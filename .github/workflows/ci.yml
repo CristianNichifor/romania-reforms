@@ -18,8 +18,10 @@ jobs:
         run: uv run --with referencing python scripts/validate_data.py
       - name: Court locations are reproducible
         run: |
-          uv run python simulators/justitie/scripts/locate_instante.py
-          git diff --exit-code simulators/justitie/data/instante-localizate-2023.json
+          for year in 2023 2025; do
+            uv run python simulators/justitie/scripts/locate_instante.py --year "$year"
+          done
+          git diff --exit-code simulators/justitie/data/
       - name: Tests
         run: uv run --with referencing python -m pytest tests/ -q
 
@@ -65,7 +67,7 @@ jobs:
       # The app draws a file the pipeline writes, so the pipeline runs first: a typecheck
       # against a missing court map would pass and the map would still be empty.
       - name: Locate the courts
-        run: uv run python simulators/justitie/scripts/locate_instante.py
+        run: uv run python simulators/justitie/scripts/locate_instante.py --year 2025
       - name: App
         working-directory: simulators/justitie/app
         run: |

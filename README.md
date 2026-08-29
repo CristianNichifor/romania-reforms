@@ -37,7 +37,7 @@ argument. This repository is an index, not a monolith.
 
 | | | |
 | --- | --- | --- |
-| **justitie** | The judicial reform | in progress, no app yet |
+| **justitie** | The judicial reform | migrated to the 2025 report |
 | **salarizare** | Public-sector pay | migrated |
 | **administrativ** | Consolidation of the 3 186 UATs | migrated |
 

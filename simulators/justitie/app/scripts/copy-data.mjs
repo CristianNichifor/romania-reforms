@@ -17,7 +17,8 @@ const out = resolve(here, '../public/data');
 mkdirSync(out, { recursive: true });
 
 const sources = [
-  [resolve(here, '../../data/instante-localizate-2023.json'), 'instante.json'],
+  // The latest edition. Older ones stay in data/ so the two years can be compared.
+  [resolve(here, '../../data/instante-localizate-2025.json'), 'instante.json'],
   [
     resolve(here, '../../../administrativ/web/public/data/counties.geojson'),
     'counties.geojson',

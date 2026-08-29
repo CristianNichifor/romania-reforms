@@ -37,6 +37,7 @@ Usage:
 
 from __future__ import annotations
 
+import argparse
 import json
 import re
 import sys
@@ -49,8 +50,8 @@ REGISTRY = (
 )
 MANIFEST = HERE.parent / "administrativ" / "web" / "public" / "data" / "manifest.json"
 SEATS = HERE.parent / "administrativ" / "web" / "public" / "data" / "seats.geojson"
-COURTS = HERE / "data" / "instante-2023.json"
-OUT = HERE / "data" / "instante-localizate-2023.json"
+# The CSM publishes annually; the edition is chosen rather than assumed.
+LATEST = "2025"
 
 # Rank 3 is an oras and anything lower is a municipiu; 4 is a commune.
 ADMIN_RANK_ORAS = 3
@@ -61,6 +62,7 @@ COURT_PREFIXES = (
     "CURTEA DE APEL ",
     "TRIBUNALUL PENTRU MINORI SI FAMILIE ",
     "TRIBUNALUL MILITAR TERITORIAL ",
+    "TRIBUNALUL SPECIALIZAT ",
     "TRIBUNALUL COMERCIAL ",
     "TRIBUNALUL MILITAR ",
     "TRIBUNALUL ",
@@ -72,12 +74,14 @@ COURT_PREFIXES = (
 # "Odorheiu Secuiesc". Romanian place names carry the article in some registers and not in
 # others, and neither spelling is wrong.
 #
-# `VTLCEA` is different and worth keeping visible: page 142 of the report — the annex this
-# data comes from — prints `Tribunalul VŢLCEA`, with a T-cedilla where an A-circumflex
-# belongs, while pages 42, 53 and 125 of the same document print it correctly. The import
-# transcribed the page faithfully, which is why the name in `instante-2023.json` is garbled
-# and marked `verbatim`. The fix belongs here rather than there: the printed form stays as
-# printed, and this records what it was read as.
+# `VTLCEA` is different and worth keeping visible: page 142 of the **2023** report — the
+# annex that data comes from — prints `Tribunalul VŢLCEA`, with a T-cedilla where an
+# A-circumflex belongs, while pages 42, 53 and 125 of the same document print it correctly.
+# The import transcribed the page faithfully, which is why the name in `instante-2023.json`
+# is garbled and marked `verbatim`. The fix belongs here rather than there: the printed form
+# stays as printed, and this records what it was read as. The 2025 report prints `VALCEA`
+# cleanly, so the alias is dead weight for that edition and load-bearing for the older one —
+# which is the argument for keeping both editions rather than replacing one with the other.
 ALIASES = {
     "VTLCEA": "VALCEA",
     "ODORHEIUL SECUIESC": "ODORHEIU SECUIESC",
@@ -117,8 +121,14 @@ def strip_status(name: str) -> str:
     return name
 
 
-def main() -> int:
-    for path in (REGISTRY, MANIFEST, SEATS, COURTS):
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--year", default=LATEST)
+    args = parser.parse_args(argv)
+    courts_file = HERE / "data" / f"instante-{args.year}.json"
+    out_file = HERE / "data" / f"instante-localizate-{args.year}.json"
+
+    for path in (REGISTRY, MANIFEST, SEATS, courts_file):
         if not path.exists():
             raise SystemExit(f"Missing {path}")
 
@@ -132,7 +142,7 @@ def main() -> int:
         if isinstance(f.get("id"), int) and f["geometry"]["type"] == "Point"
     }
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
-    document = json.loads(COURTS.read_text(encoding="utf-8"))
+    document = json.loads(courts_file.read_text(encoding="utf-8"))
 
     names = registry["name"]
     counties = registry["county"]
@@ -311,8 +321,8 @@ def main() -> int:
         # catchment, not position.
         "limitations": document["limitations"],
     }
-    OUT.write_text(json.dumps(out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"\nWrote {OUT.relative_to(HERE.parent.parent)}")
+    out_file.write_text(json.dumps(out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(f"\nWrote {out_file.relative_to(HERE.parent.parent)}")
     return 0
 
 

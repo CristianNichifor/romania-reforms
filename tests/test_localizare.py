@@ -13,8 +13,13 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
-SOURCE = ROOT / "simulators/justitie/data/instante-2023.json"
-LOCATED = ROOT / "simulators/justitie/data/instante-localizate-2023.json"
+# Every edition that has been located, so a new year is covered the moment it is imported
+# rather than when someone remembers to widen the test.
+LOCATED_FILES = sorted((ROOT / "simulators/justitie/data").glob("instante-localizate-*.json"))
+LOCATED = LOCATED_FILES[-1] if LOCATED_FILES else ROOT / "simulators/justitie/data/none.json"
+SOURCE = (
+    LOCATED.with_name(LOCATED.name.replace("-localizate", "")) if LOCATED_FILES else LOCATED
+)
 REGISTRY = ROOT / "simulators/administrativ/web/public/data/attributes.json"
 
 # Anything above this is a commune.
@@ -93,7 +98,11 @@ def test_the_courts_that_really_are_in_communes(located, registry):
         c["name"] for c in located if c["siruta"] and rank_of[c["siruta"]] > ADMIN_RANK_ORAS
     }
     assert len(in_communes) == 5, sorted(in_communes)
-    assert all(n.startswith("Judecatoria") for n in in_communes), sorted(in_communes)
+    # Both spellings: the 2023 annex prints "Judecatoria", the 2025 one "Judecătoria". The
+    # same five courts either way, and the diacritic is the only thing that moved.
+    assert all(n.startswith(("Judecatoria", "Judecătoria")) for n in in_communes), sorted(
+        in_communes
+    )
 
 
 def test_only_bucharest_courts_are_placed_without_a_uat(located):

@@ -29,24 +29,74 @@ headers.
 from __future__ import annotations
 
 import json
+import argparse
 import re
 import unicodedata
 import urllib.request
+from collections.abc import Iterator
+from dataclasses import dataclass
 from pathlib import Path
 
 from pypdf import PdfReader
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE_FILE = ROOT / "sources/csm-starea-justitiei-2023.pdf"
-OUT = ROOT / "data/instante-2023.json"
-
-URL = (
-    "https://www.csm1909.ro/ViewFile.ashx"
-    "?guid=ab8ae9f9-cb62-4a9c-8b56-9932fa016648-InfoCSM"
-)
 UA = "romania-reforms/0.1 (+https://github.com/CristianNichifor)"
-SOURCE = "csm-starea-justitiei-2023"
-PERIOD = "2023"
+
+
+@dataclass(frozen=True)
+class Edition:
+    """One year's report. The CSM publishes annually and the annex keeps its shape.
+
+    Kept as a table rather than replaced, because two editions answer a question one cannot:
+    a court that looks small in a single year may be busy the next, which is exactly what the
+    `un-singur-an` limitation says. Holding both lets the map show a court's direction rather
+    than a snapshot.
+    """
+
+    period: str
+    guid: str
+    # The national averages the report prints above each tier's table. They are the check on
+    # the parse: reconstructing them from the rows and landing far from the printed figure
+    # means rows were missed, which is how six Bucharest sector courts once went missing
+    # without the output looking wrong.
+    printed_averages: dict[str, dict[str, int]]
+
+    @property
+    def source(self) -> str:
+        return f"csm-starea-justitiei-{self.period}"
+
+    @property
+    def file(self) -> Path:
+        return ROOT / f"sources/{self.source}.pdf"
+
+    @property
+    def out(self) -> Path:
+        return ROOT / f"data/instante-{self.period}.json"
+
+    @property
+    def url(self) -> str:
+        return f"https://www.csm1909.ro/files/{self.guid}?download=1"
+
+
+EDITIONS = {
+    "2023": Edition(
+        period="2023",
+        guid="ab8ae9f9-cb62-4a9c-8b56-9932fa016648",
+        printed_averages={
+            "curte-de-apel": {"perJudge": 651, "perPost": 574},
+            "judecatorie": {"perJudge": 1455, "perPost": 998},
+        },
+    ),
+    "2025": Edition(
+        period="2025",
+        guid="25abaf7e-ac14-4420-bb28-3d66e94a10f8",
+        printed_averages={
+            "curte-de-apel": {"perJudge": 606, "perPost": 560},
+            "judecatorie": {"perJudge": 1479, "perPost": 1180},
+        },
+    ),
+}
+LATEST = "2025"
 
 # "12 Judecatoria BAIA MARE 23614 15938 944.6 1365" — rank, name, volume, resolved, and the
 # two caseload ratios.
@@ -76,23 +126,59 @@ ROW = re.compile(
 TIERS = {"Judecatoria": "judecatorie", "Judecătoria": "judecatorie",
          "Tribunalul": "tribunal", "Curtea de Apel": "curte-de-apel"}
 
-# The averages the report prints above each tier's table, used as a check on the parse.
-PRINTED_AVERAGES = {
-    "curte-de-apel": {"perJudge": 651, "perPost": 574},
-    "judecatorie": {"perJudge": 1455, "perPost": 998},
-}
-
-
-def download() -> Path:
-    if SOURCE_FILE.exists():
-        return SOURCE_FILE
-    print(f"downloading {URL} ...")
-    request = urllib.request.Request(URL, headers={"User-Agent": UA})
+def download(edition: Edition) -> Path:
+    if edition.file.exists():
+        return edition.file
+    print(f"downloading {edition.url} ...")
+    request = urllib.request.Request(edition.url, headers={"User-Agent": UA})
     with urllib.request.urlopen(request, timeout=300) as response:  # noqa: S310
         data = response.read()
-    SOURCE_FILE.parent.mkdir(parents=True, exist_ok=True)
-    SOURCE_FILE.write_bytes(data)
-    return SOURCE_FILE
+    edition.file.parent.mkdir(parents=True, exist_ok=True)
+    edition.file.write_bytes(data)
+    return edition.file
+
+
+# A row the PDF broke across lines still starts the same way: rank, then the court type.
+ROW_START = re.compile(r"^\s*\d{1,3}\s+(?:Judec[ăa]toria|Tribunalul|Curtea de Apel)\b")
+
+# How many following lines a row may be stitched from. Three covers the worst case seen —
+# "36 Judecatoria CÂMPULUNG" / "MOLDOVENESC 4612" / "3628" / the two ratios — and bounds the
+# damage if a page ever confuses the parser.
+MAX_JOIN = 3
+
+
+def logical_rows(lines: list[str]) -> Iterator[str]:
+    """Yield table rows, rejoining the ones the PDF split across lines.
+
+    The 2023 annex fits every row on one line. The 2025 annex does not, in three different
+    ways: a long court name wrapping before its numbers ("Tribunalul pentru minori si
+    familie" / "BRAŞOV 1635 1423 480.0 480"), a name wrapping mid-word with the numbers
+    trailing over two more lines, and a row breaking between its first and second number
+    ("... DROBETA-TURNU SEVERIN 24448" / "15415 905.5 1413.2").
+
+    Reading line by line silently loses those rows, and losing rows is the failure this
+    importer exists to prevent — it is how six Bucharest sector courts disappeared once
+    while the output still looked like a court map. The rank continuity check catches it
+    afterwards; this is what stops it happening.
+
+    Joining stops at the next row's start, so a row can never absorb the one below it.
+    """
+    cleaned = [" ".join(line.split()) for line in lines]
+    index = 0
+    while index < len(cleaned):
+        line = cleaned[index]
+        if ROW_START.match(line):
+            joined = line
+            for step in range(MAX_JOIN + 1):
+                if ROW.match(joined):
+                    yield joined
+                    index += step
+                    break
+                nxt = index + step + 1
+                if nxt >= len(cleaned) or ROW_START.match(cleaned[nxt]):
+                    break
+                joined = f"{joined} {cleaned[nxt]}"
+        index += 1
 
 
 def number(text: str) -> float:
@@ -105,8 +191,12 @@ def slug(name: str) -> str:
     return re.sub(r"-+", "-", re.sub(r"[^a-z0-9]+", "-", text)).strip("-")
 
 
-def main() -> None:
-    path = download()
+def main(argv: list[str] | None = None) -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--year", choices=sorted(EDITIONS), default=LATEST)
+    args = parser.parse_args(argv)
+    edition = EDITIONS[args.year]
+    path = download(edition)
     reader = PdfReader(str(path))
     print(f"read {len(reader.pages)} pages\n")
 
@@ -116,7 +206,7 @@ def main() -> None:
 
     for index, page in enumerate(reader.pages):
         text = page.extract_text() or ""
-        for line in text.splitlines():
+        for line in logical_rows(text.splitlines()):
             match = ROW.match(line)
             if not match:
                 continue
@@ -163,7 +253,7 @@ def main() -> None:
                 "judges": round(judges, 2),
                 "posts": round(posts, 2),
                 "provenance": {
-                    "source": SOURCE,
+                    "source": edition.source,
                     "locator": f"Anexa 1, p. {index + 1}, randul „{name}”",
                     "confidence": "verbatim",
                     "note": (
@@ -201,7 +291,7 @@ def main() -> None:
                 "judges": round(volume / per_judge, 1),
                 "posts": round(volume / per_post, 1),
                 "provenance": {
-                    "source": SOURCE,
+                    "source": edition.source,
                     "locator": f"Anexa 1, p. {index + 1}",
                     "confidence": "verbatim",
                 },
@@ -234,7 +324,7 @@ def main() -> None:
                     f"{tier}: the report numbers rows 1..{max(present)} but "
                     f"{len(gaps)} are missing ({gaps[:10]}) — rows were dropped, refusing to write"
                 )
-        printed = PRINTED_AVERAGES.get(tier)
+        printed = edition.printed_averages.get(tier)
         flag = ""
         if printed:
             drift = max(
@@ -250,9 +340,9 @@ def main() -> None:
         "id": "instante-2023",
         "title": "Harta instanțelor și volumul lor de activitate, 2023",
         "publisher": "Consiliul Superior al Magistraturii",
-        "period": PERIOD,
+        "period": edition.period,
         "provenance": {
-            "source": SOURCE,
+            "source": edition.source,
             "locator": "Raport privind starea justiției în anul 2023, Anexa 1",
             "confidence": "verbatim",
         },
@@ -311,9 +401,9 @@ def main() -> None:
         ],
     }
 
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps(document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"\nwrote {OUT.relative_to(ROOT)}: {len(courts)} instante")
+    edition.out.parent.mkdir(parents=True, exist_ok=True)
+    edition.out.write_text(json.dumps(document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(f"\nwrote {edition.out.relative_to(ROOT)}: {len(courts)} instante")
 
 
 if __name__ == "__main__":

@@ -56,6 +56,7 @@ interface Limitation {
 }
 
 interface Document {
+  period: string;
   courts: Court[];
   nationalAverages: { byTier: { tier: string; perJudge: number; perPost: number }[] };
   limitations: Limitation[];
@@ -99,6 +100,13 @@ async function main(): Promise<void> {
     fetch(`${base}data/instante.json`).then((r) => r.json() as Promise<Document>),
     fetch(`${base}data/counties.geojson`).then((r) => r.json()),
   ]);
+
+  // The year comes from the document, not the markup. The CSM publishes annually and this
+  // page had 2023 written into its subtitle while reading 2025 — a caption that disagrees
+  // with its own figures is worse than none.
+  el('#sub').textContent =
+    `${ro.format(doc.courts.length)} de instanțe, dosarele pe care le-au avut de soluționat ` +
+    `în ${doc.period} și încărcătura pe judecător.`;
 
   const averageFor = new Map(doc.nationalAverages.byTier.map((t) => [t.tier, t.perJudge]));
 
