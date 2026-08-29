@@ -78,6 +78,13 @@
             "motivInstante": {
               "type": "string",
               "description": "Where the count comes from, when it is not a size target. For nivel 1 it is territorial coverage — one court per county, 41 plus Bucharest — which is a floor rather than an aim, and pulls against the population band applied on top of it."
+            },
+            "regula": {
+              "enum": [
+                "acoperire",
+                "populatie"
+              ],
+              "description": "Which rule fixes the number of courts. `acoperire` means territorial coverage — one per county — with workload absorbed by staffing and buildings. `populatie` would mean the count follows the population band instead. They give very different maps, so the document has to say which, rather than leaving a reader to infer it."
             }
           }
         },

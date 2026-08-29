@@ -31,9 +31,10 @@
         "source": "reforma-sistem-judiciar-romania",
         "locator": "Capitolul 12, p. 59, „Nivel 1: 42 judecatorii + tribunale comasate … fiecare deserveste 150.000–200.000 locuitori”",
         "confidence": "verbatim",
-        "note": "Cifra de 42 este un prag de acoperire, nu o țintă dimensională: câte o instanță pentru fiecare dintre cele 41 de județe plus București. Pragul de 150.000–200.000 de locuitori este regula de mărime aplicată peste el."
+        "note": "Numărul de 42 vine din acoperire: o instanță pe județ. Pragul de 150.000–200.000 de locuitori apare în text, dar nu este regula după care se stabilește numărul: la 42 de instanțe media este de 453.662 de locuitori, iar pragul nu poate fi respectat fără a tripla numărul. Formularea din document rămâne de clarificat."
       },
-      "motivInstante": "41 de județe + București: cel puțin o instanță de nivel 1 în fiecare județ, pentru acoperire teritorială."
+      "motivInstante": "41 de județe + București: câte o instanță de nivel 1 în fiecare județ. Numărul este fixat de acoperirea teritorială, nu de populație. Diferențele de volum între județe se absorb în dimensiunea instanței — judecători, grefieri, clădire — nu în numărul de instanțe.",
+      "regula": "acoperire"
     },
     "curtiDeApel": {
       "instante": 15,
@@ -55,13 +56,11 @@
   },
   "limitations": [
     {
-      "id": "tinta-nu-se-inchide-aritmetic",
-      "text": "Cele două reguli ale propunerii nu pot fi respectate simultan. Acoperirea cere cel puțin o instanță pe județ — 41 de județe plus București, de unde 42. Mărimea cere 150.000–200.000 de locuitori pe instanță. România are 19.053.815 locuitori: la 42 de instanțe fiecare ar deservi 453.662, de peste două ori pragul; iar respectarea pragului cere circa 116 instanțe, cu câte una pe județ ca minim și cel mult 200.000 de locuitori fiecare. Pragul de acoperire aproape că nu se activează: un singur județ, Tulcea, cu 193.355 de locuitori, e destul de mic încât o singură instanță să-l acopere sub plafon. În rest, mărimea decide. Simulatorul arată ambele variante și nu alege între ele: alegerea aparține autorului propunerii, nu calculului.",
-      "severity": "blocking",
+      "id": "pragul-de-populatie-nu-e-regula",
+      "text": "Documentul spune că fiecare instanță de nivel 1 „deservește 150.000–200.000 locuitori”, dar numărul de 42 vine din acoperire — o instanță pe județ — iar dimensionarea se face prin judecători și spații, nu prin înmulțirea instanțelor. Cele două nu se pot susține împreună: la 42 de instanțe media este de 453.662 de locuitori fiecare, iar respectarea pragului ar cere circa 116 instanțe. Simulatorul modelează regula de acoperire, aceea fiind intenția autorului, și semnalează pragul ca formulare de corectat în document.",
+      "severity": "material",
       "affects": [
-        "nivel1",
-        "consolidation",
-        "access"
+        "nivel1"
       ]
     },
     {
@@ -88,6 +87,15 @@
       "affects": [
         "nivel1",
         "access"
+      ]
+    },
+    {
+      "id": "acoperirea-pe-judet-fixeaza-disparitatea",
+      "text": "Regula „o instanță pe județ” garantează diferențe mari între instanțe, pentru că județele însele diferă mult. Pe datele din 2025, instanța din București ar prelua 546.113 de dosare, iar cea din Covasna 21.505 — de 25 de ori mai puține. Propunerea reproșează sistemului actual „disparități uriașe” între tribunale; acoperirea pe județ nu le elimină, ci le mută de la numărul de instanțe la mărimea lor.",
+      "severity": "material",
+      "affects": [
+        "nivel1",
+        "consolidation"
       ]
     }
   ]

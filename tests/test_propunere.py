@@ -54,8 +54,9 @@ def test_the_two_rules_cannot_both_hold(proposal):
     each. Recomputed from the registry rather than trusted from the prose, so the limitation
     cannot quietly stop being true.
     """
-    blocking = [x for x in proposal["limitations"] if x["id"] == "tinta-nu-se-inchide-aritmetic"]
-    assert blocking and blocking[0]["severity"] == "blocking"
+    assert proposal["tinta"]["nivel1"]["regula"] == "acoperire"
+    flagged = [x for x in proposal["limitations"] if x["id"] == "pragul-de-populatie-nu-e-regula"]
+    assert flagged, "the population band in the text is not flagged as non-operative"
 
     if not REGISTRY.exists():
         pytest.skip("registry not built")
