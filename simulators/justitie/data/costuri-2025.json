@@ -1,0 +1,134 @@
+{
+  "$schema": "../schema/costuri.schema.json",
+  "id": "costuri-2025",
+  "title": "Costul de bază al judecătorilor, azi și după comasare",
+  "publisher": "Cristian Nichifor",
+  "period": "2025",
+  "provenance": {
+    "source": "legea-153-2017",
+    "locator": "Anexa nr. V, Capitolul I, litera A × numărul de judecători din raportul CSM",
+    "confidence": "derived",
+    "note": "Indemnizația de bază, la vârful grilei, înmulțită cu numărul de judecători reconstituit din raportul CSM. Nu include sporuri."
+  },
+  "monthlyLeiByTier": {
+    "iccj": 26250.0,
+    "curte-de-apel": 23000.0,
+    "tribunal": 22500.0,
+    "judecatorie": 17250.0
+  },
+  "today": {
+    "annualLei": 685674600,
+    "byTier": [
+      {
+        "tier": "iccj",
+        "courts": 1,
+        "judges": 21.6,
+        "monthlyLei": 26250.0,
+        "annualLei": 6804000
+      },
+      {
+        "tier": "curte-de-apel",
+        "courts": 15,
+        "judges": 325.3,
+        "monthlyLei": 23000.0,
+        "annualLei": 89782800
+      },
+      {
+        "tier": "tribunal",
+        "courts": 50,
+        "judges": 762.4,
+        "monthlyLei": 22500.0,
+        "annualLei": 205848000
+      },
+      {
+        "tier": "judecatorie",
+        "courts": 175,
+        "judges": 1851.4,
+        "monthlyLei": 17250.0,
+        "annualLei": 383239800
+      }
+    ],
+    "levelOne": {
+      "judges": 2613.8,
+      "volume": 3463124,
+      "annualLei": 589090500
+    }
+  },
+  "scenarios": [
+    {
+      "target": 932.3,
+      "targetLabel": "tribunal",
+      "gradePaid": "judecatorie",
+      "judgesNeeded": 3714.6,
+      "annualLei": 768922200,
+      "differenceLei": 179831700
+    },
+    {
+      "target": 932.3,
+      "targetLabel": "tribunal",
+      "gradePaid": "tribunal",
+      "judgesNeeded": 3714.6,
+      "annualLei": 1002942000,
+      "differenceLei": 413851500
+    },
+    {
+      "target": 1325.0,
+      "targetLabel": "actual",
+      "gradePaid": "judecatorie",
+      "judgesNeeded": 2613.7,
+      "annualLei": 541035900,
+      "differenceLei": -48054600
+    },
+    {
+      "target": 1325.0,
+      "targetLabel": "actual",
+      "gradePaid": "tribunal",
+      "judgesNeeded": 2613.7,
+      "annualLei": 705699000,
+      "differenceLei": 116608500
+    },
+    {
+      "target": 1479.0,
+      "targetLabel": "judecatorie",
+      "gradePaid": "judecatorie",
+      "judgesNeeded": 2341.5,
+      "annualLei": 484690500,
+      "differenceLei": -104400000
+    },
+    {
+      "target": 1479.0,
+      "targetLabel": "judecatorie",
+      "gradePaid": "tribunal",
+      "judgesNeeded": 2341.5,
+      "annualLei": 632205000,
+      "differenceLei": 43114500
+    }
+  ],
+  "limitations": [
+    {
+      "id": "gradul-instantei-comasate-nu-e-stabilit",
+      "text": "Propunerea unește judecătoriile și tribunalele într-o singură instanță de nivel 1, dar nu spune ce grad au judecătorii ei. La grad de judecătorie un judecător costă 17.250 lei pe lună, la grad de tribunal 22.500 — o diferență de sute de milioane pe an la efectivele în discuție. Ambele sunt calculate; niciuna nu e prezentată drept răspunsul.",
+      "severity": "blocking",
+      "affects": [
+        "cost"
+      ]
+    },
+    {
+      "id": "doar-indemnizatia-de-baza",
+      "text": "Sunt doar indemnizațiile de bază, la vârful grilei. Sporurile — exact subiectul capitolului 10 — nu sunt incluse și nu pot fi aflate din datele publice disponibile aici. Cifrele sunt deci o limită de sus pentru bază și o limită de jos pentru ce se plătește în realitate.",
+      "severity": "blocking",
+      "affects": [
+        "cost",
+        "salarizare"
+      ]
+    },
+    {
+      "id": "numarul-de-judecatori-e-derivat",
+      "text": "Numărul de judecători nu e tipărit în raport, ci reconstituit împărțind volumul la încărcătura pe judecător, deci e un efectiv mediu pe an, nu un cap de om la o dată anume.",
+      "severity": "material",
+      "affects": [
+        "cost"
+      ]
+    }
+  ]
+}

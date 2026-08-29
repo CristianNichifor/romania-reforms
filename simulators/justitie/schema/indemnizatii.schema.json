@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/indemnizatii.schema.json",
+  "title": "What the law pays a judge, by grade",
+  "description": "Annex V Chapter I of Legea 153/2017. The pay simulator imported Chapter VIII of the same annex — grefieri, specialists, archivists — and its 184 justice positions contain no judge, so the grades that price a court had to be read separately.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "period",
+    "provenance",
+    "grades",
+    "tierToGrade",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "period": {
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json#/$defs/provenance"
+    },
+    "grades": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "seniority",
+          "steps",
+          "monthlyLei",
+          "coefficient",
+          "provenance"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "seniority": {
+            "type": "string"
+          },
+          "steps": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "monthlyLei",
+                "coefficient"
+              ],
+              "properties": {
+                "monthlyLei": {
+                  "type": "number"
+                },
+                "coefficient": {
+                  "type": "number"
+                }
+              }
+            }
+          },
+          "monthlyLei": {
+            "type": "number",
+            "description": "Top of whatever the table prints."
+          },
+          "coefficient": {
+            "type": "number"
+          },
+          "provenance": {
+            "$ref": "provenance.schema.json#/$defs/provenance"
+          }
+        }
+      }
+    },
+    "tierToGrade": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Court tier to the grade the law pays it — the join to the caseload data."
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "provenance.schema.json#/$defs/limitation"
+      }
+    }
+  }
+}
