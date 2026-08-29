@@ -99,6 +99,13 @@ h1 {
   margin-bottom: 0.35rem;
 }
 
+/* `hidden` loses to any rule that sets `display`, so the ramp stayed on screen in the access
+   view underneath a legend describing a different scale. Stated once, for every element the
+   panel hides. */
+[hidden] {
+  display: none !important;
+}
+
 .ramp {
   display: flex;
   height: 8px;
@@ -243,4 +250,31 @@ dd {
 #target {
   width: 100%;
   accent-color: var(--accent);
+}
+
+#acces-note {
+  margin-bottom: 1rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.steps {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0.5rem 0 0.9rem;
+  font-size: 0.8rem;
+}
+
+.steps div {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.steps i {
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 3px;
+  flex: none;
 }
