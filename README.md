@@ -130,6 +130,28 @@ scripts/              one validation gate for every simulator's data
 simulators/<name>/    schema/ · scripts/ · data/ · sources/ · engine/ · app/
 ```
 
+## Adding a reform
+
+Five edits, deliberately by hand:
+
+1. `simulators/<name>/` — its own `schema/`, `scripts/`, `data/`, `sources/`, and an app if it
+   has one. Its data validated by its own script; the caveat vocabulary from
+   `packages/provenance` so a limitation means the same thing across simulators.
+2. A job in `.github/workflows/ci.yml`.
+3. A build step in `.github/workflows/deploy.yml`, with `VITE_BASE` set to
+   `/${{ github.event.repository.name }}/<name>/`.
+4. A line in that workflow's assembly step, and its path in the check below it — the check is
+   what stops a simulator that failed to build appearing on the landing page as a link to a
+   404.
+5. A card in `site/index.html`.
+
+**Not a registry, and not a shared build.** Three simulators have three shapes: one React, one
+not, one with no interface at all; `app/` in one and `web/` in another; different test
+commands and different lockfiles. A config file over three special cases would be the same
+mistake as extracting a UI package from a single consumer — it reads as generality and
+behaves as a fourth thing to keep in sync. Five explicit edits are cheaper to get right than
+one clever one, and the deploy check catches the one that matters if you forget it.
+
 ## Running it
 
 ```sh
