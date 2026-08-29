@@ -389,7 +389,7 @@ def speeds_for_classes(classes: np.ndarray) -> np.ndarray:
 cd simulators/transport && uv run pytest -q
 ```
 
-Expected: `27 passed` (12 named tests plus 14 parametrised cases, minus the one deleted placeholder — the exact count is not the point; zero failures is).
+Expected: `26 passed` (12 named tests plus 14 parametrised cases). Zero failures is the point.
 
 - [ ] **Step 5: Lint**
 
@@ -609,7 +609,7 @@ def build_graph(
 cd simulators/administrativ && uv run pytest tests/test_build_road_distance.py -q
 ```
 
-Expected: `7 passed`.
+Expected: `6 passed`.
 
 - [ ] **Step 5: Run administrativ's whole suite to prove nothing moved**
 
