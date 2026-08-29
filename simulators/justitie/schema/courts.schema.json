@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/courts.schema.json",
+  "title": "The court map, as it stands",
+  "description": "Every court in one document, with the work it carried and the people who carried it. The proposal in the reform paper is a transformation of this: 176 judecatorii and 42 tribunale into 42 consolidated tribunale and 15 regional courts of appeal. Modelling that requires knowing, per court, how much work it does and how many judges it has — so this document is the baseline the whole simulator argues from.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "period",
+    "provenance",
+    "courts",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Relative path to this schema, so an editor can validate the file in place."
+    },
+    "id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "period": {
+      "type": "string",
+      "description": "The reporting year the figures describe."
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json#/$defs/provenance"
+    },
+    "nationalAverages": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "The averages the report prints for each tier, kept so a derived figure can be checked against the source's own arithmetic.",
+      "properties": {
+        "byTier": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "tier",
+              "perJudge",
+              "perPost"
+            ],
+            "properties": {
+              "tier": {
+                "type": "string"
+              },
+              "perJudge": {
+                "type": "number"
+              },
+              "perPost": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      }
+    },
+    "courts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "tier",
+          "volume",
+          "resolved",
+          "provenance"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "tier": {
+            "enum": [
+              "iccj",
+              "curte-de-apel",
+              "tribunal",
+              "judecatorie"
+            ],
+            "description": "The four levels of the Romanian court hierarchy."
+          },
+          "specialised": {
+            "type": "boolean",
+            "description": "A specialised tribunal — commercial, or for minors and family — which the proposal would fold into the county tribunal as an internal section."
+          },
+          "volume": {
+            "type": "integer",
+            "description": "Cases on the roll during the year."
+          },
+          "resolved": {
+            "type": "integer",
+            "description": "Cases disposed of."
+          },
+          "loadPerPost": {
+            "type": "number",
+            "description": "Cases per established post, as printed."
+          },
+          "loadPerJudge": {
+            "type": "number",
+            "description": "Cases per sitting judge, as printed."
+          },
+          "judges": {
+            "type": "number",
+            "description": "Derived: volume / loadPerJudge. The report does not print judge counts, but it prints a ratio built from them, so the count can be recovered — and is marked derived, never verbatim."
+          },
+          "posts": {
+            "type": "number",
+            "description": "Derived: volume / loadPerPost. The establishment, which exceeds the sitting judges wherever posts are vacant."
+          },
+          "provenance": {
+            "$ref": "provenance.schema.json#/$defs/provenance"
+          }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "$ref": "provenance.schema.json#/$defs/limitation"
+      }
+    }
+  }
+}
