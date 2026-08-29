@@ -358,7 +358,7 @@ EFFECTIVE_KMH: Final[dict[str, float]] = {
 FALLBACK_KMH: Final[float] = 20.0
 
 SPEED_PROVENANCE: Final[dict[str, str]] = {
-    "source": "oug-195-2002-plus-judgement",
+    "source": "oug-195-2002-plus-judecata",
     "locator": (
         "Limitele legale din OUG 195/2002 art. 49, reduse la viteze efective de parcurs; "
         "calibrate prin verificarea pe județul de control"
