@@ -122,3 +122,45 @@ def test_the_weighting_caveat_is_declared(acces):
     assert "distanta-nu-e-timp" in ids
     assert "delta-nu-are-drum" in ids
     assert "arondarea-peste-judet-nu-e-legala-azi" in ids
+
+
+def test_balancing_costs_travel_and_buys_evenness(acces):
+    """The trade the ceiling makes, asserted in the direction it must go.
+
+    A load ceiling can only push communes away from their nearest court, so mean travel under
+    any ceiling is at least the unconstrained figure. If it came out lower, the assignment
+    would be finding journeys the nearest-court routing missed, which is impossible.
+    """
+    scenarios = acces["summary"]["balanced"]
+    assert scenarios, "no ceiling scenarios were computed"
+    floor = acces["summary"]["mean"]["metresNearest"]
+    for name, scenario in scenarios.items():
+        assert scenario["meanMetres"] >= floor, (name, scenario["meanMetres"], floor)
+
+
+def test_a_tighter_ceiling_never_travels_less(acces):
+    """Ordered by ceiling, travel must not fall as the constraint tightens.
+
+    This is what caught the first version: the fallback sent full-court communes to the
+    *farthest* court in the country, and a 1,2x ceiling came out both more even and vastly
+    more expensive than 1,5x — a shape no correct assignment produces.
+    """
+    scenarios = sorted(
+        acces["summary"]["balanced"].values(), key=lambda s: s["ceilingMultiplier"]
+    )
+    travel = [s["meanMetres"] for s in scenarios]
+    assert travel == sorted(travel, reverse=True), travel
+
+
+def test_bucharest_cannot_be_balanced_away(acces):
+    """Its sectors carry 5,7x the average court and cannot move, so no ceiling reaches them.
+
+    Recomputed from the rows: if this ever came out under about 3x, the capital would have
+    become balanceable by moving communes, which would mean the attribution changed rather
+    than the country.
+    """
+    rows = [r for r in acces["communes"] if r["byRoad"]]
+    total = sum(r["cases"] for r in rows)
+    bucharest = sum(r["cases"] for r in rows if r["county"] == "B")
+    mean = total / 42
+    assert bucharest / mean > 3, bucharest / mean

@@ -103,6 +103,16 @@ def main() -> int:
             continue
         county_court.setdefault(court["county"], court["siruta"])
 
+    # Bucharest's tribunal is seated on the city rather than on a sector, so it carries no
+    # SIRUTA and never entered the court set — which left its six sectors being routed to
+    # other counties' courts as though the capital had none. Seated on its lowest-numbered
+    # sector: the choice is arbitrary and the distance is nil either way, because every
+    # sector court and the tribunal are inside the same city.
+    if BUCHAREST not in county_court:
+        sectors = sorted(s for s in data.population if data.county[s] == BUCHAREST)
+        if sectors:
+            county_court[BUCHAREST] = sectors[0]
+
     def distances_from(seats: list[str]) -> np.ndarray:
         """Rows are seats, columns are UATs, in metres."""
         return dijkstra(graph, directed=False, indices=[index_of[s] for s in seats])
@@ -221,6 +231,97 @@ def main() -> int:
         "communesWithoutRoad": sum(1 for r in rows if not r["byRoad"]),
     }
 
+    # ---- assignment under a load ceiling -------------------------------------------------
+    #
+    # Nearest-court routing minimises travel and makes the load *less* even: communes flow to
+    # whichever court is easiest to reach, and those are already the busiest. Balancing needs
+    # the other half of the statement — get people as close as possible *subject to* no court
+    # taking more than its share.
+    #
+    # Solved greedily by regret, deterministically, rather than by a solver. Each commune is
+    # priced by what its second-nearest court would cost it over its nearest; the ones with
+    # most to lose choose first, and a full court is skipped. Ties break on SIRUTA so the
+    # answer is the same on every machine. This is not the optimum — an exact transportation
+    # LP would beat it — but it is explainable line by line, which is worth more here than the
+    # last per cent, and every run reports how far the result sits from unconstrained travel.
+    # Bucharest is pinned, and the reason is a finding rather than a convenience. Its six
+    # sectors carry 373.213 dossiers between them — 5,7 times the average court — and they
+    # cannot be sent anywhere: a sector of the capital does not attend court in another
+    # county. So no ceiling below 5,7x is reachable for Bucharest by moving communes, and the
+    # only lever the proposal does not pull is giving the city more than one court.
+    #
+    # Left in the pool, its caseload spilled across the country and dragged mean travel to
+    # 47,7 km, which is a statement about the algorithm rather than about Romania.
+    bucharest_seat = county_court.get(BUCHAREST)
+
+    def assign_with_ceiling(multiplier: float) -> tuple[dict[str, str], float]:
+        movable = [r for r in on_road if r["county"] != BUCHAREST]
+        total_cases = sum(r["cases"] for r in movable)
+        seats = [s for s in proposed_seats if s != bucharest_seat]
+        ceiling = multiplier * total_cases / max(len(seats), 1)
+        load = dict.fromkeys(proposed_seats, 0.0)
+
+        chosen_fixed = {}
+        for row in on_road:
+            if row["county"] == BUCHAREST and bucharest_seat:
+                chosen_fixed[row["siruta"]] = bucharest_seat
+                load[bucharest_seat] += row["cases"]
+
+        priced = []
+        for row in movable:
+            column = index_of[row["siruta"]]
+            options = sorted(
+                (
+                    (proposed_matrix[i, seat_index], seat)
+                    for i, seat in enumerate(proposed_seats)
+                    if seat != bucharest_seat
+                    for seat_index in [column]
+                ),
+                key=lambda pair: (pair[0], pair[1]),
+            )
+            regret = options[1][0] - options[0][0] if len(options) > 1 else 0.0
+            priced.append((-regret, row["siruta"], row, options))
+        priced.sort(key=lambda item: (item[0], item[1]))
+
+        chosen: dict[str, str] = dict(chosen_fixed)
+        loads: dict[str, float] = dict(load)
+        cost = 0.0
+        for _, siruta, row, options in priced:
+            # The ceiling is soft at the margin, and it has to be. Where every court is
+            # already full the commune still has to go somewhere, and it goes to its nearest:
+            # falling through to the last option instead sent it to the farthest court in the
+            # country, which drove mean travel to 50 km and made a tighter ceiling produce a
+            # worse spread than a looser one — the shape that gave the bug away.
+            pick = next(
+                ((m, seat) for m, seat in options if loads[seat] + row["cases"] <= ceiling),
+                options[0],
+            )
+            metres, seat = pick
+            chosen[siruta] = seat
+            loads[seat] += row["cases"]
+            cost += metres * row["population"]
+        load.update(loads)
+        return chosen, cost
+
+    scenarios = {}
+    for multiplier in (1.2, 1.5, 2.0):
+        chosen, cost = assign_with_ceiling(multiplier)
+        cases_of = {r["siruta"]: r["cases"] for r in on_road}
+        loads: dict[str, float] = {}
+        for siruta, seat in chosen.items():
+            loads[seat] = loads.get(seat, 0.0) + cases_of[siruta]
+        moved = sum(
+            1
+            for r in on_road
+            if chosen[r["siruta"]] != proposed_seats[nearest_row[index_of[r["siruta"]]]]
+        )
+        scenarios[f"{multiplier:g}"] = {
+            "ceilingMultiplier": multiplier,
+            "spread": round(max(loads.values()) / max(min(loads.values()), 1), 1),
+            "meanMetres": round(cost / people),
+            "communesNotAtNearest": moved,
+        }
+
     # Workload per receiving court, under each rule.
     def workload(key: str) -> dict[str, float]:
         totals: dict[str, float] = {}
@@ -235,6 +336,7 @@ def main() -> int:
     # it is nearer to a neighbour's court, which is a statement about that county rather than
     # about the arithmetic. Reported rather than divided by.
     empty = sorted(c for c in by_county_load if by_access_load.get(c, 0) == 0)
+    summary["balanced"] = scenarios
     summary["workload"] = {
         "byCounty": {
             "min": round(min(by_county_load.values())),
@@ -258,6 +360,10 @@ def main() -> int:
     load = summary["workload"]
     ratio = lambda d: f"{d['max'] / d['min']:.1f}x" if d["min"] else "infinit"  # noqa: E731
     print(f"  workload spread  pe judet {ratio(load['byCounty'])}   dupa acces {ratio(load['byAccess'])}")
+    for name, sc in scenarios.items():
+        print(f"  ceiling {name}x mean:  spread {sc['spread']:>5.1f}x   "
+              f"mean travel {sc['meanMetres'] / 1000:>5.1f} km   "
+              f"{sc['communesNotAtNearest']:>4} communes not at their nearest")
     if load["byAccess"]["countiesDrawingNothing"]:
         print(f"  counties whose court draws nothing: {load['byAccess']['countiesDrawingNothing']}")
 
