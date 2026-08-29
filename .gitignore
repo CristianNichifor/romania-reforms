@@ -13,3 +13,8 @@ simulators/*/sources/*.pdf
 # is not in the repository it does not exist for anyone but its author — and a simulator
 # whose central claim cannot be read by the reader is not an instrument for public debate.
 !simulators/justitie/sources/reforma-sistem-judiciar-romania.pdf
+
+# And the arondare decision. It has a stable URL, but sgg.gov.ro times out from GitHub's
+# runners, so CI cannot fetch it — and a source CI cannot fetch is, for CI's purposes, a
+# source that does not exist. 521 KB to keep the reproducibility gate working.
+!simulators/justitie/sources/hg-1217-2023-arondare.pdf
