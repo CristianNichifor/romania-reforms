@@ -1,0 +1,8 @@
+# Built artefacts. Reproducible from administrativ's road graph plus scripts/, so they are
+# not committed — road_time.parquet alone is one row per adjacent UAT pair.
+data/*.parquet
+data/reports/
+
+# Small, validated documents under data/*.json stay tracked on purpose: scripts/validate_data.py
+# globs simulators/*/data/*.json and checks each against its schema, so ignoring the whole
+# directory would quietly remove this simulator from the repository's one data gate.
