@@ -37,13 +37,20 @@ argument. This repository is an index, not a monolith.
 
 | | | |
 | --- | --- | --- |
-| **justitie** | The judicial reform | in progress |
-| **salarizare** | Public-sector pay — [live](https://cristiannichifor.github.io/public-pay-simulator/) | to migrate |
-| **administrativ** | Consolidation of the 3 186 UATs — [live](https://cristiannichifor.github.io/administrative-reform-simulator/) | to migrate |
+| **justitie** | The judicial reform | in progress, no app yet |
+| **salarizare** | Public-sector pay | migrated |
+| **administrativ** | Consolidation of the 3 186 UATs | migrated |
 
-The two live ones stay in their own repositories until `justitie` has proven which pieces
-are genuinely shared. Extracting an abstraction before its second real consumer exists is
-how shared packages end up wrong.
+Both live simulators now live here, with their history, on project paths under one Pages
+site: `/romania-reforms/salarizare/` and `/romania-reforms/administrativ/`. Their old
+repositories become one-page redirects that carry `location.hash` across, so a scenario
+someone has already pasted into an argument still opens the scenario.
+
+**The code moved; the abstraction has not.** They are three apps in one repository, not
+three consumers of a shared UI package. `packages/provenance` is shared because a second
+simulator genuinely needed the same vocabulary; there is no `packages/ui` because
+`justitie` has no interface yet, and extracting one from a single real consumer is how
+shared packages end up wrong. That extraction waits for `justitie` to need it.
 
 ### justitie
 

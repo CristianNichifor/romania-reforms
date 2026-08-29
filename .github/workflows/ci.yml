@@ -1,7 +1,13 @@
 name: CI
 on: [push, pull_request]
+
+# One job per simulator, run in parallel rather than filtered by path. Filtering would save
+# a few minutes and cost a dependency and a class of mistake — a shared package changing
+# under a simulator whose job was skipped. The whole matrix is under five minutes.
+
 jobs:
-  data:
+  shared:
+    name: shared (schemas + provenance)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -10,3 +16,66 @@ jobs:
         run: uv run --with referencing python scripts/validate_data.py
       - name: Tests
         run: uv run --with referencing python -m pytest tests/ -q
+
+  salarizare:
+    name: salarizare
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: simulators/salarizare
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate every regime, crosswalk and fiscal series
+        run: uv run --with jsonschema python scripts/validate_data.py
+      - name: Importer tests
+        run: uv run --with openpyxl --with pytest --with jsonschema pytest tests/ -q
+      - name: Import is reproducible
+        run: |
+          uv run --with openpyxl python scripts/import_coeficienti.py
+          git diff --exit-code data/regimes/ro-draft-2026-07-16.json
+      - name: Engine
+        run: |
+          npm ci
+          npm run typecheck
+          npm test
+
+  administrativ:
+    name: administrativ
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: simulators/administrativ/web/package-lock.json
+      # The reference model's own tests need the built pipeline artefacts, which are not in
+      # the repository — they skip here, exactly as they did in the standalone repo. What
+      # does run in CI is the web side: `web/public/data` *is* tracked, so the parity
+      # fixtures compare the TypeScript port against the Python reference by hash, and a
+      # single commune out of 3,186 landing in the wrong unit fails the build.
+      - name: Reference model (lint; tests skip without built artefacts)
+        working-directory: simulators/administrativ
+        env:
+          PYTHONHASHSEED: '0'
+        run: |
+          uv sync --all-groups
+          uv run ruff check pipeline tests
+          uv run ruff format --check pipeline tests
+          uv run pytest -q
+      - name: Web
+        working-directory: simulators/administrativ/web
+        run: |
+          npm ci
+          npm run lint
+          npm run typecheck
+          npm test

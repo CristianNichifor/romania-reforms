@@ -1,0 +1,98 @@
+name: Deploy to GitHub Pages
+
+# One Pages site for the repository, with each simulator on its own project path. Both apps
+# already read VITE_BASE, so the build side of the migration is nearly free — what this file
+# adds is the assembly, and the checks that stop it publishing a half-built site.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Built separately rather than through a workspace: the two apps arrived with their own
+      # lockfiles and their own dependency trees (one React, one not), and `npm ci` against the
+      # lockfile each was tested with is the honest way to build them until there is a reason
+      # to unify.
+      - name: Build salarizare
+        working-directory: simulators/salarizare/app
+        env:
+          VITE_BASE: /${{ github.event.repository.name }}/salarizare/
+        run: |
+          npm ci
+          npm run build
+
+      - name: Build administrativ
+        working-directory: simulators/administrativ/web
+        env:
+          VITE_BASE: /${{ github.event.repository.name }}/administrativ/
+        run: |
+          npm ci
+          npm run lint
+          npm run typecheck
+          npm test
+          npm run build
+
+      - name: Assemble the site
+        run: |
+          mkdir -p dist
+          cp site/index.html dist/index.html
+          cp -r simulators/salarizare/app/dist dist/salarizare
+          cp -r simulators/administrativ/web/dist dist/administrativ
+
+      # One deploy for the whole repository means a simulator that failed to build would
+      # otherwise be published as a dead tile on the landing page — a link to a 404. Checked
+      # explicitly so the deploy fails instead.
+      - name: Check every advertised path exists
+        run: |
+          fail=0
+          for path in index.html salarizare/index.html administrativ/index.html; do
+            if [ -s "dist/$path" ]; then
+              echo "ok   dist/$path"
+            else
+              echo "MISSING dist/$path"; fail=1
+            fi
+          done
+          # The administrative map is useless without its payload, and the payload is copied
+          # by Vite from public/ rather than produced by the bundler, so it can go missing
+          # without the build failing.
+          if [ ! -s dist/administrativ/data/manifest.json ]; then
+            echo "MISSING dist/administrativ/data/manifest.json"; fail=1
+          fi
+          # Every link on the landing page must resolve to something that was built.
+          for href in $(grep -o 'href="[a-z]*/"' site/index.html | cut -d'"' -f2); do
+            [ -s "dist/${href}index.html" ] || { echo "landing page links to missing $href"; fail=1; }
+          done
+          exit $fail
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
