@@ -57,6 +57,12 @@ interface Limitation {
   affects: string[];
 }
 
+interface Costuri {
+  monthlyLeiByTier: Record<string, number>;
+  today: { annualLei: number; levelOne: { judges: number; annualLei: number } };
+  limitations: Limitation[];
+}
+
 interface Design {
   chapters: {
     number: number;
@@ -121,6 +127,9 @@ const TIER_LABEL: Record<Court['tier'], string> = {
 };
 
 const ro = new Intl.NumberFormat('ro-RO');
+/** Millions, because a wage bill in bare lei is nine digits nobody reads. */
+const milioane = (lei: number): string =>
+  `${(lei / 1e6).toLocaleString('ro-RO', { maximumFractionDigits: 1 })} mil.`;
 
 const base = import.meta.env.BASE_URL;
 const el = <T extends HTMLElement>(q: string): T => {
@@ -147,7 +156,7 @@ const BLANK = {
 };
 
 async function main(): Promise<void> {
-  const [doc, counties, proposal, manifest, design] = await Promise.all([
+  const [doc, counties, proposal, manifest, design, costuri] = await Promise.all([
     fetch(`${base}data/instante.json`).then((r) => r.json() as Promise<Document>),
     fetch(`${base}data/counties.geojson`).then((r) => r.json()),
     fetch(`${base}data/propunere.json`).then((r) => r.json() as Promise<Proposal>),
@@ -155,6 +164,7 @@ async function main(): Promise<void> {
       (r) => r.json() as Promise<{ countyNames?: Record<string, string> }>,
     ),
     fetch(`${base}data/design.json`).then((r) => r.json() as Promise<Design>),
+    fetch(`${base}data/costuri.json`).then((r) => r.json() as Promise<Costuri>),
   ]);
   const countyName = (code: string): string => manifest.countyNames?.[code] ?? code;
 
@@ -441,6 +451,11 @@ async function main(): Promise<void> {
           <dt>Dosare de soluționat</dt><dd>${ro.format(p.volume)}</dd>
           <dt>Soluționate</dt><dd>${ro.format(p.resolved)}</dd>
           <dt>Judecători</dt><dd>${p.judges ? ro.format(Math.round(p.judges * 10) / 10) : '—'}</dd>
+          <dt>Indemnizații de bază</dt><dd>${
+            p.judges && costuri.monthlyLeiByTier[p.tier]
+              ? `${milioane(p.judges * costuri.monthlyLeiByTier[p.tier]! * 12)} lei/an`
+              : '—'
+          }</dd>
           <dt>Pe judecător</dt><dd>${load ? ro.format(load) : '—'}${
             load && average
               ? ` <span class="vs">(media gradului ${ro.format(Math.round(average))})</span>`
@@ -464,6 +479,33 @@ async function main(): Promise<void> {
     const showAccesLayer = (visible: boolean): void => {
       if (!map.getLayer('acces-fill')) return;
       map.setLayoutProperty('acces-fill', 'visibility', visible ? 'visible' : 'none');
+    };
+
+    /**
+     * What those judges would cost, at both readings of a question the paper leaves open.
+     *
+     * It merges judecatorii and tribunale and never says what grade the merged court's judges
+     * hold. At 17.250 lei a month against 22.500 the same headcount differs by hundreds of
+     * millions a year, so both are shown and neither is called the answer.
+     */
+    const wageBill = (judges: number): string => {
+      const pay = costuri.monthlyLeiByTier;
+      const today = costuri.today.levelOne.annualLei;
+      const at = (grade: 'judecatorie' | 'tribunal'): string => {
+        const annual = judges * (pay[grade] ?? 0) * 12;
+        const delta = annual - today;
+        return (
+          `<div class="figure">la grad de ${grade === 'judecatorie' ? 'judecătorie' : 'tribunal'}: ` +
+          `<strong>${milioane(annual)}</strong> lei/an ` +
+          `<span class="vs">(${delta >= 0 ? '+' : '−'}${milioane(Math.abs(delta))} față de azi)</span></div>`
+        );
+      };
+      return (
+        `<div class="figure" style="margin-top:.5rem">indemnizația de bază a judecătorilor de
+          nivel 1, azi <strong>${milioane(today)}</strong> lei/an</div>` +
+        at('judecatorie') +
+        at('tribunal')
+      );
     };
 
     const km = (metres: number): string => (metres / 1000).toFixed(1).replace('.', ',');
@@ -605,7 +647,8 @@ async function main(): Promise<void> {
           necesari, față de ${ro.format(Math.round(judgesToday))} azi
           <span class="vs">(${delta >= 0 ? '+' : ''}${ro.format(Math.round(delta))})</span></div>
         <div class="figure">cea mai mare instanță ar avea de
-          <strong>${spread.toFixed(0)}×</strong> mai multe dosare decât cea mai mică</div>`;
+          <strong>${spread.toFixed(0)}×</strong> mai multe dosare decât cea mai mică</div>
+        ${wageBill(needed)}`;
     };
 
     for (const button of document.querySelectorAll<HTMLButtonElement>('[data-mode]')) {
@@ -646,7 +689,7 @@ async function main(): Promise<void> {
 
   // The limitations are part of the map, not a footnote to it. The blocking one is the reason
   // this shows where courts are and refuses to show what closing one would cost.
-  el('#limits').innerHTML = [...doc.limitations, ...proposal.limitations]
+  el('#limits').innerHTML = [...doc.limitations, ...proposal.limitations, ...costuri.limitations]
     .map(
       (l) =>
         `<p class="limit ${l.severity === 'blocking' ? 'blocking' : ''}">${
