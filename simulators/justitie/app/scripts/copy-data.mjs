@@ -26,6 +26,8 @@ const sources = [
   // The proposal is a document with its own provenance, not a constant in the code: what the
   // page claims the reform says has to be checkable against the paper it was read from.
   [resolve(here, '../../data/propunere-harta-judiciara.json'), 'propunere.json'],
+  // The chapters that argue rather than measure, quoted with their pages.
+  [resolve(here, '../../data/design-reforma.json'), 'design.json'],
   // County codes to full names, so a merged court is "Tribunalul Covasna" and not "CV".
   [resolve(here, '../../../administrativ/web/public/data/manifest.json'), 'manifest.json'],
 ];

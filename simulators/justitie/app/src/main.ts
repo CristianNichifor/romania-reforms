@@ -57,6 +57,15 @@ interface Limitation {
   affects: string[];
 }
 
+interface Design {
+  chapters: {
+    number: number;
+    title: string;
+    page: number;
+    excerpt: string;
+  }[];
+}
+
 interface Acces {
   summary: {
     communes: number;
@@ -123,13 +132,14 @@ const BLANK = {
 };
 
 async function main(): Promise<void> {
-  const [doc, counties, proposal, manifest] = await Promise.all([
+  const [doc, counties, proposal, manifest, design] = await Promise.all([
     fetch(`${base}data/instante.json`).then((r) => r.json() as Promise<Document>),
     fetch(`${base}data/counties.geojson`).then((r) => r.json()),
     fetch(`${base}data/propunere.json`).then((r) => r.json() as Promise<Proposal>),
     fetch(`${base}data/manifest.json`).then(
       (r) => r.json() as Promise<{ countyNames?: Record<string, string> }>,
     ),
+    fetch(`${base}data/design.json`).then((r) => r.json() as Promise<Design>),
   ]);
   const countyName = (code: string): string => manifest.countyNames?.[code] ?? code;
 
@@ -556,6 +566,19 @@ async function main(): Promise<void> {
       `${proposal.publisher}, autorul acestui simulator. Nu este act normativ și nu a trecut ` +
       `printr-un proces public. Baza de comparație — activitatea instanțelor — este raportul ` +
       `Consiliului Superior al Magistraturii.`;
+
+  // The chapters that argue rather than measure, listed beneath the views that compute. Kept
+  // collapsed: they are context for the map, not the map itself, and a reader who wants the
+  // reasoning can open it while one reading the numbers is not made to scroll past it.
+  el('#design-list').innerHTML = design.chapters
+    .map(
+      (c) =>
+        `<details>
+           <summary>${c.title}<span>cap. ${c.number}, p. ${c.page}</span></summary>
+           <p class="excerpt">${c.excerpt}…</p>
+         </details>`,
+    )
+    .join('');
 
   // The limitations are part of the map, not a footnote to it. The blocking one is the reason
   // this shows where courts are and refuses to show what closing one would cost.
