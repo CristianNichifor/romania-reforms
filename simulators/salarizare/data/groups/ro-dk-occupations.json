@@ -1,0 +1,156 @@
+{
+  "id": "ro-dk-occupations",
+  "title": "Grupe ocupaționale puse față în față",
+  "from": "ro-draft-2026-07-16",
+  "dkSource": "dk-occupations",
+  "provenance": {
+    "source": "propunere-alternativa",
+    "locator": "data/groups/ro-dk-occupations.json",
+    "confidence": "derived",
+    "note": "Gruparea funcțiilor românești după ocupație, nu după anexă. Proiectul le împarte pe familii ocupaționale care urmează angajatorul și statutul juridic; grupele de aici urmează meseria — cum face și statistica daneză, și cum face piața muncii. Fiecare grupă spune ce funcții a prins și cu ce regulă, ca să poată fi contestată."
+  },
+  "groups": [
+    {
+      "id": "medici",
+      "sector": "Sănătate",
+      "label": "Medici",
+      "proposedName": "Medic (rezident → primar)",
+      "ro": {
+        "family": "II-sanatate-asistenta-sociala",
+        "kind": ["execution"],
+        "nameMatches": "^medic",
+        "excludeMatches": "veterinar|dentist|stomatolog"
+      },
+      "dkOccupations": ["Doctors (junior doctors)", "Senior consultants (medical)"],
+      "basis": "Aceeași meserie, tot parcursul: de la rezident la medic primar. Partea daneză unește medicii tineri cu medicii primari, ca să acopere aceeași carieră.",
+      "confidence": "derived"
+    },
+    {
+      "id": "asistenti-medicali",
+      "sector": "Sănătate",
+      "label": "Asistenți medicali",
+      "proposedName": "Asistent medical",
+      "ro": {
+        "family": "II-sanatate-asistenta-sociala",
+        "kind": ["execution"],
+        "nameMatches": "^asistent medical"
+      },
+      "dkOccupations": ["Nurses"],
+      "basis": "Aceeași meserie. În România denumirea se împarte pe nivel de studii — S, SSD, PL, M — care în Danemarca nu apare ca funcție separată.",
+      "confidence": "derived"
+    },
+    {
+      "id": "ingrijire",
+      "sector": "Sănătate",
+      "label": "Îngrijire și asistență socială",
+      "proposedName": "Îngrijitor / asistent social",
+      "ro": {
+        "family": "II-sanatate-asistenta-sociala",
+        "kind": ["execution"],
+        "nameMatches": "ingrijitor|îngrijitor|infirmier|asistent social|parinte social|părinte social|asistent personal"
+      },
+      "dkOccupations": ["Social and health care assistants"],
+      "basis": "Munca de îngrijire directă. Capătul de jos al grilei românești.",
+      "confidence": "derived"
+    },
+    {
+      "id": "profesori-gimnaziu",
+      "sector": "Educație",
+      "label": "Învățători și profesori de gimnaziu",
+      "proposedName": "Profesor (învățământ obligatoriu)",
+      "ro": {
+        "family": "I-invatamant",
+        "kind": ["execution"],
+        "nameMatches": "^(profesor|invatator|învăţător|învățător|institutor)",
+        "excludeMatches": "universitar"
+      },
+      "dkOccupations": ["Primary and lower secondary school teachers"],
+      "basis": "Predare în învățământul obligatoriu. Proiectul românesc separă funcția pe grad didactic și pe vechime; Danemarca nu.",
+      "confidence": "derived"
+    },
+    {
+      "id": "educatori",
+      "sector": "Educație",
+      "label": "Educatori",
+      "proposedName": "Educator",
+      "ro": {
+        "family": "I-invatamant",
+        "kind": ["execution"],
+        "nameMatches": "educatoare|educator-puericultor|^educator"
+      },
+      "dkOccupations": ["Pedagogues / Educators"],
+      "basis": "Educație timpurie și antepreșcolară.",
+      "confidence": "derived"
+    },
+    {
+      "id": "universitari",
+      "sector": "Educație",
+      "label": "Cadre didactice universitare",
+      "proposedName": "Cadru didactic universitar",
+      "ro": {
+        "family": "I-invatamant",
+        "kind": ["execution"],
+        "nameMatches": "universitar|conferentiar|conferenţiar|^lector|^asistent univ"
+      },
+      "dkOccupations": ["Upper secondary school teachers"],
+      "basis": "Echivalare slabă și declarată ca atare: LONSOFF nu are o grupă separată pentru universitari, iar cea mai apropiată publicată e profesorii de liceu. Comparația subestimează capătul de sus danez.",
+      "confidence": "assumed",
+      "disputed": true
+    },
+    {
+      "id": "specialisti-administratie",
+      "sector": "Administrație",
+      "label": "Specialiști cu studii superioare",
+      "proposedName": "Specialist administrație publică (studii superioare)",
+      "ro": {
+        "family": "VIII-administratie",
+        "kind": ["execution"],
+        "studyLevel": ["S"],
+        "nameMatches": "^(consilier|expert|inspector|auditor|referent de specialitate)"
+      },
+      "dkOccupations": ["Graduates with a Masters degree"],
+      "basis": "Funcții de execuție cu studii superioare din administrație. Denumirea românească descrie gradul din ierarhia funcției publice; cea daneză descrie pregătirea.",
+      "confidence": "derived"
+    },
+    {
+      "id": "administrativ-studii-medii",
+      "sector": "Administrație",
+      "label": "Personal administrativ cu studii medii",
+      "proposedName": "Personal de birou",
+      "ro": {
+        "family": "VIII-administratie",
+        "kind": ["execution"],
+        "studyLevel": ["M", "PL", "M,G", "G"],
+        "nameMatches": "^(referent|casier|secretar|arhivar|magaziner|operator)"
+      },
+      "dkOccupations": ["Office staff"],
+      "basis": "Munca administrativă care nu cere studii superioare.",
+      "confidence": "derived"
+    },
+    {
+      "id": "conducere",
+      "sector": "Administrație",
+      "label": "Conducere în sectorul public",
+      "proposedName": "Manager din sectorul public",
+      "ro": {
+        "family": "VIII-administratie",
+        "kind": ["management"]
+      },
+      "dkOccupations": ["Public sector managers"],
+      "basis": "Toate funcțiile de conducere din administrație, de la șef de birou la secretar general.",
+      "confidence": "derived"
+    },
+    {
+      "id": "politie",
+      "sector": "Ordine publică",
+      "label": "Poliție și ordine publică",
+      "proposedName": "Polițist",
+      "ro": {
+        "family": "VI-aparare-ordine-securitate"
+      },
+      "dkOccupations": ["Police officers"],
+      "basis": "Anexa VI acoperă apărarea, ordinea publică și securitatea națională la un loc, deci grupa românească e mai largă decât cea daneză, care numără doar polițiștii.",
+      "confidence": "assumed"
+    }
+  ]
+}

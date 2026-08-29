@@ -1,0 +1,96 @@
+{
+  "$schema": "../../schema/proposal.schema.json",
+  "id": "propunere-v1",
+  "name": "Propunere alternativă v1 — grila reparată",
+  "base": "ro-draft-2026-07-16",
+  "status": "proposal",
+  "summary": "Cinci corecturi la proiectul MMFTSS. Niciuna nu schimbă cine cât ia unul față de altul: fiecare repară un defect pe care instrumentul îl arată deja în datele publicate. Este o versiune corectată a propunerii ministerului, nu o politică salarială alternativă.",
+  "notPolicy": "Această propunere nu ridică și nu scade salarii în raport unele cu altele. Compresia grilei, nivelul valorii de referință și repartiția între familii ocupaționale rămân exact cele propuse de minister. Ce se schimbă este dacă regulile scrise în lege pot fi de fapt aplicate. Excepția este ultima corectură, marcată ca atare: ea schimbă cine cât ia, pentru că mută sporuri legate de instituție în interiorul plafonului.",
+  "provenance": {
+    "source": "propunere-alternativa",
+    "locator": "data/proposals/propunere-v1.json",
+    "confidence": "derived",
+    "note": "Fiecare patch trimite la constatarea care îl motivează, iar constatarea trimite la celula sau articolul din sursă."
+  },
+  "patches": [
+    {
+      "id": "rotunjire-2-zecimale",
+      "op": "roundCoefficients",
+      "decimals": 2,
+      "title": "Coeficienții se rotunjesc la două zecimale",
+      "fixes": "coeficienti-retrocalculati",
+      "rationale": "1361 de coeficienți distincți, dintre care 61,9% au 14 sau mai multe zecimale și 582 au exact 16. Un coeficient ca 5,189610389610378 nu este o decizie de politică salarială, ci restul unei împărțiri: grila a fost dedusă din salariile existente, nu proiectată prin evaluarea funcțiilor pe care o descrie Art. 8. Rotunjirea nu schimbă ierarhia — schimbă doar faptul că valorile devin alegeri asumate, care pot fi dezbătute și modificate una câte una.",
+      "expectedEffect": "Numărul de valori distincte scade abrupt; histograma de precizie se concentrează pe două zecimale. Salariile se mișcă cu cel mult câțiva lei."
+    },
+    {
+      "id": "grade-contigue",
+      "op": "makeGradeBandsContiguous",
+      "title": "Intervalele gradelor salariale devin continue",
+      "fixes": "coeficienti-intre-grade",
+      "rationale": "Art. 9 alin. (2) scrie cele 12 intervale cu două zecimale — gradul 1 se termină la 1,19, gradul 2 începe la 1,20 — dar anexele livrează coeficienți cu 16 zecimale. 92 de variante cad în golurile de o sutime dintre intervale și nu aparțin niciunui grad salarial. Încadrarea în grad determină evaluarea, promovarea și orice măsură de compresie, deci un coeficient fără grad este un om fără regulă aplicabilă.",
+      "expectedEffect": "Cele 92 de variante primesc un grad. Niciun coeficient nu se schimbă."
+    },
+    {
+      "id": "institutia-nu-e-denumire",
+      "op": "separateInstitutionFactor",
+      "title": "Tipul instituției iese din denumirea funcției",
+      "fixes": "asimilare-prin-punctuatie",
+      "rationale": "Meseria e ce faci; instituția e unde o faci. Proiectul le amestecă: 95 de funcții au variante care diferă numai după categoria instituției — nivel central I sau II, cele patru trepte de administrație locală, categoria unității sanitare — iar una și aceeași denumire ajunge plătită cu până la 50% mai mult după unde e postul. Consecința practică e că nu se mai poate deosebi o promovare de un transfer, iar comparația cu piața muncii devine imposibilă, pentru că piața cunoaște o singură meserie. Corectura păstrează funcția o singură dată, la coeficientul cel mai mic, și transformă diferența într-un multiplicator explicit al instituției, care poate fi discutat separat de grila de funcții. Nimeni nu pierde și nimeni nu câștigă: aceleași sume, altfel scrise.",
+      "expectedEffect": "215 variante dispar din nomenclator fără ca vreun salariu să se schimbe. Diferența pe instituție rămâne, dar se vede."
+    },
+    {
+      "id": "o-functie-un-nume",
+      "title": "Aceeași meserie are un singur nume",
+      "op": "mergeDuplicateTitles",
+      "fixes": "o-meserie-mai-multe-nume",
+      "rationale": "Grila numește meseria o dată pentru fiecare angajator. „Director” apare sub 25 de coduri în șase anexe, „Șef serviciu” sub alte 25, „Director general adjunct” sub 22 — nu fiindcă munca diferă, ci fiindcă instituția diferă. Este exact defectul pe care îl repară separarea multiplicatorului de instituție, doar cu un nivel mai sus: acolo erau mai mulți coeficienți sub un nume, aici sunt mai multe nume pentru o meserie. Două funcții sunt aceeași meserie doar dacă denumirea, familia ocupațională, tipul postului și nivelul de studii coincid — un director din învățământ și unul din administrație rămân posturi diferite. Rândurile al căror nume întreg e doar un grad profesional („debutant”, „principal”) nu se comasează: acolo denumirea meseriei s-a pierdut la import, iar unirea lor ar inventa o funcție numită „debutant”.",
+      "expectedEffect": "Numărul de funcții numite scade substanțial fără ca vreun salariu să se schimbe. Denumirile absorbite rămân în titlurile funcției păstrate, iar diferența dintre angajatori devine un multiplicator explicit."
+    },
+    {
+      "id": "raport-1-8-de-la-inceput",
+      "op": "collapseSchedule",
+      "dimension": "an",
+      "keep": "first",
+      "title": "Raportul de 1 la 8 se aplică de la intrarea în vigoare",
+      "fixes": "raportul-1-8-esalonat",
+      "rationale": "Art. 5 spune că raportul este 1 la 8. În grilă, raportul efectiv în 2026/2027 este 1:7,39, iar 8,00 apare abia în coloana 2031 a Anexei IX. O lege care își declară propriul raport ar trebui să îl respecte în ziua în care intră în vigoare, nu la capătul unui eșalonament de cinci ani care poate fi oricând modificat de o altă lege. Varianta aleasă aici păstrează coeficientul din primul an și elimină eșalonarea, adică ține vârful jos, nu ridică baza.",
+      "expectedEffect": "Coeficienții demnitarilor rămân la nivelul 2026/2027. Raportul declarat și cel efectiv coincid."
+    },
+    {
+      "id": "plafon-fara-portite",
+      "op": "setSupplementCounts",
+      "supplementIds": [
+        "administrare-resurse-europene",
+        "izolare-delta",
+        "capacitate-fiscal-bugetara"
+      ],
+      "countsToCap": true,
+      "title": "Sporurile exceptate intră în plafonul de 20%",
+      "fixes": "plafon-20-nu-e-per-persoana",
+      "rationale": "Art. 21 alin. (2) pune un plafon de 20% pe sporuri, apoi Art. 16 alin. (7), Art. 17 alin. (2), Art. 19 alin. (2), Art. 22 alin. (10) și anexele scot pe rând din el sporurile cele mai mari. Un plafon din care se poate ieși prin încadrarea într-o categorie exceptată nu este un plafon, ci o formalitate. Rămân exceptate doar cele care compensează timp de muncă efectiv prestat în afara programului — noaptea, orele suplimentare — și partea din sporul de fonduri externe care se decontează din fonduri externe, pentru că aceea nu apasă pe bugetul de stat.",
+      "expectedEffect": "Gradul de utilizare a plafonului crește vizibil, iar plafonul începe să limiteze ceva."
+    },
+    {
+      "id": "o-singura-vechime",
+      "op": "unifySeniority",
+      "ladder": "gradatii",
+      "title": "Un singur mecanism de vechime, pentru toată lumea",
+      "fixes": "doua-mecanisme-de-vechime",
+      "rationale": "Art. 13 alin. (2) spune că toți coeficienții pentru funcții de execuție sunt stabiliți la gradația 0, urmând să crească cu 7,5/5/5/2,5/2,5%. Anexele I și V nu funcționează așa: publică un rând de coeficient pe fiecare tranșă de vechime, fiecare cu propriul cod. Pentru profesori și magistrați vechimea este deja în coeficient, deci aplicarea gradațiilor peste el ar plăti vechimea de două ori — iar neaplicarea lor înseamnă că aceleași cuvinte din lege produc rezultate diferite în funcție de anexă. Se păstrează gradațiile de la Art. 13 și se recalculează coeficienții acelor anexe la gradația 0.",
+      "expectedEffect": "Vechimea devine calculabilă uniform. Salariul la vechimea maximă rămâne aproximativ cel din proiect; se schimbă drumul până acolo, nu capătul."
+    },
+    {
+      "id": "spor-de-conditii-proportionat",
+      "op": "setSupplementRate",
+      "supplementIds": [
+        "conditii-periculoase-i"
+      ],
+      "rate": 0.15,
+      "policyChange": true,
+      "title": "Sporul pentru condiții se aduce la un nivel proporțional cu munca",
+      "fixes": "plafon-20-nu-e-per-persoana",
+      "rationale": "Este o schimbare de politică, nu o reparație — mută bani între oameni. Temeiul e ce se plătește efectiv în Danemarca, unde sporul de condiții nu are plafon legal, ci rezultă din negociere: 8,8% din câștig la asistenții de îngrijire, 5,5% la asistenți medicali, 4,9% la polițiști și medici — dar 0,2% la învățători, 0,3% la personalul de birou și 0,0% la manageri. Adică se plătește acolo unde condițiile chiar diferă, proporțional cu cât diferă. Proiectul românesc permite până la 50% din salariul de bază pentru un singur spor de condiții, de peste cinci ori maximul danez observat, iar mărimea concretă o stabilește ordonatorul. Propunerea coboară plafonul la 15%, ceea ce lasă loc peste tot ce se plătește în Danemarca pentru cea mai grea muncă.",
+      "expectedEffect": "Diferența dintre două persoane cu aceeași funcție, în instituții diferite, scade substanțial. Sporul rămâne, dar nu mai poate dubla singur salariul."
+    }
+  ]
+}

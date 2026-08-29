@@ -1,0 +1,84 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Allow one deploy at a time; a queued run supersedes an older one rather than racing it.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # The UI is built last, on purpose: the engine has to be right before anything renders
+    # it. Skip cleanly until app/package.json exists rather than failing every push.
+    outputs:
+      app: ${{ steps.app.outputs.exists }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for an app
+        id: app
+        run: |
+          if [ -f app/package.json ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "No app/ yet — nothing to deploy."
+          fi
+
+      - uses: actions/setup-node@v4
+        if: steps.app.outputs.exists == 'true'
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Install
+        if: steps.app.outputs.exists == 'true'
+        working-directory: app
+        run: npm ci
+
+      - name: Check
+        if: steps.app.outputs.exists == 'true'
+        working-directory: app
+        run: |
+          npm run typecheck
+          npm test
+
+      - name: Build
+        if: steps.app.outputs.exists == 'true'
+        working-directory: app
+        # A project site is served from /<repo>/, so assets need that prefix.
+        env:
+          VITE_BASE: /${{ github.event.repository.name }}/
+        run: npm run build
+
+      - uses: actions/configure-pages@v5
+        if: steps.app.outputs.exists == 'true'
+
+      - uses: actions/upload-pages-artifact@v3
+        if: steps.app.outputs.exists == 'true'
+        with:
+          path: app/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    # Only publish when there is an artifact. Without this guard the job would call
+    # deploy-pages with nothing uploaded and fail every push until the UI lands.
+    if: needs.build.outputs.app == 'true'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

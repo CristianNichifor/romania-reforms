@@ -1,0 +1,1082 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/schema/regime.schema.json",
+  "title": "Pay regime",
+  "description": "One pay regime as data. Romanian statutes, the Danish state/region/municipal agreements and hypothetical proposals are all instances of this one document type. Nothing in here is jurisdiction-specific.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "name",
+    "jurisdiction",
+    "status",
+    "currency",
+    "provenance",
+    "reference",
+    "grades",
+    "ladders",
+    "positions",
+    "supplements",
+    "caps",
+    "levies",
+    "limitations"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "name": {
+      "type": "string"
+    },
+    "jurisdiction": {
+      "type": "string",
+      "description": "ISO 3166-1 alpha-2 plus optional tier, e.g. RO, DK-stat, DK-kommune"
+    },
+    "status": {
+      "enum": [
+        "in-force",
+        "draft",
+        "proposal",
+        "comparator"
+      ]
+    },
+    "effectiveFrom": {
+      "type": "string",
+      "format": "date"
+    },
+    "currency": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
+    },
+    "minorUnits": {
+      "type": "integer",
+      "default": 2,
+      "description": "Decimal places in the currency's minor unit. All engine arithmetic is in integer minor units."
+    },
+    "provenance": {
+      "$ref": "#/$defs/provenance"
+    },
+    "reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "amount",
+        "factor",
+        "baseDate",
+        "unit",
+        "period",
+        "rounding",
+        "provenance"
+      ],
+      "description": "The single multiplier both systems share. base = positionValue x amount x factor, rounded. RO: amount = valoarea de referinta (4100 RON), factor = 1, unit = coefficient. DK: amount = 1, factor = reguleringsprocent, unit = absolute, and positionValue is the frozen basisbeloeb at baseDate.",
+      "properties": {
+        "amount": {
+          "$ref": "#/$defs/valueSeries"
+        },
+        "factor": {
+          "$ref": "#/$defs/valueSeries"
+        },
+        "baseDate": {
+          "type": "string",
+          "format": "date",
+          "description": "Date the position values are expressed in. RO: date the coefficients were set. DK stat: 2012-03-31, region: 2018-03-31, kommune: 2000-03-31."
+        },
+        "unit": {
+          "enum": [
+            "coefficient",
+            "absolute"
+          ],
+          "description": "Presentation hint only. The arithmetic is identical."
+        },
+        "period": {
+          "enum": [
+            "month",
+            "year"
+          ],
+          "default": "month",
+          "description": "The period a position value resolves to. Romanian coefficients yield a monthly salariu de baza; the Danish basic amounts are annual. Without this the engine would happily add a Danish year to a Romanian month, so payslip() refuses to emit a figure whose period it cannot name."
+        },
+        "rounding": {
+          "$ref": "#/$defs/rounding",
+          "description": "Default rounding for anything derived from this reference. Individual ladders, positions and supplements may override it - the Danish state tables round the basic salary scale to whole kroner but leave supplements at two decimals."
+        },
+        "growthCapId": {
+          "type": "string",
+          "description": "id of a cap of kind 'growth' that constrains how amount may rise year on year"
+        },
+        "provenance": {
+          "$ref": "#/$defs/provenance"
+        }
+      }
+    },
+    "grades": {
+      "type": "array",
+      "description": "System-wide bands of position value. RO: the 12 grade salariale of Art. 9(2). DK: empty - Danish bands are per position, expressed as variant.range.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "min",
+          "max",
+          "provenance"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "min": {
+            "$ref": "#/$defs/valueSeries"
+          },
+          "max": {
+            "$ref": "#/$defs/valueSeries"
+          },
+          "description": {
+            "type": "string"
+          },
+          "provenance": {
+            "$ref": "#/$defs/provenance"
+          }
+        }
+      }
+    },
+    "ladders": {
+      "type": "object",
+      "description": "Seniority progressions, keyed by id. A regime may have several; a position names the one it uses, or none.",
+      "additionalProperties": {
+        "$ref": "#/$defs/ladder"
+      }
+    },
+    "positions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/position"
+      }
+    },
+    "supplements": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/supplement"
+      }
+    },
+    "caps": {
+      "type": "array",
+      "description": "Plural and typed. RO has at least three structurally different caps; DK has none.",
+      "items": {
+        "$ref": "#/$defs/cap"
+      }
+    },
+    "levies": {
+      "type": "array",
+      "description": "Ordered deductions and contributions. Includes occupational pension, which in DK is the dominant one and is split employee/employer.",
+      "items": {
+        "$ref": "#/$defs/levy"
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "description": "What this regime document deliberately cannot compute, in the author's own words. The UI must render these where the affected number is shown - not in a footnote.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "text",
+          "affects"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "affects": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "base",
+                "seniority",
+                "supplements",
+                "gross",
+                "net",
+                "employerCost",
+                "pensionSplit",
+                "capUtilisation",
+                "aggregate",
+                "structure"
+              ]
+            }
+          },
+          "severity": {
+            "enum": [
+              "blocking",
+              "material",
+              "note"
+            ],
+            "default": "material"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "locator",
+        "confidence"
+      ],
+      "description": "Required on every number that could be argued with.",
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "Source document id, e.g. 'proiect-lege-2026-07-16' or 'ida-loentabeller-2026-04-01'"
+        },
+        "locator": {
+          "type": "string",
+          "description": "Article/annex/sheet+cell, e.g. 'Art. 13 alin. (3) lit. b)' or \"sheet 'IX A'!G10\""
+        },
+        "confidence": {
+          "enum": [
+            "verbatim",
+            "derived",
+            "assumed"
+          ],
+          "description": "verbatim: copied from the source. derived: computed from it, formula recorded in note. assumed: not in any source document yet - must be resolved before publication."
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "valueSeries": {
+      "description": "A number, or a dated step function. Annex IX phases dignitary coefficients 2026->2031; the Danish reguleringsprocent is redated twice a year; the RO reference value is set annually by HG. One primitive covers all three.",
+      "oneOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "from",
+              "value"
+            ],
+            "properties": {
+              "from": {
+                "type": "string",
+                "format": "date"
+              },
+              "value": {
+                "type": "number"
+              },
+              "provenance": {
+                "$ref": "#/$defs/provenance"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "rounding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "step",
+        "mode"
+      ],
+      "properties": {
+        "step": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "In minor units. 100 = round to a whole leu / whole krone."
+        },
+        "mode": {
+          "enum": [
+            "ceil",
+            "floor",
+            "halfUp",
+            "halfEven",
+            "none"
+          ]
+        },
+        "provenance": {
+          "$ref": "#/$defs/provenance"
+        }
+      }
+    },
+    "ladder": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "steps",
+        "provenance"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "compoundingUplift",
+            "absoluteSteps"
+          ],
+          "description": "compoundingUplift: each step multiplies the previous salary (RO gradatii). absoluteSteps: each step names its own position value (DK scale grades)."
+        },
+        "bakedInto": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/positionKind"
+          },
+          "description": "Position kinds for which the top step is already inside the published value and must not be applied again. RO Art. 10(6): functii de conducere carry the maximum gradatie inside the coefficient."
+        },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "provenance"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "fromYears": {
+                "type": "number",
+                "description": "Lower bound of the seniority band this step corresponds to."
+              },
+              "toYears": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "pct": {
+                "$ref": "#/$defs/valueSeries",
+                "description": "compoundingUplift only. 0.075 = 7.5%."
+              },
+              "value": {
+                "$ref": "#/$defs/valueSeries",
+                "description": "absoluteSteps only. A position value in the same unit as positions[].variants[].value."
+              },
+              "provenance": {
+                "$ref": "#/$defs/provenance"
+              }
+            }
+          }
+        },
+        "provenance": {
+          "$ref": "#/$defs/provenance"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "compoundingUplift"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "steps": {
+                "items": {
+                  "required": [
+                    "pct"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "absoluteSteps"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "steps": {
+                "items": {
+                  "required": [
+                    "value"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "positionKind": {
+      "enum": [
+        "execution",
+        "management",
+        "dignitary",
+        "uniformed",
+        "academic"
+      ],
+      "description": "Drives whether a ladder applies at all, not pay level."
+    },
+    "position": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "name",
+        "family",
+        "kind",
+        "variants",
+        "provenance"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "The source's own code where one exists (RO: the 81.10101002.02.2 form in the coefficient workbook). Importer-assigned codes must say so in provenance.note."
+        },
+        "name": {
+          "type": "string",
+          "description": "Canonical display title. When the source merges several former titles into one row, this is the first of them and the rest live in titles[]."
+        },
+        "titles": {
+          "type": "array",
+          "description": "Every job title the source places on this one position. A draft-law row such as 'Director; sef compartiment; inspector sef; comisar sef divizie; ...' is nine formerly distinct titles now sharing one code, one coefficient and one grade. The merge is a fact of the source cell, so it belongs to the regime rather than to a crosswalk. Cross-REGIME mappings (153/2017 -> draft 2026) live in data/crosswalks instead.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "canonical": {
+                "type": "boolean",
+                "default": false
+              },
+              "qualifier": {
+                "type": "string",
+                "description": "Trailing qualifier that applies to every title in the row, e.g. 'studii superioare lunga durata grad didactic I'. Held separately so it is not mistaken for a title."
+              },
+              "note": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "assimilation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "rawTitleCell",
+            "parse"
+          ],
+          "description": "How titles[] was obtained. The split is contested - the workbook uses ';' both between titles and inside them - so the original string is kept verbatim and every parse records how much to trust it.",
+          "properties": {
+            "rawTitleCell": {
+              "type": "string",
+              "description": "The source cell exactly as written, punctuation and double spaces included. Never regenerated from titles[]."
+            },
+            "parse": {
+              "enum": [
+                "single",
+                "semicolon",
+                "comma",
+                "slash",
+                "mixed",
+                "needsReview"
+              ],
+              "description": "single: one title, no merge. semicolon/comma/slash: split cleanly on that separator. mixed: separators nest, e.g. titles by ';' with a shared qualifier after a ','. needsReview: at least one fragment does not look like a job title and a human must rule. All three separators are ambiguous somewhere in the workbook - ';' also appears inside single titles, ',' also introduces qualifiers, '/' also appears inside one title as in 'secretar institutie/unitate de invatamant' - so the parse is a claim, not a fact."
+            },
+            "fanIn": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Number of former titles collapsed here. 1 means no merge."
+            },
+            "reviewedBy": {
+              "type": "string"
+            },
+            "provenance": {
+              "$ref": "#/$defs/provenance"
+            }
+          }
+        },
+        "family": {
+          "type": "string",
+          "description": "Occupational family. RO: one of the 7 familii ocupationale / annex number. DK: bargaining area."
+        },
+        "chapter": {
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/positionKind"
+        },
+        "studyLevel": {
+          "type": "string",
+          "description": "As written in the source: S, SSD, M, PL, G, M/G, MSc, BSc."
+        },
+        "ordonator": {
+          "type": "string",
+          "description": "Ordonator principal de credite this position sits under, when the source pins it. Needed for cap scoping."
+        },
+        "dims": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Names of the axes that split this position into variants: gradProfesional, gradManagerial, treapta, institutionLevel, vechimeBand. Empty when the position has a single value."
+        },
+        "ladder": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "id of a ladder in ladders, or null when seniority does not move this position."
+        },
+        "ladderPath": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Ordered step ids this position actually walks, repeats allowed. DK bachelors walk grades 1,2,4,4,5. Omit to walk the ladder's own step order."
+        },
+        "variants": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "provenance"
+            ],
+            "properties": {
+              "dims": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "value": {
+                "$ref": "#/$defs/valueSeries"
+              },
+              "range": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "min",
+                  "max"
+                ],
+                "properties": {
+                  "min": {
+                    "$ref": "#/$defs/valueSeries"
+                  },
+                  "max": {
+                    "$ref": "#/$defs/valueSeries"
+                  }
+                },
+                "description": "Where the source gives an interval rather than a point: DK specialist/senior consultants, RO functii de conducere grad managerial I-II set by the head of institution."
+              },
+              "gradeId": {
+                "type": "string",
+                "description": "id in grades[] this variant is placed in by the source. The engine checks it against min/max rather than trusting it."
+              },
+              "modifier": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "pct",
+                  "reason"
+                ],
+                "properties": {
+                  "pct": {
+                    "$ref": "#/$defs/valueSeries"
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                },
+                "description": "Annex II Art. 10: the same coefficient is applied +/-15% by unit category. A modifier on the value, not a supplement - it moves the base and therefore the cap denominator."
+              },
+              "provenance": {
+                "$ref": "#/$defs/provenance"
+              }
+            },
+            "oneOf": [
+              {
+                "required": [
+                  "value"
+                ]
+              },
+              {
+                "required": [
+                  "range"
+                ]
+              }
+            ]
+          }
+        },
+        "provenance": {
+          "$ref": "#/$defs/provenance"
+        },
+        "institutionFactor": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "min",
+            "max",
+            "reason"
+          ],
+          "description": "Where pay varies by the kind of institution rather than by the job, the variation belongs here as an explicit multiplier on one position — not as several positions sharing a title. The draft does the opposite: 95 of its positions carry variants that differ only by institutional tier, one of them by a factor of 1,5 under a single name.",
+          "properties": {
+            "min": {
+              "type": "number"
+            },
+            "max": {
+              "type": "number"
+            },
+            "reason": {
+              "type": "string"
+            },
+            "provenance": {
+              "$ref": "#/$defs/provenance"
+            }
+          }
+        }
+      }
+    },
+    "supplement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "mode",
+        "base",
+        "countsToCap",
+        "provenance"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "mode": {
+          "enum": [
+            "fixed",
+            "upTo",
+            "range"
+          ],
+          "description": "fixed: the law states the rate (Art. 14, 10%). upTo: the law states a ceiling and someone downstream picks (Art. 15, up to 40%). This distinction is the whole point of Art. 21 and must not be flattened."
+        },
+        "rate": {
+          "$ref": "#/$defs/valueSeries",
+          "description": "Proportion of base, e.g. 0.40. Use with base = baseSalary | referenceValue | hourlyRate."
+        },
+        "rateMin": {
+          "$ref": "#/$defs/valueSeries"
+        },
+        "amount": {
+          "$ref": "#/$defs/valueSeries",
+          "description": "Absolute value in position-value units, multiplied by reference like any position value. DK supplements are all of this form."
+        },
+        "base": {
+          "enum": [
+            "baseSalary",
+            "referenceValue",
+            "hourlyRate",
+            "gross",
+            "absolute"
+          ],
+          "description": "What the rate is applied to. Art. 19 (handicap, 15%) is on the reference value, not on the base salary - a different number for everyone."
+        },
+        "countsToCap": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "const": "partial"
+            }
+          ],
+          "description": "Whether this supplement enters the numerator of the cap named in capId. 'partial' is required by Art. 15(18)-(19): the externally-funded share is exempt, the co-financed share counts."
+        },
+        "capId": {
+          "type": "string",
+          "description": "Which cap this is measured against. Defaults to the first cap of kind shareOfBase."
+        },
+        "capSplit": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "countsWhen"
+          ],
+          "properties": {
+            "countsWhen": {
+              "type": "string",
+              "description": "Machine-readable condition naming the person/scenario field that decides the split, e.g. 'cofinancingShare'."
+            },
+            "provenance": {
+              "$ref": "#/$defs/provenance"
+            }
+          },
+          "description": "Required when countsToCap = 'partial'."
+        },
+        "rounding": {
+          "$ref": "#/$defs/rounding",
+          "description": "Overrides reference.rounding for this supplement."
+        },
+        "ladder": {
+          "type": "string",
+          "description": "id of a ladder this supplement escalates along, when it has its own seniority scale independent of the base salary. DK raadighedstillaeg."
+        },
+        "levyOverrides": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "levyId",
+              "rate"
+            ],
+            "properties": {
+              "levyId": {
+                "type": "string"
+              },
+              "rate": {
+                "$ref": "#/$defs/valueSeries"
+              },
+              "provenance": {
+                "$ref": "#/$defs/provenance"
+              }
+            }
+          },
+          "description": "Per-component levy rates. The Danish availability supplement carries 12,50% pension where the basic salary carries 18,07%."
+        },
+        "excludes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Supplement ids that cannot be drawn at the same time. Annex II Art. 1: the 15% three-shift supplement replaces the 25% night supplement."
+        },
+        "requires": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "eligibility": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "families": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "positionKinds": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/positionKind"
+              }
+            },
+            "maxStaffShare": {
+              "$ref": "#/$defs/valueSeries",
+              "description": "Ceiling on the share of an institution's staff who may draw it. Annex II Art. 7(5): 10% for level I dangerous conditions, 20% for the rest. Ignored by payslip(), binding in aggregate()."
+            },
+            "condition": {
+              "type": "string",
+              "description": "Prose condition the engine cannot evaluate, e.g. Art. 23's local tax-revenue ratio test. Surfaces as a diagnostic."
+            }
+          }
+        },
+        "provenance": {
+          "$ref": "#/$defs/provenance"
+        }
+      }
+    },
+    "cap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "scope",
+        "provenance"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "shareOfBase",
+            "shareOfHeadcount",
+            "growth",
+            "shareOfGdp"
+          ],
+          "description": "shareOfBase: Art. 21(2), 20% of the base wage bill; Art. 22(6), 4% for performance premia. shareOfHeadcount: Art. 22(7), at most 30% of posts. growth: Art. 9(4), the reference value may not rise faster than nominal GDP. shareOfGdp: Art. 36(3), the whole wage bill must fall by at least 1.5 points of GDP between 2024 and 2031 - a target on an external statistic rather than on anything the payroll controls."
+        },
+        "pct": {
+          "$ref": "#/$defs/valueSeries"
+        },
+        "scope": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "level",
+            "period"
+          ],
+          "properties": {
+            "level": {
+              "enum": [
+                "person",
+                "institution",
+                "ordonatorPrincipal",
+                "system"
+              ]
+            },
+            "partitionBy": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "fundingSource",
+                  "family",
+                  "positionKind"
+                ]
+              }
+            },
+            "period": {
+              "enum": [
+                "month",
+                "year"
+              ]
+            }
+          },
+          "description": "Art. 21(2) is per ordonator principal, per funding source. It is NOT a per-person cap; a payslip can only ever show a notional utilisation."
+        },
+        "numerator": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "include": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "supplements",
+                  "indemnities",
+                  "premia",
+                  "bonuses"
+                ]
+              }
+            },
+            "exclude": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "denominator": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "include": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "baseSalary",
+                  "seniority",
+                  "gradePay",
+                  "commandPay",
+                  "indemnityOfEmployment",
+                  "monthlyIndemnity"
+                ]
+              }
+            }
+          }
+        },
+        "boundTo": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "dataset",
+            "seriesId"
+          ],
+          "description": "The external series this cap is measured against. Required for kind 'growth' and 'shareOfGdp'. A dangling reference is a validation error: a rule the statute states but the model cannot evaluate must say so through a limitation, not through a string nobody resolves.",
+          "properties": {
+            "dataset": {
+              "type": "string",
+              "description": "id of a document in data/fiscal/"
+            },
+            "seriesId": {
+              "type": "string"
+            },
+            "baselinePeriod": {
+              "type": "string",
+              "description": "shareOfGdp: the period the target is measured from. Art. 36(3) names 2024."
+            },
+            "targetPeriod": {
+              "type": "string",
+              "description": "shareOfGdp: the period the target must be met by. Art. 36(3) names 2031."
+            },
+            "deltaPp": {
+              "type": "number",
+              "description": "shareOfGdp: required change in percentage points. Negative for a reduction. Art. 36(3): at least -1.5."
+            },
+            "provenance": {
+              "$ref": "#/$defs/provenance"
+            }
+          }
+        },
+        "penalty": {
+          "type": "string",
+          "description": "What the source attaches to breach. Art. 35(2): 30 000-50 000 lei plus recovery."
+        },
+        "provenance": {
+          "$ref": "#/$defs/provenance"
+        }
+      }
+    },
+    "levy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "payer",
+        "base",
+        "order",
+        "provenance"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "socialInsurance",
+            "health",
+            "incomeTax",
+            "employerContribution",
+            "pension",
+            "other"
+          ]
+        },
+        "payer": {
+          "enum": [
+            "employee",
+            "employer",
+            "split"
+          ]
+        },
+        "split": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "employee",
+            "employer"
+          ],
+          "properties": {
+            "employee": {
+              "type": "number"
+            },
+            "employer": {
+              "type": "number"
+            }
+          },
+          "description": "Required when payer = split. DK occupational pension: 1/3 employee, 2/3 employer. This is what feeds payslip.pensionSplit."
+        },
+        "rate": {
+          "$ref": "#/$defs/valueSeries"
+        },
+        "bands": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "upTo",
+              "rate"
+            ],
+            "properties": {
+              "upTo": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "rate": {
+                "$ref": "#/$defs/valueSeries"
+              }
+            }
+          },
+          "description": "Progressive schedules. Unused by RO (flat) but required for any honest DK income tax, which is why net is currently null for DK."
+        },
+        "base": {
+          "enum": [
+            "gross",
+            "grossLessDeductions",
+            "baseSalary",
+            "netSalary",
+            "taxable"
+          ]
+        },
+        "deducts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Levy ids subtracted before applying this one. RO impozit deducts cas and cass."
+        },
+        "order": {
+          "type": "integer"
+        },
+        "inGross": {
+          "type": "boolean",
+          "default": false,
+          "description": "true when the levy is added into gross rather than taken out of it. DK pension is quoted on top of the netted basic salary."
+        },
+        "provenance": {
+          "$ref": "#/$defs/provenance"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,255 @@
+{
+  "$schema": "../../schema/regime.schema.json",
+  "id": "ro-153-2017",
+  "name": "Legea-cadru 153/2017 privind salarizarea personalului platit din fonduri publice",
+  "jurisdiction": "RO",
+  "status": "in-force",
+  "effectiveFrom": "2017-07-01",
+  "currency": "RON",
+  "minorUnits": 2,
+  "provenance": {
+    "source": "legea-153-2017",
+    "locator": "Legea 153/2017, forma consolidata pe legislatie.just.ro",
+    "confidence": "verbatim"
+  },
+  "reference": {
+    "amount": [
+      {
+        "from": "2022-01-01",
+        "value": 2500,
+        "provenance": {
+          "source": "legea-153-2017",
+          "locator": "Art. 12 alin. (1)",
+          "confidence": "derived",
+          "note": "Anexele publica salariul de baza in lei pentru anul 2022 si coeficientul aferent. Raportul lei/coeficient este 2500,6-2502,7, deci referinta este salariul minim brut de 2500 lei; coeficientii sunt tipariti inmultiti cu 100 si rotunjiti la intreg."
+        }
+      }
+    ],
+    "factor": 1,
+    "baseDate": "2022-01-01",
+    "unit": "coefficient",
+    "period": "month",
+    "provenance": {
+      "source": "legea-153-2017",
+      "locator": "Legea 153/2017, forma consolidata pe legislatie.just.ro",
+      "confidence": "verbatim"
+    },
+    "rounding": {
+      "step": 100,
+      "mode": "ceil",
+      "provenance": {
+        "source": "legea-153-2017",
+        "locator": "Art. 10 alin. (5)",
+        "confidence": "derived",
+        "note": "Rotunjire din leu in leu in favoarea salariatului, ca in proiectul din 2026."
+      }
+    }
+  },
+  "grades": [],
+  "ladders": {
+    "gradatii": {
+      "id": "gradatii",
+      "label": "Gradatii corespunzatoare transelor de vechime in munca",
+      "kind": "compoundingUplift",
+      "bakedInto": [
+        "management",
+        "dignitary"
+      ],
+      "provenance": {
+        "source": "legea-153-2017",
+        "locator": "Art. 10 alin. (1)-(4)",
+        "confidence": "verbatim",
+        "note": "Cinci gradatii, aplicate succesiv peste salariul de baza din anexe."
+      },
+      "steps": [
+        {
+          "id": "gr0",
+          "label": "Gradatia 0 (sub 3 ani)",
+          "fromYears": 0,
+          "toYears": 3,
+          "pct": 0,
+          "provenance": {
+            "source": "legea-153-2017",
+            "locator": "Art. 10 alin. (1)",
+            "confidence": "verbatim",
+            "note": "Salariile din anexe sunt cele de la gradatia 0."
+          }
+        },
+        {
+          "id": "g1",
+          "label": "Gradatia 1 (3-5 ani)",
+          "fromYears": 3,
+          "toYears": 5,
+          "pct": 0.075,
+          "provenance": {
+            "source": "legea-153-2017",
+            "locator": "Art. 10 alin. (1)",
+            "confidence": "verbatim"
+          }
+        },
+        {
+          "id": "g2",
+          "label": "Gradatia 2 (5-10 ani)",
+          "fromYears": 5,
+          "toYears": 10,
+          "pct": 0.05,
+          "provenance": {
+            "source": "legea-153-2017",
+            "locator": "Art. 10 alin. (1)",
+            "confidence": "verbatim"
+          }
+        },
+        {
+          "id": "g3",
+          "label": "Gradatia 3 (10-15 ani)",
+          "fromYears": 10,
+          "toYears": 15,
+          "pct": 0.05,
+          "provenance": {
+            "source": "legea-153-2017",
+            "locator": "Art. 10 alin. (1)",
+            "confidence": "verbatim"
+          }
+        },
+        {
+          "id": "g4",
+          "label": "Gradatia 4 (15-20 ani)",
+          "fromYears": 15,
+          "toYears": 20,
+          "pct": 0.025,
+          "provenance": {
+            "source": "legea-153-2017",
+            "locator": "Art. 10 alin. (1)",
+            "confidence": "verbatim"
+          }
+        },
+        {
+          "id": "g5",
+          "label": "Gradatia 5 (peste 20 ani)",
+          "fromYears": 20,
+          "pct": 0.025,
+          "provenance": {
+            "source": "legea-153-2017",
+            "locator": "Art. 10 alin. (1)",
+            "confidence": "verbatim"
+          }
+        }
+      ]
+    }
+  },
+  "supplements": [],
+  "caps": [],
+  "levies": [
+    {
+      "id": "cas",
+      "label": "Contributia de asigurari sociale",
+      "kind": "socialInsurance",
+      "payer": "employee",
+      "rate": 0.25,
+      "base": "gross",
+      "order": 1,
+      "provenance": {
+        "source": "oug-79-2017",
+        "locator": "Legea 227/2015, art. 138 lit. a), in forma data de OUG 79/2017 pct. 62",
+        "confidence": "verbatim",
+        "note": "„Cotele de contributii de asigurari sociale sunt urmatoarele: a) 25% datorata de catre persoanele fizice care au calitatea de angajati”. Verificat in textul OUG 79/2017 (sources/oug-79-2017.html). Atentie: forma originala din 2015 a Codului fiscal are alte cote - CAS 26,3%, CASS 5,5%, impozit 16% - fiindca OUG 79/2017 a mutat contributiile in sarcina angajatului. Cine verifica in textul din 2015 confirma cifre gresite. „Cotele de contributii de asigurari sociale sunt urmatoarele: a) 25% datorata de catre persoanele fizice care au calitatea de angajati”. Verificat in textul OUG 79/2017 (sources/oug-79-2017.html). Atentie: forma originala din 2015 a Codului fiscal are alte cote - CAS 26,3%, CASS 5,5%, impozit 16% - fiindca OUG 79/2017 a mutat contributiile in sarcina angajatului. Cine verifica in textul din 2015 confirma cifre gresite."
+      }
+    },
+    {
+      "id": "cass",
+      "label": "Contributia de asigurari sociale de sanatate",
+      "kind": "health",
+      "payer": "employee",
+      "rate": 0.1,
+      "base": "gross",
+      "order": 2,
+      "provenance": {
+        "source": "oug-79-2017",
+        "locator": "Legea 227/2015, art. 156, in forma data de OUG 79/2017 pct. 69",
+        "confidence": "verbatim",
+        "note": "„Cota de contributie de asigurari sociale de sanatate este de 10% si se datoreaza de catre persoanele fizice care au calitatea de angajati”. Verificat in textul OUG 79/2017 (sources/oug-79-2017.html). Atentie: forma originala din 2015 a Codului fiscal are alte cote - CAS 26,3%, CASS 5,5%, impozit 16% - fiindca OUG 79/2017 a mutat contributiile in sarcina angajatului. Cine verifica in textul din 2015 confirma cifre gresite. „Cota de contributie de asigurari sociale de sanatate este de 10% si se datoreaza de catre persoanele fizice care au calitatea de angajati”. Verificat in textul OUG 79/2017 (sources/oug-79-2017.html). Atentie: forma originala din 2015 a Codului fiscal are alte cote - CAS 26,3%, CASS 5,5%, impozit 16% - fiindca OUG 79/2017 a mutat contributiile in sarcina angajatului. Cine verifica in textul din 2015 confirma cifre gresite."
+      }
+    },
+    {
+      "id": "impozit",
+      "label": "Impozitul pe venit",
+      "kind": "incomeTax",
+      "payer": "employee",
+      "rate": 0.1,
+      "base": "grossLessDeductions",
+      "deducts": [
+        "cas",
+        "cass"
+      ],
+      "order": 3,
+      "provenance": {
+        "source": "oug-79-2017",
+        "locator": "Legea 227/2015, art. 64 alin. (1), in forma data de OUG 79/2017 pct. 14",
+        "confidence": "verbatim",
+        "note": "Deducerea personala nu e modelata - vezi limitation 'deducere-personala'. „Cota de impozit este de 10% si se aplica asupra venitului impozabil […] b) salarii si asimilate salariilor”. Verificat in textul OUG 79/2017 (sources/oug-79-2017.html). Atentie: forma originala din 2015 a Codului fiscal are alte cote - CAS 26,3%, CASS 5,5%, impozit 16% - fiindca OUG 79/2017 a mutat contributiile in sarcina angajatului. Cine verifica in textul din 2015 confirma cifre gresite. „Cota de impozit este de 10% si se aplica asupra venitului impozabil […] b) salarii si asimilate salariilor”. Verificat in textul OUG 79/2017 (sources/oug-79-2017.html). Atentie: forma originala din 2015 a Codului fiscal are alte cote - CAS 26,3%, CASS 5,5%, impozit 16% - fiindca OUG 79/2017 a mutat contributiile in sarcina angajatului. Cine verifica in textul din 2015 confirma cifre gresite."
+      }
+    },
+    {
+      "id": "cam",
+      "label": "Contributia asiguratorie pentru munca",
+      "kind": "employerContribution",
+      "payer": "employer",
+      "rate": 0.0225,
+      "base": "gross",
+      "order": 4,
+      "provenance": {
+        "source": "oug-79-2017",
+        "locator": "Legea 227/2015, art. 220^3, introdus prin OUG 79/2017 pct. 82",
+        "confidence": "verbatim",
+        "note": "„Cota contributiei asiguratorie pentru munca este de 2,25%”. Verificat in textul OUG 79/2017 (sources/oug-79-2017.html). Atentie: forma originala din 2015 a Codului fiscal are alte cote - CAS 26,3%, CASS 5,5%, impozit 16% - fiindca OUG 79/2017 a mutat contributiile in sarcina angajatului. Cine verifica in textul din 2015 confirma cifre gresite. „Cota contributiei asiguratorie pentru munca este de 2,25%”. Verificat in textul OUG 79/2017 (sources/oug-79-2017.html). Atentie: forma originala din 2015 a Codului fiscal are alte cote - CAS 26,3%, CASS 5,5%, impozit 16% - fiindca OUG 79/2017 a mutat contributiile in sarcina angajatului. Cine verifica in textul din 2015 confirma cifre gresite."
+      }
+    }
+  ],
+  "limitations": [
+    {
+      "id": "forma-consolidata-neoficiala",
+      "severity": "material",
+      "affects": [
+        "gross",
+        "structure"
+      ],
+      "text": "Anexele de aici sunt citite din forma consolidata publicata pe legislatie.just.ro. Portalul spune explicit ca formele consolidate sunt neoficiale, ca referirile din documente oficiale trebuie facute la textul tiparit in Monitorul Oficial si ca cine citeaza consolidarea isi asuma raspunderea. Cifrele sunt bune pentru o dezbatere publica si nu sunt o sursa de drept: intr-un act oficial se citeaza Monitorul, nu acest fisier."
+    },
+    {
+      "id": "anexele-sunt-pentru-2022",
+      "severity": "material",
+      "affects": [
+        "gross",
+        "net"
+      ],
+      "text": "Anexele legii publica salariile pentru anul 2022, capatul unui esalonar inceput in 2018. Ele nu sunt ce se plateste azi: peste ele s-au aplicat majorari succesive prin ordonante anuale, iar art. 38 a suspendat aplicarea integrala in mai multi ani. Cifrele de aici descriu grila asa cum o scrie legea-cadru, nu statul de plata din 2026."
+    },
+    {
+      "id": "coeficienti-rotunjiti-la-intreg",
+      "severity": "note",
+      "affects": [
+        "gross"
+      ],
+      "text": "Coeficientii sunt tipariti inmultiti cu 100 si rotunjiti la numar intreg, asa ca reconstituirea sumei din coeficient difera de suma tiparita cu pana la cativa lei. Suma in lei este cea autoritara; coeficientul este derivat din ea."
+    },
+    {
+      "id": "fara-sporuri-in-model",
+      "severity": "blocking",
+      "affects": [
+        "gross",
+        "net",
+        "capUtilisation"
+      ],
+      "text": "Sporurile din 153/2017 nu sunt modelate. Legea le imprastie prin anexe si prin acte conexe, cu procente care depind de institutie si de conditii, iar plafonul de 30% din art. 25 se masoara pe ordonator. Comparatia cu proiectul se poate face pe salariul de baza; pe venitul total nu."
+    },
+    {
+      "id": "art-38-esalonare",
+      "severity": "material",
+      "affects": [
+        "gross"
+      ],
+      "text": "Art. 38 esaloneaza aplicarea intre 2018 si 2022 si a fost modificat aproape in fiecare an. Grila din anexe este destinatia, nu ce s-a platit pe drum - aceeasi problema pe care o are si proiectul din 2026 cu esalonarea lui."
+    }
+  ],
+  "positionOverrides": {}
+}

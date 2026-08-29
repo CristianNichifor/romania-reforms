@@ -1,0 +1,3645 @@
+{
+  "$schema": "../../schema/fiscal.schema.json",
+  "id": "plafon-sporuri",
+  "title": "Plafonul de 20% măsurat acolo unde îl măsoară legea: pe ordonator principal și pe sursă de finanțare",
+  "publisher": "Ministerul Finanțelor (execuții bugetare), agregat de transparenta.eu",
+  "methodology": "Execuția pe entitate raportoare, agregată la nivel de ordonator principal de credite și defalcată pe sursă de finanțare. Numitor: 10.01.01. Numărător strict: 10.01.05 + 10.01.06. Numărător larg: tot titlul 10.01 minus salariul de bază și minus decontările (10.01.12–14).",
+  "retrieved": "2025",
+  "query": {
+    "endpoint": "https://api.transparenta.eu/graphql",
+    "field": "entityAnalytics",
+    "reportType": "PRINCIPAL_AGGREGATED",
+    "accountCategory": "ch",
+    "year": "2025",
+    "fundingSources": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ]
+  },
+  "provenance": {
+    "source": "transparenta-eu-executie",
+    "locator": "transparenta.eu GraphQL, entityAnalytics",
+    "confidence": "derived"
+  },
+  "series": [
+    {
+      "id": "plafon-pereche-narrow-banda-fără-sporuri-raportate",
+      "label": "perechi ordonator × sursă în banda fără sporuri raportate (narrow)",
+      "geo": "RO",
+      "unit": "COUNT",
+      "dims": {
+        "kind": "band",
+        "scope": "pereche",
+        "measure": "narrow",
+        "band": "fără sporuri raportate",
+        "bandIndex": "0",
+        "overCap": "false"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 2942
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Numărul de perechi ordonator × sursă cu raport sporuri/salarii de bază în banda fără sporuri raportate, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-pereche-narrow-banda-sub-10pct",
+      "label": "perechi ordonator × sursă în banda sub 10% (narrow)",
+      "geo": "RO",
+      "unit": "COUNT",
+      "dims": {
+        "kind": "band",
+        "scope": "pereche",
+        "measure": "narrow",
+        "band": "sub 10%",
+        "bandIndex": "1",
+        "overCap": "false"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 1151
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Numărul de perechi ordonator × sursă cu raport sporuri/salarii de bază în banda sub 10%, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-pereche-narrow-banda-10–20pct",
+      "label": "perechi ordonator × sursă în banda 10–20% (narrow)",
+      "geo": "RO",
+      "unit": "COUNT",
+      "dims": {
+        "kind": "band",
+        "scope": "pereche",
+        "measure": "narrow",
+        "band": "10–20%",
+        "bandIndex": "2",
+        "overCap": "false"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 155
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Numărul de perechi ordonator × sursă cu raport sporuri/salarii de bază în banda 10–20%, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-pereche-narrow-banda-20–30pct",
+      "label": "perechi ordonator × sursă în banda 20–30% (narrow)",
+      "geo": "RO",
+      "unit": "COUNT",
+      "dims": {
+        "kind": "band",
+        "scope": "pereche",
+        "measure": "narrow",
+        "band": "20–30%",
+        "bandIndex": "3",
+        "overCap": "true"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 125
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Numărul de perechi ordonator × sursă cu raport sporuri/salarii de bază în banda 20–30%, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-pereche-narrow-banda-30–50pct",
+      "label": "perechi ordonator × sursă în banda 30–50% (narrow)",
+      "geo": "RO",
+      "unit": "COUNT",
+      "dims": {
+        "kind": "band",
+        "scope": "pereche",
+        "measure": "narrow",
+        "band": "30–50%",
+        "bandIndex": "4",
+        "overCap": "true"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 32
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Numărul de perechi ordonator × sursă cu raport sporuri/salarii de bază în banda 30–50%, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-pereche-narrow-banda-peste-50pct",
+      "label": "perechi ordonator × sursă în banda peste 50% (narrow)",
+      "geo": "RO",
+      "unit": "COUNT",
+      "dims": {
+        "kind": "band",
+        "scope": "pereche",
+        "measure": "narrow",
+        "band": "peste 50%",
+        "bandIndex": "5",
+        "overCap": "true"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 2
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Numărul de perechi ordonator × sursă cu raport sporuri/salarii de bază în banda peste 50%, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-pereche-narrow-peste-plafon",
+      "label": "perechi ordonator × sursă peste plafonul de 20% (narrow)",
+      "geo": "RO",
+      "unit": "COUNT",
+      "dims": {
+        "kind": "overCap",
+        "scope": "pereche",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 159
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Câte perechi ordonator × sursă depășesc 20%, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-pereche-narrow-pondere-masa",
+      "label": "Din masa salarială de bază, partea aflată peste plafon (narrow)",
+      "geo": "RO",
+      "unit": "PC_TOT",
+      "dims": {
+        "kind": "overCapWeight",
+        "scope": "pereche",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.20347
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Salariile de bază ale perechi ordonator × sursă peste 20%, ÷ total, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-pereche-wide-banda-fără-sporuri-raportate",
+      "label": "perechi ordonator × sursă în banda fără sporuri raportate (wide)",
+      "geo": "RO",
+      "unit": "COUNT",
+      "dims": {
+        "kind": "band",
+        "scope": "pereche",
+        "measure": "wide",
+        "band": "fără sporuri raportate",
+        "bandIndex": "0",
+        "overCap": "false"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 162
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Numărul de perechi ordonator × sursă cu raport sporuri/salarii de bază în banda fără sporuri raportate, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-pereche-wide-banda-sub-10pct",
+      "label": "perechi ordonator × sursă în banda sub 10% (wide)",
+      "geo": "RO",
+      "unit": "COUNT",
+      "dims": {
+        "kind": "band",
+        "scope": "pereche",
+        "measure": "wide",
+        "band": "sub 10%",
+        "bandIndex": "1",
+        "overCap": "false"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 3333
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Numărul de perechi ordonator × sursă cu raport sporuri/salarii de bază în banda sub 10%, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-pereche-wide-banda-10–20pct",
+      "label": "perechi ordonator × sursă în banda 10–20% (wide)",
+      "geo": "RO",
+      "unit": "COUNT",
+      "dims": {
+        "kind": "band",
+        "scope": "pereche",
+        "measure": "wide",
+        "band": "10–20%",
+        "bandIndex": "2",
+        "overCap": "false"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 596
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Numărul de perechi ordonator × sursă cu raport sporuri/salarii de bază în banda 10–20%, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-pereche-wide-banda-20–30pct",
+      "label": "perechi ordonator × sursă în banda 20–30% (wide)",
+      "geo": "RO",
+      "unit": "COUNT",
+      "dims": {
+        "kind": "band",
+        "scope": "pereche",
+        "measure": "wide",
+        "band": "20–30%",
+        "bandIndex": "3",
+        "overCap": "true"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 117
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Numărul de perechi ordonator × sursă cu raport sporuri/salarii de bază în banda 20–30%, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-pereche-wide-banda-30–50pct",
+      "label": "perechi ordonator × sursă în banda 30–50% (wide)",
+      "geo": "RO",
+      "unit": "COUNT",
+      "dims": {
+        "kind": "band",
+        "scope": "pereche",
+        "measure": "wide",
+        "band": "30–50%",
+        "bandIndex": "4",
+        "overCap": "true"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 155
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Numărul de perechi ordonator × sursă cu raport sporuri/salarii de bază în banda 30–50%, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-pereche-wide-banda-peste-50pct",
+      "label": "perechi ordonator × sursă în banda peste 50% (wide)",
+      "geo": "RO",
+      "unit": "COUNT",
+      "dims": {
+        "kind": "band",
+        "scope": "pereche",
+        "measure": "wide",
+        "band": "peste 50%",
+        "bandIndex": "5",
+        "overCap": "true"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 44
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Numărul de perechi ordonator × sursă cu raport sporuri/salarii de bază în banda peste 50%, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-pereche-wide-peste-plafon",
+      "label": "perechi ordonator × sursă peste plafonul de 20% (wide)",
+      "geo": "RO",
+      "unit": "COUNT",
+      "dims": {
+        "kind": "overCap",
+        "scope": "pereche",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 316
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Câte perechi ordonator × sursă depășesc 20%, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-pereche-wide-pondere-masa",
+      "label": "Din masa salarială de bază, partea aflată peste plafon (wide)",
+      "geo": "RO",
+      "unit": "PC_TOT",
+      "dims": {
+        "kind": "overCapWeight",
+        "scope": "pereche",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.40427
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Salariile de bază ale perechi ordonator × sursă peste 20%, ÷ total, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-ordonator-narrow-banda-fără-sporuri-raportate",
+      "label": "ordonatori principali în banda fără sporuri raportate (narrow)",
+      "geo": "RO",
+      "unit": "COUNT",
+      "dims": {
+        "kind": "band",
+        "scope": "ordonator",
+        "measure": "narrow",
+        "band": "fără sporuri raportate",
+        "bandIndex": "0",
+        "overCap": "false"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 2196
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Numărul de ordonatori principali cu raport sporuri/salarii de bază în banda fără sporuri raportate, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-ordonator-narrow-banda-sub-10pct",
+      "label": "ordonatori principali în banda sub 10% (narrow)",
+      "geo": "RO",
+      "unit": "COUNT",
+      "dims": {
+        "kind": "band",
+        "scope": "ordonator",
+        "measure": "narrow",
+        "band": "sub 10%",
+        "bandIndex": "1",
+        "overCap": "false"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 875
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Numărul de ordonatori principali cu raport sporuri/salarii de bază în banda sub 10%, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-ordonator-narrow-banda-10–20pct",
+      "label": "ordonatori principali în banda 10–20% (narrow)",
+      "geo": "RO",
+      "unit": "COUNT",
+      "dims": {
+        "kind": "band",
+        "scope": "ordonator",
+        "measure": "narrow",
+        "band": "10–20%",
+        "bandIndex": "2",
+        "overCap": "false"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 160
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Numărul de ordonatori principali cu raport sporuri/salarii de bază în banda 10–20%, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-ordonator-narrow-banda-20–30pct",
+      "label": "ordonatori principali în banda 20–30% (narrow)",
+      "geo": "RO",
+      "unit": "COUNT",
+      "dims": {
+        "kind": "band",
+        "scope": "ordonator",
+        "measure": "narrow",
+        "band": "20–30%",
+        "bandIndex": "3",
+        "overCap": "true"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 54
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Numărul de ordonatori principali cu raport sporuri/salarii de bază în banda 20–30%, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-ordonator-narrow-banda-30–50pct",
+      "label": "ordonatori principali în banda 30–50% (narrow)",
+      "geo": "RO",
+      "unit": "COUNT",
+      "dims": {
+        "kind": "band",
+        "scope": "ordonator",
+        "measure": "narrow",
+        "band": "30–50%",
+        "bandIndex": "4",
+        "overCap": "true"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 2
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Numărul de ordonatori principali cu raport sporuri/salarii de bază în banda 30–50%, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-ordonator-narrow-banda-peste-50pct",
+      "label": "ordonatori principali în banda peste 50% (narrow)",
+      "geo": "RO",
+      "unit": "COUNT",
+      "dims": {
+        "kind": "band",
+        "scope": "ordonator",
+        "measure": "narrow",
+        "band": "peste 50%",
+        "bandIndex": "5",
+        "overCap": "true"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Numărul de ordonatori principali cu raport sporuri/salarii de bază în banda peste 50%, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-ordonator-narrow-peste-plafon",
+      "label": "ordonatori principali peste plafonul de 20% (narrow)",
+      "geo": "RO",
+      "unit": "COUNT",
+      "dims": {
+        "kind": "overCap",
+        "scope": "ordonator",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 56
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Câte ordonatori principali depășesc 20%, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-ordonator-narrow-pondere-masa",
+      "label": "Din masa salarială de bază, partea aflată peste plafon (narrow)",
+      "geo": "RO",
+      "unit": "PC_TOT",
+      "dims": {
+        "kind": "overCapWeight",
+        "scope": "ordonator",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.19403
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Salariile de bază ale ordonatori principali peste 20%, ÷ total, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-ordonator-wide-banda-fără-sporuri-raportate",
+      "label": "ordonatori principali în banda fără sporuri raportate (wide)",
+      "geo": "RO",
+      "unit": "COUNT",
+      "dims": {
+        "kind": "band",
+        "scope": "ordonator",
+        "measure": "wide",
+        "band": "fără sporuri raportate",
+        "bandIndex": "0",
+        "overCap": "false"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 44
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Numărul de ordonatori principali cu raport sporuri/salarii de bază în banda fără sporuri raportate, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-ordonator-wide-banda-sub-10pct",
+      "label": "ordonatori principali în banda sub 10% (wide)",
+      "geo": "RO",
+      "unit": "COUNT",
+      "dims": {
+        "kind": "band",
+        "scope": "ordonator",
+        "measure": "wide",
+        "band": "sub 10%",
+        "bandIndex": "1",
+        "overCap": "false"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 2609
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Numărul de ordonatori principali cu raport sporuri/salarii de bază în banda sub 10%, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-ordonator-wide-banda-10–20pct",
+      "label": "ordonatori principali în banda 10–20% (wide)",
+      "geo": "RO",
+      "unit": "COUNT",
+      "dims": {
+        "kind": "band",
+        "scope": "ordonator",
+        "measure": "wide",
+        "band": "10–20%",
+        "bandIndex": "2",
+        "overCap": "false"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 448
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Numărul de ordonatori principali cu raport sporuri/salarii de bază în banda 10–20%, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-ordonator-wide-banda-20–30pct",
+      "label": "ordonatori principali în banda 20–30% (wide)",
+      "geo": "RO",
+      "unit": "COUNT",
+      "dims": {
+        "kind": "band",
+        "scope": "ordonator",
+        "measure": "wide",
+        "band": "20–30%",
+        "bandIndex": "3",
+        "overCap": "true"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 134
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Numărul de ordonatori principali cu raport sporuri/salarii de bază în banda 20–30%, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-ordonator-wide-banda-30–50pct",
+      "label": "ordonatori principali în banda 30–50% (wide)",
+      "geo": "RO",
+      "unit": "COUNT",
+      "dims": {
+        "kind": "band",
+        "scope": "ordonator",
+        "measure": "wide",
+        "band": "30–50%",
+        "bandIndex": "4",
+        "overCap": "true"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 51
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Numărul de ordonatori principali cu raport sporuri/salarii de bază în banda 30–50%, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-ordonator-wide-banda-peste-50pct",
+      "label": "ordonatori principali în banda peste 50% (wide)",
+      "geo": "RO",
+      "unit": "COUNT",
+      "dims": {
+        "kind": "band",
+        "scope": "ordonator",
+        "measure": "wide",
+        "band": "peste 50%",
+        "bandIndex": "5",
+        "overCap": "true"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 1
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Numărul de ordonatori principali cu raport sporuri/salarii de bază în banda peste 50%, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-ordonator-wide-peste-plafon",
+      "label": "ordonatori principali peste plafonul de 20% (wide)",
+      "geo": "RO",
+      "unit": "COUNT",
+      "dims": {
+        "kind": "overCap",
+        "scope": "ordonator",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 186
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Câte ordonatori principali depășesc 20%, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-ordonator-wide-pondere-masa",
+      "label": "Din masa salarială de bază, partea aflată peste plafon (wide)",
+      "geo": "RO",
+      "unit": "PC_TOT",
+      "dims": {
+        "kind": "overCapWeight",
+        "scope": "ordonator",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.38713
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Salariile de bază ale ordonatori principali peste 20%, ÷ total, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-13729380-narrow",
+      "label": "MINISTERUL EDUCATIEI SI CERCETARII — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "13729380",
+        "name": "MINISTERUL EDUCATIEI SI CERCETARII",
+        "entityType": "education",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.03971
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MINISTERUL EDUCATIEI SI CERCETARII (CUI 13729380), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-13729380-wide",
+      "label": "MINISTERUL EDUCATIEI SI CERCETARII — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "13729380",
+        "name": "MINISTERUL EDUCATIEI SI CERCETARII",
+        "entityType": "education",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.15218
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MINISTERUL EDUCATIEI SI CERCETARII (CUI 13729380), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-13729380-baza",
+      "label": "MINISTERUL EDUCATIEI SI CERCETARII — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "13729380",
+        "name": "MINISTERUL EDUCATIEI SI CERCETARII"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 36513111646.5
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MINISTERUL EDUCATIEI SI CERCETARII (CUI 13729380), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4267095-narrow",
+      "label": "MINISTERUL AFACERILOR INTERNE — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4267095",
+        "name": "MINISTERUL AFACERILOR INTERNE",
+        "entityType": "public_entity",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.04637
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MINISTERUL AFACERILOR INTERNE (CUI 4267095), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4267095-wide",
+      "label": "MINISTERUL AFACERILOR INTERNE — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4267095",
+        "name": "MINISTERUL AFACERILOR INTERNE",
+        "entityType": "public_entity",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.20715
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MINISTERUL AFACERILOR INTERNE (CUI 4267095), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4267095-baza",
+      "label": "MINISTERUL AFACERILOR INTERNE — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "4267095",
+        "name": "MINISTERUL AFACERILOR INTERNE"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 14011491918.83
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MINISTERUL AFACERILOR INTERNE (CUI 4267095), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-11424532-narrow",
+      "label": "Ministerul Apararii Nationale — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "11424532",
+        "name": "Ministerul Apararii Nationale",
+        "entityType": "central_authority",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.06342
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Ministerul Apararii Nationale (CUI 11424532), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-11424532-wide",
+      "label": "Ministerul Apararii Nationale — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "11424532",
+        "name": "Ministerul Apararii Nationale",
+        "entityType": "central_authority",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.14798
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Ministerul Apararii Nationale (CUI 11424532), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-11424532-baza",
+      "label": "Ministerul Apararii Nationale — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "11424532",
+        "name": "Ministerul Apararii Nationale"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 9487409265.44
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Ministerul Apararii Nationale (CUI 11424532), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4266456-narrow",
+      "label": "MINISTERUL SANATATII — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4266456",
+        "name": "MINISTERUL SANATATII",
+        "entityType": "central_authority",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.2819
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MINISTERUL SANATATII (CUI 4266456), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4266456-wide",
+      "label": "MINISTERUL SANATATII — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4266456",
+        "name": "MINISTERUL SANATATII",
+        "entityType": "central_authority",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.39723
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MINISTERUL SANATATII (CUI 4266456), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4266456-baza",
+      "label": "MINISTERUL SANATATII — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "4266456",
+        "name": "MINISTERUL SANATATII"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 8031449037.21
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MINISTERUL SANATATII (CUI 4266456), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4221306-narrow",
+      "label": "MINISTERUL FINANTELOR — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4221306",
+        "name": "MINISTERUL FINANTELOR",
+        "entityType": "central_authority",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.06004
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MINISTERUL FINANTELOR (CUI 4221306), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4221306-wide",
+      "label": "MINISTERUL FINANTELOR — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4221306",
+        "name": "MINISTERUL FINANTELOR",
+        "entityType": "central_authority",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.08769
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MINISTERUL FINANTELOR (CUI 4221306), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4221306-baza",
+      "label": "MINISTERUL FINANTELOR — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "4221306",
+        "name": "MINISTERUL FINANTELOR"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 3645205605.94
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MINISTERUL FINANTELOR (CUI 4221306), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4340587-narrow",
+      "label": "INALTA CURTE DE CASATIE SI JUSTITIE — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4340587",
+        "name": "INALTA CURTE DE CASATIE SI JUSTITIE",
+        "entityType": "public_entity",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.24937
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "INALTA CURTE DE CASATIE SI JUSTITIE (CUI 4340587), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4340587-wide",
+      "label": "INALTA CURTE DE CASATIE SI JUSTITIE — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4340587",
+        "name": "INALTA CURTE DE CASATIE SI JUSTITIE",
+        "entityType": "public_entity",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.31649
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "INALTA CURTE DE CASATIE SI JUSTITIE (CUI 4340587), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4340587-baza",
+      "label": "INALTA CURTE DE CASATIE SI JUSTITIE — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "4340587",
+        "name": "INALTA CURTE DE CASATIE SI JUSTITIE"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 2457065665.0
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "INALTA CURTE DE CASATIE SI JUSTITIE (CUI 4340587), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4265841-narrow",
+      "label": "MINISTERUL JUSTITIEI — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4265841",
+        "name": "MINISTERUL JUSTITIEI",
+        "entityType": "central_authority",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.09475
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MINISTERUL JUSTITIEI (CUI 4265841), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4265841-wide",
+      "label": "MINISTERUL JUSTITIEI — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4265841",
+        "name": "MINISTERUL JUSTITIEI",
+        "entityType": "central_authority",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.1532
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MINISTERUL JUSTITIEI (CUI 4265841), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4265841-baza",
+      "label": "MINISTERUL JUSTITIEI — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "4265841",
+        "name": "MINISTERUL JUSTITIEI"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 2082065313.63
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MINISTERUL JUSTITIEI (CUI 4265841), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4221187-narrow",
+      "label": "Ministerul Agriculturii si Dezvoltarii Rurale — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4221187",
+        "name": "Ministerul Agriculturii si Dezvoltarii Rurale",
+        "entityType": "central_authority",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.05306
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Ministerul Agriculturii si Dezvoltarii Rurale (CUI 4221187), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4221187-wide",
+      "label": "Ministerul Agriculturii si Dezvoltarii Rurale — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4221187",
+        "name": "Ministerul Agriculturii si Dezvoltarii Rurale",
+        "entityType": "central_authority",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.07726
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Ministerul Agriculturii si Dezvoltarii Rurale (CUI 4221187), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4221187-baza",
+      "label": "Ministerul Agriculturii si Dezvoltarii Rurale — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "4221187",
+        "name": "Ministerul Agriculturii si Dezvoltarii Rurale"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 1703725377.91
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Ministerul Agriculturii si Dezvoltarii Rurale (CUI 4221187), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4267117-narrow",
+      "label": "MUNICIPIUL BUCURESTI — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4267117",
+        "name": "MUNICIPIUL BUCURESTI",
+        "entityType": "admin_municipality",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.19305
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MUNICIPIUL BUCURESTI (CUI 4267117), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4267117-wide",
+      "label": "MUNICIPIUL BUCURESTI — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4267117",
+        "name": "MUNICIPIUL BUCURESTI",
+        "entityType": "admin_municipality",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.30228
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MUNICIPIUL BUCURESTI (CUI 4267117), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4267117-baza",
+      "label": "MUNICIPIUL BUCURESTI — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "4267117",
+        "name": "MUNICIPIUL BUCURESTI"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 1591943109.84
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MUNICIPIUL BUCURESTI (CUI 4267117), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-16335444-narrow",
+      "label": "MINISTERUL MEDIULUI APELOR SI PADURILOR — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "16335444",
+        "name": "MINISTERUL MEDIULUI APELOR SI PADURILOR",
+        "entityType": "central_authority",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.0813
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MINISTERUL MEDIULUI APELOR SI PADURILOR (CUI 16335444), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-16335444-wide",
+      "label": "MINISTERUL MEDIULUI APELOR SI PADURILOR — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "16335444",
+        "name": "MINISTERUL MEDIULUI APELOR SI PADURILOR",
+        "entityType": "central_authority",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.13573
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MINISTERUL MEDIULUI APELOR SI PADURILOR (CUI 16335444), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-16335444-baza",
+      "label": "MINISTERUL MEDIULUI APELOR SI PADURILOR — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "16335444",
+        "name": "MINISTERUL MEDIULUI APELOR SI PADURILOR"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 1257397589.06
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MINISTERUL MEDIULUI APELOR SI PADURILOR (CUI 16335444), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4266669-narrow",
+      "label": "MINISTERUL MUNCII FAMILIEI TINERETULUI SI SOLIDARITATII SOCIALE — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4266669",
+        "name": "MINISTERUL MUNCII FAMILIEI TINERETULUI SI SOLIDARITATII SOCIALE",
+        "entityType": "central_authority",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.06516
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MINISTERUL MUNCII FAMILIEI TINERETULUI SI SOLIDARITATII SOCIALE (CUI 4266669), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4266669-wide",
+      "label": "MINISTERUL MUNCII FAMILIEI TINERETULUI SI SOLIDARITATII SOCIALE — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4266669",
+        "name": "MINISTERUL MUNCII FAMILIEI TINERETULUI SI SOLIDARITATII SOCIALE",
+        "entityType": "central_authority",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.13607
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MINISTERUL MUNCII FAMILIEI TINERETULUI SI SOLIDARITATII SOCIALE (CUI 4266669), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4266669-baza",
+      "label": "MINISTERUL MUNCII FAMILIEI TINERETULUI SI SOLIDARITATII SOCIALE — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "4266669",
+        "name": "MINISTERUL MUNCII FAMILIEI TINERETULUI SI SOLIDARITATII SOCIALE"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 1184128144.93
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MINISTERUL MUNCII FAMILIEI TINERETULUI SI SOLIDARITATII SOCIALE (CUI 4266669), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4364748-narrow",
+      "label": "PARCHETUL DE PE LANGA INALTA CURTE DE CASATIE SI JUSTITIE — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4364748",
+        "name": "PARCHETUL DE PE LANGA INALTA CURTE DE CASATIE SI JUSTITIE",
+        "entityType": "justice",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.22433
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "PARCHETUL DE PE LANGA INALTA CURTE DE CASATIE SI JUSTITIE (CUI 4364748), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4364748-wide",
+      "label": "PARCHETUL DE PE LANGA INALTA CURTE DE CASATIE SI JUSTITIE — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4364748",
+        "name": "PARCHETUL DE PE LANGA INALTA CURTE DE CASATIE SI JUSTITIE",
+        "entityType": "justice",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.24491
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "PARCHETUL DE PE LANGA INALTA CURTE DE CASATIE SI JUSTITIE (CUI 4364748), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4364748-baza",
+      "label": "PARCHETUL DE PE LANGA INALTA CURTE DE CASATIE SI JUSTITIE — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "4364748",
+        "name": "PARCHETUL DE PE LANGA INALTA CURTE DE CASATIE SI JUSTITIE"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 1139646511.0
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "PARCHETUL DE PE LANGA INALTA CURTE DE CASATIE SI JUSTITIE (CUI 4364748), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-26369185-narrow",
+      "label": "MINISTERUL DEZVOLTARII LUCRARILOR PUBLICE SI ADMINISTRATIEI — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "26369185",
+        "name": "MINISTERUL DEZVOLTARII LUCRARILOR PUBLICE SI ADMINISTRATIEI",
+        "entityType": "central_authority",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.05274
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MINISTERUL DEZVOLTARII LUCRARILOR PUBLICE SI ADMINISTRATIEI (CUI 26369185), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-26369185-wide",
+      "label": "MINISTERUL DEZVOLTARII LUCRARILOR PUBLICE SI ADMINISTRATIEI — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "26369185",
+        "name": "MINISTERUL DEZVOLTARII LUCRARILOR PUBLICE SI ADMINISTRATIEI",
+        "entityType": "central_authority",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.06234
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MINISTERUL DEZVOLTARII LUCRARILOR PUBLICE SI ADMINISTRATIEI (CUI 26369185), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-26369185-baza",
+      "label": "MINISTERUL DEZVOLTARII LUCRARILOR PUBLICE SI ADMINISTRATIEI — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "26369185",
+        "name": "MINISTERUL DEZVOLTARII LUCRARILOR PUBLICE SI ADMINISTRATIEI"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 753508472.0
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MINISTERUL DEZVOLTARII LUCRARILOR PUBLICE SI ADMINISTRATIEI (CUI 26369185), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4540712-narrow",
+      "label": "JUDETUL IASI — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4540712",
+        "name": "JUDETUL IASI",
+        "entityType": "admin_county_council",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.20771
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "JUDETUL IASI (CUI 4540712), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4540712-wide",
+      "label": "JUDETUL IASI — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4540712",
+        "name": "JUDETUL IASI",
+        "entityType": "admin_county_council",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.29942
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "JUDETUL IASI (CUI 4540712), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4540712-baza",
+      "label": "JUDETUL IASI — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "4540712",
+        "name": "JUDETUL IASI"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 720898010.0
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "JUDETUL IASI (CUI 4540712), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-13633330-narrow",
+      "label": "MINISTERUL TRANSPORTURILOR SI INFRASTRUCTURII — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "13633330",
+        "name": "MINISTERUL TRANSPORTURILOR SI INFRASTRUCTURII",
+        "entityType": "central_authority",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.14586
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MINISTERUL TRANSPORTURILOR SI INFRASTRUCTURII (CUI 13633330), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-13633330-wide",
+      "label": "MINISTERUL TRANSPORTURILOR SI INFRASTRUCTURII — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "13633330",
+        "name": "MINISTERUL TRANSPORTURILOR SI INFRASTRUCTURII",
+        "entityType": "central_authority",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.22192
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MINISTERUL TRANSPORTURILOR SI INFRASTRUCTURII (CUI 13633330), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-13633330-baza",
+      "label": "MINISTERUL TRANSPORTURILOR SI INFRASTRUCTURII — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "13633330",
+        "name": "MINISTERUL TRANSPORTURILOR SI INFRASTRUCTURII"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 649241637.37
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MINISTERUL TRANSPORTURILOR SI INFRASTRUCTURII (CUI 13633330), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-14756536-narrow",
+      "label": "MUNICIPIUL TIMISOARA — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "14756536",
+        "name": "MUNICIPIUL TIMISOARA",
+        "entityType": "admin_municipality",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.18734
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MUNICIPIUL TIMISOARA (CUI 14756536), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-14756536-wide",
+      "label": "MUNICIPIUL TIMISOARA — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "14756536",
+        "name": "MUNICIPIUL TIMISOARA",
+        "entityType": "admin_municipality",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.29112
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MUNICIPIUL TIMISOARA (CUI 14756536), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-14756536-baza",
+      "label": "MUNICIPIUL TIMISOARA — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "14756536",
+        "name": "MUNICIPIUL TIMISOARA"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 636310086.67
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MUNICIPIUL TIMISOARA (CUI 14756536), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4283422-narrow",
+      "label": "SECRETARIATUL GENERAL AL GUVERNULUI — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4283422",
+        "name": "SECRETARIATUL GENERAL AL GUVERNULUI",
+        "entityType": "public_entity",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.05972
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "SECRETARIATUL GENERAL AL GUVERNULUI (CUI 4283422), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4283422-wide",
+      "label": "SECRETARIATUL GENERAL AL GUVERNULUI — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4283422",
+        "name": "SECRETARIATUL GENERAL AL GUVERNULUI",
+        "entityType": "public_entity",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.12099
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "SECRETARIATUL GENERAL AL GUVERNULUI (CUI 4283422), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4283422-baza",
+      "label": "SECRETARIATUL GENERAL AL GUVERNULUI — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "4283422",
+        "name": "SECRETARIATUL GENERAL AL GUVERNULUI"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 632305138.81
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "SECRETARIATUL GENERAL AL GUVERNULUI (CUI 4283422), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4192812-narrow",
+      "label": "MINISTERUL CULTURII — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4192812",
+        "name": "MINISTERUL CULTURII",
+        "entityType": "public_entity",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.06922
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MINISTERUL CULTURII (CUI 4192812), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4192812-wide",
+      "label": "MINISTERUL CULTURII — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4192812",
+        "name": "MINISTERUL CULTURII",
+        "entityType": "public_entity",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.12379
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MINISTERUL CULTURII (CUI 4192812), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4192812-baza",
+      "label": "MINISTERUL CULTURII — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "4192812",
+        "name": "MINISTERUL CULTURII"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 603567192.0
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MINISTERUL CULTURII (CUI 4192812), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-2981739-narrow",
+      "label": "JUDETUL CONSTANTA — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "2981739",
+        "name": "JUDETUL CONSTANTA",
+        "entityType": "admin_county_council",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.24894
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "JUDETUL CONSTANTA (CUI 2981739), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-2981739-wide",
+      "label": "JUDETUL CONSTANTA — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "2981739",
+        "name": "JUDETUL CONSTANTA",
+        "entityType": "admin_county_council",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.32787
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "JUDETUL CONSTANTA (CUI 2981739), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-2981739-baza",
+      "label": "JUDETUL CONSTANTA — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "2981739",
+        "name": "JUDETUL CONSTANTA"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 580197259.8
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "JUDETUL CONSTANTA (CUI 2981739), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4192472-narrow",
+      "label": "ACADEMIA ROMANA — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4192472",
+        "name": "ACADEMIA ROMANA",
+        "entityType": "research",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.14984
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "ACADEMIA ROMANA (CUI 4192472), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4192472-wide",
+      "label": "ACADEMIA ROMANA — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4192472",
+        "name": "ACADEMIA ROMANA",
+        "entityType": "research",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.23679
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "ACADEMIA ROMANA (CUI 4192472), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4192472-baza",
+      "label": "ACADEMIA ROMANA — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "4192472",
+        "name": "ACADEMIA ROMANA"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 563209329.96
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "ACADEMIA ROMANA (CUI 4192472), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4384150-narrow",
+      "label": "JUDETUL BRASOV — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4384150",
+        "name": "JUDETUL BRASOV",
+        "entityType": "admin_county_council",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.22391
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "JUDETUL BRASOV (CUI 4384150), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4384150-wide",
+      "label": "JUDETUL BRASOV — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4384150",
+        "name": "JUDETUL BRASOV",
+        "entityType": "admin_county_council",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.32755
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "JUDETUL BRASOV (CUI 4384150), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4384150-baza",
+      "label": "JUDETUL BRASOV — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "4384150",
+        "name": "JUDETUL BRASOV"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 532285219.06
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "JUDETUL BRASOV (CUI 4384150), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-16277408-narrow",
+      "label": "AUTORITATEA NATIONALA SANITARA VETERINARA SI PENTRU SIGURANTA ALIMENTELOR — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "16277408",
+        "name": "AUTORITATEA NATIONALA SANITARA VETERINARA SI PENTRU SIGURANTA ALIMENTELOR",
+        "entityType": "public_entity",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.20644
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "AUTORITATEA NATIONALA SANITARA VETERINARA SI PENTRU SIGURANTA ALIMENTELOR (CUI 16277408), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-16277408-wide",
+      "label": "AUTORITATEA NATIONALA SANITARA VETERINARA SI PENTRU SIGURANTA ALIMENTELOR — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "16277408",
+        "name": "AUTORITATEA NATIONALA SANITARA VETERINARA SI PENTRU SIGURANTA ALIMENTELOR",
+        "entityType": "public_entity",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.23601
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "AUTORITATEA NATIONALA SANITARA VETERINARA SI PENTRU SIGURANTA ALIMENTELOR (CUI 16277408), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-16277408-baza",
+      "label": "AUTORITATEA NATIONALA SANITARA VETERINARA SI PENTRU SIGURANTA ALIMENTELOR — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "16277408",
+        "name": "AUTORITATEA NATIONALA SANITARA VETERINARA SI PENTRU SIGURANTA ALIMENTELOR"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 532038131.99
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "AUTORITATEA NATIONALA SANITARA VETERINARA SI PENTRU SIGURANTA ALIMENTELOR (CUI 16277408), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4288110-narrow",
+      "label": "JUDETUL CLUJ — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4288110",
+        "name": "JUDETUL CLUJ",
+        "entityType": "admin_county_council",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.218
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "JUDETUL CLUJ (CUI 4288110), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4288110-wide",
+      "label": "JUDETUL CLUJ — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4288110",
+        "name": "JUDETUL CLUJ",
+        "entityType": "admin_county_council",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.30665
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "JUDETUL CLUJ (CUI 4288110), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4288110-baza",
+      "label": "JUDETUL CLUJ — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "4288110",
+        "name": "JUDETUL CLUJ"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 530616499.0
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "JUDETUL CLUJ (CUI 4288110), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4266863-narrow",
+      "label": "MINISTERUL AFACERILOR EXTERNE — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4266863",
+        "name": "MINISTERUL AFACERILOR EXTERNE",
+        "entityType": "public_entity",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.02986
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MINISTERUL AFACERILOR EXTERNE (CUI 4266863), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4266863-wide",
+      "label": "MINISTERUL AFACERILOR EXTERNE — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4266863",
+        "name": "MINISTERUL AFACERILOR EXTERNE",
+        "entityType": "public_entity",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.1529
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MINISTERUL AFACERILOR EXTERNE (CUI 4266863), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4266863-baza",
+      "label": "MINISTERUL AFACERILOR EXTERNE — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "4266863",
+        "name": "MINISTERUL AFACERILOR EXTERNE"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 529339502.11
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MINISTERUL AFACERILOR EXTERNE (CUI 4266863), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4229512-narrow",
+      "label": "JUDETUL ARGES — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4229512",
+        "name": "JUDETUL ARGES",
+        "entityType": "admin_county_council",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.17884
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "JUDETUL ARGES (CUI 4229512), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4229512-wide",
+      "label": "JUDETUL ARGES — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4229512",
+        "name": "JUDETUL ARGES",
+        "entityType": "admin_county_council",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.25434
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "JUDETUL ARGES (CUI 4229512), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4229512-baza",
+      "label": "JUDETUL ARGES — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "4229512",
+        "name": "JUDETUL ARGES"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 517458296.4
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "JUDETUL ARGES (CUI 4229512), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4230487-narrow",
+      "label": "MUNICIPIUL ORADEA — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4230487",
+        "name": "MUNICIPIUL ORADEA",
+        "entityType": "admin_municipality",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.237
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MUNICIPIUL ORADEA (CUI 4230487), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4230487-wide",
+      "label": "MUNICIPIUL ORADEA — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4230487",
+        "name": "MUNICIPIUL ORADEA",
+        "entityType": "admin_municipality",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.39103
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MUNICIPIUL ORADEA (CUI 4230487), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4230487-baza",
+      "label": "MUNICIPIUL ORADEA — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "4230487",
+        "name": "MUNICIPIUL ORADEA"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 504154302.69
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MUNICIPIUL ORADEA (CUI 4230487), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4406223-narrow",
+      "label": "JUDETUL SIBIU — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4406223",
+        "name": "JUDETUL SIBIU",
+        "entityType": "admin_county_council",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.24881
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "JUDETUL SIBIU (CUI 4406223), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4406223-wide",
+      "label": "JUDETUL SIBIU — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4406223",
+        "name": "JUDETUL SIBIU",
+        "entityType": "admin_county_council",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.31339
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "JUDETUL SIBIU (CUI 4406223), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4406223-baza",
+      "label": "JUDETUL SIBIU — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "4406223",
+        "name": "JUDETUL SIBIU"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 478983193.49
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "JUDETUL SIBIU (CUI 4406223), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4322980-narrow",
+      "label": "JUDETUL MURES — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4322980",
+        "name": "JUDETUL MURES",
+        "entityType": "admin_county_council",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.20503
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "JUDETUL MURES (CUI 4322980), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4322980-wide",
+      "label": "JUDETUL MURES — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4322980",
+        "name": "JUDETUL MURES",
+        "entityType": "admin_county_council",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.28274
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "JUDETUL MURES (CUI 4322980), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4322980-baza",
+      "label": "JUDETUL MURES — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "4322980",
+        "name": "JUDETUL MURES"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 464668057.0
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "JUDETUL MURES (CUI 4322980), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4417214-narrow",
+      "label": "MUNICIPIUL CRAIOVA — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4417214",
+        "name": "MUNICIPIUL CRAIOVA",
+        "entityType": "admin_municipality",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.23781
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MUNICIPIUL CRAIOVA (CUI 4417214), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4417214-wide",
+      "label": "MUNICIPIUL CRAIOVA — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4417214",
+        "name": "MUNICIPIUL CRAIOVA",
+        "entityType": "admin_municipality",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.32676
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MUNICIPIUL CRAIOVA (CUI 4417214), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4417214-baza",
+      "label": "MUNICIPIUL CRAIOVA — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "4417214",
+        "name": "MUNICIPIUL CRAIOVA"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 443901698.0
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MUNICIPIUL CRAIOVA (CUI 4417214), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-11697800-narrow",
+      "label": "CASA NATIONALA DE ASIGURARI DE SANATATE — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "11697800",
+        "name": "CASA NATIONALA DE ASIGURARI DE SANATATE",
+        "entityType": "public_entity",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.05249
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "CASA NATIONALA DE ASIGURARI DE SANATATE (CUI 11697800), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-11697800-wide",
+      "label": "CASA NATIONALA DE ASIGURARI DE SANATATE — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "11697800",
+        "name": "CASA NATIONALA DE ASIGURARI DE SANATATE",
+        "entityType": "public_entity",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.0713
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "CASA NATIONALA DE ASIGURARI DE SANATATE (CUI 11697800), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-11697800-baza",
+      "label": "CASA NATIONALA DE ASIGURARI DE SANATATE — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "11697800",
+        "name": "CASA NATIONALA DE ASIGURARI DE SANATATE"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 443629452.0
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "CASA NATIONALA DE ASIGURARI DE SANATATE (CUI 11697800), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-3127476-narrow",
+      "label": "JUDETUL GALATI — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "3127476",
+        "name": "JUDETUL GALATI",
+        "entityType": "admin_county_council",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.22231
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "JUDETUL GALATI (CUI 3127476), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-3127476-wide",
+      "label": "JUDETUL GALATI — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "3127476",
+        "name": "JUDETUL GALATI",
+        "entityType": "admin_county_council",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.29687
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "JUDETUL GALATI (CUI 3127476), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-3127476-baza",
+      "label": "JUDETUL GALATI — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "3127476",
+        "name": "JUDETUL GALATI"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 432398576.0
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "JUDETUL GALATI (CUI 3127476), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-2842889-narrow",
+      "label": "JUDETUL PRAHOVA — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "2842889",
+        "name": "JUDETUL PRAHOVA",
+        "entityType": "admin_county_council",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.2623
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "JUDETUL PRAHOVA (CUI 2842889), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-2842889-wide",
+      "label": "JUDETUL PRAHOVA — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "2842889",
+        "name": "JUDETUL PRAHOVA",
+        "entityType": "admin_county_council",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.36996
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "JUDETUL PRAHOVA (CUI 2842889), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-2842889-baza",
+      "label": "JUDETUL PRAHOVA — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "2842889",
+        "name": "JUDETUL PRAHOVA"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 412439047.0
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "JUDETUL PRAHOVA (CUI 2842889), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4340730-narrow",
+      "label": "SECTORUL 6 AL MUNICIPIULUI BUCURESTI — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4340730",
+        "name": "SECTORUL 6 AL MUNICIPIULUI BUCURESTI",
+        "entityType": "admin_sector_hall",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.05287
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "SECTORUL 6 AL MUNICIPIULUI BUCURESTI (CUI 4340730), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4340730-wide",
+      "label": "SECTORUL 6 AL MUNICIPIULUI BUCURESTI — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4340730",
+        "name": "SECTORUL 6 AL MUNICIPIULUI BUCURESTI",
+        "entityType": "admin_sector_hall",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.1609
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "SECTORUL 6 AL MUNICIPIULUI BUCURESTI (CUI 4340730), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4340730-baza",
+      "label": "SECTORUL 6 AL MUNICIPIULUI BUCURESTI — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "4340730",
+        "name": "SECTORUL 6 AL MUNICIPIULUI BUCURESTI"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 395080220.0
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "SECTORUL 6 AL MUNICIPIULUI BUCURESTI (CUI 4340730), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-5057580-narrow",
+      "label": "JUDETUL BACAU — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "5057580",
+        "name": "JUDETUL BACAU",
+        "entityType": "admin_county_council",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.25009
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "JUDETUL BACAU (CUI 5057580), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-5057580-wide",
+      "label": "JUDETUL BACAU — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "5057580",
+        "name": "JUDETUL BACAU",
+        "entityType": "admin_county_council",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.32789
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "JUDETUL BACAU (CUI 5057580), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-5057580-baza",
+      "label": "JUDETUL BACAU — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "5057580",
+        "name": "JUDETUL BACAU"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 378667930.79
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "JUDETUL BACAU (CUI 5057580), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4541580-narrow",
+      "label": "MUNICIPIUL IASI — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4541580",
+        "name": "MUNICIPIUL IASI",
+        "entityType": "admin_municipality",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.08831
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MUNICIPIUL IASI (CUI 4541580), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4541580-wide",
+      "label": "MUNICIPIUL IASI — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4541580",
+        "name": "MUNICIPIUL IASI",
+        "entityType": "admin_municipality",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.16118
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MUNICIPIUL IASI (CUI 4541580), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4541580-baza",
+      "label": "MUNICIPIUL IASI — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "4541580",
+        "name": "MUNICIPIUL IASI"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 369046809.0
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MUNICIPIUL IASI (CUI 4541580), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-3897378-narrow",
+      "label": "JUDETUL SATU MARE — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "3897378",
+        "name": "JUDETUL SATU MARE",
+        "entityType": "admin_county_council",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.23471
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "JUDETUL SATU MARE (CUI 3897378), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-3897378-wide",
+      "label": "JUDETUL SATU MARE — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "3897378",
+        "name": "JUDETUL SATU MARE",
+        "entityType": "admin_county_council",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.32316
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "JUDETUL SATU MARE (CUI 3897378), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-3897378-baza",
+      "label": "JUDETUL SATU MARE — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "3897378",
+        "name": "JUDETUL SATU MARE"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 362910035.71
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "JUDETUL SATU MARE (CUI 3897378), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-3814810-narrow",
+      "label": "MUNICIPIUL GALATI — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "3814810",
+        "name": "MUNICIPIUL GALATI",
+        "entityType": "admin_municipality",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.14636
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MUNICIPIUL GALATI (CUI 3814810), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-3814810-wide",
+      "label": "MUNICIPIUL GALATI — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "3814810",
+        "name": "MUNICIPIUL GALATI",
+        "entityType": "admin_municipality",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.22116
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MUNICIPIUL GALATI (CUI 3814810), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-3814810-baza",
+      "label": "MUNICIPIUL GALATI — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "3814810",
+        "name": "MUNICIPIUL GALATI"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 359481401.93
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "MUNICIPIUL GALATI (CUI 3814810), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4420465-narrow",
+      "label": "SECTORUL 3 AL MUNICIPIULUI BUCURESTI — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4420465",
+        "name": "SECTORUL 3 AL MUNICIPIULUI BUCURESTI",
+        "entityType": "admin_sector_hall",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.06224
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "SECTORUL 3 AL MUNICIPIULUI BUCURESTI (CUI 4420465), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4420465-wide",
+      "label": "SECTORUL 3 AL MUNICIPIULUI BUCURESTI — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4420465",
+        "name": "SECTORUL 3 AL MUNICIPIULUI BUCURESTI",
+        "entityType": "admin_sector_hall",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.20158
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "SECTORUL 3 AL MUNICIPIULUI BUCURESTI (CUI 4420465), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4420465-baza",
+      "label": "SECTORUL 3 AL MUNICIPIULUI BUCURESTI — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "4420465",
+        "name": "SECTORUL 3 AL MUNICIPIULUI BUCURESTI"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 338370493.03
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "SECTORUL 3 AL MUNICIPIULUI BUCURESTI (CUI 4420465), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-3627315-narrow",
+      "label": "Judetul Maramures — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "3627315",
+        "name": "Judetul Maramures",
+        "entityType": "admin_county_council",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.21768
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Judetul Maramures (CUI 3627315), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-3627315-wide",
+      "label": "Judetul Maramures — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "3627315",
+        "name": "Judetul Maramures",
+        "entityType": "admin_county_council",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.36051
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Judetul Maramures (CUI 3627315), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-3627315-baza",
+      "label": "Judetul Maramures — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "3627315",
+        "name": "Judetul Maramures"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 333300323.0
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "Judetul Maramures (CUI 3627315), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4204038-narrow",
+      "label": "SECTORUL 2 AL MUNICIPIULUI BUCURESTI — narrow",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4204038",
+        "name": "SECTORUL 2 AL MUNICIPIULUI BUCURESTI",
+        "entityType": "admin_sector_hall",
+        "measure": "narrow"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.10009
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "SECTORUL 2 AL MUNICIPIULUI BUCURESTI (CUI 4204038), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4204038-wide",
+      "label": "SECTORUL 2 AL MUNICIPIULUI BUCURESTI — wide",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "entity",
+        "cui": "4204038",
+        "name": "SECTORUL 2 AL MUNICIPIULUI BUCURESTI",
+        "entityType": "admin_sector_hall",
+        "measure": "wide"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 0.18865
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "SECTORUL 2 AL MUNICIPIULUI BUCURESTI (CUI 4204038), sporuri ÷ salarii de bază, 2025",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "plafon-entitate-4204038-baza",
+      "label": "SECTORUL 2 AL MUNICIPIULUI BUCURESTI — masa salarială de bază",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "entityBase",
+        "cui": "4204038",
+        "name": "SECTORUL 2 AL MUNICIPIULUI BUCURESTI"
+      },
+      "observations": [
+        {
+          "period": "2025",
+          "value": 330201223.4
+        }
+      ],
+      "provenance": {
+        "source": "transparenta-eu-executie",
+        "locator": "SECTORUL 2 AL MUNICIPIULUI BUCURESTI (CUI 4204038), 10.01.01, 2025",
+        "confidence": "derived"
+      }
+    }
+  ],
+  "limitations": [
+    {
+      "id": "codul-contabil-nu-e-multimea-din-art-21",
+      "text": "10.01.05 și 10.01.06 sunt paragrafele pe care contabilitatea le numește sporuri; nu sunt mulțimea pe care Art. 21 o plafonează. Legea scoate din plafon munca de noapte, orele suplimentare, sporul de handicap, turele din sănătate, izolarea în Deltă, administrarea fondurilor europene și premiul de performanță — iar clasificația economică nu știe asta. Cifra strictă e cea mai bună aproximare publicată, nu plafonul însuși.",
+      "affects": [
+        "structure",
+        "gross"
+      ],
+      "severity": "material"
+    },
+    {
+      "id": "regimul-actual-nu-proiectul",
+      "text": "Execuția arată ce s-a plătit sub legea în vigoare. Plafonul de 20% aparține proiectului și nu s-a aplicat încă niciun an. Cifrele spun pe cine ar prinde plafonul dacă lucrurile rămân cum sunt, nu ce s-a întâmplat sub el.",
+      "affects": [
+        "structure"
+      ],
+      "severity": "material"
+    },
+    {
+      "id": "sporuri-raportate-la-alt-paragraf",
+      "text": "Un ordonator care nu raportează nimic la 10.01.05 sau 10.01.06 apare cu zero sporuri, deși poate plăti drepturi similare la 10.01.30 „Alte drepturi salariale în bani”. De aceea se publică și raportul larg, care ia tot ce nu e salariu de bază: acolo nu se poate ascunde nimic prin alegerea paragrafului.",
+      "affects": [
+        "structure"
+      ],
+      "severity": "material"
+    },
+    {
+      "id": "doua-dimensiuni-nu-una",
+      "text": "Plafonul se măsoară pe ordonator principal ȘI pe sursă de finanțare. Un ordonator poate sta sub 20% pe total și să depășească pe una dintre surse. De aceea se publică ambele numărători: pe perechi ordonator × sursă, cum spune legea, și pe ordonator cu sursele însumate, cum se citește de obicei.",
+      "affects": [
+        "structure"
+      ],
+      "severity": "note"
+    }
+  ]
+}

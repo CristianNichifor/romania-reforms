@@ -1,0 +1,15 @@
+[project]
+name = "public-pay-simulator"
+version = "0.1.0"
+description = "Importers and probes that turn the Romanian pay-law sources into validated JSON"
+requires-python = ">=3.11"
+dependencies = ["openpyxl>=3.1", "python-docx>=1.1", "pypdf>=5.0", "jsonschema>=4.23", "pandas>=2.2", "lxml>=5.0"]
+
+[dependency-groups]
+dev = ["pytest>=8.0"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]

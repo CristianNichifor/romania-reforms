@@ -1,0 +1,144 @@
+{
+  "$schema": "../../schema/crosswalk.schema.json",
+  "id": "ro-draft-2026-07-16--dk-stat-2026",
+  "kind": "alignment",
+  "from": "ro-draft-2026-07-16",
+  "to": "dk-stat-2026",
+  "authority": "editorial",
+  "provenance": {
+    "source": "propunere-alternativa",
+    "locator": "data/crosswalks/ro-draft-2026-07-16--dk-stat-2026.json",
+    "confidence": "derived",
+    "note": "Echivalări editoriale, nu drepturi. Nicio autoritate nu recunoaște aceste corespondențe; ele există ca să facă posibilă o comparație de structură și de nume. Baza fiecărei echivalări este declarată explicit: nivelul de studii cerut și funcția efectiv îndeplinită — exact criteriile pe care sistemul danez le folosește ca să numească un post, în locul instituției angajatoare și al statutului juridic pe care le folosește proiectul românesc."
+  },
+
+  "needs": [
+    {
+      "document": "Contractele colective daneze pentru personal cu studii medii (HK/Stat, FOA, 3F)",
+      "why": "Tabelele IDA acoperă ingineri și academici. Funcțiile românești cu studii medii — referent, casier, îngrijitor, muncitor — nu au corespondent în acest document, iar absența nu înseamnă că postul nu există în Danemarca, ci că e plătit sub alt contract.",
+      "status": "missing"
+    },
+    {
+      "document": "Clasificarea ocupațiilor din România (COR), varianta în vigoare",
+      "why": "Un cod COR pe fiecare funcție ar transforma echivalările din judecată editorială în corespondență prin clasificare ocupațională standard, aceeași folosită de piața muncii și comparabilă internațional prin ISCO-08.",
+      "status": "missing"
+    }
+  ],
+
+  "links": [
+    {
+      "id": "profesor-universitar",
+      "relation": "identity",
+      "from": [{ "positionCode": "11.00401001.01", "title": "Profesor universitar" }],
+      "to": [{ "positionCode": "dk-stat-professor", "title": "Professor at a university" }],
+      "confidence": "derived",
+      "evidence": [
+        "Aceeași funcție: cel mai înalt grad didactic universitar în ambele sisteme.",
+        "Același nivel de studii: doctorat plus abilitare.",
+        "În Danemarca postul are un singur nume și o singură treaptă de bază (bracket 37); în România numele este identic, dar coeficientul se schimbă pe cinci trepte de vechime în învățământ."
+      ],
+      "note": "Denumirea românească este deja aliniată pieței muncii. Diferența nu este de nume, ci de mecanism: Danemarca plătește funcția, România plătește funcția plus vechimea.",
+      "provenance": { "source": "ida-loentabeller-2026-04-01", "locator": "p. 13", "confidence": "verbatim" }
+    },
+    {
+      "id": "decan",
+      "relation": "identity",
+      "from": [{ "positionCode": "11.00101004.01", "title": "Decan" }],
+      "to": [{ "positionCode": "dk-stat-dekan", "title": "University dean" }],
+      "confidence": "derived",
+      "evidence": ["Conducătorul unei facultăți în ambele sisteme.", "Ambele cer același nivel academic."],
+      "provenance": { "source": "ida-loentabeller-2026-04-01", "locator": "p. 13", "confidence": "verbatim" }
+    },
+    {
+      "id": "director-departament",
+      "relation": "identity",
+      "from": [{ "positionCode": "11.00101006.01", "title": "Director de departament" }],
+      "to": [{ "positionCode": "dk-stat-institutleder", "title": "Department head" }],
+      "confidence": "derived",
+      "evidence": ["Conducătorul unui departament academic în ambele sisteme."],
+      "provenance": { "source": "ida-loentabeller-2026-04-01", "locator": "p. 13", "confidence": "verbatim" }
+    },
+    {
+      "id": "rector",
+      "relation": "regrade",
+      "from": [{ "positionCode": "11.00101001.01", "title": "Rector" }],
+      "to": [{ "positionCode": "dk-stat-dekan", "title": "University dean" }],
+      "confidence": "assumed",
+      "disputed": true,
+      "evidence": [
+        "Rectorul conduce universitatea, decanul conduce o facultate — nu sunt același post.",
+        "Tabelele IDA nu publică salariul rectorilor danezi: acesta se negociază individual, în afara oricărui tabel."
+      ],
+      "note": "Echivalare slabă, păstrată doar ca limită superioară. Cel mai apropiat post publicat este decanul, care este ierarhic sub rector. Comparația subestimează, iar acest lucru trebuie spus oriunde apare cifra.",
+      "provenance": { "source": "ida-loentabeller-2026-04-01", "locator": "p. 13", "confidence": "assumed" }
+    },
+    {
+      "id": "secretar-general-ministru",
+      "relation": "identity",
+      "from": [{ "positionCode": "81.10101001.01", "title": "Secretar general" }],
+      "to": [{ "positionCode": "dk-stat-chef-35", "title": "Governmental executive, salary bracket 35" }],
+      "confidence": "derived",
+      "evidence": [
+        "Cel mai înalt post de carieră dintr-un minister, sub nivelul politic, în ambele sisteme.",
+        "Ambele sunt scoase din grila obișnuită: în România prin categoria înalților funcționari publici, în Danemarca prin acordul separat pentru chefer."
+      ],
+      "provenance": { "source": "ida-loentabeller-2026-04-01", "locator": "p. 14", "confidence": "verbatim" }
+    },
+    {
+      "id": "auditor-consilier-superior",
+      "relation": "identity",
+      "from": [{ "positionCode": "81.10104001.01", "title": "Auditor, grad profesional superior" }],
+      "to": [{ "positionCode": "dk-stat-specialkonsulent", "title": "Specialist consultant" }],
+      "confidence": "derived",
+      "evidence": [
+        "Specialist cu studii superioare, fără subordonați, la treapta cea mai înaltă de execuție.",
+        "În Danemarca este postul-tip pentru un academician senior care nu conduce oameni; în România, gradul profesional superior joacă același rol."
+      ],
+      "proposedName": "Auditor intern senior (studii superioare, fără conducere)",
+      "note": "Aici numele chiar diferă ca logică. Denumirea românească descrie poziția în ierarhia funcției publice — „grad profesional superior”, categorie juridică. Denumirea daneză descrie ce face omul și ce nivel de expertiză are. Un anunț de angajare de pe piața muncii ar folosi a doua formă.",
+      "provenance": { "source": "ida-loentabeller-2026-04-01", "locator": "p. 7", "confidence": "verbatim" }
+    },
+    {
+      "id": "director-administratie",
+      "relation": "merge",
+      "from": [
+        { "positionCode": "81.10103003.09", "title": "Director" },
+        { "positionCode": "81.10103003.09", "title": "director executiv" },
+        { "positionCode": "81.10103003.09", "title": "trezorier șef" }
+      ],
+      "to": [{ "positionCode": "dk-stat-tjenestemand-36", "title": "Civil servant, salary bracket 36" }],
+      "confidence": "assumed",
+      "evidence": [
+        "Conducere de direcție într-o instituție publică centrală.",
+        "Proiectul românesc adună nouă denumiri sub acest cod; Danemarca nu are nomenclator de funcții, ci încadrează postul pe o treaptă."
+      ],
+      "note": "Comasarea românească nu are corespondent danez, pentru că sistemul danez nu numește posturile de conducere printr-o listă: le încadrează pe o treaptă și le negociază local. Aceasta este diferența de fond dintre cele două moduri de a numi munca.",
+      "provenance": { "source": "ida-loentabeller-2026-04-01", "locator": "p. 12", "confidence": "assumed" }
+    },
+    {
+      "id": "inginer-executie",
+      "relation": "identity",
+      "from": [{ "positionCode": "81.10104001.01", "title": "funcție publică de execuție, studii superioare, debutant" }],
+      "to": [{ "positionCode": "dk-stat-eng", "title": "Engineer (state, new salary system)" }],
+      "confidence": "assumed",
+      "evidence": [
+        "Intrarea în carieră cu studii superioare de lungă durată.",
+        "Danemarca plasează inginerul pe treptele 4–8 ale scării, câte un an fiecare; România îl plasează la gradația 0 și îl urcă pe cele șase gradații."
+      ],
+      "note": "Echivalare de mecanism, nu de post: arată cele două moduri de a plăti începutul de carieră, nu că cele două posturi ar fi identice.",
+      "provenance": { "source": "ida-loentabeller-2026-04-01", "locator": "p. 6", "confidence": "assumed" }
+    },
+    {
+      "id": "studii-medii-fara-corespondent",
+      "relation": "abolished",
+      "from": [{ "positionCode": "21.00303045.04", "title": "Părinte social, îngrijitor la domiciliu, asistent personal" }],
+      "to": [],
+      "confidence": "verbatim",
+      "evidence": [
+        "Tabelele IDA acoperă ingineri și academici. Îngrijirea la domiciliu este plătită în Danemarca prin contractul FOA, care nu apare în acest document."
+      ],
+      "note": "„abolished” înseamnă aici doar că nu există capăt în documentul danez folosit, nu că postul ar lipsi din Danemarca. Este cea mai importantă limită a acestei comparații: partea de jos a grilei românești nu are cu ce fi comparată.",
+      "provenance": { "source": "ida-loentabeller-2026-04-01", "locator": "întregul document", "confidence": "verbatim" }
+    }
+  ]
+}

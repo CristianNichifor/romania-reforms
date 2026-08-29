@@ -1,0 +1,254 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/schema/crosswalk.schema.json",
+  "title": "Crosswalk",
+  "description": "A relation between the positions of two regimes. Kept out of the regime documents on purpose: a regime is a self-contained statement of one law, and must not depend on another regime to be read. A crosswalk is an editorial artefact with its own provenance and its own confidence, and deleting it must never change what a regime says.\n\nTwo kinds, and the difference is not cosmetic. An 'assimilation' is within one jurisdiction and has legal grounding - Article 32 of the draft requires every serving person to be reincadrat onto a position in the new annexes. An 'alignment' is between jurisdictions, is editorial, has no legal force whatsoever, and exists only to compare shape.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "kind",
+    "from",
+    "to",
+    "links",
+    "provenance"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9.-]+--[a-z0-9.-]+$"
+    },
+    "kind": {
+      "enum": [
+        "assimilation",
+        "alignment"
+      ],
+      "description": "assimilation: same jurisdiction, one regime superseding another, legally grounded. alignment: different jurisdictions, editorial, structural comparison only - never a claim that two posts are equivalent in pay, status or duties."
+    },
+    "from": {
+      "type": "string",
+      "description": "regime id the links start from"
+    },
+    "to": {
+      "type": "string",
+      "description": "regime id the links point to"
+    },
+    "legalBasis": {
+      "type": "string",
+      "description": "For kind = assimilation, the provision that mandates the exercise. Art. 32 alin. (1)-(2) of the draft. Absent for alignments, and its absence is meaningful."
+    },
+    "authority": {
+      "enum": [
+        "published",
+        "reconstructed",
+        "editorial"
+      ],
+      "description": "published: the mapping is itself an official table. reconstructed: inferred from two official documents. editorial: the authors' judgement. The Romanian assimilation is 'reconstructed' at best - Article 32 requires the reincadrare but publishes no mapping, leaving each ordonator to decide, so the same former title can land differently in two institutions."
+    },
+    "provenance": {
+      "$ref": "#/$defs/provenance"
+    },
+    "needs": {
+      "type": "array",
+      "description": "Source documents required to populate or finish this crosswalk. Lets a half-built crosswalk state what is missing instead of quietly looking complete.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "document",
+          "why"
+        ],
+        "properties": {
+          "document": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "why": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "missing",
+              "partial",
+              "held"
+            ],
+            "default": "missing"
+          }
+        }
+      }
+    },
+    "links": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "relation",
+          "from",
+          "to",
+          "confidence",
+          "provenance"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "relation": {
+            "enum": [
+              "identity",
+              "rename",
+              "merge",
+              "split",
+              "regrade",
+              "new",
+              "abolished"
+            ],
+            "description": "Cardinality is the point. merge: many from, one to - the dominant Romanian case. split: one from, many to. new: nothing on the 'from' side, so nobody is being reincadrat onto it. abolished: nothing on the 'to' side, which is the finding that matters most to the people holding it."
+          },
+          "from": {
+            "$ref": "#/$defs/endpointList"
+          },
+          "to": {
+            "$ref": "#/$defs/endpointList"
+          },
+          "confidence": {
+            "enum": [
+              "verbatim",
+              "derived",
+              "assumed"
+            ],
+            "description": "assumed links must never be shown without saying so. A crosswalk that quietly guesses is worse than no crosswalk, because it launders judgement as fact."
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Why this link is believed: identical title, identical duties in the annex, identical code stem, same coefficient."
+          },
+          "disputed": {
+            "type": "boolean",
+            "default": false,
+            "description": "The link is contested, or two ordonatori are known to have resolved it differently."
+          },
+          "note": {
+            "type": "string"
+          },
+          "provenance": {
+            "$ref": "#/$defs/provenance"
+          },
+          "proposedName": {
+            "type": "string",
+            "description": "What the position would be called if it were named the way the labour market names jobs — occupation and level of expertise — instead of by employing institution and legal status. Present only where the two naming logics actually differ; a Romanian title that already reads like a labour-market title does not get one."
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "endpointList": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "positionCode"
+        ],
+        "properties": {
+          "positionCode": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "description": "The specific title within that position, when the position carries several."
+          },
+          "dims": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "weight": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Share of the endpoint's filled posts attributed to this link. Required whenever a merge or split is used in aggregate or envelope mode: collapsing four former titles into one new position only produces an honest wage-bill delta if the four headcounts are weighted. Absent means unknown, and the engine must refuse to aggregate rather than assume an even split."
+          }
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "locator",
+        "confidence"
+      ],
+      "properties": {
+        "source": {
+          "type": "string"
+        },
+        "locator": {
+          "type": "string"
+        },
+        "confidence": {
+          "enum": [
+            "verbatim",
+            "derived",
+            "assumed"
+          ]
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "id": "ro-153-2017--ro-draft-2026-07-16",
+      "kind": "assimilation",
+      "from": "ro-153-2017",
+      "to": "ro-draft-2026-07-16",
+      "legalBasis": "Art. 32 alin. (1)-(2)",
+      "authority": "reconstructed",
+      "provenance": {
+        "source": "proiect-lege-2026-07-16",
+        "locator": "Art. 32",
+        "confidence": "derived"
+      },
+      "links": [
+        {
+          "relation": "merge",
+          "from": [
+            {
+              "positionCode": "153:director-executiv",
+              "weight": 0.4
+            },
+            {
+              "positionCode": "153:trezorier-sef",
+              "weight": 0.2
+            }
+          ],
+          "to": [
+            {
+              "positionCode": "81.10103003.09"
+            }
+          ],
+          "confidence": "assumed",
+          "evidence": [
+            "Both former titles appear verbatim inside the new row's title cell."
+          ],
+          "provenance": {
+            "source": "coeficienti-2026-07-16",
+            "locator": "sheet 'VIII_CI_A_1'!C17",
+            "confidence": "derived"
+          }
+        }
+      ]
+    }
+  ]
+}

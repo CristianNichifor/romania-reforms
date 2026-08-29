@@ -1,0 +1,184 @@
+{
+  "$schema": "../../schema/fiscal.schema.json",
+  "id": "benchmarks",
+  "title": "Repere salariale naționale: media și pragul de jos",
+  "publisher": "Eurostat; pentru pragul danez, surse secundare",
+  "methodology": "ESA 2010 pentru medii; salariul minim legal pentru România",
+  "retrieved": "2024",
+  "query": {
+    "endpoint": "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data",
+    "datasets": [
+      "nama_10_a10",
+      "nama_10_a10_e",
+      "earn_mw_cur"
+    ]
+  },
+  "provenance": {
+    "source": "eurostat",
+    "locator": "nama_10_a10, nama_10_a10_e, earn_mw_cur",
+    "confidence": "derived"
+  },
+  "series": [
+    {
+      "id": "avg-gross-monthly-ro",
+      "label": "Salariul mediu brut lunar, toată economia (RO)",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "benchmark"
+      },
+      "observations": [
+        {
+          "period": "2024",
+          "value": 8728.77
+        }
+      ],
+      "provenance": {
+        "source": "eurostat",
+        "locator": "Eurostat nama_10_a10 D11 ÷ nama_10_a10_e SAL_DC ÷ 12, geo=RO, 2024",
+        "confidence": "derived",
+        "note": "D11 sunt salariile brute, fără contribuțiile angajatorului — același concept ca 'basic earnings' din statistica daneză."
+      }
+    },
+    {
+      "id": "avg-gross-monthly-dk",
+      "label": "Salariul mediu brut lunar, toată economia (DK)",
+      "geo": "DK",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "benchmark"
+      },
+      "observations": [
+        {
+          "period": "2024",
+          "value": 42199.73
+        }
+      ],
+      "provenance": {
+        "source": "eurostat",
+        "locator": "Danmarks Statistik LONS50, BASISST × 160.33 ore/lună, toate sectoarele, 2024",
+        "confidence": "derived",
+        "note": "Câștig de bază pe oră standard, fără pensie. Măsura de titlu a DST (STANDARDIZED HOURLY EARNINGS) include pensia, concediul și plățile neregulate, deci ar fi umflat reperul danez cu circa o cincime."
+      }
+    },
+    {
+      "id": "avg-gross-monthly-gov-dk",
+      "label": "Salariul mediu brut lunar, sectorul public (DK)",
+      "geo": "DK",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "benchmark"
+      },
+      "observations": [
+        {
+          "period": "2024",
+          "value": 38276.38
+        }
+      ],
+      "provenance": {
+        "source": "eurostat",
+        "locator": "Danmarks Statistik LONS50, BASISST, General government, 2024",
+        "confidence": "derived"
+      }
+    },
+    {
+      "id": "avg-gross-monthly-gov-ro",
+      "label": "Salariul mediu brut lunar, sectorul public (RO)",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "benchmark"
+      },
+      "observations": [
+        {
+          "period": "2024",
+          "value": 12635.88
+        }
+      ],
+      "provenance": {
+        "source": "eurostat",
+        "locator": "Eurostat gov_10a_exp D1 ÷ posturi ocupate (MF) ÷ 12 ÷ 1,0225, 2024",
+        "confidence": "derived",
+        "note": "D1 include contribuția asiguratorie pentru muncă de 2,25%, scoasă aici ca să rămână salariul brut. Numărul de posturi e din raportarea MF pentru iunie 2026, nu din 2024, deci raportul e aproximativ."
+      }
+    },
+    {
+      "id": "floor-monthly-ro",
+      "label": "Salariul minim brut pe țară (RO)",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "benchmark"
+      },
+      "observations": [
+        {
+          "period": "2026-S2",
+          "value": 4325.0
+        }
+      ],
+      "provenance": {
+        "source": "eurostat",
+        "locator": "Eurostat earn_mw_cur, geo=RO, 2026-S2",
+        "confidence": "verbatim"
+      }
+    },
+    {
+      "id": "floor-monthly-dk",
+      "label": "Prag de jos din contractele colective (DK) — aproximare",
+      "geo": "DK",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "benchmark",
+        "statutory": "no"
+      },
+      "observations": [
+        {
+          "period": "2026",
+          "value": 22446.67
+        }
+      ],
+      "provenance": {
+        "source": "presa-si-sinteze-sectoriale",
+        "locator": "Rate orare de 135–145 DKK pentru munca necalificată în servicii, 2026",
+        "confidence": "assumed",
+        "note": "Danemarca nu are salariu minim legal. S-a folosit 140 DKK/oră × 160.33 ore/lună (37 de ore pe săptămână). Cifra provine din sinteze secundare, nu din textul unui contract colectiv, și trebuie înlocuită cu tariful din overenskomst-ul 3F sau HK atunci când e disponibil."
+      }
+    }
+  ],
+  "limitations": [
+    {
+      "id": "media-nu-e-mediana",
+      "text": "Media este trasă în sus de vârfuri. Mediana ar descrie mai bine „un salariu obișnuit”, dar nu e publicată anual pentru ambele țări prin aceeași metodă. Un raport față de medie subestimează cât de sus stă de fapt un post față de omul obișnuit — în ambele țări, dar mai tare în cea cu inegalitate mai mare.",
+      "affects": [
+        "structure",
+        "gross"
+      ],
+      "severity": "material"
+    },
+    {
+      "id": "pragul-danez-nu-e-lege",
+      "text": "Danemarca nu are salariu minim legal, iar pragul folosit aici este o rată din contracte colective, preluată din surse secundare și marcată ca atare. Nu are aceeași autoritate ca salariul minim românesc, care este stabilit prin hotărâre de guvern, și cele două nu trebuie citite ca fiind același tip de cifră.",
+      "affects": [
+        "structure",
+        "gross"
+      ],
+      "severity": "material"
+    },
+    {
+      "id": "ore-diferite",
+      "text": "Săptămâna standard daneză are 37 de ore, cea românească 40. La salariu lunar egal, ora daneză e plătită cu circa 8% mai bine decât arată comparația lunară.",
+      "affects": [
+        "gross"
+      ],
+      "severity": "note"
+    },
+    {
+      "id": "media-e-din-2024",
+      "text": "Mediile sunt pe 2024, ultimul an complet din conturile naționale, în timp ce grilele comparate sunt din 2026. Salariile au crescut între timp în ambele țări, deci rapoartele sunt ușor supraestimate în ambele coloane.",
+      "affects": [
+        "structure"
+      ],
+      "severity": "note"
+    }
+  ]
+}

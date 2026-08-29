@@ -1,0 +1,108 @@
+{
+  "$schema": "../../schema/fiscal.schema.json",
+  "id": "ecb-fx",
+  "title": "Cursuri de referință BCE",
+  "publisher": "Banca Centrală Europeană",
+  "methodology": "ECB reference exchange rates, 14:15 CET",
+  "retrieved": "2026-08-27",
+  "query": {
+    "endpoint": "https://data-api.ecb.europa.eu/service/data/EXR/D.<currency>.EUR.SP00.A",
+    "series": [
+      "D.DKK.EUR.SP00.A",
+      "D.RON.EUR.SP00.A"
+    ],
+    "note": "Re-run scripts/import_fx.py to refresh."
+  },
+  "provenance": {
+    "source": "ecb-exr",
+    "locator": "ECB Data Portal, dataset EXR, daily reference rates",
+    "confidence": "verbatim"
+  },
+  "series": [
+    {
+      "id": "eur-dkk",
+      "label": "Coroane daneze pentru un euro",
+      "geo": "DK",
+      "unit": "RATE",
+      "dims": {
+        "base": "EUR",
+        "quote": "DKK"
+      },
+      "observations": [
+        {
+          "period": "2026-08-27",
+          "value": 7.4747
+        }
+      ],
+      "provenance": {
+        "source": "ecb-exr",
+        "locator": "EXR.D.DKK.EUR.SP00.A",
+        "confidence": "verbatim"
+      }
+    },
+    {
+      "id": "eur-ron",
+      "label": "Lei pentru un euro",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "base": "EUR",
+        "quote": "RON"
+      },
+      "observations": [
+        {
+          "period": "2026-08-27",
+          "value": 5.2584
+        }
+      ],
+      "provenance": {
+        "source": "ecb-exr",
+        "locator": "EXR.D.RON.EUR.SP00.A",
+        "confidence": "verbatim"
+      }
+    },
+    {
+      "id": "dkk-ron",
+      "label": "Lei pentru o coroană daneză",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "base": "DKK",
+        "quote": "RON"
+      },
+      "observations": [
+        {
+          "period": "2026-08-27",
+          "value": 0.703493
+        }
+      ],
+      "provenance": {
+        "source": "ecb-exr",
+        "locator": "EXR.D.RON.EUR.SP00.A ÷ EXR.D.DKK.EUR.SP00.A",
+        "confidence": "derived",
+        "note": "Ambele cotate față de euro, deci cursul încrucișat este raportul lor."
+      }
+    }
+  ],
+  "limitations": [
+    {
+      "id": "curs-nu-e-putere-de-cumparare",
+      "text": "Cursul de schimb spune cât de mare este un număr într-o monedă cunoscută, nu cât cumpără. Un salariu danez convertit în lei la 0,70 ar cumpăra în România cât arată cifra doar dacă prețurile ar fi identice în cele două țări, ceea ce nu e cazul. Pentru „o duce mai bine?” e nevoie de paritatea puterii de cumpărare, care este o altă serie și o altă întrebare.",
+      "affects": [
+        "gross",
+        "net",
+        "aggregate"
+      ],
+      "severity": "material"
+    },
+    {
+      "id": "curs-de-o-zi",
+      "text": "Este cursul de referință al unei singure zile. Coroana daneză este legată de euro într-o bandă îngustă, deci raportul DKK/RON se mișcă practic doar cât se mișcă leul față de euro — dar se mișcă.",
+      "affects": [
+        "gross",
+        "net"
+      ],
+      "severity": "note"
+    }
+  ]
+}

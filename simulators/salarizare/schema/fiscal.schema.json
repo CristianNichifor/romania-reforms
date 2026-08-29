@@ -1,0 +1,187 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/schema/fiscal.schema.json",
+  "title": "Fiscal series",
+  "description": "External economic series that pay-regime rules are denominated in. Kept as its own document type, alongside regimes and crosswalks, for the same reason: a regime states what a law says, and must not carry statistics that get revised underneath it.\n\nThis exists because the draft law is not self-contained. Art. 9(4) bounds the reference value by nominal GDP growth; Art. 36(3) sets the uplift from 2028 by a target to cut the public wage bill by at least 1.5 points of GDP between 2024 and 2031; Art. 23(3)-(4) gates a local supplement on ratios of local tax revenue. None of those can be evaluated from the statute alone.\n\nThese series bound and denominate. They do not justify: a wage bill of x% of GDP says what a pay structure costs, never what any post ought to be paid.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "retrieved",
+    "provenance",
+    "series",
+    "limitations"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "title": {
+      "type": "string"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "methodology": {
+      "type": "string",
+      "description": "The statistical standard, e.g. ESA 2010. Two series are only comparable across countries when this matches."
+    },
+    "retrieved": {
+      "type": "string",
+      "format": "date",
+      "description": "Statistical agencies revise back series. The retrieval date is part of this document's identity, not metadata - a chart drawn today and one drawn last year can legitimately disagree."
+    },
+    "query": {
+      "type": "object",
+      "description": "Enough to re-derive the document from the publisher. Makes the import reproducible rather than merely repeatable.",
+      "additionalProperties": true
+    },
+    "provenance": {
+      "$ref": "#/$defs/provenance"
+    },
+    "series": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "label",
+          "geo",
+          "unit",
+          "observations",
+          "provenance"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable identifier a regime's cap can point at."
+          },
+          "label": {
+            "type": "string"
+          },
+          "geo": {
+            "type": "string"
+          },
+          "unit": {
+            "enum": [
+              "PC_GDP",
+              "CP_MNAC",
+              "CP_MEUR",
+              "PC_TOT",
+              "THS_PER",
+              "RATE",
+              "COUNT"
+            ],
+            "description": "PC_GDP is a share of GDP - a structural ratio, and therefore the only form in which Romanian and Danish figures may be shown side by side. Currency units must never be compared across the two. COUNT is a plain tally of things - institutions, posts, reporting units - and carries no currency, so it needs no such rule."
+          },
+          "dims": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Free-form classification. `family` optionally maps a COFOG function onto an occupational family in the regimes; that mapping is approximate and each document says so in limitations."
+          },
+          "observations": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "period",
+                "value"
+              ],
+              "properties": {
+                "period": {
+                  "type": "string",
+                  "description": "ISO year, or YYYY-MM for sub-annual."
+                },
+                "value": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "description": "null where the publisher reports no observation. Never interpolated: a gap is information."
+                },
+                "flag": {
+                  "type": "string",
+                  "description": "Publisher's flag, e.g. p for provisional, e for estimated."
+                }
+              }
+            }
+          },
+          "provenance": {
+            "$ref": "#/$defs/provenance"
+          }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "text",
+          "affects"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "affects": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "severity": {
+            "enum": [
+              "blocking",
+              "material",
+              "note"
+            ],
+            "default": "material"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "locator",
+        "confidence"
+      ],
+      "properties": {
+        "source": {
+          "type": "string"
+        },
+        "locator": {
+          "type": "string"
+        },
+        "confidence": {
+          "enum": [
+            "verbatim",
+            "derived",
+            "assumed"
+          ]
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
