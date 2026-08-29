@@ -12,6 +12,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
+      - name: Repository size
+        run: uv run python scripts/check_repo_size.py
       - name: Validate every simulator's data against its schema
         run: uv run --with referencing python scripts/validate_data.py
       - name: Tests
