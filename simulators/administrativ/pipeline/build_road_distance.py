@@ -97,13 +97,28 @@ def load_roads() -> gpd.GeoDataFrame:
     return roads.to_crs(CRS_STEREO70)
 
 
-def build_graph(roads: gpd.GeoDataFrame, report: Report):
+def build_graph(
+    roads: gpd.GeoDataFrame,
+    report: Report,
+    speed_kmh: np.ndarray | None = None,
+):
     """Turn road linestrings into a weighted node graph.
 
     Every vertex becomes a node and every consecutive pair an undirected edge weighted by
     its length. Vertices are snapped to a 1 m grid first so that ways meeting at a junction
     share a node rather than passing through each other.
+
+    With `speed_kmh` — one effective speed per road feature, in the row order of `roads` —
+    each edge is weighted by **travel time in seconds** instead of length in metres. The
+    graph is otherwise identical, so a caller wanting minutes and a caller wanting kilometres
+    share this construction rather than each maintaining a copy of the vertex hashing below.
     """
+    if speed_kmh is not None and len(speed_kmh) != len(roads):
+        raise ValueError(
+            f"speed_kmh must hold one speed per road feature: "
+            f"got {len(speed_kmh)} for {len(roads)} features"
+        )
+
     coords, index = get_coordinates(roads.geometry, return_index=True)
     snapped = np.round(coords / SNAP_GRID_M).astype(np.int64)
 
@@ -127,15 +142,23 @@ def build_graph(roads: gpd.GeoDataFrame, report: Report):
     seg = coords[1:][same_line] - coords[:-1][same_line]
     length = np.hypot(seg[:, 0], seg[:, 1])
 
+    if speed_kmh is None:
+        weight = length
+    else:
+        # Which feature each segment came from, so a segment is priced by its own road class
+        # rather than by an average over the file.
+        segment_speed = speed_kmh[index[:-1][same_line]]
+        weight = length / (segment_speed / 3.6)
+
     # Drop self-loops created by snapping.
     keep = a != b
-    a, b, length = a[keep], b[keep], length[keep]
+    a, b, weight = a[keep], b[keep], weight[keep]
 
     # Built symmetric directly: duplicate entries are summed by coo_matrix, which would
     # double the weight of any segment appearing twice, so `directed=False` is used at
     # query time and each segment is stored once in each direction.
     graph = coo_matrix(
-        (np.concatenate([length, length]), (np.concatenate([a, b]), np.concatenate([b, a]))),
+        (np.concatenate([weight, weight]), (np.concatenate([a, b]), np.concatenate([b, a]))),
         shape=(n_nodes, n_nodes),
     ).tocsr()
 
