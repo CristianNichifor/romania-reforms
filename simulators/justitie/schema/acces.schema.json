@@ -1,0 +1,135 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/acces.schema.json",
+  "title": "Travel to court, before and after consolidation",
+  "description": "The cost the reform paper asserts but cannot show: for every commune, the road distance to the court that serves it today under HG 1217/2023, and to the one court its county would keep. Closing courts is a saving counted in courts; to the person attending one it is a distance, and this is that distance.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "period",
+    "provenance",
+    "summary",
+    "communes",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "period": {
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json#/$defs/provenance"
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "communes",
+        "people",
+        "medianTodayM",
+        "medianProposedM",
+        "beyond"
+      ],
+      "properties": {
+        "communes": {
+          "type": "integer"
+        },
+        "people": {
+          "type": "integer"
+        },
+        "medianTodayM": {
+          "type": "number"
+        },
+        "medianProposedM": {
+          "type": "number"
+        },
+        "meanTodayM": {
+          "type": "number"
+        },
+        "meanProposedM": {
+          "type": "number"
+        },
+        "unchanged": {
+          "type": "integer"
+        },
+        "beyond": {
+          "type": "object",
+          "description": "People further than N km from a court, today and under the proposal.",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "todayPeople",
+              "proposedPeople"
+            ],
+            "properties": {
+              "todayPeople": {
+                "type": "integer"
+              },
+              "proposedPeople": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      }
+    },
+    "communes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "siruta",
+          "county",
+          "population",
+          "courtToday",
+          "metresToday",
+          "metresProposed"
+        ],
+        "properties": {
+          "siruta": {
+            "type": "string"
+          },
+          "county": {
+            "type": "string"
+          },
+          "population": {
+            "type": "integer"
+          },
+          "courtToday": {
+            "type": "string"
+          },
+          "metresToday": {
+            "type": "integer"
+          },
+          "metresProposed": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "provenance.schema.json#/$defs/limitation"
+      }
+    }
+  }
+}
