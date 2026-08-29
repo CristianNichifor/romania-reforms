@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/courts-located.schema.json",
+  "title": "The court map, with each court placed",
+  "description": "The baseline document with a location added to every court. The CSM report contains no locations — its own `fara-geografie` limitation says so — and these are derived from the court's printed name against the SIRUTA registry, never read from the report. Knowing where a court sits is not knowing what it serves: the arondare is set by law, not by this report, so the limitation stays blocking and the access cost of a closure is still unanswerable from this document.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "period",
+    "provenance",
+    "courts",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Relative path to this schema, so an editor can validate the file in place."
+    },
+    "id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "period": {
+      "type": "string",
+      "description": "The reporting year the figures describe."
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json#/$defs/provenance"
+    },
+    "nationalAverages": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "The averages the report prints for each tier, kept so a derived figure can be checked against the source's own arithmetic.",
+      "properties": {
+        "byTier": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "tier",
+              "perJudge",
+              "perPost"
+            ],
+            "properties": {
+              "tier": {
+                "type": "string"
+              },
+              "perJudge": {
+                "type": "number"
+              },
+              "perPost": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      }
+    },
+    "courts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "tier",
+          "volume",
+          "resolved",
+          "provenance",
+          "county",
+          "siruta",
+          "placedBy"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "tier": {
+            "enum": [
+              "iccj",
+              "curte-de-apel",
+              "tribunal",
+              "judecatorie"
+            ],
+            "description": "The four levels of the Romanian court hierarchy."
+          },
+          "specialised": {
+            "type": "boolean",
+            "description": "A specialised tribunal — commercial, or for minors and family — which the proposal would fold into the county tribunal as an internal section."
+          },
+          "volume": {
+            "type": "integer",
+            "description": "Cases on the roll during the year."
+          },
+          "resolved": {
+            "type": "integer",
+            "description": "Cases disposed of."
+          },
+          "loadPerPost": {
+            "type": "number",
+            "description": "Cases per established post, as printed."
+          },
+          "loadPerJudge": {
+            "type": "number",
+            "description": "Cases per sitting judge, as printed."
+          },
+          "judges": {
+            "type": "number",
+            "description": "Derived: volume / loadPerJudge. The report does not print judge counts, but it prints a ratio built from them, so the count can be recovered — and is marked derived, never verbatim."
+          },
+          "posts": {
+            "type": "number",
+            "description": "Derived: volume / loadPerPost. The establishment, which exceeds the sitting judges wherever posts are vacant."
+          },
+          "provenance": {
+            "$ref": "provenance.schema.json#/$defs/provenance"
+          },
+          "county": {
+            "type": "string",
+            "pattern": "^[A-Z]{1,2}$",
+            "description": "County code of the place the court sits in."
+          },
+          "siruta": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "SIRUTA code of the UAT the court sits in. Null only for a court seated on Bucharest as a whole rather than on one of its six sectors — the city has no single seat."
+          },
+          "placedBy": {
+            "enum": [
+              "name",
+              "county-seat",
+              "city"
+            ],
+            "description": "How the location was reached, so a reader can weigh it. `name`: the court is named after its seat. `county-seat`: the court is named after a county and sits in that county's capital — the one real assumption here. `city`: seated on Bucharest as a whole."
+          }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "$ref": "provenance.schema.json#/$defs/limitation"
+      }
+    }
+  }
+}

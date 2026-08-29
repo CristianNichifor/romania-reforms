@@ -16,6 +16,10 @@ jobs:
         run: uv run python scripts/check_repo_size.py
       - name: Validate every simulator's data against its schema
         run: uv run --with referencing python scripts/validate_data.py
+      - name: Court locations are reproducible
+        run: |
+          uv run python simulators/justitie/scripts/locate_instante.py
+          git diff --exit-code simulators/justitie/data/instante-localizate-2023.json
       - name: Tests
         run: uv run --with referencing python -m pytest tests/ -q
 
