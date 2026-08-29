@@ -8,9 +8,41 @@ Plan for this layer: [`docs/superpowers/plans/2026-08-29-transport-l0-travel-tim
 
 ## Status
 
-**`L0` only, and not yet verified.** The travel-time substrate is built and unit-tested; the
-gate that makes it trustworthy has not been run, because it needs drive times a human has to
-record. Nothing above `L0` may be built until it passes.
+**`L0` built and run at national scale. Not yet verified.** The substrate exists and its
+machinery is sound; the gate that would make its *numbers* trustworthy has not been run,
+because it needs drive times a human has to record. Nothing above `L0` may be built until it
+passes.
+
+First full run, over the OSM Romania extract:
+
+```
+road_graph                 511.650 road features -> 5.710.662 junctions
+seat_snapping              median 19 m, max 749 m; 0 beyond 5.000 m
+routed_pairs               9.239 of 9.281 adjacent pairs; 42 unreachable
+travel_time_distribution   median 14,6 min, p90 31,9 min, max 159,2 min
+implied_speed              median 54,5 km/h over 9.086 pairs; 0 above 110
+```
+
+### What the run settled, and what it did not
+
+**Settled: 153 pairs administrativ cannot reach do have road routes.** Administrativ bounds
+its search at 60 km of distance and records 195 adjacent pairs as unreachable. Bounding by
+*time* instead reaches further along fast roads, and finds routes for 153 of them — 55 to 159
+minutes, median 81. No pair went the other way. This matters outside this simulator:
+`reference_model._county_road_distances` substitutes a straight-line estimate for an edge it
+has no measured distance for, so those pairs currently carry a Euclidean guess in `justitie`'s
+published access map where the real drive is well over an hour.
+
+**Not settled: whether the speed table is right.** `implied_speed` divides administrativ's
+shortest-*distance* by this build's shortest-*time*, and those are two different routes. The
+fastest route may be the longer one, so the ratio understates how fast the model actually
+drives — the true figure is at or above 54,5 km/h, against perhaps 40–50 for real rural
+seat-to-seat driving in Romania.
+
+That is consistent with the table being 10–20% optimistic, which is what `trunk` at 75 km/h
+would predict. **It is not grounds to tune it.** Calibrating `EFFECTIVE_KMH` against a hybrid
+proxy would fit the table to a number that is not ground truth, which is the failure the gate
+exists to prevent. The correction waits for recorded drives.
 
 ## What L0 is
 
