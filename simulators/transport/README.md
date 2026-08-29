@@ -23,6 +23,17 @@ travel_time_distribution   median 14,6 min, p90 31,9 min, max 159,2 min
 implied_speed              median 54,5 km/h over 9.086 pairs; 0 above 110
 ```
 
+### The change to administrativ is verified beyond what CI can show
+
+`L0` gave `pipeline.build_graph` an optional speed argument, so administrativ's every region
+boundary now flows through a function this simulator edited. CI cannot prove that safe: it
+skips administrativ's reference-model and parity tests for want of the built artefacts.
+
+With the artefacts present locally the full suite is **114 passed, 0 skipped** — where it is
+64 passed and 50 skipped in CI. Those 50 include the parity fixtures, which compare the
+Python reference model against the TypeScript port by hash across all 3 186 UATs. Every
+region assignment is unchanged.
+
 ### What the run settled, and what it did not
 
 **Settled: 153 pairs administrativ cannot reach do have road routes.** Administrativ bounds
