@@ -57,6 +57,23 @@ interface Limitation {
   affects: string[];
 }
 
+interface Acces {
+  summary: {
+    communes: number;
+    people: number;
+    medianTodayM: number;
+    medianProposedM: number;
+    meanTodayM: number;
+    meanProposedM: number;
+    unchanged: number;
+    beyond: Record<string, { todayPeople: number; proposedPeople: number }>;
+  };
+  limitations: Limitation[];
+  /** Metres to the court, per UAT index in the administrative payload. -1 where unknown. */
+  today: number[];
+  proposed: number[];
+}
+
 interface Proposal {
   publisher: string;
   published: boolean;
@@ -235,7 +252,68 @@ async function main(): Promise<void> {
   });
   map.addControl(new NavigationControl({ showCompass: false }), 'top-right');
 
-  let mode: 'today' | 'proposed' = 'today';
+  let mode: 'today' | 'proposed' | 'acces' = 'today';
+
+  /**
+   * The access view, loaded only when asked for.
+   *
+   * The commune outlines are 2,9 MB — bigger than everything else on the page put together —
+   * and most readers never open this view, so nothing is fetched until one does. Polygons are
+   * painted through feature state rather than by rebuilding the source: 3.184 shapes upload
+   * once and only their colour changes afterwards.
+   */
+  let accesLoaded: Promise<Acces> | null = null;
+  const loadAcces = (): Promise<Acces> => {
+    accesLoaded ??= (async () => {
+      const [figures, shapes] = await Promise.all([
+        fetch(`${base}data/acces.json`).then((r) => r.json() as Promise<Acces>),
+        fetch(`${base}data/uats.geojson`).then((r) => r.json()),
+      ]);
+      map.addSource('uats', { type: 'geojson', data: shapes });
+      map.addLayer(
+        {
+          id: 'acces-fill',
+          type: 'fill',
+          source: 'uats',
+          layout: { visibility: 'none' },
+          paint: {
+            // Extra kilometres, in bands rather than a gradient: the question is which side
+            // of "an hour further" a commune falls, not a smooth ramp nobody can read.
+            'fill-color': [
+              'case',
+              ['<', ['coalesce', ['feature-state', 'extra'], -1], 0],
+              '#3a4149',
+              [
+                'step',
+                ['feature-state', 'extra'],
+                '#2f7d4f',
+                1,
+                '#7fa86a',
+                10000,
+                '#d9c05a',
+                25000,
+                '#d98040',
+                50000,
+                '#c2453a',
+              ],
+            ] as unknown as ExpressionSpecification,
+            'fill-opacity': 0.75,
+          },
+        },
+        'county-lines',
+      );
+      for (let index = 0; index < figures.proposed.length; index += 1) {
+        const today = figures.today[index] ?? -1;
+        const proposed = figures.proposed[index] ?? -1;
+        map.setFeatureState(
+          { source: 'uats', id: index },
+          { extra: today < 0 || proposed < 0 ? -1 : proposed - today },
+        );
+      }
+      return figures;
+    })();
+    return accesLoaded;
+  };
   const targetInput = el<HTMLInputElement>('#target');
   const courtsFor = (m: typeof mode) =>
     m === 'today' ? doc.courts : proposed(Number(targetInput.value));
@@ -357,9 +435,54 @@ async function main(): Promise<void> {
       show(null);
     });
 
+    /** Applied here rather than in render, because the layer does not exist until it loads. */
+    const showAccesLayer = (visible: boolean): void => {
+      if (!map.getLayer('acces-fill')) return;
+      map.setLayoutProperty('acces-fill', 'visibility', visible ? 'visible' : 'none');
+    };
+
+    const km = (metres: number): string => (metres / 1000).toFixed(1).replace('.', ',');
+
+    const renderAcces = (figures: Acces): void => {
+      showAccesLayer(mode === 'acces');
+      const s = figures.summary;
+      // Its caveats join the others rather than sitting apart: population is a poor proxy for
+      // litigants, and kilometres are not hours.
+      if (!el('#limits').dataset.acces) {
+        el('#limits').dataset.acces = 'yes';
+        el('#limits').innerHTML += figures.limitations
+          .map((l) => `<p class="limit">${l.text}</p>`)
+          .join('');
+      }
+      const band = (label: string, colour: string) =>
+        `<div><i style="background:${colour}"></i>${label}</div>`;
+      el('#acces-note').innerHTML =
+        'Cât are de mers un locuitor până la instanța lui, azi și dacă județul păstrează una ' +
+        'singură. Distanțe pe drum, între reședința comunei și sediul instanței.';
+      el('#ramp-title').textContent = 'Cât în plus ar avea de mers';
+      el('#summary').innerHTML = `
+        <div class="figure">drum median <strong>${km(s.medianTodayM)} km</strong> →
+          <strong>${km(s.medianProposedM)} km</strong></div>
+        <div class="figure">peste 50 km de instanță:
+          <strong>${ro.format(s.beyond['50']!.todayPeople)}</strong> →
+          <strong>${ro.format(s.beyond['50']!.proposedPeople)}</strong> de oameni</div>
+        <div class="figure">peste 100 km:
+          ${ro.format(s.beyond['100']!.todayPeople)} →
+          <strong>${ro.format(s.beyond['100']!.proposedPeople)}</strong></div>
+        <div class="figure"><strong>${ro.format(s.unchanged)}</strong> comune nu ar avea de
+          mers mai mult</div>
+        <div class="steps">
+          ${band('nu se schimbă', '#2f7d4f')}
+          ${band('sub 10 km în plus', '#7fa86a')}
+          ${band('10–25 km', '#d9c05a')}
+          ${band('25–50 km', '#d98040')}
+          ${band('peste 50 km', '#c2453a')}
+        </div>`;
+    };
+
     const render = (): void => {
-      const courts = courtsFor(mode);
-      const ratioOf = ratioFor(mode, courts);
+      const courts = courtsFor(mode === 'acces' ? 'proposed' : mode);
+      const ratioOf = ratioFor(mode === 'acces' ? 'proposed' : mode, courts);
       (map.getSource('courts') as GeoJSONSource).setData(asFeatures(courts, ratioOf));
 
       el('#ramp-title').textContent =
@@ -367,8 +490,19 @@ async function main(): Promise<void> {
           ? 'Încărcătura față de media pe grad'
           : 'Judecători necesari față de câți sunt azi';
       el('#staffing').hidden = mode !== 'proposed';
-      el('#authorship').hidden = mode !== 'proposed';
+      el('#authorship').hidden = mode === 'today';
+      el('#acces-note').hidden = mode !== 'acces';
+      // The old diverging ramp describes a comparison this view does not make; the access
+      // view brings its own stepped legend with the summary.
+      el('.ramp').hidden = mode === 'acces';
+      el('.ramp-ends').hidden = mode === 'acces';
+      showAccesLayer(mode === 'acces');
       el<HTMLOutputElement>('#target-value').textContent = ro.format(Number(targetInput.value));
+
+      if (mode === 'acces') {
+        void loadAcces().then(renderAcces);
+        return;
+      }
 
       const total = courts.reduce((n, c) => n + c.volume, 0);
       if (mode === 'today') {
