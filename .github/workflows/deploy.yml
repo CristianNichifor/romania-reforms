@@ -63,6 +63,7 @@ jobs:
         run: |
           mkdir -p dist
           cp site/index.html dist/index.html
+          cp site/favicon.svg dist/favicon.svg
           cp -r simulators/salarizare/app/dist dist/salarizare
           cp -r simulators/administrativ/web/dist dist/administrativ
           cp -r simulators/justitie/app/dist dist/justitie
@@ -94,6 +95,14 @@ jobs:
           # Every link on the landing page must resolve to something that was built.
           for href in $(grep -o 'href="[a-z]*/"' site/index.html | cut -d'"' -f2); do
             [ -s "dist/${href}index.html" ] || { echo "landing page links to missing $href"; fail=1; }
+          done
+          # The icon is mirrored into each app's public/ so it resolves in dev and in preview
+          # too. Four copies drift silently; a page whose icon 404s falls back to the domain
+          # root, which a project site cannot serve, and the request fails on every visit.
+          copies=$(sha256sum site/favicon.svg simulators/*/*/public/favicon.svg | cut -d' ' -f1 | sort -u | wc -l)
+          [ "$copies" = 1 ] || { echo "favicon copies have drifted apart"; fail=1; }
+          for path in favicon.svg salarizare/favicon.svg administrativ/favicon.svg justitie/favicon.svg; do
+            [ -s "dist/$path" ] || { echo "MISSING dist/$path"; fail=1; }
           done
           exit $fail
 
