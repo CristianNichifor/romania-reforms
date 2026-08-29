@@ -51,6 +51,27 @@ jobs:
           npm run typecheck
           npm test
 
+  justitie:
+    name: justitie
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      # The app draws a file the pipeline writes, so the pipeline runs first: a typecheck
+      # against a missing court map would pass and the map would still be empty.
+      - name: Locate the courts
+        run: uv run python simulators/justitie/scripts/locate_instante.py
+      - name: App
+        working-directory: simulators/justitie/app
+        run: |
+          npm ci
+          npm run build
+
   administrativ:
     name: administrativ
     runs-on: ubuntu-latest

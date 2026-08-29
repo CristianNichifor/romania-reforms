@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ro">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Harta instanțelor — reforma justiției</title>
+    <meta
+      name="description"
+      content="Cele 241 de instanțe din România, cu volumul de dosare și încărcătura pe judecător, și ce ar însemna comasarea propusă."
+    />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+
+    <aside id="panel">
+      <header>
+        <h1>Harta instanțelor</h1>
+        <p class="sub">
+          241 de instanțe, dosarele pe care le-au avut de soluționat în 2023 și încărcătura pe
+          judecător.
+        </p>
+      </header>
+
+      <section class="modes">
+        <button data-mode="today" class="on">Astăzi</button>
+        <button data-mode="proposed">Propunerea</button>
+      </section>
+
+      <section id="summary"></section>
+
+      <section class="legend">
+        <div class="legend-title">Încărcătura față de media pe grad</div>
+        <div class="ramp"><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="ramp-ends"><span>mult sub</span><span>medie</span><span>mult peste</span></div>
+        <div class="legend-title">Mărimea cercului</div>
+        <div class="note">Dosare de soluționat. Cel mai mare cerc este cea mai încărcată instanță.</div>
+      </section>
+
+      <section id="detail" class="detail">
+        <p class="hint">Treci cu mouse-ul peste o instanță.</p>
+      </section>
+
+      <footer id="limits"></footer>
+    </aside>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

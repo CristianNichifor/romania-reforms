@@ -48,6 +48,7 @@ REGISTRY = (
     HERE.parent / "administrativ" / "web" / "public" / "data" / "attributes.json"
 )
 MANIFEST = HERE.parent / "administrativ" / "web" / "public" / "data" / "manifest.json"
+SEATS = HERE.parent / "administrativ" / "web" / "public" / "data" / "seats.geojson"
 COURTS = HERE / "data" / "instante-2023.json"
 OUT = HERE / "data" / "instante-localizate-2023.json"
 
@@ -117,11 +118,19 @@ def strip_status(name: str) -> str:
 
 
 def main() -> int:
-    for path in (REGISTRY, MANIFEST, COURTS):
+    for path in (REGISTRY, MANIFEST, SEATS, COURTS):
         if not path.exists():
             raise SystemExit(f"Missing {path}")
 
     registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
+    # Seat coordinates, keyed by the index the export stamps on each feature — an explicit
+    # `id`, not the position in the array, so this does not depend on file ordering.
+    seats = json.loads(SEATS.read_text(encoding="utf-8"))
+    point_of_index = {
+        f["id"]: f["geometry"]["coordinates"]
+        for f in seats["features"]
+        if isinstance(f.get("id"), int) and f["geometry"]["type"] == "Point"
+    }
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
     document = json.loads(COURTS.read_text(encoding="utf-8"))
 
@@ -142,13 +151,41 @@ def main() -> int:
         if code != BUCHAREST and registry["isCapital"][index]:
             seat_of_county.setdefault(code, index)
 
+    def point_for(index: int) -> list[float] | None:
+        return point_of_index.get(index)
+
+    # Bucharest-wide courts sit on the city, and the city's point is the mean of its six
+    # sector seats. Picking one sector would put the Court of Appeal in whichever sector the
+    # registry happened to list first, which is an arbitrary claim about a real building.
+    sector_points = [
+        point_of_index[i]
+        for i, code in enumerate(counties)
+        if code == BUCHAREST and i in point_of_index
+    ]
+    city_point = (
+        [
+            round(sum(p[0] for p in sector_points) / len(sector_points), 5),
+            round(sum(p[1] for p in sector_points) / len(sector_points), 5),
+        ]
+        if sector_points
+        else None
+    )
+
     located: list[dict] = []
     failed: list[str] = []
 
     for court in document["courts"]:
         if court["tier"] == "iccj":
             # One court, in Bucharest, and not a candidate for consolidation.
-            located.append({**court, "county": BUCHAREST, "siruta": None, "placedBy": "city"})
+            located.append(
+                {
+                    **court,
+                    "county": BUCHAREST,
+                    "siruta": None,
+                    "placedBy": "city",
+                    "point": city_point,
+                }
+            )
             continue
 
         place = fold(court["name"])
@@ -159,7 +196,15 @@ def main() -> int:
         place = ALIASES.get(place, place)
 
         if place == "BUCURESTI":
-            located.append({**court, "county": BUCHAREST, "siruta": None, "placedBy": "city"})
+            located.append(
+                {
+                    **court,
+                    "county": BUCHAREST,
+                    "siruta": None,
+                    "placedBy": "city",
+                    "point": city_point,
+                }
+            )
             continue
 
         candidates = by_place.get(place, [])
@@ -176,13 +221,27 @@ def main() -> int:
         if len(candidates) == 1:
             index = candidates[0]
             located.append(
-                {**court, "county": counties[index], "siruta": siruta[index], "placedBy": "name"}
+                {
+                    **court,
+                    "county": counties[index],
+                    "siruta": siruta[index],
+                    "placedBy": "name",
+                    "point": point_for(index),
+                }
             )
             continue
 
         code = county_code_of.get(place)
         if code == BUCHAREST:
-            located.append({**court, "county": BUCHAREST, "siruta": None, "placedBy": "city"})
+            located.append(
+                {
+                    **court,
+                    "county": BUCHAREST,
+                    "siruta": None,
+                    "placedBy": "city",
+                    "point": city_point,
+                }
+            )
             continue
         if code is not None and code in seat_of_county:
             index = seat_of_county[code]
@@ -192,6 +251,7 @@ def main() -> int:
                     "county": code,
                     "siruta": siruta[index],
                     "placedBy": "county-seat",
+                    "point": point_for(index),
                 }
             )
             continue
@@ -202,6 +262,10 @@ def main() -> int:
     for how in ("name", "county-seat", "city"):
         print(f"  placed by {how:<12} {sum(1 for c in located if c['placedBy'] == how):>4}")
     print(f"  unplaced             {len(failed):>4}")
+
+    unplotted = [c["name"] for c in located if not c.get("point")]
+    if unplotted:
+        failed.extend(f"{n}: placed but has no coordinates" for n in unplotted)
 
     if failed:
         print("\nunplaced:", file=sys.stderr)

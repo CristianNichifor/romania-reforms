@@ -51,12 +51,21 @@ jobs:
           npm test
           npm run build
 
+      - name: Build justitie
+        working-directory: simulators/justitie/app
+        env:
+          VITE_BASE: /${{ github.event.repository.name }}/justitie/
+        run: |
+          npm ci
+          npm run build
+
       - name: Assemble the site
         run: |
           mkdir -p dist
           cp site/index.html dist/index.html
           cp -r simulators/salarizare/app/dist dist/salarizare
           cp -r simulators/administrativ/web/dist dist/administrativ
+          cp -r simulators/justitie/app/dist dist/justitie
 
       # One deploy for the whole repository means a simulator that failed to build would
       # otherwise be published as a dead tile on the landing page — a link to a 404. Checked
@@ -64,7 +73,7 @@ jobs:
       - name: Check every advertised path exists
         run: |
           fail=0
-          for path in index.html salarizare/index.html administrativ/index.html; do
+          for path in index.html salarizare/index.html administrativ/index.html justitie/index.html; do
             if [ -s "dist/$path" ]; then
               echo "ok   dist/$path"
             else
@@ -76,6 +85,11 @@ jobs:
           # without the build failing.
           if [ ! -s dist/administrativ/data/manifest.json ]; then
             echo "MISSING dist/administrativ/data/manifest.json"; fail=1
+          fi
+          # Same trap for justitie: its court map and county outlines are copied into public/
+          # by a prebuild step, so a failed copy leaves a map with nothing on it.
+          if [ ! -s dist/justitie/data/instante.json ]; then
+            echo "MISSING dist/justitie/data/instante.json"; fail=1
           fi
           # Every link on the landing page must resolve to something that was built.
           for href in $(grep -o 'href="[a-z]*/"' site/index.html | cut -d'"' -f2); do
