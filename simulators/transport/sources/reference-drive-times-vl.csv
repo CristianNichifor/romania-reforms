@@ -1,7 +1,31 @@
 kind,from_siruta,to_siruta,from_name,to_name,minutes,source,retrieved
-# Twelve seat-to-seat drives in Vâlcea, recorded by hand: at least six `adjacent` (the two
-# UATs share a border) and at least six `journey` (several hops apart). Replace every
-# REPLACE_ME with a real SIRUTA code and a real recorded time before running the gate; the
-# gate refuses to run on an unfilled file rather than passing an empty check.
-adjacent,REPLACE_ME,REPLACE_ME,Râmnicu Vâlcea,Băbeni,0,REPLACE_ME,2026-08-29
-journey,REPLACE_ME,REPLACE_ME,Râmnicu Vâlcea,Horezu,0,REPLACE_ME,2026-08-29
+# Twelve seat-to-seat drives in Vâlcea, to be recorded by hand.
+#
+# The pairs below are not arbitrary. Every `adjacent` row is a pair that genuinely shares a
+# border and is marked traversable in administrativ's adjacency.parquet, so the gate will find
+# a one-hop edge for it; every `journey` row is six hops apart in the same graph. They are
+# spread across the three terrains that make Vâlcea worth using as the control county — the
+# Olt gorge in the north, the hills around Râmnicu Vâlcea, and the plain toward Drăgășani —
+# and across road classes from trunk (DN7) down to secondary.
+#
+# WHAT IS LEFT TO DO: replace REPLACE_ME in the `minutes` and `source` columns with a real
+# recorded driving time between the two commune seats and the service it came from. Nothing
+# else needs changing. The SIRUTA codes are from uat_seats.gpkg and are authoritative.
+#
+# Do not estimate. A guessed time makes the gate pass while verifying nothing, which is worse
+# than having no gate — that is the whole reason this file is committed unfilled.
+#
+# --- adjacent: one hop, isolates the speed table from the accumulation ---
+adjacent,167794,167909,Brezoi,Călimănești,REPLACE_ME,REPLACE_ME,2026-08-29
+adjacent,167473,168880,Râmnicu Vâlcea,Bujoreni,REPLACE_ME,REPLACE_ME,2026-08-29
+adjacent,168372,171325,Băbeni,Mihăești,REPLACE_ME,REPLACE_ME,2026-08-29
+adjacent,168229,168602,Alunu,Berbești,REPLACE_ME,REPLACE_ME,2026-08-29
+adjacent,167981,172457,Drăgășani,Prundeni,REPLACE_ME,REPLACE_ME,2026-08-29
+adjacent,170952,173748,Lungești,Ștefănești,REPLACE_ME,REPLACE_ME,2026-08-29
+# --- journey: six hops, tests the accumulation end to end ---
+journey,167473,173061,Râmnicu Vâlcea,Slătioara,REPLACE_ME,REPLACE_ME,2026-08-29
+journey,167981,169039,Drăgășani,Cernișoara,REPLACE_ME,REPLACE_ME,2026-08-29
+journey,168372,172153,Băbeni,Perișani,REPLACE_ME,REPLACE_ME,2026-08-29
+journey,167909,172947,Călimănești,Scundu,REPLACE_ME,REPLACE_ME,2026-08-29
+journey,171325,174254,Mihăești,Voineasa,REPLACE_ME,REPLACE_ME,2026-08-29
+journey,168791,174496,Budești,Titești,REPLACE_ME,REPLACE_ME,2026-08-29
