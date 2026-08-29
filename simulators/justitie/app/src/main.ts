@@ -85,7 +85,11 @@ const el = <T extends HTMLElement>(q: string): T => {
  */
 const BLANK = {
   version: 8 as const,
-  glyphs: undefined,
+  // `glyphs` is omitted, not set to undefined. MapLibre validates the style and rejects a
+  // key that is present with no value — "glyphs: string expected, undefined found" — and the
+  // failure is quiet in the worst way: the style never loads, so `load` never fires, so no
+  // layers are ever added and the page shows an empty canvas with a working panel beside it.
+  // Nothing 404s and nothing throws where a reader would look.
   sources: {},
   layers: [{ id: 'bg', type: 'background' as const, paint: { 'background-color': '#0b0d10' } }],
 };
@@ -98,11 +102,26 @@ async function main(): Promise<void> {
 
   const averageFor = new Map(doc.nationalAverages.byTier.map((t) => [t.tier, t.perJudge]));
 
-  /** A court's load per judge as a multiple of the average for its grade. */
-  const ratioOf = (court: { tier: string; loadPerJudge?: number }): number | null => {
-    const average = averageFor.get(court.tier);
-    if (!average || !court.loadPerJudge) return null;
-    return court.loadPerJudge / average;
+  /**
+   * A court's load per judge, as a multiple of the yardstick it should be judged against.
+   *
+   * Today that is the national average for its own grade, which the report prints: a
+   * judecatorie against 1.454,7 and a tribunal against 932,3, so a small court is not made
+   * to look good by being compared with the Inalta Curte.
+   *
+   * Under the proposal it cannot be. A merged court carries the judecatorie work of its whole
+   * county at tribunal grade, so measuring it against the *old* tribunal average paints every
+   * one of the 42 red — which says nothing about the reform and everything about comparing a
+   * court with a yardstick built before it existed. The proposal is therefore measured against
+   * itself: the mean load per judge across the merged courts. That answers the question the
+   * view can actually support — which of them would be worse off than the rest.
+   */
+  const ratioAgainst = (
+    court: { tier: string; loadPerJudge?: number },
+    yardstick: number | undefined,
+  ): number | null => {
+    if (!yardstick || !court.loadPerJudge) return null;
+    return court.loadPerJudge / yardstick;
   };
 
   /**
@@ -144,7 +163,12 @@ async function main(): Promise<void> {
     return [...kept, ...merged];
   };
 
-  const asFeatures = (courts: Court[]) => ({
+  const meanLoadOf = (courts: Court[]): number => {
+    const loads = courts.map((c) => c.loadPerJudge ?? 0).filter((n) => n > 0);
+    return loads.length ? loads.reduce((a, b) => a + b, 0) / loads.length : 0;
+  };
+
+  const asFeatures = (courts: Court[], ratioOf: (c: Court) => number | null) => ({
     type: 'FeatureCollection' as const,
     features: courts.map((c) => {
       const ratio = ratioOf(c);
@@ -177,6 +201,16 @@ async function main(): Promise<void> {
   let mode: 'today' | 'proposed' = 'today';
   const courtsFor = (m: typeof mode) => (m === 'today' ? doc.courts : proposed());
 
+  /** The yardstick differs by view, so it is built with the courts rather than assumed. */
+  const ratioFor = (m: typeof mode, courts: Court[]): ((c: Court) => number | null) => {
+    if (m === 'today') return (c) => ratioAgainst(c, averageFor.get(c.tier));
+    const merged = courts.filter((c) => c.id.startsWith('t-'));
+    const mean = meanLoadOf(merged);
+    // Courts the proposal leaves alone keep their own grade's yardstick.
+    return (c) =>
+      c.id.startsWith('t-') ? ratioAgainst(c, mean) : ratioAgainst(c, averageFor.get(c.tier));
+  };
+
   map.on('load', () => {
     map.addSource('counties', { type: 'geojson', data: counties });
     map.addLayer({
@@ -186,7 +220,10 @@ async function main(): Promise<void> {
       paint: { 'line-color': '#2b333c', 'line-width': 1 },
     });
 
-    map.addSource('courts', { type: 'geojson', data: asFeatures(courtsFor(mode)) });
+    map.addSource('courts', {
+      type: 'geojson',
+      data: asFeatures(courtsFor(mode), ratioFor(mode, courtsFor(mode))),
+    });
 
     // Radius by the square root of the volume: area reads as quantity, radius does not, and
     // the largest court carries a hundred times the smallest.
@@ -243,7 +280,7 @@ async function main(): Promise<void> {
         return;
       }
       const p = f.properties as unknown as Court & { tierLabel: string; ratio: number };
-      const average = averageFor.get(p.tier);
+      const average = p.id.startsWith('t-') ? null : averageFor.get(p.tier);
       const load = p.loadPerJudge ? Math.round(p.loadPerJudge) : null;
       detail.innerHTML = `
         <div class="court">${p.name}</div>
@@ -255,7 +292,9 @@ async function main(): Promise<void> {
           <dt>Pe judecător</dt><dd>${load ? ro.format(load) : '—'}${
             load && average
               ? ` <span class="vs">(media gradului ${ro.format(Math.round(average))})</span>`
-              : ''
+              : load
+                ? ' <span class="vs">(comparat cu media instanțelor comasate)</span>'
+                : ''
           }</dd>
         </dl>`;
     };
@@ -271,9 +310,16 @@ async function main(): Promise<void> {
 
     const render = (): void => {
       const courts = courtsFor(mode);
-      (map.getSource('courts') as GeoJSONSource).setData(asFeatures(courts));
+      const ratioOf = ratioFor(mode, courts);
+      (map.getSource('courts') as GeoJSONSource).setData(asFeatures(courts, ratioOf));
       const total = courts.reduce((n, c) => n + c.volume, 0);
       const over = courts.filter((c) => (ratioOf(c) ?? 0) > 1).length;
+      // The legend has to name the yardstick, because it changes with the view and a reader
+      // comparing colours across the two would otherwise be comparing different questions.
+      el('#ramp-title').textContent =
+        mode === 'today'
+          ? 'Încărcătura față de media pe grad'
+          : 'Încărcătura față de media instanțelor comasate';
       el('#summary').innerHTML = `
         <div class="figure"><strong>${ro.format(courts.length)}</strong> instanțe</div>
         <div class="figure"><strong>${ro.format(total)}</strong> dosare</div>
