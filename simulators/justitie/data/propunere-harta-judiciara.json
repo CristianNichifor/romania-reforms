@@ -1,0 +1,80 @@
+{
+  "$schema": "../schema/propunere.schema.json",
+  "id": "propunere-harta-judiciara",
+  "title": "Propunerea pentru noua hartă judiciară",
+  "publisher": "Cristian Nichifor",
+  "published": false,
+  "period": "2026",
+  "provenance": {
+    "source": "reforma-sistem-judiciar-romania",
+    "locator": "Capitolul 12 — Noua hartă judiciară, p. 59",
+    "confidence": "verbatim",
+    "note": "Documentul este propunerea autorului acestui simulator. Nu este un act normativ, nu este publicat de o instituție și nu a trecut printr-un proces public. Simulatorul îl modelează ca pe orice altă propunere: calculează ce spune, nu ce ar trebui să spună."
+  },
+  "diagnostic": {
+    "judecatorii": 176,
+    "judecatoriiEficiente": 20,
+    "tribunale": 42,
+    "provenance": {
+      "source": "reforma-sistem-judiciar-romania",
+      "locator": "Capitolul 12, p. 59, „176 judecatorii → doar 20 functioneaza eficient”",
+      "confidence": "verbatim"
+    }
+  },
+  "tinta": {
+    "nivel1": {
+      "instante": 42,
+      "populatieMinima": 150000,
+      "populatieMaxima": 200000,
+      "descriere": "judecătorii + tribunale comasate, specializate, digitalizate",
+      "provenance": {
+        "source": "reforma-sistem-judiciar-romania",
+        "locator": "Capitolul 12, p. 59, „Nivel 1: 42 judecatorii + tribunale comasate … fiecare deserveste 150.000–200.000 locuitori”",
+        "confidence": "verbatim"
+      }
+    },
+    "curtiDeApel": {
+      "instante": 15,
+      "provenance": {
+        "source": "reforma-sistem-judiciar-romania",
+        "locator": "Capitolul 12, p. 59, „Nivel 3: 15 curti de apel”",
+        "confidence": "verbatim"
+      }
+    },
+    "iccj": {
+      "instante": 1,
+      "rol": "unificarea jurisprudenței",
+      "provenance": {
+        "source": "reforma-sistem-judiciar-romania",
+        "locator": "Capitolul 12, p. 59, „Nivel 4: ICCJ, rol strict de unificare jurisprudenta”",
+        "confidence": "verbatim"
+      }
+    }
+  },
+  "limitations": [
+    {
+      "id": "tinta-nu-se-inchide-aritmetic",
+      "text": "Cele două cifre ale propunerii nu se închid una cu alta. România are 19.053.815 locuitori în registrul SIRUTA. La 42 de instanțe de nivel 1, fiecare ar deservi 453.662 de locuitori — de 2,3 până la 3 ori peste pragul de 150.000–200.000 pe care propunerea îl fixează. Ca să fie respectat pragul, ar fi nevoie de 95–127 de instanțe, nu de 42. Simulatorul arată ambele variante și nu alege între ele: alegerea aparține autorului propunerii, nu calculului.",
+      "severity": "blocking",
+      "affects": ["nivel1", "consolidation"]
+    },
+    {
+      "id": "propunere-nepublicata",
+      "text": "Propunerea nu este publicată de nicio instituție și nu are un identificator public. Este documentul autorului acestui simulator, inclus în depozit tocmai pentru ca cititorul să poată verifica ce anume se modelează.",
+      "severity": "material",
+      "affects": ["provenance"]
+    },
+    {
+      "id": "fara-nivel-2",
+      "text": "Propunerea numerotează Nivel 1, Nivel 3 și Nivel 4, fără un Nivel 2. Nu este clar dacă lipsește un grad de jurisdicție din text sau din numerotare, iar simulatorul nu presupune care dintre ele.",
+      "severity": "material",
+      "affects": ["nivel1", "curtiDeApel"]
+    },
+    {
+      "id": "criteriul-nu-e-arondarea",
+      "text": "Propunerea dimensionează instanțele după populația deservită, dar arondarea — ce comune răspund de care instanță — este stabilită prin lege și nu se află în acest document. Gruparea pe care o arată harta este construită din populație și distanță rutieră, nu citită dintr-o listă oficială.",
+      "severity": "blocking",
+      "affects": ["nivel1", "access"]
+    }
+  ]
+}

@@ -7,3 +7,9 @@ dist/
 
 # Large source documents are fetched by the importers, not committed.
 simulators/*/sources/*.pdf
+
+# Except the ones with nowhere to be fetched from. The CSM reports are published at a stable
+# URL and the importer downloads them; the reform paper is not published anywhere, so if it
+# is not in the repository it does not exist for anyone but its author — and a simulator
+# whose central claim cannot be read by the reader is not an instrument for public debate.
+!simulators/justitie/sources/reforma-sistem-judiciar-romania.pdf

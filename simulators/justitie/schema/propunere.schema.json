@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/propunere.schema.json",
+  "title": "A proposal for the judicial map",
+  "description": "What a reform document proposes, separately from what the CSM report measures. Kept apart on purpose: the baseline is published by an institution and the proposal is not, so mixing them would let an unpublished claim inherit the authority of a published statistic. `published` records which is which, and every figure carries the chapter and page it was read from.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "published",
+    "provenance",
+    "tinta",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "published": {
+      "type": "boolean",
+      "description": "Whether an institution published this. False means it is somebody's paper, and the page must say so rather than let it read as an official plan."
+    },
+    "period": {
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json#/$defs/provenance"
+    },
+    "diagnostic": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "What the proposal says is wrong today, in its own numbers."
+    },
+    "tinta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "nivel1",
+        "curtiDeApel",
+        "iccj"
+      ],
+      "properties": {
+        "nivel1": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "instante",
+            "provenance"
+          ],
+          "properties": {
+            "instante": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "provenance": {
+              "$ref": "provenance.schema.json#/$defs/provenance"
+            },
+            "populatieMinima": {
+              "type": "integer"
+            },
+            "populatieMaxima": {
+              "type": "integer"
+            },
+            "descriere": {
+              "type": "string"
+            }
+          }
+        },
+        "curtiDeApel": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "instante",
+            "provenance"
+          ],
+          "properties": {
+            "instante": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "provenance": {
+              "$ref": "provenance.schema.json#/$defs/provenance"
+            }
+          }
+        },
+        "iccj": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "instante",
+            "provenance"
+          ],
+          "properties": {
+            "instante": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "provenance": {
+              "$ref": "provenance.schema.json#/$defs/provenance"
+            },
+            "rol": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "provenance.schema.json#/$defs/limitation"
+      }
+    }
+  }
+}
