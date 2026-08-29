@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/design.schema.json",
+  "title": "The reform's institutional design, as argued rather than computed",
+  "description": "Kept apart from the computed documents on purpose. A simulator can show what a design decision costs or whom it reaches; it cannot say whether the decision is right, and one that scored institutional architecture would be inventing authority. These chapters are quoted with the page they sit on so a reader can weigh them as argument.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "published",
+    "provenance",
+    "chapters"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "published": {
+      "type": "boolean"
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json#/$defs/provenance"
+    },
+    "chapters": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "number",
+          "title",
+          "page",
+          "excerpt",
+          "provenance"
+        ],
+        "properties": {
+          "number": {
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "page": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "excerpt": {
+            "type": "string",
+            "minLength": 20
+          },
+          "provenance": {
+            "$ref": "provenance.schema.json#/$defs/provenance"
+          }
+        }
+      }
+    }
+  }
+}

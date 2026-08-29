@@ -278,3 +278,48 @@ dd {
   border-radius: 3px;
   flex: none;
 }
+
+#design {
+  border-top: 1px solid var(--line);
+  padding-top: 1rem;
+  margin-bottom: 1.1rem;
+}
+
+#design h2 {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  margin: 0 0 0.35rem;
+}
+
+#design details {
+  border-bottom: 1px solid var(--line);
+  padding: 0.5rem 0;
+}
+
+#design summary {
+  cursor: pointer;
+  font-size: 0.88rem;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+#design summary::-webkit-details-marker {
+  display: none;
+}
+
+#design summary span {
+  color: var(--muted);
+  font-size: 0.76rem;
+  flex: none;
+}
+
+#design p.excerpt {
+  margin: 0.45rem 0 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.55;
+}
