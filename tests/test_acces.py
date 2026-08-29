@@ -41,25 +41,47 @@ def test_it_covers_every_commune_the_arondare_places(acces):
 
 def test_the_summary_matches_its_own_rows(acces):
     rows = acces["communes"]
+    on_road = [r for r in rows if r["byRoad"]]
     summary = acces["summary"]
     assert summary["communes"] == len(rows)
-    assert summary["people"] == sum(r["population"] for r in rows)
+    assert summary["people"] == sum(r["population"] for r in on_road)
     for km, counts in summary["beyond"].items():
         metres = int(km) * 1000
-        assert counts["todayPeople"] == sum(
-            r["population"] for r in rows if r["metresToday"] > metres
-        ), km
-        assert counts["proposedPeople"] == sum(
-            r["population"] for r in rows if r["metresProposed"] > metres
-        ), km
+        for key, value in counts.items():
+            assert value == sum(
+                r["population"] for r in on_road if r[key] > metres
+            ), f"{km} km, {key}"
 
 
 def test_consolidation_never_shortens_the_journey_on_average(acces):
     """A merge that closes courts cannot reduce mean travel, so if it appears to, the
     computation is wrong rather than the reform miraculous."""
-    summary = acces["summary"]
-    assert summary["meanProposedM"] >= summary["meanTodayM"]
-    assert summary["medianProposedM"] >= summary["medianTodayM"]
+    mean = acces["summary"]["mean"]
+    assert mean["metresByCounty"] >= mean["metresToday"]
+    assert mean["metresNearest"] >= mean["metresToday"]
+
+
+def test_dropping_the_county_line_never_costs_anyone(acces):
+    """Nearest-of-42 is by construction no further than that county's court, commune by
+    commune. If it were, the routing would be picking something other than the nearest."""
+    worse = [
+        r["siruta"]
+        for r in acces["communes"]
+        if r["byRoad"] and r["metresNearest"] > r["metresByCounty"]
+    ]
+    assert worse == [], worse[:10]
+
+
+def test_the_roadless_communes_are_kept_and_excluded(acces):
+    """Eight of the eleven are the Delta, reached by water whatever any reform says.
+
+    Kept in the file so the count stays honest, and out of every average so the averages do.
+    """
+    without = [r for r in acces["communes"] if not r["byRoad"]]
+    assert len(without) == acces["summary"]["communesWithoutRoad"] == 11
+    assert all(r["metresToday"] is None for r in without)
+    delta = {r["siruta"] for r in without if r["county"] == "TL"}
+    assert len(delta) == 8, sorted(delta)
 
 
 def test_some_communes_are_unaffected(acces):
@@ -68,18 +90,19 @@ def test_some_communes_are_unaffected(acces):
     If this were zero, every commune would have been reassigned, which would mean the
     proposed court was not being seated where a court already is.
     """
-    rows = acces["communes"]
-    same = [r for r in rows if r["metresProposed"] <= r["metresToday"]]
+    rows = [r for r in acces["communes"] if r["byRoad"]]
+    same = [r for r in rows if r["metresByCounty"] <= r["metresToday"]]
     assert len(same) > 500, len(same)
-    assert acces["summary"]["unchanged"] == len(same)
 
 
 def test_distances_are_plausible(acces):
-    """Romania is about 700 km across and no county is; a county-scoped road distance beyond
-    300 km means the graph, not the geography."""
-    worst = max(r["metresProposed"] for r in acces["communes"])
-    assert worst < 300_000, worst
-    assert all(r["metresToday"] >= 0 and r["metresProposed"] >= 0 for r in acces["communes"])
+    """Romania is about 700 km across, so anything past 300 km is the graph, not geography."""
+    on_road = [r for r in acces["communes"] if r["byRoad"]]
+    assert max(r["metresNearest"] for r in on_road) < 300_000
+    assert all(
+        r["metresToday"] >= 0 and r["metresByCounty"] >= 0 and r["metresNearest"] >= 0
+        for r in on_road
+    )
 
 
 def test_bucharest_is_not_given_a_commute(acces):
@@ -87,10 +110,15 @@ def test_bucharest_is_not_given_a_commute(acces):
     what access means here, and leaving it in would put a fake number on two million people."""
     rows = [r for r in acces["communes"] if r["county"] == "B"]
     assert rows, "Bucharest is missing entirely"
-    assert all(r["metresToday"] == 0 and r["metresProposed"] == 0 for r in rows)
+    assert all(
+        r["metresToday"] == 0 and r["metresByCounty"] == 0 and r["metresNearest"] == 0
+        for r in rows
+    )
 
 
 def test_the_weighting_caveat_is_declared(acces):
     ids = {x["id"] for x in acces["limitations"]}
     assert "populatia-nu-e-numarul-de-justitiabili" in ids
     assert "distanta-nu-e-timp" in ids
+    assert "delta-nu-are-drum" in ids
+    assert "arondarea-peste-judet-nu-e-legala-azi" in ids

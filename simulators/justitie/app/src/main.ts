@@ -66,21 +66,24 @@ interface Design {
   }[];
 }
 
+type AccesKey = 'metresToday' | 'metresByCounty' | 'metresNearest';
+
 interface Acces {
   summary: {
     communes: number;
     people: number;
-    medianTodayM: number;
-    medianProposedM: number;
-    meanTodayM: number;
-    meanProposedM: number;
-    unchanged: number;
-    beyond: Record<string, { todayPeople: number; proposedPeople: number }>;
+    communesWithoutRoad: number;
+    median: Record<AccesKey, number>;
+    mean: Record<AccesKey, number>;
+    beyond: Record<string, Record<AccesKey, number>>;
+    crossCounty: number;
+    crossCountyPeople: number;
   };
   limitations: Limitation[];
-  /** Metres to the court, per UAT index in the administrative payload. -1 where unknown. */
+  /** Metres to the court, per UAT index in the administrative payload. -1 where no road. */
   today: number[];
-  proposed: number[];
+  byCounty: number[];
+  nearest: number[];
 }
 
 interface Proposal {
@@ -312,9 +315,9 @@ async function main(): Promise<void> {
         },
         'county-lines',
       );
-      for (let index = 0; index < figures.proposed.length; index += 1) {
+      for (let index = 0; index < figures.byCounty.length; index += 1) {
         const today = figures.today[index] ?? -1;
-        const proposed = figures.proposed[index] ?? -1;
+        const proposed = figures.byCounty[index] ?? -1;
         map.setFeatureState(
           { source: 'uats', id: index },
           { extra: today < 0 || proposed < 0 ? -1 : proposed - today },
@@ -470,17 +473,22 @@ async function main(): Promise<void> {
         'Cât are de mers un locuitor până la instanța lui, azi și dacă județul păstrează una ' +
         'singură. Distanțe pe drum, între reședința comunei și sediul instanței.';
       el('#ramp-title').textContent = 'Cât în plus ar avea de mers';
+      const fifty = s.beyond['50']!;
       el('#summary').innerHTML = `
-        <div class="figure">drum median <strong>${km(s.medianTodayM)} km</strong> →
-          <strong>${km(s.medianProposedM)} km</strong></div>
+        <div class="figure">drum median <strong>${km(s.median.metresToday)} km</strong> →
+          <strong>${km(s.median.metresByCounty)} km</strong></div>
         <div class="figure">peste 50 km de instanță:
-          <strong>${ro.format(s.beyond['50']!.todayPeople)}</strong> →
-          <strong>${ro.format(s.beyond['50']!.proposedPeople)}</strong> de oameni</div>
+          <strong>${ro.format(fifty.metresToday)}</strong> →
+          <strong>${ro.format(fifty.metresByCounty)}</strong> de oameni</div>
         <div class="figure">peste 100 km:
-          ${ro.format(s.beyond['100']!.todayPeople)} →
-          <strong>${ro.format(s.beyond['100']!.proposedPeople)}</strong></div>
-        <div class="figure"><strong>${ro.format(s.unchanged)}</strong> comune nu ar avea de
-          mers mai mult</div>
+          ${ro.format(s.beyond['100']!.metresToday)} →
+          <strong>${ro.format(s.beyond['100']!.metresByCounty)}</strong></div>
+        <div class="figure">dacă granița de județ nu ar conta, cei de peste 50 km ar fi
+          <strong>${ro.format(fifty.metresNearest)}</strong> —
+          <strong>${ro.format(s.crossCounty)}</strong> de comune sunt mai aproape de instanța
+          altui județ</div>
+        <div class="figure">${ro.format(s.communesWithoutRoad)} comune nu au drum până la nicio
+          instanță; sunt lăsate necolorate</div>
         <div class="steps">
           ${band('nu se schimbă', '#2f7d4f')}
           ${band('sub 10 km în plus', '#7fa86a')}

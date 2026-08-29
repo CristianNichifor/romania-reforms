@@ -29,14 +29,18 @@ const attributes = JSON.parse(
 
 const indexOf = new Map(attributes.siruta.map((code, i) => [code, i]));
 const today = new Int32Array(attributes.siruta.length).fill(-1);
-const proposed = new Int32Array(attributes.siruta.length).fill(-1);
+const byCounty = new Int32Array(attributes.siruta.length).fill(-1);
+const nearest = new Int32Array(attributes.siruta.length).fill(-1);
 
 let joined = 0;
 for (const row of acces.communes) {
   const index = indexOf.get(row.siruta);
   if (index === undefined) continue;
-  today[index] = row.metresToday;
-  proposed[index] = row.metresProposed;
+  // -1 stays for the eleven communes with no road, so the map greys them rather than
+  // painting them as if the distance were zero.
+  today[index] = row.metresToday ?? -1;
+  byCounty[index] = row.metresByCounty ?? -1;
+  nearest[index] = row.metresNearest ?? -1;
   joined += 1;
 }
 if (joined !== acces.communes.length) {
@@ -49,9 +53,10 @@ writeFileSync(
   JSON.stringify({
     summary: acces.summary,
     limitations: acces.limitations,
-    // -1 means the commune is not in the arondare, which is the two created after it.
+    // -1 means no road, or a commune the arondare does not place.
     today: Array.from(today),
-    proposed: Array.from(proposed),
+    byCounty: Array.from(byCounty),
+    nearest: Array.from(nearest),
   }),
 );
 copyFileSync(

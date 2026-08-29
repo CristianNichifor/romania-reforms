@@ -1,34 +1,38 @@
-"""What consolidation costs in travel: every commune, to its court, before and after.
+"""What consolidation costs in travel, and where the county line itself is the cost.
 
-This is the question the CSM report cannot answer and the reform paper asserts. Closing 183
-first-level courts is a saving expressed in courts; to the person who has to attend one it is
-a distance. With the arondare — which commune belongs to which judecătorie — and the road
-graph the administrative simulator already builds, the distance is computable rather than
-arguable.
+Closing 183 first-level courts is a saving expressed in courts; to the person attending one it
+is a distance. With the arondare — which commune belongs to which judecătorie — and the road
+graph the administrative simulator builds, the distance is computable rather than arguable.
 
-**Today** is read from the law: HG 1217/2023 says which court serves a commune, and the road
-distance is from that commune's seat to that court's seat.
+Three numbers per commune, all on the **national** road graph:
 
-**Under the proposal** each county keeps one level-1 court, seated where its tribunal already
-sits, so every commune in the county travels to that one instead.
+  **azi** — to the court the law assigns it, under HG 1217/2023.
+  **pe județ** — to the one court its county would keep.
+  **cea mai apropiată** — to the nearest of the 42, wherever it is.
 
-Both are road distances inside a county, which is the right scope: the arondare never crosses
-a county line, and neither does the proposal.
+The third exists because the county line is a legal fact, not a geographic one. A commune in
+northern Tulcea can be nearer to Brăila or Galați than to Tulcea, and a model that routes
+everyone to their own county seat charges them for a boundary rather than for a journey. The
+gap between the second and third numbers is what the county rule costs on its own, separately
+from what consolidation costs.
 
-Two things this deliberately does not do. It does not judge whether the extra distance is
-worth the saving — that is the reader's call, and the point of showing it. And it does not
-model who actually travels: a commune's population is not its litigants, so figures are
-weighted by residents as the only proxy the data supports, and the limitation says so.
+Routing is national throughout, including for today's assignment: a commune's court is in its
+own county, but the road to it need not stay there, and a county-scoped route would overstate
+today's distance and flatter the comparison.
+
+**Workload follows access.** If communes are reassigned to their nearest court, the caseload
+goes with them. A court's dossiers are attributed to its communes in proportion to population
+— the only split the public data supports — and then re-totalled per receiving court. The
+proportionality is an assumption and the limitations say so.
 
 Usage:
-    uv run python scripts/build_acces.py
+    uv run --project ../administrativ python scripts/build_acces.py
 """
 
 from __future__ import annotations
 
 import json
 import math
-import statistics
 import sys
 from pathlib import Path
 
@@ -36,22 +40,26 @@ ROOT = Path(__file__).resolve().parents[1]
 ADMINISTRATIV = ROOT.parent / "administrativ"
 OUT = ROOT / "data" / "acces-2025.json"
 
-# The road graph belongs to the administrative simulator, which builds it from OSM and already
-# exposes county-scoped shortest paths. Importing it is a real coupling and the second time
-# this simulator has needed something from over there — the SIRUTA registry was the first.
-# When there is a third, these move to packages/; two consumers is where that starts being
-# arguable rather than premature.
+# The road graph belongs to the administrative simulator, which builds it from OSM. This is
+# the second thing this simulator needs from over there, after the SIRUTA registry; a third
+# would settle the argument for moving both into packages/.
 sys.path.insert(0, str(ADMINISTRATIV))
 
 BUCHAREST = "B"
 
 
 def main() -> int:
-    from pipeline.reference_model import _county_road_distances, load_data  # noqa: PLC0415
+    import numpy as np  # noqa: PLC0415
+    import pandas as pd  # noqa: PLC0415
+    from scipy.sparse import coo_matrix  # noqa: PLC0415
+    from scipy.sparse.csgraph import dijkstra  # noqa: PLC0415
+
+    from pipeline.reference_model import load_data  # noqa: PLC0415
 
     arondare_file = ROOT / "data" / "arondare-2023.json"
     courts_file = ROOT / "data" / "instante-localizate-2025.json"
-    for path in (arondare_file, courts_file):
+    edges_file = ADMINISTRATIV / "data" / "processed" / "road_distance.parquet"
+    for path in (arondare_file, courts_file, edges_file):
         if not path.exists():
             raise SystemExit(f"Missing {path}")
 
@@ -59,62 +67,135 @@ def main() -> int:
     located = json.loads(courts_file.read_text(encoding="utf-8"))["courts"]
     data = load_data()
 
-    # The county's tribunal, which is where the proposal seats its one court. Specialised and
-    # military tribunals are excluded: they sit in the same town but are not the county's
-    # general first-level court.
-    tribunal_seat: dict[str, str] = {}
+    order = sorted(data.population)
+    index_of = {siruta: i for i, siruta in enumerate(order)}
+    size = len(order)
+
+    # One undirected graph over every UAT seat in the country. County lines are not edges.
+    edges = pd.read_parquet(edges_file)
+    a = np.array([index_of[str(x)] for x in edges["a_siruta"]])
+    b = np.array([index_of[str(x)] for x in edges["b_siruta"]])
+    weight = edges["road_m"].to_numpy(dtype=float)
+    keep = np.isfinite(weight)
+    a, b, weight = a[keep], b[keep], weight[keep]
+    graph = coo_matrix(
+        (np.concatenate([weight, weight]), (np.concatenate([a, b]), np.concatenate([b, a]))),
+        shape=(size, size),
+    ).tocsr()
+
+    # Today's courts, and the one court each county would keep. The proposal seats it where
+    # the county's tribunal already sits; specialised and military tribunals share the town
+    # but are not the county's general first-level court.
+    court_of: dict[str, str] = {}
+    seat_of_court: dict[str, str] = {}
+    for court in arondare["courts"]:
+        if not court["seatSiruta"]:
+            continue
+        seat_of_court[court["name"]] = court["seatSiruta"]
+        for siruta in court["localities"]:
+            court_of[siruta] = court["name"]
+
+    county_court: dict[str, str] = {}
     for court in located:
         if court["tier"] != "tribunal" or not court["siruta"]:
             continue
-        name = court["name"]
-        if any(word in name for word in ("Specializat", "Comercial", "Militar", "minori")):
+        if any(w in court["name"] for w in ("Specializat", "Comercial", "Militar", "minori")):
             continue
-        tribunal_seat.setdefault(court["county"], court["siruta"])
+        county_court.setdefault(court["county"], court["siruta"])
+
+    def distances_from(seats: list[str]) -> np.ndarray:
+        """Rows are seats, columns are UATs, in metres."""
+        return dijkstra(graph, directed=False, indices=[index_of[s] for s in seats])
+
+    today_seats = sorted(set(seat_of_court.values()))
+    today_rows = {seat: i for i, seat in enumerate(today_seats)}
+    today_matrix = distances_from(today_seats)
+
+    proposed_seats = sorted(set(county_court.values()))
+    proposed_rows = {seat: i for i, seat in enumerate(proposed_seats)}
+    proposed_matrix = distances_from(proposed_seats)
+    nearest_row = proposed_matrix.argmin(axis=0)
+    nearest_metres = proposed_matrix.min(axis=0)
+
+    # Attribute each court's dossiers to its communes by population, so that reassigning a
+    # commune moves a share of the work with it.
+    #
+    # Keyed by the seat's SIRUTA, not by name: the decision writes "Judecatoria Gurahont" and
+    # the CSM report "JUDECATORIA GURA HONT", and eleven of the 176 differ that way. Keyed by
+    # name, every one of those courts contributes zero and the whole redistribution silently
+    # collapses — which is exactly what it did.
+    #
+    # Judecatorii only. A tribunal's caseload is not attributable to communes the same way:
+    # it serves the county as an appellate and specialised court rather than through an
+    # arondare, so splitting it by population would invent a geography it does not have.
+    volume_of_seat: dict[str, int] = {}
+    for court in located:
+        if court["tier"] == "judecatorie" and court["siruta"]:
+            volume_of_seat[court["siruta"]] = volume_of_seat.get(court["siruta"], 0) + court["volume"]
+    people_in_court: dict[str, int] = {}
+    for siruta, name in court_of.items():
+        people_in_court[name] = people_in_court.get(name, 0) + data.population[siruta]
 
     rows: list[dict] = []
     unreachable: list[str] = []
+    for siruta, name in sorted(court_of.items()):
+        column = index_of[siruta]
+        county = data.county[siruta]
+        seat = seat_of_court[name]
 
-    for court in arondare["courts"]:
-        seat = court["seatSiruta"]
-        county = court["county"]
-        if not court["localities"] or not seat:
-            continue
-        today = _county_road_distances(data, county, [seat])
-        target = tribunal_seat.get(county)
-        tomorrow = _county_road_distances(data, county, [target]) if target else {}
+        today = today_matrix[today_rows[seat], column]
+        by_county = (
+            proposed_matrix[proposed_rows[county_court[county]], column]
+            if county in county_court
+            else math.inf
+        )
+        nearest = nearest_metres[column]
+        nearest_seat = proposed_seats[nearest_row[column]]
 
-        for siruta in court["localities"]:
-            now = today.get(siruta, math.inf)
-            then = tomorrow.get(siruta, math.inf)
-            # Bucharest is one city: its sector courts and its tribunal are all in it, and a
-            # road distance between sectors is not what anyone means by access here.
-            if county == BUCHAREST:
-                now = then = 0.0
-            if not math.isfinite(now) or not math.isfinite(then):
-                unreachable.append(f"{data.name[siruta]} ({county})")
-                continue
-            rows.append(
-                {
-                    "siruta": siruta,
-                    "county": county,
-                    "population": data.population[siruta],
-                    "courtToday": court["name"],
-                    "metresToday": round(now),
-                    "metresProposed": round(then),
-                }
-            )
+        # Bucharest is one city: its sectors, their courts and the tribunal are all inside it,
+        # and a road distance between them is not what access means here.
+        if county == BUCHAREST:
+            today = by_county = nearest = 0.0
+            nearest_seat = county_court.get(BUCHAREST, seat)
+
+        # No road at all. Eight of the eleven are the Danube Delta, where there is none —
+        # Sulina, Crisan, Chilia Veche and their neighbours are reached by water whatever any
+        # reform says. Kept in the file with null distances rather than dropped: eleven
+        # communes vanishing from an access study would be the study answering a question
+        # about 3.173 communes while appearing to answer one about 3.184.
+        by_road = all(math.isfinite(x) for x in (today, by_county, nearest))
+        if not by_road:
+            unreachable.append(f"{data.name[siruta]} ({county})")
+
+        # A court's caseload, split across its communes by population.
+        share = data.population[siruta] / max(people_in_court.get(name, 0), 1)
+        court_volume = volume_of_seat.get(seat, 0)
+        rows.append(
+            {
+                "siruta": siruta,
+                "county": county,
+                "population": data.population[siruta],
+                "courtToday": name,
+                "cases": round(court_volume * share, 1),
+                "metresToday": round(today) if by_road else None,
+                "metresByCounty": round(by_county) if by_road else None,
+                "metresNearest": round(nearest) if by_road else None,
+                "nearestCounty": data.county[nearest_seat] if by_road else county,
+                "byRoad": by_road,
+            }
+        )
 
     if unreachable:
-        print(f"{len(unreachable)} communes have no road route to a court:", file=sys.stderr)
+        print(f"{len(unreachable)} communes have no road route:", file=sys.stderr)
         for line in unreachable[:10]:
             print(f"  {line}", file=sys.stderr)
 
-    people = sum(r["population"] for r in rows)
+    on_road = [r for r in rows if r["byRoad"]]
+    people = sum(r["population"] for r in on_road)
 
     def weighted_median(key: str) -> float:
-        ordered = sorted(rows, key=lambda r: r[key])
-        half = people / 2
-        running = 0
+        ordered = sorted(on_road, key=lambda r: r[key])
+        half, running = people / 2, 0
         for row in ordered:
             running += row["population"]
             if running >= half:
@@ -122,33 +203,63 @@ def main() -> int:
         return 0.0
 
     def beyond(key: str, metres: int) -> int:
-        return sum(r["population"] for r in rows if r[key] > metres)
+        return sum(r["population"] for r in on_road if r[key] > metres)
 
+    keys = ("metresToday", "metresByCounty", "metresNearest")
     summary = {
         "communes": len(rows),
         "people": people,
-        "medianTodayM": weighted_median("metresToday"),
-        "medianProposedM": weighted_median("metresProposed"),
-        "meanTodayM": round(sum(r["metresToday"] * r["population"] for r in rows) / people),
-        "meanProposedM": round(sum(r["metresProposed"] * r["population"] for r in rows) / people),
+        "median": {k: weighted_median(k) for k in keys},
+        "mean": {k: round(sum(r[k] * r["population"] for r in on_road) / people) for k in keys},
         "beyond": {
-            str(km): {
-                "todayPeople": beyond("metresToday", km * 1000),
-                "proposedPeople": beyond("metresProposed", km * 1000),
-            }
-            for km in (25, 50, 75, 100)
+            str(km): {k: beyond(k, km * 1000) for k in keys} for km in (25, 50, 75, 100)
         },
-        "unchanged": sum(1 for r in rows if r["metresProposed"] <= r["metresToday"]),
+        "crossCounty": sum(1 for r in on_road if r["nearestCounty"] != r["county"]),
+        "crossCountyPeople": sum(
+            r["population"] for r in on_road if r["nearestCounty"] != r["county"]
+        ),
+        "communesWithoutRoad": sum(1 for r in rows if not r["byRoad"]),
     }
 
-    print(f"communes: {summary['communes']:,}   people: {people:,}")
-    print(f"  median travel  {summary['medianTodayM'] / 1000:>6.1f} km -> "
-          f"{summary['medianProposedM'] / 1000:.1f} km")
-    print(f"  mean travel    {summary['meanTodayM'] / 1000:>6.1f} km -> "
-          f"{summary['meanProposedM'] / 1000:.1f} km")
-    for km, counts in summary["beyond"].items():
-        print(f"  beyond {km:>3} km: {counts['todayPeople']:>10,} -> {counts['proposedPeople']:,}")
-    print(f"  no worse off: {summary['unchanged']:,} communes")
+    # Workload per receiving court, under each rule.
+    def workload(key: str) -> dict[str, float]:
+        totals: dict[str, float] = {}
+        for row in rows:
+            county = row["county"] if key == "metresByCounty" else row["nearestCounty"]
+            totals[county] = totals.get(county, 0) + row["cases"]
+        return totals
+
+    by_county_load = workload("metresByCounty")
+    by_access_load = workload("metresNearest")
+    # A county whose court draws nothing is not a rounding artefact: it means every commune in
+    # it is nearer to a neighbour's court, which is a statement about that county rather than
+    # about the arithmetic. Reported rather than divided by.
+    empty = sorted(c for c in by_county_load if by_access_load.get(c, 0) == 0)
+    summary["workload"] = {
+        "byCounty": {
+            "min": round(min(by_county_load.values())),
+            "max": round(max(by_county_load.values())),
+        },
+        "byAccess": {
+            "min": round(min(by_access_load.values())),
+            "max": round(max(by_access_load.values())),
+            "countiesDrawingNothing": empty,
+        },
+    }
+
+    print(f"communes {summary['communes']:,} ({summary['communesWithoutRoad']} without a road)"
+          f"   people on the road network {people:,}")
+    for label, key in (("azi", "metresToday"), ("pe judet", "metresByCounty"), ("cea mai apropiata", "metresNearest")):
+        print(f"  {label:<18} median {summary['median'][key] / 1000:>5.1f} km   "
+              f"mean {summary['mean'][key] / 1000:>5.1f} km   "
+              f"peste 50 km {summary['beyond']['50'][key]:>9,}")
+    print(f"  communes nearer to another county's court: {summary['crossCounty']:,} "
+          f"({summary['crossCountyPeople']:,} people)")
+    load = summary["workload"]
+    ratio = lambda d: f"{d['max'] / d['min']:.1f}x" if d["min"] else "infinit"  # noqa: E731
+    print(f"  workload spread  pe judet {ratio(load['byCounty'])}   dupa acces {ratio(load['byAccess'])}")
+    if load["byAccess"]["countiesDrawingNothing"]:
+        print(f"  counties whose court draws nothing: {load['byAccess']['countiesDrawingNothing']}")
 
     document = {
         "$schema": "../schema/acces.schema.json",
@@ -161,9 +272,9 @@ def main() -> int:
             "locator": "arondarea din HG 1217/2023, distanțe rutiere din rețeaua OSM",
             "confidence": "derived",
             "note": (
-                "Distanțele sunt calculate pe rețeaua de drumuri dintre reședința comunei și "
-                "sediul instanței, în interiorul județului. Arondarea de azi este cea legală; "
-                "cea propusă așază fiecare județ pe tribunalul lui."
+                "Distanțele sunt calculate pe rețeaua națională de drumuri, între reședința "
+                "comunei și sediul instanței. Traseul nu se oprește la granița județului, "
+                "pentru că nici drumul nu se oprește."
             ),
         },
         "summary": summary,
@@ -172,13 +283,14 @@ def main() -> int:
             {
                 "id": "populatia-nu-e-numarul-de-justitiabili",
                 "text": (
-                    "Cifrele sunt ponderate cu populația comunei, pentru că numărul de "
-                    "oameni care chiar ajung într-un proces nu există în datele publice pe "
-                    "comune. O comună cu mulți locuitori și puține dosare cântărește aici mai "
-                    "mult decât ar trebui."
+                    "Cifrele sunt ponderate cu populația comunei, pentru că numărul de oameni "
+                    "care chiar ajung într-un proces nu există în datele publice pe comune. O "
+                    "comună cu mulți locuitori și puține dosare cântărește aici mai mult decât "
+                    "ar trebui. Din același motiv, dosarele unei instanțe sunt împărțite pe "
+                    "comunele ei proporțional cu populația."
                 ),
                 "severity": "material",
-                "affects": ["access"],
+                "affects": ["access", "workload"],
             },
             {
                 "id": "distanta-nu-e-timp",
@@ -189,6 +301,28 @@ def main() -> int:
                 ),
                 "severity": "material",
                 "affects": ["access"],
+            },
+            {
+                "id": "delta-nu-are-drum",
+                "text": (
+                    "Unsprezece comune nu au drum până la nicio instanță; opt dintre ele sunt "
+                    "în Deltă — Sulina, Crișan, Chilia Veche, Pardina și vecinele lor — unde "
+                    "accesul e pe apă, indiferent de orice reformă. Rămân în fișier, fără "
+                    "distanță, și sunt scoase din medii; a le șterge ar face ca studiul să "
+                    "răspundă despre 3.173 de comune arătând că răspunde despre 3.184."
+                ),
+                "severity": "material",
+                "affects": ["access"],
+            },
+            {
+                "id": "arondarea-peste-judet-nu-e-legala-azi",
+                "text": (
+                    "Varianta „cea mai apropiată instanță” ignoră granițele de județ. Astăzi "
+                    "arondarea este stabilită prin lege pe județ, așa că această variantă "
+                    "arată ce ar costa mai puțin, nu ce se poate face fără a schimba legea."
+                ),
+                "severity": "material",
+                "affects": ["access", "workload"],
             },
         ],
     }
