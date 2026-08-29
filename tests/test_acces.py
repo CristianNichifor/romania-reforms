@@ -152,6 +152,34 @@ def test_a_tighter_ceiling_never_travels_less(acces):
     assert travel == sorted(travel, reverse=True), travel
 
 
+def test_a_tighter_ceiling_is_more_even(acces):
+    """Evenness must improve as the constraint tightens, or the constraint is doing nothing.
+
+    Measured by coefficient of variation over all forty-two courts. The first two attempts at
+    this measure both moved the wrong way: max-over-min is set by whichever court ends up
+    emptiest, and excluding Bucharest measured its overflow onto the neighbours rather than
+    the evenness of the rest.
+    """
+    scenarios = sorted(
+        acces["summary"]["balanced"].values(), key=lambda s: s["ceilingMultiplier"]
+    )
+    variation = [s["variation"] for s in scenarios]
+    assert variation == sorted(variation), variation
+
+
+def test_no_ceiling_moves_nobody(acces):
+    """The loosest scenario must reproduce nearest-court routing exactly.
+
+    It is the control's anchor: if anything moves at a ceiling of 99x the average, the
+    assignment is constraining something it should not be.
+    """
+    loosest = max(
+        acces["summary"]["balanced"].values(), key=lambda s: s["ceilingMultiplier"]
+    )
+    assert loosest["communesNotAtNearest"] == 0
+    assert loosest["meanMetres"] == acces["summary"]["mean"]["metresNearest"]
+
+
 def test_bucharest_cannot_be_balanced_away(acces):
     """Its sectors carry 5,7x the average court and cannot move, so no ceiling reaches them.
 

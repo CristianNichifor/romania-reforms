@@ -13,7 +13,8 @@
     "provenance",
     "summary",
     "communes",
-    "limitations"
+    "limitations",
+    "balancedMetres"
   ],
   "properties": {
     "$schema": {
@@ -85,6 +86,42 @@
           "type": "object",
           "additionalProperties": true,
           "description": "Dossiers per receiving court under each rule — the spread, not the list."
+        },
+        "bucharestMultipleOfMean": {
+          "type": "number",
+          "description": "How many times the average court Bucharest's own sectors amount to. They cannot be assigned elsewhere, so no ceiling below this is reachable by moving communes."
+        },
+        "balanced": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "ceilingMultiplier",
+              "variation",
+              "meanMetres",
+              "communesNotAtNearest"
+            ],
+            "properties": {
+              "ceilingMultiplier": {
+                "type": "number"
+              },
+              "spread": {
+                "type": "number",
+                "description": "Largest court over smallest. Fragile."
+              },
+              "variation": {
+                "type": "number",
+                "description": "Coefficient of variation of court loads — the honest measure here. Max-over-min is decided by whichever court ends up emptiest and moved the wrong way as the ceiling loosened."
+              },
+              "meanMetres": {
+                "type": "number"
+              },
+              "communesNotAtNearest": {
+                "type": "integer"
+              }
+            }
+          }
         }
       }
     },
@@ -160,6 +197,19 @@
       "minItems": 1,
       "items": {
         "$ref": "provenance.schema.json#/$defs/limitation"
+      }
+    },
+    "balancedMetres": {
+      "type": "object",
+      "description": "Per-commune road metres under each load ceiling, aligned to `communes`. The key is the ceiling as a multiple of the average court; 99 means no ceiling at all, kept as a scenario so a control has one end of the trade to sit at.",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
       }
     }
   }

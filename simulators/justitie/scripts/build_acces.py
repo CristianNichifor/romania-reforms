@@ -254,29 +254,28 @@ def main() -> int:
     # 47,7 km, which is a statement about the algorithm rather than about Romania.
     bucharest_seat = county_court.get(BUCHAREST)
 
-    def assign_with_ceiling(multiplier: float) -> tuple[dict[str, str], float]:
-        movable = [r for r in on_road if r["county"] != BUCHAREST]
-        total_cases = sum(r["cases"] for r in movable)
-        seats = [s for s in proposed_seats if s != bucharest_seat]
-        ceiling = multiplier * total_cases / max(len(seats), 1)
+    def assign_with_ceiling(multiplier: float) -> tuple[dict[str, str], float, dict[str, float]]:
+        # The ceiling is over every court and every case, and Bucharest's court starts already
+        # loaded with its sectors. That is the honest arrangement: the capital's court is over
+        # any reachable ceiling before a single outside commune is added, so the constraint
+        # pushes others away from it rather than pretending it is not there.
+        ceiling = multiplier * sum(r["cases"] for r in on_road) / len(proposed_seats)
         load = dict.fromkeys(proposed_seats, 0.0)
 
+        # Only the sectors are pinned: they cannot attend court in another county.
         chosen_fixed = {}
         for row in on_road:
             if row["county"] == BUCHAREST and bucharest_seat:
                 chosen_fixed[row["siruta"]] = bucharest_seat
                 load[bucharest_seat] += row["cases"]
 
+        movable = [r for r in on_road if r["county"] != BUCHAREST]
+
         priced = []
         for row in movable:
             column = index_of[row["siruta"]]
             options = sorted(
-                (
-                    (proposed_matrix[i, seat_index], seat)
-                    for i, seat in enumerate(proposed_seats)
-                    if seat != bucharest_seat
-                    for seat_index in [column]
-                ),
+                ((proposed_matrix[i, column], seat) for i, seat in enumerate(proposed_seats)),
                 key=lambda pair: (pair[0], pair[1]),
             )
             regret = options[1][0] - options[0][0] if len(options) > 1 else 0.0
@@ -285,6 +284,7 @@ def main() -> int:
 
         chosen: dict[str, str] = dict(chosen_fixed)
         loads: dict[str, float] = dict(load)
+        metres_of: dict[str, float] = {s: 0.0 for s in chosen_fixed}
         cost = 0.0
         for _, siruta, row, options in priced:
             # The ceiling is soft at the margin, and it has to be. Where every court is
@@ -297,15 +297,19 @@ def main() -> int:
                 options[0],
             )
             metres, seat = pick
+            metres_of[siruta] = metres
             chosen[siruta] = seat
             loads[seat] += row["cases"]
             cost += metres * row["population"]
         load.update(loads)
-        return chosen, cost
+        return chosen, cost, {siruta: metres_of[siruta] for siruta in chosen}
 
+    # Enough ceilings for a control the reader can move, each with its own per-commune
+    # distances so the map repaints rather than only the figures changing.
     scenarios = {}
-    for multiplier in (1.2, 1.5, 2.0):
-        chosen, cost = assign_with_ceiling(multiplier)
+    per_commune: dict[str, list[int | None]] = {}
+    for multiplier in (1.2, 1.5, 2.0, 3.0, 99.0):
+        chosen, cost, metres_by = assign_with_ceiling(multiplier)
         cases_of = {r["siruta"]: r["cases"] for r in on_road}
         loads: dict[str, float] = {}
         for siruta, seat in chosen.items():
@@ -315,9 +319,44 @@ def main() -> int:
             for r in on_road
             if chosen[r["siruta"]] != proposed_seats[nearest_row[index_of[r["siruta"]]]]
         )
-        scenarios[f"{multiplier:g}"] = {
+        key = f"{multiplier:g}"
+        per_commune[key] = [
+            round(metres_by[r["siruta"]]) if r["byRoad"] and r["siruta"] in metres_by else None
+            for r in rows
+        ]
+        # Averaged from the same rounded per-commune metres the rest of the summary uses.
+        # Accumulating the unrounded cost instead left the no-ceiling scenario one metre below
+        # `mean.metresNearest`, which it must equal exactly — and a test comparing them then
+        # failed on an arithmetic artefact rather than on anything about the assignment.
+        cost = sum(
+            metres * r["population"]
+            for metres, r in zip(per_commune[key], rows, strict=True)
+            if metres is not None and r["byRoad"]
+        )
+        # Evenness measured by how far the loads sit from their own average, not by the ratio
+        # of the largest to the smallest. Max-over-min is decided by whichever single court
+        # ends up emptiest and moved the wrong way as the ceiling loosened — a 3x ceiling
+        # scored worse than no ceiling at all, which no correct measure does. The coefficient
+        # of variation uses every court and falls as the constraint bites.
+        #
+        # Measured over all forty-two. Excluding Bucharest looked tempting — its court cannot
+        # be balanced — but capping it pushes its overflow onto its neighbours, so the figure
+        # over the remaining 41 rose as the ceiling tightened. It was measuring the capital's
+        # spill, not the evenness of the rest. Bucharest's own multiple of the average is
+        # reported once, separately, as the fixed fact it is.
+
+        def variation(values: list[float]) -> float:
+            if not values:
+                return 0.0
+            average = sum(values) / len(values)
+            if average <= 0:
+                return 0.0
+            spread = (sum((v - average) ** 2 for v in values) / len(values)) ** 0.5
+            return round(spread / average, 3)
+        scenarios[key] = {
             "ceilingMultiplier": multiplier,
             "spread": round(max(loads.values()) / max(min(loads.values()), 1), 1),
+            "variation": variation(list(loads.values())),
             "meanMetres": round(cost / people),
             "communesNotAtNearest": moved,
         }
@@ -336,7 +375,14 @@ def main() -> int:
     # it is nearer to a neighbour's court, which is a statement about that county rather than
     # about the arithmetic. Reported rather than divided by.
     empty = sorted(c for c in by_county_load if by_access_load.get(c, 0) == 0)
+    bucharest_cases = sum(r["cases"] for r in on_road if r["county"] == BUCHAREST)
+    summary["bucharestMultipleOfMean"] = round(
+        bucharest_cases / (sum(r["cases"] for r in on_road) / len(proposed_seats)), 1
+    )
     summary["balanced"] = scenarios
+    # 99 is "no ceiling at all": every commune to its nearest court. Kept as a scenario rather
+    # than a special case so the control has one end of the trade to sit at.
+    document_balanced = per_commune
     summary["workload"] = {
         "byCounty": {
             "min": round(min(by_county_load.values())),
@@ -361,7 +407,7 @@ def main() -> int:
     ratio = lambda d: f"{d['max'] / d['min']:.1f}x" if d["min"] else "infinit"  # noqa: E731
     print(f"  workload spread  pe judet {ratio(load['byCounty'])}   dupa acces {ratio(load['byAccess'])}")
     for name, sc in scenarios.items():
-        print(f"  ceiling {name}x mean:  spread {sc['spread']:>5.1f}x   "
+        print(f"  ceiling {name}x mean:  cv {sc['variation']:>5.3f}   "
               f"mean travel {sc['meanMetres'] / 1000:>5.1f} km   "
               f"{sc['communesNotAtNearest']:>4} communes not at their nearest")
     if load["byAccess"]["countiesDrawingNothing"]:
@@ -385,6 +431,7 @@ def main() -> int:
         },
         "summary": summary,
         "communes": rows,
+        "balancedMetres": document_balanced,
         "limitations": [
             {
                 "id": "populatia-nu-e-numarul-de-justitiabili",

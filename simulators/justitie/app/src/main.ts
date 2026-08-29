@@ -73,6 +73,16 @@ interface Acces {
     communes: number;
     people: number;
     communesWithoutRoad: number;
+    bucharestMultipleOfMean: number;
+    balanced: Record<
+      string,
+      {
+        ceilingMultiplier: number;
+        variation: number;
+        meanMetres: number;
+        communesNotAtNearest: number;
+      }
+    >;
     median: Record<AccesKey, number>;
     mean: Record<AccesKey, number>;
     beyond: Record<string, Record<AccesKey, number>>;
@@ -84,6 +94,8 @@ interface Acces {
   today: number[];
   byCounty: number[];
   nearest: number[];
+  /** Per-ceiling distances, keyed by the ceiling as a multiple of the average court. */
+  balanced: Record<string, number[]>;
 }
 
 interface Proposal {
@@ -456,8 +468,43 @@ async function main(): Promise<void> {
 
     const km = (metres: number): string => (metres / 1000).toFixed(1).replace('.', ',');
 
+    const paint = (figures: Acces, key: string): void => {
+      const lane = figures.balanced[key] ?? figures.byCounty;
+      for (let index = 0; index < lane.length; index += 1) {
+        const today = figures.today[index] ?? -1;
+        const after = lane[index] ?? -1;
+        map.setFeatureState(
+          { source: 'uats', id: index },
+          { extra: today < 0 || after < 0 ? -1 : after - today },
+        );
+      }
+    };
+
+    const ceilingInput = el<HTMLInputElement>('#ceiling-input');
+    let ceilingsLoaded: string[] = [];
+
     const renderAcces = (figures: Acces): void => {
       showAccesLayer(mode === 'acces');
+      el('#ceiling').hidden = false;
+
+      // Ceilings in order, loosest last, so the control reads left to right from strict to
+      // none and rests on no-ceiling: the reader meets the unconstrained map first and
+      // tightens it themselves rather than being handed a balanced one as the default.
+      if (!ceilingsLoaded.length) {
+        ceilingsLoaded = Object.keys(figures.summary.balanced).sort(
+          (a, c) => Number(a) - Number(c),
+        );
+        ceilingInput.max = String(ceilingsLoaded.length - 1);
+        ceilingInput.value = String(ceilingsLoaded.length - 1);
+        ceilingInput.addEventListener('input', () => renderAcces(figures));
+      }
+      const key = ceilingsLoaded[Number(ceilingInput.value)] ?? ceilingsLoaded.at(-1)!;
+      const scenario = figures.summary.balanced[key]!;
+      paint(figures, key);
+      const noCeiling = scenario.ceilingMultiplier > 10;
+      el<HTMLOutputElement>('#ceiling-value').textContent = noCeiling
+        ? 'fără'
+        : `${scenario.ceilingMultiplier.toLocaleString('ro-RO')}× media`;
       const s = figures.summary;
       // Its caveats join the others rather than sitting apart: population is a poor proxy for
       // litigants, and kilometres are not hours.
@@ -489,6 +536,14 @@ async function main(): Promise<void> {
           altui județ</div>
         <div class="figure">${ro.format(s.communesWithoutRoad)} comune nu au drum până la nicio
           instanță; sunt lăsate necolorate</div>
+        <div class="figure" style="margin-top:.5rem">cu plafonul de mai jos: drum mediu
+          <strong>${km(scenario.meanMetres)} km</strong>, inegalitate între instanțe
+          <strong>${scenario.variation.toLocaleString('ro-RO')}</strong>,
+          <strong>${ro.format(scenario.communesNotAtNearest)}</strong> comune trimise altundeva
+          decât la cea mai apropiată</div>
+        <div class="figure">Bucureștiul singur cântărește
+          <strong>${s.bucharestMultipleOfMean.toLocaleString('ro-RO')}×</strong> media unei
+          instanțe și nu poate fi echilibrat: sectoarele lui nu pot merge în alt județ</div>
         <div class="steps">
           ${band('nu se schimbă', '#2f7d4f')}
           ${band('sub 10 km în plus', '#7fa86a')}
@@ -510,6 +565,7 @@ async function main(): Promise<void> {
       el('#staffing').hidden = mode !== 'proposed';
       el('#authorship').hidden = mode === 'today';
       el('#acces-note').hidden = mode !== 'acces';
+      el('#ceiling').hidden = mode !== 'acces';
       // The old diverging ramp describes a comparison this view does not make; the access
       // view brings its own stepped legend with the summary.
       el('.ramp').hidden = mode === 'acces';

@@ -48,11 +48,24 @@ if (joined !== acces.communes.length) {
   process.exit(1);
 }
 
+// Per-ceiling distances, reindexed the same way, so moving the control repaints the map
+// rather than only changing the figures beside it.
+const balanced = {};
+for (const [key, metres] of Object.entries(acces.balancedMetres ?? {})) {
+  const lane = new Int32Array(attributes.siruta.length).fill(-1);
+  acces.communes.forEach((row, i) => {
+    const index = indexOf.get(row.siruta);
+    if (index !== undefined) lane[index] = metres[i] ?? -1;
+  });
+  balanced[key] = Array.from(lane);
+}
+
 writeFileSync(
   resolve(out, 'acces.json'),
   JSON.stringify({
     summary: acces.summary,
     limitations: acces.limitations,
+    balanced,
     // -1 means no road, or a commune the arondare does not place.
     today: Array.from(today),
     byCounty: Array.from(byCounty),
