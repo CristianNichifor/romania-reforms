@@ -120,6 +120,27 @@ def test_a_gate_with_only_journeys_never_passes():
     assert "adjacent" in out["reason"]
 
 
+def test_too_few_adjacent_drives_never_passes():
+    """One adjacent drive is a sample, not a bias. A gate that averaged a single hop and
+    announced the speed table clean would be reporting scatter as verification — and with
+    only two, one unlucky recording moves the mean past the limit either way."""
+    rows = [{"kind": "adjacent", "within_tolerance": True, "error_ratio": 1.01}] + [
+        {"kind": "journey", "within_tolerance": True, "error_ratio": r} for r in (1.0, 0.99, 1.01)
+    ]
+    out = verdict(rows)
+    assert out["passed"] is False
+    assert "need 3" in out["reason"]
+
+
+def test_exactly_the_minimum_adjacent_drives_is_enough():
+    """The boundary, pinned: three is the stated minimum, so three must pass rather than
+    being caught by an off-by-one."""
+    rows = [
+        {"kind": "adjacent", "within_tolerance": True, "error_ratio": r} for r in (1.01, 0.99, 1.0)
+    ]
+    assert verdict(rows)["passed"] is True
+
+
 def test_the_reference_file_is_filled_in():
     """Fails until a human has recorded real times. An unfilled gate that passes is worse
     than no gate, because it reads as verification."""

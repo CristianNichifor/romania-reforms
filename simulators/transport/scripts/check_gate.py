@@ -79,10 +79,20 @@ def _bias(rows: list[dict], kind: str) -> float | None:
     return statistics.mean(ratios) - 1.0 if ratios else None
 
 
+def _ratios(rows: list[dict], kind: str) -> list[float]:
+    return [
+        r["error_ratio"] for r in rows if r.get("kind") == kind and r.get("error_ratio") is not None
+    ]
+
+
 def verdict(rows: list[dict]) -> dict:
-    """Pass or fail, and why. An empty set never passes, and neither does one with no
-    adjacent pairs — that would leave the speed table measured only through the
-    accumulation, which is the confusion the split exists to remove."""
+    """Pass or fail, and why.
+
+    An empty set never passes, and neither does one with too few adjacent pairs. Adjacent
+    hops are the only place the speed table is measured without the accumulation on top of
+    it, so a gate that has fewer than MINIMUM_ADJACENT of them has not measured the table at
+    all — and a mean over one or two drives is scatter with the word "bias" attached to it.
+    """
     if not rows:
         return {"passed": False, "reason": "no reference drives; the gate checked nothing"}
 
@@ -90,13 +100,18 @@ def verdict(rows: list[dict]) -> dict:
     if out:
         return {"passed": False, "reason": f"{len(out)} of {len(rows)} drives outside tolerance"}
 
-    adjacent_bias = _bias(rows, "adjacent")
-    if adjacent_bias is None:
+    adjacent = _ratios(rows, "adjacent")
+    if len(adjacent) < MINIMUM_ADJACENT:
         return {
             "passed": False,
-            "reason": "no adjacent drives; the speed table is never measured on its own",
+            "reason": (
+                f"only {len(adjacent)} adjacent drives, need {MINIMUM_ADJACENT}: fewer than "
+                f"that leaves the speed table measured only through the accumulation, and a "
+                f"mean over one or two drives is scatter rather than bias"
+            ),
         }
 
+    adjacent_bias = statistics.mean(adjacent) - 1.0
     journey_bias = _bias(rows, "journey")
 
     if abs(adjacent_bias) > BIAS_LIMIT:
