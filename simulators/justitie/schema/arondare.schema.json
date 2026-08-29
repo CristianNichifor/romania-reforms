@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/arondare.schema.json",
+  "title": "The arondare — which localities each judecătorie serves",
+  "description": "Set by Government Decision 1217/2023 under art. 42(2) of Legea 304/2022, not by any statistic. It is what turns a closed court from a number into a distance: with it, every commune has a courthouse and a road to it, so the cost of a merge can be measured rather than asserted.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "period",
+    "provenance",
+    "courts",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "period": {
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json#/$defs/provenance"
+    },
+    "courts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "county",
+          "seatSiruta",
+          "localities",
+          "suspended"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "county": {
+            "type": "string",
+            "pattern": "^[A-Z]{1,2}$"
+          },
+          "localities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "SIRUTA codes. Empty only for a court that is not sitting."
+          },
+          "suspended": {
+            "type": "boolean",
+            "description": "True where the decision defines the court but its communes are currently served by another. Judecatoria Insuratei is the only one, and the reason the decision defines 176 courts while the CSM report counts 175."
+          },
+          "seatSiruta": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "SIRUTA of the locality the court sits in, read from the decision's own 'cu sediul in' line. This is what joins the arondare to the CSM caseload: eleven of the 176 courts are spelled differently in the two documents, and a code is not."
+          }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "provenance.schema.json#/$defs/limitation"
+      }
+    }
+  }
+}

@@ -16,6 +16,10 @@ jobs:
         run: uv run python scripts/check_repo_size.py
       - name: Validate every simulator's data against its schema
         run: uv run --with referencing python scripts/validate_data.py
+      - name: The arondare is reproducible
+        run: |
+          uv run --with pypdf python simulators/justitie/scripts/import_arondare.py
+          git diff --exit-code simulators/justitie/data/arondare-2023.json
       - name: Court locations are reproducible
         run: |
           for year in 2023 2025; do
