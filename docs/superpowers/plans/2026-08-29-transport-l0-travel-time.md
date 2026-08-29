@@ -1183,21 +1183,45 @@ This is the task the whole layer exists for. Nothing above L0 may be built until
 
 **Why Vâlcea (VL):** the county has both the Olt valley and genuine mountain roads, so the speed table's weakest assumption — that a road class implies a speed regardless of terrain — is exercised rather than flattered. A flat county would pass this gate with a badly wrong table.
 
+#### Why the reference set is split in two
+
+L0 has two independent sources of error, and they point in opposite directions:
+
+- **The speed table** (`speeds.py`) is likely **optimistic** — Romanian DNs thread through villages, DJ and DC roads are worse than their class suggests. Too-fast segments mean too-short journeys.
+- **The accumulation** (`county_times.py`) is deliberately **pessimistic** — it forces every route through each intermediate seat village rather than past it, so a multi-hop journey is longer than the real drive.
+
+Compare only whole journeys and those two errors **partially cancel**. The gate would pass while both components are individually wrong, and the cancellation would hold only for the pair distances Vâlcea happens to contain. That is a gate that has verified nothing while reading as verification — the exact failure this layer is built to prevent.
+
+So each reference drive is labelled `kind`:
+
+- **`adjacent`** — two UAT seats that share a border. Compared against the **raw edge time** in `road_time.parquet`, with no accumulation. This isolates the speed table.
+- **`journey`** — two seats several hops apart. Compared against `county_times`. This tests the substrate end to end.
+
+Bias is then reported **per kind**, which makes the gate diagnostic rather than merely pass/fail:
+
+| adjacent | journey | means |
+|---|---|---|
+| biased | biased | the speed table is wrong; fix `EFFECTIVE_KMH` |
+| clean | biased | the speed table is fine; the accumulation detour is the cost |
+| biased | clean | the two errors are cancelling — the dangerous case, and now visible |
+
 - [ ] **Step 1: Create the reference file with real, cited drive times**
 
-This file is **human-authored** and is the only part of L0 that cannot be generated. Record each pair from a public routing service, note which and when, and keep the pairs spread across terrain — valley, plateau and mountain — rather than clustered near Râmnicu Vâlcea.
+This file is **human-authored** and is the only part of L0 that cannot be generated. Record each drive from a public routing service, note which and when, and spread the pairs across terrain — valley, plateau and mountain — rather than clustering them near Râmnicu Vâlcea.
 
 Create `simulators/transport/sources/reference-drive-times-vl.csv`:
 
 ```csv
-from_siruta,to_siruta,from_name,to_name,minutes,source,retrieved
-# Twelve seat-to-seat drives in Vâlcea, recorded by hand. Replace every REPLACE_ME with a
-# real SIRUTA code and a real recorded time before running the gate; the gate refuses to run
-# on an unfilled file rather than passing an empty check.
-REPLACE_ME,REPLACE_ME,Râmnicu Vâlcea,Băbeni,0,REPLACE_ME,2026-08-29
+kind,from_siruta,to_siruta,from_name,to_name,minutes,source,retrieved
+# Twelve seat-to-seat drives in Vâlcea, recorded by hand: at least six `adjacent` (the two
+# UATs share a border) and at least six `journey` (several hops apart). Replace every
+# REPLACE_ME with a real SIRUTA code and a real recorded time before running the gate; the
+# gate refuses to run on an unfilled file rather than passing an empty check.
+adjacent,REPLACE_ME,REPLACE_ME,Râmnicu Vâlcea,Băbeni,0,REPLACE_ME,2026-08-29
+journey,REPLACE_ME,REPLACE_ME,Râmnicu Vâlcea,Horezu,0,REPLACE_ME,2026-08-29
 ```
 
-> **Note for the implementer:** the SIRUTA codes come from `simulators/administrativ/data/processed/uat_seats.gpkg`, or from the `attributes.json` already published under `dist/administrativ/data/`. Do not invent them. The gate's `test_the_reference_file_is_filled_in` test fails while any `REPLACE_ME` remains, which is deliberate — an empty gate that passes is worse than no gate.
+> **Note for the implementer:** the SIRUTA codes come from `simulators/administrativ/data/processed/uat_seats.gpkg`, or from the `attributes.json` already published under `dist/administrativ/data/`. Do not invent them. For `adjacent` rows the two UATs must genuinely share a border — check `adjacency.parquet`, or the gate will find no edge and score the row as a failure. The test `test_the_reference_file_is_filled_in` fails while any `REPLACE_ME` remains, which is deliberate: an empty gate that passes is worse than no gate.
 
 - [ ] **Step 2: Write the failing tests**
 
@@ -1218,69 +1242,101 @@ import pytest
 from scripts.check_gate import compare, verdict
 
 
+def ref(kind="adjacent", frm="1", to="2", minutes=30.0):
+    return {"kind": kind, "from_siruta": frm, "to_siruta": to, "minutes": minutes}
+
+
 def test_a_close_match_passes():
-    rows = compare(
-        modelled_min={("1", "2"): 30.0},
-        reference=[{"from_siruta": "1", "to_siruta": "2", "minutes": 32.0}],
-    )
+    rows = compare(modelled_min={("1", "2"): 32.0}, reference=[ref(minutes=30.0)])
     assert rows[0]["within_tolerance"] is True
 
 
 def test_a_wild_miss_fails():
-    rows = compare(
-        modelled_min={("1", "2"): 12.0},
-        reference=[{"from_siruta": "1", "to_siruta": "2", "minutes": 45.0}],
-    )
+    rows = compare(modelled_min={("1", "2"): 12.0}, reference=[ref(minutes=45.0)])
     assert rows[0]["within_tolerance"] is False
 
 
 def test_the_error_is_relative_not_absolute():
     """Ten minutes out on a two-hour drive is fine; ten minutes out on a twelve-minute drive
     is the speed table being wrong."""
-    long_drive = compare(
-        modelled_min={("1", "2"): 130.0},
-        reference=[{"from_siruta": "1", "to_siruta": "2", "minutes": 120.0}],
-    )
-    short_drive = compare(
-        modelled_min={("1", "2"): 22.0},
-        reference=[{"from_siruta": "1", "to_siruta": "2", "minutes": 12.0}],
-    )
+    long_drive = compare({("1", "2"): 130.0}, [ref(minutes=120.0)])
+    short_drive = compare({("1", "2"): 22.0}, [ref(minutes=12.0)])
     assert long_drive[0]["within_tolerance"] is True
     assert short_drive[0]["within_tolerance"] is False
 
 
 def test_a_pair_the_model_cannot_route_is_a_failure_not_a_skip():
     """A missing pair is the graph failing on exactly the journey someone checked by hand."""
-    rows = compare(
-        modelled_min={},
-        reference=[{"from_siruta": "1", "to_siruta": "2", "minutes": 30.0}],
-    )
+    rows = compare(modelled_min={}, reference=[ref()])
     assert rows[0]["within_tolerance"] is False
     assert rows[0]["modelled_min"] is None
 
 
+def test_the_kind_is_carried_through_to_the_row():
+    """Bias is judged per kind, so a row that loses its label cannot be judged at all."""
+    rows = compare({("1", "2"): 30.0}, [ref(kind="journey")])
+    assert rows[0]["kind"] == "journey"
+
+
 def test_the_verdict_fails_when_any_pair_is_out():
-    rows = [{"within_tolerance": True}, {"within_tolerance": False}]
-    assert verdict(rows)["passed"] is False
-
-
-def test_the_verdict_reports_systematic_bias():
-    """Every pair 20% slow is a speed table to fix, not twelve separate coincidences. Errors
-    that all lean the same way are the signal; scatter is not."""
     rows = [
-        {"within_tolerance": True, "error_ratio": 1.18},
-        {"within_tolerance": True, "error_ratio": 1.21},
-        {"within_tolerance": True, "error_ratio": 1.19},
+        {"kind": "adjacent", "within_tolerance": True, "error_ratio": 1.0},
+        {"kind": "adjacent", "within_tolerance": False, "error_ratio": 2.0},
     ]
     assert verdict(rows)["passed"] is False
-    assert "systematic" in verdict(rows)["reason"]
+
+
+def test_bias_in_the_adjacent_set_fails_and_names_the_speed_table():
+    """Adjacent pairs are one hop, so accumulation cannot be blamed. Consistent error here
+    is the speed table and nothing else."""
+    rows = [
+        {"kind": "adjacent", "within_tolerance": True, "error_ratio": r}
+        for r in (1.18, 1.21, 1.19)
+    ]
+    out = verdict(rows)
+    assert out["passed"] is False
+    assert "speed table" in out["reason"]
+
+
+def test_bias_in_the_journey_set_alone_names_the_accumulation():
+    """Clean adjacent, biased journey: the per-hop speeds are right and the detour through
+    intermediate seats is what costs. That is a known approximation, reported not hidden."""
+    rows = [
+        {"kind": "adjacent", "within_tolerance": True, "error_ratio": r}
+        for r in (1.02, 0.99, 1.01)
+    ] + [
+        {"kind": "journey", "within_tolerance": True, "error_ratio": r}
+        for r in (1.24, 1.27, 1.22)
+    ]
+    out = verdict(rows)
+    assert out["passed"] is False
+    assert "accumulation" in out["reason"]
+
+
+def test_opposing_bias_between_the_two_sets_is_caught():
+    """The dangerous case the split exists for: the speed table runs fast, the accumulation
+    runs slow, and a combined average would look clean."""
+    rows = [
+        {"kind": "adjacent", "within_tolerance": True, "error_ratio": r}
+        for r in (0.78, 0.80, 0.82)
+    ] + [
+        {"kind": "journey", "within_tolerance": True, "error_ratio": r}
+        for r in (1.20, 1.22, 1.18)
+    ]
+    out = verdict(rows)
+    assert out["passed"] is False
+    # Averaged together these are 1.0 and would have passed a single-set check.
+    mean_all = sum(r["error_ratio"] for r in rows) / len(rows)
+    assert 0.97 < mean_all < 1.03
 
 
 def test_scattered_errors_within_tolerance_pass():
     rows = [
-        {"within_tolerance": True, "error_ratio": 1.08},
-        {"within_tolerance": True, "error_ratio": 0.94},
-        {"within_tolerance": True, "error_ratio": 1.02},
+        {"kind": "adjacent", "within_tolerance": True, "error_ratio": r}
+        for r in (1.08, 0.94, 1.02)
+    ] + [
+        {"kind": "journey", "within_tolerance": True, "error_ratio": r}
+        for r in (1.05, 0.96, 1.03)
     ]
     assert verdict(rows)["passed"] is True
 
@@ -1288,6 +1344,18 @@ def test_scattered_errors_within_tolerance_pass():
 def test_an_empty_gate_never_passes():
     """The failure mode this whole task exists to prevent."""
     assert verdict([])["passed"] is False
+
+
+def test_a_gate_with_only_journeys_never_passes():
+    """Without adjacent pairs the speed table is never measured on its own, which is the
+    whole reason the reference set is split."""
+    rows = [
+        {"kind": "journey", "within_tolerance": True, "error_ratio": r}
+        for r in (1.01, 0.99, 1.02)
+    ]
+    out = verdict(rows)
+    assert out["passed"] is False
+    assert "adjacent" in out["reason"]
 
 
 def test_the_reference_file_is_filled_in():
@@ -1298,17 +1366,17 @@ def test_the_reference_file_is_filled_in():
     csv = Path(__file__).resolve().parents[1] / "sources/reference-drive-times-vl.csv"
     text = csv.read_text(encoding="utf-8")
     assert "REPLACE_ME" not in text, "record real drive times before the gate means anything"
-    rows = [line for line in text.splitlines() if line and not line.startswith(("#", "from_"))]
+    rows = [line for line in text.splitlines() if line and not line.startswith(("#", "kind"))]
     assert len(rows) >= 12, f"only {len(rows)} reference drives; the gate needs at least 12"
+    kinds = [line.split(",")[0] for line in rows]
+    assert kinds.count("adjacent") >= 6, "at least six adjacent pairs isolate the speed table"
+    assert kinds.count("journey") >= 6, "at least six journeys test the accumulation"
 
 
 @pytest.mark.parametrize("minutes", [0.0, -5.0])
 def test_a_nonsense_reference_time_is_rejected(minutes):
     with pytest.raises(ValueError, match="positive"):
-        compare(
-            modelled_min={("1", "2"): 30.0},
-            reference=[{"from_siruta": "1", "to_siruta": "2", "minutes": minutes}],
-        )
+        compare({("1", "2"): 30.0}, [ref(minutes=minutes)])
 ```
 
 - [ ] **Step 3: Run the tests to verify they fail**
@@ -1334,10 +1402,18 @@ Vâlcea because it has both the Olt valley and real mountain roads, so the table
 assumption — that a road class implies a speed regardless of terrain — is exercised rather
 than flattered. A flat county would pass this gate with a badly wrong table.
 
-Two ways to fail, and the second matters more. Any single pair outside tolerance fails.
-But so does a set of pairs that are all inside tolerance and all leaning the same way: twelve
-drives each 18% slow is one speed table to fix, not twelve coincidences, and it is exactly
-the error a per-pair tolerance is blind to.
+**Why the reference set is split.** L0 has two errors pointing opposite ways: the speed table
+is probably optimistic, and the accumulation in `county_times` is deliberately pessimistic
+because it routes through every intermediate seat village. Compared only as whole journeys
+they partly cancel, and the gate would pass with both components wrong. So `adjacent` drives
+are checked against the raw one-hop edge, where accumulation cannot reach them, and `journey`
+drives against the accumulated result. Bias is judged per kind, which tells you *which*
+component is wrong instead of only that something is.
+
+Three ways to fail:
+  - any single drive outside tolerance;
+  - either kind showing systematic bias, all leaning the same way;
+  - no adjacent drives at all, which would leave the speed table unmeasured.
 
 Usage:
     uv run python -m scripts.check_gate
@@ -1363,19 +1439,22 @@ TOLERANCE = 0.35
 # Mean error beyond this, in a consistent direction, is a systematic bias rather than scatter.
 BIAS_LIMIT = 0.15
 
+MINIMUM_ADJACENT = 3
+
 
 def compare(modelled_min: dict[tuple[str, str], float], reference: list[dict]) -> list[dict]:
     """One row per reference drive, with the modelled time beside it."""
     rows = []
-    for ref in reference:
-        recorded = float(ref["minutes"])
+    for entry in reference:
+        recorded = float(entry["minutes"])
         if recorded <= 0:
             raise ValueError(f"reference minutes must be positive, got {recorded}")
-        key = (str(ref["from_siruta"]), str(ref["to_siruta"]))
+        key = (str(entry["from_siruta"]), str(entry["to_siruta"]))
         got = modelled_min.get(key)
         ratio = None if got is None else got / recorded
         rows.append(
             {
+                "kind": entry.get("kind", "journey"),
                 "from_siruta": key[0],
                 "to_siruta": key[1],
                 "recorded_min": recorded,
@@ -1387,8 +1466,17 @@ def compare(modelled_min: dict[tuple[str, str], float], reference: list[dict]) -
     return rows
 
 
+def _bias(rows: list[dict], kind: str) -> float | None:
+    ratios = [
+        r["error_ratio"] for r in rows if r.get("kind") == kind and r.get("error_ratio") is not None
+    ]
+    return statistics.mean(ratios) - 1.0 if ratios else None
+
+
 def verdict(rows: list[dict]) -> dict:
-    """Pass or fail, and why. An empty set never passes."""
+    """Pass or fail, and why. An empty set never passes, and neither does one with no
+    adjacent pairs — that would leave the speed table measured only through the
+    accumulation, which is the confusion the split exists to remove."""
     if not rows:
         return {"passed": False, "reason": "no reference drives; the gate checked nothing"}
 
@@ -1396,20 +1484,37 @@ def verdict(rows: list[dict]) -> dict:
     if out:
         return {"passed": False, "reason": f"{len(out)} of {len(rows)} drives outside tolerance"}
 
-    ratios = [r["error_ratio"] for r in rows if r.get("error_ratio") is not None]
-    if ratios:
-        bias = statistics.mean(ratios) - 1.0
-        if abs(bias) > BIAS_LIMIT:
-            direction = "slow" if bias > 0 else "fast"
-            return {
-                "passed": False,
-                "reason": (
-                    f"systematic bias: every drive models {abs(bias):.0%} {direction} on "
-                    f"average — a speed table to fix, not scatter"
-                ),
-            }
+    adjacent_bias = _bias(rows, "adjacent")
+    if adjacent_bias is None:
+        return {
+            "passed": False,
+            "reason": "no adjacent drives; the speed table is never measured on its own",
+        }
 
-    return {"passed": True, "reason": f"{len(rows)} drives within {TOLERANCE:.0%}"}
+    journey_bias = _bias(rows, "journey")
+
+    if abs(adjacent_bias) > BIAS_LIMIT:
+        direction = "slow" if adjacent_bias > 0 else "fast"
+        return {
+            "passed": False,
+            "reason": (
+                f"the speed table is wrong: adjacent hops model {abs(adjacent_bias):.0%} "
+                f"{direction} on average, and one hop cannot blame the accumulation"
+            ),
+        }
+
+    if journey_bias is not None and abs(journey_bias) > BIAS_LIMIT:
+        direction = "slow" if journey_bias > 0 else "fast"
+        return {
+            "passed": False,
+            "reason": (
+                f"the accumulation is the cost: per-hop speeds are clean but journeys model "
+                f"{abs(journey_bias):.0%} {direction}, which is the detour through every "
+                f"intermediate seat"
+            ),
+        }
+
+    return {"passed": True, "reason": f"{len(rows)} drives within {TOLERANCE:.0%}, no bias"}
 
 
 def load_reference(path: Path = REFERENCE) -> list[dict]:
@@ -1441,26 +1546,37 @@ def main(argv: list[str] | None = None) -> int:
 
     reference = load_reference()
     modelled: dict[tuple[str, str], float] = {}
-    for ref in reference:
-        source = str(ref["from_siruta"])
-        reach = county_times(data.county, data.neighbours, edge_s, COUNTY, [source])
-        target = str(ref["to_siruta"])
-        if target in reach:
-            modelled[(source, target)] = reach[target] / 60.0
+    for entry in reference:
+        source = str(entry["from_siruta"])
+        target = str(entry["to_siruta"])
+        if entry.get("kind") == "adjacent":
+            # The raw one-hop edge, with no accumulation, so the speed table is measured alone.
+            seconds = edge_s.get((source, target))
+            if seconds is not None:
+                modelled[(source, target)] = seconds / 60.0
+        else:
+            reach = county_times(data.county, data.neighbours, edge_s, COUNTY, [source])
+            if target in reach:
+                modelled[(source, target)] = reach[target] / 60.0
 
     rows = compare(modelled, reference)
     result = verdict(rows)
 
     print(f"Gate 1 — travel time, {COUNTY}\n")
-    print(f"{'from':>9} {'to':>9} {'recorded':>9} {'modelled':>9} {'ratio':>7}")
+    print(f"{'kind':>9} {'from':>9} {'to':>9} {'recorded':>9} {'modelled':>9} {'ratio':>7}")
     for row in rows:
         got = "—" if row["modelled_min"] is None else f"{row['modelled_min']:.0f}"
         ratio = "—" if row["error_ratio"] is None else f"{row['error_ratio']:.2f}"
         mark = " " if row["within_tolerance"] else "✗"
         print(
-            f"{row['from_siruta']:>9} {row['to_siruta']:>9} "
+            f"{row['kind']:>9} {row['from_siruta']:>9} {row['to_siruta']:>9} "
             f"{row['recorded_min']:>8.0f}m {got:>8}m {ratio:>7} {mark}"
         )
+
+    for kind in ("adjacent", "journey"):
+        bias = _bias(rows, kind)
+        if bias is not None:
+            print(f"\n  {kind:>8} bias: {bias:+.1%}")
 
     print(f"\n{'PASS' if result['passed'] else 'FAIL'}: {result['reason']}")
     return 0 if result["passed"] else 1
@@ -1480,7 +1596,7 @@ Expected: all pass **except** `test_the_reference_file_is_filled_in`, which fail
 
 - [ ] **Step 6: Fill in the reference file, then re-run**
 
-Record twelve real seat-to-seat drives in Vâlcea, spread across valley, plateau and mountain. Replace the placeholder row entirely. Then:
+Record twelve real seat-to-seat drives in Vâlcea — at least six `adjacent`, at least six `journey` — spread across valley, plateau and mountain. Replace the placeholder rows entirely. Then:
 
 ```bash
 cd simulators/transport && uv run pytest tests/test_check_gate.py -q
@@ -1494,21 +1610,23 @@ Expected: all pass, including `test_the_reference_file_is_filled_in`.
 cd simulators/transport && uv run ruff check scripts tests && uv run ruff format --check scripts tests
 cd "$(git rev-parse --show-toplevel)"
 git add simulators/transport/scripts/check_gate.py simulators/transport/tests/test_check_gate.py simulators/transport/sources/reference-drive-times-vl.csv
-git commit -m "Check the modelled times against twelve real drives in Valcea
+git commit -m "Check the modelled times against real drives, per hop and per journey
 
 The speed table is assumed and nothing else makes it defensible. Valcea
 because it has both the Olt valley and real mountain roads, so the weakest
 assumption — that a road class implies a speed whatever the terrain — is
 exercised rather than flattered.
 
-Two ways to fail. Any single drive outside 35% fails. So does a set that
-are all within tolerance and all leaning the same way: twelve drives each
-18% slow is one table to fix, not twelve coincidences, and it is exactly
-what a per-pair tolerance cannot see.
+The reference set is split because L0's two errors point opposite ways.
+The speed table is probably optimistic; the accumulation is deliberately
+pessimistic, routing through every intermediate seat. Compared only as
+whole journeys they cancel, and the gate would pass with both components
+wrong — verification that verified nothing. So adjacent drives are checked
+against the raw one-hop edge, where accumulation cannot reach them, and
+bias is judged per kind. That says which component is wrong, not merely
+that something is.
 
-An empty gate never passes, and the tests fail while the reference file
-still holds placeholders. A gate that passes without checking anything
-reads as verification, which is worse than having none."
+An empty gate never passes, and neither does one without adjacent drives."
 ```
 
 ---
@@ -1648,7 +1766,13 @@ is the check most worth having run on every push."
 
 **Spec coverage.** L0 in the spec is the road travel-time substrate (§9 `traveltime` unit) plus Gate 1 (§14.1). Tasks 2–5 build the unit; Task 6 builds the gate; Task 7 runs both. §14.5's determinism requirement is covered by `test_it_is_sorted_so_the_artefact_is_byte_reproducible` and Parquet's byte-reproducibility, which the spec already notes is safe where GeoPackage is not. §13's provenance requirement is covered by `SPEED_PROVENANCE` and its test. Not covered, and correctly so: the rail matrix (§9 `railnet`, layer `LR`), and the TypeScript port and parity suite (§10) — L0 produces a pipeline artefact with no browser consumer yet, so a port would be a port of nothing.
 
-**One deliberate deviation from the spec.** §14.1 says "roughly a dozen seat-to-seat pairs"; Task 6 fixes it at twelve minimum and adds a systematic-bias check the spec does not mention. The bias check earns its place: twelve independent tolerances cannot see the one error most likely to occur, which is the whole table being uniformly wrong.
+**Two deliberate deviations from the spec, both in Task 6.** §14.1 says "roughly a dozen seat-to-seat pairs" checked against real drive times, and nothing more.
+
+First, a **systematic-bias check**. Twelve independent tolerances cannot see the error most likely to occur — the whole table being uniformly wrong — because each drive passes on its own while all of them lean the same way.
+
+Second, and more important, the reference set is **split into `adjacent` and `journey` drives**, with bias judged separately for each. This was not in the first draft of this plan and it should have been. L0 contains two errors that point in opposite directions: the speed table is probably optimistic (Romanian DNs thread through villages; DJ and DC roads underperform their class), while `county_times` is deliberately pessimistic (it routes through every intermediate seat village rather than past it). Compare only whole journeys and the two **partially cancel** — the gate passes, both components are wrong, and the cancellation holds only for the pair distances Vâlcea happens to contain. That is a gate that verified nothing while reading as verification, which is precisely the failure this layer exists to prevent.
+
+Checking `adjacent` drives against the raw one-hop edge puts the speed table somewhere the accumulation cannot reach it. The gate then reports *which* component is wrong rather than only that something is — and `test_opposing_bias_between_the_two_sets_is_caught` pins the dangerous case, using ratios whose combined mean is 1.0 and would have passed the single-set check.
 
 **Where the plan is smaller than the spec assumed.** The spec treats L0 as building a travel-time substrate from scratch. It is not: `build_road_distance.py` already builds the graph, snaps the seats and runs the chunked Dijkstra. L0 adds a speed table and a weight. Task 3 is the only change outside `simulators/transport/`, it is additive, and its tests pin the existing behaviour as the no-argument default.
 
