@@ -47,6 +47,9 @@ BIAS_LIMIT = 0.15
 
 MINIMUM_ADJACENT = 3
 
+# What an unrecorded row still says. The reference file ships full of these on purpose.
+PLACEHOLDER = "REPLACE_ME"
+
 
 def compare(modelled_min: dict[tuple[str, str], float], reference: list[dict]) -> list[dict]:
     """One row per reference drive, with the modelled time beside it."""
@@ -144,12 +147,32 @@ def load_reference(path: Path = REFERENCE) -> list[dict]:
     return list(csv.DictReader(lines))
 
 
+def unfilled(reference: list[dict]) -> int:
+    """How many reference rows are still placeholders rather than recorded drives."""
+    return sum(1 for row in reference if PLACEHOLDER in ",".join(str(v) for v in row.values()))
+
+
 def main(argv: list[str] | None = None) -> int:
     argparse.ArgumentParser(description=__doc__).parse_args(argv)
 
     import pandas as pd
 
     from scripts.county_times import county_times
+
+    # Checked before anything expensive. load_data() below reads a 73 MB GeoPackage, and
+    # making someone wait for that only to be told their reference file is empty — or worse,
+    # to be shown a ValueError traceback from a placeholder time of zero — is a poor way to
+    # deliver the one instruction this script has for them.
+    reference = load_reference()
+    still_blank = unfilled(reference)
+    if still_blank or not reference:
+        print(f"Gate 1 — travel time, {COUNTY}\n")
+        print(f"  {still_blank} of {len(reference)} reference drives are still {PLACEHOLDER}.")
+        print(f"  Record real drives in {REFERENCE.relative_to(ROOT)} before this means")
+        print("  anything: at least six `adjacent` (the two UATs share a border) and six")
+        print("  `journey` (several hops apart), each with the service and date it came from.")
+        print("\nFAIL: the gate has nothing to check against")
+        return 1
 
     times_path = ROOT / "data/road_time.parquet"
     if not times_path.exists():

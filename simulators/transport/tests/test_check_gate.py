@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import pytest
 
-from scripts.check_gate import compare, verdict
+from scripts.check_gate import PLACEHOLDER, compare, unfilled, verdict
 
 
 def ref(kind="adjacent", frm="1", to="2", minutes=30.0):
@@ -107,6 +107,30 @@ def test_scattered_errors_within_tolerance_pass():
 def test_an_empty_gate_never_passes():
     """The failure mode this whole task exists to prevent."""
     assert verdict([])["passed"] is False
+
+
+def test_unfilled_counts_rows_that_are_still_placeholders():
+    """Placeholder rows carry a recorded time of zero, which compare() rightly rejects as
+    nonsense — but a traceback is a poor way to tell someone their homework is outstanding,
+    so the placeholders are counted and reported before anything expensive runs."""
+    rows = [
+        {"kind": "adjacent", "from_siruta": PLACEHOLDER, "minutes": "0"},
+        {"kind": "journey", "from_siruta": "54975", "minutes": "41"},
+    ]
+    assert unfilled(rows) == 1
+
+
+def test_unfilled_finds_a_placeholder_in_any_column():
+    """The source column is as unrecorded as the time. A drive with a real duration and no
+    stated origin is not a citation, and the repository's whole rule is that a number
+    carries where it came from."""
+    rows = [{"kind": "adjacent", "from_siruta": "54975", "minutes": "41", "source": PLACEHOLDER}]
+    assert unfilled(rows) == 1
+
+
+def test_a_fully_recorded_set_counts_as_filled():
+    rows = [{"kind": "adjacent", "from_siruta": "54975", "minutes": "41", "source": "a service"}]
+    assert unfilled(rows) == 0
 
 
 def test_a_gate_with_only_journeys_never_passes():

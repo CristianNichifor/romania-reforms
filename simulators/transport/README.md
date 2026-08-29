@@ -96,18 +96,28 @@ bias attached to it.
 ## Running it
 
 ```sh
-# In simulators/administrativ, once — L0 reads its road graph.
-# The OSM extract is roughly a gigabyte and the graph build is long.
+# In simulators/administrativ, once. The OSM extract is 312 MB and the graph build is long
+# — around twenty minutes end to end on an ordinary machine.
 uv run python -m pipeline.fetch --with-roads
 uv run python -m pipeline.build_geometry
 uv run python -m pipeline.build_seats
 uv run python -m pipeline.build_adjacency
 uv run python -m pipeline.build_road_distance
+# check_gate reads administrativ's full model, not only its road graph, so these two are
+# needed as well even though the travel-time build itself does not touch them:
+uv run python -m pipeline.build_candidacy
+uv run python -m pipeline.build_finance
 
 # Then here:
 uv run python -m scripts.build_road_time   # writes data/road_time.parquet
 uv run python -m scripts.check_gate        # the gate; non-zero exit on failure
 ```
+
+`build_road_time` needs only `adjacency.parquet`, `uat_seats.gpkg`, `road_distance.parquet`
+and the OSM extract. `check_gate` calls `reference_model.load_data()`, which additionally
+wants `uat_geometry.gpkg`, `candidacy.parquet` and `finance.parquet` — six artefacts in all.
+Running the gate before those exist fails on a missing file after a long wait, which is why
+they are listed here rather than discovered later.
 
 `data/` is not committed. It is reproducible from the commands above.
 
