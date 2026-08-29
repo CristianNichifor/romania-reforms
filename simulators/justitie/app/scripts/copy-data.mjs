@@ -30,6 +30,8 @@ const sources = [
   [resolve(here, '../../data/design-reforma.json'), 'design.json'],
   // Pay grades and the wage bill, so the staffing control can price what it moves.
   [resolve(here, '../../data/costuri-2025.json'), 'costuri.json'],
+  // The two pension reforms, so the page can show them against each other.
+  [resolve(here, '../../data/pensii-comparatie.json'), 'pensii.json'],
   // County codes to full names, so a merged court is "Tribunalul Covasna" and not "CV".
   [resolve(here, '../../../administrativ/web/public/data/manifest.json'), 'manifest.json'],
 ];

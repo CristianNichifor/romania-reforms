@@ -57,6 +57,21 @@ interface Limitation {
   affects: string[];
 }
 
+interface Pensii {
+  averageGrossWageLei: number;
+  paper: { formula: string; retirementAgeFrom: number; retirementAgeTo: number };
+  bill: { percent: number; seniorityYears: number; netCapPercent: number };
+  byGrade: {
+    grade: string;
+    currentLei: number;
+    billFloorLei: number;
+    paperCapLei: number;
+    paperCapBelowBillFloor: boolean;
+  }[];
+  disagreements: { id: string; text: string }[];
+  limitations: Limitation[];
+}
+
 interface Costuri {
   monthlyLeiByTier: Record<string, number>;
   today: { annualLei: number; levelOne: { judges: number; annualLei: number } };
@@ -156,7 +171,7 @@ const BLANK = {
 };
 
 async function main(): Promise<void> {
-  const [doc, counties, proposal, manifest, design, costuri] = await Promise.all([
+  const [doc, counties, proposal, manifest, design, costuri, pensii] = await Promise.all([
     fetch(`${base}data/instante.json`).then((r) => r.json() as Promise<Document>),
     fetch(`${base}data/counties.geojson`).then((r) => r.json()),
     fetch(`${base}data/propunere.json`).then((r) => r.json() as Promise<Proposal>),
@@ -165,6 +180,7 @@ async function main(): Promise<void> {
     ),
     fetch(`${base}data/design.json`).then((r) => r.json() as Promise<Design>),
     fetch(`${base}data/costuri.json`).then((r) => r.json() as Promise<Costuri>),
+    fetch(`${base}data/pensii.json`).then((r) => r.json() as Promise<Pensii>),
   ]);
   const countyName = (code: string): string => manifest.countyNames?.[code] ?? code;
 
@@ -550,11 +566,15 @@ async function main(): Promise<void> {
       const s = figures.summary;
       // Its caveats join the others rather than sitting apart: population is a poor proxy for
       // litigants, and kilometres are not hours.
+      // The access caveats arrive with the lazy load, so they join the fold late — and the
+      // count on the summary has to follow them, or it goes quietly stale.
       if (!el('#limits').dataset.acces) {
         el('#limits').dataset.acces = 'yes';
         el('#limits').innerHTML += figures.limitations
           .map((l) => `<p class="limit">${l.text}</p>`)
           .join('');
+        el('#limits-count').textContent =
+          `${el('#limits').querySelectorAll('p').length} rezerve`;
       }
       const band = (label: string, colour: string) =>
         `<div><i style="background:${colour}"></i>${label}</div>`;
@@ -674,6 +694,36 @@ async function main(): Promise<void> {
       `printr-un proces public. Baza de comparație — activitatea instanțelor — este raportul ` +
       `Consiliului Superior al Magistraturii.`;
 
+  // The two pension reforms, against the same judge. The paper's cap is a flat sum and the
+  // bill's floor is a share of each grade's own indemnity, so the two cross: for every grade
+  // but the trainee the paper pays less than the bill's minimum. Marked where that happens
+  // rather than left for a reader to compare four columns by eye.
+  // Four columns in a 314-pixel panel: the headers have to be one word each or they wrap into
+  // two lines apiece and the table becomes taller than the figures in it.
+  const short = (grade: string): string =>
+    grade.replace(/^Judecător (cu grad de )?/, '').replace(/,.*$/, '');
+  el('#pensii-body').innerHTML =
+    `<p class="note">Lei pe lună, la vârful grilei: pensia după regula de azi, pragul din
+      proiectul Ministerului Justiției și plafonul propus de lucrare.</p>
+     <div class="pens-row">
+       <span class="pens-head">grad</span>
+       <span class="pens-head">azi</span>
+       <span class="pens-head">proiect</span>
+       <span class="pens-head">lucrare</span>
+       ${pensii.byGrade
+         .map(
+           (g) =>
+             `<span>${short(g.grade)}</span>
+              <span>${ro.format(g.currentLei)}</span>
+              <span>${ro.format(g.billFloorLei)}</span>
+              <span class="${g.paperCapBelowBillFloor ? 'pens-low' : ''}">${ro.format(
+                g.paperCapLei,
+              )}</span>`,
+         )
+         .join('')}
+     </div>` +
+    pensii.disagreements.map((d) => `<p class="disagree">${d.text}</p>`).join('');
+
   // The chapters that argue rather than measure, listed beneath the views that compute. Kept
   // collapsed: they are context for the map, not the map itself, and a reader who wants the
   // reasoning can open it while one reading the numbers is not made to scroll past it.
@@ -689,14 +739,22 @@ async function main(): Promise<void> {
 
   // The limitations are part of the map, not a footnote to it. The blocking one is the reason
   // this shows where courts are and refuses to show what closing one would cost.
-  el('#limits').innerHTML = [...doc.limitations, ...proposal.limitations, ...costuri.limitations]
-    .map(
-      (l) =>
-        `<p class="limit ${l.severity === 'blocking' ? 'blocking' : ''}">${
-          l.severity === 'blocking' ? '<strong>Nu putem răspunde:</strong> ' : ''
-        }${l.text}</p>`,
-    )
+  // Blocking caveats stay in the open; the rest fold. Thirteen paragraphs under a map is a
+  // wall a reader scrolls past, and the ones that change how a number should be read are not
+  // the ones to lose that way.
+  const allLimits = [
+    ...doc.limitations,
+    ...proposal.limitations,
+    ...costuri.limitations,
+    ...pensii.limitations,
+  ];
+  const blocking = allLimits.filter((l) => l.severity === 'blocking');
+  const rest = allLimits.filter((l) => l.severity !== 'blocking');
+  el('#blocking').innerHTML = blocking
+    .map((l) => `<p class="limit blocking"><strong>Nu putem răspunde:</strong> ${l.text}</p>`)
     .join('');
+  el('#limits').innerHTML = rest.map((l) => `<p class="limit">${l.text}</p>`).join('');
+  el('#limits-count').textContent = `${rest.length} rezerve`;
 }
 
 main().catch((error: unknown) => {

@@ -1,0 +1,115 @@
+{
+  "$schema": "../schema/pensii-comparatie.schema.json",
+  "id": "pensii-comparatie",
+  "title": "Două reforme ale pensiilor de serviciu, față în față",
+  "publisher": "Cristian Nichifor",
+  "published": false,
+  "period": "2025",
+  "provenance": {
+    "source": "reforma-sistem-judiciar-romania",
+    "locator": "Capitolul 11, comparat cu proiectul MJ din 19 noiembrie 2025",
+    "confidence": "derived"
+  },
+  "averageGrossWageLei": 8728.77,
+  "paper": {
+    "principles": [
+      "contributivitate",
+      "plafonare",
+      "transparență",
+      "eliminarea sporurilor din baza de calcul",
+      "creșterea vârstei de pensionare"
+    ],
+    "formula": "pensie contributivă + supliment de cel mult 20%",
+    "supplementPercent": 20,
+    "supplementCondition": "doar pentru continuitatea în sistem",
+    "capDescription": "un salariu mediu brut pe economie",
+    "retirementAgeFrom": 58,
+    "retirementAgeTo": 65,
+    "transitionYears": 10,
+    "provenance": {
+      "source": "reforma-sistem-judiciar-romania",
+      "locator": "Capitolul 11, p. 58-59",
+      "confidence": "verbatim"
+    }
+  },
+  "bill": {
+    "percent": 55,
+    "seniorityYears": 35,
+    "baseDescription": "media indemnizațiilor de încadrare brute lunare și a sporurilor pentru care s-au reținut contribuții, pe ultimele 60 de luni",
+    "netCapPercent": 70,
+    "provenance": {
+      "source": "lege-pensii-magistrati-2025",
+      "locator": "Art. I pct. 1, modificând art. 211 alin. (1) din Legea nr. 303/2022",
+      "confidence": "verbatim"
+    }
+  },
+  "byGrade": [
+    {
+      "grade": "Judecător cu grad de ICCJ",
+      "currentLei": 21000,
+      "billFloorLei": 14438,
+      "paperCapLei": 8729,
+      "paperCapBelowBillFloor": true
+    },
+    {
+      "grade": "Judecător cu grad de curte de apel",
+      "currentLei": 18400,
+      "billFloorLei": 12650,
+      "paperCapLei": 8729,
+      "paperCapBelowBillFloor": true
+    },
+    {
+      "grade": "Judecător cu grad de tribunal, judecător militar la tribunalulmilitar",
+      "currentLei": 18000,
+      "billFloorLei": 12375,
+      "paperCapLei": 8729,
+      "paperCapBelowBillFloor": true
+    },
+    {
+      "grade": "Judecător cu grad de judecătorie",
+      "currentLei": 13800,
+      "billFloorLei": 9488,
+      "paperCapLei": 8729,
+      "paperCapBelowBillFloor": true
+    },
+    {
+      "grade": "Judecător stagiar",
+      "currentLei": 8320,
+      "billFloorLei": 5720,
+      "paperCapLei": 8729,
+      "paperCapBelowBillFloor": false
+    }
+  ],
+  "disagreements": [
+    {
+      "id": "sporurile-in-baza",
+      "text": "Lucrarea scoate sporurile din baza de calcul; proiectul le scrie înăuntru, explicit — „media indemnizațiilor de încadrare brute lunare și a sporurilor pentru care au fost reținute contribuții”. Este detaliul care decide cel mai mult din cuantum, și cele două merg în direcții opuse."
+    },
+    {
+      "id": "plafonul",
+      "text": "Lucrarea plafonează pensia la un salariu mediu brut — 8.729 lei. Proiectul o plafonează la 70% din venitul net al persoanei. deci proporțional cu propriul salariu. Plafonul lucrării este sub pragul proiectului la 4 din 5 grade."
+    },
+    {
+      "id": "varsta",
+      "text": "Lucrarea cere 58 de ani acum și 65 la final; proiectul nu schimbă vârsta, ci vechimea — de la 25 la 35 de ani de muncă."
+    }
+  ],
+  "limitations": [
+    {
+      "id": "lucrarea-nu-e-lege",
+      "text": "Lucrarea este propunerea autorului acestui simulator, nu un act normativ. Proiectul este un document al Guvernului aflat în dezbatere publică. Sunt comparate ca argumente, nu ca norme de rang egal.",
+      "severity": "material",
+      "affects": [
+        "pensii"
+      ]
+    },
+    {
+      "id": "pensia-contributiva-nu-e-calculata",
+      "text": "Formula lucrării pornește de la pensia contributivă, care depinde de contribuțiile fiecărei persoane pe toată cariera. Nu se poate calcula din datele de aici, așa că din propunerea lucrării se poate arăta doar plafonul, nu și cuantumul.",
+      "severity": "blocking",
+      "affects": [
+        "pensii"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/pensii-comparatie.schema.json",
+  "title": "Two pension reforms against the same judge",
+  "description": "The paper's Chapter 11 and the Ministry of Justice bill of 19 November 2025, written at the same time about the same problem and disagreeing on the detail that decides most of the amount: the paper removes sporuri from the base, the bill writes them in. Neither is scored; both are applied to the same grades so the difference is visible.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "published",
+    "provenance",
+    "averageGrossWageLei",
+    "paper",
+    "bill",
+    "byGrade",
+    "disagreements",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "published": {
+      "type": "boolean"
+    },
+    "period": {
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json#/$defs/provenance"
+    },
+    "averageGrossWageLei": {
+      "type": "number",
+      "description": "What the paper's cap resolves to, since it caps at one average gross wage."
+    },
+    "paper": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "formula",
+        "provenance"
+      ]
+    },
+    "bill": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "percent",
+        "provenance"
+      ]
+    },
+    "byGrade": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "grade",
+          "currentLei",
+          "billFloorLei",
+          "paperCapLei",
+          "paperCapBelowBillFloor"
+        ],
+        "properties": {
+          "grade": {
+            "type": "string"
+          },
+          "currentLei": {
+            "type": "number"
+          },
+          "billFloorLei": {
+            "type": "number"
+          },
+          "paperCapLei": {
+            "type": "number"
+          },
+          "paperCapBelowBillFloor": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "disagreements": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "text"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "provenance.schema.json#/$defs/limitation"
+      }
+    }
+  }
+}

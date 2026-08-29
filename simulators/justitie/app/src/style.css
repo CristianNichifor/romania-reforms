@@ -323,3 +323,89 @@ dd {
   color: var(--muted);
   line-height: 1.55;
 }
+
+/* --- folds -------------------------------------------------------------------------- */
+/* Eleven stacked sections had become a wall a reader scrolled past rather than read. The
+   secondary material folds; what stays open is the map's own figures and the caveats that
+   would change how a number is read. */
+.fold {
+  border-top: 1px solid var(--line);
+  margin-top: 0.4rem;
+}
+
+.fold > details {
+  border-bottom: 1px solid var(--line);
+}
+
+.fold > details > summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.7rem 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.fold > details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.fold > details > summary .chev {
+  font-weight: 400;
+  font-size: 0.76rem;
+  color: var(--muted);
+  flex: none;
+}
+
+.fold > details[open] > summary {
+  color: var(--accent);
+}
+
+.fold > details > *:not(summary) {
+  padding-bottom: 0.8rem;
+}
+
+#design h2 {
+  display: none;
+}
+
+/* --- pensions ----------------------------------------------------------------------- */
+.pens-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 0.2rem 0.6rem;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.pens-row > span:not(:first-child) {
+  text-align: right;
+}
+
+.pens-head {
+  color: var(--muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pens-low {
+  color: #e8c98a;
+}
+
+.disagree {
+  margin: 0.7rem 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+/* --- blocking caveats stay in the open ---------------------------------------------- */
+#blocking {
+  border-top: 1px solid var(--line);
+  margin-top: 0.9rem;
+  padding-top: 0.85rem;
+}
