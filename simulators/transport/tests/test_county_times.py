@@ -79,3 +79,24 @@ def test_a_missing_edge_does_not_silently_become_free():
     route through exactly the pairs the router failed on."""
     got = county_times(COUNTY, NEIGHBOURS, {}, "XX", ["1"])
     assert got == {"1": 0.0}
+
+
+def test_an_unmeasured_hop_is_detoured_around_rather_than_taken():
+    """The case above is degenerate: with *every* edge missing, nothing moves, and a
+    free-edge bug would show up as all four UATs at zero. The failure that actually happens
+    is one hop unmeasured among many — and there the router must take the longer measured
+    way round instead of the hole.
+
+    1 and 3 are adjacent but their hop was never measured. 1-2-3 was. The journey to 3 must
+    cost 200, not 0 (free) and not absent (giving up at the hole)."""
+    county = {"1": "XX", "2": "XX", "3": "XX"}
+    neighbours = {"1": ["2", "3"], "2": ["1", "3"], "3": ["1", "2"]}
+    measured = {
+        ("1", "2"): 100.0,
+        ("2", "1"): 100.0,
+        ("2", "3"): 100.0,
+        ("3", "2"): 100.0,
+        # ("1", "3") deliberately absent — the router failed on this pair.
+    }
+    got = county_times(county, neighbours, measured, "XX", ["1"])
+    assert got["3"] == 200.0
