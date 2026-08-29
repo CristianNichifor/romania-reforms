@@ -46,46 +46,38 @@ def test_every_target_figure_cites_a_page(proposal):
         assert tier["provenance"]["confidence"] == "verbatim", name
 
 
-def test_the_two_rules_cannot_both_hold(proposal):
-    """Coverage and size pull against each other, and the document says so.
+def test_the_viability_floor_holds(proposal):
+    """Every county can sustain a court, which is what makes the two rules compatible.
 
-    42 is a coverage floor — one court per county, 41 plus Bucharest — not a target. The size
-    rule is 150.000-200.000 inhabitants per court. Both cannot hold: 42 courts is 453.662
-    each. Recomputed from the registry rather than trusted from the prose, so the limitation
-    cannot quietly stop being true.
+    The population figures are a minimum — a court should serve at least 150.000-200.000 —
+    not a band each court must fall inside. Read as a band they would need roughly 116
+    courts instead of 42, which is the misreading the `formulare-de-clarificat` note exists
+    to prevent. Recomputed from the registry so the claim cannot quietly stop being true.
     """
-    assert proposal["tinta"]["nivel1"]["regula"] == "acoperire"
-    flagged = [x for x in proposal["limitations"] if x["id"] == "pragul-de-populatie-nu-e-regula"]
-    assert flagged, "the population band in the text is not flagged as non-operative"
+    tier = proposal["tinta"]["nivel1"]
+    assert tier["regula"] == "acoperire"
+    assert tier["pragEste"] == "minim"
 
     if not REGISTRY.exists():
         pytest.skip("registry not built")
+    import collections
     import struct
 
     registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
-    count = len(registry["siruta"])
     raw = (REGISTRY.parent / "attributes.bin").read_bytes()
-    population = sum(struct.unpack_from(f"<{count}I", raw, 0))
-
-    tier = proposal["tinta"]["nivel1"]
-    per_court = population / tier["instante"]
-    assert per_court > tier["populatieMaxima"], (
-        f"{per_court:,.0f} per court is inside the stated band, so the limitation is stale"
-    )
-    needed_low = population / tier["populatieMaxima"]
-    needed_high = population / tier["populatieMinima"]
-    assert needed_low > tier["instante"], (needed_low, tier["instante"])
-    # The range the text quotes, recomputed.
-    assert 90 <= needed_low <= 100, needed_low
-    assert 120 <= needed_high <= 135, needed_high
-
-    # And the floor is nearly inert: applying it county by county, only one county is small
-    # enough for a single court to stay under the cap. If that ever stops being true the
-    # limitation's claim about which rule decides has changed.
-    import collections
-
     by_county: dict[str, int] = collections.Counter()
     for index, code in enumerate(registry["county"]):
         by_county[code] += struct.unpack_from("<I", raw, index * 4)[0]
-    at_floor = [c for c, p in by_county.items() if p <= tier["populatieMaxima"]]
-    assert at_floor == ["TL"], at_floor
+
+    assert len(by_county) == tier["instante"], (len(by_county), tier["instante"])
+    below = {c: p for c, p in by_county.items() if p < tier["populatieMinima"]}
+    assert below == {}, f"a county cannot sustain its own court: {below}"
+
+    # Tulcea is the only county inside the band rather than above it. If that changes, the
+    # note describing the floor as nearly slack has changed with it.
+    inside = sorted(c for c, p in by_county.items() if p < tier["populatieMaxima"])
+    assert inside == ["TL"], inside
+
+
+def test_the_wording_is_flagged(proposal):
+    assert any(x["id"] == "formulare-de-clarificat" for x in proposal["limitations"])

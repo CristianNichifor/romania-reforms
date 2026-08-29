@@ -85,6 +85,14 @@
                 "populatie"
               ],
               "description": "Which rule fixes the number of courts. `acoperire` means territorial coverage — one per county — with workload absorbed by staffing and buildings. `populatie` would mean the count follows the population band instead. They give very different maps, so the document has to say which, rather than leaving a reader to infer it."
+            },
+            "pragEste": {
+              "enum": [
+                "minim",
+                "interval",
+                "plafon"
+              ],
+              "description": "How the population figures bind. `minim` means each court must serve at least that many and may serve far more, with the excess absorbed by staffing and buildings. `interval` would mean every court has to fall inside the band, which needs roughly 116 courts rather than 42 — the reading a reader reaches without this field."
             }
           }
         },
