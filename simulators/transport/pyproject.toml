@@ -1,0 +1,41 @@
+[project]
+name = "transport-simulator-pipeline"
+version = "0.1.0"
+description = "Travel-time substrate and network model for the Romanian public transport simulator"
+requires-python = ">=3.12"
+license = { text = "Apache-2.0" }
+
+# The same geo stack as administrativ, because L0 drives administrativ's road graph rather
+# than building its own. scipy is declared explicitly here: build_road_distance.py imports it
+# but administrativ only receives it transitively through libpysal, which is a dependency
+# nobody chose on purpose.
+dependencies = [
+    "geopandas>=1.0",
+    "shapely>=2.0",
+    "pyproj>=3.6",
+    "pandas>=2.2",
+    "numpy>=1.26",
+    "pyogrio>=0.9",
+    "pyarrow>=25.0.1",
+    "scipy>=1.14",
+]
+
+[dependency-groups]
+dev = ["pytest>=8.0", "ruff>=0.6"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+# Determinism is a hard requirement: a test that depends on dict ordering, set iteration
+# order or hash seeding is a test that hides a real bug.
+addopts = "-p no:randomly --strict-markers"
+
+[tool.uv]
+package = false
