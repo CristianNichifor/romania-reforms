@@ -19,9 +19,11 @@ from pipeline.reference_model import (
     _county_capital,
     _county_road_distances,
     _is_connected,
+    county_travel_cost,
     equalise,
     load_data,
     run,
+    solve_county,
 )
 
 REQUIRED = [
@@ -582,6 +584,54 @@ class TestLastResort:
         keeper = result.last_resort.get(herculane)
         assert keeper is not None, "Baile Herculane was expected to be stranded here"
         assert data.name[keeper] == "ORAȘ MOLDOVA NOUĂ", data.name[keeper]
+
+
+class TestOptimality:
+    """How close the grown-and-repaired map is to what optimising it directly would give.
+
+    The rules were built one at a time, each fixing a case the last one got wrong, and there
+    was never a number saying whether the result was any good — only whether it obeyed the
+    rules. `county_travel_cost` is that number: population-weighted road distance from every
+    commune to its own seat, so a commune of 10,000 people 5 km out counts the same as one of
+    1,000 people 50 km out.
+
+    `solve_county` then does steepest descent against it under the same constraints. What it
+    recovers is the gap between what the rules produced and what the objective wanted.
+    """
+
+    def test_the_map_is_close_to_what_local_search_can_find(self, data) -> None:
+        """Nationally the gap is 0,22% — 36 communes out of 3,186.
+
+        This is a guard, not a target. It fails if a future rule change makes the map
+        materially worse than the objective allows, which is the failure mode the rule-by-rule
+        approach cannot otherwise see: every rule can still pass while the map degrades.
+
+        The measure is sensitive: scrambling 119 communes into neighbouring units — under 4%
+        of the country — takes the recoverable gap from 0,22% to 3,28%.
+        """
+        params = Params()
+        result, _ = run(data, params)
+        counties = sorted({data.county[s] for s in data.population} - {BUCHAREST_COUNTY_CODE})
+
+        before = sum(county_travel_cost(data, result, county) for county in counties)
+        moved = sum(solve_county(data, params, result, county) for county in counties)
+        after = sum(county_travel_cost(data, result, county) for county in counties)
+
+        recoverable = 100 * (before - after) / before
+        assert recoverable < 1.0, (
+            f"local search recovered {recoverable:.2f}% by moving {moved} communes; "
+            "the rules have drifted from the objective"
+        )
+
+    def test_the_objective_falls_when_a_commune_moves_nearer(self, data) -> None:
+        # Guards the measure itself. A cost function that did not respond to the thing it
+        # claims to measure would let the test above pass on any map at all.
+        params = Params()
+        result, _ = run(data, params)
+        county = "CT"
+        before = county_travel_cost(data, result, county)
+        assert solve_county(data, params, result, county) > 0, "no move was available in CT"
+        assert county_travel_cost(data, result, county) < before
 
 
 class TestEqualise:

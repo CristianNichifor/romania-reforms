@@ -897,6 +897,10 @@ _REBALANCE_SWEEPS = 8
 # Rounds of equalising paired with re-seating. Each round is itself convergent; this only
 # bounds the settling between the two.
 _EQUALISE_ROUNDS = 4
+# Steepest descent applies one move per round, so this bounds how many communes a single
+# county may be handed. Constanta converges well inside it; the cap is a backstop, and a
+# county that hits it is reported rather than silently truncated.
+_SOLVER_ROUNDS = 400
 
 # How many times re-seating and consolidation may take turns before the map is called
 # settled. Two or three is normal; the limit is a guard, not a knob.
@@ -2024,6 +2028,157 @@ def equalise(data: Data, params: Params, result: Result) -> int:
         if moved == 0:
             break
     return moved_total
+
+
+def county_travel_cost(data: Data, result: Result, county_code: str) -> float:
+    """Population-weighted road distance from every commune to its own seat, in the county.
+
+    The quantity the whole map is supposed to minimise, stated once. Everything the growth
+    rules do — reach, concession, rebalancing, equalising — is an attempt to lower this
+    without ever naming it, which is why each new rule could undo an older one. Naming it
+    makes an assignment comparable to another assignment instead of only to a rule.
+
+    Person-metres: a commune of 10,000 people 5 km from its seat counts the same as one of
+    1,000 people 50 km away. That is the trade a resident would recognise.
+    """
+    total = 0.0
+    for seat in result.members:
+        if data.county[seat] != county_code:
+            continue
+        reach = _county_road_distances(data, county_code, [seat])
+        for member in result.members[seat]:
+            total += data.population[member] * reach.get(member, 0.0)
+    return total
+
+
+def _imbalance(population: int, target: int) -> float:
+    """How far a unit is from the target, squared, in people².
+
+    Squared so that one unit at 15,000 beside one at 95,000 costs more than two at 55,000,
+    which is the whole complaint about the map. Linear distance from the target would price
+    those two arrangements identically.
+    """
+    return float(population - target) ** 2
+
+
+def solve_county(
+    data: Data, params: Params, result: Result, county_code: str, balance_m: float = 0.0
+) -> int:
+    """Improve one county's assignment against `county_travel_cost`, move by move.
+
+    Steepest descent over reassignments: at each round every commune that borders another
+    unit is priced against moving there, the single best improving move is applied, and the
+    round repeats until nothing improves. Deterministic — no randomness, ties broken by
+    SIRUTA — and monotone, because only strictly improving moves are taken, so it terminates.
+
+    **The seats and the unit count are fixed here.** This does not decide how many units a
+    county has or where they sit; it decides which commune belongs to which, given those.
+    That keeps every rule about counts and centres — the county minimum, the promotion
+    separation, the capital ring — settled before this runs and untouched by it.
+
+    A move must also keep the map legal, and the constraints are the same ones the rules
+    enforce, not a relaxed set: the unit left behind stays in one piece and does not fall
+    below the target if it was above it, a capital keeps its ring, no centre gives up a
+    commune on its own border, the distance cap holds, and neither shape gets worse than the
+    compactness floor allows.
+    """
+    seats = [seat for seat in result.members if data.county[seat] == county_code]
+    if len(seats) < 2:
+        return 0
+
+    reach_cache: dict[str, dict[str, float]] = {}
+
+    def reach_from(seat: str) -> dict[str, float]:
+        cached = reach_cache.get(seat)
+        if cached is None:
+            cached = _county_road_distances(data, county_code, [seat])
+            reach_cache[seat] = cached
+        return cached
+
+    def population_of(unit: str) -> int:
+        return sum(data.population[m] for m in result.members[unit])
+
+    moved = 0
+    for _round in range(_SOLVER_ROUNDS):
+        best_gain = 0.0
+        best_move: tuple[str, str, str] | None = None
+
+        for siruta in sorted(data.population):
+            if data.county[siruta] != county_code:
+                continue
+            here = result.region_of[siruta]
+            if here == siruta or data.county[here] != county_code:
+                continue
+            # A capital holds the ring around it, and no centre gives up a commune on its
+            # own border. Both rules outrank travel time, so they bound the search rather
+            # than being priced into it.
+            if is_capital_seat(data, here) and siruta in capital_ring(data, params, here):
+                continue
+            if siruta in data.neighbours.get(here, ()):
+                continue
+
+            here_distance = reach_from(here).get(siruta, math.inf)
+            if not math.isfinite(here_distance):
+                continue
+
+            for neighbour in data.neighbours.get(siruta, ()):
+                there = result.region_of[neighbour]
+                if there == here or data.county[there] != county_code:
+                    continue
+                if not _may_absorb(data, there, siruta):
+                    continue
+                if is_capital_seat(data, there) and siruta not in capital_ring(data, params, there):
+                    continue
+                there_distance = reach_from(there).get(siruta, math.inf)
+                if not math.isfinite(there_distance):
+                    continue
+                if params.max_road_m > 0 and there_distance > params.max_road_m:
+                    continue
+
+                gain = data.population[siruta] * (here_distance - there_distance)
+                if balance_m > 0 and params.p_target > 0:
+                    # Travel is in person-metres; imbalance is in people². `balance_m` is the
+                    # exchange rate between them — metres per person² — and it is the only
+                    # number in this model that says how much detour a fairer split is worth.
+                    here_pop = population_of(here)
+                    there_pop = population_of(there)
+                    moved_pop = data.population[siruta]
+                    after = _imbalance(here_pop - moved_pop, params.p_target) + _imbalance(
+                        there_pop + moved_pop, params.p_target
+                    )
+                    now = _imbalance(here_pop, params.p_target) + _imbalance(
+                        there_pop, params.p_target
+                    )
+                    gain += balance_m * (now - after)
+                if gain <= best_gain:
+                    continue
+
+                remaining = [m for m in result.members[here] if m != siruta]
+                if not remaining or not _is_connected(data, remaining):
+                    continue
+                if params.p_target > 0:
+                    before = population_of(here)
+                    if before >= params.p_target > before - data.population[siruta]:
+                        continue
+                if not _shape_allows(data, params, result.members[here], remaining):
+                    continue
+                if not _shape_allows(
+                    data, params, result.members[there], result.members[there] + [siruta]
+                ):
+                    continue
+
+                best_gain = gain
+                best_move = (siruta, here, there)
+
+        if best_move is None:
+            break
+        siruta, here, there = best_move
+        result.members[here] = [m for m in result.members[here] if m != siruta]
+        result.members[there].append(siruta)
+        result.region_of[siruta] = there
+        moved += 1
+
+    return moved
 
 
 def _is_connected(data: Data, members: list[str]) -> bool:
