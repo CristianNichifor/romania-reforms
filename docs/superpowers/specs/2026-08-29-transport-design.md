@@ -93,24 +93,53 @@ this repository rather than in a separate one.
 
 ## 4. The service rule
 
+**Every UAT gets a published timetable.** What varies with population is how many departures a
+UAT receives and where they sit in the day. What never varies is whether those departures can
+be relied on. Nothing in this simulator is booked in advance.
+
 A UAT's service class follows from its population, through one table the reader edits:
 
 | band | class | vehicle | service |
 |---|---|---|---|
-| below the flex threshold | **flex** | minibus, book-ahead | demand-responsive, costed per trip |
-| between the thresholds | **feeder** | small bus | fixed route, low frequency |
-| above the trunk threshold, or is a hub | **trunk** | full bus | fixed route, pulse frequency |
+| smallest | **basic** | small bus | fixed and published; few departures, placed on the peaks and on the hub pulse |
+| middle | **feeder** | small or medium bus | fixed and published; peak-frequent, thinned off-peak |
+| largest, or is a hub | **trunk** | full bus | fixed and published; pulse headway across the service day |
 
-Thresholds, vehicle sizes and frequencies are all inputs. The *structure* — three classes
-assigned by population band — is fixed.
+Thresholds, vehicle sizes and departure counts are all inputs. The *structure* — three classes
+assigned by population band, all of them fixed-route and published — is fixed.
 
-**Why flex exists.** Most of the 3 186 UATs are small. Modelling every one of them as a
-fixed-route bus produces an annual figure so large the simulator discredits itself in a single
-screenshot, and it is not what any comparable country does. Danish rural transit runs on
-**flextrafik** — book-ahead, demand-responsive — precisely because a fixed timetable to a
-200-person village is ruinous. The Danish trafikselskaber publish cost per flextur trip, which
-gives the flex tier a real external anchor. Omitting flex would not be a simplification; it
-would be a strawman.
+### Predictability is a design constraint, not a service level
+
+An earlier draft made the smallest tier demand-responsive — book-ahead minibuses, on the Danish
+**flextrafik** model, which exists because a clockface timetable to a 200-person village is
+ruinous. That was rejected, and the reasoning is worth recording because it is a values
+decision rather than a technical one.
+
+A public system's first obligation is that it can be relied upon without arrangement. Booking
+is a barrier that falls hardest on exactly the population rural Romanian transit exists to
+serve: the elderly, people without smartphones or data, people making unplanned trips. A
+service you must telephone for is not a public network; it is a subsidised taxi with a
+timetable-shaped hole where the timetable should be.
+
+The cost objection that motivated flex is real, but it is answered better by **frequency than by
+responsiveness**. A small commune does not need an hourly bus. It needs four departures that
+always run, timed to school, work and the hub pulse. That is stable, predictable, and still far
+cheaper than clockface headway — and unlike flex, it is a network.
+
+Flex is retained as an optional **comparison scenario** at `L2`, so a reader can price the
+alternative and see the trade rather than have it decided for them. It is not the default and
+it is not a tier.
+
+**This design costs more than the flex design.** Fixed service to all 3 186 UATs is more
+expensive than book-ahead minibuses to the smallest of them. The simulator reports that
+difference rather than shaving it.
+
+### The service day
+
+Because departures are placed rather than merely counted, each class declares its departures
+across a **day profile**: AM peak, midday, PM peak, evening, and a separate weekend profile.
+The profile is an input. It is what allows the model to be sized for peaks rather than for
+averages, and it is what makes §6's fleet arithmetic possible at all.
 
 **Why distance is absent from this table.** Distance does not change a UAT's *service class*,
 but it fully drives that service's *cost*: a UAT 40 km from its hub generates roughly four
@@ -160,6 +189,28 @@ interval**. That rounding sometimes buys an extra vehicle, and **the model repor
 vehicles as their own line item.** It is the honest price of a connection that actually
 connects, and hiding it inside a total would misrepresent what pulse costs.
 
+### Sizing for the peak
+
+The formula above is evaluated **per period of the day profile**, not once. Two different
+numbers fall out of it, and conflating them is the classic way to under-cost a transit system:
+
+- **Peak vehicle requirement (PVR)** — the maximum concurrent vehicles across all periods.
+  **This sizes the fleet, and therefore CAPEX.** A bus bought for the 07:00 peak stands in the
+  depot at 11:00. That is not waste; it is what being able to serve the peak costs, and a system
+  that owns only its average fleet cannot serve a peak at all.
+- **Bus-hours** — summed across every period. **This drives OPEX and driver numbers.**
+
+They diverge, and the ratio between them is itself an output worth displaying: a peaky service
+carries a high fleet cost per bus-hour, a flat one a low one. A reader flattening the day
+profile can watch OPEX rise while CAPEX falls, which is the actual trade a transport authority
+faces.
+
+**Spare ratio.** Fleet is `PVR × (1 + spare ratio)`. Vehicles under maintenance or repair cannot
+run a published departure, so a system that owns exactly its PVR will cancel service routinely.
+The ratio is an explicit input, not an allowance folded into an average — named, it reads as the
+cost of the timetable being true; buried, it reads as slack that an opponent will propose
+cutting.
+
 The **pulse interval is a slider, not a constant.** Sixty minutes is the Danish default and the
 natural clockface; 120 minutes is what a poor county could actually afford. The difference
 between them is one of the more interesting things the simulator can show.
@@ -174,7 +225,7 @@ FTE. The platform-to-paid ratio is an assumption and is marked as one.
 
 | tier | link | mode |
 |---|---|---|
-| **T3** | UAT → region centre | bus or flex, by the §4 rule |
+| **T3** | UAT → region centre | bus — basic, feeder or trunk class by the §4 rule |
 | **T2** | region centre → county seat | **rail where track exists and serves, otherwise bus** |
 | **T1** | county seat ↔ county seat | **rail** |
 
@@ -245,9 +296,9 @@ Eight units. Each takes explicit inputs, returns plain data, holds no shared mut
 | `traveltime` | seats, roads, road-class speed table | seat-to-seat road minutes, intra-county |
 | `railnet` | lines (open/closed/electrified), stations, published timetables | rail graph, station↔UAT join, rail minutes |
 | `hubs` | *provider interface* `hubOf` | UAT → hub assignment |
-| `tiers` | population, tier table | service class, vehicle type, frequency |
+| `tiers` | population, tier table, day profile | service class, vehicle type, departures per period |
 | `network` | hubs, tiers, traveltime, railnet | route set, as **legs carrying a mode** |
-| `timetable` | routes, pulse interval, train clock | cycle times, vehicles, bus-hours, bus-km, train-hours, train-km |
+| `timetable` | routes, pulse interval, train clock, day profile | per-period vehicles, **PVR**, bus-hours, bus-km, train-hours, train-km |
 | `cost` | resource vector, per-mode rate table | OPEX, CAPEX, annualised |
 | `access` | timetable | isochrones over mixed-mode chains |
 
@@ -261,7 +312,8 @@ number**, because they have different sources and deserve different trust.
 The interface that carries multimodality:
 
 ```
-Leg = { from, to, mode: 'flex' | 'bus' | 'rail', tier: 'T1' | 'T2' | 'T3', minutes, km }
+Leg = { from, to, mode: 'bus' | 'rail' | 'flex', tier: 'T1' | 'T2' | 'T3', minutes, km }
+       // 'flex' never appears in the default scenario — only in the L2 comparison run
 ```
 
 The resource vector is per-mode: bus-hours, bus-km, train-hours, train-km, and vehicle counts by
@@ -331,6 +383,10 @@ would not survive contact with a critic, and would not deserve to.
 CAPEX covers fleet purchase and renewal, depots, and — for rail — rolling stock and any
 reopening or electrification the reader switches on. Annualised over stated asset lives.
 
+**Fleet CAPEX is driven by `PVR × (1 + spare ratio)`, never by average vehicles in service.**
+Costing a fleet off average utilisation understates it by whatever the peak-to-average ratio is,
+which for a commuter-shaped rural network is substantial.
+
 **Diesel in v1; electric as a scenario toggle at `L2`.** The fork is large in both CAPEX and
 OPEX and has live PNRR funding relevance, but it is a toggle over the same engine rather than a
 structural question.
@@ -343,8 +399,9 @@ Per `packages/provenance`:
 
 - `verbatim` — INS Tempo wage tables, published timetable times, published track access charges.
 - `derived` — cost per bus-hour, cost per bus-km, vehicle counts, driver FTE.
-- `assumed` — layover and platform-to-paid ratios, every tier threshold, road-class speeds, rail
-  times on reopened or modernised lines, asset lives.
+- `assumed` — layover and platform-to-paid ratios, every tier threshold, the shape of the day
+  profile, the spare ratio, road-class speeds, rail times on reopened or modernised lines, asset
+  lives.
 
 Declared limitations, each naming the outputs it affects:
 
@@ -370,7 +427,8 @@ and was quietly incorrect.
 1. **`L0` road travel time — one county, hand-checked.** Roughly a dozen seat-to-seat pairs
    verified against real drive times, with a stated tolerance, failing loudly. National scope,
    county-scale audit. Nothing in `L1` builds until this passes.
-2. **Coverage.** Every one of the 3 186 UATs appears in exactly one route or flex zone. No
+2. **Coverage.** Every one of the 3 186 UATs appears on exactly one route, with at least one
+   departure in the day profile. No UAT may be served only by a scenario variant. No
    silent drops. Administrativ lost eight courts — including all six Bucharest sector courts —
    to precisely this failure, and it was caught by a structural check rather than a tolerance
    check. The structural check is the one that goes here.
@@ -451,6 +509,10 @@ service on railway that already exists.
 
 No demand, no revenue, no fares. No urban networks inside municipalities. No school transport.
 No live administrativ coupling — `frozen` provider only. Driver supply reported, not constrained.
+
+**Demand-responsive service is not a tier.** Every UAT receives fixed published departures. Flex
+survives only as an optional comparison scenario at `L2`, priced against the Danish flextur
+figures so the trade is visible rather than assumed.
 
 CFR rail and the inter-county layer are **not** cuts. They are `LR`, and the engine is built
 mode-aware from the first commit so that adding them requires no rewrite of `network`,
