@@ -112,3 +112,32 @@ jobs:
           npm run lint
           npm run typecheck
           npm test
+
+  transport:
+    name: transport
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      # The travel-time build needs administrativ's road graph and a 1 GB OSM extract, so it
+      # does not run here — the same reason administrativ's reference-model tests skip. What
+      # runs is everything that does not need the artefacts: the speed table, the
+      # accumulation, and the gate's own logic.
+      #
+      # This job is expected to FAIL until a human records the reference drive times in
+      # sources/reference-drive-times-vl.csv. That is the point of it. The gate is the only
+      # thing standing between an assumed speed table and every number built on top of it,
+      # and a gate excluded from CI so the badge stays green is how an unfilled gate ships
+      # as though it had verified something. The failing test names itself:
+      # test_the_reference_file_is_filled_in.
+      - name: Pipeline
+        working-directory: simulators/transport
+        env:
+          PYTHONHASHSEED: '0'
+        run: |
+          uv sync --all-groups
+          uv run ruff check scripts tests
+          uv run ruff format --check scripts tests
+          uv run pytest -q
