@@ -76,6 +76,45 @@ missing the biggest urban ones would have been worse than no map. The tolerance 
 averages had passed at 4,5%; the rank-continuity check caught it outright, and with the
 rows restored the reconstructed average matches the printed one to 0,0%.
 
+## Decided: how the migration goes
+
+No custom domain. URLs will be plain GitHub Pages project paths, one Pages site for the
+whole repository:
+
+```
+cristiannichifor.github.io/romania-reforms/              the index
+cristiannichifor.github.io/romania-reforms/justitie/
+cristiannichifor.github.io/romania-reforms/salarizare/
+cristiannichifor.github.io/romania-reforms/administrativ/
+```
+
+That breaks the links people already have, and for `salarizare` that matters more than it
+looks: its whole design premise is that a scenario *is* a link, hash and all. So each old
+repository stays alive as a one-page redirect that carries `location.hash` across, then
+gets archived. Nothing shared before the move stops working.
+
+A domain would remove the problem rather than absorb it, and the stubs are compatible with
+adding one later — they would simply point somewhere else. Not needed now.
+
+**Order, each step independently verifiable — after each, both old and new sites work:**
+
+1. Move `salarizare`. Most tests, best understood, proves the layout under real load.
+2. Extract `packages/ui` (`money.ts`, the dataviz primitives, the nav shell) only once
+   `justitie` has an app that actually wants them — a second real consumer, not a guess.
+3. Move `administrativ`, renaming `pipeline/` → `scripts/` and `web/` → `app/` to match.
+4. Replace both old repositories with redirect stubs and archive them.
+
+**Build:** both apps already read `VITE_BASE` from the environment instead of hardcoding a
+path, so each is built with `VITE_BASE=/romania-reforms/<name>/` and the outputs are
+assembled into one Pages artifact with the index. One deploy for the repository means one
+broken build can block every simulator, so the assembly step should fail loudly and leave
+the previous deployment standing rather than publish a site with a dead tile.
+
+**Packaging:** a `uv` workspace with `members = ["simulators/*", "packages/*"]`, so each
+simulator declares only the dependencies it uses — the flat list in the root
+`pyproject.toml` is a placeholder for the single simulator that exists today. npm
+workspaces over `simulators/*/app` and `packages/ui` on the Node side.
+
 ## Layout
 
 ```
