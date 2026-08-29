@@ -35,14 +35,22 @@ ADMINISTRATIV = ROOT.parent / "administrativ"
 # docs/superpowers/specs/2026-08-29-transport-design.md §3.
 sys.path.insert(0, str(ADMINISTRATIV))
 
-from scripts.speeds import speeds_for_classes  # noqa: E402
+from scripts.speeds import EFFECTIVE_KMH, FALLBACK_KMH, speeds_for_classes  # noqa: E402
 
 OUT_DIR = ROOT / "data"
 
 # Administrativ bounds its search at 60 km because adjacent seats are close and an unbounded
-# national search would explore the whole country per source. The same bound in seconds, at
-# the slowest speed in the table, so nothing reachable within 60 km is lost to the limit.
-SEARCH_LIMIT_S = 60_000 / (20.0 / 3.6)
+# national search would explore the whole country per source. This is the same bound in
+# seconds: the time the slowest road in the table would take to cover that distance, so
+# nothing administrativ can reach is lost here to the limit.
+#
+# **Derived, not written down.** The real longest adjacent pair is 60,0 km — administrativ's
+# own limit, exactly — which at 20 km/h is 10 798 s against a limit of 10 800. The margin is
+# two seconds. A literal here would still read as correct after someone lowered a speed in
+# the table, and pairs would begin disappearing from the graph with nothing to say so.
+SLOWEST_KMH = min(min(EFFECTIVE_KMH.values()), FALLBACK_KMH)
+SEARCH_LIMIT_M = 60_000
+SEARCH_LIMIT_S = SEARCH_LIMIT_M / (SLOWEST_KMH / 3.6)
 
 # Sources per Dijkstra call: each allocates one float64 row per source over every node.
 SOURCE_CHUNK = 4

@@ -18,10 +18,13 @@ ADMINISTRATIV = ROOT / "simulators/administrativ"
 sys.path.insert(0, str(ADMINISTRATIV))
 
 from scripts.build_road_time import (  # noqa: E402
+    SEARCH_LIMIT_M,
     SEARCH_LIMIT_S,
+    SLOWEST_KMH,
     plausibility,
     time_table,
 )
+from scripts.speeds import EFFECTIVE_KMH, FALLBACK_KMH  # noqa: E402
 
 
 def test_it_pairs_every_edge_with_a_time():
@@ -79,6 +82,22 @@ def test_plausibility_ignores_unreachable_pairs():
 
 
 def test_the_search_limit_covers_the_distance_limit():
-    """Administrativ bounds its search at 60 km. At the slowest class in the table that is
-    well over an hour, so a limit shorter than that would silently drop real neighbours."""
-    assert SEARCH_LIMIT_S >= 60_000 / (20.0 / 3.6)
+    """Administrativ bounds its search at 60 km. At the slowest road in the table that is
+    three hours, so a shorter limit would silently drop real neighbours.
+
+    The real margin is two seconds: the longest adjacent pair in Romania is 60,0 km, which
+    is administrativ's limit exactly, and at 20 km/h that is 10 798 s against 10 800."""
+    assert SEARCH_LIMIT_S >= SEARCH_LIMIT_M / (SLOWEST_KMH / 3.6)
+
+
+def test_the_slowest_speed_is_taken_from_the_table_not_written_down():
+    """The margin above is two seconds, so the limit cannot be a literal. If someone lowers
+    a speed in speeds.py and this constant does not follow, pairs begin vanishing from the
+    graph with nothing to announce it — and a hardcoded test would stay green throughout."""
+    assert min(min(EFFECTIVE_KMH.values()), FALLBACK_KMH) == SLOWEST_KMH
+
+
+def test_lowering_the_slowest_speed_would_demand_a_longer_search():
+    """Pins the direction of the coupling: a slower table needs more seconds, not fewer."""
+    slower = SLOWEST_KMH / 2
+    assert SEARCH_LIMIT_M / (slower / 3.6) > SEARCH_LIMIT_S
