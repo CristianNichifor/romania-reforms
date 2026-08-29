@@ -46,12 +46,13 @@ def test_every_target_figure_cites_a_page(proposal):
         assert tier["provenance"]["confidence"] == "verbatim", name
 
 
-def test_the_arithmetic_gap_is_recorded_and_still_true(proposal):
-    """The proposal's two numbers do not close, and the document says so.
+def test_the_two_rules_cannot_both_hold(proposal):
+    """Coverage and size pull against each other, and the document says so.
 
-    42 courts at 150.000-200.000 inhabitants each covers 6,3-8,4 million people. Romania has
-    19 million. This recomputes it from the registry rather than trusting the prose, so the
-    limitation cannot quietly stop being true.
+    42 is a coverage floor — one court per county, 41 plus Bucharest — not a target. The size
+    rule is 150.000-200.000 inhabitants per court. Both cannot hold: 42 courts is 453.662
+    each. Recomputed from the registry rather than trusted from the prose, so the limitation
+    cannot quietly stop being true.
     """
     blocking = [x for x in proposal["limitations"] if x["id"] == "tinta-nu-se-inchide-aritmetic"]
     assert blocking and blocking[0]["severity"] == "blocking"
@@ -76,3 +77,14 @@ def test_the_arithmetic_gap_is_recorded_and_still_true(proposal):
     # The range the text quotes, recomputed.
     assert 90 <= needed_low <= 100, needed_low
     assert 120 <= needed_high <= 135, needed_high
+
+    # And the floor is nearly inert: applying it county by county, only one county is small
+    # enough for a single court to stay under the cap. If that ever stops being true the
+    # limitation's claim about which rule decides has changed.
+    import collections
+
+    by_county: dict[str, int] = collections.Counter()
+    for index, code in enumerate(registry["county"]):
+        by_county[code] += struct.unpack_from("<I", raw, index * 4)[0]
+    at_floor = [c for c, p in by_county.items() if p <= tier["populatieMaxima"]]
+    assert at_floor == ["TL"], at_floor

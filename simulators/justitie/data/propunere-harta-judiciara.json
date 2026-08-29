@@ -30,8 +30,10 @@
       "provenance": {
         "source": "reforma-sistem-judiciar-romania",
         "locator": "Capitolul 12, p. 59, „Nivel 1: 42 judecatorii + tribunale comasate … fiecare deserveste 150.000–200.000 locuitori”",
-        "confidence": "verbatim"
-      }
+        "confidence": "verbatim",
+        "note": "Cifra de 42 este un prag de acoperire, nu o țintă dimensională: câte o instanță pentru fiecare dintre cele 41 de județe plus București. Pragul de 150.000–200.000 de locuitori este regula de mărime aplicată peste el."
+      },
+      "motivInstante": "41 de județe + București: cel puțin o instanță de nivel 1 în fiecare județ, pentru acoperire teritorială."
     },
     "curtiDeApel": {
       "instante": 15,
@@ -54,27 +56,39 @@
   "limitations": [
     {
       "id": "tinta-nu-se-inchide-aritmetic",
-      "text": "Cele două cifre ale propunerii nu se închid una cu alta. România are 19.053.815 locuitori în registrul SIRUTA. La 42 de instanțe de nivel 1, fiecare ar deservi 453.662 de locuitori — de 2,3 până la 3 ori peste pragul de 150.000–200.000 pe care propunerea îl fixează. Ca să fie respectat pragul, ar fi nevoie de 95–127 de instanțe, nu de 42. Simulatorul arată ambele variante și nu alege între ele: alegerea aparține autorului propunerii, nu calculului.",
+      "text": "Cele două reguli ale propunerii nu pot fi respectate simultan. Acoperirea cere cel puțin o instanță pe județ — 41 de județe plus București, de unde 42. Mărimea cere 150.000–200.000 de locuitori pe instanță. România are 19.053.815 locuitori: la 42 de instanțe fiecare ar deservi 453.662, de peste două ori pragul; iar respectarea pragului cere circa 116 instanțe, cu câte una pe județ ca minim și cel mult 200.000 de locuitori fiecare. Pragul de acoperire aproape că nu se activează: un singur județ, Tulcea, cu 193.355 de locuitori, e destul de mic încât o singură instanță să-l acopere sub plafon. În rest, mărimea decide. Simulatorul arată ambele variante și nu alege între ele: alegerea aparține autorului propunerii, nu calculului.",
       "severity": "blocking",
-      "affects": ["nivel1", "consolidation"]
+      "affects": [
+        "nivel1",
+        "consolidation",
+        "access"
+      ]
     },
     {
       "id": "propunere-nepublicata",
       "text": "Propunerea nu este publicată de nicio instituție și nu are un identificator public. Este documentul autorului acestui simulator, inclus în depozit tocmai pentru ca cititorul să poată verifica ce anume se modelează.",
       "severity": "material",
-      "affects": ["provenance"]
+      "affects": [
+        "provenance"
+      ]
     },
     {
       "id": "fara-nivel-2",
       "text": "Propunerea numerotează Nivel 1, Nivel 3 și Nivel 4, fără un Nivel 2. Nu este clar dacă lipsește un grad de jurisdicție din text sau din numerotare, iar simulatorul nu presupune care dintre ele.",
       "severity": "material",
-      "affects": ["nivel1", "curtiDeApel"]
+      "affects": [
+        "nivel1",
+        "curtiDeApel"
+      ]
     },
     {
       "id": "criteriul-nu-e-arondarea",
       "text": "Propunerea dimensionează instanțele după populația deservită, dar arondarea — ce comune răspund de care instanță — este stabilită prin lege și nu se află în acest document. Gruparea pe care o arată harta este construită din populație și distanță rutieră, nu citită dintr-o listă oficială.",
       "severity": "blocking",
-      "affects": ["nivel1", "access"]
+      "affects": [
+        "nivel1",
+        "access"
+      ]
     }
   ]
 }
