@@ -23,6 +23,11 @@ const sources = [
     resolve(here, '../../../administrativ/web/public/data/counties.geojson'),
     'counties.geojson',
   ],
+  // The proposal is a document with its own provenance, not a constant in the code: what the
+  // page claims the reform says has to be checkable against the paper it was read from.
+  [resolve(here, '../../data/propunere-harta-judiciara.json'), 'propunere.json'],
+  // County codes to full names, so a merged court is "Tribunalul Covasna" and not "CV".
+  [resolve(here, '../../../administrativ/web/public/data/manifest.json'), 'manifest.json'],
 ];
 
 for (const [from, name] of sources) {

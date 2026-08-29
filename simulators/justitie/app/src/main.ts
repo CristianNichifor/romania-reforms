@@ -42,6 +42,8 @@ interface Court {
   loadPerPost?: number;
   judges?: number;
   posts?: number;
+  /** Level-1 judges the county has today, carried on a merged court for comparison. */
+  judgesToday?: number;
   county: string;
   siruta: string | null;
   placedBy: 'name' | 'county-seat' | 'city';
@@ -53,6 +55,14 @@ interface Limitation {
   text: string;
   severity: string;
   affects: string[];
+}
+
+interface Proposal {
+  publisher: string;
+  published: boolean;
+  provenance: { note?: string };
+  tinta: { nivel1: { instante: number; motivInstante?: string } };
+  limitations: Limitation[];
 }
 
 interface Document {
@@ -96,10 +106,15 @@ const BLANK = {
 };
 
 async function main(): Promise<void> {
-  const [doc, counties] = await Promise.all([
+  const [doc, counties, proposal, manifest] = await Promise.all([
     fetch(`${base}data/instante.json`).then((r) => r.json() as Promise<Document>),
     fetch(`${base}data/counties.geojson`).then((r) => r.json()),
+    fetch(`${base}data/propunere.json`).then((r) => r.json() as Promise<Proposal>),
+    fetch(`${base}data/manifest.json`).then(
+      (r) => r.json() as Promise<{ countyNames?: Record<string, string> }>,
+    ),
   ]);
+  const countyName = (code: string): string => manifest.countyNames?.[code] ?? code;
 
   // The year comes from the document, not the markup. The CSM publishes annually and this
   // page had 2023 written into its subtitle while reading 2025 — a caption that disagrees
@@ -139,7 +154,18 @@ async function main(): Promise<void> {
    * appeal and there are already 15. Where a county has several tribunale, the specialised
    * ones fold in too, which is what "42 consolidated tribunale" means.
    */
-  const proposed = (): Court[] => {
+  /**
+   * The proposal: one level-1 court per county, sized by the work it inherits.
+   *
+   * The count is fixed by territorial coverage — 41 counties and Bucharest, hence 42 — and a
+   * county with more work gets a bigger court rather than another one. Judges follow from the
+   * volume and the target rate; the number of courts does not move.
+   *
+   * The paper also says each court would serve 150.000-200.000 inhabitants. That cannot hold
+   * at 42 — the average is 453.662 — and it is recorded in the proposal document as wording
+   * to correct rather than modelled here. Curtile de apel and the Inalta Curte are untouched.
+   */
+  const proposed = (target: number): Court[] => {
     const kept = doc.courts.filter((c) => c.tier === 'iccj' || c.tier === 'curte-de-apel');
     const byCounty = new Map<string, Court[]>();
     for (const court of doc.courts) {
@@ -150,20 +176,23 @@ async function main(): Promise<void> {
     }
     const merged: Court[] = [];
     for (const [county, courts] of byCounty) {
-      // The consolidated court is seated where that county's tribunal already is.
+      // Seated where the county's tribunal already is: it is the level-1 court that exists
+      // at county scale, so it is the one with a building that plausibly takes the rest.
       const seat = courts.find((c) => c.tier === 'tribunal') ?? courts[0]!;
       const volume = courts.reduce((n, c) => n + c.volume, 0);
       const resolved = courts.reduce((n, c) => n + c.resolved, 0);
-      const judges = courts.reduce((n, c) => n + (c.judges ?? 0), 0);
       merged.push({
         ...seat,
         id: `t-${county}`,
-        name: `Tribunalul ${county} (comasat)`,
+        name: `Instanța ${countyName(county)}`,
         tier: 'tribunal',
         volume,
         resolved,
-        judges,
-        loadPerJudge: judges > 0 ? volume / judges : undefined,
+        // Staffing is the output here, not an input carried over: this is what the court
+        // would need to run at the chosen rate, which is the question consolidation raises.
+        judges: volume / target,
+        judgesToday: courts.reduce((n, c) => n + (c.judges ?? 0), 0),
+        loadPerJudge: target,
         posts: undefined,
         loadPerPost: undefined,
       });
@@ -171,10 +200,10 @@ async function main(): Promise<void> {
     return [...kept, ...merged];
   };
 
-  const meanLoadOf = (courts: Court[]): number => {
-    const loads = courts.map((c) => c.loadPerJudge ?? 0).filter((n) => n > 0);
-    return loads.length ? loads.reduce((a, b) => a + b, 0) / loads.length : 0;
-  };
+  /** Judges at level 1 today, the figure the proposal's staffing is compared against. */
+  const judgesToday = doc.courts
+    .filter((c) => c.tier === 'judecatorie' || c.tier === 'tribunal')
+    .reduce((n, c) => n + (c.judges ?? 0), 0);
 
   const asFeatures = (courts: Court[], ratioOf: (c: Court) => number | null) => ({
     type: 'FeatureCollection' as const,
@@ -207,16 +236,28 @@ async function main(): Promise<void> {
   map.addControl(new NavigationControl({ showCompass: false }), 'top-right');
 
   let mode: 'today' | 'proposed' = 'today';
-  const courtsFor = (m: typeof mode) => (m === 'today' ? doc.courts : proposed());
+  const targetInput = el<HTMLInputElement>('#target');
+  const courtsFor = (m: typeof mode) =>
+    m === 'today' ? doc.courts : proposed(Number(targetInput.value));
 
-  /** The yardstick differs by view, so it is built with the courts rather than assumed. */
+  /**
+   * What the colour means differs by view, because the two views vary in different things.
+   *
+   * Today: load per judge against the national average for the court's own grade, so a
+   * judecatorie is compared with judecatorii.
+   *
+   * Under the proposal every merged court runs at exactly the chosen rate — that is how its
+   * staffing is derived — so colouring by load would paint all forty-two identically. What
+   * actually varies is whether a county would need more judges than it has, which is the
+   * question the merge raises and the one a reader can act on.
+   */
   const ratioFor = (m: typeof mode, courts: Court[]): ((c: Court) => number | null) => {
     if (m === 'today') return (c) => ratioAgainst(c, averageFor.get(c.tier));
-    const merged = courts.filter((c) => c.id.startsWith('t-'));
-    const mean = meanLoadOf(merged);
-    // Courts the proposal leaves alone keep their own grade's yardstick.
-    return (c) =>
-      c.id.startsWith('t-') ? ratioAgainst(c, mean) : ratioAgainst(c, averageFor.get(c.tier));
+    return (c) => {
+      if (!c.id.startsWith('t-')) return ratioAgainst(c, averageFor.get(c.tier));
+      if (!c.judgesToday || !c.judges) return null;
+      return c.judges / c.judgesToday;
+    };
   };
 
   map.on('load', () => {
@@ -320,18 +361,43 @@ async function main(): Promise<void> {
       const courts = courtsFor(mode);
       const ratioOf = ratioFor(mode, courts);
       (map.getSource('courts') as GeoJSONSource).setData(asFeatures(courts, ratioOf));
-      const total = courts.reduce((n, c) => n + c.volume, 0);
-      const over = courts.filter((c) => (ratioOf(c) ?? 0) > 1).length;
-      // The legend has to name the yardstick, because it changes with the view and a reader
-      // comparing colours across the two would otherwise be comparing different questions.
+
       el('#ramp-title').textContent =
         mode === 'today'
           ? 'Încărcătura față de media pe grad'
-          : 'Încărcătura față de media instanțelor comasate';
+          : 'Judecători necesari față de câți sunt azi';
+      el('#staffing').hidden = mode !== 'proposed';
+      el('#authorship').hidden = mode !== 'proposed';
+      el<HTMLOutputElement>('#target-value').textContent = ro.format(Number(targetInput.value));
+
+      const total = courts.reduce((n, c) => n + c.volume, 0);
+      if (mode === 'today') {
+        const over = courts.filter((c) => (ratioOf(c) ?? 0) > 1).length;
+        el('#summary').innerHTML = `
+          <div class="figure"><strong>${ro.format(courts.length)}</strong> instanțe</div>
+          <div class="figure"><strong>${ro.format(total)}</strong> dosare</div>
+          <div class="figure"><strong>${ro.format(over)}</strong> peste media gradului</div>`;
+        return;
+      }
+
+      const merged = courts.filter((c) => c.id.startsWith('t-'));
+      const needed = merged.reduce((n, c) => n + (c.judges ?? 0), 0);
+      // The dossiers the forty-two would actually carry. Printing the system-wide figure
+      // beside "42 instante de nivel 1" reads as though they handle the appeals too.
+      const levelOne = merged.reduce((n, c) => n + c.volume, 0);
+      const delta = needed - judgesToday;
+      const volumes = merged.map((c) => c.volume).sort((a, c) => a - c);
+      const spread = volumes.length ? volumes[volumes.length - 1]! / volumes[0]! : 0;
       el('#summary').innerHTML = `
-        <div class="figure"><strong>${ro.format(courts.length)}</strong> instanțe</div>
-        <div class="figure"><strong>${ro.format(total)}</strong> dosare</div>
-        <div class="figure"><strong>${ro.format(over)}</strong> peste media gradului</div>`;
+        <div class="figure"><strong>${ro.format(merged.length)}</strong> instanțe de nivel 1,
+          câte una pe județ</div>
+        <div class="figure"><strong>${ro.format(levelOne)}</strong> dosare de nivel 1
+          <span class="vs">(din ${ro.format(total)} în tot sistemul)</span></div>
+        <div class="figure"><strong>${ro.format(Math.round(needed))}</strong> judecători
+          necesari, față de ${ro.format(Math.round(judgesToday))} azi
+          <span class="vs">(${delta >= 0 ? '+' : ''}${ro.format(Math.round(delta))})</span></div>
+        <div class="figure">cea mai mare instanță ar avea de
+          <strong>${spread.toFixed(0)}×</strong> mai multe dosare decât cea mai mică</div>`;
     };
 
     for (const button of document.querySelectorAll<HTMLButtonElement>('[data-mode]')) {
@@ -342,12 +408,24 @@ async function main(): Promise<void> {
         render();
       });
     }
+    targetInput.addEventListener('input', render);
     render();
   });
 
+  // Who wrote the proposal, stated on the view that shows it. The baseline is a CSM report
+  // and the proposal is one person's paper; a reader seeing "Astăzi / Propunerea" has no way
+  // to tell them apart unless the page says so. Read from the document, so it cannot drift
+  // from what the data claims.
+  el('#authorship').innerHTML = proposal.published
+    ? `Propunere publicată de ${proposal.publisher}.`
+    : `<strong>Propunere neinstituțională.</strong> Documentul este al lui ` +
+      `${proposal.publisher}, autorul acestui simulator. Nu este act normativ și nu a trecut ` +
+      `printr-un proces public. Baza de comparație — activitatea instanțelor — este raportul ` +
+      `Consiliului Superior al Magistraturii.`;
+
   // The limitations are part of the map, not a footnote to it. The blocking one is the reason
   // this shows where courts are and refuses to show what closing one would cost.
-  el('#limits').innerHTML = doc.limitations
+  el('#limits').innerHTML = [...doc.limitations, ...proposal.limitations]
     .map(
       (l) =>
         `<p class="limit ${l.severity === 'blocking' ? 'blocking' : ''}">${
