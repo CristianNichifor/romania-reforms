@@ -66,15 +66,33 @@ hubOf : SIRUTA → SIRUTA
 
 Two providers satisfy it:
 
-- **frozen** — one administrativ scenario exported to a data file. This is v1. There is no
-  engine coupling, no shared package, and transport is testable entirely on its own.
+- **frozen** — one administrativ scenario exported to a data file. This is v1. No engine
+  coupling, and transport is testable entirely on its own.
 - **live** — administrativ's TypeScript model running in the worker alongside this one, so
   moving the *radius slider* moves the *bus fleet*. Later, same engine, different provider.
 
-The staging matters because the repository's stated rule is that a shared package waits for a
-second real consumer. Under `frozen` there is no second consumer and nothing to extract.
-Under `live` there provably is — and by then the surface to extract will be known rather than
-guessed. This is the same discipline the README applies to `packages/ui` and `justitie`.
+The staging buys isolation: under `frozen`, transport can be built, tested and disputed without
+administrativ running at all, and the hub assignment is a file a critic can inspect.
+
+### On extracting a shared package
+
+An earlier draft of this section argued that `frozen` means "no second consumer, therefore
+nothing to extract". **That is no longer true and the record should say so.** `justitie` already
+consumes administrativ's SIRUTA registry and, since `650f89b`, its road graph — and says as
+much: *the second thing this simulator has needed from over there… which is where extracting a
+package starts being arguable rather than premature.* Transport would be the third consumer.
+
+So the extraction question is live now, independently of which provider transport uses. The
+distinction that resolves it is one the README already draws:
+
+- **The data substrate** — SIRUTA registry, road graph, and from `L0` the travel-time matrices —
+  now has three consumers. This is what should be extracted.
+- **The engines** — the accretion model, the pay model, this simulator's timetable and cost
+  engines — have one consumer each and share nothing but the ethos. These stay where they are,
+  exactly as the README says.
+
+Transport should not force that extraction, but it should not pretend to be the trigger for it
+either. It is the third consumer of something two simulators already share.
 
 ### What the coupling unlocks
 
@@ -475,6 +493,17 @@ L5   fare + demand — Rejsekort proper
 ```
 
 `L2` is the first public artefact, and it deliberately ships before any demand assumption exists.
+
+**`L0` has a customer outside this simulator.** `justitie` already maps what court consolidation
+costs in travel, and carries an explicit caveat against its own figures:
+
+> kilometres are not hours: forty in the mountains can cost more than eighty on the plain.
+
+The `L0` substrate answers that directly — it replaces road distance with road minutes, over the
+same graph and the same SIRUTA join. Building it retires a declared limitation in another
+simulator and upgrades a map that is already published. `L0` is therefore not transport-only
+infrastructure to be justified by layers above it; it is the shared substrate of §3, and it is
+worth building first on that basis alone.
 
 `L4` is pure import work and the largest import in the repository — 41 counties of heterogeneous
 documents. It is independent of every other layer and turns "X lei per year" into "X versus what
