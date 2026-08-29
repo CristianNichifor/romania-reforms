@@ -19,6 +19,7 @@ jobs:
       - name: Pay grades and costs are reproducible
         run: |
           uv run python simulators/justitie/scripts/import_indemnizatii.py
+          uv run --with pypdf python simulators/justitie/scripts/import_pensii.py
           uv run python simulators/justitie/scripts/build_costuri.py
           git diff --exit-code simulators/justitie/data/
       - name: The arondare is reproducible
