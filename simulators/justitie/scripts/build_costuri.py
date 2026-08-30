@@ -5,11 +5,19 @@ from the CSM report, and what the law pays a judge of that grade, read from Anne
 Multiplying gives the base wage bill — per court, per grade, and under the staffing the
 proposal would need.
 
-**One question the reform paper does not answer decides a third of the answer.** It merges
-judecătorii and tribunale into a single first-level court and never says what grade that
-court's judges hold. At judecătorie grade a judge costs 17.250 lei a month; at tribunal grade,
-22.500. Across the numbers involved that is a difference of hundreds of millions a year, so
-both are computed and neither is presented as the answer.
+**The question that used to decide a third of the answer is settled, and the paper settles it.**
+This file long said the paper merges judecătorii and tribunale without saying what grade the
+merged court's judges hold — a difference of hundreds of millions a year between 17.250 and
+22.500 lei a month. It does say, twice. The architecture table on p. 43 lists judecătoriile as
+DESFIINȚATE and level 2 as "Judecătorii + Tribunale consolidate ~42"; p. 45 spells out that the
+reform "elimină judecătoriile ca instituții administrative separate" and that their judging
+function "este preluată integral de tribunale județene sau metropolitane". The surviving
+institution is the tribunal, so the merged court is a tribunal and its judges are paid at
+tribunal grade.
+
+The judecătorie-grade figures stay in the file as the counterfactual — what the same judiciary
+would have cost had the merged court been the junior one — but they are no longer offered as
+an equal reading of the paper.
 
 Everything here is base indemnity at the top of the printed scale. It is an upper bound on the
 base and a lower bound on what is actually paid, because the sporuri the chapter argues about
@@ -29,6 +37,21 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "data" / "costuri-2025.json"
 
 MONTHS = 12
+
+# The grade of the merged first-level court, read out of the paper rather than left open.
+RESOLVED_GRADE = {
+    "grade": "tribunal",
+    "provenance": {
+        "source": "reforma-sistem-judiciar-romania",
+        "locator": "p. 43, tabelul 7.8; p. 45, clarificarea privind desființarea judecătoriilor",
+        "confidence": "verbatim",
+        "note": (
+            "„Judecatorii DESFIINTATE”; nivelul 2 este „Judecatorii + Tribunale consolidate”, "
+            "iar funcția de judecată „este preluata integral de tribunale judetene sau "
+            "metropolitane”. Instanța care supraviețuiește este tribunalul."
+        ),
+    },
+}
 
 # The per-judge caseload the merged courts would run at. The report prints two rates and the
 # paper picks neither, so the wage bill is computed across the range rather than at a point.
@@ -100,6 +123,7 @@ def main() -> int:
                     "judgesNeeded": needed,
                     "annualLei": round(annual),
                     "differenceLei": round(annual - today_level_one),
+                    "isPaperGrade": grade == RESOLVED_GRADE["grade"],
                 }
             )
 
@@ -139,18 +163,21 @@ def main() -> int:
                 "annualLei": round(today_level_one),
             },
         },
+        "resolvedGrade": RESOLVED_GRADE,
         "scenarios": scenarios,
         "limitations": [
             {
-                "id": "gradul-instantei-comasate-nu-e-stabilit",
+                "id": "tranzitia-de-grad-nu-e-stabilita",
                 "text": (
-                    "Propunerea unește judecătoriile și tribunalele într-o singură instanță de "
-                    "nivel 1, dar nu spune ce grad au judecătorii ei. La grad de judecătorie "
-                    "un judecător costă 17.250 lei pe lună, la grad de tribunal 22.500 — o "
-                    "diferență de sute de milioane pe an la efectivele în discuție. Ambele "
-                    "sunt calculate; niciuna nu e prezentată drept răspunsul."
+                    "Instanța de nivel 1 este tribunalul: lucrarea desființează judecătoriile ca "
+                    "instituții separate, iar funcția lor de judecată este preluată integral de "
+                    "tribunale (p. 43 și p. 45). Cifrele sunt deci calculate la grad de tribunal. "
+                    "Ce nu spune lucrarea este dacă judecătorii veniți de la judecătorii își "
+                    "păstrează gradul în tranziție; dacă da, factura primilor ani este sub cea "
+                    "de aici. Varianta la grad de judecătorie rămâne calculată, ca termen de "
+                    "comparație, nu ca a doua citire a propunerii."
                 ),
-                "severity": "blocking",
+                "severity": "material",
                 "affects": ["cost"],
             },
             {

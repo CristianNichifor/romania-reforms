@@ -1,9 +1,9 @@
 """Tests for the judiciary priced under the July 2026 pay draft.
 
 The claim that carries weight here is comparative — the draft compresses the bench, and that
-shrinks the cost of the reform paper's unstated merged-court grade. A comparison is easy to
-get backwards, so every direction is asserted explicitly rather than assumed from the numbers
-that happen to be in the file today.
+shrinks what the merged court's grade transition is worth. A comparison is easy to get
+backwards, so every direction is asserted explicitly rather than assumed from the numbers that
+happen to be in the file today.
 """
 
 from __future__ import annotations
@@ -89,10 +89,12 @@ def test_the_draft_compresses_rather_than_lifts(proiect):
 def test_the_grade_gap_narrows_and_the_swing_follows_it(proiect):
     """Why compression matters for this simulator specifically.
 
-    The paper never says what grade a merged first-level court's judges hold, and the cost of
-    that silence is the gap between the two grades times the headcount. A narrower gap is a
-    cheaper silence — at every staffing target, not just on average.
+    The paper settles which grade the merged court holds — it abolishes judecatoriile — so the
+    gap no longer prices an ambiguity. It prices the transition: what it costs if judges
+    arriving from an abolished judecatorie keep their grade for a while. A narrower gap is a
+    cheaper transition, at every staffing target rather than only on average.
     """
+    assert proiect["gradeIsResolved"] is True
     gap = proiect["gradeGap"]
     assert gap["narrows"] is True
     assert 0 < gap["draftMonthlyLei"] < gap["todayMonthlyLei"]
@@ -137,6 +139,8 @@ def test_the_two_years_are_declared_incomparable_in_level(proiect):
     ids = {x["id"] for x in proiect["limitations"]}
     assert "ani-diferiti-fara-deflator" in ids
     assert "doar-judecatorii-sunt-evaluati" in ids
+    # The grade is settled but the transition is not, and the gap is what that question costs.
+    assert "tranzitia-de-grad-nu-e-stabilita" in ids
     assert "diferenta-tranzitorie-nu-e-modelata" in {
         x["id"] for x in proiect["limitations"] if x["severity"] == "blocking"
     }

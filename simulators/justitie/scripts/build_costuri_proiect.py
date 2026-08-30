@@ -11,12 +11,12 @@ grade to 26.250 at the Înalta Curte, a spread of 1,52 to 1. The draft's coeffic
 to 5,50 — a spread of 1,25. Read rank by rank it raises the bottom and cuts the top, which is
 the opposite of what "reforming magistrates' pay" is usually taken to mean.
 
-**That matters for the one question this simulator cannot answer.** The reform paper merges
-judecătorii and tribunale into a single first-level court and never says what grade its judges
-hold. Under the law in force the two grades differ by 5.250 lei a month — the single costliest
-silence in the paper, worth hundreds of millions a year across the staffing in question. Under
-the draft they differ by about 2.861. The question does not go away, but the draft halves what
-it costs to leave it open, and that is a finding about the draft, not about the paper.
+**That matters for what the merged court costs.** The paper abolishes judecătoriile and hands
+their work to the tribunale, so the merged level-1 court is a tribunal and its judges are paid
+at tribunal grade. Under the law in force tribunal grade costs 5.250 lei a month more than
+judecătorie grade; under the draft, about 2.861. The choice is settled, but the gap still
+prices one open question — whether judges arriving from a judecătorie keep their grade through
+the transition — and the draft roughly halves what that transition is worth.
 
 Two things are deliberately not done here. The 2022 and 2026 figures are in the money of their
 own years and no deflator is applied, so levels are not compared — only ratios, which are
@@ -115,8 +115,8 @@ def main() -> int:
     spread_today = today_pay["iccj"] / today_pay["judecatorie"]
     spread_draft = coefficients["iccj"] / coefficients["judecatorie"]
 
-    # The paper's costliest silence, priced under each regime. Level 1 is judecatorii plus
-    # tribunale merged; the paper does not say which grade the merged court's judges hold.
+    # The gap between the two grades, priced under each regime. The paper settles which grade
+    # the merged court holds; what the gap now measures is the transition, not the ambiguity.
     gap_today = today_pay["tribunal"] - today_pay["judecatorie"]
     gap_draft = pay(coefficients["tribunal"]) - pay(coefficients["judecatorie"])
 
@@ -155,7 +155,7 @@ def main() -> int:
               f"{row['todayMonthlyLei']:>13,.0f}{row['ratioToToday']:>9.2f}")
     print(f"\nevantai vârf/bază:  azi {spread_today:.2f}x   proiect {spread_draft:.2f}x")
     print(f"diferența de grad:  azi {gap_today:,.0f} lei/lună   proiect {gap_draft:,.0f} lei/lună")
-    print(f"\ncât costă tăcerea lucrării despre grad, pe an:")
+    print(f"\ncât valorează diferența de grad, pe an:")
     for s in swings:
         print(f"  la {s['target']:,.0f} dosare/judecător: azi {s['todayLei'] / 1e6:>7,.1f} M   "
               f"proiect {s['draftLei'] / 1e6:>7,.1f} M")
@@ -190,7 +190,20 @@ def main() -> int:
         "levelOne": {"volume": level_one["volume"]},
         "scenarios": scenarios,
         "gradeChoiceSwing": swings,
+        "gradeIsResolved": True,
         "limitations": [
+            {
+                "id": "tranzitia-de-grad-nu-e-stabilita",
+                "text": (
+                    "Instanța de nivel 1 este tribunalul, deci gradul plătit este cel de "
+                    "tribunal. Lucrarea nu spune însă ce se întâmplă cu judecătorii veniți de "
+                    "la judecătorii: dacă își păstrează gradul o perioadă, factura primilor ani "
+                    "este sub cea de aici. Diferența dintre grade — 5.250 lei pe lună azi, 2.861 "
+                    "după proiect — este exact ce valorează această întrebare."
+                ),
+                "severity": "material",
+                "affects": ["cost"],
+            },
             {
                 "id": "ani-diferiti-fara-deflator",
                 "text": (

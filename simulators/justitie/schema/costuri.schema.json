@@ -14,7 +14,8 @@
     "monthlyLeiByTier",
     "today",
     "scenarios",
-    "limitations"
+    "limitations",
+    "resolvedGrade"
   ],
   "properties": {
     "$schema": {
@@ -78,7 +79,8 @@
           "gradePaid",
           "judgesNeeded",
           "annualLei",
-          "differenceLei"
+          "differenceLei",
+          "isPaperGrade"
         ],
         "properties": {
           "target": {
@@ -98,6 +100,10 @@
           },
           "differenceLei": {
             "type": "number"
+          },
+          "isPaperGrade": {
+            "description": "True for the grade the paper implies; the other grade is kept as a counterfactual.",
+            "type": "boolean"
           }
         }
       }
@@ -107,6 +113,26 @@
       "minItems": 1,
       "items": {
         "$ref": "provenance.schema.json#/$defs/limitation"
+      }
+    },
+    "resolvedGrade": {
+      "description": "The grade the paper's own architecture implies for the merged level-1 court. Cited, not chosen.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "grade",
+        "provenance"
+      ],
+      "properties": {
+        "grade": {
+          "enum": [
+            "judecatorie",
+            "tribunal"
+          ]
+        },
+        "provenance": {
+          "$ref": "provenance.schema.json#/$defs/provenance"
+        }
       }
     }
   }

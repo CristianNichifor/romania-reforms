@@ -761,12 +761,14 @@ async function main(): Promise<void> {
      <p class="disagree">Evantaiul de la vârf la bază se strânge de la
        ${dec2(proiect.spread.todayRatio)} la ${dec2(proiect.spread.draftRatio)}: gradele
        de sus sunt tăiate, judecătoria e urcată. Nu e o creștere generală, e o comprimare.</p>
-     <p class="disagree">Pentru simulatorul ăsta contează direct. Lucrarea nu spune ce grad au
-       judecătorii instanței de nivel 1, iar diferența dintre grade scade de la
+     <p class="disagree">Pentru simulatorul ăsta contează direct. Instanța de nivel 1 este
+       tribunalul — lucrarea desființează judecătoriile —, dar nu spune dacă judecătorii veniți
+       de acolo își păstrează gradul în tranziție. Diferența dintre grade scade de la
        ${ro.format(proiect.gradeGap.todayMonthlyLei)} la
-       ${ro.format(proiect.gradeGap.draftMonthlyLei)} lei pe lună. Tăcerea aceea costă azi
-       ${ro.format(Math.round((lowest?.todayLei ?? 0) / 1e6))} milioane de lei pe an și ar costa
-       ${ro.format(Math.round((lowest?.draftLei ?? 0) / 1e6))} de milioane după proiect.</p>`;
+       ${ro.format(proiect.gradeGap.draftMonthlyLei)} lei pe lună, deci întrebarea aceea
+       valorează azi ${ro.format(Math.round((lowest?.todayLei ?? 0) / 1e6))} milioane de lei pe
+       an și ar valora ${ro.format(Math.round((lowest?.draftLei ?? 0) / 1e6))} de milioane după
+       proiect.</p>`;
 
   // The one number three other sections used to say could not be found. Shown against the two
   // things it decides — the draft law's ceiling and the pension bill's headline — because a

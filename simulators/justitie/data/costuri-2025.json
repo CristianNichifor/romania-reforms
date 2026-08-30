@@ -54,6 +54,15 @@
       "annualLei": 589090500
     }
   },
+  "resolvedGrade": {
+    "grade": "tribunal",
+    "provenance": {
+      "source": "reforma-sistem-judiciar-romania",
+      "locator": "p. 43, tabelul 7.8; p. 45, clarificarea privind desființarea judecătoriilor",
+      "confidence": "verbatim",
+      "note": "„Judecatorii DESFIINTATE”; nivelul 2 este „Judecatorii + Tribunale consolidate”, iar funcția de judecată „este preluata integral de tribunale judetene sau metropolitane”. Instanța care supraviețuiește este tribunalul."
+    }
+  },
   "scenarios": [
     {
       "target": 932.3,
@@ -61,7 +70,8 @@
       "gradePaid": "judecatorie",
       "judgesNeeded": 3714.6,
       "annualLei": 768922200,
-      "differenceLei": 179831700
+      "differenceLei": 179831700,
+      "isPaperGrade": false
     },
     {
       "target": 932.3,
@@ -69,7 +79,8 @@
       "gradePaid": "tribunal",
       "judgesNeeded": 3714.6,
       "annualLei": 1002942000,
-      "differenceLei": 413851500
+      "differenceLei": 413851500,
+      "isPaperGrade": true
     },
     {
       "target": 1325.0,
@@ -77,7 +88,8 @@
       "gradePaid": "judecatorie",
       "judgesNeeded": 2613.7,
       "annualLei": 541035900,
-      "differenceLei": -48054600
+      "differenceLei": -48054600,
+      "isPaperGrade": false
     },
     {
       "target": 1325.0,
@@ -85,7 +97,8 @@
       "gradePaid": "tribunal",
       "judgesNeeded": 2613.7,
       "annualLei": 705699000,
-      "differenceLei": 116608500
+      "differenceLei": 116608500,
+      "isPaperGrade": true
     },
     {
       "target": 1479.0,
@@ -93,7 +106,8 @@
       "gradePaid": "judecatorie",
       "judgesNeeded": 2341.5,
       "annualLei": 484690500,
-      "differenceLei": -104400000
+      "differenceLei": -104400000,
+      "isPaperGrade": false
     },
     {
       "target": 1479.0,
@@ -101,14 +115,15 @@
       "gradePaid": "tribunal",
       "judgesNeeded": 2341.5,
       "annualLei": 632205000,
-      "differenceLei": 43114500
+      "differenceLei": 43114500,
+      "isPaperGrade": true
     }
   ],
   "limitations": [
     {
-      "id": "gradul-instantei-comasate-nu-e-stabilit",
-      "text": "Propunerea unește judecătoriile și tribunalele într-o singură instanță de nivel 1, dar nu spune ce grad au judecătorii ei. La grad de judecătorie un judecător costă 17.250 lei pe lună, la grad de tribunal 22.500 — o diferență de sute de milioane pe an la efectivele în discuție. Ambele sunt calculate; niciuna nu e prezentată drept răspunsul.",
-      "severity": "blocking",
+      "id": "tranzitia-de-grad-nu-e-stabilita",
+      "text": "Instanța de nivel 1 este tribunalul: lucrarea desființează judecătoriile ca instituții separate, iar funcția lor de judecată este preluată integral de tribunale (p. 43 și p. 45). Cifrele sunt deci calculate la grad de tribunal. Ce nu spune lucrarea este dacă judecătorii veniți de la judecătorii își păstrează gradul în tranziție; dacă da, factura primilor ani este sub cea de aici. Varianta la grad de judecătorie rămâne calculată, ca termen de comparație, nu ca a doua citire a propunerii.",
+      "severity": "material",
       "affects": [
         "cost"
       ]
