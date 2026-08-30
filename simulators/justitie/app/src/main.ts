@@ -179,6 +179,64 @@ interface Eficienta {
   limitations: Limitation[];
 }
 
+interface Resurse {
+  chapter: {
+    page: number;
+    digitalisationMillionEur: number[];
+    buildingsMillionEur: number[];
+    buildingsYears: number | null;
+    auxiliaryAnnualMillionEur: number;
+    auxiliaryRecruits: number[];
+    magistrateRecruits: number;
+    magistrateYears: number;
+  };
+  exchangeRate: { leiPerEur: number; date: string; yearAverage: number };
+  auxiliaryCheck: {
+    annualMoneyLei: number;
+    recruitsLow: number;
+    recruitsHigh: number;
+    band: { withSporuriLowMonthlyLei: number; withSporuriHighMonthlyLei: number };
+    costOfRecruitsDearestLei: number;
+    costOfRecruitsCheapestLei: number;
+    moneyOverDearest: number;
+    moneyOverCheapest: number;
+    unexplainedAnnualLei: number;
+  };
+  magistrateCheck: {
+    recruits: number;
+    years: number;
+    judgesVacant: number;
+    prosecutorsVacant: number;
+    bothVacant: number;
+    coversJudgeVacancies: boolean;
+    coversBothVacancies: boolean;
+    shortfallIfBoth: number;
+  };
+  buildingsCheck: {
+    millionEurLow: number;
+    millionEurHigh: number;
+    years: number | null;
+    sitesToday: number;
+    sitesProposed: number;
+    sitesClosed: number;
+    perSiteTodayLowEur: number;
+    perSiteTodayHighEur: number;
+    perSiteProposedLowEur: number;
+    perSiteProposedHighEur: number;
+  };
+  total: {
+    annualLowMillionEur: number;
+    annualHighMillionEur: number;
+    annualLowLei: number;
+    annualHighLei: number;
+    basePayrollLei: number;
+    shareOfBasePayrollLow: number;
+    shareOfBasePayrollHigh: number;
+    horizonYears: number;
+  };
+  limitations: Limitation[];
+}
+
 interface Politie {
   summary: {
     stations: number;
@@ -410,6 +468,7 @@ async function main(): Promise<void> {
     parchete,
     acoperire,
     curtiApel,
+    resurse,
   ] = await Promise.all([
     fetch(`${base}data/instante.json`).then((r) => r.json() as Promise<Document>),
     fetch(`${base}data/counties.geojson`).then((r) => r.json()),
@@ -430,6 +489,7 @@ async function main(): Promise<void> {
     fetch(`${base}data/parchete.json`).then((r) => r.json() as Promise<Parchete>),
     fetch(`${base}data/acoperire.json`).then((r) => r.json() as Promise<Acoperire>),
     fetch(`${base}data/curti-apel.json`).then((r) => r.json() as Promise<CurtiApel>),
+    fetch(`${base}data/resurse.json`).then((r) => r.json() as Promise<Resurse>),
   ]);
   const countyName = (code: string): string => manifest.countyNames?.[code] ?? code;
 
@@ -1386,6 +1446,90 @@ async function main(): Promise<void> {
        ${ro.format(parchete.auxiliary.filled)} ocupate plus ${parchete.auxiliary.vacant} vacante
        fac mai mult decât cele ${ro.format(parchete.auxiliary.posts)} prevăzute.</p>`;
 
+  // Chapter 16: the only chapter whose numbers can be checked against each other rather than
+  // against an outside source. Three of them do not survive it, so the fold leads with the
+  // chapter's own asks and then says, one at a time, what each collides with.
+  const rs = resurse;
+  const mil = (lei: number): string => `${ro.format(Math.round(lei / 1e6))} mil. lei`;
+  // Romanian writes 1,49 and 2,8. toFixed gives a dot, and a page that prints lei in one
+  // convention and ratios in another looks like two documents stapled together.
+  const dec = (n: number, digits: number): string =>
+    n.toLocaleString('ro-RO', { minimumFractionDigits: digits, maximumFractionDigits: digits });
+  // A range names its unit once: "237–513 mil. lei", not "237 mil. lei–513 mil. lei".
+  const milRange = (low: number, high: number): string =>
+    `${ro.format(Math.round(low / 1e6))}–${ro.format(Math.round(high / 1e6))} mil. lei`;
+  el('#resurse-chev').textContent =
+    `+${Math.round(rs.total.shareOfBasePayrollLow * 100)}–` +
+    `${Math.round(rs.total.shareOfBasePayrollHigh * 100)}%`;
+  el('#resurse-body').innerHTML =
+    `<p class="note">Capitolul 16 cere resursele reformei în cinci rânduri, fără să le pună
+       unele lângă altele. Puse, trei dintre ele se ciocnesc de cifrele din restul paginii.
+       Euro sunt convertiți la cursul BCE din ${rs.exchangeRate.date}
+       (${dec(rs.exchangeRate.leiPerEur, 4)} lei; media anului
+       ${dec(rs.exchangeRate.yearAverage, 4)}, deci data aleasă nu schimbă nimic).</p>
+     <div class="pens-row">
+       <span class="pens-head">ce cere</span>
+       <span class="pens-head">cât</span>
+       <span class="pens-head">pe</span>
+       <span class="pens-head"></span>
+       <span>digitalizare</span>
+       <span>${rs.chapter.digitalisationMillionEur[0]}–${rs.chapter.digitalisationMillionEur[1]} mil. €</span>
+       <span>o dată</span><span></span>
+       <span>reabilitare sedii</span>
+       <span>${rs.chapter.buildingsMillionEur[0]}–${rs.chapter.buildingsMillionEur[1]} mil. €</span>
+       <span>${rs.chapter.buildingsYears} ani</span><span></span>
+       <span>personal auxiliar</span>
+       <span>${rs.chapter.auxiliaryAnnualMillionEur} mil. €</span>
+       <span>anual</span><span></span>
+       <span>posturi auxiliare</span>
+       <span>${ro.format(rs.chapter.auxiliaryRecruits[0]!)}–${ro.format(rs.chapter.auxiliaryRecruits[1]!)}</span>
+       <span>—</span><span></span>
+       <span>magistrați</span>
+       <span>${ro.format(rs.chapter.magistrateRecruits)}</span>
+       <span>${rs.chapter.magistrateYears} ani</span><span></span>
+     </div>
+     <p class="disagree"><strong>Banii și oamenii nu sunt aceeași mărime.</strong> Cele
+       ${rs.chapter.auxiliaryAnnualMillionEur} mil. € pe an fac
+       ${mil(rs.auxiliaryCheck.annualMoneyLei)}. Cei
+       ${ro.format(rs.auxiliaryCheck.recruitsLow)}–${ro.format(rs.auxiliaryCheck.recruitsHigh)}
+       de auxiliari costă ${milRange(
+         rs.auxiliaryCheck.costOfRecruitsCheapestLei,
+         rs.auxiliaryCheck.costOfRecruitsDearestLei,
+       )} pe an, la grila din Legea 153/2017 plus cota de sporuri din execuția bugetară —
+       ${ro.format(Math.round(rs.auxiliaryCheck.band.withSporuriLowMonthlyLei))}–${ro.format(
+         Math.round(rs.auxiliaryCheck.band.withSporuriHighMonthlyLei),
+       )} lei/lună. Chiar la cea mai scumpă citire, banii sunt de
+       ${dec(rs.auxiliaryCheck.moneyOverDearest, 2)}× cât oamenii pe care spun că îi
+       plătesc. Capitolul nu spune ce cumpără restul.</p>
+     <p class="disagree"><strong>${ro.format(rs.magistrateCheck.recruits)} de magistrați în
+       ${rs.magistrateCheck.years} ani nu acoperă golul de azi.</strong> La 31 decembrie 2025
+       erau vacante ${rs.magistrateCheck.judgesVacant} de posturi de judecător și
+       ${rs.magistrateCheck.prosecutorsVacant} de procuror. Citită ca judecători, recrutarea
+       ajunge; citită ca magistrați — judecători și procurori — rămâne în urmă cu
+       ${rs.magistrateCheck.shortfallIfBoth}, înainte de orice pensionare. Lucrarea nu spune
+       care dintre cele două înțelesuri îl folosește.</p>
+     <p class="disagree"><strong>Ce parc imobiliar se reabilitează?</strong> Cele
+       ${rs.buildingsCheck.millionEurLow}–${rs.buildingsCheck.millionEurHigh} mil. € se împart
+       altfel după cum sunt socotite: pe cele ${rs.buildingsCheck.sitesToday} de locații de
+       azi ies ${dec(rs.buildingsCheck.perSiteTodayLowEur / 1e6, 1)}–${dec(
+         rs.buildingsCheck.perSiteTodayHighEur / 1e6,
+         1,
+       )} mil. € de locație; pe cele ${rs.buildingsCheck.sitesProposed} rămase după
+       propria hartă a lucrării, ${dec(rs.buildingsCheck.perSiteProposedLowEur / 1e6, 1)}–${dec(
+         rs.buildingsCheck.perSiteProposedHighEur / 1e6,
+         1,
+       )} mil. €. Capitolul 7 închide ${rs.buildingsCheck.sitesClosed} de locații;
+       capitolul 16 nu spune dacă a ținut cont.</p>
+     <p class="disagree"><strong>Cât face tot.</strong> Întinse pe cei
+       ${rs.total.horizonYears} ani ai planului, cererile capitolului fac
+       ${rs.total.annualLowMillionEur}–${rs.total.annualHighMillionEur} mil. € pe an, adică
+       ${milRange(rs.total.annualLowLei, rs.total.annualHighLei)}. Salariile de bază ale
+       instanțelor sunt ${mil(rs.total.basePayrollLei)} pe an, deci cererea e cu
+       ${Math.round(rs.total.shareOfBasePayrollLow * 100)}–${Math.round(
+         rs.total.shareOfBasePayrollHigh * 100,
+       )}% peste ele. Salariile nu sunt bugetul justiției, iar procentul din buget ar fi mai
+       mic — dar este singurul numitor pe care pagina îl poate calcula din surse citabile.</p>`;
+
   const ef = eficienta.comparison;
   const cited = eficienta.years.find((y) => y.year === ef.citedYear)!;
   el('#eficienta-chev').textContent = `${ef.reportSaysEfficientOrBetter} din ${cited.judecatorii.classified}`;
@@ -1820,6 +1964,7 @@ async function main(): Promise<void> {
     ['spitale-fold', 7, 'simulare'],
     ['proiect-fold', 10, 'simulare'],
     ['pensii-fold', 11, 'ambele'],
+    ['resurse-fold', 16, 'ambele'],
   ].forEach(([id, chapter, kind]) =>
     badge(id as string, chapter as number, kind as 'politică' | 'simulare' | 'ambele'),
   );
@@ -1842,6 +1987,7 @@ async function main(): Promise<void> {
     ...parchete.limitations,
     ...acoperire.limitations,
     ...curtiApel.limitations,
+    ...resurse.limitations,
   ];
   const blocking = allLimits.filter((l) => l.severity === 'blocking');
   const rest = allLimits.filter((l) => l.severity !== 'blocking');

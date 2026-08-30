@@ -2,8 +2,8 @@
 
 The page grew by whatever happened to be computable, so its sections are named after topics —
 "Sporurile", "Parchetele" — and a reader has no way to map them back to the document they come
-from, or to see what was left out. Chapter 16 does not appear on the page at all. A simulator
-that silently omits a chapter is making a claim about coverage without stating it.
+from, or to see what was left out. A simulator that silently omits a chapter is making a claim
+about coverage without stating it.
 
 This builds the ledger: every chapter of the paper, with what the simulator does about it.
 
@@ -13,12 +13,17 @@ Three states, and the third splits in a way that matters:
   * **citat** — carried as the paper's own text, because it is institutional design rather
     than a quantity. ANIR, the KPI framework, the implementation plan.
   * **negacoperit** — and the honest distinction is between a chapter that *could* be built
-    and one that is not a quantity at all. Chapter 16 is arithmetic nobody has done here.
-    Chapter 1 is an argument; there is nothing to compute. Collapsing those two would be
+    and one that is not a quantity at all. Chapters 4 and 5 are arithmetic nobody has done
+    here. Chapter 1 is an argument; there is nothing to compute. Collapsing those two would be
     dishonest in opposite directions — one hides work, the other invents it.
 
 Chapters 7, 10 and 11 are both simulated and quoted: their measurable parts are computed and
 their design parts are carried verbatim. The ledger records both rather than forcing a choice.
+
+Chapter 16 was the largest of the buildable gaps and is now simulated. It turned out not to be
+missing arithmetic but unreconciled arithmetic: six figures asserted in a bullet list, three of
+which disagree with the pay grid, the vacancy count and the court estate this repository
+already holds.
 
 **The status of each chapter is a judgement, not a reading.** Titles and pages come out of the
 PDF; whether a chapter counts as covered is mine, and it is marked `assumed` for that reason.
@@ -68,6 +73,7 @@ SIMULATED = {
     7: ["instante-localizate-2025", "arondare-noua", "parchete-2025", "acces-servicii"],
     10: ["indemnizatii-2022", "sporuri-2025", "costuri-proiect-2026"],
     11: ["pensii-2025", "pensii-comparatie"],
+    16: ["resurse-necesare"],
     12: ["costuri-2025", "acces-2025", "arondare-noua", "eficienta-csm", "personal-2025"],
 }
 
@@ -83,7 +89,6 @@ GAPS = {
     4: "buildable",
     5: "buildable",
     6: "not-a-quantity",
-    16: "buildable",
     17: "not-a-quantity",
     18: "not-a-quantity",
     19: "not-a-quantity",
@@ -92,7 +97,6 @@ GAPS = {
 GAP_WHY = {
     4: "Datele daneze există deja în simulatorul de salarizare (dk-stat-2026, dk-occupations); nimic nu le leagă de argumentul de convergență al lucrării.",
     5: "Aceeași comparație România–Danemarca, pe structuri. Se poate calcula din date pe care depozitul le are deja.",
-    16: "Bugetul, clădirile, digitalizarea și personalul de care ar fi nevoie. Este aritmetică pe care nimeni nu a făcut-o aici — cel mai substanțial capitol nemodelat.",
     1: "Diagnostic și motivație; nu conține cantități de verificat.",
     2: "Descriere a sistemului; cifrele ei sunt reluate în capitolele care se simulează.",
     3: "Enumerare de probleme structurale, argumentativă.",
