@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/rail-cost.schema.json",
+  "title": "Rail cost, and the price of a minute of journey time",
+  "description": "Turns the rail network into lei, and then into the one figure that lets rail be argued against anything else: what an hour of passenger time costs to buy. The comparison against pulsing the bus timetable is included in the artefact rather than left to prose, because a unit cost with nothing beside it is not an argument.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "title", "publisher", "period", "provenance", "rates", "reference", "rehabilitation", "againstPulsing", "limitations"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "type": "string" },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "period": { "type": "string" },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+    "rates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tuiByClass", "crewRonPerTrainHour", "energyRonPerTrainKm", "unitPriceRon", "seats"],
+      "properties": {
+        "tuiByClass": {
+          "description": "Access charge per train-km by CFR line class. Must be monotone: better track costs more to use, which is what makes rehabilitation partly self-taxing.",
+          "type": "object",
+          "additionalProperties": { "type": "number", "exclusiveMinimum": 0 }
+        },
+        "crewRonPerTrainHour": { "type": "number", "exclusiveMinimum": 0 },
+        "energyRonPerTrainKm": { "type": "number", "exclusiveMinimum": 0 },
+        "unitPriceRon": { "type": "number", "exclusiveMinimum": 0 },
+        "seats": { "type": "integer", "exclusiveMinimum": 0 }
+      }
+    },
+    "reference": {
+      "description": "A unit of comparison rather than a real corridor, so the headline figure is not hostage to which line was chosen.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lineKm", "trainsPerWeekday", "passengersPerTrain", "units", "asIsKmh", "rehabilitatedKmh", "asIsLineClass", "rehabilitatedLineClass", "operatingRon", "capitalRon", "crewRon", "accessRon", "energyRon"],
+      "properties": {
+        "lineKm": { "type": "number", "exclusiveMinimum": 0 },
+        "trainsPerWeekday": { "type": "integer", "exclusiveMinimum": 0 },
+        "passengersPerTrain": { "type": "integer", "exclusiveMinimum": 0 },
+        "units": { "type": "integer", "exclusiveMinimum": 0 },
+        "asIsKmh": { "type": "number", "exclusiveMinimum": 0 },
+        "rehabilitatedKmh": { "type": "number", "exclusiveMinimum": 0 },
+        "asIsLineClass": { "type": "string", "enum": ["A", "B", "C", "D"] },
+        "rehabilitatedLineClass": { "type": "string", "enum": ["A", "B", "C", "D"] },
+        "operatingRon": { "type": "number", "minimum": 0 },
+        "capitalRon": { "type": "number", "minimum": 0 },
+        "crewRon": { "type": "number", "minimum": 0 },
+        "accessRon": { "type": "number", "minimum": 0 },
+        "energyRon": { "type": "number", "minimum": 0 }
+      }
+    },
+    "rehabilitation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ronPerKm", "hoursSavedPerTrip", "passengerHoursPerYear", "annualCapitalRon", "extraAccessRon", "ronPerPassengerHour"],
+      "properties": {
+        "ronPerKm": { "type": "number", "exclusiveMinimum": 0 },
+        "hoursSavedPerTrip": { "type": "number", "exclusiveMinimum": 0 },
+        "passengerHoursPerYear": { "type": "number", "exclusiveMinimum": 0 },
+        "annualCapitalRon": { "type": "number", "exclusiveMinimum": 0 },
+        "extraAccessRon": {
+          "description": "The renewed line moves up a tariff band, so some of what renewal buys is handed straight back as access charge.",
+          "type": "number"
+        },
+        "ronPerPassengerHour": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "againstPulsing": {
+      "description": "The bus network's cheapest minute, set beside rail's. Same buses, same kilometres, same drivers — only the departure times move, so the capital cost is zero and stays zero in the artefact.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pulseSavingMin", "peopleServed", "tripsPerPersonYear", "passengerHoursPerYear", "equivalentRailSpendRon", "pulseCapitalRon"],
+      "properties": {
+        "pulseSavingMin": { "type": "number", "exclusiveMinimum": 0 },
+        "peopleServed": { "type": "integer", "exclusiveMinimum": 0 },
+        "tripsPerPersonYear": { "type": "integer", "exclusiveMinimum": 0 },
+        "passengerHoursPerYear": { "type": "number", "exclusiveMinimum": 0 },
+        "equivalentRailSpendRon": { "type": "number", "exclusiveMinimum": 0 },
+        "pulseCapitalRon": { "type": "number", "const": 0 }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+    }
+  }
+}

@@ -1,0 +1,174 @@
+{
+  "$schema": "../schema/rail-cost-inputs.schema.json",
+  "id": "rail-cost-inputs",
+  "title": "Prețurile unitare ale serviciului feroviar",
+  "publisher": "Cristian Nichifor",
+  "period": "2026",
+  "provenance": {
+    "source": "cfr-ddr-2026-plus-contracte-semnate",
+    "locator": "Tarifele de infrastructură din Documentul de Referință al Rețelei CFR 2026, Anexa 25.c, în vigoare de la 01.03.2024; materialul rulant din contractul CFR Călători–Pesa semnat la 12.06.2024; reabilitarea din contracte de modernizare atribuite",
+    "confidence": "derived",
+    "note": "Spre deosebire de partea rutieră, cele trei poziții mari de aici — accesul la infrastructură, trenul și reabilitarea — au sursă românească verbatim, pentru că administratorul de infrastructură își publică tarifele iar contractele de achiziție sunt publice. Energia, personalul de tren și durata de viață a materialului rulant rămân estimări."
+  },
+  "currency": "RON",
+  "items": {
+    "tuiTsnClassA": {
+      "value": 3.45,
+      "unit": "RON/train-km",
+      "confidence": "verbatim",
+      "note": "Element tarifar de bază Tsn pentru trafic de călători, clasa de linie A (121-160 km/h). Tabel nr. 8.2 din Anexa 25.c la Documentul de Referință al Rețelei CFR 2026, valori aplicate de la 01.03.2024."
+    },
+    "tuiTsnClassB": {
+      "value": 2.8,
+      "unit": "RON/train-km",
+      "confidence": "verbatim",
+      "note": "Tsn călători, clasa B (91-120 km/h). Aceeași sursă. Este clasa în care ar intra o linie regională reabilitată."
+    },
+    "tuiTsnClassC": {
+      "value": 2.14,
+      "unit": "RON/train-km",
+      "confidence": "verbatim",
+      "note": "Tsn călători, clasa C (51-90 km/h). Aceeași sursă. Este clasa în care se află astăzi majoritatea rețelei regionale."
+    },
+    "tuiTsnClassD": {
+      "value": 1.48,
+      "unit": "RON/train-km",
+      "confidence": "verbatim",
+      "note": "Tsn călători, clasa D (sub 50 km/h). Aceeași sursă. Cel mai ieftin acces la infrastructură din rețea — pentru că este cea mai proastă linie, ceea ce arată direct că tariful urmărește calitatea liniei, nu invers."
+    },
+    "tuiTtse": {
+      "value": 0.676,
+      "unit": "RON/train-km",
+      "confidence": "verbatim",
+      "note": "Elementul de electrificare, adăugat numai trenurilor cu tracțiune electrică. Anexa 25.c: costurile de electrificare raportate la volumul de tren-km cu tracțiune electrică."
+    },
+    "tuiFt": {
+      "value": 0.00014,
+      "unit": "per tonne",
+      "confidence": "verbatim",
+      "note": "Coeficientul de modulare cu tonajul pentru trafic de călători. Tabel nr. 8.2, Anexa 25.c."
+    },
+    "tuiTminTonnes": {
+      "value": 60,
+      "unit": "tonnes",
+      "confidence": "verbatim",
+      "note": "Tonajul brut de referință sub care nu se aplică modularea. Formula TUI tonaj = Km x Ttsn [1 + (Tonaj brut - Tmin) x Ft], Anexa 25.c."
+    },
+    "emuGrossTonnes": {
+      "value": 150,
+      "unit": "tonnes",
+      "confidence": "assumed",
+      "note": "Masa brută a unei rame electrice de trei vagoane cu călători la bord. Contează puțin: la Ft = 0,00014 modularea adaugă circa 1,3% la tarif, adică sub patru bani pe tren-km."
+    },
+    "emuPriceRon": {
+      "value": 41520000,
+      "unit": "RON/unit",
+      "confidence": "verbatim",
+      "note": "830,4 milioane lei pentru 20 de rame electrice, adică 41,52 milioane lei (circa 8,4 milioane euro) pe ramă. Contract CFR Călători–Pesa semnat la 12.06.2024, ramă de trei vagoane, 192 de locuri, 160 km/h. Valoarea materialului rulant, fără componenta de mentenanță, care este contractată separat."
+    },
+    "emuSeats": {
+      "value": 192,
+      "unit": "seats",
+      "confidence": "verbatim",
+      "note": "Locuri pe ramă, clasa I și a II-a, din specificația aceluiași contract."
+    },
+    "emuMaintenanceRonYear": {
+      "value": 920000,
+      "unit": "RON/unit/year",
+      "confidence": "derived",
+      "note": "276 de milioane de lei pentru mentenanța a 20 de rame pe 15 ani, adică 0,92 milioane de lei pe ramă pe an. Din același contract, unde mentenanța are valoare separată — ceea ce este exact separarea pe care partea rutieră a modelului nu a putut-o obține din nicio sursă românească."
+    },
+    "emuLifeYears": {
+      "value": 30,
+      "unit": "years",
+      "confidence": "assumed",
+      "note": "Durata de folosință a unei rame electrice. Mult peste cei 12 ani ai unui autobuz, și acesta este unul dintre motivele pentru care costul pe loc-kilometru iese diferit între moduri."
+    },
+    "energyKwhPerKm": {
+      "value": 9.5,
+      "unit": "kWh/train-km",
+      "confidence": "assumed",
+      "note": "Consum de tracțiune al unei rame electrice regionale de trei vagoane, din intervalul raportat de 7,8-12 kWh/km. Variază cu anotimpul: încălzirea și climatizarea adaugă 10-15% sub zero grade."
+    },
+    "energyPriceRonKwh": {
+      "value": 0.75,
+      "unit": "RON/kWh",
+      "confidence": "assumed",
+      "note": "Preț al energiei electrice pentru un consumator industrial mare racordat la înaltă tensiune, fără TVA. Estimare de lucru, de înlocuit cu prețul din contractul de furnizare al operatorului feroviar."
+    },
+    "driverGrossMonthly": {
+      "value": 8550,
+      "unit": "RON/month",
+      "confidence": "verbatim",
+      "note": "Salariul de bază brut maxim pentru funcția de mecanic locomotivă-automotor, valabil de la 01.01.2025, din grila de drepturi salariale publicată de CFR. Se folosește maximul grilei pentru că un mecanic care conduce trenuri de călători pe linie curentă nu este la începutul grilei. Sporurile specifice meseriei ridică câștigul total considerabil peste baza de grilă, iar ele nu sunt incluse aici."
+    },
+    "trainCrewSize": {
+      "value": 2,
+      "unit": "persons",
+      "confidence": "assumed",
+      "note": "Un mecanic și un conductor pe ramă. Serviciul regional danez merge frecvent cu agent unic, ceea ce ar scădea această poziție cu jumătate — este un parametru de reformă, nu o constantă fizică."
+    },
+    "crewPaidHoursMonth": {
+      "value": 165,
+      "unit": "hours/month",
+      "confidence": "assumed",
+      "note": "Ore plătite lunar, normă întreagă. Aceeași convenție ca la partea rutieră."
+    },
+    "platformToPaidRatio": {
+      "value": 1.3,
+      "unit": "ratio",
+      "confidence": "assumed",
+      "note": "Ore plătite pentru fiecare oră de tren în circulație. Aceeași convenție ca la partea rutieră, unde este explicată pe larg."
+    },
+    "employerContributionRate": {
+      "value": 0.0225,
+      "unit": "share of gross",
+      "confidence": "verbatim",
+      "note": "Contribuția asiguratorie pentru muncă, 2,25% din brut (Legea 227/2015 art. 220^3)."
+    },
+    "rehabilitationRonPerKm": {
+      "value": 44730000,
+      "unit": "RON/km",
+      "confidence": "verbatim",
+      "note": "9 milioane de euro pe kilometru, mijlocul intervalului de 7-11 milioane rezultat din contracte de modernizare atribuite în România: Brașov-Apața și Cața-Sighișoara, 620,7 milioane euro pentru 86 km, adică 7,2 milioane pe km; Craiova-Filiași, 410 milioane pentru circa 38 km, adică 10,8 milioane pe km; Caransebeș-Timișoara-Arad, 1,8 miliarde pentru 162 km, adică 11,1 milioane pe km. Este modernizare completă: linie, terasamente, poduri, semnalizare, electrificare."
+    },
+    "electrificationOnlyRonPerKm": {
+      "value": 5019700,
+      "unit": "RON/km",
+      "confidence": "verbatim",
+      "note": "Circa 1,01 milioane de euro pe kilometru, din contractul de electrificare Tecuci-Socola-Cristești-Jijia, 180 de milioane de euro pentru 179 km. Un ordin de mărime sub modernizarea completă, pentru că nu atinge linia."
+    },
+    "rehabilitationLifeYears": {
+      "value": 30,
+      "unit": "years",
+      "confidence": "assumed",
+      "note": "Durata până la următoarea reînnoire majoră a suprastructurii. Sub această durată investiția pare mai scumpă pe an decât este, peste ea mai ieftină."
+    },
+    "ronPerEur": {
+      "value": 4.97,
+      "unit": "RON/EUR",
+      "confidence": "assumed",
+      "note": "Curs de lucru, identic cu cel din partea rutieră, ca cele două să rămână comparabile."
+    }
+  },
+  "limitations": [
+    {
+      "id": "tui-nu-e-tot-costul-liniei",
+      "text": "TUI acoperă pachetul minim de acces și este calculat, conform Regulamentului UE 2015/909, la costul direct generat de circulația unui tren. El exclude explicit costurile fixe ale infrastructurii. Deci TUI este ce plătește operatorul, nu ce costă rețeaua: statul suportă separat întreținerea de bază a liniei, iar acea sumă nu apare în acest model.",
+      "severity": "material",
+      "affects": ["rail-cost"]
+    },
+    {
+      "id": "clasa-liniei-e-dedusa-nu-citita",
+      "text": "Tariful depinde de clasa secției TUI, iar lista oficială a încadrării secțiilor pe clase nu a fost preluată. Clasa este dedusă din viteza măsurată în OSM, folosind exact pragurile CFR (A 121-160, B 91-120, C 51-90, D sub 50). Metodologia CFR clasifică secția după media ponderată a vitezelor tehnice maxime admise, inclusiv restricțiile permanente — adică după aceeași mărime pe care o măsoară eticheta maxspeed — dar potrivirea nu a fost verificată secție cu secție.",
+      "severity": "material",
+      "affects": ["rail-cost"]
+    },
+    {
+      "id": "fara-cerere-feroviara",
+      "text": "Se calculează costul unui tren, nu al unui călător. Fără model de cerere nu se știe câți oameni sunt în ramă, iar toate cifrele pe călător de aici depind de o încărcare presupusă.",
+      "severity": "blocking",
+      "affects": ["rail-cost"]
+    }
+  ]
+}

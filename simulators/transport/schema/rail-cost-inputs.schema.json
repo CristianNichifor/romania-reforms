@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/rail-cost-inputs.schema.json",
+  "title": "Unit prices for rail service",
+  "description": "The rail side of the cost model, and the one place in this repository where the large inputs are Romanian and verbatim: the infrastructure manager publishes its access tariff in the network statement, and both rolling stock and track rehabilitation are public procurements with signed contract values. Every item carries its own provenance so a reader can replace one without accepting the rest.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "title", "publisher", "period", "provenance", "currency", "items", "limitations"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "type": "string" },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "period": { "type": "string" },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+    "currency": { "type": "string", "enum": ["RON"] },
+    "items": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["value", "unit", "confidence"],
+        "properties": {
+          "value": { "type": "number" },
+          "unit": { "type": "string" },
+          "confidence": { "enum": ["verbatim", "derived", "assumed"] },
+          "note": { "type": "string" }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+    }
+  }
+}

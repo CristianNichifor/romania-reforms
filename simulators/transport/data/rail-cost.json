@@ -1,0 +1,98 @@
+{
+  "$schema": "../schema/rail-cost.schema.json",
+  "id": "rail-cost",
+  "title": "Costul serviciului feroviar și prețul unui minut de călătorie",
+  "publisher": "Cristian Nichifor",
+  "period": "2026",
+  "provenance": {
+    "source": "cfr-ddr-2026-plus-contracte-semnate",
+    "locator": "Tarifele de infrastructură din Documentul de Referință al Rețelei CFR 2026, Anexa 25.c, în vigoare de la 01.03.2024; materialul rulant din contractul CFR Călători–Pesa semnat la 12.06.2024; reabilitarea din contracte de modernizare atribuite",
+    "confidence": "derived",
+    "note": "Spre deosebire de partea rutieră, cele trei poziții mari de aici — accesul la infrastructură, trenul și reabilitarea — au sursă românească verbatim, pentru că administratorul de infrastructură își publică tarifele iar contractele de achiziție sunt publice. Energia, personalul de tren și durata de viață a materialului rulant rămân estimări."
+  },
+  "rates": {
+    "tuiByClass": {
+      "A": 4.169,
+      "B": 3.511,
+      "C": 2.843,
+      "D": 2.175
+    },
+    "crewRonPerTrainHour": 137.76,
+    "energyRonPerTrainKm": 7.125,
+    "unitPriceRon": 41520000,
+    "seats": 192
+  },
+  "reference": {
+    "lineKm": 100.0,
+    "trainsPerWeekday": 20,
+    "passengersPerTrain": 96,
+    "units": 6,
+    "asIsKmh": 45.0,
+    "rehabilitatedKmh": 74.3,
+    "asIsLineClass": "D",
+    "rehabilitatedLineClass": "C",
+    "operatingRon": 11700476,
+    "capitalRon": 8304000,
+    "crewRon": 1530652,
+    "accessRon": 1087324,
+    "energyRon": 3562500
+  },
+  "rehabilitation": {
+    "ronPerKm": 44730000,
+    "hoursSavedPerTrip": 0.876,
+    "passengerHoursPerYear": 420348,
+    "annualCapitalRon": 149100000,
+    "extraAccessRon": 334158,
+    "ronPerPassengerHour": 355.5
+  },
+  "againstPulsing": {
+    "pulseSavingMin": 25.0,
+    "peopleServed": 16850967,
+    "tripsPerPersonYear": 1,
+    "passengerHoursPerYear": 7021236,
+    "equivalentRailSpendRon": 2496057356,
+    "pulseCapitalRon": 0
+  },
+  "limitations": [
+    {
+      "id": "tui-nu-e-tot-costul-liniei",
+      "text": "TUI acoperă pachetul minim de acces și este calculat, conform Regulamentului UE 2015/909, la costul direct generat de circulația unui tren. El exclude explicit costurile fixe ale infrastructurii. Deci TUI este ce plătește operatorul, nu ce costă rețeaua: statul suportă separat întreținerea de bază a liniei, iar acea sumă nu apare în acest model.",
+      "severity": "material",
+      "affects": [
+        "rail-cost"
+      ]
+    },
+    {
+      "id": "clasa-liniei-e-dedusa-nu-citita",
+      "text": "Tariful depinde de clasa secției TUI, iar lista oficială a încadrării secțiilor pe clase nu a fost preluată. Clasa este dedusă din viteza măsurată în OSM, folosind exact pragurile CFR (A 121-160, B 91-120, C 51-90, D sub 50). Metodologia CFR clasifică secția după media ponderată a vitezelor tehnice maxime admise, inclusiv restricțiile permanente — adică după aceeași mărime pe care o măsoară eticheta maxspeed — dar potrivirea nu a fost verificată secție cu secție.",
+      "severity": "material",
+      "affects": [
+        "rail-cost"
+      ]
+    },
+    {
+      "id": "fara-cerere-feroviara",
+      "text": "Se calculează costul unui tren, nu al unui călător. Fără model de cerere nu se știe câți oameni sunt în ramă, iar toate cifrele pe călător de aici depind de o încărcare presupusă.",
+      "severity": "blocking",
+      "affects": [
+        "rail-cost"
+      ]
+    },
+    {
+      "id": "compara-preturi-unitare-nu-aceiasi-calatori",
+      "text": "Comparația este între prețuri unitare, nu între două feluri de a servi aceiași oameni. Reabilitarea unei linii scurtează drumul călătorilor din tren; corespondența scurtează drumul celor din autobuz. Sunt persoane diferite pe rute diferite, iar cifra comună — leul pe oră de călător economisită — spune cât costă un minut cumpărat în fiecare mod, nu că unul l-ar putea înlocui pe celălalt. Concluzia care rezistă este despre ordinea cheltuielilor: măsura organizatorică se face prima pentru că este aproape gratuită, nu pentru că reabilitarea ar fi inutilă.",
+      "severity": "material",
+      "affects": [
+        "rail-cost"
+      ]
+    },
+    {
+      "id": "incarcarea-decide-rezultatul",
+      "text": "Rezultatul depinde direct de câți oameni sunt în tren. La 96 de călători pe ramă ora de călător costă 356 de lei; la jumătate din încărcare costă dublu. Nu există model de cerere în acest depozit, deci încărcarea este presupusă, iar ea este singurul număr care poate răsturna ordinul de mărime.",
+      "severity": "blocking",
+      "affects": [
+        "rail-cost"
+      ]
+    }
+  ]
+}
