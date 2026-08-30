@@ -1,0 +1,154 @@
+{
+  "$schema": "../schema/danemarca.schema.json",
+  "id": "danemarca-comparatie",
+  "title": "Comparația cu Danemarca: dacă „de trei ori mai multe instanțe” se susține",
+  "publisher": "Cristian Nichifor",
+  "period": "2026",
+  "provenance": {
+    "source": "reforma-sistem-judiciar-romania",
+    "locator": "Capitolele 4.2 și 5.1, p. 20 și 26",
+    "confidence": "derived",
+    "note": "Structura daneză și concluzia sunt citate din lucrare; populațiile sunt de la Eurostat; numărul instanțelor din România vine din raportul CSM. Densitățile și rapoartele sunt calculate aici."
+  },
+  "population": {
+    "romania": 19041322,
+    "denmark": 6025603,
+    "year": 2026,
+    "provenance": {
+      "source": "eurostat-tps00001",
+      "locator": "Population on 1 January, tps00001, geo=RO,DK",
+      "confidence": "verbatim"
+    }
+  },
+  "denmark": {
+    "firstInstance": 24,
+    "appellate": 2,
+    "supreme": 1,
+    "provenance": {
+      "source": "reforma-sistem-judiciar-romania",
+      "locator": "Capitolul 4.2 și 5.1, p. 20 și 26",
+      "confidence": "verbatim",
+      "note": "Cifrele daneze sunt ale lucrării. Nicio sursă independentă nu a putut fi citită automat: portalul CEPEJ, domstol.dk și paginile e-Justice refuză accesul sau nu mai există la adresele încercate."
+    }
+  },
+  "romania": {
+    "firstInstance": 175,
+    "tribunals": 50,
+    "tribunalSites": 42,
+    "appellate": 15,
+    "supreme": 1,
+    "provenance": {
+      "source": "csm-starea-justitiei-2025",
+      "locator": "Anexa 1, prin instante-localizate-2025",
+      "confidence": "derived"
+    }
+  },
+  "paperRomania": {
+    "firstInstanceText": "180+ judecatorii",
+    "firstInstance": 180,
+    "tribunals": 42,
+    "appellate": 15,
+    "provenance": {
+      "source": "reforma-sistem-judiciar-romania",
+      "locator": "Capitolul 5.1, p. 26",
+      "confidence": "verbatim"
+    }
+  },
+  "paperClaim": {
+    "text": "Romania are de trei ori mai multe instante decat ar fi necesar pentru populatia si volumul sau de cauze",
+    "multiple": 3,
+    "provenance": {
+      "source": "reforma-sistem-judiciar-romania",
+      "locator": "Capitolul 5.1, concluzie, p. 26",
+      "confidence": "verbatim"
+    }
+  },
+  "firstInstance": {
+    "denmarkCourts": 24,
+    "denmarkPeoplePerCourt": 251067,
+    "romaniaCourts": 175,
+    "romaniaPeoplePerCourt": 108808,
+    "impliedAtDanishDensity": 75.8,
+    "actualOverImplied": 2.31,
+    "paperSaysMultiple": 3,
+    "proposedCourts": 42,
+    "proposedOverImplied": 0.55,
+    "proposedPeoplePerCourt": 453365
+  },
+  "appellate": {
+    "denmarkCourts": 2,
+    "denmarkPeoplePerCourt": 3012802,
+    "romaniaCourts": 15,
+    "romaniaPeoplePerCourt": 1269421,
+    "impliedAtDanishDensity": 6.3,
+    "actualOverImplied": 2.37,
+    "regionVariantCourts": 8,
+    "regionVariantOverImplied": 1.27
+  },
+  "pay": {
+    "denmarkHasSporuri": false,
+    "romaniaNarrowShare": 0.2494,
+    "romaniaWideShare": 0.3165,
+    "provenance": {
+      "source": "transparenta-eu-executie",
+      "locator": "prin sporuri-2025, execuția bugetară a instanțelor",
+      "confidence": "derived"
+    }
+  },
+  "selfCount": {
+    "paperFirstInstance": 180,
+    "paperFirstInstanceText": "180+ judecatorii",
+    "actualFirstInstance": 175,
+    "paperTribunals": 42,
+    "actualTribunals": 50,
+    "actualTribunalSites": 42,
+    "paperAppellate": 15,
+    "actualAppellate": 15,
+    "appellateAgrees": true
+  },
+  "limitations": [
+    {
+      "id": "volumul-de-cauze-nu-s-a-putut-masura",
+      "text": "Criteriul lucrării are două jumătăți — „populația și volumul său de cauze” — și doar prima s-a putut calcula. Volumul de dosare al instanțelor daneze nu e accesibil din nicio sursă pe care această construcție o poate citi: CEPEJ refuză accesul automat, domstol.dk răspunde 403, paginile e-Justice nu mai există la adresele încercate. Lipsa nu e neutră: România are un volum de dosare foarte mare, iar un test pe dosare ar putea justifica mai multe instanțe decât unul pe populație. Concluzia de aici e despre jumătatea care s-a putut măsura.",
+      "severity": "blocking",
+      "affects": [
+        "firstInstance",
+        "appellate"
+      ]
+    },
+    {
+      "id": "cifrele-daneze-sunt-ale-lucrarii",
+      "text": "Cele 24 de instanțe districtuale, 2 curți de apel și 1 curte supremă sunt luate din lucrare, nu verificate independent — din același motiv ca mai sus. Deci ce se testează aici e dacă concluzia lucrării decurge din premisele ei, nu dacă premisele sunt adevărate. Pentru o propoziție care spune „prin urmare”, e testul potrivit, dar e mai îngust decât pare.",
+      "severity": "blocking",
+      "affects": [
+        "firstInstance",
+        "appellate"
+      ]
+    },
+    {
+      "id": "densitatea-nu-e-acces",
+      "text": "Instanțe la mia de locuitori nu spune nimic despre cât are de mers un om până la ele. Danemarca are 43.000 km² și România 238.000; aceeași densitate pe hârtie înseamnă distanțe complet diferite. Distanțele reale sunt calculate în altă parte a acestei pagini, pe drumuri, și nu intră aici.",
+      "severity": "material",
+      "affects": [
+        "firstInstance"
+      ]
+    },
+    {
+      "id": "competentele-nu-sunt-aceleasi",
+      "text": "O byret daneză și o judecătorie română nu judecă aceleași lucruri. Danemarca și-a comasat instanțele în 2007 dându-le competențe largi; România împarte materia între judecătorie, tribunal specializat și tribunal. A număra „instanțe de nivel 1” de fiecare parte e cea mai bună aproximație disponibilă, nu o echivalență.",
+      "severity": "material",
+      "affects": [
+        "firstInstance",
+        "appellate"
+      ]
+    },
+    {
+      "id": "lucrarea-isi-numara-gresit-tara",
+      "text": "5.1 pornește de la „180+ judecatorii” și „42 tribunale”, când raportul CSM dă 175 de judecătorii și 50 de instanțe de nivel tribunal, aflate în 42 de orașe. Cifra de 42 pare să numere orașele, nu instanțele. Diferențele nu răstoarnă comparația, dar o comparație e la fel de bună ca partea pe care se presupune că o știi.",
+      "severity": "material",
+      "affects": [
+        "selfCount"
+      ]
+    }
+  ]
+}

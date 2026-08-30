@@ -179,6 +179,39 @@ interface Eficienta {
   limitations: Limitation[];
 }
 
+interface Danemarca {
+  population: { romania: number; denmark: number; year: number };
+  denmark: { firstInstance: number; appellate: number; supreme: number };
+  romania: { firstInstance: number; tribunals: number; tribunalSites: number; appellate: number };
+  paperClaim: { text: string; multiple: number };
+  firstInstance: {
+    denmarkPeoplePerCourt: number;
+    romaniaPeoplePerCourt: number;
+    romaniaCourts: number;
+    impliedAtDanishDensity: number;
+    actualOverImplied: number;
+    paperSaysMultiple: number;
+    proposedCourts: number;
+    proposedOverImplied: number;
+    proposedPeoplePerCourt: number;
+  };
+  appellate: {
+    romaniaCourts: number;
+    impliedAtDanishDensity: number;
+    actualOverImplied: number;
+    regionVariantCourts: number;
+    regionVariantOverImplied: number;
+  };
+  selfCount: {
+    paperFirstInstanceText: string;
+    actualFirstInstance: number;
+    paperTribunals: number;
+    actualTribunals: number;
+    actualTribunalSites: number;
+  };
+  limitations: Limitation[];
+}
+
 interface Resurse {
   chapter: {
     page: number;
@@ -469,6 +502,7 @@ async function main(): Promise<void> {
     acoperire,
     curtiApel,
     resurse,
+    danemarca,
   ] = await Promise.all([
     fetch(`${base}data/instante.json`).then((r) => r.json() as Promise<Document>),
     fetch(`${base}data/counties.geojson`).then((r) => r.json()),
@@ -490,6 +524,7 @@ async function main(): Promise<void> {
     fetch(`${base}data/acoperire.json`).then((r) => r.json() as Promise<Acoperire>),
     fetch(`${base}data/curti-apel.json`).then((r) => r.json() as Promise<CurtiApel>),
     fetch(`${base}data/resurse.json`).then((r) => r.json() as Promise<Resurse>),
+    fetch(`${base}data/danemarca.json`).then((r) => r.json() as Promise<Danemarca>),
   ]);
   const countyName = (code: string): string => manifest.countyNames?.[code] ?? code;
 
@@ -1530,6 +1565,60 @@ async function main(): Promise<void> {
        )}% peste ele. Salariile nu sunt bugetul justiției, iar procentul din buget ar fi mai
        mic — dar este singurul numitor pe care pagina îl poate calcula din surse citabile.</p>`;
 
+  // Chapters 4-5. The paper's judicial map rests on one sentence in 5.1, and the sentence can
+  // be checked against the paper's own Danish counts — which is a narrower test than it looks,
+  // and the fold says so rather than letting a reader think Denmark was audited here.
+  const dn = danemarca;
+  const dnFirst = dn.firstInstance;
+  el('#danemarca-chev').textContent = `${dec(dnFirst.actualOverImplied, 1)}×, nu ${dnFirst.paperSaysMultiple}×`;
+  el('#danemarca-body').innerHTML =
+    `<p class="note">Capitolul 5.1 încheie cu propoziția pe care stă toată harta judiciară
+       propusă: „${dn.paperClaim.text}”. Capitolul își dă și premisele — Danemarca are
+       ${dn.denmark.firstInstance} de instanțe districtuale, ${dn.denmark.appellate} curți de
+       apel și o curte supremă — deci propoziția se poate verifica.</p>
+     <div class="pens-row">
+       <span class="pens-head">nivel 1</span>
+       <span class="pens-head">instanțe</span>
+       <span class="pens-head">1 la</span>
+       <span class="pens-head"></span>
+       <span>Danemarca</span><span>${dn.denmark.firstInstance}</span>
+       <span>${ro.format(dnFirst.denmarkPeoplePerCourt)}</span><span></span>
+       <span>România azi</span><span>${dnFirst.romaniaCourts}</span>
+       <span>${ro.format(dnFirst.romaniaPeoplePerCourt)}</span><span></span>
+       <span>la densitatea daneză</span><span>${dec(dnFirst.impliedAtDanishDensity, 0)}</span>
+       <span>${ro.format(dnFirst.denmarkPeoplePerCourt)}</span><span></span>
+       <span>propunerea</span><span>${dnFirst.proposedCourts}</span>
+       <span>${ro.format(dnFirst.proposedPeoplePerCourt)}</span><span></span>
+     </div>
+     <p class="disagree"><strong>Nu de trei ori, ci de
+       ${dec(dnFirst.actualOverImplied, 1)}.</strong> La populația Eurostat din
+       ${dn.population.year} (${ro.format(dn.population.romania)} față de
+       ${ro.format(dn.population.denmark)}), densitatea daneză ar da României
+       ${dec(dnFirst.impliedAtDanishDensity, 0)} de instanțe de nivel 1. Are
+       ${dnFirst.romaniaCourts}. Concluzia capitolului își supraevaluează propriul raport cu
+       aproape o treime.</p>
+     <p class="disagree"><strong>Iar propunerea trece de model, nu se apropie de el.</strong>
+       Harta lucrării lasă ${dnFirst.proposedCourts} de instanțe de nivel 1 — o instanță la
+       ${ro.format(dnFirst.proposedPeoplePerCourt)} de locuitori, adică
+       ${dec(dnFirst.proposedOverImplied, 2)} din densitatea daneză. Argumentul e că Danemarca
+       e reperul; rezultatul e la aproape jumătate din ce are Danemarca pe cap de locuitor.
+       Același lucru un nivel mai sus: densitatea daneză ar da
+       ${dec(dn.appellate.impliedAtDanishDensity, 0)} curți de apel, lucrarea păstrează
+       ${dn.appellate.romaniaCourts}, iar varianta pe regiuni din această pagină —
+       ${dn.appellate.regionVariantCourts} — e singura din cele trei aproape de reper.</p>
+     <p class="disagree"><strong>Capitolul își numără greșit propria țară.</strong> Pornește de
+       la „${dn.selfCount.paperFirstInstanceText}”, când raportul CSM dă
+       ${dn.selfCount.actualFirstInstance}; și de la „${dn.selfCount.paperTribunals} tribunale”,
+       când sunt ${dn.selfCount.actualTribunals} de instanțe de nivel tribunal, în
+       ${dn.selfCount.actualTribunalSites} de orașe — cifra pare să numere orașele, nu
+       instanțele.</p>
+     <p class="disagree"><strong>Ce nu s-a putut verifica.</strong> Criteriul lucrării are două
+       jumătăți — populația <em>și</em> volumul de cauze — și doar prima s-a putut calcula:
+       volumul instanțelor daneze nu e accesibil din nicio sursă pe care pagina o poate citi.
+       Lipsa nu e neutră, fiindcă România are un volum de dosare foarte mare. Și cifrele daneze
+       de mai sus sunt ale lucrării, nu verificate independent: se testează dacă concluzia
+       decurge din premisele ei, nu dacă premisele sunt adevărate.</p>`;
+
   const ef = eficienta.comparison;
   const cited = eficienta.years.find((y) => y.year === ef.citedYear)!;
   el('#eficienta-chev').textContent = `${ef.reportSaysEfficientOrBetter} din ${cited.judecatorii.classified}`;
@@ -1965,6 +2054,7 @@ async function main(): Promise<void> {
     ['proiect-fold', 10, 'simulare'],
     ['pensii-fold', 11, 'ambele'],
     ['resurse-fold', 16, 'ambele'],
+    ['danemarca-fold', 5, 'simulare'],
   ].forEach(([id, chapter, kind]) =>
     badge(id as string, chapter as number, kind as 'politică' | 'simulare' | 'ambele'),
   );
@@ -1988,6 +2078,7 @@ async function main(): Promise<void> {
     ...acoperire.limitations,
     ...curtiApel.limitations,
     ...resurse.limitations,
+    ...danemarca.limitations,
   ];
   const blocking = allLimits.filter((l) => l.severity === 'blocking');
   const rest = allLimits.filter((l) => l.severity !== 'blocking');

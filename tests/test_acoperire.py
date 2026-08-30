@@ -54,18 +54,37 @@ def test_status_follows_from_the_evidence(acoperire):
             assert c["status"] == "negacoperit", c["number"]
 
 
+# The chapters that are arguments rather than quantities. Pinned by number, because this is
+# the list an author would be tempted to grow: moving a computable chapter in here would make
+# the gap list look principled while quietly retiring work.
+NOT_A_QUANTITY = {1, 2, 3, 6, 17, 18, 19}
+
+
 def test_the_two_kinds_of_gap_stay_apart(acoperire):
     """A chapter nobody has built and a chapter that cannot be built are different admissions.
 
-    If every gap were 'not-a-quantity' the ledger would be excusing itself; if every gap were
-    'buildable' it would be inventing obligations. Both kinds must be present, and each
-    uncovered chapter must say which it is and why.
+    This once required both kinds to be present, on the reasoning that a ledger whose every gap
+    was 'not-a-quantity' would be excusing itself. That stopped being true when the buildable
+    ones were actually built: 4, 5 and 16 became simulated, and an empty buildable set is now a
+    fact about the work rather than a dodge.
+
+    So the guard moved rather than went. What it defends is the same thing — nobody may quietly
+    reclassify a computable chapter as unmeasurable — but it defends it by pinning *which*
+    chapters may claim to be arguments, which the old form could not check at all.
     """
     gaps = [c for c in acoperire["chapters"] if c["status"] == "negacoperit"]
-    kinds = {c["gap"] for c in gaps}
-    assert kinds == {"buildable", "not-a-quantity"}, kinds
+    assert {c["gap"] for c in gaps} <= {"buildable", "not-a-quantity"}
+    assert {c["number"] for c in gaps if c["gap"] == "not-a-quantity"} == NOT_A_QUANTITY
     for c in gaps:
         assert c["why"], c["number"]
+
+
+def test_a_buildable_gap_is_never_also_simulated(acoperire):
+    """The two states are exclusive: a chapter that names documents has been built, whatever
+    the gap field says."""
+    for c in acoperire["chapters"]:
+        if c["gap"] == "buildable":
+            assert not c["simulated"], c["number"]
 
 
 def test_covered_chapters_carry_no_gap(acoperire):

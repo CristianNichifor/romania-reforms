@@ -13,9 +13,9 @@ Three states, and the third splits in a way that matters:
   * **citat** — carried as the paper's own text, because it is institutional design rather
     than a quantity. ANIR, the KPI framework, the implementation plan.
   * **negacoperit** — and the honest distinction is between a chapter that *could* be built
-    and one that is not a quantity at all. Chapters 4 and 5 are arithmetic nobody has done
-    here. Chapter 1 is an argument; there is nothing to compute. Collapsing those two would be
-    dishonest in opposite directions — one hides work, the other invents it.
+    and one that is not a quantity at all. Nothing is left in the first group. Chapter 1 is an
+    argument; there is nothing to compute. Keeping the distinction still matters: collapsing
+    the two would be dishonest in opposite directions — one hides work, the other invents it.
 
 Chapters 7, 10 and 11 are both simulated and quoted: their measurable parts are computed and
 their design parts are carried verbatim. The ledger records both rather than forcing a choice.
@@ -24,6 +24,10 @@ Chapter 16 was the largest of the buildable gaps and is now simulated. It turned
 missing arithmetic but unreconciled arithmetic: six figures asserted in a bullet list, three of
 which disagree with the pay grid, the vacancy count and the court estate this repository
 already holds.
+
+Chapters 4 and 5 were the last two, and they close the same way: the Danish comparison is
+checked against the paper's own premises and Eurostat's populations, and the headline of 5.1 —
+"de trei ori mai multe instante" — comes out at 2,3. Every chapter that can be computed now is.
 
 **The status of each chapter is a judgement, not a reading.** Titles and pages come out of the
 PDF; whether a chapter counts as covered is mine, and it is marked `assumed` for that reason.
@@ -70,6 +74,8 @@ CHAPTERS = {
 
 # What the simulator does about each. Documents are named so the claim can be checked.
 SIMULATED = {
+    4: ["danemarca-comparatie"],
+    5: ["danemarca-comparatie"],
     7: ["instante-localizate-2025", "arondare-noua", "parchete-2025", "acces-servicii"],
     10: ["indemnizatii-2022", "sporuri-2025", "costuri-proiect-2026"],
     11: ["pensii-2025", "pensii-comparatie"],
@@ -86,8 +92,6 @@ GAPS = {
     1: "not-a-quantity",
     2: "not-a-quantity",
     3: "not-a-quantity",
-    4: "buildable",
-    5: "buildable",
     6: "not-a-quantity",
     17: "not-a-quantity",
     18: "not-a-quantity",
@@ -95,8 +99,6 @@ GAPS = {
 }
 
 GAP_WHY = {
-    4: "Datele daneze există deja în simulatorul de salarizare (dk-stat-2026, dk-occupations); nimic nu le leagă de argumentul de convergență al lucrării.",
-    5: "Aceeași comparație România–Danemarca, pe structuri. Se poate calcula din date pe care depozitul le are deja.",
     1: "Diagnostic și motivație; nu conține cantități de verificat.",
     2: "Descriere a sistemului; cifrele ei sunt reluate în capitolele care se simulează.",
     3: "Enumerare de probleme structurale, argumentativă.",
