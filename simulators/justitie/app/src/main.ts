@@ -61,10 +61,13 @@ interface Sporuri {
   scope: { filledPosts: number; baseMonthlyLeiPerPost: number };
   sporuri: { narrow: number; wide: number };
   draftCap: { percent: number; overCap: boolean; gapPercentagePoints: number };
+  judges: { count: number; shareOfCourtsBase: number };
   pension: {
     currentPercent: number;
     proposedPercent: number;
     reductionWithoutSporuriPercent: number;
+    ifJudgesDrawNoSporuriPercent: number;
+    ifSporuriSpreadEvenlyPercent: number;
     readings: { measure: string; reductionPercent: number }[];
   };
   limitations: Limitation[];
@@ -746,7 +749,15 @@ async function main(): Promise<void> {
        ${ro.format(sporuri.pension.reductionWithoutSporuriPercent)}%; cu ele, este de
        ${ro.format(narrow?.reductionPercent ?? 0)}%${
          wide ? ` — sau ${ro.format(wide.reductionPercent)}% la definiția largă` : ''
-       }.</p>`;
+       }.</p>
+     <p class="note">Judecătorii sunt ${ro.format(Math.round(sporuri.judges.count))} din cei
+       ${ro.format(sporuri.scope.filledPosts)} de angajați și ${pct(
+         sporuri.judges.shareOfCourtsBase,
+       )} din masa salarială de bază, deci procentul de mai sus e dat mai ales de grefieri.
+       Dacă sporurile se împart uniform, scăderea pensiei e de
+       ${ro.format(sporuri.pension.ifSporuriSpreadEvenlyPercent)}%; dacă judecătorii nu iau
+       deloc sporuri, rămâne ${ro.format(sporuri.pension.ifJudgesDrawNoSporuriPercent)}%.
+       Între ele, datele nu pot alege.</p>`;
 
   // The two pension reforms, against the same judge. The paper's cap is a flat sum and the
   // bill's floor is a share of each grade's own indemnity, so the two cross: for every grade

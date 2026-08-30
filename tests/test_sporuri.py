@@ -129,3 +129,44 @@ def test_ministerul_justitiei_is_declared_unusable(sporuri):
     """Its execution line rolls in the prison service while its headcount row does not, so the
     two disagree on perimeter. Declared rather than quietly skipped."""
     assert "ministerul-justitiei-nu-e-comparabil" in {x["id"] for x in sporuri["limitations"]}
+
+
+def test_judges_are_the_minority_of_the_payroll(sporuri):
+    """Why the ratio is mostly a statement about grefieri, not judges.
+
+    If judges turned out to be most of the base wage bill, the aggregate would be a fair proxy
+    for their own supplements and the largest caveat on the pension correction would fall away.
+    They are not: about 3.000 of 14.650 posts and under a third of the base.
+    """
+    judges = sporuri["judges"]
+    assert judges["count"] < sporuri["scope"]["filledPosts"] / 2
+    assert 0 < judges["shareOfCourtsBase"] < 0.5, judges["shareOfCourtsBase"]
+    assert judges["shareIsFloor"] is True
+
+
+def test_the_split_is_bounded_but_not_settled(sporuri):
+    """The honest shape of the answer.
+
+    Judges drawing no supplements leaves the base unwidened, which is exactly the figure
+    published before this document existed. An even spread gives the smaller cut. The truth
+    sits between, and nothing here locates it — so the two ends must bracket the reading and
+    must not collapse onto each other.
+    """
+    pension = sporuri["pension"]
+    high = pension["ifJudgesDrawNoSporuriPercent"]
+    low = pension["ifSporuriSpreadEvenlyPercent"]
+    assert high == pension["reductionWithoutSporuriPercent"]
+    assert low < high, (low, high)
+    narrow = next(r for r in pension["readings"] if r["measure"] == "narrow")
+    assert low == narrow["reductionPercent"]
+
+
+def test_the_closed_route_is_recorded(sporuri):
+    """The justice annex was the obvious place to split the ratio and it names no supplement.
+
+    Recorded so the same dead end is not walked twice: a later reader who wonders why the
+    split was never done finds the answer in the document rather than repeating the search.
+    """
+    assert "impartirea-pe-categorii-nu-exista-in-surse" in {
+        x["id"] for x in sporuri["limitations"]
+    }

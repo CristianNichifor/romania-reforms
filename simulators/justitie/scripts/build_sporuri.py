@@ -17,9 +17,24 @@ That gives the number nobody had:
 **This changes the headline of the pension bill.** The bill cuts the rate from 80% to 55% and
 widens the base at the same time, from last month's indemnity alone to a five-year average
 that includes the sporuri carrying contributions. With sporuri unknown, the only defensible
-statement was that the cut is *at most* 31%. With sporuri at a quarter of base pay, 55% of a
-base a quarter larger is about 69% of the indemnity — a cut nearer 14%. The published 31%
-overstates it by more than double.
+statement was that the cut is *at most* 31%. That bound still holds — it is what the cut would
+be if judges drew no sporuri at all — but it was being read as the figure. With sporuri at a
+quarter of base pay, 55% of a base a quarter larger is about 69% of the indemnity, so an even
+spread gives a cut nearer 14%. The bound was never wrong; presenting it as the answer was.
+
+**The split between judges and grefieri cannot be closed, and it was worth checking why.** The
+July 2026 draft's own justice annex was the obvious place to look: it names no supplement at
+all, only coefficients for management posts. Neither does Anexa V of the law in force, which
+mentions sporuri once, to say that seniority is already inside the indemnity. The draft's
+general list does carry Art. 20 supplements for working conditions, but the frame records that
+their size is set by later Government decision, so there is nothing to compute against. Every
+route this repository holds ends in the same place.
+
+What can be computed is the weight of each group in the base. Judges are 27,9% of the courts'
+base wage bill and 2.961 of 14.650 posts, so the ratio is dominated by auxiliary staff. That
+bounds the answer without settling it: if sporuri fall evenly the cut is 14,1%, and if judges
+draw none of them it is the 31,2% published before. Where between those the truth sits, the
+data cannot say.
 
 Two things this still cannot do, both of which keep a caveat on the result:
 
@@ -105,6 +120,14 @@ def main() -> int:
         return 1
     cap_pct = cap["pct"]
 
+    # Judges' weight inside that payroll, so the reader can see the ratio is mostly grefieri.
+    # The judge wage bill is priced on the 2022 scale against 2025 execution, and pay rose in
+    # between, so this share is a floor on the judges' true weight, not an estimate of it.
+    costuri = json.loads((ROOT / "data" / "costuri-2025.json").read_text(encoding="utf-8"))
+    judges_bill = costuri["today"]["annualLei"]
+    judges_count = sum(r["judges"] for r in costuri["today"]["byTier"])
+    judges_share = judges_bill / courts["base"]
+
     bill = json.loads((ROOT / "data" / "pensii-2025.json").read_text(encoding="utf-8"))
     now_pct = bill["current"]["percent"] / 100
     then_pct = bill["proposed"]["percent"] / 100
@@ -167,6 +190,12 @@ def main() -> int:
             "narrowDescription": "10.01.05 + 10.01.06, paragrafele pe care contabilitatea le numește sporuri",
             "wideDescription": "tot titlul 10.01 în afară de salariul de bază și de decontări",
         },
+        "judges": {
+            "annualLei": round(judges_bill),
+            "count": round(judges_count, 1),
+            "shareOfCourtsBase": round(judges_share, 4),
+            "shareIsFloor": True,
+        },
         "prosecutionNarrow": round(prosecution["narrow"], 4) if prosecution else None,
         "draftCap": {
             "percent": round(cap_pct * 100),
@@ -179,16 +208,28 @@ def main() -> int:
             "proposedPercent": bill["proposed"]["percent"],
             "reductionWithoutSporuriPercent": without,
             "readings": readings,
+            # The two ends of the unknown. Judges drawing no sporuri at all leaves the base
+            # unwidened and the published 31,2% standing; an even spread gives 14,1%. The
+            # answer is somewhere inside, and nothing here narrows it further.
+            "ifJudgesDrawNoSporuriPercent": without,
+            "ifSporuriSpreadEvenlyPercent": readings[0]["reductionPercent"],
         },
         "limitations": [
             {
                 "id": "raportul-e-pe-tot-personalul",
                 "text": (
                     "Procentul este pe toți cei "
-                    f"{posts:,}".replace(",", ".")
-                    + " de angajați ai instanțelor, dintre care cei "
-                    "mai mulți sunt grefieri, nu judecători. Dacă sporurile se împart altfel "
-                    "între cele două categorii, cota judecătorilor nu este aceasta."
+                    + f"{posts:,}".replace(",", ".")
+                    + " de angajați ai instanțelor. Judecătorii sunt "
+                    + f"{judges_count:,.0f}".replace(",", ".")
+                    + " dintre ei și "
+                    + f"{judges_share * 100:.1f}".replace(".", ",")
+                    + "% din masa salarială de bază, deci raportul este dat mai ales de "
+                    "grefieri. Dacă sporurile se împart uniform, scăderea pensiei este de "
+                    + f"{readings[0]['reductionPercent']:.1f}".replace(".", ",")
+                    + "%; dacă judecătorii nu iau deloc sporuri, rămâne "
+                    + f"{without:.1f}".replace(".", ",")
+                    + "%. Adevărul e între ele și nu se poate localiza din datele de aici."
                 ),
                 "severity": "material",
                 "affects": ["cost", "pensii"],
@@ -225,6 +266,20 @@ def main() -> int:
                 ),
                 "severity": "material",
                 "affects": ["pensii"],
+            },
+            {
+                "id": "impartirea-pe-categorii-nu-exista-in-surse",
+                "text": (
+                    "Anexa de justiție a proiectului de salarizare din iulie 2026 nu prevede "
+                    "niciun spor — doar coeficienți pentru funcțiile de conducere. Nici Anexa V "
+                    "a legii în vigoare nu prevede: acolo sporul apare o singură dată, ca să "
+                    "spună că vechimea este deja inclusă în indemnizație. Sporurile pentru "
+                    "condiții de muncă din proiect (Art. 20) își primesc cuantumul prin hotărâre "
+                    "de Guvern, care încă nu există. Nu există deci sursă în acest depozit care "
+                    "să împartă procentul între judecători și grefieri."
+                ),
+                "severity": "material",
+                "affects": ["cost", "pensii"],
             },
             {
                 "id": "ministerul-justitiei-nu-e-comparabil",

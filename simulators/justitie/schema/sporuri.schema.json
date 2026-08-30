@@ -18,21 +18,46 @@
     "limitations"
   ],
   "properties": {
-    "$schema": { "type": "string" },
-    "id": { "const": "sporuri-2025" },
-    "title": { "type": "string" },
-    "publisher": { "type": "string" },
-    "period": { "type": "string" },
-    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "const": "sporuri-2025"
+    },
+    "title": {
+      "type": "string"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "period": {
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json#/$defs/provenance"
+    },
     "scope": {
       "description": "Whose supplements these are. Stated because the ratio is only as good as the perimeter it was measured over.",
       "type": "object",
       "additionalProperties": false,
-      "required": ["entity", "filledPosts", "baseAnnualLei", "baseMonthlyLeiPerPost"],
+      "required": [
+        "entity",
+        "filledPosts",
+        "baseAnnualLei",
+        "baseMonthlyLeiPerPost"
+      ],
       "properties": {
-        "entity": { "type": "string" },
-        "filledPosts": { "type": "integer", "exclusiveMinimum": 0 },
-        "baseAnnualLei": { "type": "number", "exclusiveMinimum": 0 },
+        "entity": {
+          "type": "string"
+        },
+        "filledPosts": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "baseAnnualLei": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
         "baseMonthlyLeiPerPost": {
           "description": "The cross-check that told us this line is every court, not the supreme court alone.",
           "type": "number",
@@ -43,7 +68,12 @@
     "sporuri": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["narrow", "wide", "narrowDescription", "wideDescription"],
+      "required": [
+        "narrow",
+        "wide",
+        "narrowDescription",
+        "wideDescription"
+      ],
       "properties": {
         "narrow": {
           "description": "10.01.05 + 10.01.06 over 10.01.01. The closest proxy for what a ceiling would measure.",
@@ -57,13 +87,20 @@
           "minimum": 0,
           "maximum": 3
         },
-        "narrowDescription": { "type": "string" },
-        "wideDescription": { "type": "string" }
+        "narrowDescription": {
+          "type": "string"
+        },
+        "wideDescription": {
+          "type": "string"
+        }
       }
     },
     "prosecutionNarrow": {
       "description": "The prosecution service's own ratio, carried for context only.",
-      "type": ["number", "null"],
+      "type": [
+        "number",
+        "null"
+      ],
       "minimum": 0,
       "maximum": 3
     },
@@ -71,12 +108,26 @@
       "description": "The 20% ceiling in the July 2026 draft salary law, read from the pay simulator's frame.",
       "type": "object",
       "additionalProperties": false,
-      "required": ["percent", "overCap", "gapPercentagePoints", "provenance"],
+      "required": [
+        "percent",
+        "overCap",
+        "gapPercentagePoints",
+        "provenance"
+      ],
       "properties": {
-        "percent": { "type": "number", "exclusiveMinimum": 0 },
-        "overCap": { "type": "boolean" },
-        "gapPercentagePoints": { "type": "number" },
-        "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" }
+        "percent": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "overCap": {
+          "type": "boolean"
+        },
+        "gapPercentagePoints": {
+          "type": "number"
+        },
+        "provenance": {
+          "$ref": "provenance.schema.json#/$defs/provenance"
+        }
       }
     },
     "pension": {
@@ -87,11 +138,19 @@
         "currentPercent",
         "proposedPercent",
         "reductionWithoutSporuriPercent",
-        "readings"
+        "readings",
+        "ifJudgesDrawNoSporuriPercent",
+        "ifSporuriSpreadEvenlyPercent"
       ],
       "properties": {
-        "currentPercent": { "type": "number", "exclusiveMinimum": 0 },
-        "proposedPercent": { "type": "number", "exclusiveMinimum": 0 },
+        "currentPercent": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "proposedPercent": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
         "reductionWithoutSporuriPercent": {
           "description": "The figure published before this document existed: rate change alone, no widening.",
           "type": "number"
@@ -109,19 +168,73 @@
               "reductionPercent"
             ],
             "properties": {
-              "measure": { "enum": ["narrow", "wide"] },
-              "sporuriShare": { "type": "number", "minimum": 0, "maximum": 3 },
-              "effectivePercentOfIndemnity": { "type": "number", "exclusiveMinimum": 0 },
-              "reductionPercent": { "type": "number" }
+              "measure": {
+                "enum": [
+                  "narrow",
+                  "wide"
+                ]
+              },
+              "sporuriShare": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 3
+              },
+              "effectivePercentOfIndemnity": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "reductionPercent": {
+                "type": "number"
+              }
             }
           }
+        },
+        "ifJudgesDrawNoSporuriPercent": {
+          "description": "One end of the unknown split: judges draw none, the base does not widen, the published bound stands.",
+          "type": "number"
+        },
+        "ifSporuriSpreadEvenlyPercent": {
+          "description": "The other end: supplements fall evenly across all staff.",
+          "type": "number"
         }
       }
     },
     "limitations": {
       "type": "array",
       "minItems": 1,
-      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+      "items": {
+        "$ref": "provenance.schema.json#/$defs/limitation"
+      }
+    },
+    "judges": {
+      "description": "Judges' weight inside the courts' payroll, which is what makes the ratio mostly a statement about grefieri.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "annualLei",
+        "count",
+        "shareOfCourtsBase",
+        "shareIsFloor"
+      ],
+      "properties": {
+        "annualLei": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "count": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "shareOfCourtsBase": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "shareIsFloor": {
+          "description": "Priced on the 2022 scale against 2025 execution, so the true share is higher.",
+          "const": true
+        }
+      }
     }
   }
 }

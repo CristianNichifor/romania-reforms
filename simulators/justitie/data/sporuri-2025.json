@@ -21,6 +21,12 @@
     "narrowDescription": "10.01.05 + 10.01.06, paragrafele pe care contabilitatea le numește sporuri",
     "wideDescription": "tot titlul 10.01 în afară de salariul de bază și de decontări"
   },
+  "judges": {
+    "annualLei": 685674600,
+    "count": 2960.7,
+    "shareOfCourtsBase": 0.2791,
+    "shareIsFloor": true
+  },
   "prosecutionNarrow": 0.2243,
   "draftCap": {
     "percent": 20,
@@ -50,12 +56,14 @@
         "effectivePercentOfIndemnity": 72.4,
         "reductionPercent": 9.5
       }
-    ]
+    ],
+    "ifJudgesDrawNoSporuriPercent": 31.2,
+    "ifSporuriSpreadEvenlyPercent": 14.1
   },
   "limitations": [
     {
       "id": "raportul-e-pe-tot-personalul",
-      "text": "Procentul este pe toți cei 14.650 de angajați ai instanțelor, dintre care cei mai mulți sunt grefieri, nu judecători. Dacă sporurile se împart altfel între cele două categorii, cota judecătorilor nu este aceasta.",
+      "text": "Procentul este pe toți cei 14.650 de angajați ai instanțelor. Judecătorii sunt 2.961 dintre ei și 27,9% din masa salarială de bază, deci raportul este dat mai ales de grefieri. Dacă sporurile se împart uniform, scăderea pensiei este de 14,1%; dacă judecătorii nu iau deloc sporuri, rămâne 31,2%. Adevărul e între ele și nu se poate localiza din datele de aici.",
       "severity": "material",
       "affects": [
         "cost",
@@ -84,6 +92,15 @@
       "text": "Proiectul scade și plafonul net de la 100% la 70% din venitul net al persoanei. Acesta lucrează separat de procent și poate deveni el constrângerea efectivă. Nu este inclus în cifrele de aici.",
       "severity": "material",
       "affects": [
+        "pensii"
+      ]
+    },
+    {
+      "id": "impartirea-pe-categorii-nu-exista-in-surse",
+      "text": "Anexa de justiție a proiectului de salarizare din iulie 2026 nu prevede niciun spor — doar coeficienți pentru funcțiile de conducere. Nici Anexa V a legii în vigoare nu prevede: acolo sporul apare o singură dată, ca să spună că vechimea este deja inclusă în indemnizație. Sporurile pentru condiții de muncă din proiect (Art. 20) își primesc cuantumul prin hotărâre de Guvern, care încă nu există. Nu există deci sursă în acest depozit care să împartă procentul între judecători și grefieri.",
+      "severity": "material",
+      "affects": [
+        "cost",
         "pensii"
       ]
     },
