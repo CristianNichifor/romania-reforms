@@ -101,6 +101,16 @@ jobs:
                       admin-manifest.json admin-attributes.json court-distance.bin; do
             [ -s "dist/justitie/data/$path" ] || { echo "MISSING dist/justitie/data/$path"; fail=1; }
           done
+          # Every simulator must offer a way back to the index. Without it each one is a
+          # dead end: reachable from the landing page and never returning, which is how three
+          # simulators in one repository end up behaving like three unrelated sites.
+          for sim in salarizare administrativ justitie; do
+            if grep -rqs 'to-index' "dist/$sim/index.html" dist/$sim/assets/*.js; then
+              echo "ok   dist/$sim has a link back"
+            else
+              echo "MISSING back link in dist/$sim"; fail=1
+            fi
+          done
           # Every link on the landing page must resolve to something that was built.
           for href in $(grep -o 'href="[a-z]*/"' site/index.html | cut -d'"' -f2); do
             [ -s "dist/${href}index.html" ] || { echo "landing page links to missing $href"; fail=1; }
