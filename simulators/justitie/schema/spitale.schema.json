@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/spitale.schema.json",
+  "title": "Hospitals published by the Ministry of Health, placed on the map",
+  "description": "Name and coordinates per hospital, read from the ministry page's map markers and placed in a UAT by point-in-polygon. Used to test the reform paper's logistics argument: are the 42 proposed court seats already where the county concentrates its services? The register omits six counties, so nothing national can be computed from it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "title", "publisher", "period", "provenance", "summary", "hospitals", "limitations"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "const": "spitale-2026" },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "period": { "type": "string" },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "hospitals", "located", "countiesCovered", "countiesTotal", "countiesMissing",
+        "courtSeatsCheckable", "courtSeatsWithHospital", "hospitalsInCourtSeatTowns"
+      ],
+      "properties": {
+        "hospitals": { "type": "integer", "exclusiveMinimum": 0 },
+        "located": {
+          "description": "Markers falling inside a UAT boundary. Anything outside is kept in the file and out of every count.",
+          "type": "integer", "exclusiveMinimum": 0
+        },
+        "countiesCovered": { "type": "integer", "exclusiveMinimum": 0 },
+        "countiesTotal": { "type": "integer", "const": 42 },
+        "countiesMissing": {
+          "description": "Counties absent from the register entirely. Not counties without hospitals.",
+          "type": "array", "items": { "type": "string" }
+        },
+        "courtSeatsCheckable": {
+          "description": "Court seats in a county the register covers. The only ones the co-location figure may speak about.",
+          "type": "integer", "exclusiveMinimum": 0
+        },
+        "courtSeatsWithHospital": { "type": "integer", "minimum": 0 },
+        "hospitalsInCourtSeatTowns": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "hospitals": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "lat", "lng", "siruta", "uat", "county"],
+        "properties": {
+          "name": { "type": "string" },
+          "lat": { "type": "number" },
+          "lng": { "type": "number" },
+          "siruta": { "type": ["string", "null"] },
+          "uat": { "type": ["string", "null"] },
+          "county": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array", "minItems": 1,
+      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+    }
+  }
+}

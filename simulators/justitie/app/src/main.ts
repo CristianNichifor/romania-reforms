@@ -58,6 +58,20 @@ interface Limitation {
   affects: string[];
 }
 
+interface Spitale {
+  summary: {
+    hospitals: number;
+    located: number;
+    countiesCovered: number;
+    countiesTotal: number;
+    countiesMissing: string[];
+    courtSeatsCheckable: number;
+    courtSeatsWithHospital: number;
+    hospitalsInCourtSeatTowns: number;
+  };
+  limitations: Limitation[];
+}
+
 interface ArondareNoua {
   courtSeats: number;
   summary: {
@@ -227,8 +241,19 @@ const BLANK = {
 };
 
 async function main(): Promise<void> {
-  const [doc, counties, proposal, manifest, design, costuri, pensii, sporuri, proiect, arondare] =
-    await Promise.all([
+  const [
+    doc,
+    counties,
+    proposal,
+    manifest,
+    design,
+    costuri,
+    pensii,
+    sporuri,
+    proiect,
+    arondare,
+    spitale,
+  ] = await Promise.all([
     fetch(`${base}data/instante.json`).then((r) => r.json() as Promise<Document>),
     fetch(`${base}data/counties.geojson`).then((r) => r.json()),
     fetch(`${base}data/propunere.json`).then((r) => r.json() as Promise<Proposal>),
@@ -241,6 +266,7 @@ async function main(): Promise<void> {
     fetch(`${base}data/sporuri.json`).then((r) => r.json() as Promise<Sporuri>),
     fetch(`${base}data/proiect.json`).then((r) => r.json() as Promise<Proiect>),
     fetch(`${base}data/arondare-noua.json`).then((r) => r.json() as Promise<ArondareNoua>),
+    fetch(`${base}data/spitale.json`).then((r) => r.json() as Promise<Spitale>),
   ]);
   const countyName = (code: string): string => manifest.countyNames?.[code] ?? code;
 
@@ -762,6 +788,40 @@ async function main(): Promise<void> {
   // The tightest staffing target, where the grade choice costs the most. Sorted rather than
   // indexed, and the fold is skipped entirely if the document ships no targets at all.
   const [lowest] = [...proiect.gradeChoiceSwing].sort((a, b) => a.target - b.target);
+  const sp = spitale.summary;
+  el('#spitale-chev').textContent = `${sp.courtSeatsWithHospital} din ${sp.courtSeatsCheckable}`;
+  el('#spitale-body').innerHTML =
+    `<p class="note">Capitolul 7 susține comasarea și prin logistică: instanța, parchetul și
+       poliția județeană într-un singur oraș. Spitalele sunt singurul serviciu de rang județean
+       cu registru public localizabil, deci sunt testul disponibil — nu dovada.</p>
+     <div class="pens-row">
+       <span class="pens-head">ce</span>
+       <span class="pens-head">cât</span>
+       <span class="pens-head">din</span>
+       <span class="pens-head"></span>
+       <span>sedii cu spital</span>
+       <span>${sp.courtSeatsWithHospital}</span>
+       <span>${sp.courtSeatsCheckable}</span>
+       <span>verificabile</span>
+       <span>spitale în orașe-sedii</span>
+       <span>${sp.hospitalsInCourtSeatTowns}</span>
+       <span>${sp.located}</span>
+       <span>${Math.round((100 * sp.hospitalsInCourtSeatTowns) / sp.located)}%</span>
+       <span>județe în registru</span>
+       <span class="pens-low">${sp.countiesCovered}</span>
+       <span>${sp.countiesTotal}</span>
+       <span class="pens-low">lipsesc ${sp.countiesMissing.length}</span>
+     </div>
+     <p class="disagree">Fiecare sediu de instanță pe care registrul îl acoperă are un spital —
+       ${sp.courtSeatsWithHospital} din ${sp.courtSeatsCheckable}. Sediile propuse sunt deci
+       deja centre de servicii. Dar registrul nu acoperă ${sp.countiesMissing.length} județe
+       (${sp.countiesMissing.join(', ')}), iar Galațiul și Târgu Mureșul au evident spitale
+       județene: lipsa lor e o gaură în sursă, nu în țară.</p>
+     <p class="disagree">Invers, ${Math.round(
+       100 - (100 * sp.hospitalsInCourtSeatTowns) / sp.located,
+     )}% dintre spitale nu sunt în orașul unui sediu. Concentrarea serviciilor în 42 de orașe
+       le apropie de instanță, dar le depărtează de restul spitalelor.</p>`;
+
   // Assignment by distance rather than by county line, on the consolidated units rather than
   // on today's communes. The split count leads because it is the part that only appears once
   // the unit, not the commune, is the thing being assigned.
@@ -1004,6 +1064,7 @@ async function main(): Promise<void> {
     ...sporuri.limitations,
     ...proiect.limitations,
     ...arondare.limitations,
+    ...spitale.limitations,
   ];
   const blocking = allLimits.filter((l) => l.severity === 'blocking');
   const rest = allLimits.filter((l) => l.severity !== 'blocking');
