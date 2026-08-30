@@ -154,3 +154,39 @@ def resources_for_route(
         bus_km=sum(departures.values()) * km_round_trip,
         cycle_slack_min=slack,
     )
+
+
+def paid_driver_hours(
+    driving_hours: float,
+    span_hours: float,
+    platform_to_paid: float,
+    max_duty_span_hours: float,
+    minimum_paid_shift_hours: float,
+    max_driving_hours_day: float,
+) -> tuple[float, int]:
+    """Paid driver-hours for one vehicle's day, and the duties it takes.
+
+    Not its driving hours. Three things push it up and the model used to catch only the first:
+
+    1. **Sign-on, breaks and deadhead** — the platform-to-paid ratio.
+    2. **The span.** A vehicle out from 06:00 to 22:00 exceeds what one duty may cover, so it
+       needs two whatever it drives. EU 561/2006 caps daily driving at nine hours.
+    3. **The minimum shift.** Four departures on the peaks is about three hours of driving
+       spread across twelve with a five-hour hole in it. Nobody is employed on those terms.
+
+    This is where a service concentrated on the peaks stops being cheap: it buys very little
+    driving over a very long day, and the day is what has to be staffed.
+    """
+    if driving_hours <= 0:
+        return 0.0, 0
+    by_span = math.ceil(span_hours / max_duty_span_hours)
+    by_driving = math.ceil(driving_hours / max_driving_hours_day)
+    duties = max(1, by_span, by_driving)
+    return max(driving_hours * platform_to_paid, duties * minimum_paid_shift_hours), duties
+
+
+def drivers_required(paid_hours_per_year: float, paid_hours_month: float) -> int:
+    """Full-time drivers for a year of PAID hours."""
+    if paid_hours_month <= 0:
+        return 0
+    return math.ceil(paid_hours_per_year / (paid_hours_month * 12))

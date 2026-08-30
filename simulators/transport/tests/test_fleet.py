@@ -210,3 +210,40 @@ def test_resources_add_up_across_routes():
     assert total.bus_hours == pytest.approx(15.0)
     assert total.bus_km == pytest.approx(140.0)
     assert total.cycle_slack_min == pytest.approx(55.0)
+
+
+def test_a_sixteen_hour_vehicle_day_needs_two_duties():
+    """The point the fleet count hides: a vehicle out from 06:00 to 22:00 cannot be one person,
+    whatever it drives. EU 561/2006 caps daily driving at nine hours and a duty cannot span the
+    whole service day."""
+    from scripts.fleet import paid_driver_hours
+
+    _, duties = paid_driver_hours(8.0, 16.0, 1.3, 13.0, 6.0, 9.0)
+    assert duties == 2
+    _, one = paid_driver_hours(8.0, 12.0, 1.3, 13.0, 6.0, 9.0)
+    assert one == 1
+
+
+def test_a_peak_only_route_costs_more_than_its_driving_hours():
+    """Three hours of driving across a twelve-hour day, with a five-hour hole in the middle.
+    Charging 3 x 1,3 made a peak-concentrated service look cheaper than it is."""
+    from scripts.fleet import paid_driver_hours
+
+    hours, _ = paid_driver_hours(3.0, 12.0, 1.3, 13.0, 6.0, 9.0)
+    assert hours == 6.0
+    assert hours > 3.0 * 1.3
+
+
+def test_a_solidly_worked_day_falls_back_to_the_ratio():
+    from scripts.fleet import paid_driver_hours
+
+    hours, _ = paid_driver_hours(8.0, 10.0, 1.3, 13.0, 6.0, 9.0)
+    assert hours == pytest.approx(8.0 * 1.3)
+
+
+def test_the_span_is_first_departure_to_last():
+    from scripts.tiers import duty_span_hours
+
+    assert duty_span_hours({"am_peak": 2, "midday": 0, "pm_peak": 2, "evening": 0}) == 12
+    assert duty_span_hours({"am_peak": 3, "midday": 5, "pm_peak": 4, "evening": 4}) == 16
+    assert duty_span_hours({"am_peak": 0, "midday": 0, "pm_peak": 0, "evening": 0}) == 0

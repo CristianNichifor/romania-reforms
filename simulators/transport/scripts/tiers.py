@@ -29,6 +29,16 @@ from typing import Final
 # profile in L1b, not a period of the weekday.
 PERIODS: Final[tuple[str, ...]] = ("am_peak", "midday", "pm_peak", "evening")
 
+# When each period starts and ends on the clock. The profile gives lengths; a duty needs
+# times, because what decides how many drivers a vehicle needs is not how long it runs but how
+# far apart its first and last departures are.
+PERIOD_CLOCK: Final[dict[str, tuple[float, float]]] = {
+    "am_peak": (6.0, 9.0),
+    "midday": (9.0, 14.0),
+    "pm_peak": (14.0, 18.0),
+    "evening": (18.0, 22.0),
+}
+
 DAY_PROFILE: Final[dict[str, float]] = {
     "am_peak": 3.0,  # 06:00-09:00
     "midday": 5.0,  # 09:00-14:00
@@ -106,3 +116,17 @@ def classify(population: int, is_hub: bool) -> str:
 def service_for(tier: str) -> Service:
     """The service a class runs. Raises on an unknown class rather than inventing one."""
     return SERVICES[tier]
+
+
+def duty_span_hours(departures: dict[str, int]) -> float:
+    """Hours from the first departure of the day to the last.
+
+    Four departures placed on the peaks is a twelve-hour day, not a three-hour one, and the
+    day is what has to be staffed.
+    """
+    live = [p for p, count in departures.items() if count > 0]
+    if not live:
+        return 0.0
+    start = min(PERIOD_CLOCK[p][0] for p in live if p in PERIOD_CLOCK)
+    end = max(PERIOD_CLOCK[p][1] for p in live if p in PERIOD_CLOCK)
+    return max(0.0, end - start)

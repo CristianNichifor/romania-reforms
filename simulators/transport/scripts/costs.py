@@ -9,7 +9,8 @@ argues with `tiers.py`. None of them has to accept the others to make their case
 with how many of them must exist. They are driven by different numbers and behave differently
 under every lever a reader can pull:
 
-- **per bus-hour** — the driver, who is paid for standing at a terminus as well as for driving.
+- **per paid driver-hour** — the driver, who is staffed against the vehicle's DAY rather than
+  its driving: a bus out from 06:00 to 22:00 needs two duties however little it moves.
 - **per bus-km** — fuel, tyres, the parts that wear.
 - **per vehicle-year** — insurance and depot, owed whether the bus moves or not.
 - **capital** — the vehicles themselves, annualised over their life.
@@ -45,6 +46,7 @@ class Prices:
     """Unit prices, resolved from the data file into the four rates the model needs."""
 
     per_bus_hour: float
+    per_paid_hour: float
     per_bus_km_by_class: dict[str, float]
     per_vehicle_year: float
     admin_share: float
@@ -125,6 +127,7 @@ def load_prices(path: Path = COST_INPUTS) -> Prices:
 
     return Prices(
         per_bus_hour=per_bus_hour,
+        per_paid_hour=per_paid_hour,
         per_bus_km_by_class=per_km,
         per_vehicle_year=item["insurancePerVehicleYear"]
         + item["depotPerVehicleYear"]
@@ -136,7 +139,7 @@ def load_prices(path: Path = COST_INPUTS) -> Prices:
 
 
 def annual_cost(
-    bus_hours_per_weekday: float,
+    paid_driver_hours_per_weekday: float,
     bus_km_per_weekday_by_class: dict[str, float],
     fleet_by_class: dict[str, int],
     prices: Prices,
@@ -146,8 +149,15 @@ def annual_cost(
 
     Kilometres come per class because a 20-seat minibus and a 50-seat coach do not burn the
     same fuel over the same road, and the classes differ by nearly a factor of two.
+
+    The driver line takes PAID hours — see `fleet.paid_driver_hours`. Passing bus-hours here
+    understates it, because the dead time a peak timetable creates is real and someone is
+    employed across it.
     """
-    driver = bus_hours_per_weekday * weekdays * prices.per_bus_hour
+    # PAID hours, not bus-hours. A vehicle out from 06:00 to 22:00 needs two duties whatever
+    # it drives, and a peak-only route buys three hours of driving across a twelve-hour day.
+    # Billing bus-hours charged nothing for either.
+    driver = paid_driver_hours_per_weekday * weekdays * prices.per_paid_hour
     running = sum(
         km * weekdays * prices.per_bus_km_by_class[name]
         for name, km in bus_km_per_weekday_by_class.items()

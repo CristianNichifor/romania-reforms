@@ -18,6 +18,7 @@ import {
   SERVICES,
   SERVICE_LEVELS,
   driversRequired,
+  dutySpanHours,
   levelById,
   annualCost,
   chooseTraction,
@@ -29,6 +30,7 @@ import {
   fleetRequired,
   lifetimeCost,
   loadPrices,
+  paidDriverHours,
   resourcesForRoute,
   vehiclesForPeriod,
 } from './serviciu';
@@ -110,6 +112,10 @@ describe('cost arithmetic', () => {
       diesel: { basic: 2, trunk: 4 },
     },
     passengerKmPerPersonYear: 300,
+    perPaidHour: 40,
+    maxDrivingHoursDay: 9,
+    maxDutySpanHours: 13,
+    minimumPaidShiftHours: 6,
     depotCapexPerBus: 745_500,
     depotElectricPremiumPerBus: 497_000,
     depotLifeYears: 40,
@@ -261,21 +267,14 @@ describe('service levels', () => {
 });
 
 describe('drivers', () => {
-  it('needs more drivers than buses, because a driver is paid for more than driving', () => {
-    // One bus on the road for a full service day cannot be one driver.
-    const hours = 6_917_575;
-    expect(driversRequired(hours, 165, 1.3)).toBeGreaterThan(4000);
-  });
-
-  it('scales with the platform-to-paid ratio', () => {
-    expect(driversRequired(100_000, 165, 1.3)).toBeGreaterThan(
-      driversRequired(100_000, 165, 1.0),
-    );
+  it('turns paid hours into full-time people', () => {
+    expect(driversRequired(165 * 12, 165)).toBe(1);
+    expect(driversRequired(165 * 12 * 10, 165)).toBe(10);
   });
 
   it('returns none for a service that does not run', () => {
-    expect(driversRequired(0, 165, 1.3)).toBe(0);
-    expect(driversRequired(100, 0, 1.3)).toBe(0);
+    expect(driversRequired(0, 165)).toBe(0);
+    expect(driversRequired(100, 0)).toBe(0);
   });
 });
 
@@ -428,5 +427,50 @@ describe('depot capital follows the traction mix', () => {
     const few = lifetimeCost(cost, 12, 12, 100, 745_500, 10, 497_000).depotCapexRon;
     const many = lifetimeCost(cost, 12, 12, 100, 745_500, 90, 497_000).depotCapexRon;
     expect(many).toBeGreaterThan(few);
+  });
+});
+
+describe('driver duties, not driving hours', () => {
+  const prices = {
+    platformToPaidRatio: 1.3,
+    maxDutySpanHours: 13,
+    minimumPaidShiftHours: 6,
+    maxDrivingHoursDay: 9,
+  };
+
+  it('measures the span from the first departure to the last', () => {
+    // Four departures on the peaks is a twelve-hour day, not a three-hour one.
+    expect(dutySpanHours({ am_peak: 2, midday: 0, pm_peak: 2, evening: 0 })).toBe(12);
+    expect(dutySpanHours({ am_peak: 3, midday: 5, pm_peak: 4, evening: 4 })).toBe(16);
+    expect(dutySpanHours({ am_peak: 2, midday: 0, pm_peak: 0, evening: 0 })).toBe(3);
+  });
+
+  it('needs two duties for a vehicle out from six to ten at night', () => {
+    // The heart of it: a sixteen-hour vehicle day cannot be one person, whatever it drives.
+    expect(paidDriverHours(8, 16, prices).duties).toBe(2);
+    expect(paidDriverHours(8, 12, prices).duties).toBe(1);
+  });
+
+  it('needs two duties when the driving alone exceeds the legal day', () => {
+    // EU 561/2006 caps daily driving at nine hours, span or no span.
+    expect(paidDriverHours(14, 10, prices).duties).toBe(2);
+  });
+
+  it('pays a peak-only route far more than its driving hours', () => {
+    // Three hours of driving across a twelve-hour day. Charging 3 x 1,3 made a service
+    // concentrated on the peaks look cheaper than it is; the minimum shift is what it costs.
+    const peakOnly = paidDriverHours(3, 12, prices);
+    expect(peakOnly.hours).toBe(6);
+    expect(peakOnly.hours).toBeGreaterThan(3 * 1.3);
+  });
+
+  it('falls back to the ratio when the day is worked solidly', () => {
+    // A vehicle driving eight of its ten hours is not paying for dead time; the ratio governs.
+    const solid = paidDriverHours(8, 10, prices);
+    expect(solid.hours).toBeCloseTo(8 * 1.3);
+  });
+
+  it('costs nothing for a route that does not run', () => {
+    expect(paidDriverHours(0, 12, prices)).toEqual({ hours: 0, duties: 0 });
   });
 });

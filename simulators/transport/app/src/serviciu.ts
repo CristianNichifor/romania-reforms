@@ -24,6 +24,29 @@ export const DAY_PROFILE: Record<string, number> = {
   evening: 4.0,
 };
 
+/**
+ * When each period of the service day starts and ends.
+ *
+ * The day profile gives lengths; a duty needs clock times, because what decides how many
+ * drivers a vehicle needs is not how long it runs but how far apart its first and last
+ * departures are. A vehicle out from 06:00 to 22:00 needs two people whatever it does between.
+ */
+export const PERIOD_CLOCK: Record<string, { start: number; end: number }> = {
+  am_peak: { start: 6, end: 9 },
+  midday: { start: 9, end: 14 },
+  pm_peak: { start: 14, end: 18 },
+  evening: { start: 18, end: 22 },
+};
+
+/** Hours from the first departure of the day to the last, for a set of departures. */
+export function dutySpanHours(departures: Record<string, number>): number {
+  const live = Object.entries(departures).filter(([, n]) => n > 0).map(([p]) => p);
+  if (!live.length) return 0;
+  const start = Math.min(...live.map((p) => PERIOD_CLOCK[p]?.start ?? 0));
+  const end = Math.max(...live.map((p) => PERIOD_CLOCK[p]?.end ?? 0));
+  return Math.max(0, end - start);
+}
+
 export interface Service {
   tier: string;
   seats: number;
@@ -256,10 +279,19 @@ export interface Prices {
   /** Paid hours a full-time driver works in a month. */
   /** Capital to build one vehicle space: parking, workshop, wash, admin. */
   depotCapexPerBus: number;
-  /** A depot outlives three generations of bus, so it is annualised on its own horizon. */
   /** Extra capital for a charging-equipped space, on top of the base one. */
   depotElectricPremiumPerBus: number;
+  /** A depot outlives three generations of bus, so it is annualised on its own horizon. */
   depotLifeYears: number;
+  /** Cost of one PAID driver-hour, before the platform-to-paid ratio. */
+  perPaidHour: number;
+  /** EU 561/2006: nine hours of driving a day, and a break after four and a half. */
+  maxDrivingHoursDay: number;
+  /** How much of the day one duty may span, sign-on to sign-off. */
+  maxDutySpanHours: number;
+  /** Nobody is employed for ninety minutes. */
+  minimumPaidShiftHours: number;
+  /** Paid hours a full-time driver works in a month. */
   driverPaidHoursMonth: number;
   /** Paid hours per hour the bus is moving: sign-on, breaks, deadhead. */
   platformToPaidRatio: number;
@@ -378,6 +410,10 @@ export function loadPrices(document: {
     depotElectricPremiumPerBus: item('depotElectricPremiumPerBusRon'),
     depotLifeYears: item('depotLifeYears'),
     passengerKmPerPersonYear: item('passengerKmPerPersonYear'),
+    perPaidHour,
+    maxDrivingHoursDay: item('maxDrivingHoursDay'),
+    maxDutySpanHours: item('maxDutySpanHours'),
+    minimumPaidShiftHours: item('minimumPaidShiftHours'),
     driverPaidHoursMonth: item('driverPaidHoursMonth'),
     platformToPaidRatio: item('platformToPaidRatio'),
     serviceSpeedFactor: item('serviceSpeedFactor'),
@@ -417,6 +453,10 @@ export interface NetworkCost {
    * it too rather than dividing bus-hours by a working year.
    */
   drivers: number;
+  /** Driver duties a weekday — the shifts that must be rostered, not the hours driven. */
+  dutiesPerWeekday: number;
+  /** Paid driver-hours a weekday, including dead time a peak timetable creates. */
+  paidHoursPerWeekday: number;
   cost: Cost;
   /** Capacity the timetable offers, in seat-kilometres a year. */
   seatKmPerYear: number;
@@ -486,14 +526,43 @@ export function lifetimeCost(
   };
 }
 
-/** Full-time drivers for a year of bus-hours. */
-export function driversRequired(
-  busHoursPerYear: number,
-  paidHoursMonth: number,
-  platformToPaid: number,
-): number {
+/**
+ * Paid driver-hours for one vehicle's day, which is not its driving hours.
+ *
+ * Three things push it up, and the model used to catch only the first:
+ *
+ * 1. **Sign-on, breaks and deadhead** — the platform-to-paid ratio.
+ * 2. **The span.** A vehicle out from 06:00 to 22:00 exceeds what one duty may cover, so it
+ *    needs two, whatever it drives. EU 561/2006 caps daily driving at nine hours.
+ * 3. **The minimum shift.** Four departures on the peaks is about three hours of driving spread
+ *    across twelve, with a five-hour hole in the middle. Nobody is employed on those terms, and
+ *    charging three hours for it made a peak-only service look cheaper than it is.
+ *
+ * This is where a service concentrated on the peaks stops being cheap: it buys very little
+ * driving over a very long day, and the day is what has to be staffed.
+ */
+export function paidDriverHours(
+  drivingHours: number,
+  spanHours: number,
+  prices: Pick<
+    Prices,
+    'platformToPaidRatio' | 'maxDutySpanHours' | 'minimumPaidShiftHours' | 'maxDrivingHoursDay'
+  >,
+): { hours: number; duties: number } {
+  if (drivingHours <= 0) return { hours: 0, duties: 0 };
+  // A duty is limited both by how long it may span and by how much may be driven inside it.
+  const bySpan = Math.ceil(spanHours / prices.maxDutySpanHours);
+  const byDriving = Math.ceil(drivingHours / prices.maxDrivingHoursDay);
+  const duties = Math.max(1, bySpan, byDriving);
+  const withRatio = drivingHours * prices.platformToPaidRatio;
+  const withMinimum = duties * prices.minimumPaidShiftHours;
+  return { hours: Math.max(withRatio, withMinimum), duties };
+}
+
+/** Full-time drivers for a year of PAID hours. */
+export function driversRequired(paidHoursPerYear: number, paidHoursMonth: number): number {
   if (paidHoursMonth <= 0) return 0;
-  return Math.ceil((busHoursPerYear * platformToPaid) / (paidHoursMonth * 12));
+  return Math.ceil(paidHoursPerYear / (paidHoursMonth * 12));
 }
 
 /**
@@ -527,6 +596,8 @@ export function costNetwork(
   const kmByClass: Record<string, number> = { basic: 0, feeder: 0, trunk: 0 };
   const peakByTraction: Record<Traction, number> = { electric: 0, hybrid: 0, diesel: 0 };
   const runningRon: Record<string, number> = {};
+  let paidHours = 0;
+  let duties = 0;
   let hours = 0;
   let routeCount = 0;
   let withoutLength = 0;
@@ -539,6 +610,13 @@ export function costNetwork(
     hours += r.busHours;
     busKm += r.busKm;
     routeCount += 1;
+
+    // Drivers are staffed against the vehicle's DAY, not its driving. A route on the peaks
+    // spans twelve hours to move for three, and someone has to be there for the span.
+    const span = dutySpanHours(level.departures[name]);
+    const perVehicle = paidDriverHours(r.busHours / Math.max(1, r.peakVehicles), span, prices);
+    paidHours += perVehicle.hours * Math.max(1, r.peakVehicles);
+    duties += perVehicle.duties * Math.max(1, r.peakVehicles);
 
     // What this route needs, from what it does: kilometres a vehicle covers in a day, and how
     // often it stops. Both come out of the resources just computed rather than being assumed.
@@ -619,7 +697,8 @@ export function costNetwork(
   }
 
   const running = Object.values(runningRon).reduce((a, b) => a + b, 0);
-  const driver = hours * prices.weekdaysPerYear * prices.perBusHour;
+  // Paid hours, not bus-hours. The difference is the dead time a peak service creates.
+  const driver = paidHours * prices.weekdaysPerYear * prices.perPaidHour;
   const standing = fleetTotal * prices.perVehicleYear;
   const admin = (driver + running + standing) * prices.adminShare;
   const operating = driver + running + standing + admin;
@@ -640,11 +719,9 @@ export function costNetwork(
     seatsOwned,
     tractionMix,
     ronPerSeatKm: seatKmPerYear ? totals.totalRon / seatKmPerYear : 0,
-    drivers: driversRequired(
-      hours * prices.weekdaysPerYear,
-      prices.driverPaidHoursMonth,
-      prices.platformToPaidRatio,
-    ),
+    drivers: driversRequired(paidHours * prices.weekdaysPerYear, prices.driverPaidHoursMonth),
+    dutiesPerWeekday: duties,
+    paidHoursPerWeekday: paidHours,
     peakVehicles: peakTotal,
     busHoursPerWeekday: hours,
     busKmPerWeekday: busKm,

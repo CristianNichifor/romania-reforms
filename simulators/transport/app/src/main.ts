@@ -304,6 +304,7 @@ async function main() {
         .toFixed(3)
         .replace('.', ',')} lei</dd>
       <dt>Șoferi</dt><dd>${fmt.format(resourcesFor().drivers)}</dd>
+      <dt>Ture pe zi</dt><dd>${fmt.format(resourcesFor().dutiesPerWeekday)}</dd>
       <dt>Electric / hibrid / diesel</dt><dd>${fmt.format(
         resourcesFor().tractionMix.electric,
       )} / ${fmt.format(resourcesFor().tractionMix.hybrid)} / ${fmt.format(
@@ -311,6 +312,9 @@ async function main() {
       )}</dd>
       <dt>Ore de autobuz pe zi</dt><dd>${fmt.format(
         Math.round(resourcesFor().busHoursPerWeekday),
+      )}</dd>
+      <dt>Ore plătite șoferilor</dt><dd>${fmt.format(
+        Math.round(resourcesFor().paidHoursPerWeekday),
       )}</dd>
       <dt>OPEX pe an</dt><dd>${bn(resourcesFor().cost.operatingRon)}</dd>
       <dt>CAPEX vehicule</dt><dd>${bn(life().fleetCapexRon)}</dd>
@@ -320,9 +324,15 @@ async function main() {
     // The line nobody expects, and the least defensible input in the model. Both facts belong
     // next to it rather than in a limitations list further down the page.
     const ratio = life().depotCapexRon / life().fleetCapexRon;
-    const mix = resourcesFor().tractionMix;
+    const r = resourcesFor();
+    const deadTime = r.paidHoursPerWeekday / r.busHoursPerWeekday;
+    const mix = r.tractionMix;
     const electricShare = mix.electric / (mix.electric + mix.hybrid + mix.diesel);
     el('cost-note').textContent =
+      `Se plătesc ${deadTime.toFixed(2).replace('.', ',')} ore de șofer pentru fiecare oră în ` +
+      `care autobuzul chiar merge. Un vehicul care iese la 6 și intră la 22 are nevoie de două ` +
+      `ture oricât ar circula, iar o cursă doar pe vârfuri înseamnă trei ore de condus întinse ` +
+      `pe douăsprezece. Timpul mort este cel care se plătește. ` +
       `Tracțiunea o cere traseul, nu o alege o politică: ${(electricShare * 100).toFixed(0)}% ` +
       `din parc poate fi electric pentru că face sub ${fmt.format(
         Math.round(costInputs.items.electricRangeKm.value),

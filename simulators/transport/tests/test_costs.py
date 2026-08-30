@@ -19,6 +19,7 @@ COST = ROOT / "data" / "cost.json"
 
 PRICES = Prices(
     per_bus_hour=50.0,
+    per_paid_hour=40.0,
     per_bus_km_by_class={"basic": 2.0, "feeder": 3.0, "trunk": 4.0},
     per_vehicle_year=10_000.0,
     admin_share=0.10,
@@ -27,11 +28,11 @@ PRICES = Prices(
 )
 
 
-def test_the_driver_line_follows_hours_not_kilometres():
+def test_the_driver_line_follows_paid_hours_not_kilometres():
     """A driver is paid for time. If this ever scaled with distance, a slow route through
     villages would cost less than a fast one over the same hours."""
     cost = annual_cost(100.0, {"basic": 0.0}, {"basic": 0}, PRICES, weekdays=10)
-    assert cost.driver_ron == pytest.approx(100 * 10 * 50.0)
+    assert cost.driver_ron == pytest.approx(100 * 10 * 40.0)
 
 
 def test_the_running_line_is_priced_per_class():
@@ -87,8 +88,8 @@ def test_the_driver_rate_includes_contributions_and_unpaid_platform_time():
     real = load_prices()
     inputs = json.loads((ROOT / "data" / "cost-inputs.json").read_text(encoding="utf-8"))["items"]
     naive = inputs["driverGrossMonthly"]["value"] / inputs["driverPaidHoursMonth"]["value"]
-    assert real.per_bus_hour > naive * inputs["platformToPaidRatio"]["value"] * 0.99
-    assert real.per_bus_hour > naive
+    assert real.per_paid_hour > naive
+    assert real.per_bus_hour > real.per_paid_hour
 
 
 def test_every_price_carries_its_own_confidence():
@@ -196,4 +197,3 @@ def test_maintenance_at_parity_wages_is_the_benchmark():
         "ronPerEur": 4.97,
     }
     assert maintenance_per_km(item) == pytest.approx(0.45 * 4.97)
-

@@ -10,8 +10,11 @@
     "confidence": "derived",
     "note": "Derivat dintr-un lanț în care nimic nu este verificat pe teren: vitezele sunt modelate, prețurile unitare sunt estimate, iar economiile vin de la simulatorul administrativ cu limitările lui."
   },
+  "drivers": 5552,
   "perWeekday": {
     "busHours": 27670.3,
+    "paidDriverHours": 43964.8,
+    "duties": 6538,
     "busKm": 1018343.8,
     "kmPerBusHour": 36.8,
     "routesCosted": 1707,
@@ -32,19 +35,19 @@
     "spareRatio": 0.15
   },
   "annualRon": {
-    "driver": 417350261,
+    "driver": 510092298,
     "running": 1000378927,
     "standing": 51860631,
-    "admin": 176350778,
-    "operating": 1645940597,
+    "admin": 187479823,
+    "operating": 1749811678,
     "capital": 276441961,
-    "total": 1922382558
+    "total": 2026253639
   },
   "ledgerRon": {
-    "transportCost": 1922382558,
+    "transportCost": 2026253639,
     "administrativeSaving": 8727843155,
     "operatingSaving": 32651674949,
-    "netAgainstAdministrativeSaving": 6805460597
+    "netAgainstAdministrativeSaving": 6701589516
   },
   "limitations": [
     {
@@ -81,7 +84,7 @@
     },
     {
       "id": "cost-pe-km-sub-referinta-ajustata",
-      "text": "Costul de funcționare iese 6,47 lei pe kilometru. Față de tariful aprobat la Buzău în 2025, convertit prin numărul mediu de locuri cum cere metodologia ANRSC, modelul este la 0,92 din reper la 20 de locuri — capacitatea pe care o cer de obicei programele județene — și la 0,41 la media parcului modelat. Reperul NU se poate compara direct: costul pe kilometru nu crește proporțional cu locurile, deci lei/km/loc nu normalizează între parcuri diferite, iar compoziția parcului din Buzău nu a fost găsită. Ponderea șoferilor este 25% față de 22-24% așteptat după ajustarea salarială a reperului vest-european. O versiune anterioară a acestei limitări afirma că modelul este de 2,3 ori sub reper; afirmația venea din compararea la media parcului nostru și era greșită.",
+      "text": "Costul de funcționare iese 6,87 lei pe kilometru. Față de tariful aprobat la Buzău în 2025, convertit prin numărul mediu de locuri cum cere metodologia ANRSC, modelul este la 0,98 din reper la 20 de locuri — capacitatea pe care o cer de obicei programele județene — și la 0,43 la media parcului modelat. Reperul NU se poate compara direct: costul pe kilometru nu crește proporțional cu locurile, deci lei/km/loc nu normalizează între parcuri diferite, iar compoziția parcului din Buzău nu a fost găsită. Ponderea șoferilor este 29% față de 22-24% așteptat după ajustarea salarială a reperului vest-european. O versiune anterioară a acestei limitări afirma că modelul este de 2,3 ori sub reper; afirmația venea din compararea la media parcului nostru și era greșită.",
       "severity": "material",
       "affects": [
         "cost"

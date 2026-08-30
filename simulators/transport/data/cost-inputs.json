@@ -196,6 +196,24 @@
       "unit": "passenger-km/person/year",
       "confidence": "assumed",
       "note": "Câți kilometri-călător face un locuitor pe an PE ACEASTĂ REȚEA. Cererea se extrapolează din populație: fiecare comună generează populația ei înmulțită cu acest număr, iar gradul de ocupare devine un REZULTAT, nu o presupunere. Reperul publicat este media UE de circa 2.100 km-călător pe locuitor pe an cu transportul public, iar țările din frunte trec de 3.000 — dar acelea includ transportul urban, unde se fac majoritatea călătoriilor, și trenul de lungă distanță. Rețeaua de aici leagă doar comuna de centru și centrul de reședință. CALIBRAT PRIN VERIFICARE, ca la viteza feroviară: 175 dă un grad de ocupare de circa 25%, adică exact intervalul de 20-30% observat la servicii regionale. La 300 modelul scotea 49% ocupare și 120% acoperire din bilete — adică o rețea rurală care se autofinanțează, ceea ce nu există nicăieri. Acela este capătul de sus al plauzibilului, nu o valoare de lucru."
+    },
+    "maxDrivingHoursDay": {
+      "value": 9,
+      "unit": "hours",
+      "confidence": "verbatim",
+      "note": "Timpul maxim de conducere pe zi, Regulamentul (CE) 561/2006 art. 6: nouă ore, cu extindere la zece de cel mult două ori pe săptămână. Art. 7 cere o pauză de 45 de minute după cel mult patru ore și jumătate de conducere. Aceasta este limita care decide de câți oameni are nevoie un vehicul, nu câte ore merge el."
+    },
+    "maxDutySpanHours": {
+      "value": 13,
+      "unit": "hours",
+      "confidence": "assumed",
+      "note": "Cât poate acoperi o singură tură, de la luarea în primire până la predare, inclusiv pauze. Sub amplitudinea zilei de serviciu de 16 ore, deci un vehicul care circulă de la 6 la 22 are nevoie de doi oameni oricâte ore ar merge efectiv. Directiva 2002/15/CE limitează separat săptămâna de lucru a personalului mobil la 48 de ore în medie și 60 maxim."
+    },
+    "minimumPaidShiftHours": {
+      "value": 6,
+      "unit": "hours",
+      "confidence": "assumed",
+      "note": "Minimul plătit pentru o tură, oricât de puțin s-ar conduce în ea. Aici se vede costul real al unui serviciu concentrat pe vârfuri: patru curse pe zi înseamnă circa trei ore de condus întinse pe douăsprezece, iar nimeni nu este angajat pentru trei ore cu o pauză neplătită de cinci la mijloc. Fără acest minim, modelul plătea timpul mort cu zero și scotea un serviciu de vârf mai ieftin decât este."
     }
   },
   "vehicles": {
@@ -292,6 +310,14 @@
       "severity": "material",
       "affects": [
         "fares",
+        "cost"
+      ]
+    },
+    {
+      "id": "turele-nu-sunt-programate",
+      "text": "Numărul de șoferi vine dintr-o regulă pe vehicul — amplitudinea zilei împărțită la durata maximă a unei ture — nu dintr-o programare reală a turelor. O programare bună leagă capătul unui traseu de începutul altuia și scade necesarul; una proastă îl crește. Ce prinde totuși regula: un vehicul care circulă de la 6 la 22 are nevoie de cel puțin doi oameni, iar o cursă de vârf cu trei ore de condus întinse pe douăsprezece nu se plătește ca trei ore.",
+      "severity": "material",
+      "affects": [
         "cost"
       ]
     }

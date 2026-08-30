@@ -37,8 +37,8 @@ ADMINISTRATIV = ROOT.parent / "administrativ"
 OUT = ROOT / "data" / "cost.json"
 
 from scripts.costs import WEEKDAYS_PER_YEAR, annual_cost, load_prices  # noqa: E402
-from scripts.fleet import resources_for_route  # noqa: E402
-from scripts.tiers import DAY_PROFILE, classify, service_for  # noqa: E402
+from scripts.fleet import drivers_required, paid_driver_hours, resources_for_route  # noqa: E402
+from scripts.tiers import DAY_PROFILE, classify, duty_span_hours, service_for  # noqa: E402
 
 LAYOVER_MIN: Final[float] = 10.0
 SPARE_RATIO: Final[float] = 0.15
@@ -82,6 +82,8 @@ def main(argv: list[str] | None = None) -> int:
     population = dict(zip(uats.siruta, uats.population, strict=True))
 
     hours = 0.0
+    paid_hours = 0.0
+    duties = 0
     km_by_class: dict[str, float] = collections.defaultdict(float)
     peak_by_class: dict[str, int] = collections.defaultdict(int)
     unmeasured = 0
@@ -111,13 +113,27 @@ def main(argv: list[str] | None = None) -> int:
             km_round_trip=2 * route["oneWayKm"],
         )
         hours += resources.bus_hours
+
+        # Drivers are staffed against the vehicle's DAY, not its driving. A route on the peaks
+        # spans twelve hours to move for three, and someone has to be there for the span.
+        vehicles = max(1, resources.peak_vehicles)
+        per_vehicle_hours, per_vehicle_duties = paid_driver_hours(
+            resources.bus_hours / vehicles,
+            duty_span_hours(service.departures),
+            items["platformToPaidRatio"]["value"],
+            items["maxDutySpanHours"]["value"],
+            items["minimumPaidShiftHours"]["value"],
+            items["maxDrivingHoursDay"]["value"],
+        )
+        paid_hours += per_vehicle_hours * vehicles
+        duties += per_vehicle_duties * vehicles
         km_by_class[name] += resources.bus_km
         peak_by_class[name] += resources.peak_vehicles
 
     fleet_by_class = {
         name: math.ceil(peak * (1 + SPARE_RATIO)) for name, peak in peak_by_class.items()
     }
-    cost = annual_cost(hours, dict(km_by_class), fleet_by_class, prices)
+    cost = annual_cost(paid_hours, dict(km_by_class), fleet_by_class, prices)
 
     saving_admin = hubs["savingsRon"]["administrative"]
     saving_operating = hubs["savingsRon"]["operating"]
@@ -157,8 +173,13 @@ def main(argv: list[str] | None = None) -> int:
                 "simulatorul administrativ cu limitările lui."
             ),
         },
+        "drivers": drivers_required(
+            paid_hours * WEEKDAYS_PER_YEAR, items["driverPaidHoursMonth"]["value"]
+        ),
         "perWeekday": {
             "busHours": round(hours, 1),
+            "paidDriverHours": round(paid_hours, 1),
+            "duties": duties,
             "busKm": round(sum(km_by_class.values()), 1),
             "kmPerBusHour": round(sum(km_by_class.values()) / hours, 1),
             "routesCosted": len(network["routes"]) - unmeasured,
