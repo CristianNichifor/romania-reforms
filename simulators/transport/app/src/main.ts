@@ -106,6 +106,8 @@ async function main() {
       HORIZON_YEARS,
       resourcesFor().fleetTotal,
       prices.depotCapexPerBus,
+      resourcesFor().tractionMix.electric,
+      prices.depotElectricPremiumPerBus,
     );
 
   let scenario: Timetable = hash().get('s') === 'pulsed' ? 'pulsed' : 'uncoordinated';
@@ -579,6 +581,8 @@ async function main() {
         HORIZON_YEARS,
         r.fleetTotal,
         prices.depotCapexPerBus,
+        r.tractionMix.electric,
+        prices.depotElectricPremiumPerBus,
       );
       return `<tr class="${l.id === level.id ? 'on' : ''}">
         <td>${l.label.split(' — ')[0]}</td>

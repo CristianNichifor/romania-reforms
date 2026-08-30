@@ -255,6 +255,8 @@ export interface Prices {
   /** Capital to build one vehicle space: parking, workshop, wash, admin. */
   depotCapexPerBus: number;
   /** A depot outlives three generations of bus, so it is annualised on its own horizon. */
+  /** Extra capital for a charging-equipped space, on top of the base one. */
+  depotElectricPremiumPerBus: number;
   depotLifeYears: number;
   driverPaidHoursMonth: number;
   /** Paid hours per hour the bus is moving: sign-on, breaks, deadhead. */
@@ -371,6 +373,7 @@ export function loadPrices(document: {
     perKmByTraction: perKmByTraction,
     spareRatio: 0.15,
     depotCapexPerBus: item('depotCapexPerBusRon'),
+    depotElectricPremiumPerBus: item('depotElectricPremiumPerBusRon'),
     depotLifeYears: item('depotLifeYears'),
     driverPaidHoursMonth: item('driverPaidHoursMonth'),
     platformToPaidRatio: item('platformToPaidRatio'),
@@ -449,6 +452,8 @@ export function lifetimeCost(
   years: number,
   fleet = 0,
   depotCapexPerBus = 0,
+  electricSpaces = 0,
+  depotElectricPremiumPerBus = 0,
 ): {
   fleetCapexRon: number;
   depotCapexRon: number;
@@ -463,7 +468,10 @@ export function lifetimeCost(
   // life shows up as the reason the same buildings serve the NEXT fleet too — which is why the
   // twelve-year figure overstates the true whole-life cost of the buildings and the code says
   // so rather than quietly spreading it.
-  const depotCapex = fleet * depotCapexPerBus;
+  // Every space costs the base; only the electric ones carry a charger and a grid connection.
+  // So the depot bill rises exactly as far as the route rule asks for battery vehicles, rather
+  // than by a policy percentage nobody derived.
+  const depotCapex = fleet * depotCapexPerBus + electricSpaces * depotElectricPremiumPerBus;
   const opex = cost.operatingRon * years;
   return {
     fleetCapexRon: fleetCapex,

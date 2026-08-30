@@ -109,6 +109,7 @@ describe('cost arithmetic', () => {
       diesel: { basic: 2, trunk: 4 },
     },
     depotCapexPerBus: 745_500,
+    depotElectricPremiumPerBus: 497_000,
     depotLifeYears: 40,
     driverPaidHoursMonth: 165,
     platformToPaidRatio: 1.3,
@@ -398,5 +399,27 @@ describe.skipIf(!ready)('the mix the routes ask for', () => {
     const r = built();
     const total = r.tractionMix.electric + r.tractionMix.hybrid + r.tractionMix.diesel;
     expect(Math.abs(total - r.fleetTotal)).toBeLessThanOrEqual(3);
+  });
+});
+
+describe('depot capital follows the traction mix', () => {
+  const cost = {
+    driverRon: 0, runningRon: 0, standingRon: 0, adminRon: 0,
+    capitalRon: 0, operatingRon: 0, totalRon: 0,
+  };
+
+  it('charges the charging premium only to electric spaces', () => {
+    // A diesel space needs a hall and a pit; it does not need a substation. Spreading the
+    // premium across the whole fleet would price chargers for buses that never plug in.
+    const allDiesel = lifetimeCost(cost, 12, 12, 100, 745_500, 0, 497_000);
+    const halfElectric = lifetimeCost(cost, 12, 12, 100, 745_500, 50, 497_000);
+    expect(allDiesel.depotCapexRon).toBe(100 * 745_500);
+    expect(halfElectric.depotCapexRon).toBe(100 * 745_500 + 50 * 497_000);
+  });
+
+  it('rises with the electric share and not with a policy target', () => {
+    const few = lifetimeCost(cost, 12, 12, 100, 745_500, 10, 497_000).depotCapexRon;
+    const many = lifetimeCost(cost, 12, 12, 100, 745_500, 90, 497_000).depotCapexRon;
+    expect(many).toBeGreaterThan(few);
   });
 });

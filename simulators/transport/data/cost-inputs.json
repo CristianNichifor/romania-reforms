@@ -129,7 +129,7 @@
       "value": 745500,
       "unit": "RON/vehicle space",
       "confidence": "assumed",
-      "note": "Investiția în autobază, pe loc de vehicul: parcare, hală de întreținere cu canal, spălătorie, spații administrative. 150.000 de euro pe loc, la cursul de lucru. DEDUS, nu citat, din contracte românești care nu se pot folosi direct: Câmpina, 34.454.991,51 lei pentru o autobază de NOUĂ locuri cu atelier, canal, spălătorie și administrativ, adică circa 770.000 de euro pe loc; Iași, peste 60 de milioane de euro pentru un depou de tramvaie ȘI autobuze, circa 119 vehicule, adică 510.000 pe vehicul. Ambele sunt pentru vehicule ELECTRICE și includ stații de încărcare și racorduri pe care un parc diesel nu le are, iar Câmpina împarte atelierul și spălătoria la doar nouă locuri. Cifra de aici este sub amândouă pentru că presupune o autobază mare, diesel: aproximativ patru locuri de parcare auto ca suprafață, plus hala și spălătoria diluate la scară. Este cea mai slab fundamentată intrare din model și totodată una dintre cele mai mari — vezi limitarea autobazele-domina-capexul."
+      "note": "Investiția de bază într-un loc de autobază convențională: parcare, hală cu canal, spălătorie, alimentare, administrativ. 150.000 de euro pe loc. Reperul cel mai apropiat este Oradea, 18 milioane de euro pentru o autobază nouă cu două clădiri, atelier, stație de alimentare și două parcări acoperite — o autobază CONVENȚIONALĂ, nu electrică, ceea ce o face comparabilă cu majoritatea parcului modelat. Numărul de locuri nu este publicat, deci împărțirea rămâne o deducție, nu o citire. Pentru context, capătul de sus: Berlin, 120 de milioane de euro pentru 220 de autobuze electrice, adică 545.000 de euro pe loc — construcție germană și electrificare completă."
     },
     "depotLifeYears": {
       "value": 40,
@@ -184,29 +184,35 @@
       "unit": "stops/km",
       "confidence": "assumed",
       "note": "De la câte opriri pe kilometru merită hibridul pe un traseu prea lung pentru electric. Sub prag, traseul este o cursă lungă între localități și un diesel simplu este mai ieftin; peste prag, opririle dese fac recuperarea la frânare să conteze."
+    },
+    "depotElectricPremiumPerBusRon": {
+      "value": 497000,
+      "unit": "RON/electric vehicle space",
+      "confidence": "assumed",
+      "note": "În plus față de un loc obișnuit, pentru un loc cu încărcare: stație, racord și putere disponibilă. 100.000 de euro. Dedus din distanța dintre o autobază convențională și una electrică — Berlin este la 545.000 de euro pe loc față de circa 150.000 pentru una convențională, dar în costuri de construcție germane; premiul folosit aici este mult sub acea diferență. Se aplică DOAR locurilor electrice, deci crește exact atât cât cere mixul de tracțiune pe care îl aleg traseele — nu o cotă."
     }
   },
   "vehicles": {
     "basic": {
-      "seats": 20,
-      "priceRon": 323050,
+      "seats": 29,
+      "priceRon": 586460,
       "dieselPer100Km": 18,
       "confidence": "verbatim",
-      "note": "Microbuz nou de până în 22 de locuri, 65.000 euro preț de referință. Anexa 6 la documentația de negociere a Consiliului Județean Constanța, Grupa 03, 2025, estimare pe elementele de cheltuieli din Anexa 2 la Ordinul ANRSC 272/2007."
+      "note": "118.000 de euro, Isuzu Novolux 29+1 locuri, an 2026, preț de listă la vânzare în Europa. Un al doilea punct de piață: Temsa Prestij interurban 2025, circa 102.000 de euro. Locurile au urcat de la 20 la 29 pentru că ASTA se vinde: un microbuz de 20 de locuri nu mai este produsul standard pentru transport județean. Estimarea anterioară era 65.000 de euro, din Anexa 6 a documentației Constanța — un preț de REFERINȚĂ pentru calculul tarifului, nu un preț de achiziție, și sub piață cu aproape jumătate."
     },
     "feeder": {
-      "seats": 40,
-      "priceRon": 472150,
+      "seats": 41,
+      "priceRon": 790230,
       "dieselPer100Km": 25,
       "confidence": "verbatim",
-      "note": "Autobuz nou de 23 de locuri sau mai mult, 95.000 euro preț de referință. Anexa 6 la documentația de negociere a Consiliului Județean Constanța, Grupa 03, 2025, estimare pe elementele de cheltuieli din Anexa 2 la Ordinul ANRSC 272/2007."
+      "note": "159.000 de euro, Otokar Sultan Giga, 41 de locuri, an 2025, preț de vânzare în Europa. Anterior 95.000 de euro pentru 40 de locuri, din documentația Constanța."
     },
     "trunk": {
-      "seats": 50,
-      "priceRon": 472150,
+      "seats": 57,
+      "priceRon": 941815,
       "dieselPer100Km": 30,
       "confidence": "verbatim",
-      "note": "Același preț de referință de 95.000 euro: documentația nu diferențiază peste 23 de locuri. Estimările anterioare de aici, 141.000 și 221.000 euro, erau mult prea mari — un operator județean român nu cumpără autocare de clasa aceea. Anexa 6 la documentația de negociere a Consiliului Județean Constanța, Grupa 03, 2025, estimare pe elementele de cheltuieli din Anexa 2 la Ordinul ANRSC 272/2007."
+      "note": "189.500 de euro, MAN Lion's Intercity R 60, an 2024, preț de vânzare în Europa — un interurban de linie, nu autocar de turism. Pentru comparație, un MAN Lion's Coach de turism din 2026 cere 305.000 de euro; nu este vehiculul de care are nevoie o rețea județeană și nu se folosește aici. Anterior 95.000 de euro pentru 50 de locuri — aceeași cifră ca la clasa mai mică, pentru că documentația Constanța nu diferenția peste 23 de locuri."
     }
   },
   "limitations": [
@@ -252,7 +258,7 @@
     },
     {
       "id": "autobazele-domina-capexul",
-      "text": "Investiția în autobaze nu are sursă românească directă pentru un parc diesel de dimensiunea modelată și este dedusă din două contracte pentru autobaze electrice, mult mai scumpe pe loc. Contează mult: la 150.000 de euro pe loc, autobazele costă mai mult decât autobuzele care stau în ele. Dacă cifra reală este jumătate sau dublă, costul total pe douăzeci de ani se mișcă cu miliarde. Se vede separat în model tocmai ca să poată fi contestată singură.",
+      "text": "Investiția în autobaze este acum sprijinită de un reper românesc pentru o autobază convențională (Oradea, 18 milioane de euro) și de unul german pentru una electrică (Berlin, 545.000 de euro pe loc), dar niciunul nu publică numărul de locuri împreună cu suma în forma de care ar fi nevoie, deci împărțirea rămâne o deducție. Contează mult: autobazele costă mai mult decât autobuzele din ele. Dacă cifra reală este jumătate sau dublă, costul total pe doisprezece ani se mișcă cu miliarde. Stă pe rând separat, împărțită în bază și supliment de încărcare, tocmai ca fiecare parte să poată fi contestată singură. Ce lipsește complet: terenul, care în jurul orașelor mari este o parte reală din investiție.",
       "severity": "material",
       "affects": [
         "cost"
@@ -261,6 +267,14 @@
     {
       "id": "tractiunea-e-o-regula-nu-o-masuratoare",
       "text": "Alegerea între electric, hibrid și diesel se face după o regulă simplă — kilometri pe zi față de autonomia de iarnă, apoi opriri pe kilometru — nu după o analiză de exploatare. Ce lipsește: încărcarea pe traseu, care ar face electricul posibil pe trasee lungi; relieful, care în Carpați scade autonomia mult sub media de iarnă; și puterea disponibilă în rețea la fiecare autobază, care în multe localități este constrângerea reală, nu autonomia vehiculului. Și o consecință vizibilă: modelul nu enumeră opririle intermediare de pe traseele de trunchi, deci acestea apar ca alergări fără opriri și ajung toate la diesel. Zero hibride NU este un rezultat, este un artefact al acestei simplificări — un trunchi care leagă opt centre are opriri destule cât să merite recuperarea la frânare.",
+      "severity": "material",
+      "affects": [
+        "cost"
+      ]
+    },
+    {
+      "id": "preturile-de-vehicule-sunt-de-piata-nu-de-licitatie",
+      "text": "Prețurile vehiculelor sunt acum prețuri de vânzare de pe piața europeană, 2025-2026, nu prețuri de referință din documentații de tarifare. Sunt aproape duble față de ce folosea modelul înainte, iar investiția în parc crește pe măsură. Ce rămâne neacoperit: o achiziție publică de câteva mii de vehicule nu se face la preț de listă — se negociază în jos pe volum și în sus pe cerințe de dotare, iar cele două nu se anulează previzibil.",
       "severity": "material",
       "affects": [
         "cost"
