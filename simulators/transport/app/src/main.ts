@@ -1,6 +1,14 @@
 import * as maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import './style.css';
+import {
+  BANDS,
+  NO_DATA,
+  journeyPaint,
+  railLinePaint,
+  railLineWidth,
+  stationRadius,
+} from './paint';
 
 /**
  * The map answers one question: how long would it take to reach your county seat by bus,
@@ -29,21 +37,6 @@ interface Consolidation {
   administrativeSavingRon: number | null;
   journey: Array<[number, number] | null>;
 }
-
-// RdYlBu, not RdYlGn. The previous ramp ran green→red, which ColorBrewer marks as *not*
-// colour-blind safe: to the ~8% of men with deuteranopia or protanopia the two ends of it are
-// the same colour, and on this map the ends carry the entire meaning — "your county seat is
-// twenty minutes away" against "two hours". Swapping green for blue keeps the ramp diverging
-// and legible under every common form of colour vision deficiency, and it stays ordered in
-// greyscale. The popup also states the number, which is the real backstop.
-const BANDS: Array<{ upTo: number; colour: string; label: string }> = [
-  { upTo: 45, colour: '#2c7bb6', label: 'sub 45 min' },
-  { upTo: 60, colour: '#abd9e9', label: '45–60 min' },
-  { upTo: 90, colour: '#ffffbf', label: '60–90 min' },
-  { upTo: 120, colour: '#fdae61', label: '90–120 min' },
-  { upTo: Infinity, colour: '#d7191c', label: 'peste 120 min' },
-];
-const NO_DATA = '#3a3f4d';
 
 const base = import.meta.env.BASE_URL;
 const asset = (name: string) => `${base}data/${name}`;
@@ -119,15 +112,8 @@ async function main() {
   map.addSource('counties', { type: 'geojson', data: counties });
 
   const paint = (s: Timetable): maplibregl.DataDrivenPropertyValueSpecification<string> => {
-    const key = s === 'pulsed' ? 'p' : 'u';
-    const steps: unknown[] = ['step', ['get', key], NO_DATA];
-    for (const band of BANDS) {
-      if (band.upTo === Infinity) break;
-      steps.push(band.upTo, band.colour);
-    }
-    steps.push(BANDS[BANDS.length - 1].colour);
-    // Anything below zero is a UAT with no journey — the delta communes and Bucharest.
-    return ['case', ['<', ['get', key], 0], NO_DATA, steps] as never;
+    // Built and tested in ./paint.ts, against the same parser MapLibre uses.
+    return journeyPaint(s === 'pulsed' ? 'p' : 'u') as never;
   };
 
   map.addLayer({
@@ -253,12 +239,8 @@ async function main() {
         type: 'line',
         source: 'rail',
         paint: {
-          'line-color': [
-            'case',
-            ['<', ['get', 'maxspeed'], 0], '#6b7280',
-            ['step', ['get', 'maxspeed'], '#d7191c', 51, '#fdae61', 91, '#abd9e9', 121, '#2c7bb6'],
-          ],
-          'line-width': ['interpolate', ['linear'], ['zoom'], 6, 1.1, 10, 2.6],
+          'line-color': railLinePaint() as never,
+          'line-width': railLineWidth() as never,
         },
       });
       map.addLayer({
@@ -266,7 +248,7 @@ async function main() {
         type: 'circle',
         source: 'stations',
         paint: {
-          'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 1.6, 11, 4],
+          'circle-radius': stationRadius() as never,
           'circle-color': '#e8eaf0',
           'circle-stroke-color': '#12141a',
           'circle-stroke-width': 0.6,
