@@ -40,6 +40,7 @@ argument. This repository is an index, not a monolith.
 | **justitie** | The judicial reform | migrated to the 2025 report |
 | **salarizare** | Public-sector pay | migrated |
 | **administrativ** | Consolidation of the 3 186 UATs | migrated |
+| **impozit-teren** | Taxing land on its value | both taxes computed, 2 counties of 41 |
 
 Both live simulators now live here, with their history, on project paths under one Pages
 site: `/romania-reforms/salarizare/` and `/romania-reforms/administrativ/`. Their old
@@ -82,6 +83,124 @@ every tribunal but Bucharest. A court map arguing that small courts are the prob
 missing the biggest urban ones would have been worse than no map. The tolerance check on
 averages had passed at 4,5%; the rank-continuity check caught it outright, and with the
 rows restored the reconstructed average matches the printed one to 0,0%.
+
+### impozit-teren
+
+Romania taxes land on **surface area** times a coefficient from the Fiscal Code — rank of
+locality, zone letter, and nothing about what the land is worth. This models the other
+option: taxing land on its value, and what that would move.
+
+The value exists and the state already leans on it. Each Chamber of Public Notaries publishes
+an annual *studiu de piață* setting minimum orientative values, used as the floor for notary
+fees and transfer tax. It is the only valuation of Romanian land that is official, national,
+published, and granular below the commune — Bacău's study prices land **village by village**,
+in EUR/m², split by use category, with towns priced by zone letter instead.
+
+`scripts/import_ghid.py` reads it. Two counties are in, from two documents:
+
+| | villages | communes | towns zoned | pages |
+| --- | --- | --- | --- | --- |
+| Bacău | 528 | 85 | 8 + 1 commune | 129 |
+| Neamț | 664 | 78 | 5 | 108 |
+
+**The residual method these grids were expected to need turned out to be unnecessary.** The
+first plan recovered land value from property prices minus depreciated building cost, on the
+assumption that the studies carried a construction-cost table. They do not — "costuri de
+construcție" appears in them only in prose. They print land outright, which is better, and
+the check that found this cost an afternoon rather than a rewrite.
+
+The parse is measured against the **INS land register**, not against another page of the same
+document: every locality the register lists for the county must come out of the study's tables,
+and every locality the tables yield must be one the register lists. The schema refuses to
+validate a file where either direction fails. An earlier version checked against the study's
+own organisation page, which exists in the two documents from CNP Bacău and in none of the
+fifteen tried from four other chambers. That gate earned itself immediately and repeatedly — a number pattern treating a space as
+a thousands separator read Bacău's `256 123 48 35` as one number and silently dropped the
+**curți construcții** row of the county's largest city, which is the single row a land tax
+mostly lands on. Row counts looked fine throughout.
+
+Two things the documents do that no template survives: commune names wrap **mid-word** —
+`CLEJ` / `A`, `ONCEST` / `I`, and Valea Seacă split four ways with its last letter sharing a
+line with the first village — and the same study spells the same place two ways, printing
+`GIRLENI` for Gârleni but `BARSANESTI` for Bârsănești. Names are therefore resolved against
+the roster rather than parsed, and a fragment is only absorbed if absorbing it turns an
+unrecognised name into a recognised one.
+
+**The other half is how much land there is.** A price per square metre is not a tax base
+without a count of them. INS matrix `AGR101B` has hectares per locality by the same cadastral
+categories the notaries price; `import_fond_funciar.py` reads it and `build_valoare_teren.py`
+multiplies the two together.
+
+| | localities | area | built-up | land value, low → high |
+| --- | --- | --- | --- | --- |
+| Bacău | 93 | 662 052 ha | 21 719 ha (3,3%) | 2,8 → 9,7 bn EUR |
+| Neamț | 83 | 589 614 ha | 15 224 ha (2,6%) | 3,5 → 9,4 bn EUR |
+
+**The answer is a band, and the band is the finding.** The grid publishes one price per
+village and one per town zone, and neither villages nor zones have published areas to weight
+them by — so every commune is valued at its cheapest published price, its dearest, and the
+unweighted mean, and all three travel together. A single confident number here would be a
+fiction. Two assumptions carry the arithmetic and both are `blocking`: that curți-construcții
+is the intravilan (the register does not record the split, and intravilan land is priced up to
+250× higher), and the absent weighting above.
+
+Two defects worth recording because neither threw and both validated. INS repeats a dimension
+label only when it changes and writes `-` underneath, so read literally the table credited
+every category of every commune to the one named on the first row — putting Bacău county at
+**4 319 hectares instead of 662 052**. And matching commune names on one spelling of â lost 16
+of 176 communes, each of which then had no land value rather than a visibly missing one. Both
+are now tested against numbers from outside the pipeline: the counties' real surface areas.
+
+**Both taxes, on the same hectares.** `import_cod_fiscal.py` reads article 465 of Legea
+227/2015 — five tables — from the consolidated text on the legislative portal, and
+`build_impozit.py` levies it on the same land the value was computed from. Statutory against
+statutory, deliberately: comparing a modelled tax with what councils actually collect would
+attribute arrears, exemptions and collection rates to the change of rule.
+
+| județ | Cod fiscal, mil RON | valoarea terenului, mld RON | **cota neutră** |
+| --- | --- | --- | --- |
+| Bacău | 40 → 94 → 179 | 15 → 28 → 51 | 0,08 → **0,33** → 1,21 % |
+| Neamț | 31 → 64 → 114 | 18 → 31 → 49 | 0,06 → **0,21** → 0,62 % |
+
+**A land value tax replacing today's land tax would be a fifth to a third of one per cent** of
+land value in these two counties — an order of magnitude below the 1% that gets assumed in
+argument. The reason is not that land is worth little; it is that the current tax is very
+small relative to the value it sits on.
+
+**The tax we already have is a band too, and a wider one than the land value.** That was the
+surprise. Article 465 (2) does not state a rate, it states 8 282–20 706 lei/ha for zone A of a
+rank-0 locality, and paragraph (9) leaves the choice to the local council. The zone A–D is a
+council decision as well, with no national register of zones or their areas. And a commune's
+seat is rank IV while its other villages are rank V. Three unpublished local decisions
+multiply: **the cheapest and dearest lawful readings of today's tax differ by 4,5× in Bacău.**
+Nobody can say what Romania charges on land without reading 3 186 council decisions.
+
+**Where it stops, and it stops early — two counties of 41, and the reason is measured.**
+Fifteen more were tried, from four other chambers: Alba, Sibiu, Hunedoara, Cluj, Maramureș,
+Bistrița-Năsăud, Sălaj, Timiș, Arad, Caraș-Severin, Iași, Satu Mare, Vâlcea, Mureș, Harghita.
+**None parsed**, and none was landed, because a grid that fails its own checks is worse than
+a county that is honestly absent.
+
+The studies are not one document in 41 editions. They are written by different valuation
+firms — Cluj's by a company in Cluj, Timiș's by another in Timișoara — and share no layout:
+
+| chamber | what the tables look like | distance from here |
+| --- | --- | --- |
+| Alba, Iași, Mureș, Harghita | closest to Bacău's shape; 30–70% of communes parse | a dialect of the same parser |
+| Cluj (CJ, MM, BN, SJ) | 22–45 pages for a whole county, compact per-locality tables | a second parser |
+| Timiș, Arad, Caraș, Satu Mare, Vâlcea | prose by court circumscription; no per-village land table in this shape at all | a different document |
+
+What did generalise is the checking. The **land areas are imported for all 42 counties** on
+demand, and the register is now the roster every grid is measured against — so the next
+chamber's parser starts with its check already written.
+
+Inside towns the value depends on zone A–D and the zones are defined as **lists of
+streets and house-number ranges**, not polygons; there is no published geometry for them, so
+urban values are per-town and per-zone but cannot be put on a map below the town. And the
+grids are legal floors, not transactions: they sit under market prices by a margin that is
+neither published nor constant between counties. They rank places against each other far
+better than they measure any of them, and that limitation is carried as `blocking` so it
+reaches every figure derived from it.
 
 ## Decided: how the migration goes
 

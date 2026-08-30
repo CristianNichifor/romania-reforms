@@ -118,3 +118,74 @@ jobs:
           npm run lint
           npm run typecheck
           npm test
+
+  impozit-teren:
+    name: impozit-teren
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: simulators/impozit-teren/app/package-lock.json
+      # The studies are fetched rather than committed, so this job is also the check that
+      # unnpr.ro is still serving them at the paths the importer knows. If that ever stops
+      # being true the job fails loudly, which is the right outcome: a land grid that cannot
+      # be re-derived from its source is not evidence, it is a number in a file.
+      # Imported before the grids: the register is the roster each grid is checked
+      # against, so a grid cannot be verified before its county's areas exist.
+      # INS TEMPO is a separate service from unnpr.ro and fails differently: over its cell
+      # budget it answers 200 with an empty body rather than an error, so "it ran" is not
+      # evidence it worked. The importer's own check — the register's categories against the
+      # register's total — is what turns that into a failure.
+      - name: The land areas are reproducible
+        run: |
+          for county in BC NT; do
+            uv run python simulators/impozit-teren/scripts/import_fond_funciar.py \
+              --county "$county"
+          done
+          git diff --exit-code simulators/impozit-teren/data/
+      - name: The land grids are reproducible
+        run: |
+          for chamber in bacau neamt; do
+            uv run --with pypdf python simulators/impozit-teren/scripts/import_ghid.py \
+              --chamber "$chamber"
+          done
+          git diff --exit-code simulators/impozit-teren/data/
+      - name: The land value is reproducible
+        run: |
+          for county in BC NT; do
+            uv run python simulators/impozit-teren/scripts/build_valoare_teren.py \
+              --county "$county"
+          done
+          git diff --exit-code simulators/impozit-teren/data/
+      # The Fiscal Code's tables change: two of the five were replaced with effect from
+      # 1 January 2026. Re-reading them on every run is how that gets noticed, and the
+      # importer refuses to write a table whose shape no longer matches the article.
+      - name: The Fiscal Code tables are reproducible
+        run: |
+          uv run python simulators/impozit-teren/scripts/import_cod_fiscal.py
+          git diff --exit-code simulators/impozit-teren/data/cod-fiscal-teren-2026.json
+      # Not diffed: the comparison carries the day's ECB reference rate, so it changes when
+      # the euro does and a byte-identical rerun would only prove the cache was warm. The
+      # tests check the claim instead of the bytes.
+      - name: The comparison runs
+        run: |
+          for county in BC NT; do
+            uv run python simulators/impozit-teren/scripts/build_impozit.py --county "$county"
+          done
+      # The page redoes both taxes in the browser as the reader moves the assumptions, so it
+      # is a second implementation of the two builders. `npm test` is the parity check
+      # between them: at the Python's own settings the two must agree to the rounding, or the
+      # page keeps rendering confident numbers that no longer match the files behind them.
+      - name: App
+        working-directory: simulators/impozit-teren/app
+        run: |
+          npm ci
+          npm run typecheck
+          npm test
+          npm run build
