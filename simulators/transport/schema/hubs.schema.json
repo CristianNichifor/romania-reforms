@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/hubs.schema.json",
+  "title": "Which centre serves each UAT, in one consolidation scenario",
+  "description": "The frozen provider for the transport engine's single input interface: a map from every UAT to the centre that serves it, produced by running the administrative simulator once at recorded parameters. The parameters travel with the map on purpose — a hub assignment means nothing without the scenario that produced it, and this simulator's argument is precisely that a consolidation saving administration adds travel.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "title", "publisher", "period", "provenance", "scenario", "summary", "savingsRon", "hubOf", "limitations"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "type": "string" },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "period": { "type": "string" },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+    "scenario": {
+      "description": "The administrative model's parameters, as run. Recorded so the map cannot be quoted without them.",
+      "type": "object",
+      "additionalProperties": { "type": "number" },
+      "minProperties": 1
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["uats", "hubs", "reductionPct", "membersMin", "membersMedian", "membersMax", "singletonHubs", "counties", "hubsPerCountyMin", "hubsPerCountyMax"],
+      "properties": {
+        "uats": { "type": "integer", "minimum": 1 },
+        "hubs": { "type": "integer", "minimum": 1 },
+        "reductionPct": { "type": "number", "minimum": 0, "maximum": 100 },
+        "membersMin": { "type": "integer", "minimum": 1 },
+        "membersMedian": { "type": "integer", "minimum": 1 },
+        "membersMax": { "type": "integer", "minimum": 1 },
+        "singletonHubs": {
+          "description": "Hubs serving only themselves. A feeder route to one of these has nothing to feed.",
+          "type": "integer", "minimum": 0
+        },
+        "counties": { "type": "integer", "minimum": 1 },
+        "hubsPerCountyMin": { "type": "integer", "minimum": 1 },
+        "hubsPerCountyMax": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "savingsRon": {
+      "description": "What the consolidation claims to save, carried from the administrative simulator so both columns of the ledger sit together.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["administrative", "operating"],
+      "properties": {
+        "administrative": { "type": "number" },
+        "operating": { "type": "number" }
+      }
+    },
+    "hubOf": {
+      "description": "UAT SIRUTA -> serving centre SIRUTA. Every UAT appears exactly once.",
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": { "type": "string", "minLength": 1 }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+    }
+  }
+}
