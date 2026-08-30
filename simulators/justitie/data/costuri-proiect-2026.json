@@ -1,0 +1,169 @@
+{
+  "$schema": "../schema/costuri-proiect.schema.json",
+  "id": "costuri-proiect-2026",
+  "title": "Judecătorii, plătiți după proiectul de salarizare din iulie 2026",
+  "publisher": "Cristian Nichifor",
+  "period": "2026",
+  "provenance": {
+    "source": "proiect-lege-2026-07-16",
+    "locator": "Anexa V Cap. I A+B, coeficienți × valoarea de referință de la Art. 36 alin. (2)",
+    "confidence": "derived",
+    "note": "Coeficienții sunt citați din grila proiectului; înmulțirea cu valoarea de referință și rotunjirea sunt aplicate aici, după Art. 10 alin. (4)."
+  },
+  "referenceLei": 4100,
+  "byTier": [
+    {
+      "tier": "iccj",
+      "judges": 116.0,
+      "coefficient": 5.5,
+      "monthlyLei": 22550.0,
+      "annualLei": 31389600,
+      "todayMonthlyLei": 26250.0,
+      "ratioToToday": 0.859
+    },
+    {
+      "tier": "curte-de-apel",
+      "judges": 902.0,
+      "coefficient": 5.3625,
+      "monthlyLei": 21987.0,
+      "annualLei": 237987288,
+      "todayMonthlyLei": 23000.0,
+      "ratioToToday": 0.956
+    },
+    {
+      "tier": "tribunal",
+      "judges": 1308.0,
+      "coefficient": 5.0977265625,
+      "monthlyLei": 20901.0,
+      "annualLei": 328062096,
+      "todayMonthlyLei": 22500.0,
+      "ratioToToday": 0.9289
+    },
+    {
+      "tier": "judecatorie",
+      "judges": 1993.0,
+      "coefficient": 4.4,
+      "monthlyLei": 18040.0,
+      "annualLei": 431444640,
+      "todayMonthlyLei": 17250.0,
+      "ratioToToday": 1.0458
+    }
+  ],
+  "spread": {
+    "todayRatio": 1.5217,
+    "draftRatio": 1.25,
+    "compresses": true
+  },
+  "gradeGap": {
+    "todayMonthlyLei": 5250,
+    "draftMonthlyLei": 2861,
+    "narrows": true
+  },
+  "levelOne": {
+    "volume": 3463124
+  },
+  "scenarios": [
+    {
+      "target": 932.3,
+      "targetLabel": "tribunal",
+      "gradePaid": "judecatorie",
+      "judgesNeeded": 3714.6,
+      "annualLei": 804136608
+    },
+    {
+      "target": 932.3,
+      "targetLabel": "tribunal",
+      "gradePaid": "tribunal",
+      "judgesNeeded": 3714.6,
+      "annualLei": 931666255
+    },
+    {
+      "target": 1325.0,
+      "targetLabel": "actual",
+      "gradePaid": "judecatorie",
+      "judgesNeeded": 2613.7,
+      "annualLei": 565813776
+    },
+    {
+      "target": 1325.0,
+      "targetLabel": "actual",
+      "gradePaid": "tribunal",
+      "judgesNeeded": 2613.7,
+      "annualLei": 655547324
+    },
+    {
+      "target": 1479.0,
+      "targetLabel": "judecatorie",
+      "gradePaid": "judecatorie",
+      "judgesNeeded": 2341.5,
+      "annualLei": 506887920
+    },
+    {
+      "target": 1479.0,
+      "targetLabel": "judecatorie",
+      "gradePaid": "tribunal",
+      "judgesNeeded": 2341.5,
+      "annualLei": 587276298
+    }
+  ],
+  "gradeChoiceSwing": [
+    {
+      "target": 932.3,
+      "todayLei": 234019800,
+      "draftLei": 127529647
+    },
+    {
+      "target": 1325.0,
+      "todayLei": 164663100,
+      "draftLei": 89733548
+    },
+    {
+      "target": 1479.0,
+      "todayLei": 147514500,
+      "draftLei": 80388378
+    }
+  ],
+  "gradeIsResolved": true,
+  "limitations": [
+    {
+      "id": "tranzitia-de-grad-nu-e-stabilita",
+      "text": "Instanța de nivel 1 este tribunalul, deci gradul plătit este cel de tribunal. Lucrarea nu spune însă ce se întâmplă cu judecătorii veniți de la judecătorii: dacă își păstrează gradul o perioadă, factura primilor ani este sub cea de aici. Diferența dintre grade — 5.250 lei pe lună azi, 2.861 după proiect — este exact ce valorează această întrebare.",
+      "severity": "material",
+      "affects": [
+        "cost"
+      ]
+    },
+    {
+      "id": "ani-diferiti-fara-deflator",
+      "text": "Grila în vigoare tipărește sume în lei 2022; proiectul se calculează la o valoare de referință pentru decembrie 2026. Nu se aplică niciun deflator, așa că nivelurile nu sunt comparabile între ele. Comparabile sunt doar rapoartele — evantaiul vârf/bază și diferența dintre grade —, care nu depind de unitatea de măsură.",
+      "severity": "material",
+      "affects": [
+        "cost"
+      ]
+    },
+    {
+      "id": "doar-judecatorii-sunt-evaluati",
+      "text": "Sunt evaluați doar judecătorii. Grefierii sunt majoritatea celor 14.650 de posturi ale instanțelor, iar proiectul le dă și lor coeficienți, dar datele de personal nu împart posturile pe funcții, așa că masa lor salarială nu se poate calcula fără a inventa împărțirea.",
+      "severity": "material",
+      "affects": [
+        "cost"
+      ]
+    },
+    {
+      "id": "varful-grilei-din-nou",
+      "text": "Sunt luate coeficientele pentru „Peste 20 de ani”, ca și la grila în vigoare, ca să fie comparate aceleași trepte. Proiectul publică însă și treptele inferioare, pe care grila din 2022 nu le are pentru judecători, deci costul real este sub cel de aici la ambele regimuri.",
+      "severity": "material",
+      "affects": [
+        "cost"
+      ]
+    },
+    {
+      "id": "diferenta-tranzitorie-nu-e-modelata",
+      "text": "Art. 33 din proiect menține venitul din noiembrie 2026 printr-o diferență salarială tranzitorie care intră în baza celorlalte drepturi. Fără datele individuale din acea lună, componenta lipsește din orice cifră de aici, iar în primii ani ea domină factura reală.",
+      "severity": "blocking",
+      "affects": [
+        "cost"
+      ]
+    }
+  ]
+}

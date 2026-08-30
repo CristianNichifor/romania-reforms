@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cristiannichifor.github.io/romania-reforms/schema/acces.schema.json",
   "title": "Travel to court, before and after consolidation",
-  "description": "The cost the reform paper asserts but cannot show: for every commune, the road distance to the court that serves it today under HG 1217/2023, and to the one court its county would keep. Closing courts is a saving counted in courts; to the person attending one it is a distance, and this is that distance.",
+  "description": "The cost the reform paper asserts but cannot show, in three numbers per commune, all on the national road graph: to the court the law assigns it today, to the one court its county would keep, and to the nearest of the 42 wherever it sits. The third exists because a county line is a legal fact and not a geographic one — a Tulcea commune can be nearer to Braila — so the gap between the second and third is what the county rule costs on its own, apart from what consolidation costs.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -13,7 +13,8 @@
     "provenance",
     "summary",
     "communes",
-    "limitations"
+    "limitations",
+    "balancedMetres"
   ],
   "properties": {
     "$schema": {
@@ -40,8 +41,8 @@
       "required": [
         "communes",
         "people",
-        "medianTodayM",
-        "medianProposedM",
+        "median",
+        "mean",
         "beyond"
       ],
       "properties": {
@@ -51,36 +52,72 @@
         "people": {
           "type": "integer"
         },
-        "medianTodayM": {
-          "type": "number"
-        },
-        "medianProposedM": {
-          "type": "number"
-        },
-        "meanTodayM": {
-          "type": "number"
-        },
-        "meanProposedM": {
-          "type": "number"
-        },
-        "unchanged": {
+        "communesWithoutRoad": {
           "type": "integer"
+        },
+        "median": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          }
+        },
+        "mean": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          }
         },
         "beyond": {
           "type": "object",
-          "description": "People further than N km from a court, today and under the proposal.",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer"
+            }
+          }
+        },
+        "crossCounty": {
+          "type": "integer"
+        },
+        "crossCountyPeople": {
+          "type": "integer"
+        },
+        "workload": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Dossiers per receiving court under each rule — the spread, not the list."
+        },
+        "bucharestMultipleOfMean": {
+          "type": "number",
+          "description": "How many times the average court Bucharest's own sectors amount to. They cannot be assigned elsewhere, so no ceiling below this is reachable by moving communes."
+        },
+        "balanced": {
+          "type": "object",
           "additionalProperties": {
             "type": "object",
             "additionalProperties": false,
             "required": [
-              "todayPeople",
-              "proposedPeople"
+              "ceilingMultiplier",
+              "variation",
+              "meanMetres",
+              "communesNotAtNearest"
             ],
             "properties": {
-              "todayPeople": {
-                "type": "integer"
+              "ceilingMultiplier": {
+                "type": "number"
               },
-              "proposedPeople": {
+              "spread": {
+                "type": "number",
+                "description": "Largest court over smallest. Fragile."
+              },
+              "variation": {
+                "type": "number",
+                "description": "Coefficient of variation of court loads — the honest measure here. Max-over-min is decided by whichever court ends up emptiest and moved the wrong way as the ceiling loosened."
+              },
+              "meanMetres": {
+                "type": "number"
+              },
+              "communesNotAtNearest": {
                 "type": "integer"
               }
             }
@@ -99,8 +136,12 @@
           "county",
           "population",
           "courtToday",
+          "cases",
           "metresToday",
-          "metresProposed"
+          "metresByCounty",
+          "metresNearest",
+          "nearestCounty",
+          "byRoad"
         ],
         "properties": {
           "siruta": {
@@ -116,10 +157,37 @@
             "type": "string"
           },
           "metresToday": {
-            "type": "integer"
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Road metres to the court the law assigns it. Null where the commune has no road to any court."
           },
-          "metresProposed": {
-            "type": "integer"
+          "metresByCounty": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Road metres to the one court its county would keep. Null where the commune has no road to any court."
+          },
+          "metresNearest": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Road metres to the nearest of the 42, ignoring county lines. Null where the commune has no road to any court."
+          },
+          "nearestCounty": {
+            "type": "string",
+            "description": "County of that nearest court. Differing from `county` means the commune would be served from another county if the boundary did not bind."
+          },
+          "byRoad": {
+            "type": "boolean",
+            "description": "False for the eleven communes with no road to any court, eight of them in the Danube Delta. They stay in the file and are excluded from every average."
+          },
+          "cases": {
+            "type": "number",
+            "description": "The commune's share of its court's dossiers, split by population, so that reassigning it moves work with it."
           }
         }
       }
@@ -129,6 +197,19 @@
       "minItems": 1,
       "items": {
         "$ref": "provenance.schema.json#/$defs/limitation"
+      }
+    },
+    "balancedMetres": {
+      "type": "object",
+      "description": "Per-commune road metres under each load ceiling, aligned to `communes`. The key is the ceiling as a multiple of the average court; 99 means no ceiling at all, kept as a scenario so a control has one end of the trade to sit at.",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
       }
     }
   }

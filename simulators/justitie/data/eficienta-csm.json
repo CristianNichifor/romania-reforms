@@ -1,0 +1,134 @@
+{
+  "$schema": "../schema/eficienta.schema.json",
+  "id": "eficienta-csm",
+  "title": "Eficiența instanțelor după indicatorii CSM, față de ce spune lucrarea",
+  "publisher": "Consiliul Superior al Magistraturii",
+  "period": "2023-2025",
+  "provenance": {
+    "source": "csm-starea-justitiei-2023",
+    "locator": "Capitolul I.3, comparat cu Capitolul 12 al lucrării",
+    "confidence": "verbatim"
+  },
+  "indicators": [
+    {
+      "code": "E01",
+      "name": "Rata de soluționare a dosarelor"
+    },
+    {
+      "code": "E02",
+      "name": "Stocul de dosare mai vechi de 1 an / 1 an și 6 luni"
+    },
+    {
+      "code": "E03",
+      "name": "Ponderea dosarelor închise într-un an"
+    },
+    {
+      "code": "E04",
+      "name": "Durata medie de soluționare"
+    },
+    {
+      "code": "E05",
+      "name": "Redactările peste termenul legal"
+    }
+  ],
+  "indicatorsProvenance": {
+    "source": "csm-starea-justitiei-2025",
+    "locator": "Hotărârea nr. 1305/2014 a Secției pentru judecători, citată în Cap. I.3",
+    "confidence": "verbatim"
+  },
+  "years": [
+    {
+      "year": 2023,
+      "judecatorii": {
+        "veryEfficient": 18,
+        "efficient": 147,
+        "satisfactory": 10,
+        "inefficient": 0,
+        "classified": 175,
+        "efficientOrBetter": 165
+      },
+      "tribunale": {
+        "veryEfficient": 11,
+        "efficient": 33,
+        "satisfactory": 6,
+        "inefficient": 0,
+        "classified": 50,
+        "efficientOrBetter": 44
+      },
+      "provenance": {
+        "source": "csm-starea-justitiei-2023",
+        "locator": "Capitolul I.3, Indicatorii de eficiență",
+        "confidence": "verbatim"
+      }
+    },
+    {
+      "year": 2025,
+      "judecatorii": {
+        "veryEfficient": 12,
+        "efficient": 146,
+        "satisfactory": 16,
+        "inefficient": 0,
+        "classified": 174,
+        "efficientOrBetter": 158
+      },
+      "tribunale": {
+        "veryEfficient": 9,
+        "efficient": 28,
+        "satisfactory": 13,
+        "inefficient": 0,
+        "classified": 50,
+        "efficientOrBetter": 37
+      },
+      "provenance": {
+        "source": "csm-starea-justitiei-2025",
+        "locator": "Capitolul I.3, Indicatorii de eficiență",
+        "confidence": "verbatim"
+      }
+    }
+  ],
+  "paperClaim": {
+    "text": "176 judecatorii → doar 20 functioneaza eficient",
+    "efficientCourts": 20,
+    "totalCourts": 176,
+    "provenance": {
+      "source": "reforma-sistem-judiciar-romania",
+      "locator": "Capitolul 12, p. 59",
+      "confidence": "verbatim"
+    }
+  },
+  "comparison": {
+    "citedYear": 2023,
+    "paperSaysEfficient": 20,
+    "reportSaysEfficientOrBetter": 165,
+    "reportSaysVeryEfficient": 18,
+    "reportSaysInefficient": 0,
+    "latestEfficientOrBetter": 158,
+    "latestClassified": 174
+  },
+  "limitations": [
+    {
+      "id": "eficienta-nu-e-viabilitate",
+      "text": "Indicatorii CSM măsoară cât de repede își golește o instanță rolul, nu dacă o instanță cu șase judecători poate să se specializeze, să țină o grefă sau să supraviețuiască unei pensionări. Argumentul din 7.4 al lucrării este despre al doilea lucru, iar cifra de eficiență nu a fost niciodată dovada potrivită pentru el — nici în favoarea, nici împotriva.",
+      "severity": "material",
+      "affects": [
+        "eficienta"
+      ]
+    },
+    {
+      "id": "gradele-pe-instanta-sunt-culori",
+      "text": "Raportul dă gradul fiecărei instanțe într-un tabel colorat, nu în text, așa că gradele pe instanță nu se pot extrage din PDF. Se pot extrage doar totalurile pe grad, pe care raportul le scrie în cuvinte.",
+      "severity": "material",
+      "affects": [
+        "eficienta"
+      ]
+    },
+    {
+      "id": "nu-stim-ce-a-citit-lucrarea",
+      "text": "„Doar 20” este aproape de cele 18 instanțe din gradul „foarte eficient” al ediției 2023, ceea ce sugerează că al doilea grad — cele 147 pe care CSM le numește pur și simplu „eficient” — nu a fost socotit. Dacă asta a fost intenția, fișierul de față nu poate spune; spune doar că sursa nu susține propoziția.",
+      "severity": "note",
+      "affects": [
+        "eficienta"
+      ]
+    }
+  ]
+}

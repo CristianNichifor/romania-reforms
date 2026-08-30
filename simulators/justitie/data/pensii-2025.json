@@ -1,0 +1,144 @@
+{
+  "$schema": "../schema/pensii.schema.json",
+  "id": "pensii-2025",
+  "title": "Pensia de serviciu a magistraților: regula de azi și proiectul din 2025",
+  "publisher": "Guvernul României",
+  "period": "2025",
+  "provenance": {
+    "source": "lege-pensii-magistrati-2025",
+    "locator": "Lege pentru modificarea unor acte normative din domeniul pensiilor de serviciu, semnată de MJ la 19 noiembrie 2025",
+    "confidence": "verbatim"
+  },
+  "current": {
+    "seniorityYears": 25,
+    "percent": 80,
+    "baseDescription": "indemnizația de încadrare brută din ultima lună de activitate",
+    "netCapPercent": 100,
+    "provenance": {
+      "source": "legea-303-2022",
+      "locator": "art. 211 alin. (1), înainte de modificare",
+      "confidence": "derived",
+      "note": "Regula în vigoare, descrisă prin ceea ce proiectul din 2025 înlocuiește. Textul consolidat al Legii 303/2022 nu se află în depozit."
+    }
+  },
+  "proposed": {
+    "seniorityYears": 35,
+    "percent": 55,
+    "baseMonths": 60,
+    "baseIncludesSporuri": true,
+    "baseDescription": "media indemnizațiilor de încadrare brute lunare și a sporurilor pentru care s-au reținut contribuții, pe ultimele 60 de luni",
+    "netCapPercent": 70,
+    "provenance": {
+      "source": "lege-pensii-magistrati-2025",
+      "locator": "Art. I pct. 1, modificând art. 211 alin. (1) din Legea nr. 303/2022",
+      "confidence": "verbatim"
+    }
+  },
+  "byGrade": [
+    {
+      "grade": "Judecător cu grad de ICCJ",
+      "monthlyLei": 26250.0,
+      "currentLei": 21000,
+      "proposedFloorLei": 14438,
+      "reductionPercent": 31.2
+    },
+    {
+      "grade": "Judecător cu grad de curte de apel",
+      "monthlyLei": 23000.0,
+      "currentLei": 18400,
+      "proposedFloorLei": 12650,
+      "reductionPercent": 31.2
+    },
+    {
+      "grade": "Judecător cu grad de tribunal, judecător militar la tribunalulmilitar",
+      "monthlyLei": 22500.0,
+      "currentLei": 18000,
+      "proposedFloorLei": 12375,
+      "reductionPercent": 31.2
+    },
+    {
+      "grade": "Judecător cu grad de judecătorie",
+      "monthlyLei": 17250.0,
+      "currentLei": 13800,
+      "proposedFloorLei": 9488,
+      "reductionPercent": 31.2
+    },
+    {
+      "grade": "Judecător stagiar",
+      "monthlyLei": 10400.0,
+      "currentLei": 8320,
+      "proposedFloorLei": 5720,
+      "reductionPercent": 31.2
+    },
+    {
+      "grade": "Procuror cu grad de PICCJ",
+      "monthlyLei": 25000.0,
+      "currentLei": 20000,
+      "proposedFloorLei": 13750,
+      "reductionPercent": 31.2
+    },
+    {
+      "grade": "Procuror cu grad de curte de apel",
+      "monthlyLei": 21905.0,
+      "currentLei": 17524,
+      "proposedFloorLei": 12048,
+      "reductionPercent": 31.2
+    },
+    {
+      "grade": "Procuror cu grad de tribunal, judecător militar la tribunalulmilitar",
+      "monthlyLei": 21429.0,
+      "currentLei": 17143,
+      "proposedFloorLei": 11786,
+      "reductionPercent": 31.2
+    },
+    {
+      "grade": "Procuror cu grad de judecătorie",
+      "monthlyLei": 16429.0,
+      "currentLei": 13143,
+      "proposedFloorLei": 9036,
+      "reductionPercent": 31.2
+    },
+    {
+      "grade": "Procuror stagiar",
+      "monthlyLei": 9905.0,
+      "currentLei": 7924,
+      "proposedFloorLei": 5448,
+      "reductionPercent": 31.2
+    }
+  ],
+  "limitations": [
+    {
+      "id": "sporurile-nu-sunt-publice",
+      "text": "Proiectul lărgește baza de calcul: pe lângă indemnizație intră și sporurile pentru care s-au reținut contribuții, pe cinci ani. Scăderea calculată aici — doar pe indemnizație — este deci maximul posibil, nu o estimare. Cu sporurile instanțelor la 24,9% din salariile de bază, trecerea de la 80% la 55% taie în jur de 14%, nu 31% (vezi sporuri-2025).",
+      "severity": "material",
+      "affects": [
+        "pensii"
+      ]
+    },
+    {
+      "id": "regula-actuala-e-dedusa",
+      "text": "Textul consolidat al Legii 303/2022 nu se află în depozit; regula de azi este descrisă prin ceea ce proiectul înlocuiește. Cifrele ei sunt marcate ca derivate, nu citate.",
+      "severity": "material",
+      "affects": [
+        "pensii"
+      ]
+    },
+    {
+      "id": "proiect-nu-lege",
+      "text": "Este un proiect pus în dezbatere publică în noiembrie 2025, nu o lege în vigoare. Ce va fi adoptat poate diferi.",
+      "severity": "material",
+      "affects": [
+        "pensii"
+      ]
+    },
+    {
+      "id": "nu-stim-cati-pensionari",
+      "text": "Numărul magistraților pensionați și vârstele lor nu se află în datele publice de aici, deci costul total al pensiilor de serviciu — și economia pe care ar aduce-o proiectul — nu se pot calcula. Aici se compară doar regulile, la nivel de o singură pensie.",
+      "severity": "blocking",
+      "affects": [
+        "pensii",
+        "cost"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/spitale.schema.json",
+  "title": "Hospitals published by the Ministry of Health, placed on the map",
+  "description": "Two sources doing different jobs. The ANMCS accreditation register from data.gov.ro is complete by county but carries no locality, and names county hospitals after their patron rather than their town. The Ministry of Health's map carries coordinates but omits six counties. Co-location with the 42 court seats is answered where coordinates exist and declared unanswerable elsewhere.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "period",
+    "provenance",
+    "summary",
+    "hospitals",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "const": "spitale-2026"
+    },
+    "title": {
+      "type": "string"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "period": {
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json#/$defs/provenance"
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "registerHospitals",
+        "registerCounties",
+        "registerInMissingCounties",
+        "hospitals",
+        "located",
+        "countiesCovered",
+        "countiesTotal",
+        "countiesMissing",
+        "courtSeatsCheckable",
+        "courtSeatsWithHospital",
+        "hospitalsInCourtSeatTowns"
+      ],
+      "properties": {
+        "hospitals": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "located": {
+          "description": "Markers falling inside a UAT boundary. Anything outside is kept in the file and out of every count.",
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "countiesCovered": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "countiesTotal": {
+          "type": "integer",
+          "const": 42
+        },
+        "countiesMissing": {
+          "description": "Counties absent from the register entirely. Not counties without hospitals.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "courtSeatsCheckable": {
+          "description": "Court seats in a county the register covers. The only ones the co-location figure may speak about.",
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "courtSeatsWithHospital": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "hospitalsInCourtSeatTowns": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "registerHospitals": {
+          "description": "ANMCS accreditation register, complete by county. The backbone that turns the map's gaps from 'no hospitals' into 'not plotted'.",
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "registerCounties": {
+          "type": "integer",
+          "const": 42
+        },
+        "registerInMissingCounties": {
+          "description": "Hospitals the register lists in counties the ministry's map omits. Must be positive, or the map's gaps would be real gaps.",
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "hospitals": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "lat",
+          "lng",
+          "siruta",
+          "uat",
+          "county"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "lat": {
+            "type": "number"
+          },
+          "lng": {
+            "type": "number"
+          },
+          "siruta": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "uat": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "county": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "provenance.schema.json#/$defs/limitation"
+      }
+    }
+  }
+}

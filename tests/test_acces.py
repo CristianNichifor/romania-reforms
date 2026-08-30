@@ -41,25 +41,47 @@ def test_it_covers_every_commune_the_arondare_places(acces):
 
 def test_the_summary_matches_its_own_rows(acces):
     rows = acces["communes"]
+    on_road = [r for r in rows if r["byRoad"]]
     summary = acces["summary"]
     assert summary["communes"] == len(rows)
-    assert summary["people"] == sum(r["population"] for r in rows)
+    assert summary["people"] == sum(r["population"] for r in on_road)
     for km, counts in summary["beyond"].items():
         metres = int(km) * 1000
-        assert counts["todayPeople"] == sum(
-            r["population"] for r in rows if r["metresToday"] > metres
-        ), km
-        assert counts["proposedPeople"] == sum(
-            r["population"] for r in rows if r["metresProposed"] > metres
-        ), km
+        for key, value in counts.items():
+            assert value == sum(
+                r["population"] for r in on_road if r[key] > metres
+            ), f"{km} km, {key}"
 
 
 def test_consolidation_never_shortens_the_journey_on_average(acces):
     """A merge that closes courts cannot reduce mean travel, so if it appears to, the
     computation is wrong rather than the reform miraculous."""
-    summary = acces["summary"]
-    assert summary["meanProposedM"] >= summary["meanTodayM"]
-    assert summary["medianProposedM"] >= summary["medianTodayM"]
+    mean = acces["summary"]["mean"]
+    assert mean["metresByCounty"] >= mean["metresToday"]
+    assert mean["metresNearest"] >= mean["metresToday"]
+
+
+def test_dropping_the_county_line_never_costs_anyone(acces):
+    """Nearest-of-42 is by construction no further than that county's court, commune by
+    commune. If it were, the routing would be picking something other than the nearest."""
+    worse = [
+        r["siruta"]
+        for r in acces["communes"]
+        if r["byRoad"] and r["metresNearest"] > r["metresByCounty"]
+    ]
+    assert worse == [], worse[:10]
+
+
+def test_the_roadless_communes_are_kept_and_excluded(acces):
+    """Eight of the eleven are the Delta, reached by water whatever any reform says.
+
+    Kept in the file so the count stays honest, and out of every average so the averages do.
+    """
+    without = [r for r in acces["communes"] if not r["byRoad"]]
+    assert len(without) == acces["summary"]["communesWithoutRoad"] == 11
+    assert all(r["metresToday"] is None for r in without)
+    delta = {r["siruta"] for r in without if r["county"] == "TL"}
+    assert len(delta) == 8, sorted(delta)
 
 
 def test_some_communes_are_unaffected(acces):
@@ -68,18 +90,19 @@ def test_some_communes_are_unaffected(acces):
     If this were zero, every commune would have been reassigned, which would mean the
     proposed court was not being seated where a court already is.
     """
-    rows = acces["communes"]
-    same = [r for r in rows if r["metresProposed"] <= r["metresToday"]]
+    rows = [r for r in acces["communes"] if r["byRoad"]]
+    same = [r for r in rows if r["metresByCounty"] <= r["metresToday"]]
     assert len(same) > 500, len(same)
-    assert acces["summary"]["unchanged"] == len(same)
 
 
 def test_distances_are_plausible(acces):
-    """Romania is about 700 km across and no county is; a county-scoped road distance beyond
-    300 km means the graph, not the geography."""
-    worst = max(r["metresProposed"] for r in acces["communes"])
-    assert worst < 300_000, worst
-    assert all(r["metresToday"] >= 0 and r["metresProposed"] >= 0 for r in acces["communes"])
+    """Romania is about 700 km across, so anything past 300 km is the graph, not geography."""
+    on_road = [r for r in acces["communes"] if r["byRoad"]]
+    assert max(r["metresNearest"] for r in on_road) < 300_000
+    assert all(
+        r["metresToday"] >= 0 and r["metresByCounty"] >= 0 and r["metresNearest"] >= 0
+        for r in on_road
+    )
 
 
 def test_bucharest_is_not_given_a_commute(acces):
@@ -87,10 +110,85 @@ def test_bucharest_is_not_given_a_commute(acces):
     what access means here, and leaving it in would put a fake number on two million people."""
     rows = [r for r in acces["communes"] if r["county"] == "B"]
     assert rows, "Bucharest is missing entirely"
-    assert all(r["metresToday"] == 0 and r["metresProposed"] == 0 for r in rows)
+    assert all(
+        r["metresToday"] == 0 and r["metresByCounty"] == 0 and r["metresNearest"] == 0
+        for r in rows
+    )
 
 
 def test_the_weighting_caveat_is_declared(acces):
     ids = {x["id"] for x in acces["limitations"]}
     assert "populatia-nu-e-numarul-de-justitiabili" in ids
     assert "distanta-nu-e-timp" in ids
+    assert "delta-nu-are-drum" in ids
+    assert "arondarea-peste-judet-nu-e-legala-azi" in ids
+
+
+def test_balancing_costs_travel_and_buys_evenness(acces):
+    """The trade the ceiling makes, asserted in the direction it must go.
+
+    A load ceiling can only push communes away from their nearest court, so mean travel under
+    any ceiling is at least the unconstrained figure. If it came out lower, the assignment
+    would be finding journeys the nearest-court routing missed, which is impossible.
+    """
+    scenarios = acces["summary"]["balanced"]
+    assert scenarios, "no ceiling scenarios were computed"
+    floor = acces["summary"]["mean"]["metresNearest"]
+    for name, scenario in scenarios.items():
+        assert scenario["meanMetres"] >= floor, (name, scenario["meanMetres"], floor)
+
+
+def test_a_tighter_ceiling_never_travels_less(acces):
+    """Ordered by ceiling, travel must not fall as the constraint tightens.
+
+    This is what caught the first version: the fallback sent full-court communes to the
+    *farthest* court in the country, and a 1,2x ceiling came out both more even and vastly
+    more expensive than 1,5x — a shape no correct assignment produces.
+    """
+    scenarios = sorted(
+        acces["summary"]["balanced"].values(), key=lambda s: s["ceilingMultiplier"]
+    )
+    travel = [s["meanMetres"] for s in scenarios]
+    assert travel == sorted(travel, reverse=True), travel
+
+
+def test_a_tighter_ceiling_is_more_even(acces):
+    """Evenness must improve as the constraint tightens, or the constraint is doing nothing.
+
+    Measured by coefficient of variation over all forty-two courts. The first two attempts at
+    this measure both moved the wrong way: max-over-min is set by whichever court ends up
+    emptiest, and excluding Bucharest measured its overflow onto the neighbours rather than
+    the evenness of the rest.
+    """
+    scenarios = sorted(
+        acces["summary"]["balanced"].values(), key=lambda s: s["ceilingMultiplier"]
+    )
+    variation = [s["variation"] for s in scenarios]
+    assert variation == sorted(variation), variation
+
+
+def test_no_ceiling_moves_nobody(acces):
+    """The loosest scenario must reproduce nearest-court routing exactly.
+
+    It is the control's anchor: if anything moves at a ceiling of 99x the average, the
+    assignment is constraining something it should not be.
+    """
+    loosest = max(
+        acces["summary"]["balanced"].values(), key=lambda s: s["ceilingMultiplier"]
+    )
+    assert loosest["communesNotAtNearest"] == 0
+    assert loosest["meanMetres"] == acces["summary"]["mean"]["metresNearest"]
+
+
+def test_bucharest_cannot_be_balanced_away(acces):
+    """Its sectors carry 5,7x the average court and cannot move, so no ceiling reaches them.
+
+    Recomputed from the rows: if this ever came out under about 3x, the capital would have
+    become balanceable by moving communes, which would mean the attribution changed rather
+    than the country.
+    """
+    rows = [r for r in acces["communes"] if r["byRoad"]]
+    total = sum(r["cases"] for r in rows)
+    bucharest = sum(r["cases"] for r in rows if r["county"] == "B")
+    mean = total / 42
+    assert bucharest / mean > 3, bucharest / mean

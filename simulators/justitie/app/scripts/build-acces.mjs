@@ -29,14 +29,18 @@ const attributes = JSON.parse(
 
 const indexOf = new Map(attributes.siruta.map((code, i) => [code, i]));
 const today = new Int32Array(attributes.siruta.length).fill(-1);
-const proposed = new Int32Array(attributes.siruta.length).fill(-1);
+const byCounty = new Int32Array(attributes.siruta.length).fill(-1);
+const nearest = new Int32Array(attributes.siruta.length).fill(-1);
 
 let joined = 0;
 for (const row of acces.communes) {
   const index = indexOf.get(row.siruta);
   if (index === undefined) continue;
-  today[index] = row.metresToday;
-  proposed[index] = row.metresProposed;
+  // -1 stays for the eleven communes with no road, so the map greys them rather than
+  // painting them as if the distance were zero.
+  today[index] = row.metresToday ?? -1;
+  byCounty[index] = row.metresByCounty ?? -1;
+  nearest[index] = row.metresNearest ?? -1;
   joined += 1;
 }
 if (joined !== acces.communes.length) {
@@ -44,14 +48,28 @@ if (joined !== acces.communes.length) {
   process.exit(1);
 }
 
+// Per-ceiling distances, reindexed the same way, so moving the control repaints the map
+// rather than only changing the figures beside it.
+const balanced = {};
+for (const [key, metres] of Object.entries(acces.balancedMetres ?? {})) {
+  const lane = new Int32Array(attributes.siruta.length).fill(-1);
+  acces.communes.forEach((row, i) => {
+    const index = indexOf.get(row.siruta);
+    if (index !== undefined) lane[index] = metres[i] ?? -1;
+  });
+  balanced[key] = Array.from(lane);
+}
+
 writeFileSync(
   resolve(out, 'acces.json'),
   JSON.stringify({
     summary: acces.summary,
     limitations: acces.limitations,
-    // -1 means the commune is not in the arondare, which is the two created after it.
+    balanced,
+    // -1 means no road, or a commune the arondare does not place.
     today: Array.from(today),
-    proposed: Array.from(proposed),
+    byCounty: Array.from(byCounty),
+    nearest: Array.from(nearest),
   }),
 );
 copyFileSync(

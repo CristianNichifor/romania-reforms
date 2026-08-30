@@ -16,6 +16,8 @@ const here = dirname(fileURLToPath(import.meta.url));
 const out = resolve(here, '../public/data');
 mkdirSync(out, { recursive: true });
 
+const ADMIN = (name) => resolve(here, `../../../administrativ/web/public/data/${name}`);
+
 const sources = [
   // The latest edition. Older ones stay in data/ so the two years can be compared.
   [resolve(here, '../../data/instante-localizate-2025.json'), 'instante.json'],
@@ -28,6 +30,36 @@ const sources = [
   [resolve(here, '../../data/propunere-harta-judiciara.json'), 'propunere.json'],
   // The chapters that argue rather than measure, quoted with their pages.
   [resolve(here, '../../data/design-reforma.json'), 'design.json'],
+  // Pay grades and the wage bill, so the staffing control can price what it moves.
+  [resolve(here, '../../data/costuri-2025.json'), 'costuri.json'],
+  // The two pension reforms, so the page can show them against each other.
+  [resolve(here, '../../data/pensii-comparatie.json'), 'pensii.json'],
+  // What the courts pay above base salary, and what it does to the bill's headline.
+  [resolve(here, '../../data/sporuri-2025.json'), 'sporuri.json'],
+  // The same judges priced under the July 2026 pay draft.
+  [resolve(here, '../../data/costuri-proiect-2026.json'), 'proiect.json'],
+  // Consolidated UATs assigned to courts by distance, county lines ignored.
+  [resolve(here, '../../data/arondare-noua.json'), 'arondare-noua.json'],
+  [resolve(here, '../../data/court-distance.json'), 'court-distance.json'],
+  // Hospitals, as the only county-scale service with a public national register.
+  [resolve(here, '../../data/spitale-2026.json'), 'spitale.json'],
+  [resolve(here, '../../data/acces-servicii.json'), 'servicii.json'],
+  [resolve(here, '../../data/politie-osm.json'), 'politie.json'],
+  // The paper's efficiency premise, against the report it cites for it.
+  [resolve(here, '../../data/eficienta-csm.json'), 'eficienta.json'],
+  // The prosecution service, reorganised in parallel by 7.3.
+  [resolve(here, '../../data/parchete-2025.json'), 'parchete.json'],
+  // The ledger: which chapters this page checks, quotes, or leaves alone.
+  [resolve(here, '../../data/acoperire.json'), 'acoperire.json'],
+  [resolve(here, '../../data/court-distance.bin'), 'court-distance.bin'],
+  // The administrative model's own payload, so the merge can be re-run here as the reader
+  // moves the sliders. Copied rather than fetched across from the administrative site: 1,6 MB
+  // is the price of this page working when it is the only one deployed.
+  [ADMIN('manifest.json'), 'admin-manifest.json'],
+  [ADMIN('attributes.json'), 'admin-attributes.json'],
+  [ADMIN('attributes.bin'), 'admin-attributes.bin'],
+  [ADMIN('adjacency.bin'), 'admin-adjacency.bin'],
+  [ADMIN('candidacy.bin'), 'admin-candidacy.bin'],
   // County codes to full names, so a merged court is "Tribunalul Covasna" and not "CV".
   [resolve(here, '../../../administrativ/web/public/data/manifest.json'), 'manifest.json'],
 ];

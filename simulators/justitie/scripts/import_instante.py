@@ -352,9 +352,11 @@ def main(argv: list[str] | None = None) -> None:
             {
                 "id": "judecatori-derivati",
                 "text": (
-                    "Raportul nu tipărește numărul de judecători, ci încărcătura pe judecător "
-                    "și pe schemă. Numerele de aici sunt reconstituite împărțind volumul la "
-                    "acele rapoarte. Ce iese e un efectiv *mediu pe an*, nu un cap de om la o "
+                    "Raportul nu tipărește numărul de judecători *pe instanță*, ci "
+                    "încărcătura pe judecător și pe schemă; totalul pe grad îl tipărește însă, "
+                    "în alt capitol — 4.319 posturi ocupate la 31 decembrie 2025 (vezi "
+                    "personal-2025). Numerele pe instanță de aici sunt reconstituite împărțind "
+                    "volumul la acele rapoarte. Ce iese e un efectiv *mediu pe an*, nu un cap de om la o "
                     "dată anume: judecătorii vin, pleacă și stau o parte din an, iar CSM "
                     "împarte la o medie. De aceea aproape niciun rezultat nu e număr întreg, "
                     "și de aceea cifra e bună pentru a compara instanțe între ele, nu pentru "

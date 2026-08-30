@@ -1,0 +1,229 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/costuri-proiect.schema.json",
+  "title": "The judiciary priced under the July 2026 pay draft",
+  "description": "Judge pay as coefficient times reference value, set against the 2022 scale the rest of this simulator uses. The draft compresses the bench, and in doing so it halves what the transition is worth if judges arriving from an abolished judecatorie keep their grade.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "period",
+    "provenance",
+    "referenceLei",
+    "byTier",
+    "spread",
+    "gradeGap",
+    "scenarios",
+    "gradeChoiceSwing",
+    "limitations",
+    "gradeIsResolved"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "const": "costuri-proiect-2026"
+    },
+    "title": {
+      "type": "string"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "period": {
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json#/$defs/provenance"
+    },
+    "referenceLei": {
+      "description": "Art. 36 alin. (2). Every figure here is this number times a coefficient.",
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "byTier": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "tier",
+          "judges",
+          "coefficient",
+          "monthlyLei",
+          "annualLei",
+          "todayMonthlyLei",
+          "ratioToToday"
+        ],
+        "properties": {
+          "tier": {
+            "enum": [
+              "iccj",
+              "curte-de-apel",
+              "tribunal",
+              "judecatorie"
+            ]
+          },
+          "judges": {
+            "type": "number",
+            "minimum": 0
+          },
+          "coefficient": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "monthlyLei": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "annualLei": {
+            "type": "number",
+            "minimum": 0
+          },
+          "todayMonthlyLei": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "ratioToToday": {
+            "description": "Draft over current. Below one means the rank is cut, above one means it is raised.",
+            "type": "number",
+            "exclusiveMinimum": 0
+          }
+        }
+      }
+    },
+    "spread": {
+      "description": "Top rank over bottom rank. Scale-free, so it survives the two regimes being in different years' money.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "todayRatio",
+        "draftRatio",
+        "compresses"
+      ],
+      "properties": {
+        "todayRatio": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "draftRatio": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "compresses": {
+          "type": "boolean"
+        }
+      }
+    },
+    "gradeGap": {
+      "description": "Tribunal grade minus judecatorie grade — what it is worth if judges arriving from an abolished judecatorie keep their grade through the transition.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "todayMonthlyLei",
+        "draftMonthlyLei",
+        "narrows"
+      ],
+      "properties": {
+        "todayMonthlyLei": {
+          "type": "number"
+        },
+        "draftMonthlyLei": {
+          "type": "number"
+        },
+        "narrows": {
+          "type": "boolean"
+        }
+      }
+    },
+    "levelOne": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "volume": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "scenarios": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "target",
+          "targetLabel",
+          "gradePaid",
+          "judgesNeeded",
+          "annualLei"
+        ],
+        "properties": {
+          "target": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "targetLabel": {
+            "type": "string"
+          },
+          "gradePaid": {
+            "enum": [
+              "judecatorie",
+              "tribunal"
+            ]
+          },
+          "judgesNeeded": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "annualLei": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          }
+        }
+      }
+    },
+    "gradeChoiceSwing": {
+      "description": "What the gap between the two grades is worth per year, under each regime, at each staffing target.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "target",
+          "todayLei",
+          "draftLei"
+        ],
+        "properties": {
+          "target": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "todayLei": {
+            "type": "number"
+          },
+          "draftLei": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "provenance.schema.json#/$defs/limitation"
+      }
+    },
+    "gradeIsResolved": {
+      "description": "The paper settles which grade the merged court holds; the gap now prices the transition, not the ambiguity.",
+      "const": true
+    }
+  }
+}

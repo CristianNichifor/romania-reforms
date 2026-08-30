@@ -1,0 +1,169 @@
+{
+  "$schema": "../schema/costuri.schema.json",
+  "id": "costuri-2025",
+  "title": "Costul de bază al judecătorilor, azi și după comasare",
+  "publisher": "Cristian Nichifor",
+  "period": "2025",
+  "provenance": {
+    "source": "legea-153-2017",
+    "locator": "Anexa nr. V, Capitolul I, litera A × numărul de judecători din raportul CSM",
+    "confidence": "derived",
+    "note": "Indemnizația de bază, la vârful grilei, înmulțită cu numărul de judecători reconstituit din raportul CSM. Nu include sporuri."
+  },
+  "monthlyLeiByTier": {
+    "iccj": 26250.0,
+    "curte-de-apel": 23000.0,
+    "tribunal": 22500.0,
+    "judecatorie": 17250.0
+  },
+  "today": {
+    "annualLei": 1051203000,
+    "byTier": [
+      {
+        "tier": "iccj",
+        "courts": 1,
+        "judges": 116.0,
+        "judgesDerived": 21.6,
+        "monthlyLei": 26250.0,
+        "annualLei": 36540000
+      },
+      {
+        "tier": "curte-de-apel",
+        "courts": 15,
+        "judges": 902.0,
+        "judgesDerived": 325.3,
+        "monthlyLei": 23000.0,
+        "annualLei": 248952000
+      },
+      {
+        "tier": "tribunal",
+        "courts": 50,
+        "judges": 1308.0,
+        "judgesDerived": 762.4,
+        "monthlyLei": 22500.0,
+        "annualLei": 353160000
+      },
+      {
+        "tier": "judecatorie",
+        "courts": 175,
+        "judges": 1993.0,
+        "judgesDerived": 1851.4,
+        "monthlyLei": 17250.0,
+        "annualLei": 412551000
+      }
+    ],
+    "levelOne": {
+      "judges": 3301.0,
+      "volume": 3463124,
+      "annualLei": 765711000
+    }
+  },
+  "auxiliary": {
+    "posts": 8001,
+    "lowMonthlyLei": 3950.0,
+    "highMonthlyLei": 5417.0,
+    "annualLowLei": 379247400,
+    "annualHighLei": 520097004
+  },
+  "reconciliation": {
+    "payrollPosts": 14650,
+    "judgesFilled": 4319,
+    "auxiliaryFilled": 8001,
+    "magistrateAssistants": 148,
+    "judicialAssistants": 193,
+    "unaccounted": 1989,
+    "executionBaseAnnualLei": 2457065665
+  },
+  "resolvedGrade": {
+    "grade": "tribunal",
+    "provenance": {
+      "source": "reforma-sistem-judiciar-romania",
+      "locator": "p. 43, tabelul 7.8; p. 45, clarificarea privind desființarea judecătoriilor",
+      "confidence": "verbatim",
+      "note": "„Judecatorii DESFIINTATE”; nivelul 2 este „Judecatorii + Tribunale consolidate”, iar funcția de judecată „este preluata integral de tribunale judetene sau metropolitane”. Instanța care supraviețuiește este tribunalul."
+    }
+  },
+  "scenarios": [
+    {
+      "target": 932.3,
+      "targetLabel": "tribunal",
+      "gradePaid": "judecatorie",
+      "judgesNeeded": 3714.6,
+      "annualLei": 768922200,
+      "differenceLei": 3211200,
+      "isPaperGrade": false
+    },
+    {
+      "target": 932.3,
+      "targetLabel": "tribunal",
+      "gradePaid": "tribunal",
+      "judgesNeeded": 3714.6,
+      "annualLei": 1002942000,
+      "differenceLei": 237231000,
+      "isPaperGrade": true
+    },
+    {
+      "target": 1325.0,
+      "targetLabel": "actual",
+      "gradePaid": "judecatorie",
+      "judgesNeeded": 2613.7,
+      "annualLei": 541035900,
+      "differenceLei": -224675100,
+      "isPaperGrade": false
+    },
+    {
+      "target": 1325.0,
+      "targetLabel": "actual",
+      "gradePaid": "tribunal",
+      "judgesNeeded": 2613.7,
+      "annualLei": 705699000,
+      "differenceLei": -60012000,
+      "isPaperGrade": true
+    },
+    {
+      "target": 1479.0,
+      "targetLabel": "judecatorie",
+      "gradePaid": "judecatorie",
+      "judgesNeeded": 2341.5,
+      "annualLei": 484690500,
+      "differenceLei": -281020500,
+      "isPaperGrade": false
+    },
+    {
+      "target": 1479.0,
+      "targetLabel": "judecatorie",
+      "gradePaid": "tribunal",
+      "judgesNeeded": 2341.5,
+      "annualLei": 632205000,
+      "differenceLei": -133506000,
+      "isPaperGrade": true
+    }
+  ],
+  "limitations": [
+    {
+      "id": "tranzitia-de-grad-nu-e-stabilita",
+      "text": "Instanța de nivel 1 este tribunalul: lucrarea desființează judecătoriile ca instituții separate, iar funcția lor de judecată este preluată integral de tribunale (p. 43 și p. 45). Cifrele sunt deci calculate la grad de tribunal. Ce nu spune lucrarea este dacă judecătorii veniți de la judecătorii își păstrează gradul în tranziție; dacă da, factura primilor ani este sub cea de aici. Varianta la grad de judecătorie rămâne calculată, ca termen de comparație, nu ca a doua citire a propunerii.",
+      "severity": "material",
+      "affects": [
+        "cost"
+      ]
+    },
+    {
+      "id": "doar-indemnizatia-de-baza",
+      "text": "Sunt doar indemnizațiile de bază, la vârful grilei. Sporurile — exact subiectul capitolului 10 — nu sunt incluse în calculul pe instanță. Ordinul lor de mărime se cunoaște însă: instanțele plătesc în sporuri 24,9% peste salariile de bază, deci masa salarială reală este cu circa un sfert peste cifrele de aici (vezi sporuri-2025).",
+      "severity": "material",
+      "affects": [
+        "cost",
+        "salarizare"
+      ]
+    },
+    {
+      "id": "numarul-de-judecatori-e-derivat",
+      "text": "Costul de azi folosește posturile ocupate tipărite de CSM la 31 decembrie 2025 — 4.319 judecători. Scenariile folosesc în continuare numărul dedus din volum împărțit la încărcătură, fiindcă ele întreabă de câți judecători ar fi nevoie, nu câți sunt. Cele două nu măsoară același lucru: cel dedus e de circa 2.960, un efectiv mediu pe an, nu un cap de om la o dată.",
+      "severity": "material",
+      "affects": [
+        "cost"
+      ]
+    }
+  ]
+}

@@ -217,6 +217,25 @@ def main(argv: list[str] | None = None) -> int:
             )
             continue
 
+        # A tribunal is a county court and sits in the county capital, so when its name is a
+        # county name the county wins — even if a town happens to share that name. Matching the
+        # town first put Tribunalul COVASNA in the town of Covasna rather than Sfântu Gheorghe,
+        # and Tribunalul HUNEDOARA in Hunedoara rather than Deva, which moved two of the forty-
+        # two seats every access and arondare figure is measured from.
+        tribunal_county = county_code_of.get(place) if court["tier"] == "tribunal" else None
+        if tribunal_county is not None and tribunal_county in seat_of_county:
+            index = seat_of_county[tribunal_county]
+            located.append(
+                {
+                    **court,
+                    "county": tribunal_county,
+                    "siruta": siruta[index],
+                    "placedBy": "county-seat",
+                    "point": point_for(index),
+                }
+            )
+            continue
+
         candidates = by_place.get(place, [])
         if len(candidates) > 1:
             towns = [i for i in candidates if ranks[i] <= ADMIN_RANK_ORAS]
@@ -272,6 +291,25 @@ def main(argv: list[str] | None = None) -> int:
     for how in ("name", "county-seat", "city"):
         print(f"  placed by {how:<12} {sum(1 for c in located if c['placedBy'] == how):>4}")
     print(f"  unplaced             {len(failed):>4}")
+
+    # Every county tribunal must sit in its county's capital. This is the check that would have
+    # caught the two misplaced seats immediately instead of ten documents later, so it is fatal
+    # rather than a warning.
+    capitals = {code: siruta[index] for code, index in seat_of_county.items()}
+    misplaced = [
+        f"{c['name']}: seated at {c['siruta']}, county {c['county']} capital is {capitals.get(c['county'])}"
+        for c in located
+        if c["tier"] == "tribunal"
+        and c["siruta"]
+        and c["county"] != BUCHAREST
+        and not any(w in c["name"] for w in ("Specializat", "Comercial", "Militar", "minori"))
+        and capitals.get(c["county"]) != c["siruta"]
+    ]
+    if misplaced:
+        print("\ntribunals not seated in their county capital:", file=sys.stderr)
+        for line in misplaced:
+            print(f"  {line}", file=sys.stderr)
+        return 1
 
     unplotted = [c["name"] for c in located if not c.get("point")]
     if unplotted:

@@ -18,3 +18,7 @@ simulators/*/sources/*.pdf
 # runners, so CI cannot fetch it — and a source CI cannot fetch is, for CI's purposes, a
 # source that does not exist. 521 KB to keep the reproducibility gate working.
 !simulators/justitie/sources/hg-1217-2023-arondare.pdf
+
+# And the pension bill: mmuncii.gov.ro may be as unreachable from CI as sgg.gov.ro proved to
+# be, and 235 KB is a cheap way not to find out during a deploy.
+!simulators/justitie/sources/lege-pensii-magistrati-2025.pdf

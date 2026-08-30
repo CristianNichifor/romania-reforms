@@ -1,0 +1,210 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/personal.schema.json",
+  "title": "Court posts at 31 December 2025, from the CSM report",
+  "description": "Filled and vacant posts for judges and auxiliary staff, printed in the report this simulator already used for caseload. The costing had been deriving judge counts from volume divided by caseload — about a third lower than the published headcount — and could not price the auxiliary staff at all.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "period",
+    "provenance",
+    "judges",
+    "judgesTotal",
+    "auxiliary",
+    "auxiliaryTotal",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "const": "personal-2025"
+    },
+    "title": {
+      "type": "string"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "period": {
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json#/$defs/provenance"
+    },
+    "judges": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "tier",
+          "posts",
+          "filled",
+          "vacant"
+        ],
+        "properties": {
+          "tier": {
+            "enum": [
+              "iccj",
+              "curte-de-apel",
+              "tribunal",
+              "judecatorie"
+            ]
+          },
+          "posts": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "filled": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "vacant": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "judgesTotal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "posts",
+        "filled",
+        "vacant"
+      ],
+      "properties": {
+        "posts": {
+          "type": "integer"
+        },
+        "filled": {
+          "type": "integer"
+        },
+        "vacant": {
+          "type": "integer"
+        }
+      }
+    },
+    "auxiliary": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "category",
+          "label",
+          "posts",
+          "filled",
+          "vacant"
+        ],
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "posts": {
+            "type": "integer"
+          },
+          "filled": {
+            "type": "integer"
+          },
+          "vacant": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "auxiliaryTotal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "posts",
+        "filled",
+        "vacant"
+      ],
+      "properties": {
+        "posts": {
+          "type": "integer"
+        },
+        "filled": {
+          "type": "integer"
+        },
+        "vacant": {
+          "type": "integer"
+        }
+      }
+    },
+    "magistrateAssistants": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "posts": {
+          "type": "integer"
+        },
+        "filled": {
+          "type": "integer"
+        },
+        "vacant": {
+          "type": "integer"
+        }
+      }
+    },
+    "iccjClerks": {
+      "description": "Reported separately by the supreme court; not inside the 8.066.",
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "posts": {
+          "type": "integer"
+        },
+        "filled": {
+          "type": "integer"
+        },
+        "vacant": {
+          "type": "integer"
+        }
+      }
+    },
+    "judicialAssistants": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "posts": {
+          "type": "integer"
+        },
+        "filled": {
+          "type": "integer"
+        },
+        "vacant": {
+          "type": "integer"
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "provenance.schema.json#/$defs/limitation"
+      }
+    }
+  }
+}

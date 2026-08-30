@@ -1,0 +1,275 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/acces-servicii.schema.json",
+  "title": "Distance to a court against distance to a hospital",
+  "description": "The same consolidated units measured against four networks on one road graph: today's 175 judecatorii, the 42 proposed courts, located hospitals and OSM police stations. The baseline is what makes the proposed distance legible — without it, 38 km could be a doubling of today's travel or roughly what already exists.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "period",
+    "provenance",
+    "summary",
+    "units",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "const": "acces-servicii"
+    },
+    "title": {
+      "type": "string"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "period": {
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json#/$defs/provenance"
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "units",
+        "comparableUnits",
+        "comparablePeople",
+        "meanMetresToCourt",
+        "meanMetresToHospitalAtMost",
+        "medianMetresToCourt",
+        "medianMetresToHospitalAtMost",
+        "seatsThatAreHospitalTowns",
+        "seatsThatAreCourtTowns",
+        "unitsFurtherFromCourt",
+        "peopleFurtherFromCourt",
+        "hospitalTowns",
+        "medianMetresToPoliceAtMost",
+        "seatsThatArePoliceTowns",
+        "policeTowns",
+        "todayCourts",
+        "medianMetresToTodayCourt",
+        "medianMetresToProposedCourt",
+        "seatsThatAreTodayCourtTowns",
+        "allPeople",
+        "meanMetresToTodayCourt",
+        "meanMetresToProposedCourt",
+        "unitsFurtherThanToday",
+        "peopleFurtherThanToday",
+        "unitsLosingTheirLocalCourt",
+        "peopleLosingTheirLocalCourt",
+        "beyond"
+      ],
+      "properties": {
+        "units": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "comparableUnits": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "comparablePeople": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "meanMetresToCourt": {
+          "type": "number",
+          "minimum": 0
+        },
+        "meanMetresToHospitalAtMost": {
+          "description": "An upper bound. Unplotted hospitals can only shorten the real journey.",
+          "type": "number",
+          "minimum": 0
+        },
+        "medianMetresToCourt": {
+          "type": "number",
+          "minimum": 0
+        },
+        "medianMetresToHospitalAtMost": {
+          "type": "number",
+          "minimum": 0
+        },
+        "seatsThatAreHospitalTowns": {
+          "description": "The comparison that cannot be an artefact of seat choice: one set of seats, both networks.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "seatsThatAreCourtTowns": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unitsFurtherFromCourt": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "peopleFurtherFromCourt": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "hospitalTowns": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "medianMetresToPoliceAtMost": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Upper bound: an unmapped station can only shorten the journey."
+        },
+        "seatsThatArePoliceTowns": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Over every routed unit — police cover all 42 counties, so no exclusion applies."
+        },
+        "policeTowns": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "todayCourts": {
+          "description": "The judecatorii that exist now, located. The baseline the proposed figure means nothing without.",
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "medianMetresToTodayCourt": {
+          "type": "number",
+          "minimum": 0
+        },
+        "medianMetresToProposedCourt": {
+          "type": "number",
+          "minimum": 0
+        },
+        "meanMetresToTodayCourt": {
+          "type": "number",
+          "minimum": 0
+        },
+        "meanMetresToProposedCourt": {
+          "type": "number",
+          "minimum": 0
+        },
+        "seatsThatAreTodayCourtTowns": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unitsFurtherThanToday": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "peopleFurtherThanToday": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unitsLosingTheirLocalCourt": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Units with a court in their own town today and a drive tomorrow."
+        },
+        "peopleLosingTheirLocalCourt": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "allPeople": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "beyond": {
+          "description": "Units and people further than N km from a first-level court, now and under the proposal.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "todayUnits",
+              "todayPeople",
+              "proposedUnits",
+              "proposedPeople"
+            ],
+            "properties": {
+              "todayUnits": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "todayPeople": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "proposedUnits": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "proposedPeople": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "units": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "siruta",
+          "name",
+          "county",
+          "population",
+          "courtMetres",
+          "hospitalMetresAtMost",
+          "comparable",
+          "policeMetresAtMost",
+          "todayCourtMetres"
+        ],
+        "properties": {
+          "siruta": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "county": {
+            "type": "string"
+          },
+          "population": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "courtMetres": {
+            "type": "number",
+            "minimum": 0
+          },
+          "hospitalMetresAtMost": {
+            "type": "number",
+            "minimum": 0
+          },
+          "comparable": {
+            "type": "boolean"
+          },
+          "policeMetresAtMost": {
+            "type": "number",
+            "minimum": 0
+          },
+          "todayCourtMetres": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "provenance.schema.json#/$defs/limitation"
+      }
+    }
+  }
+}

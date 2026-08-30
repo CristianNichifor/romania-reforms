@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <title>Harta instanțelor — reforma justiției</title>
     <meta
       name="description"
@@ -42,6 +43,14 @@
 
       <section id="acces-note" hidden></section>
 
+      <section id="ceiling" hidden>
+        <label class="slider-label" for="ceiling-input">
+          Plafon de încărcare <output id="ceiling-value"></output>
+        </label>
+        <input id="ceiling-input" type="range" min="0" max="4" step="1" value="4" />
+        <div class="ramp-ends"><span>strict</span><span>fără plafon</span></div>
+      </section>
+
       <section id="summary"></section>
 
       <section class="legend">
@@ -56,17 +65,69 @@
         <p class="hint">Treci cu mouse-ul peste o instanță.</p>
       </section>
 
-      <section id="design">
-        <h2>Ce mai propune reforma</h2>
-        <p class="note">
-          Capitole care nu se pot calcula: arhitectură, administrație, carieră, tranziție.
-          Simulatorul poate arăta ce costă o decizie de acest fel, nu dacă e bună. Citate din
-          propunere, cu pagina.
-        </p>
-        <div id="design-list"></div>
+      <section class="fold">
+        <details id="acoperire-fold" open>
+          <summary><span>Ce verifică pagina din lucrare</span><span class="chev" id="acoperire-chev"></span></summary>
+          <div id="acoperire-body"></div>
+        </details>
+
+        <details id="eficienta-fold">
+          <summary><span>Premisa: „doar 20 eficiente”</span><span class="chev" id="eficienta-chev"></span></summary>
+          <div id="eficienta-body"></div>
+        </details>
+
+        <details id="parchete-fold">
+          <summary><span>Parchetele</span><span class="chev" id="parchete-chev"></span></summary>
+          <div id="parchete-body"></div>
+        </details>
+
+        <details id="sporuri-fold">
+          <summary><span>Sporurile</span><span class="chev" id="sporuri-chev"></span></summary>
+          <div id="sporuri-body"></div>
+        </details>
+
+        <details id="arondare-fold">
+          <summary><span>Dacă decide distanța</span><span class="chev" id="arondare-chev"></span></summary>
+          <div id="arondare-body"></div>
+        </details>
+
+        <details id="spitale-fold">
+          <summary><span>Sediile și celelalte servicii</span><span class="chev" id="spitale-chev"></span></summary>
+          <div id="spitale-body"></div>
+        </details>
+
+        <details id="proiect-fold">
+          <summary><span>Noua grilă de salarizare</span><span class="chev" id="proiect-chev"></span></summary>
+          <div id="proiect-body"></div>
+        </details>
+
+        <details id="pensii-fold">
+          <summary><span>Pensiile de serviciu</span><span class="chev">Două reforme</span></summary>
+          <div id="pensii-body"></div>
+        </details>
+
+        <details id="design-fold">
+          <summary><span>Ce mai propune reforma</span><span class="chev">8 capitole</span></summary>
+          <p class="note">
+            Capitole care nu se pot calcula: arhitectură, administrație, carieră, tranziție.
+            Simulatorul poate arăta ce costă o decizie de acest fel, nu dacă e bună. Citate din
+            propunere, cu pagina.
+          </p>
+          <div id="design-list"></div>
+        </details>
+
+        <details id="gaps-fold">
+      <summary><span>Ce nu e acoperit deloc</span><span class="chev" id="gaps-count"></span></summary>
+      <div id="gaps"></div>
+    </details>
+
+    <details id="limits-fold">
+          <summary><span>Ce nu putem calcula</span><span class="chev" id="limits-count"></span></summary>
+          <div id="limits"></div>
+        </details>
       </section>
 
-      <footer id="limits"></footer>
+      <footer id="blocking"></footer>
     </aside>
 
     <script type="module" src="/src/main.ts"></script>
