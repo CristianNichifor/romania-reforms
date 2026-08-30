@@ -5,10 +5,12 @@ administrative saving; to the person who has to reach the centre it is a journey
 journey has a price. Both numbers come from the same scenario and sit in one document, so
 neither can be quoted without the other.
 
-**It is a cost, not a subsidy.** No demand model exists in this repository and no fare revenue
-is estimated, so what comes out is what running the service costs — not what a public budget
-would still owe after tickets. The two differ by however much fare revenue there would be, and
-that is not a small or knowable difference.
+**It is a cost, not a subsidy.** What comes out here is what running the service costs, not
+what a public budget would still owe after tickets. That second figure exists — `build_fares.py`
+puts county-council fares over a population-extrapolated demand and lands near 46% farebox
+recovery — but it lives one layer downstream on purpose, because what a bus costs to run does
+not depend on what is charged to sit in it. Quoting this file's total as a subsidy overstates
+it by the fare revenue.
 
 **Spares are applied once per vehicle class, not per route.** A workshop float covers many
 routes but a minibus spare cannot substitute for a coach, so the ratio lands on each class's
@@ -234,9 +236,15 @@ def main(argv: list[str] | None = None) -> int:
             {
                 "id": "cost-nu-subventie",
                 "text": (
-                    "Este costul serviciului, nu subvenția. Nu există model de cerere și "
-                    "niciun venit din bilete în acest depozit, deci diferența dintre cifra "
-                    "de aici și ce ar rămâne de acoperit din buget public nu este cunoscută."
+                    "Este costul serviciului, nu subvenția. Diferența se calculează în "
+                    "data/fares.json, care pune tarife pe kilometru-călător din hotărâri de "
+                    "consiliu județean peste o cerere extrapolată din populație și scoate o "
+                    "acoperire din bilete de circa 46%. Rămâne o limitare care blochează citirea "
+                    "directă: cifra de aici nu este subvenția, iar cea din fares.json atârnă "
+                    "complet de gradul de ocupare, care este parametrul liber al acelui nivel. O "
+                    "versiune anterioară a acestei limitări spunea că nu există niciun model de "
+                    "cerere și niciun venit din bilete în depozit, ceea ce a încetat să fie "
+                    "adevărat când s-a construit fares.json."
                 ),
                 "severity": "blocking",
                 "affects": ["cost"],

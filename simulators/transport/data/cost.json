@@ -62,7 +62,7 @@
   "limitations": [
     {
       "id": "cost-nu-subventie",
-      "text": "Este costul serviciului, nu subvenția. Nu există model de cerere și niciun venit din bilete în acest depozit, deci diferența dintre cifra de aici și ce ar rămâne de acoperit din buget public nu este cunoscută.",
+      "text": "Este costul serviciului, nu subvenția. Diferența se calculează în data/fares.json, care pune tarife pe kilometru-călător din hotărâri de consiliu județean peste o cerere extrapolată din populație și scoate o acoperire din bilete de circa 46%. Rămâne o limitare care blochează citirea directă: cifra de aici nu este subvenția, iar cea din fares.json atârnă complet de gradul de ocupare, care este parametrul liber al acelui nivel. O versiune anterioară a acestei limitări spunea că nu există niciun model de cerere și niciun venit din bilete în depozit, ceea ce a încetat să fie adevărat când s-a construit fares.json.",
       "severity": "blocking",
       "affects": [
         "cost"
