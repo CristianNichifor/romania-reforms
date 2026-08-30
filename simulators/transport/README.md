@@ -8,9 +8,11 @@ Design: [`docs/superpowers/specs/2026-08-29-transport-design.md`](../../docs/sup
 
 ## Status
 
-**Built end to end and published.** Measured road limits → derived speeds → hubs → routes →
-fleet → cost in lei → journey times → consolidation scenarios → rail track, rail cost, and the
-comparison between them, on a map.
+**Built end to end and published, and coupled live to the administrative reform.** The map reads
+whichever consolidation scenario the reader built next door — from the same URL `justitie` reads —
+and recomputes centres, routes, journeys, fleet, drivers, capacity and cost for it in the browser.
+Measured road limits → derived speeds → hubs → routes → fleet → cost in lei → journey times →
+rail track and rail cost, all following the reader's own map.
 
 **Nothing here is validated against a recorded Romanian journey.** No such observation exists in
 this repository. The model is defensible part by part and unverified as a whole; that is a
@@ -20,13 +22,17 @@ published national average.
 
 ## The headline
 
+At the administrative model's default parameters, proposed service level:
+
 ```
-network      249 centres   1.708 routes   4.057 buses   1,80 mld lei/an
-journey      median 98 min uncoordinated, 73 min pulsed (population-weighted)
-rail         12.516 km of passenger line, 1.993 stations
+network      249 centres  1.961 routes  4.387 buses  4.705 drivers
+capacity     11.766 million seat-km a year   0,172 lei per seat-km
+money        OPEX 1,66 md/yr   vehicles 4,36 md   depots 3,88 md
+             28,20 md lei over twelve years, undiscounted
+demand       25% of offered seats, from population
+             tickets 1,03 md, subsidy 0,63 md, 37 lei a head
+rail         magistrale 9.839 km, secondary 2.677 km, 1.993 stations
              45,0 km/h as the track stands, 74,3 km/h rehabilitated
-a minute     356 lei per passenger-hour by rehabilitating track
-             0 lei per passenger-hour by coordinating the buses that already run
 ```
 
 ## What the model found
@@ -37,26 +43,13 @@ reasoning, and each of which is reproducible from the committed data.
 ### 1. Consolidating harder makes journeys *shorter*
 
 The project was designed around a trade: fewer centres save administrative money and cost
-travel time. The sweep says the trade runs the other way.
+travel time. It runs the other way. Move the administrative sliders towards fewer, larger units
+and the median journey **falls** — because removing a hub removes the transfer, and the transfer
+was the expensive part.
 
-| scenario | centres | fleet | cost/yr | median journey | admin saving |
-|---|---|---|---|---|---|
-| default | 249 | 4 058 | 1,80 md | 73 min | 8,73 md |
-
-| higher absorber bar | 233 | 4 009 | 1,79 md | 70 min | 8,81 md |
-| smaller radii | 255 | 4 017 | 1,78 md | 75 min | 8,69 md |
-| no population target | 347 | 4 028 | 1,79 md | 73 min | 8,20 md |
-| **one centre per county** | **41** | **4 799** | **2,38 md** | **52 min** | — |
-
-At one centre per county the journey is **28% shorter** and transport **33% dearer**. Removing
-the hub removes the transfer, and the transfer was the expensive part. Between 233 and 347
-centres almost nothing moves at all — under 1% on cost, under 5% on journey time — so the
-parameter the reform argues about is not the parameter that matters.
-
-The default row reads 4 058 against `data/cost.json`'s 4 057, because the sweep recomputes hub
-assignment in memory while `build_cost` reads the committed `network.json`, and one tie breaks
-differently. It is 0,003% of cost and one bus in four thousand — left alone, but held by
-`test_the_sweep_default_agrees_with_the_costed_network` so that it cannot widen unnoticed.
+This is no longer a table of five precomputed scenarios. The page recomputes the whole network
+from whatever map the reader arrived with, so the finding is reproducible by moving a slider
+rather than by trusting a row. `#pt=100000&n=3`, for instance, gives 216 centres instead of 249.
 
 ### 2. Coordination beats capital, twice
 
@@ -103,10 +96,13 @@ charges it for that.
 | `scripts/network.py` `tiers.py` | Routes from shortest-path trees; three fixed service classes. |
 | `scripts/fleet.py` `costs.py` | Peak vehicles vs bus-hours; unit prices into lei. |
 | `scripts/build_access.py` | Feeder + wait + trunk → `data/access.json`. |
-| `scripts/sweep_scenarios.py` | Five consolidation scenarios → `data/scenarios.json`. |
 | `scripts/rail_speeds.py` | Commercial speed by track condition class, calibrated at both ends. |
 | `scripts/build_railnet.py` | Rail graph, station↔UAT join, county-seat times, map geometry. |
-| `scripts/rail_costs.py` `build_rail_cost.py` | TUI, energy, crew, rolling stock, rehabilitation. |
+| `scripts/rail_costs.py` `build_rail_cost.py` | TUI, energy, crew, rolling stock, rehabilitation, extra track. |
+| `scripts/export_traveltime.py` | The road graph for the browser: endpoints and times, 109 KB. |
+| `app/src/consolidare.ts` | Runs the administrative model and routes it, in the browser. |
+| `app/src/serviciu.ts` | Service levels, fleet, drivers, traction, capacity, cost, farebox. |
+| `app/src/feroviar.ts` | The train judged against the bus, for the reader's own network. |
 | `app/` | MapLibre map. No basemap, no runtime calls, everything client-side. |
 
 ## Where the road speeds come from
@@ -245,7 +241,6 @@ uv run python -m scripts.export_hubs       # data/hubs.json             (committ
 uv run python -m scripts.build_network     # data/network.json          (committed)
 uv run python -m scripts.build_cost        # data/cost.json             (committed)
 uv run python -m scripts.build_access      # data/access.json           (committed)
-uv run python -m scripts.sweep_scenarios   # data/scenarios.json        (committed)
 uv run python -m scripts.build_railnet     # data/railnet.json + geojson (committed)
 uv run python -m scripts.build_rail_cost   # data/rail-cost.json        (committed)
 

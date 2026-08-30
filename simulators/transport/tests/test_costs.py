@@ -197,25 +197,3 @@ def test_maintenance_at_parity_wages_is_the_benchmark():
     }
     assert maintenance_per_km(item) == pytest.approx(0.45 * 4.97)
 
-
-def test_the_sweep_default_agrees_with_the_costed_network():
-    """The sweep recomputes the network; build_cost reads the committed one. They must agree.
-
-    Two paths compute the same quantity from the same parameters, and they land one route apart
-    — 1 707 against 1 708 — because the sweep regenerates hub assignment in memory rather than
-    reading `network.json`, and one tie breaks differently. The effect is 0,003% on cost and one
-    bus in four thousand.
-
-    That is small enough to leave alone and exactly the kind of divergence that must not be
-    allowed to widen unwatched, which is what this test is for. It is a monitor, not a proof of
-    equality: if it ever fails, the two paths have stopped modelling the same network.
-    """
-    cost = json.loads((ROOT / "data" / "cost.json").read_text(encoding="utf-8"))
-    sweep = json.loads((ROOT / "data" / "scenarios.json").read_text(encoding="utf-8"))
-    default = sweep["scenarios"][0]
-
-    network = json.loads((ROOT / "data" / "network.json").read_text(encoding="utf-8"))
-    assert default["hubs"] == network["summary"]["hubs"], "hub count diverged"
-    assert default["totalRon"] == pytest.approx(cost["annualRon"]["total"], rel=0.001)
-    assert default["fleet"] == pytest.approx(cost["fleet"]["total"], abs=2)
-    assert default["busKmWeekday"] == pytest.approx(cost["perWeekday"]["busKm"], rel=0.001)

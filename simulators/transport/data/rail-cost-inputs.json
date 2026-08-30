@@ -149,6 +149,12 @@
       "unit": "RON/EUR",
       "confidence": "assumed",
       "note": "Curs de lucru, identic cu cel din partea rutieră, ca cele două să rămână comparabile."
+    },
+    "extraTrackRonPerKm": {
+      "value": 49700000,
+      "unit": "RON/km",
+      "confidence": "assumed",
+      "note": "Linie suplimentară pe o magistrală, ca serviciul de navetă să nu ia capacitate de la traficul de lungă distanță. 10 milioane de euro pe kilometru. Dedus dintr-un reper european: construcția de linie dublă costă în medie 19,79 milioane de euro pe kilometru. O linie în plus lângă un terasament existent este aproximativ jumătate din asta, plus costul de a lucra lângă o cale ferată în funcțiune și de a resemnaliza — ceea ce dă un ordin de mărime asemănător cu reabilitarea completă din acest model, 9 milioane pe kilometru, și asta este un semn bun, nu o coincidență."
     }
   },
   "limitations": [
@@ -156,19 +162,33 @@
       "id": "tui-nu-e-tot-costul-liniei",
       "text": "TUI acoperă pachetul minim de acces și este calculat, conform Regulamentului UE 2015/909, la costul direct generat de circulația unui tren. El exclude explicit costurile fixe ale infrastructurii. Deci TUI este ce plătește operatorul, nu ce costă rețeaua: statul suportă separat întreținerea de bază a liniei, iar acea sumă nu apare în acest model.",
       "severity": "material",
-      "affects": ["rail-cost"]
+      "affects": [
+        "rail-cost"
+      ]
     },
     {
       "id": "clasa-liniei-e-dedusa-nu-citita",
       "text": "Tariful depinde de clasa secției TUI, iar lista oficială a încadrării secțiilor pe clase nu a fost preluată. Clasa este dedusă din viteza măsurată în OSM, folosind exact pragurile CFR (A 121-160, B 91-120, C 51-90, D sub 50). Metodologia CFR clasifică secția după media ponderată a vitezelor tehnice maxime admise, inclusiv restricțiile permanente — adică după aceeași mărime pe care o măsoară eticheta maxspeed — dar potrivirea nu a fost verificată secție cu secție.",
       "severity": "material",
-      "affects": ["rail-cost"]
+      "affects": [
+        "rail-cost"
+      ]
     },
     {
       "id": "fara-cerere-feroviara",
       "text": "Se calculează costul unui tren, nu al unui călător. Fără model de cerere nu se știe câți oameni sunt în ramă, iar toate cifrele pe călător de aici depind de o încărcare presupusă.",
       "severity": "blocking",
-      "affects": ["rail-cost"]
+      "affects": [
+        "rail-cost"
+      ]
+    },
+    {
+      "id": "linia-in-plus-e-o-regula-nu-un-studiu-de-capacitate",
+      "text": "Modelul presupune că orice kilometru de magistrală pe care ar circula naveta are nevoie de linie suplimentară. În realitate depinde de câte trenuri circulă deja pe acel tronson: unde magistrala are capacitate liberă, naveta încape fără să se construiască nimic, iar unde este saturată nici o linie în plus nu ajunge. Un studiu de capacitate ar înlocui regula asta cu o măsurătoare pe tronson. Până atunci cifra este un capăt de sus, nu o estimare.",
+      "severity": "material",
+      "affects": [
+        "rail-cost"
+      ]
     }
   ]
 }

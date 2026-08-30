@@ -89,6 +89,10 @@ SNAP_M = 25.0
 
 TAG = re.compile(r'"([a-z_:]+)"=>"([^"]*)"')
 
+# Node-index multiplier for packing an undirected edge into one integer key. Well above the
+# ~87.000 nodes the national graph builds, and asserted rather than trusted.
+MAX_NODES = 1_000_000
+
 
 def _tags(blob: object) -> dict[str, str]:
     """Parse GDAL's hstore blob. An untagged way arrives as NaN, not as None."""
@@ -304,6 +308,10 @@ def build_graph(lines):
 
     coords: list[tuple[float, float]] = []
     edges: list[tuple[int, int, float, float]] = []
+    # Keyed by a packed integer rather than a tuple. There are around a million segment pairs
+    # in the national graph, and two dicts of tuple keys at that size cost enough memory that
+    # the process was being killed outright — exit 0, no traceback, nothing written.
+    main_metres: dict[int, float] = {}
 
     grid: dict[tuple[int, int], int] = {}
 
@@ -317,7 +325,11 @@ def build_graph(lines):
         grid[key] = index
         return index
 
-    for geom, signed in zip(lines.geometry, lines["maxspeed"], strict=True):
+    # `usage` travels with the edge because it decides what a commuter service costs: running
+    # one on a magistrala means finding capacity on a line that already carries long-distance
+    # traffic, and that is an extra track, not a timetable slot.
+    is_main_line = (lines["usage"] == "main").tolist()
+    for geom, signed, is_main in zip(lines.geometry, lines["maxspeed"], is_main_line, strict=True):
         parts = geom.geoms if geom.geom_type == "MultiLineString" else [geom]
         for part in parts:
             xs, ys = part.xy
@@ -328,9 +340,17 @@ def build_graph(lines):
                     continue
                 length = float(np.hypot(xs[i + 1] - xs[i], ys[i + 1] - ys[i]))
                 edges.append((a, b, length, signed))
+                # Only main-line edges are recorded, and only their length: those are the ones
+                # a commuter service has to buy capacity on. Stored once per undirected edge,
+                # keyed low-node-first so a path traversing it either way finds it.
+                if is_main:
+                    lo, hi = (a, b) if a < b else (b, a)
+                    main_metres[lo * MAX_NODES + hi] = length
 
     if not edges:
         raise SystemExit("rail graph has no edges")
+    if len(coords) >= MAX_NODES:
+        raise SystemExit(f"{len(coords):,} nodes exceeds the {MAX_NODES:,} edge-key packing")
 
     rows = np.array([e[0] for e in edges])
     cols = np.array([e[1] for e in edges])
@@ -338,7 +358,7 @@ def build_graph(lines):
     signed = np.array([e[3] for e in edges])
     size = len(coords)
     graph = coo_matrix((metres, (rows, cols)), shape=(size, size)).tocsr()
-    return graph, np.array(coords), signed, metres
+    return graph, np.array(coords), signed, metres, main_metres
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -366,7 +386,7 @@ def main(argv: list[str] | None = None) -> int:
     print(f"  {len(stations):,} stations and halts")
 
     print("Building graph...")
-    graph, coords, _, _ = build_graph(lines)
+    graph, coords, _, _, main_metres = build_graph(lines)
     print(f"  {graph.shape[0]:,} nodes")
 
     seats = gpd.read_file(seats_path, layer="seat").to_crs(CRS_METRIC)
@@ -398,7 +418,9 @@ def main(argv: list[str] | None = None) -> int:
     # the country, and it is what lets any UAT — not only a county seat — be priced for rail:
     # find its nearest station, look up that station's node in its own county's row. Computing
     # it separately per UAT would be 3.186 searches for information already in hand.
-    from_seat_m = dijkstra(graph, directed=False, indices=sources)
+    from_seat_m, predecessors = dijkstra(
+        graph, directed=False, indices=sources, return_predecessors=True
+    )
     rail_m = from_seat_m[:, sources]
     pair = ~np.eye(len(sources), dtype=bool)
     reachable = np.isfinite(rail_m) & pair
@@ -424,6 +446,46 @@ def main(argv: list[str] | None = None) -> int:
             f"  longest {minutes.max():6.1f} min"
         )
 
+    # Which magistrala kilometres a commuter service would actually occupy.
+    #
+    # Not a share of the network guessed at: every rail-served UAT's path back to its county
+    # capital is walked edge by edge, and the main-line edges on it are marked. Overlapping
+    # paths mark the same edge once, which is the point — twelve communes down one valley need
+    # one extra track, not twelve.
+    #
+    # This is the capital nobody budgets for. A commuter train on a magistrala is not a
+    # timetable slot; it is competing for capacity with the long-distance service the line
+    # exists to carry, and the honest answer is another track.
+    row_of_county = {c: i for i, c in enumerate(county_seats["county_code"])}
+    # Per-UAT nearest station, for all 3.186 — not the 42-row county-seat array above, which is
+    # what the first version of this loop indexed with a UAT index and read off the end of.
+    all_xy = np.column_stack([seats.geometry.x, seats.geometry.y])
+    uat_gap_m, uat_nearest = station_tree.query(all_xy)
+    used_main: set[int] = set()
+    for index, county in enumerate(seats["county_code"]):
+        row = row_of_county.get(county)
+        if row is None or uat_gap_m[index] / 1000 > STATION_WALK_KM:
+            continue
+        node = int(station_node[uat_nearest[index]])
+        guard = 0
+        while node >= 0 and guard < 10_000:
+            previous = int(predecessors[row, node])
+            if previous < 0:
+                break
+            lo, hi = (previous, node) if previous < node else (node, previous)
+            key = lo * MAX_NODES + hi
+            if key in main_metres:
+                used_main.add(key)
+            node = previous
+            guard += 1
+    commuter_main_km = sum(main_metres[key] for key in used_main) / 1000
+    main_km_total = float(lines.loc[lines["usage"] == "main"].geometry.length.sum() / 1000)
+    branch_km_total = float(lines.loc[lines["usage"] == "branch"].geometry.length.sum() / 1000)
+    print(
+        f"  commuter services would use {commuter_main_km:,.0f} km of magistrala "
+        f"({commuter_main_km / main_km_total:.0%} of {main_km_total:,.0f} km)"
+    )
+
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     write_geometry(lines, stations)
     write_uat_rail_access(seats, county_seats, station_tree, station_node, from_seat_m)
@@ -436,6 +498,9 @@ def main(argv: list[str] | None = None) -> int:
         "provenance": RAIL_SPEED_PROVENANCE,
         "network": {
             "passengerLineKm": round(float(length_km), 1),
+            "mainLineKm": round(main_km_total, 1),
+            "branchLineKm": round(branch_km_total, 1),
+            "commuterMainLineKm": round(commuter_main_km, 1),
             "wayCount": int(len(lines)),
             "taggedSpeedShare": round(float(tagged.mean()), 3),
             "stationCount": int(len(stations)),

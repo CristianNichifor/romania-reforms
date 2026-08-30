@@ -37,6 +37,13 @@
     "accessRon": 1087324,
     "energyRon": 3562500
   },
+  "commuter": {
+    "mainLineKm": 9839.0,
+    "branchLineKm": 2677.3,
+    "commuterMainLineKm": 5674.1,
+    "extraTrackRonPerKm": 49700000,
+    "extraTrackCapexRon": 282002770000
+  },
   "rehabilitation": {
     "ronPerKm": 44730000,
     "hoursSavedPerTrip": 0.876,
@@ -74,6 +81,14 @@
       "id": "fara-cerere-feroviara",
       "text": "Se calculează costul unui tren, nu al unui călător. Fără model de cerere nu se știe câți oameni sunt în ramă, iar toate cifrele pe călător de aici depind de o încărcare presupusă.",
       "severity": "blocking",
+      "affects": [
+        "rail-cost"
+      ]
+    },
+    {
+      "id": "linia-in-plus-e-o-regula-nu-un-studiu-de-capacitate",
+      "text": "Modelul presupune că orice kilometru de magistrală pe care ar circula naveta are nevoie de linie suplimentară. În realitate depinde de câte trenuri circulă deja pe acel tronson: unde magistrala are capacitate liberă, naveta încape fără să se construiască nimic, iar unde este saturată nici o linie în plus nu ajunge. Un studiu de capacitate ar înlocui regula asta cu o măsurătoare pe tronson. Până atunci cifra este un capăt de sus, nu o estimare.",
+      "severity": "material",
       "affects": [
         "rail-cost"
       ]

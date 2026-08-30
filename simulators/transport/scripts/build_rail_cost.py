@@ -30,6 +30,7 @@ from scripts.rail_speeds import class_commercial_kmh
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "data" / "rail-cost.json"
 ACCESS = ROOT / "data" / "access.json"
+RAILNET = ROOT / "data" / "railnet.json"
 
 # A representative regional line and service. Not a real corridor — a unit of comparison, so
 # the per-passenger-hour figure is not hostage to which line anyone picked.
@@ -47,6 +48,9 @@ TRIPS_PER_PERSON_YEAR = 1
 
 def main() -> int:
     prices = load_rail_prices()
+    railnet = json.loads(RAILNET.read_text(encoding="utf-8"))["network"]
+    rail_inputs = json.loads(RAIL_COST_INPUTS.read_text(encoding="utf-8"))
+    inputs_items = {n: e["value"] for n, e in rail_inputs["items"].items()}
     access = json.loads(ACCESS.read_text(encoding="utf-8"))["summary"]
 
     slow = class_commercial_kmh("as_is")
@@ -98,6 +102,18 @@ def main() -> int:
             "crewRon": round(running.crew_ron),
             "accessRon": round(running.access_ron),
             "energyRon": round(running.energy_ron),
+        },
+        # Extra track on the magistrale, so a commuter service does not take capacity from the
+        # long-distance traffic the line exists to carry. Secondary lines need none of this:
+        # they are quiet, which is exactly what makes them usable as feeders.
+        "commuter": {
+            "mainLineKm": railnet["mainLineKm"],
+            "branchLineKm": railnet["branchLineKm"],
+            "commuterMainLineKm": railnet["commuterMainLineKm"],
+            "extraTrackRonPerKm": inputs_items["extraTrackRonPerKm"],
+            "extraTrackCapexRon": round(
+                railnet["commuterMainLineKm"] * inputs_items["extraTrackRonPerKm"]
+            ),
         },
         "rehabilitation": {
             "ronPerKm": prices.rehabilitation_per_km,
@@ -161,6 +177,15 @@ def main() -> int:
     print(f"    operating      {running.operating_ron / 1e6:8,.1f} m lei/yr")
     print(f"    rolling stock  {running.capital_ron / 1e6:8,.1f} m lei/yr")
     print()
+    commuter = document["commuter"]
+    print(
+        f"  magistrala {commuter['mainLineKm']:,.0f} km, secundare "
+        f"{commuter['branchLineKm']:,.0f} km"
+    )
+    print(
+        f"  naveta ar folosi {commuter['commuterMainLineKm']:,.0f} km de magistrala -> "
+        f"{commuter['extraTrackCapexRon'] / 1e9:,.1f} md lei de linie in plus"
+    )
     print(f"  rehabilitation buys a passenger-hour for {per_hour:,.0f} lei")
     print(f"  pulsing the buses saves {pulse_saving_min:.0f} min per journey for nothing")
     print(f"  buying the same {pulse_hours / 1e6:,.1f} m passenger-hours by rehabilitation:")
