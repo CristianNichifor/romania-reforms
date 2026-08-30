@@ -96,6 +96,28 @@ interface Servicii {
   limitations: Limitation[];
 }
 
+interface CurtiApel {
+  variantOfPaper: true;
+  regions: {
+    region: string;
+    counties: string[];
+    seat: string;
+    absorbs: string[];
+    courtsToday: number;
+    volume: number;
+  }[];
+  summary: {
+    today: number;
+    variant: number;
+    absorbed: number;
+    meanMetresToNearestToday: number;
+    meanMetresToRegionSeat: number;
+    countiesTravellingFurther: number;
+    countiesCompared: number;
+  };
+  limitations: Limitation[];
+}
+
 interface Acoperire {
   counts: {
     simulat: number;
@@ -387,6 +409,7 @@ async function main(): Promise<void> {
     eficienta,
     parchete,
     acoperire,
+    curtiApel,
   ] = await Promise.all([
     fetch(`${base}data/instante.json`).then((r) => r.json() as Promise<Document>),
     fetch(`${base}data/counties.geojson`).then((r) => r.json()),
@@ -406,6 +429,7 @@ async function main(): Promise<void> {
     fetch(`${base}data/eficienta.json`).then((r) => r.json() as Promise<Eficienta>),
     fetch(`${base}data/parchete.json`).then((r) => r.json() as Promise<Parchete>),
     fetch(`${base}data/acoperire.json`).then((r) => r.json() as Promise<Acoperire>),
+    fetch(`${base}data/curti-apel.json`).then((r) => r.json() as Promise<CurtiApel>),
   ]);
   const countyName = (code: string): string => manifest.countyNames?.[code] ?? code;
 
@@ -1245,6 +1269,39 @@ async function main(): Promise<void> {
     host.insertBefore(tag, host.querySelector('.chev'));
   };
 
+  const ap = curtiApel.summary;
+  const apKm = (m: number): string => `${Math.round(m / 1000)} km`;
+  el('#apel-chev').textContent = `${ap.today} → ${ap.variant}`;
+  el('#apel-body').innerHTML =
+    `<p class="gap gap-buildable"><strong>Variantă, nu propunerea lucrării.</strong> Lucrarea
+       cere „~15 curți de apel regionale” — adică exact câte există. Varianta de aici le reduce
+       la ${ap.variant}, câte regiuni de dezvoltare are țara.</p>
+     <div class="pens-row">
+       <span class="pens-head">regiune</span>
+       <span class="pens-head">jud.</span>
+       <span class="pens-head">azi</span>
+       <span class="pens-head">sediu</span>
+       ${curtiApel.regions
+         .map(
+           (r) =>
+             `<span>${r.region}</span>
+              <span>${r.counties.length}</span>
+              <span class="${r.courtsToday > 1 ? 'pens-low' : ''}">${r.courtsToday}</span>
+              <span>${r.seat.replace('Curtea de Apel ', '')}</span>`,
+         )
+         .join('')}
+     </div>
+     <p class="disagree">Cele ${ap.today} de curți devin ${ap.variant}: ${ap.absorbed} sunt
+       absorbite de vecina cu cele mai multe dosare din regiune. Regiunile ies din geometria
+       granițelor publicate, nu dintr-un tabel scris de mână, și reproduc exact compoziția
+       Legii 315/2004.</p>
+     <p class="disagree">Prețul e drumul. De la reședința de județ la cea mai apropiată curte
+       de apel de azi sunt ${apKm(ap.meanMetresToNearestToday)} în medie; la sediul regional ar
+       fi ${apKm(ap.meanMetresToRegionSeat)} — mai mult decât dublu. ${
+         ap.countiesTravellingFurther
+       } din ${ap.countiesCompared} de județe ar avea de mers mai departe, niciunul mai
+       aproape. La apel drumul îl face de obicei avocatul, nu justițiabilul, dar el rămâne.</p>`;
+
   const PARCHET_LABEL: Record<string, string> = {
     piccj: 'PÎCCJ + DNA, DIICOT',
     'curte-de-apel': 'pe lângă curți de apel',
@@ -1738,6 +1795,7 @@ async function main(): Promise<void> {
     ...eficienta.limitations,
     ...parchete.limitations,
     ...acoperire.limitations,
+    ...curtiApel.limitations,
   ];
   const blocking = allLimits.filter((l) => l.severity === 'blocking');
   const rest = allLimits.filter((l) => l.severity !== 'blocking');
