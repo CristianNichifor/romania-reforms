@@ -179,6 +179,31 @@ interface Eficienta {
   limitations: Limitation[];
 }
 
+interface ParcheteRegiuni {
+  summary: {
+    officesBefore: number;
+    officesAfter: number;
+    absorbed: number;
+    totalVolume: number;
+    nationalPerProsecutor: number;
+    spreadBefore: { maxOverMin: number };
+    spreadAfter: { maxOverMin: number };
+    heaviestToday: string;
+    heaviestTodayPerProsecutor: number;
+    biggestToday: string;
+    biggestTodayVolume: number;
+    biggestTodayPerProsecutor: number;
+    structure: {
+      todayLower: number;
+      todayAppellate: number;
+      proposedCounty: number;
+      proposedRegional: number;
+    };
+  };
+  regions: { region: string; seat: string; volume: number; prosecutors: number; perProsecutor: number }[];
+  limitations: Limitation[];
+}
+
 interface Incarcatura {
   summary: {
     courtsBefore: number;
@@ -554,6 +579,7 @@ async function main(): Promise<void> {
     danemarca,
     comasare,
     incarcatura,
+    parcheteRegiuni,
   ] = await Promise.all([
     fetch(`${base}data/instante.json`).then((r) => r.json() as Promise<Document>),
     fetch(`${base}data/counties.geojson`).then((r) => r.json()),
@@ -578,6 +604,7 @@ async function main(): Promise<void> {
     fetch(`${base}data/danemarca.json`).then((r) => r.json() as Promise<Danemarca>),
     fetch(`${base}data/parchete-comasare.json`).then((r) => r.json() as Promise<ParcheteComasare>),
     fetch(`${base}data/incarcatura.json`).then((r) => r.json() as Promise<Incarcatura>),
+    fetch(`${base}data/parchete-regiuni.json`).then((r) => r.json() as Promise<ParcheteRegiuni>),
   ]);
   const countyName = (code: string): string => manifest.countyNames?.[code] ?? code;
 
@@ -688,6 +715,21 @@ async function main(): Promise<void> {
       };
     }),
   });
+
+  // The group headings stick just below the toolbar, and the toolbar's height depends on how
+  // the four view buttons wrap at the reader's font size. Measured rather than guessed: a
+  // hard-coded offset leaves either a gap or an overlap on every viewport but one.
+  const toolbar = document.querySelector<HTMLElement>('.toolbar');
+  if (toolbar) {
+    const measure = (): void => {
+      document.documentElement.style.setProperty(
+        '--toolbar-h',
+        `${Math.round(toolbar.getBoundingClientRect().height)}px`,
+      );
+    };
+    measure();
+    new ResizeObserver(measure).observe(toolbar);
+  }
 
   const map = new MapLibreMap({
     container: 'map',
@@ -857,7 +899,12 @@ async function main(): Promise<void> {
                 '#3a4149',
               ],
             ] as unknown as ExpressionSpecification,
-            'fill-opacity': 0.72,
+            'fill-opacity': [
+              'case',
+              ['boolean', ['feature-state', 'hover'], false],
+              0.93,
+              0.72,
+            ] as unknown as ExpressionSpecification,
           },
         },
         'uat-outline',
@@ -949,6 +996,10 @@ async function main(): Promise<void> {
 
     map.addSource('courts', {
       type: 'geojson',
+      // Feature state needs an id to address. Without this, hovering a court could move the
+      // cursor and fill the sidebar but could not mark the circle being described, which left
+      // a reader matching a name in the panel against 241 identical dots.
+      generateId: true,
       data: asFeatures(courtsFor(mode), ratioFor(mode, courtsFor(mode))),
     });
 
@@ -994,9 +1045,26 @@ async function main(): Promise<void> {
       paint: {
         'circle-radius': radius,
         'circle-color': colour,
-        'circle-opacity': 0.85,
-        'circle-stroke-color': '#0b0d10',
-        'circle-stroke-width': 1,
+        'circle-opacity': [
+          'case',
+          ['boolean', ['feature-state', 'hover'], false],
+          1,
+          0.85,
+        ] as unknown as ExpressionSpecification,
+        // A pale ring rather than a colour change: the fill is carrying the caseload ratio and
+        // must keep meaning the same thing under the cursor as away from it.
+        'circle-stroke-color': [
+          'case',
+          ['boolean', ['feature-state', 'hover'], false],
+          '#f2f4f7',
+          '#0b0d10',
+        ] as unknown as ExpressionSpecification,
+        'circle-stroke-width': [
+          'case',
+          ['boolean', ['feature-state', 'hover'], false],
+          2.5,
+          1,
+        ] as unknown as ExpressionSpecification,
       },
     });
 
@@ -1035,6 +1103,7 @@ async function main(): Promise<void> {
     // hears its cases, and how far that is by road. The distance is the one the assignment
     // itself used, read back out of feature state rather than recomputed.
     map.on('mousemove', 'arondare-fill', (e: MapMouseEvent & { features?: MapGeoJSONFeature[] }) => {
+      markUat(e.features?.[0]?.id);
       const feature = e.features?.[0];
       if (!feature || !couplingForMap || !arondareForMap) return;
       map.getCanvas().style.cursor = 'pointer';
@@ -1078,14 +1147,36 @@ async function main(): Promise<void> {
     });
     map.on('mouseleave', 'arondare-fill', () => {
       map.getCanvas().style.cursor = '';
+      markUat(undefined);
     });
+
+    // Which feature currently wears the hover state, so it can be taken off again. Held per
+    // source because the two hover targets are different layers over different data.
+    let hoveredCourt: string | number | undefined;
+    let hoveredUat: string | number | undefined;
+    const markCourt = (id: string | number | undefined): void => {
+      if (hoveredCourt !== undefined && map.getSource('courts')) {
+        map.setFeatureState({ source: 'courts', id: hoveredCourt }, { hover: false });
+      }
+      hoveredCourt = id;
+      if (id !== undefined) map.setFeatureState({ source: 'courts', id }, { hover: true });
+    };
+    const markUat = (id: string | number | undefined): void => {
+      if (hoveredUat !== undefined && map.getSource('uats')) {
+        map.setFeatureState({ source: 'uats', id: hoveredUat }, { hover: false });
+      }
+      hoveredUat = id;
+      if (id !== undefined) map.setFeatureState({ source: 'uats', id }, { hover: true });
+    };
 
     map.on('mousemove', 'courts', (e: MapMouseEvent & { features?: MapGeoJSONFeature[] }) => {
       map.getCanvas().style.cursor = 'pointer';
+      markCourt(e.features?.[0]?.id);
       show(e.features?.[0] ?? null);
     });
     map.on('mouseleave', 'courts', () => {
       map.getCanvas().style.cursor = '';
+      markCourt(undefined);
       // In the catchment view the polygons own this panel. Resetting here overwrote a commune
       // the reader was still pointing at with the hint for a court they had just left — and
       // with the wrong noun besides, since that hint says "instanță".
@@ -1675,6 +1766,7 @@ async function main(): Promise<void> {
   // Presented with the concentration it also causes, because reporting only the favourable half
   // would be the same fault the page spends the rest of its length pointing at.
   const cm = comasare.summary;
+  const pr = parcheteRegiuni;
   el('#comasare-chev').textContent =
     `${dec(cm.spreadBefore.maxOverMin, 1)}× → ${dec(cm.spreadAfter.maxOverMin, 1)}×`;
   el('#comasare-body').innerHTML =
@@ -1717,7 +1809,47 @@ async function main(): Promise<void> {
        sunt adunate, deși unul de la tribunal nu e cât unul de la judecătorie — comasarea
        propusă exact asta presupune. Se numără dosare de soluționat, nu muncă dusă la capăt.
        Și comasarea e pe județ, fiindcă asta scrie în 7.3: spre deosebire de instanțe, parchetele
-       nu se pot aronda după distanță, pentru că nu se publică ce comune acoperă fiecare.</p>`;
+       nu se pot aronda după distanță, pentru că nu se publică ce comune acoperă fiecare.</p>
+     <h4 class="sub-head">Și nivelul de deasupra, pe regiuni</h4>
+     <p class="note"><strong>Variantă, nu lucrarea.</strong> 7.3 lasă cele
+       ${pr.summary.officesBefore} parchete de pe lângă curțile de apel neatinse. Dar
+       parchetele sunt organizate în oglinda instanțelor, iar pagina asta propune deja
+       ${pr.summary.officesAfter} curți de apel pe regiunile de dezvoltare: a regionaliza
+       instanțele și a lăsa parchetele pe harta veche ar rupe tocmai oglinda. Serviciul ar
+       arăta așa: <strong>${pr.summary.structure.proposedCounty} județene</strong> lângă
+       instanțele județene, <strong>${pr.summary.structure.proposedRegional} regionale</strong>
+       lângă curțile regionale, Ministerul Public deasupra — de la
+       ${pr.summary.structure.todayLower} + ${pr.summary.structure.todayAppellate} + 1 la
+       ${pr.summary.structure.proposedCounty} + ${pr.summary.structure.proposedRegional} + 1.</p>
+     <div class="pens-row">
+       <span class="pens-head">regiune</span>
+       <span class="pens-head">dosare</span>
+       <span class="pens-head">procurori</span>
+       <span class="pens-head">pe procuror</span>
+       ${[...pr.regions]
+         .sort((a, b) => b.volume - a.volume)
+         .map(
+           (r) =>
+             `<span>${r.region}</span>
+              <span>${ro.format(r.volume)}</span>
+              <span>${r.prosecutors}</span>
+              <span>${ro.format(Math.round(r.perProsecutor))}</span>`,
+         )
+         .join('')}
+     </div>
+     <p class="disagree"><strong>Aici e mai puțin de reparat decât un nivel mai jos.</strong>
+       Comasarea județeană a strâns împrăștierea de la ${dec(cm.spreadBefore.maxOverMin, 1)}× la
+       ${dec(cm.spreadAfter.maxOverMin, 1)}×. Nivelul de apel pornește deja de la
+       ${dec(pr.summary.spreadBefore.maxOverMin, 1)}× și ajunge la
+       ${dec(pr.summary.spreadAfter.maxOverMin, 1)}×. Merită făcut, dar argumentul de
+       încărcătură care susține comasarea județeană nu susține la fel regionalizarea apelului.</p>
+     <p class="disagree"><strong>Ciudățenia nivelului e că încărcătura merge invers.</strong>
+       ${town(pr.summary.biggestToday)} are cel mai mare volum din țară
+       (${ro.format(pr.summary.biggestTodayVolume)} de dosare) și <em>cea mai mică</em>
+       încărcătură — ${ro.format(Math.round(pr.summary.biggestTodayPerProsecutor))} de dosare pe
+       procuror — fiindcă are de departe cei mai mulți procurori. ${town(pr.summary.heaviestToday)} are
+       ${ro.format(Math.round(pr.summary.heaviestTodayPerProsecutor))}. Comasarea mută granițele,
+       nu oamenii: inversiunea rămâne și după. Ce ar fi de reparat nu e harta, ci schema.</p>`;
 
   // Chapters 4-5. The paper's judicial map rests on one sentence in 5.1, and the sentence can
   // be checked against the paper's own Danish counts — which is a narrower test than it looks,
@@ -2237,6 +2369,7 @@ async function main(): Promise<void> {
     ...danemarca.limitations,
     ...comasare.limitations,
     ...incarcatura.limitations,
+    ...parcheteRegiuni.limitations,
   ];
   const blocking = allLimits.filter((l) => l.severity === 'blocking');
   const rest = allLimits.filter((l) => l.severity !== 'blocking');

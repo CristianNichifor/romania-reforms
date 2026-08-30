@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/parchete-regiuni.schema.json",
+  "title": "The prosecution service on three tiers, with the top one on development regions",
+  "description": "A variant, not the paper. Section 7.3 merges the two bottom prosecution levels into 42 county offices and leaves the appellate level at 15; this groups those 15 onto the eight development regions, mirroring the appellate-court variant in curti-apel-regiuni, because prosecution offices are organised in the mirror of the courts. It carries the volumes the CSM publishes per office, the eight merged regions, and the tier's characteristic inversion: the office with the most cases has the lightest load per prosecutor, and merging does not change that because it moves boundaries rather than people.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "period",
+    "variantOfPaper",
+    "provenance",
+    "summary",
+    "regions",
+    "offices",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "const": "parchete-regiuni" },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "period": { "type": "string" },
+    "variantOfPaper": {
+      "description": "Always true. The paper keeps fifteen appellate prosecution offices and proposes no regions for them; nothing here may be read as its proposal.",
+      "const": true
+    },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "officesBefore",
+        "officesAfter",
+        "absorbed",
+        "totalVolume",
+        "totalProsecutors",
+        "nationalPerProsecutor",
+        "spreadBefore",
+        "spreadAfter",
+        "heaviestToday",
+        "heaviestTodayPerProsecutor",
+        "lightestToday",
+        "lightestTodayPerProsecutor",
+        "biggestToday",
+        "biggestTodayVolume",
+        "biggestTodayPerProsecutor",
+        "loadRunsBackwards",
+        "structure"
+      ],
+      "properties": {
+        "officesBefore": { "const": 15 },
+        "officesAfter": { "const": 8 },
+        "absorbed": { "type": "integer", "minimum": 0 },
+        "totalVolume": { "type": "integer", "exclusiveMinimum": 0 },
+        "totalProsecutors": { "type": "integer", "exclusiveMinimum": 0 },
+        "nationalPerProsecutor": { "type": "number", "exclusiveMinimum": 0 },
+        "spreadBefore": { "$ref": "#/$defs/spread" },
+        "spreadAfter": { "$ref": "#/$defs/spread" },
+        "heaviestToday": { "type": "string" },
+        "heaviestTodayPerProsecutor": { "type": "number", "exclusiveMinimum": 0 },
+        "lightestToday": { "type": "string" },
+        "lightestTodayPerProsecutor": { "type": "number", "exclusiveMinimum": 0 },
+        "biggestToday": { "type": "string" },
+        "biggestTodayVolume": { "type": "integer", "exclusiveMinimum": 0 },
+        "biggestTodayPerProsecutor": { "type": "number", "exclusiveMinimum": 0 },
+        "loadRunsBackwards": {
+          "description": "True when the office with the largest volume also carries the lightest load per prosecutor — the inversion this tier is characterised by.",
+          "type": "boolean"
+        },
+        "structure": {
+          "description": "The whole service, before and after, so the three tiers can be read as one shape.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "todayLower",
+            "todayAppellate",
+            "proposedCounty",
+            "proposedRegional",
+            "todayTotal",
+            "proposedTotal"
+          ],
+          "properties": {
+            "todayLower": { "type": "integer", "exclusiveMinimum": 0 },
+            "todayAppellate": { "type": "integer", "exclusiveMinimum": 0 },
+            "proposedCounty": { "const": 42 },
+            "proposedRegional": { "const": 8 },
+            "todayTotal": { "type": "integer", "exclusiveMinimum": 0 },
+            "proposedTotal": { "type": "integer", "exclusiveMinimum": 0 }
+          }
+        }
+      }
+    },
+
+    "regions": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "region",
+          "seat",
+          "seatCounty",
+          "counties",
+          "officesBefore",
+          "absorbs",
+          "volume",
+          "prosecutors",
+          "perProsecutor"
+        ],
+        "properties": {
+          "region": { "type": "string" },
+          "seat": { "type": "string" },
+          "seatCounty": { "type": "string", "minLength": 1, "maxLength": 2 },
+          "counties": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+          "officesBefore": { "type": "integer", "exclusiveMinimum": 0 },
+          "absorbs": { "type": "array", "items": { "type": "string" } },
+          "volume": { "type": "integer", "exclusiveMinimum": 0 },
+          "prosecutors": { "type": "integer", "exclusiveMinimum": 0 },
+          "perProsecutor": { "type": "number", "exclusiveMinimum": 0 }
+        }
+      }
+    },
+
+    "offices": {
+      "description": "The fifteen offices as the report has them, kept so the merge can be checked against its inputs.",
+      "type": "array",
+      "minItems": 15,
+      "maxItems": 15,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["office", "volume", "perProsecutor", "perSchema", "prosecutors", "region"],
+        "properties": {
+          "office": { "type": "string" },
+          "volume": { "type": "integer", "exclusiveMinimum": 0 },
+          "perProsecutor": { "type": "number", "exclusiveMinimum": 0 },
+          "perSchema": { "type": "number", "minimum": 0 },
+          "prosecutors": { "type": "integer", "exclusiveMinimum": 0 },
+          "region": { "type": "string" }
+        }
+      }
+    },
+
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+    }
+  },
+
+  "$defs": {
+    "spread": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["min", "max", "median", "maxOverMin", "p90OverP10"],
+      "properties": {
+        "min": { "type": "number", "exclusiveMinimum": 0 },
+        "max": { "type": "number", "exclusiveMinimum": 0 },
+        "median": { "type": "number", "exclusiveMinimum": 0 },
+        "maxOverMin": { "type": "number", "exclusiveMinimum": 0 },
+        "p90OverP10": { "type": ["number", "null"], "exclusiveMinimum": 0 }
+      }
+    }
+  }
+}
