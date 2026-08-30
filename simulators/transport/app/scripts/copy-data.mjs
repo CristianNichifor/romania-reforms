@@ -29,6 +29,7 @@ const cost = JSON.parse(readFileSync(join(sim, 'data/cost.json'), 'utf8'));
 const hubs = JSON.parse(readFileSync(join(sim, 'data/hubs.json'), 'utf8'));
 const railnet = JSON.parse(readFileSync(join(sim, 'data/railnet.json'), 'utf8'));
 const railCost = JSON.parse(readFileSync(join(sim, 'data/rail-cost.json'), 'utf8'));
+const fares = JSON.parse(readFileSync(join(sim, 'data/fares.json'), 'utf8'));
 
 // The track and its stations. Copied rather than joined to anything: rail is its own layer,
 // and the whole point of the station geometry is that it does NOT line up with the settlements.
@@ -54,7 +55,13 @@ writeFileSync(
       againstPulsing: railCost.againstPulsing,
       reference: railCost.reference,
     },
-    limitations: [...access.limitations, ...cost.limitations, ...railCost.limitations],
+    fares: { central: fares.central, band: fares.band, benchmark: fares.benchmark },
+    limitations: [
+      ...access.limitations,
+      ...cost.limitations,
+      ...railCost.limitations,
+      ...fares.limitations,
+    ],
   }),
 );
 

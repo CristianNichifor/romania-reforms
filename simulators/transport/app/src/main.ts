@@ -282,6 +282,31 @@ async function main() {
     }
   }
 
+  function renderFares() {
+    const f = summary.fares;
+    if (!f) return;
+    el('fares').innerHTML = `
+      <dt>Venit din bilete</dt><dd>${bn(f.central.revenueRon)}</dd>
+      <dt>Rămâne de acoperit</dt><dd class="big">${bn(f.central.subsidyRon)}</dd>
+      <dt>Pe om, pe an</dt><dd>${fmt.format(
+        Math.round(f.central.subsidyPerPersonYearRon),
+      )} lei</dd>
+      <dt>Acoperire din bilete</dt><dd>${(f.central.recovery * 100).toFixed(0)}%</dd>`;
+
+    // The band, not just the central case. Occupancy is assumed and it is the only number that
+    // moves this result, so quoting one recovery ratio alone would read as a measurement.
+    const lo = f.band[0];
+    const hi = f.band[f.band.length - 1];
+    el('fares-note').textContent =
+      `Cifra depinde de cât de plin merge autobuzul, iar asta este presupus. La ` +
+      `${(lo.loadFactor * 100).toFixed(0)}% ocupare biletele acoperă ` +
+      `${(lo.recovery * 100).toFixed(0)}% și rămân ${bn(lo.subsidyRon)}; la ` +
+      `${(hi.loadFactor * 100).toFixed(0)}% acoperă ${(hi.recovery * 100).toFixed(0)}% și rămân ` +
+      `${bn(hi.subsidyRon)}. Tariful este cel aprobat de consilii județene; ocuparea nu are ` +
+      `cum să aibă sursă, pentru că serviciul nu există. Pentru comparație, Movia din Danemarca ` +
+      `acoperă circa ${(f.benchmark.moviaRecovery * 100).toFixed(0)}% din bilete.`;
+  }
+
   function renderRail() {
     const r = summary.rail;
     if (!r) return;
@@ -295,14 +320,23 @@ async function main() {
       )} km/h</dd>
       <dt>O oră de călător costă</dt><dd>${fmt.format(
         Math.round(r.rehabilitation.ronPerPassengerHour),
-      )} lei</dd>`;
+      )} lei</dd>
+      <dt>UAT-uri mai rapide cu trenul</dt><dd>${fmt.format(
+        a.rail.uatsFasterByRail,
+      )} din ${fmt.format(a.rail.uatsWithOption)}</dd>`;
 
     const seatsOff = r.seats.considered - r.seats.withinWalkOfStation;
     el('rail-note').textContent =
       `Linia este colorată după viteza semnalizată: roșu sub 51 km/h, verde peste 121 — ` +
       `pragurile după care CFR își tarifează propria rețea. ${seatsOff} din ` +
       `${r.seats.considered} de reședințe au gara la peste ${r.seats.walkKm} km, deci au nevoie ` +
-      `de autobuz ca să ajungă la propria cale ferată.`;
+      `de autobuz ca să ajungă la propria cale ferată. ` +
+      `Doar ${fmt.format(a.rail.uatsWithOption)} de UAT-uri au gară la mai puțin de ` +
+      `${r.seats.walkKm} km la ambele capete ale drumului, iar pentru ` +
+      `${fmt.format(a.rail.uatsFasterByRail)} dintre ele trenul este mai rapid decât autobuzul ` +
+      `— ${fmt.format(a.rail.peopleFasterByRail)} de oameni. Mediana pe țară scade de la ` +
+      `${min(a.medianPulsedMin)} la ${min(a.rail.medianBestPulsedMin)}: calea ferată ajunge la ` +
+      `puține locuri și le schimbă mult.`;
 
     // The comparison the rail layer exists to make. Kept next to the number rather than in a
     // footnote, and stated as a unit price so nobody reads it as one mode replacing the other.
@@ -329,6 +363,7 @@ async function main() {
     void showRail(true);
   }
   renderRail();
+  renderFares();
 
   el('caveats').innerHTML = summary.limitations
     .filter((l: { severity: string }) => l.severity === 'blocking' || l.severity === 'material')
