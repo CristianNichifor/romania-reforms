@@ -376,11 +376,43 @@ async function main() {
   el('loading').remove();
 }
 
-main().catch((error) => {
-  console.error(error);
+/** Is there a WebGL context at all? Without one MapLibre cannot draw and says so only in the
+ *  console — which looks exactly like "the map is not visible" and nothing else. */
+function webglAvailable(): boolean {
+  try {
+    const canvas = document.createElement('canvas');
+    return Boolean(canvas.getContext('webgl2') ?? canvas.getContext('webgl'));
+  } catch {
+    return false;
+  }
+}
+
+function fail(title: string, detail: string) {
   // Keep the way out. Replacing the whole panel would delete the link back to the other
   // simulators at the one moment a reader is stuck on a page that shows nothing.
+  //
+  // And show the actual message. A generic "could not load the data" sent me hunting for a
+  // missing file when the real fault was a malformed paint expression that MapLibre had
+  // rejected by name — the map stayed blank and the page said nothing useful about why.
   document.getElementById('panel')!.innerHTML =
     '<a class="up" href="../">← Toate simulatoarele</a>' +
-    '<h1>Nu s-au putut încărca datele</h1><p class="lede">Rulează <code>npm run build</code> în simulators/transport/app după ce ai generat datele.</p>';
-});
+    `<h1>${title}</h1><p class="lede">${detail}</p>`;
+}
+
+if (!webglAvailable()) {
+  fail(
+    'Harta are nevoie de WebGL',
+    'Browserul nu oferă un context WebGL, deci harta nu poate fi desenată. Cifrele din model ' +
+      'sunt în data/, iar pagina rămâne inutilizabilă până când WebGL este activat.',
+  );
+} else {
+  main().catch((error: unknown) => {
+    console.error(error);
+    const message = error instanceof Error ? error.message : String(error);
+    fail(
+      'Nu s-au putut încărca datele',
+      `<code>${message.replace(/</g, '&lt;')}</code><br><br>Dacă rulezi local: ` +
+        '<code>npm run build</code> în simulators/transport/app după ce ai generat datele.',
+    );
+  });
+}
