@@ -46,7 +46,7 @@
       "value": 1.2,
       "unit": "RON/km",
       "confidence": "assumed",
-      "note": "Întreținere și reparații, fără anvelope. Nefundamentat pe o sursă publică și, împreună cu celelalte costuri care nu depind de salarii, explicația cea mai probabilă pentru costul pe kilometru rămas sub referința ajustată."
+      "note": "Întreținere și reparații. Documentația Constanța pune anvelopele în aceeași poziție cu service-ul auto, deci linia separată de anvelope de aici dublează parțial. Rămâne nefundamentată pe o cifră publică și este, împreună cu celelalte costuri care nu depind de salarii, explicația cea mai probabilă pentru diferența față de reperul Buzău."
     },
     "tyresPerKm": {
       "value": 0.15,
@@ -94,28 +94,47 @@
       "unit": "share",
       "confidence": "verbatim",
       "note": "Cota standard de TVA, 21% de la 1 august 2025. Folosită doar pentru a scoate TVA-ul din prețul de la pompă."
+    },
+    "ronPerEur": {
+      "value": 4.97,
+      "unit": "RON/EUR",
+      "confidence": "assumed",
+      "note": "Curs de lucru, folosit doar pentru pozițiile citate în euro."
+    },
+    "roadTaxPerVehicleYear": {
+      "value": 2783,
+      "unit": "RON/vehicle/year",
+      "confidence": "verbatim",
+      "note": "Rovinietă: 560 euro pe an pentru autovehicule cu peste 23 de locuri, 320 euro pentru 9-23 de locuri (OG 15/2002). Se folosește valoarea mare, pentru că majoritatea parcului modelat trece de 23 de locuri. Anexa 6 la documentația de negociere a Consiliului Județean Constanța, Grupa 03, 2025, estimare pe elementele de cheltuieli din Anexa 2 la Ordinul ANRSC 272/2007."
+    },
+    "tyreLifeKm": {
+      "value": 100000,
+      "unit": "km",
+      "confidence": "verbatim",
+      "note": "Durata de viață a unui set de anvelope, circa 100.000 km. Anexa 6 la documentația de negociere a Consiliului Județean Constanța, Grupa 03, 2025, estimare pe elementele de cheltuieli din Anexa 2 la Ordinul ANRSC 272/2007."
     }
   },
   "vehicles": {
     "basic": {
       "seats": 20,
-      "priceRon": 250000,
+      "priceRon": 323050,
       "dieselPer100Km": 18,
-      "confidence": "assumed",
-      "note": "Microbuz. Clasa cu cele mai multe trasee și cei mai puțini călători."
+      "confidence": "verbatim",
+      "note": "Microbuz nou de până în 22 de locuri, 65.000 euro preț de referință. Anexa 6 la documentația de negociere a Consiliului Județean Constanța, Grupa 03, 2025, estimare pe elementele de cheltuieli din Anexa 2 la Ordinul ANRSC 272/2007."
     },
     "feeder": {
       "seats": 40,
-      "priceRon": 700000,
+      "priceRon": 472150,
       "dieselPer100Km": 25,
-      "confidence": "assumed"
+      "confidence": "verbatim",
+      "note": "Autobuz nou de 23 de locuri sau mai mult, 95.000 euro preț de referință. Anexa 6 la documentația de negociere a Consiliului Județean Constanța, Grupa 03, 2025, estimare pe elementele de cheltuieli din Anexa 2 la Ordinul ANRSC 272/2007."
     },
     "trunk": {
       "seats": 50,
-      "priceRon": 1100000,
+      "priceRon": 472150,
       "dieselPer100Km": 30,
-      "confidence": "assumed",
-      "note": "Autobuz interurban. Traseele de trunchi sunt lungi și dese, deci aici se duce cea mai mare parte a motorinei."
+      "confidence": "verbatim",
+      "note": "Același preț de referință de 95.000 euro: documentația nu diferențiază peste 23 de locuri. Estimările anterioare de aici, 141.000 și 221.000 euro, erau mult prea mari — un operator județean român nu cumpără autocare de clasa aceea. Anexa 6 la documentația de negociere a Consiliului Județean Constanța, Grupa 03, 2025, estimare pe elementele de cheltuieli din Anexa 2 la Ordinul ANRSC 272/2007."
     }
   },
   "limitations": [
@@ -146,6 +165,14 @@
     {
       "id": "diesel-si-atat",
       "text": "Doar motorină. Autobuzele electrice schimbă complet raportul dintre investiție și funcționare, iar finanțarea PNRR pentru ele nu apare aici.",
+      "severity": "material",
+      "affects": [
+        "cost"
+      ]
+    },
+    {
+      "id": "linii-de-cost-lipsa",
+      "text": "Documentația Constanța enumeră poziții pe care modelul nu le are deloc: inspecția tehnică la șase luni, licența comunitară, asigurarea de bagaje și persoane, impozitul pe terenul de parcare, și alte cheltuieli materiale neprevăzute. Rovinieta a fost adăugată; restul lipsesc și trag costul în jos.",
       "severity": "material",
       "affects": [
         "cost"

@@ -106,7 +106,9 @@ def load_prices(path: Path = COST_INPUTS) -> Prices:
     return Prices(
         per_bus_hour=per_bus_hour,
         per_bus_km_by_class=per_km,
-        per_vehicle_year=item["insurancePerVehicleYear"] + item["depotPerVehicleYear"],
+        per_vehicle_year=item["insurancePerVehicleYear"]
+        + item["depotPerVehicleYear"]
+        + item["roadTaxPerVehicleYear"],
         admin_share=item["adminOverheadShare"],
         vehicle_price={name: spec["priceRon"] for name, spec in vehicles.items()},
         vehicle_life_years=item["vehicleLifeYears"],
