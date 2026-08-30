@@ -40,6 +40,12 @@ RAIL_COST_INPUTS = ROOT / "data" / "rail-cost-inputs.json"
 # Same operating year as the road model, so the two can be added.
 WEEKDAYS_PER_YEAR: Final[int] = 250
 
+# Trains per weekday on a reference regional service. Lives here rather than in a build script
+# because two consumers need it: the cost model prices this many trains, and the access model
+# derives from it the headway a passenger waits. Two copies would let the service that is priced
+# drift away from the service that is timetabled, with nothing to say so.
+REFERENCE_TRAINS_PER_WEEKDAY: Final[int] = 20
+
 # CFR's own line bands, from Anexa 25.a art. 6, keyed by the upper bound of the speed regime.
 # Bands rather than a curve because that is how the tariff is actually written: a line at
 # 91 km/h and one at 120 pay the same access charge.

@@ -16,7 +16,7 @@
     "summary": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["uats", "people", "trunkHeadwayMin", "waitUncoordinatedMin", "waitPulsedMin", "medianUncoordinatedMin", "medianPulsedMin", "within"],
+      "required": ["uats", "people", "trunkHeadwayMin", "waitUncoordinatedMin", "waitPulsedMin", "medianUncoordinatedMin", "medianPulsedMin", "within", "rail"],
       "properties": {
         "uats": { "type": "integer", "minimum": 1 },
         "people": { "type": "integer", "minimum": 1 },
@@ -36,6 +36,37 @@
               "pulsedPct": { "type": "number", "minimum": 0, "maximum": 100 }
             }
           }
+        },
+        "rail": {
+          "description": "Kept out of the bus figures rather than blended into them. Rail reaches few places and transforms the ones it reaches; one merged median would report a four-minute improvement and describe neither half of that.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["headwayMin", "waitUncoordinatedMin", "commercialKmh", "uatsWithOption", "uatsFasterByRail", "peopleFasterByRail", "medianBestUncoordinatedMin", "medianBestPulsedMin", "withinBest"],
+          "properties": {
+            "headwayMin": { "type": "number", "exclusiveMinimum": 0 },
+            "waitUncoordinatedMin": { "type": "number", "minimum": 0 },
+            "commercialKmh": { "type": "number", "exclusiveMinimum": 0 },
+            "uatsWithOption": {
+              "description": "Both ends walkable. The ceiling on what rail can do at all here.",
+              "type": "integer", "minimum": 0
+            },
+            "uatsFasterByRail": { "type": "integer", "minimum": 0 },
+            "peopleFasterByRail": { "type": "integer", "minimum": 0 },
+            "medianBestUncoordinatedMin": { "type": "number", "minimum": 0 },
+            "medianBestPulsedMin": { "type": "number", "minimum": 0 },
+            "withinBest": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["uncoordinatedPct", "pulsedPct"],
+                "properties": {
+                  "uncoordinatedPct": { "type": "number", "minimum": 0, "maximum": 100 },
+                  "pulsedPct": { "type": "number", "minimum": 0, "maximum": 100 }
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -45,7 +76,7 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["siruta", "name", "county", "population", "feederMin", "trunkMin", "uncoordinatedMin", "pulsedMin"],
+        "required": ["siruta", "name", "county", "population", "feederMin", "trunkMin", "uncoordinatedMin", "pulsedMin", "railUncoordinatedMin", "railPulsedMin", "bestUncoordinatedMin", "bestPulsedMin", "mode"],
         "properties": {
           "siruta": { "type": "string", "minLength": 1 },
           "name": { "type": "string", "minLength": 1 },
@@ -54,7 +85,18 @@
           "feederMin": { "type": "number", "minimum": 0 },
           "trunkMin": { "type": "number", "minimum": 0 },
           "uncoordinatedMin": { "type": "number", "minimum": 0 },
-          "pulsedMin": { "type": "number", "minimum": 0 }
+          "pulsedMin": { "type": "number", "minimum": 0 },
+          "railUncoordinatedMin": {
+            "description": "null where no train is on offer — the station is too far at one end or the other. Required as a key so the absence is stated rather than inferred from a missing field.",
+            "type": ["number", "null"], "minimum": 0
+          },
+          "railPulsedMin": { "type": ["number", "null"], "minimum": 0 },
+          "bestUncoordinatedMin": { "type": "number", "minimum": 0 },
+          "bestPulsedMin": { "type": "number", "minimum": 0 },
+          "mode": {
+            "description": "Which mode actually wins for this UAT under a pulse. The mode choice is an output of comparing two journeys, never an assumption about who rides what.",
+            "enum": ["bus", "rail"]
+          }
         }
       }
     },

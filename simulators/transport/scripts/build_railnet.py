@@ -204,6 +204,60 @@ def write_geometry(lines, stations) -> None:
         print(f"  wrote {name}  {size:.1f} MB")
 
 
+def write_uat_rail_access(seats, county_seats, station_tree, station_node, from_seat_m) -> None:
+    """Per UAT: its nearest station, and the rail distance from there to its county seat.
+
+    This is what lets `build_access` offer rail as an alternative to the bus trunk rather than
+    leaving the two models side by side. It publishes **distance and access, not a journey** —
+    the decision about which mode wins belongs where the waiting and the transfer are modelled,
+    not here.
+
+    **A UAT's station is not its own.** The nearest station may be in the next commune, so
+    `stationKm` is the road-less straight-line gap a passenger must still cross somehow. It is
+    published rather than absorbed, because absorbing it would quietly claim that every village
+    with a railway two ridges away is served by it.
+    """
+    import pandas as pd
+
+    seat_xy = np.column_stack([seats.geometry.x, seats.geometry.y])
+    gap_m, nearest = station_tree.query(seat_xy)
+    node = station_node[nearest]
+
+    row_of_county = {code: index for index, code in enumerate(county_seats["county_code"])}
+    # The walk at the far end. A passenger does not arrive at the county seat, they arrive at
+    # its station, and for five of the forty-two that is over two kilometres away. Recorded here
+    # where the county seat is known, rather than re-derived downstream from a different rule.
+    index_of_siruta = {int(s): i for i, s in enumerate(seats["siruta"])}
+    seat_gap_km = {
+        code: round(float(gap_m[index_of_siruta[int(row_siruta)]]) / 1000, 3)
+        for code, row_siruta in zip(
+            county_seats["county_code"], county_seats["siruta"], strict=True
+        )
+    }
+
+    rows = []
+    for index, county in enumerate(seats["county_code"]):
+        row = row_of_county.get(county)
+        metres = float(from_seat_m[row, node[index]]) if row is not None else np.inf
+        rows.append(
+            {
+                "siruta": int(seats["siruta"].iloc[index]),
+                "county_code": county,
+                "station_km": round(float(gap_m[index]) / 1000, 3),
+                "seat_station_km": seat_gap_km.get(county),
+                "rail_km": round(metres / 1000, 3) if np.isfinite(metres) else None,
+            }
+        )
+
+    frame = pd.DataFrame(rows)
+    frame.to_parquet(OUT_DIR / "rail_access.parquet", index=False)
+    served = frame["rail_km"].notna() & (frame["station_km"] <= STATION_WALK_KM)
+    print(
+        f"  rail access: {int(served.sum()):,}/{len(frame):,} UATs have a station within "
+        f"{STATION_WALK_KM} km and a rail path to their seat"
+    )
+
+
 def build_graph(lines):
     """Weld line endpoints into a graph whose edge weight is metres.
 
@@ -304,7 +358,12 @@ def main(argv: list[str] | None = None) -> int:
     # the distance from a county seat to every anonymous vertex of track in Romania, which is a
     # number with no meaning. It read as a plausible 560 minutes, which is how that mistake
     # survives if nobody takes the submatrix.
-    rail_m = dijkstra(graph, directed=False, indices=sources)[:, sources]
+    # Kept whole as well as sliced. The full matrix is 42 rows over every vertex of track in
+    # the country, and it is what lets any UAT — not only a county seat — be priced for rail:
+    # find its nearest station, look up that station's node in its own county's row. Computing
+    # it separately per UAT would be 3.186 searches for information already in hand.
+    from_seat_m = dijkstra(graph, directed=False, indices=sources)
+    rail_m = from_seat_m[:, sources]
     pair = ~np.eye(len(sources), dtype=bool)
     reachable = np.isfinite(rail_m) & pair
 
@@ -331,6 +390,7 @@ def main(argv: list[str] | None = None) -> int:
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     write_geometry(lines, stations)
+    write_uat_rail_access(seats, county_seats, station_tree, station_node, from_seat_m)
     document = {
         "$schema": "../schema/railnet.schema.json",
         "id": "railnet",

@@ -19,6 +19,7 @@ from pathlib import Path
 
 from scripts.rail_costs import (
     RAIL_COST_INPUTS,
+    REFERENCE_TRAINS_PER_WEEKDAY,
     annual_rail_cost,
     cost_per_passenger_hour_saved,
     line_class,
@@ -33,7 +34,6 @@ ACCESS = ROOT / "data" / "access.json"
 # A representative regional line and service. Not a real corridor — a unit of comparison, so
 # the per-passenger-hour figure is not hostage to which line anyone picked.
 REFERENCE_LINE_KM = 100.0
-REFERENCE_TRAINS_PER_WEEKDAY = 20
 
 # Seats occupied on an average regional working. Assumed, and the single most influential
 # number here: halve it and the cost per passenger-hour doubles.

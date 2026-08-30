@@ -24,6 +24,7 @@ from __future__ import annotations
 import argparse
 import collections
 import json
+import math
 import sys
 from pathlib import Path
 from typing import Final
@@ -37,11 +38,99 @@ OUT = ROOT / "data" / "access.json"
 sys.path.insert(0, str(ADMINISTRATIV))
 
 from scripts.county_times import county_times  # noqa: E402
+from scripts.rail_costs import REFERENCE_TRAINS_PER_WEEKDAY  # noqa: E402
+from scripts.rail_speeds import class_commercial_kmh  # noqa: E402
 from scripts.tiers import DAY_PROFILE, service_for  # noqa: E402
 
 # Minutes a trunk bus stands at the interchange for its feeders to arrive. Under a pulse this
 # is the whole wait; the passenger steps off one bus and onto another.
 PULSE_DWELL_MIN: Final[float] = 5.0
+
+# --- the rail alternative -------------------------------------------------------------------
+#
+# A UAT is offered a train only when it has a station **within walking distance**. That is not
+# timidity, it is the one honest reading of the data available: `station_km` from the rail build
+# is a straight line, and turning a straight line into a bus leg would be precisely the
+# geometry-as-road-time error the rail speed model was written to avoid. A walk over a short
+# straight line with a detour factor is defensible; a bus over a long one is not.
+#
+# The consequence is the finding rather than a limitation of it: most Romanian communes do not
+# get a train, because the track does not pass close enough, and the model says so instead of
+# inventing a shuttle to the halt.
+WALK_KMH: Final[float] = 4.5
+
+# Straight line to street distance for a short walk. Streets are not crow-flies.
+WALK_DETOUR: Final[float] = 1.3
+
+# Beyond this a station does not serve a settlement on foot. Kept in step with
+# build_railnet.STATION_WALK_KM; repeated rather than imported so this module needs no geo stack.
+STATION_WALK_KM: Final[float] = 2.0
+
+
+def load_rail_access(path: Path | None = None) -> dict[str, dict]:
+    """Per-UAT rail access from the rail build, or empty if it has not been run.
+
+    Empty rather than fatal on purpose: setting the rail layer aside must yield exactly the
+    bus-only simulator, which is the property the design document asked for and the only way to
+    tell what rail actually changes.
+    """
+    source = path or (ROOT / "data" / "rail_access.parquet")
+    if not source.exists():
+        return {}
+    import pandas as pd
+
+    frame = pd.read_parquet(source)
+    return {
+        str(row.siruta): {
+            "station_km": row.station_km,
+            "seat_station_km": row.seat_station_km,
+            "rail_km": row.rail_km,
+        }
+        for row in frame.itertuples()
+    }
+
+
+def rail_journey_min(entry: dict, rail_kmh: float, wait: float) -> float | None:
+    """Walk, train, walk. None when the train is not a real option for this UAT.
+
+    Both ends must be walkable. A commune whose station is five kilometres off is not served by
+    the railway that passes it, and neither is one whose county seat's station is — the second
+    condition removes the whole county at a stroke, which is the correct and slightly brutal
+    answer for the five county seats whose station sits outside the town.
+    """
+    if not entry:
+        return None
+    station_km, seat_km, rail_km = (
+        entry.get("station_km"),
+        entry.get("seat_station_km"),
+        entry.get("rail_km"),
+    )
+    # `is None` is not enough. A None written into a float column comes back from parquet as
+    # NaN, and every comparison against NaN is False — so an unreachable UAT sailed through
+    # both the None check and the distance check and produced a NaN journey time, which then
+    # won a min() against a real number. Same trap as the untagged OSM way in build_railnet.
+    values = (station_km, seat_km, rail_km)
+    if any(v is None or not math.isfinite(v) for v in values):
+        return None
+    if station_km > STATION_WALK_KM or seat_km > STATION_WALK_KM:
+        return None
+    return walk_min(station_km) + wait + rail_km / rail_kmh * 60 + walk_min(seat_km)
+
+
+def walk_min(straight_km: float) -> float:
+    """Minutes on foot to cover a straight-line gap, allowing for streets."""
+    return straight_km * WALK_DETOUR / WALK_KMH * 60
+
+
+def train_headway_min(trains_per_weekday: int, service_hours: float) -> float:
+    """Minutes between trains, from a daily count over the operating day.
+
+    Trains are rarer than buses, so the uncoordinated wait is the larger part of what rail
+    costs a passenger — and correspondingly the pulse is worth more on rail than on the road.
+    """
+    if trains_per_weekday <= 0 or service_hours <= 0:
+        raise ValueError("trains per weekday and service hours must both be positive")
+    return service_hours * 60 / trains_per_weekday
 
 
 def wait_uncoordinated(headway_min: float) -> float:
@@ -113,6 +202,16 @@ def main(argv: list[str] | None = None) -> int:
 
     headway = trunk_headway_min()
     waits = {"uncoordinated": wait_uncoordinated(headway), "pulsed": PULSE_DWELL_MIN}
+    rail = load_rail_access()
+    # A regional train runs far less often than a feeder bus, so the uncoordinated wait is the
+    # larger part of what rail costs a passenger — and the pulse is worth correspondingly more
+    # on rail than on the road. Same reference service the rail cost model prices.
+    rail_kmh = class_commercial_kmh("as_is")
+    rail_headway = train_headway_min(REFERENCE_TRAINS_PER_WEEKDAY, sum(DAY_PROFILE.values()))
+    rail_waits = {
+        "uncoordinated": wait_uncoordinated(rail_headway),
+        "pulsed": PULSE_DWELL_MIN,
+    }
 
     rows: list[dict] = []
     for centre, group in members.items():
@@ -128,6 +227,19 @@ def main(argv: list[str] | None = None) -> int:
             if trunk is None:
                 continue
             wait = 0.0 if uat == centre and trunk == 0.0 else None
+            bus_unco = feeder + (0.0 if wait == 0.0 else waits["uncoordinated"]) + trunk
+            bus_pulsed = feeder + (0.0 if wait == 0.0 else waits["pulsed"]) + trunk
+
+            # The train is offered as an alternative to the whole bus journey, not as a leg
+            # bolted onto it: a passenger who can walk to a station does not ride the feeder to
+            # the centre first. Whichever is faster wins, which is the mode choice falling out
+            # of the comparison rather than being asserted.
+            entry = rail.get(uat, {})
+            rail_unco = rail_journey_min(entry, rail_kmh, rail_waits["uncoordinated"])
+            rail_pulsed = rail_journey_min(entry, rail_kmh, rail_waits["pulsed"])
+
+            best_unco = min(x for x in (bus_unco, rail_unco) if x is not None)
+            best_pulsed = min(x for x in (bus_pulsed, rail_pulsed) if x is not None)
             rows.append(
                 {
                     "siruta": uat,
@@ -136,12 +248,15 @@ def main(argv: list[str] | None = None) -> int:
                     "population": int(population[uat]),
                     "feederMin": round(feeder, 1),
                     "trunkMin": round(trunk, 1),
-                    "uncoordinatedMin": round(
-                        feeder + (0.0 if wait == 0.0 else waits["uncoordinated"]) + trunk, 1
-                    ),
-                    "pulsedMin": round(
-                        feeder + (0.0 if wait == 0.0 else waits["pulsed"]) + trunk, 1
-                    ),
+                    "uncoordinatedMin": round(bus_unco, 1),
+                    "pulsedMin": round(bus_pulsed, 1),
+                    "railUncoordinatedMin": None if rail_unco is None else round(rail_unco, 1),
+                    "railPulsedMin": None if rail_pulsed is None else round(rail_pulsed, 1),
+                    "bestUncoordinatedMin": round(best_unco, 1),
+                    "bestPulsedMin": round(best_pulsed, 1),
+                    "mode": "rail"
+                    if rail_pulsed is not None and rail_pulsed < bus_pulsed
+                    else "bus",
                 }
             )
 
@@ -174,6 +289,27 @@ def main(argv: list[str] | None = None) -> int:
             }
             for m in (60, 90, 120)
         },
+        # Rail reported separately from the bus figures above rather than folded into them.
+        # Folding would hide the shape of the result, which is the result: rail reaches few
+        # places and transforms the ones it reaches. A single blended median would show a
+        # four-minute improvement and say nothing about either half of that.
+        "rail": {
+            "headwayMin": round(rail_headway, 1),
+            "waitUncoordinatedMin": round(rail_waits["uncoordinated"], 1),
+            "commercialKmh": round(rail_kmh, 1),
+            "uatsWithOption": sum(1 for r in rows if r["railPulsedMin"] is not None),
+            "uatsFasterByRail": sum(1 for r in rows if r["mode"] == "rail"),
+            "peopleFasterByRail": sum(r["population"] for r in rows if r["mode"] == "rail"),
+            "medianBestUncoordinatedMin": weighted_median("bestUncoordinatedMin"),
+            "medianBestPulsedMin": weighted_median("bestPulsedMin"),
+            "withinBest": {
+                str(m): {
+                    "uncoordinatedPct": share_within("bestUncoordinatedMin", m),
+                    "pulsedPct": share_within("bestPulsedMin", m),
+                }
+                for m in (60, 90, 120)
+            },
+        },
     }
 
     document = {
@@ -199,6 +335,34 @@ def main(argv: list[str] | None = None) -> int:
         "summary": summary,
         "uats": sorted(rows, key=lambda r: r["siruta"]),
         "limitations": [
+            {
+                "id": "trenul-doar-pe-jos",
+                "text": (
+                    "Trenul este oferit unui UAT numai dacă are stație la mai puțin de 2 km, la "
+                    "ambele capete ale călătoriei. Motivul este că distanța până la stație se "
+                    "cunoaște doar în linie dreaptă, iar transformarea unei linii drepte lungi "
+                    "într-un traseu cu autobuzul ar fi exact eroarea pe care modelul feroviar a "
+                    "fost scris să o evite. Consecința este că o comună cu gara la 5 km apare "
+                    "aici ca neservită de calea ferată care trece prin ea. Un serviciu de "
+                    "rabatere până la haltă ar schimba rezultatul și nu poate fi evaluat fără "
+                    "timpi rutieri până la stații."
+                ),
+                "severity": "material",
+                "affects": ["access"],
+            },
+            {
+                "id": "trenul-nu-schimba-costul",
+                "text": (
+                    "Timpii de călătorie folosesc trenul acolo unde este mai rapid, dar costul "
+                    "rețelei din data/cost.json rămâne calculat pe toate traseele de autobuz. "
+                    "Nimic nu a fost scos din rețeaua rutieră pentru cele 247 de UAT-uri care "
+                    "merg mai repede cu trenul, deci acesta este un câștig de timp fără economia "
+                    "care l-ar putea însoți — sau, invers, fără costul serviciului feroviar "
+                    "suplimentar care l-ar produce."
+                ),
+                "severity": "blocking",
+                "affects": ["access", "cost"],
+            },
             {
                 "id": "asteptarea-nu-e-masurata",
                 "text": (
@@ -233,6 +397,15 @@ def main(argv: list[str] | None = None) -> int:
     print("\nmedian journey to the county seat:")
     print(f"  uncoordinated {s['medianUncoordinatedMin']:>6.1f} min")
     print(f"  pulsed        {s['medianPulsedMin']:>6.1f} min")
+    r = s["rail"]
+    print(
+        f"\nrail at {r['commercialKmh']:.0f} km/h, {r['headwayMin']:.0f} min headway:\n"
+        f"  {r['uatsWithOption']:,} UATs can walk to a station at both ends\n"
+        f"  {r['uatsFasterByRail']:,} of them are faster by train "
+        f"({r['peopleFasterByRail']:,} people)\n"
+        f"  median with rail  {r['medianBestPulsedMin']:>6.1f} min pulsed "
+        f"(bus only {s['medianPulsedMin']:.1f})"
+    )
     print("\nshare of population within:")
     for m, v in s["within"].items():
         print(
