@@ -1,0 +1,202 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/danemarca.schema.json",
+  "title": "The Danish comparison, and whether the paper's conclusion follows from it",
+  "description": "Chapter 5.1 concludes that Romania has three times more courts than its population and caseload would require, and the whole judicial-map proposal rests on that sentence. The chapter also supplies its own premises: 24 Danish district courts, 2 appellate, 1 supreme. This document holds those counts beside Eurostat populations and the CSM's court register so the conclusion can be checked against the premises it is drawn from. Two limits are structural and carried as blocking: the Danish figures are the paper's own and could not be corroborated from any reachable source, and only the population half of the paper's two-part criterion could be computed at all.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "period",
+    "provenance",
+    "population",
+    "denmark",
+    "romania",
+    "paperRomania",
+    "paperClaim",
+    "firstInstance",
+    "appellate",
+    "pay",
+    "selfCount",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "const": "danemarca-comparatie" },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "period": { "type": "string" },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+
+    "population": {
+      "description": "Eurostat population on 1 January, the same year for both countries — a density built from two different years would be a comparison of nothing.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["romania", "denmark", "year", "provenance"],
+      "properties": {
+        "romania": { "type": "integer", "exclusiveMinimum": 0 },
+        "denmark": { "type": "integer", "exclusiveMinimum": 0 },
+        "year": { "type": "integer", "minimum": 2015 },
+        "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" }
+      }
+    },
+
+    "denmark": {
+      "description": "The Danish court structure as the paper states it. Quoted, not verified.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["firstInstance", "appellate", "supreme", "provenance"],
+      "properties": {
+        "firstInstance": { "type": "integer", "exclusiveMinimum": 0 },
+        "appellate": { "type": "integer", "exclusiveMinimum": 0 },
+        "supreme": { "type": "integer", "exclusiveMinimum": 0 },
+        "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" }
+      }
+    },
+
+    "romania": {
+      "description": "The Romanian court structure as the CSM register has it, counted here.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["firstInstance", "tribunals", "tribunalSites", "appellate", "supreme", "provenance"],
+      "properties": {
+        "firstInstance": { "type": "integer", "exclusiveMinimum": 0 },
+        "tribunals": { "type": "integer", "exclusiveMinimum": 0 },
+        "tribunalSites": { "type": "integer", "exclusiveMinimum": 0 },
+        "appellate": { "type": "integer", "exclusiveMinimum": 0 },
+        "supreme": { "type": "integer", "minimum": 0 },
+        "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" }
+      }
+    },
+
+    "paperRomania": {
+      "description": "What the paper says Romania has, in the paragraph it compares from — kept separate from what the register says, because they differ.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["firstInstanceText", "firstInstance", "tribunals", "appellate", "provenance"],
+      "properties": {
+        "firstInstanceText": { "type": "string" },
+        "firstInstance": { "type": "integer", "exclusiveMinimum": 0 },
+        "tribunals": { "type": "integer", "exclusiveMinimum": 0 },
+        "appellate": { "type": "integer", "exclusiveMinimum": 0 },
+        "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" }
+      }
+    },
+
+    "paperClaim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text", "multiple", "provenance"],
+      "properties": {
+        "text": { "type": "string" },
+        "multiple": { "type": "number", "exclusiveMinimum": 0 },
+        "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" }
+      }
+    },
+
+    "firstInstance": {
+      "description": "The tier the paper's claim is about. `actualOverImplied` is the multiple its 'de trei ori' has to be read against; `proposedOverImplied` below 1 means the proposal is sparser than the model it cites, not converging on it.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "denmarkCourts",
+        "denmarkPeoplePerCourt",
+        "romaniaCourts",
+        "romaniaPeoplePerCourt",
+        "impliedAtDanishDensity",
+        "actualOverImplied",
+        "paperSaysMultiple",
+        "proposedCourts",
+        "proposedOverImplied",
+        "proposedPeoplePerCourt"
+      ],
+      "properties": {
+        "denmarkCourts": { "type": "integer", "exclusiveMinimum": 0 },
+        "denmarkPeoplePerCourt": { "type": "number", "exclusiveMinimum": 0 },
+        "romaniaCourts": { "type": "integer", "exclusiveMinimum": 0 },
+        "romaniaPeoplePerCourt": { "type": "number", "exclusiveMinimum": 0 },
+        "impliedAtDanishDensity": { "type": "number", "exclusiveMinimum": 0 },
+        "actualOverImplied": { "type": "number", "exclusiveMinimum": 0 },
+        "paperSaysMultiple": { "type": "number", "exclusiveMinimum": 0 },
+        "proposedCourts": { "type": "integer", "exclusiveMinimum": 0 },
+        "proposedOverImplied": { "type": "number", "exclusiveMinimum": 0 },
+        "proposedPeoplePerCourt": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+
+    "appellate": {
+      "description": "The same arithmetic one tier up, with the repository's eight-region variant beside the paper's fifteen.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "denmarkCourts",
+        "denmarkPeoplePerCourt",
+        "romaniaCourts",
+        "romaniaPeoplePerCourt",
+        "impliedAtDanishDensity",
+        "actualOverImplied",
+        "regionVariantCourts",
+        "regionVariantOverImplied"
+      ],
+      "properties": {
+        "denmarkCourts": { "type": "integer", "exclusiveMinimum": 0 },
+        "denmarkPeoplePerCourt": { "type": "number", "exclusiveMinimum": 0 },
+        "romaniaCourts": { "type": "integer", "exclusiveMinimum": 0 },
+        "romaniaPeoplePerCourt": { "type": "number", "exclusiveMinimum": 0 },
+        "impliedAtDanishDensity": { "type": "number", "exclusiveMinimum": 0 },
+        "actualOverImplied": { "type": "number", "exclusiveMinimum": 0 },
+        "regionVariantCourts": { "type": "integer", "exclusiveMinimum": 0 },
+        "regionVariantOverImplied": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+
+    "pay": {
+      "description": "Chapter 5.3: Denmark pays a fixed salary and no sporuri. This is how far Romania is from that, measured on budget execution rather than on the pay law.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["denmarkHasSporuri", "romaniaNarrowShare", "romaniaWideShare", "provenance"],
+      "properties": {
+        "denmarkHasSporuri": { "type": "boolean" },
+        "romaniaNarrowShare": { "type": "number", "minimum": 0 },
+        "romaniaWideShare": { "type": "number", "minimum": 0 },
+        "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" }
+      }
+    },
+
+    "selfCount": {
+      "description": "The paper's own Romanian figures against the register's. A comparison is only as good as the side the author is supposed to know.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "paperFirstInstance",
+        "paperFirstInstanceText",
+        "actualFirstInstance",
+        "paperTribunals",
+        "actualTribunals",
+        "actualTribunalSites",
+        "paperAppellate",
+        "actualAppellate",
+        "appellateAgrees"
+      ],
+      "properties": {
+        "paperFirstInstance": { "type": "integer", "exclusiveMinimum": 0 },
+        "paperFirstInstanceText": { "type": "string" },
+        "actualFirstInstance": { "type": "integer", "exclusiveMinimum": 0 },
+        "paperTribunals": { "type": "integer", "exclusiveMinimum": 0 },
+        "actualTribunals": { "type": "integer", "exclusiveMinimum": 0 },
+        "actualTribunalSites": { "type": "integer", "exclusiveMinimum": 0 },
+        "paperAppellate": { "type": "integer", "exclusiveMinimum": 0 },
+        "actualAppellate": { "type": "integer", "exclusiveMinimum": 0 },
+        "appellateAgrees": { "type": "boolean" }
+      }
+    },
+
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+    }
+  }
+}
