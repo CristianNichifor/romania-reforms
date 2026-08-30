@@ -24,8 +24,8 @@ administrativ's `attributes.json`. The manifest publishes a checksum of the pair
 that, and the exporter refuses to run if a siruta in the road graph is unknown there.
 
 Output:
-    data/road-time.bin      uint16 a[], uint16 b[], float32 seconds[] — indices into
-                            administrativ's UAT order; NaN where impassable
+    data/road-time.bin      uint16 a[], uint16 b[], float32 seconds[], float32 metres[] —
+                            indices into administrativ's UAT order; NaN where impassable
     data/road-time.json     the manifest: count, layout, checksum of the pair order
 
 Usage:
@@ -120,6 +120,19 @@ def main(argv: list[str] | None = None) -> int:
             "different countries"
         )
 
+    # Metres as well as seconds. Journey times need only the clock, but costing needs
+    # kilometres — fuel, tyres and maintenance are per kilometre, not per minute — and the
+    # browser cannot recompute a fleet without them.
+    distance_path = PROCESSED / "road_distance.parquet"
+    if not distance_path.exists():
+        raise SystemExit(f"missing {distance_path} — run administrativ build_road_distance")
+    distances = pd.read_parquet(distance_path)
+    if (
+        distances["a_siruta"].astype(str).tolist() != a_time
+        or distances["b_siruta"].astype(str).tolist() != b_time
+    ):
+        raise SystemExit("road_distance and road_time disagree on edge order")
+
     a_index = np.array([index_of[s] for s in a_time], dtype=np.uint16)
     b_index = np.array([index_of[s] for s in b_time], dtype=np.uint16)
     # NOT filtered by adjacency's `traversable` flag. That column marks whether a road crosses
@@ -128,7 +141,10 @@ def main(argv: list[str] | None = None) -> int:
     # uses every finite time, so this must too — filtering here removed a third of the roads
     # and modelled a country nobody had built.
     seconds = times["road_s"].to_numpy(dtype=np.float32)
-    OUT_BIN.write_bytes(a_index.tobytes() + b_index.tobytes() + seconds.tobytes())
+    metres = distances["road_m"].to_numpy(dtype=np.float32)
+    OUT_BIN.write_bytes(
+        a_index.tobytes() + b_index.tobytes() + seconds.tobytes() + metres.tobytes()
+    )
 
     finite = np.isfinite(seconds)
     manifest = {
@@ -154,7 +170,10 @@ def main(argv: list[str] | None = None) -> int:
         "pairChecksum": pair_checksum(a_adj, b_adj),
         "unit": "seconds",
         "dtype": "float32",
-        "layout": "uint16 a[edgeCount], uint16 b[edgeCount], float32 seconds[edgeCount]",
+        "layout": (
+            "uint16 a[edgeCount], uint16 b[edgeCount], "
+            "float32 seconds[edgeCount], float32 metres[edgeCount]"
+        ),
         "impassableEdges": int((~finite).sum()),
         "medianSeconds": round(float(np.median(seconds[finite])), 1),
         "limitations": [

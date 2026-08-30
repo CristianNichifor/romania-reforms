@@ -36,6 +36,8 @@ export interface RoadTime {
   target: Uint16Array;
   /** Seconds to that neighbour, aligned with `target`. Impassable edges are omitted. */
   seconds: Float32Array;
+  /** Metres to that neighbour, aligned with `target`. Costing is per kilometre, not per minute. */
+  metres: Float32Array;
   /** Row start per UAT index; `start[i]`..`start[i+1]` are i's edges. */
   start: Uint32Array;
   edgeCount: number;
@@ -54,6 +56,9 @@ export interface Journey {
   feeder: number;
   /** Minutes from that centre to the county capital, or -1 with no road. */
   trunk: number;
+  /** Kilometres of that same trunk leg. Costing is per kilometre; without it the trunk tier
+   *  runs for free and the network reads about a sixth cheaper than it is. */
+  trunkKm: number;
   /** Centre UAT index. */
   centre: number;
   /** Both legs exist. */
@@ -89,6 +94,7 @@ function toRows(
   a: Uint16Array,
   b: Uint16Array,
   seconds: Float32Array,
+  metres: Float32Array,
   uatCount: number,
 ): RoadTime {
   const degree = new Uint32Array(uatCount + 1);
@@ -106,20 +112,24 @@ function toRows(
   const cursor = start.slice(0, uatCount);
   const target = new Uint16Array(kept * 2);
   const weight = new Float32Array(kept * 2);
+  const length = new Float32Array(kept * 2);
   for (let e = 0; e < seconds.length; e += 1) {
     const s = seconds[e];
     if (!Number.isFinite(s)) continue;
     target[cursor[a[e]]] = b[e];
     weight[cursor[a[e]]] = s;
+    length[cursor[a[e]]] = metres[e];
     cursor[a[e]] += 1;
     target[cursor[b[e]]] = a[e];
     weight[cursor[b[e]]] = s;
+    length[cursor[b[e]]] = metres[e];
     cursor[b[e]] += 1;
   }
 
   return {
     target,
     seconds: weight,
+    metres: length,
     start,
     edgeCount: kept,
     impassable: seconds.length - kept,
@@ -156,7 +166,7 @@ export function assemble(payload: Payload): Coupled {
   } as never);
 
   const n = roadMeta.edgeCount as number;
-  const expected = n * 2 + n * 2 + n * 4;
+  const expected = n * 2 + n * 2 + n * 4 + n * 4;
   if (roadBin.byteLength !== expected) {
     throw new Error(
       `road-time.bin is ${roadBin.byteLength} bytes, expected ${expected} for ${n} edges`,
@@ -164,7 +174,8 @@ export function assemble(payload: Payload): Coupled {
   }
   const a = new Uint16Array(roadBin, 0, n);
   const b = new Uint16Array(roadBin, n * 2, n);
-  const seconds = new Float32Array(roadBin.slice(n * 4));
+  const seconds = new Float32Array(roadBin.slice(n * 4, n * 8));
+  const metres = new Float32Array(roadBin.slice(n * 8));
 
   // The endpoints are indices into administrativ's UAT order. If that order ever changed
   // without this file being regenerated, every edge would join two different communes and the
@@ -184,7 +195,7 @@ export function assemble(payload: Payload): Coupled {
 
   return {
     data,
-    road: toRows(a, b, seconds, data.uatCount),
+    road: toRows(a, b, seconds, metres, data.uatCount),
     // The model's own defaults, imported rather than retyped. Justitie's first attempt copied
     // the thirteen values by hand, got the absorber threshold wrong, and produced 259 units
     // where the reference produces 249. There is no safe place to paraphrase the parameters.
@@ -350,10 +361,16 @@ export function buildNetwork(coupled: Coupled, params: Params, pins: Pin[] = [])
   // And one per county capital gives every centre its trunk time. A capital's own unit has no
   // trunk leg: the passenger is already there.
   const trunkOfCentre = new Map<number, number>();
+  const trunkKmOfCentre = new Map<number, number>();
   for (const [county, capital] of data.capitalOfCounty) {
-    const dist = shortestTimes(road, capital, uatCount, zoneOf);
+    // `tree` rather than `shortestTimes`: it carries metres along the same chosen path, and the
+    // trunk leg has to be paid for in kilometres as well as counted in minutes.
+    const t = tree(road, capital, uatCount, zoneOf);
     for (const centre of centres) {
-      if (data.countyOf[centre] === county) trunkOfCentre.set(centre, dist[centre]);
+      if (data.countyOf[centre] === county) {
+        trunkOfCentre.set(centre, t.distance[centre]);
+        trunkKmOfCentre.set(centre, t.metres[centre] / 1000);
+      }
     }
   }
 
@@ -366,9 +383,11 @@ export function buildNetwork(coupled: Coupled, params: Params, pins: Pin[] = [])
     const hasFeeder = Number.isFinite(feederS);
     const hasTrunk = Number.isFinite(trunkS);
     if (!hasFeeder) unroutable += 1;
+    const km = trunkKmOfCentre.get(centre) ?? Infinity;
     journeys.push({
       feeder: hasFeeder ? feederS / 60 : IMPASSABLE,
       trunk: hasTrunk ? trunkS / 60 : IMPASSABLE,
+      trunkKm: Number.isFinite(km) ? km : IMPASSABLE,
       centre,
       reachable: hasFeeder && hasTrunk,
     });
@@ -379,4 +398,156 @@ export function buildNetwork(coupled: Coupled, params: Params, pins: Pin[] = [])
   ).length;
 
   return { journeys, centres, unroutable, centresWithoutTrunk };
+}
+
+
+/** One route: a hub, the leaf it runs out to, and the communes it is responsible for. */
+export interface Route {
+  hub: number;
+  leaf: number;
+  /** Every UAT on the path, hub last. Each is a stop, and dwell is charged per stop. */
+  stops: number[];
+  /** The UATs this route is responsible for — a commune is served by exactly one. */
+  serves: number[];
+  oneWayMin: number;
+  oneWayKm: number;
+}
+
+interface Tree {
+  distance: Float64Array;
+  metres: Float64Array;
+  parent: Int32Array;
+  seen: Uint8Array;
+}
+
+/**
+ * Shortest-path tree from a hub, carrying metres along the chosen path.
+ *
+ * Distance decides the tree; metres are accumulated along it rather than minimised separately.
+ * Taking the shortest-metres path would describe a different route from the one the timetable
+ * runs, and the two would disagree about the same bus.
+ */
+function tree(road: RoadTime, hub: number, uatCount: number, zoneOf: Uint8Array): Tree {
+  const distance = new Float64Array(uatCount).fill(Infinity);
+  const metres = new Float64Array(uatCount).fill(Infinity);
+  const parent = new Int32Array(uatCount).fill(-1);
+  const seen = new Uint8Array(uatCount);
+  distance[hub] = 0;
+  metres[hub] = 0;
+  seen[hub] = 1;
+
+  const zone = zoneOf[hub];
+  const nodes: number[] = [hub];
+  const costs: number[] = [0];
+  const swap = (i: number, j: number) => {
+    [nodes[i], nodes[j]] = [nodes[j], nodes[i]];
+    [costs[i], costs[j]] = [costs[j], costs[i]];
+  };
+  const push = (node: number, cost: number) => {
+    nodes.push(node);
+    costs.push(cost);
+    let i = nodes.length - 1;
+    while (i > 0) {
+      const up = (i - 1) >> 1;
+      if (costs[up] <= costs[i]) break;
+      swap(up, i);
+      i = up;
+    }
+  };
+  const pop = () => {
+    const top = nodes[0];
+    swap(0, nodes.length - 1);
+    nodes.pop();
+    costs.pop();
+    let i = 0;
+    for (;;) {
+      const l = i * 2 + 1;
+      const r = l + 1;
+      let small = i;
+      if (l < nodes.length && costs[l] < costs[small]) small = l;
+      if (r < nodes.length && costs[r] < costs[small]) small = r;
+      if (small === i) break;
+      swap(small, i);
+      i = small;
+    }
+    return top;
+  };
+
+  const settled = new Uint8Array(uatCount);
+  while (nodes.length) {
+    const here = pop();
+    if (settled[here]) continue;
+    settled[here] = 1;
+    for (let e = road.start[here]; e < road.start[here + 1]; e += 1) {
+      const next = road.target[e];
+      if (zoneOf[next] !== zone) continue;
+      const through = distance[here] + road.seconds[e];
+      if (through < distance[next]) {
+        distance[next] = through;
+        metres[next] = metres[here] + road.metres[e];
+        parent[next] = here;
+        seen[next] = 1;
+        push(next, through);
+      }
+    }
+  }
+  return { distance, metres, parent, seen };
+}
+
+function chain(node: number, parent: Int32Array): number[] {
+  const out = [node];
+  for (;;) {
+    const up = parent[out[out.length - 1]];
+    if (up < 0) break;
+    out.push(up);
+  }
+  return out;
+}
+
+/**
+ * Routes out of one hub.
+ *
+ * Every leaf of the tree becomes a route stopping at each UAT down its branch. That alone
+ * collapses thousands of village-to-centre shuttles into hundreds of routes, because a village
+ * on the way to a further village is a stop rather than a service of its own.
+ *
+ * Leaves are taken largest-population first so the biggest place on a branch decides the
+ * vehicle, and `served` stops a commune being counted twice when branches overlap.
+ */
+export function routesForHub(
+  road: RoadTime,
+  hub: number,
+  members: number[],
+  uatCount: number,
+  zoneOf: Uint8Array,
+  population: Uint32Array,
+): Route[] {
+  const { distance, metres, parent, seen } = tree(road, hub, uatCount, zoneOf);
+  const reachable = members.filter((m) => m !== hub && seen[m] === 1);
+  if (!reachable.length) return [];
+
+  const ancestors = new Set<number>();
+  for (const m of reachable) for (const node of chain(m, parent).slice(1)) ancestors.add(node);
+
+  const leaves = reachable
+    .filter((m) => !ancestors.has(m))
+    .sort((a, b) => population[b] - population[a] || a - b);
+
+  const memberSet = new Set(members);
+  const served = new Set<number>();
+  const routes: Route[] = [];
+  for (const leaf of leaves) {
+    const stops = chain(leaf, parent);
+    const serves = stops.filter((s) => s !== hub && memberSet.has(s) && !served.has(s));
+    serves.forEach((s) => served.add(s));
+    routes.push({
+      hub,
+      leaf,
+      stops,
+      serves,
+      oneWayMin: distance[leaf] / 60,
+      oneWayKm: metres[leaf] / 1000,
+    });
+  }
+  return routes;
 }

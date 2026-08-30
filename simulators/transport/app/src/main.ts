@@ -9,6 +9,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 maplibregl.setWorkerUrl(workerUrl);
 import './style.css';
 import { buildNetwork, changedParams, loadCoupling, readScenario } from './consolidare';
+import { costNetwork, loadPrices } from './serviciu';
 import {
   BANDS,
   NO_DATA,
@@ -63,14 +64,18 @@ async function main() {
   // The consolidation is no longer chosen here. It is read from the URL — the same hash the
   // administrative simulator writes — and the whole network is recomputed from it. A reader
   // who moves those sliders is looking at a different country, and this map now follows.
-  const [summary, coupled] = await Promise.all([
+  const [summary, coupled, costInputs] = await Promise.all([
     fetch(asset('summary.json')).then((r) => r.json()),
     loadCoupling(base),
+    fetch(asset('cost-inputs.json')).then((r) => r.json()),
   ]);
 
   const { params, pins } = readScenario(location.hash);
   const moved = changedParams(params);
   const net = buildNetwork(coupled, params, pins);
+  // Buses, hours and lei for THIS network, not for the one the pipeline happened to publish.
+  const prices = loadPrices(costInputs);
+  const resources = costNetwork(coupled, net, prices);
 
   let scenario: Timetable = hash().get('s') === 'pulsed' ? 'pulsed' : 'uncoordinated';
 
@@ -228,7 +233,7 @@ async function main() {
         scenario === 'pulsed' ? a.waitPulsedMin : a.waitUncoordinatedMin,
       )}</dd>
       <dt>Centre</dt><dd>${fmt.format(net.centres.length)}</dd>
-      <dt>Fără traseu</dt><dd>${fmt.format(net.unroutable)}</dd>`;
+      <dt>Autobuze</dt><dd>${fmt.format(resources.fleetTotal)}</dd>`;
     // The map is per commune and the median is per person. Most communes are small and far,
     // so the typical polygon is redder than the median — saying so stops the map and the
     // number looking like they disagree.
@@ -237,14 +242,15 @@ async function main() {
         ? `Rabaterile sunt cronometrate să prindă trunchiul: se așteaptă ${min(a.waitPulsedMin)}. Aceleași autobuze, aceiași kilometri. Mediana este pe om, harta este pe comună — comunele mici și îndepărtate sunt multe, deci harta arată mai roșu decât mediana.`
         : `Fiecare traseu are orarul lui, deci așteptarea medie este jumătate din interval, ${min(a.waitUncoordinatedMin)}. Mediana este pe om, harta este pe comună.`;
 
-    // Cost is still the pipeline's, computed for the DEFAULT consolidation. Journeys follow
-    // the reader's scenario; money does not yet, because costing needs routes — with stops and
-    // kilometres — and the route generator is not ported. Saying so is the only honest option:
-    // a live map beside a frozen price reads as one number when it is two.
+    // Recomputed for the reader's network: routes generated from their centres, vehicles from
+    // the service standard, lei from the same price file the pipeline argues from.
     el('cost').innerHTML = `
-      <dt>Funcționare</dt><dd>${bn(summary.cost.annualRon.operating)}</dd>
-      <dt>Total pe an</dt><dd class="big">${bn(summary.cost.annualRon.total)}</dd>
-      <dt>Autobuze</dt><dd>${fmt.format(summary.cost.fleet.total)}</dd>`;
+      <dt>Trasee</dt><dd>${fmt.format(resources.routes)}</dd>
+      <dt>Ore de autobuz pe zi</dt><dd>${fmt.format(
+        Math.round(resources.busHoursPerWeekday),
+      )}</dd>
+      <dt>Funcționare</dt><dd>${bn(resources.cost.operatingRon)}</dd>
+      <dt>Total pe an</dt><dd class="big">${bn(resources.cost.totalRon)}</dd>`;
 
     // What scenario the reader is actually on, and how to change it. The page used to offer
     // five presets; consolidation belongs to the administrative simulator, and this now says

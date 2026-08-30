@@ -110,6 +110,7 @@ describe('routing', () => {
     const road = {
       target: new Uint16Array([1, 0]),
       seconds: new Float32Array([60, 60]),
+      metres: new Float32Array([1000, 1000]),
       start: new Uint32Array([0, 1, 2, 2]),
       edgeCount: 1,
       impassable: 0,
@@ -124,6 +125,7 @@ describe('routing', () => {
     const road = {
       target: new Uint16Array([1, 2, 0, 2, 0, 1]),
       seconds: new Float32Array([100, 30, 100, 30, 30, 30]),
+      metres: new Float32Array([9000, 2000, 9000, 2000, 2000, 2000]),
       start: new Uint32Array([0, 2, 4, 6]),
       edgeCount: 3,
       impassable: 0,

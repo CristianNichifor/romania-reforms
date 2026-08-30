@@ -49,7 +49,9 @@ const fares = JSON.parse(readFileSync(join(sim, 'data/fares.json'), 'utf8'));
 // and the whole point of the station geometry is that it does NOT line up with the settlements.
 // The road-time graph: both endpoints and the seconds for each of the 9.281 edges. This is
 // what lets the browser route a scenario nobody precomputed.
-for (const name of ['rail-lines.geojson', 'rail-stations.geojson', 'road-time.bin', 'road-time.json']) {
+// cost-inputs travels with them: the browser now prices the reader's own network, and the
+// prices must be the same file the pipeline argues from, not a copy of its numbers.
+for (const name of ['rail-lines.geojson', 'rail-stations.geojson', 'road-time.bin', 'road-time.json', 'cost-inputs.json']) {
   copyFileSync(join(sim, 'data', name), join(out, name));
 }
 
