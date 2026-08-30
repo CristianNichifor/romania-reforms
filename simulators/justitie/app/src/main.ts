@@ -96,6 +96,28 @@ interface Servicii {
   limitations: Limitation[];
 }
 
+interface CurtiApel {
+  variantOfPaper: true;
+  regions: {
+    region: string;
+    counties: string[];
+    seat: string;
+    absorbs: string[];
+    courtsToday: number;
+    volume: number;
+  }[];
+  summary: {
+    today: number;
+    variant: number;
+    absorbed: number;
+    meanMetresToNearestToday: number;
+    meanMetresToRegionSeat: number;
+    countiesTravellingFurther: number;
+    countiesCompared: number;
+  };
+  limitations: Limitation[];
+}
+
 interface Acoperire {
   counts: {
     simulat: number;
@@ -387,6 +409,7 @@ async function main(): Promise<void> {
     eficienta,
     parchete,
     acoperire,
+    curtiApel,
   ] = await Promise.all([
     fetch(`${base}data/instante.json`).then((r) => r.json() as Promise<Document>),
     fetch(`${base}data/counties.geojson`).then((r) => r.json()),
@@ -406,6 +429,7 @@ async function main(): Promise<void> {
     fetch(`${base}data/eficienta.json`).then((r) => r.json() as Promise<Eficienta>),
     fetch(`${base}data/parchete.json`).then((r) => r.json() as Promise<Parchete>),
     fetch(`${base}data/acoperire.json`).then((r) => r.json() as Promise<Acoperire>),
+    fetch(`${base}data/curti-apel.json`).then((r) => r.json() as Promise<CurtiApel>),
   ]);
   const countyName = (code: string): string => manifest.countyNames?.[code] ?? code;
 
@@ -532,6 +556,7 @@ async function main(): Promise<void> {
   // Held for the map: the catchment view repaints from these whenever the scenario moves.
   let couplingForMap: Coupled | null = null;
   let arondareForMap: Arondare | null = null;
+  let seatTown: Map<string, string> | null = null;
 
   /**
    * The access view, loaded only when asked for.
@@ -862,6 +887,13 @@ async function main(): Promise<void> {
       const court = state.court ?? -1;
       const seat = court >= 0 ? couplingForMap.meta.courts[court] : undefined;
       const attributes = couplingForMap.data.attributes;
+      // "Tribunalul ARGEŞ" names the court; a reader wants the town they would travel to,
+      // which is Piteşti. The seat's SIRUTA is in the court record, so look up its name once
+      // and cache the index — the alternative reads as a county, not a destination.
+      seatTown ??= new Map(attributes.siruta.map((code, i) => [code, attributes.name[i] ?? '']));
+      const town = seat
+        ? (seatTown.get(seat.siruta) ?? '').replace(/^(MUNICIPIUL|ORAȘ|ORAŞ)\s+/, '')
+        : '';
       const unitSeat = arondareForMap.units.find((u) =>
         u.seatIndex === index ? true : false,
       );
@@ -873,10 +905,8 @@ async function main(): Promise<void> {
          <p class="sub">${county}${unitSeat ? ' · sediu de unitate' : ''}</p>
          ${
            seat
-             ? `<div class="figure">se judecă la <strong>${seat.name.replace(
-                 /^Tribunalul /,
-                 '',
-               )}</strong> <span class="vs">(${seat.county})</span></div>
+             ? `<div class="figure">se judecă la <strong>${town || seat.name}</strong>
+                  <span class="vs">(${seat.county})</span></div>
                 <div class="figure">${
                   metres < 0
                     ? 'fără drum'
@@ -900,6 +930,10 @@ async function main(): Promise<void> {
     });
     map.on('mouseleave', 'courts', () => {
       map.getCanvas().style.cursor = '';
+      // In the catchment view the polygons own this panel. Resetting here overwrote a commune
+      // the reader was still pointing at with the hint for a court they had just left — and
+      // with the wrong noun besides, since that hint says "instanță".
+      if (mode === 'arondare') return;
       show(null);
     });
 
@@ -1133,9 +1167,7 @@ async function main(): Promise<void> {
       }
 
       if (mode === 'arondare') {
-        if (!el('#detail').dataset.arondare) {
-          el('#detail').innerHTML = '<p class="hint">Treci cu mouse-ul peste o comună.</p>';
-        }
+        el('#detail').innerHTML = '<p class="hint">Treci cu mouse-ul peste o comună.</p>';
         el('#summary').innerHTML = arondareForMap
           ? renderArondareSummary(arondareForMap)
           : '<div class="figure">Se încarcă modelul administrativ…</div>';
@@ -1244,6 +1276,39 @@ async function main(): Promise<void> {
     tag.title = `${chapterInfo.title} (p. ${chapterInfo.page}) — ${kind}`;
     host.insertBefore(tag, host.querySelector('.chev'));
   };
+
+  const ap = curtiApel.summary;
+  const apKm = (m: number): string => `${Math.round(m / 1000)} km`;
+  el('#apel-chev').textContent = `${ap.today} → ${ap.variant}`;
+  el('#apel-body').innerHTML =
+    `<p class="gap gap-buildable"><strong>Variantă, nu propunerea lucrării.</strong> Lucrarea
+       cere „~15 curți de apel regionale” — adică exact câte există. Varianta de aici le reduce
+       la ${ap.variant}, câte regiuni de dezvoltare are țara.</p>
+     <div class="pens-row">
+       <span class="pens-head">regiune</span>
+       <span class="pens-head">jud.</span>
+       <span class="pens-head">azi</span>
+       <span class="pens-head">sediu</span>
+       ${curtiApel.regions
+         .map(
+           (r) =>
+             `<span>${r.region}</span>
+              <span>${r.counties.length}</span>
+              <span class="${r.courtsToday > 1 ? 'pens-low' : ''}">${r.courtsToday}</span>
+              <span>${r.seat.replace('Curtea de Apel ', '')}</span>`,
+         )
+         .join('')}
+     </div>
+     <p class="disagree">Cele ${ap.today} de curți devin ${ap.variant}: ${ap.absorbed} sunt
+       absorbite de vecina cu cele mai multe dosare din regiune. Regiunile ies din geometria
+       granițelor publicate, nu dintr-un tabel scris de mână, și reproduc exact compoziția
+       Legii 315/2004.</p>
+     <p class="disagree">Prețul e drumul. De la reședința de județ la cea mai apropiată curte
+       de apel de azi sunt ${apKm(ap.meanMetresToNearestToday)} în medie; la sediul regional ar
+       fi ${apKm(ap.meanMetresToRegionSeat)} — mai mult decât dublu. ${
+         ap.countiesTravellingFurther
+       } din ${ap.countiesCompared} de județe ar avea de mers mai departe, niciunul mai
+       aproape. La apel drumul îl face de obicei avocatul, nu justițiabilul, dar el rămâne.</p>`;
 
   const PARCHET_LABEL: Record<string, string> = {
     piccj: 'PÎCCJ + DNA, DIICOT',
@@ -1738,6 +1803,7 @@ async function main(): Promise<void> {
     ...eficienta.limitations,
     ...parchete.limitations,
     ...acoperire.limitations,
+    ...curtiApel.limitations,
   ];
   const blocking = allLimits.filter((l) => l.severity === 'blocking');
   const rest = allLimits.filter((l) => l.severity !== 'blocking');

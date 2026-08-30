@@ -51,6 +51,8 @@ const sources = [
   [resolve(here, '../../data/parchete-2025.json'), 'parchete.json'],
   // The ledger: which chapters this page checks, quotes, or leaves alone.
   [resolve(here, '../../data/acoperire.json'), 'acoperire.json'],
+  // A variant, not the paper: eight appellate courts instead of the fifteen it proposes.
+  [resolve(here, '../../data/curti-apel-regiuni.json'), 'curti-apel.json'],
   [resolve(here, '../../data/court-distance.bin'), 'court-distance.bin'],
   // The administrative model's own payload, so the merge can be re-run here as the reader
   // moves the sliders. Copied rather than fetched across from the administrative site: 1,6 MB
