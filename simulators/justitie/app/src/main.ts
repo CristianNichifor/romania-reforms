@@ -528,7 +528,10 @@ async function main(): Promise<void> {
   });
   map.addControl(new NavigationControl({ showCompass: false }), 'top-right');
 
-  let mode: 'today' | 'proposed' | 'acces' = 'today';
+  let mode: 'today' | 'proposed' | 'acces' | 'arondare' = 'today';
+  // Held for the map: the catchment view repaints from these whenever the scenario moves.
+  let couplingForMap: Coupled | null = null;
+  let arondareForMap: Arondare | null = null;
 
   /**
    * The access view, loaded only when asked for.
@@ -538,14 +541,24 @@ async function main(): Promise<void> {
    * painted through feature state rather than by rebuilding the source: 3.184 shapes upload
    * once and only their colour changes afterwards.
    */
+  let shapesLoaded: Promise<void> | null = null;
+  const ensureShapes = (): Promise<void> => {
+    // Two views paint these polygons now, and the source may only be added once.
+    shapesLoaded ??= fetch(`${base}data/uats.geojson`)
+      .then((r) => r.json())
+      .then((shapes) => {
+        map.addSource('uats', { type: 'geojson', data: shapes });
+      });
+    return shapesLoaded;
+  };
+
   let accesLoaded: Promise<Acces> | null = null;
   const loadAcces = (): Promise<Acces> => {
     accesLoaded ??= (async () => {
-      const [figures, shapes] = await Promise.all([
+      const [figures] = await Promise.all([
         fetch(`${base}data/acces.json`).then((r) => r.json() as Promise<Acces>),
-        fetch(`${base}data/uats.geojson`).then((r) => r.json()),
+        ensureShapes(),
       ]);
-      map.addSource('uats', { type: 'geojson', data: shapes });
       map.addLayer(
         {
           id: 'acces-fill',
@@ -590,6 +603,88 @@ async function main(): Promise<void> {
     })();
     return accesLoaded;
   };
+  /**
+   * The judicial map as catchments: every commune painted by the court it would answer to.
+   *
+   * This is the view the administrative simulator has and this one lacked. There, colour means
+   * "these communes are one unit"; here it means "these communes are heard in one courthouse",
+   * which is the same idea one level up — a consolidated unit never straddles two colours,
+   * because units are assigned whole.
+   *
+   * Eight hues cycled by court index rather than 42 distinct colours: at 42 the eye stops
+   * reading them as categories, and neighbouring catchments almost never collide.
+   */
+  const CATCHMENT = [
+    '#4c78a8', '#72b7b2', '#54a24b', '#eeca3b',
+    '#e45756', '#b279a2', '#ff9da6', '#9d755d',
+  ];
+  let arondareLoaded: Promise<void> | null = null;
+  const loadArondare = (): Promise<void> => {
+    arondareLoaded ??= (async () => {
+      await ensureShapes();
+      const ready = await loadCoupling(base);
+      couplingForMap = ready;
+      map.addLayer(
+        {
+          id: 'arondare-fill',
+          type: 'fill',
+          source: 'uats',
+          layout: { visibility: 'none' },
+          paint: {
+            'fill-color': [
+              'case',
+              ['<', ['coalesce', ['feature-state', 'court'], -1], 0],
+              '#3a4149',
+              [
+                'match',
+                ['%', ['feature-state', 'court'], CATCHMENT.length],
+                ...CATCHMENT.flatMap((colour, i) => [i, colour]),
+                '#3a4149',
+              ],
+            ] as unknown as ExpressionSpecification,
+            'fill-opacity': 0.72,
+          },
+        },
+        'county-lines',
+      );
+      paintArondare();
+    })();
+    return arondareLoaded;
+  };
+
+  /** Repaint the catchments from the current scenario. Cheap: only feature state changes. */
+  function paintArondare(): void {
+    if (!couplingForMap) return;
+    const result = assign(couplingForMap, scenario.params, scenario.pins);
+    arondareForMap = result;
+    const { meta, distance } = couplingForMap;
+    for (let uat = 0; uat < result.courtOf.length; uat += 1) {
+      const court = result.courtOf[uat] ?? -1;
+      const raw = court < 0 ? meta.unreachable : distance[court * meta.columns + uat]!;
+      map.setFeatureState(
+        { source: 'uats', id: uat },
+        {
+          court,
+          metres: raw === meta.unreachable ? -1 : raw * meta.scaleMetres,
+        },
+      );
+    }
+  }
+
+  /** The catchment view's own figures: how many courts, and how far people would travel. */
+  const renderArondareSummary = (result: Arondare): string => {
+    const s = result.summary;
+    const km = (m: number): string => `${Math.round(m / 1000)} km`;
+    return (
+      `<div class="figure"><strong>${ro.format(s.units)}</strong> unități consolidate</div>` +
+      `<div class="figure"><strong>42</strong> instanțe de nivel 1</div>` +
+      `<div class="figure"><strong>${km(s.meanMetresNearest)}</strong> drum mediu, ponderat` +
+      ` <span class="vs">(de la ${km(s.meanMetresOwnCounty)} pe județ)</span></div>` +
+      `<div class="figure"><strong>${s.crossingCounty}</strong> unități arondate în alt județ` +
+      ` <span class="vs">(${ro.format(s.peopleCrossingCounty)} locuitori)</span></div>`
+    );
+  };
+
   const targetInput = el<HTMLInputElement>('#target');
   const courtsFor = (m: typeof mode) =>
     m === 'today' ? doc.courts : proposed(Number(targetInput.value));
@@ -707,6 +802,50 @@ async function main(): Promise<void> {
         </dl>`;
     };
 
+    // Hovering a commune in the catchment view: which unit it belongs to, which courthouse
+    // hears its cases, and how far that is by road. The distance is the one the assignment
+    // itself used, read back out of feature state rather than recomputed.
+    map.on('mousemove', 'arondare-fill', (e: MapMouseEvent & { features?: MapGeoJSONFeature[] }) => {
+      const feature = e.features?.[0];
+      if (!feature || !couplingForMap || !arondareForMap) return;
+      map.getCanvas().style.cursor = 'pointer';
+      const index = Number(feature.id);
+      const state = feature.state as { court?: number; metres?: number };
+      const court = state.court ?? -1;
+      const seat = court >= 0 ? couplingForMap.meta.courts[court] : undefined;
+      const attributes = couplingForMap.data.attributes;
+      const unitSeat = arondareForMap.units.find((u) =>
+        u.seatIndex === index ? true : false,
+      );
+      const name = attributes.name[index] ?? '';
+      const county = attributes.county[index] ?? '';
+      const metres = state.metres ?? -1;
+      el('#detail').innerHTML =
+        `<h2>${name}</h2>
+         <p class="sub">${county}${unitSeat ? ' · sediu de unitate' : ''}</p>
+         ${
+           seat
+             ? `<div class="figure">se judecă la <strong>${seat.name.replace(
+                 /^Tribunalul /,
+                 '',
+               )}</strong> <span class="vs">(${seat.county})</span></div>
+                <div class="figure">${
+                  metres < 0
+                    ? 'fără drum'
+                    : `<strong>${(metres / 1000).toFixed(1).replace('.', ',')} km</strong> pe drum`
+                }</div>
+                ${
+                  seat.county !== county
+                    ? '<p class="hint">Instanța e în alt județ — e cea mai apropiată.</p>'
+                    : ''
+                }`
+             : '<p class="hint">Niciun drum către o instanță.</p>'
+         }`;
+    });
+    map.on('mouseleave', 'arondare-fill', () => {
+      map.getCanvas().style.cursor = '';
+    });
+
     map.on('mousemove', 'courts', (e: MapMouseEvent & { features?: MapGeoJSONFeature[] }) => {
       map.getCanvas().style.cursor = 'pointer';
       show(e.features?.[0] ?? null);
@@ -720,6 +859,10 @@ async function main(): Promise<void> {
     const showAccesLayer = (visible: boolean): void => {
       if (!map.getLayer('acces-fill')) return;
       map.setLayoutProperty('acces-fill', 'visibility', visible ? 'visible' : 'none');
+    };
+    const showArondareLayer = (visible: boolean): void => {
+      if (!map.getLayer('arondare-fill')) return;
+      map.setLayoutProperty('arondare-fill', 'visibility', visible ? 'visible' : 'none');
     };
 
     /**
@@ -868,13 +1011,36 @@ async function main(): Promise<void> {
       el('#ceiling').hidden = mode !== 'acces';
       // The old diverging ramp describes a comparison this view does not make; the access
       // view brings its own stepped legend with the summary.
-      el('.ramp').hidden = mode === 'acces';
-      el('.ramp-ends').hidden = mode === 'acces';
+      const noRamp = mode === 'acces' || mode === 'arondare';
+      el('.ramp').hidden = noRamp;
+      el('.ramp-ends').hidden = noRamp;
+      // Its title too: a legend with no swatches under it reads as a broken legend.
+      el('#ramp-title').hidden = noRamp;
+      el('#size-note').hidden = mode === 'arondare';
+      el('#size-title').hidden = mode === 'arondare';
+      el('#catchment-title').hidden = mode !== 'arondare';
+      el('#catchment-note').hidden = mode !== 'arondare';
       showAccesLayer(mode === 'acces');
+      showArondareLayer(mode === 'arondare');
       el<HTMLOutputElement>('#target-value').textContent = ro.format(Number(targetInput.value));
 
       if (mode === 'acces') {
         void loadAcces().then(renderAcces);
+        return;
+      }
+
+      if (mode === 'arondare') {
+        if (!el('#detail').dataset.arondare) {
+          el('#detail').innerHTML = '<p class="hint">Treci cu mouse-ul peste o comună.</p>';
+        }
+        el('#summary').innerHTML = arondareForMap
+          ? renderArondareSummary(arondareForMap)
+          : '<div class="figure">Se încarcă modelul administrativ…</div>';
+        void loadArondare().then(() => {
+          if (mode !== 'arondare') return;
+          showArondareLayer(true);
+          if (arondareForMap) el('#summary').innerHTML = renderArondareSummary(arondareForMap);
+        });
         return;
       }
 
