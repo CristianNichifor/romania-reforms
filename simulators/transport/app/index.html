@@ -11,6 +11,10 @@
     <main>
       <div id="map" aria-label="Harta timpului de călătorie până la reședința de județ"></div>
       <aside id="panel">
+        <!-- Plain relative href, not computed from BASE_URL: it resolves to the landing page
+             in production and is harmless in dev, and being static means it still works if the
+             bundle fails to load — which is exactly when a reader most needs a way out. -->
+        <a class="up" href="../">← Toate simulatoarele</a>
         <h1>Până la reședința de județ</h1>
         <p class="lede">
           Cât ar dura, cu autobuzul, dacă fiecare din cele 3.186 de UAT-uri ar avea un orar

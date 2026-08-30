@@ -351,6 +351,9 @@ async function main() {
 
 main().catch((error) => {
   console.error(error);
+  // Keep the way out. Replacing the whole panel would delete the link back to the other
+  // simulators at the one moment a reader is stuck on a page that shows nothing.
   document.getElementById('panel')!.innerHTML =
+    '<a class="up" href="../">← Toate simulatoarele</a>' +
     '<h1>Nu s-au putut încărca datele</h1><p class="lede">Rulează <code>npm run build</code> în simulators/transport/app după ce ai generat datele.</p>';
 });
