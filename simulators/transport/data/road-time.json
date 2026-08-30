@@ -1,0 +1,29 @@
+{
+  "$schema": "../schema/road-time.schema.json",
+  "id": "road-time",
+  "title": "Timpii de parcurs pe muchiile grafului administrativ",
+  "publisher": "Cristian Nichifor",
+  "period": "2026",
+  "provenance": {
+    "source": "road_time-peste-adjacency",
+    "locator": "data/road_time.parquet, aliniat pozițional la simulators/administrativ/data/processed/adjacency.parquet",
+    "confidence": "derived",
+    "note": "Un float32 pe muchie, în secunde, în ORDINEA muchiilor din graful administrativ. Browserul rulează Dijkstra peste el, deci harta poate urmări orice scenariu de comasare, nu doar cele precalculate aici."
+  },
+  "edgeCount": 9281,
+  "pairChecksum": "0053f30e95b22287",
+  "unit": "seconds",
+  "dtype": "float32",
+  "impassableEdges": 46,
+  "medianSeconds": 957.1,
+  "limitations": [
+    {
+      "id": "timpii-sunt-pozitionali",
+      "text": "Fișierul nu conține perechile de UAT-uri, ci doar timpii, în ordinea muchiilor din graful administrativ. Este ieftin — 37 KB în loc de o matrice — dar înseamnă că o reconstrucție a adiacenței fără regenerarea acestui fișier ar asocia fiecărei muchii timpul altei muchii, fără ca ceva să pară greșit. De aceea manifestul publică o sumă de control a ordinii perechilor, iar consumatorul trebuie să o verifice.",
+      "severity": "material",
+      "affects": [
+        "road-time"
+      ]
+    }
+  ]
+}
