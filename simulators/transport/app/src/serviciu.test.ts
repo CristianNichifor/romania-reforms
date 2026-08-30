@@ -20,6 +20,7 @@ import {
   driversRequired,
   levelById,
   annualCost,
+  chooseTraction,
   classify,
   costNetwork,
   cycleSlack,
@@ -99,6 +100,14 @@ describe('cost arithmetic', () => {
     vehiclePrice: { basic: 100_000, trunk: 300_000 },
     vehicleLifeYears: 10,
     spareRatio: 0.15,
+    electricRangeKm: 180,
+    stopsPerKmForHybrid: 0.35,
+    priceRatio: { electric: 1.8, hybrid: 1.3, diesel: 1 },
+    perKmByTraction: {
+      electric: { basic: 1.5, trunk: 2 },
+      hybrid: { basic: 1.8, trunk: 3 },
+      diesel: { basic: 2, trunk: 4 },
+    },
     depotCapexPerBus: 745_500,
     depotLifeYears: 40,
     driverPaidHoursMonth: 165,
@@ -330,5 +339,64 @@ describe.skipIf(!ready)('capacity on the real network', () => {
     const perSeatKm = level('implicit').ronPerSeatKm;
     expect(perSeatKm).toBeGreaterThan(0.05);
     expect(perSeatKm).toBeLessThan(1);
+  });
+});
+
+
+describe('choosing traction from the route', () => {
+  const prices = {
+    electricRangeKm: 180,
+    stopsPerKmForHybrid: 0.35,
+  } as never as Parameters<typeof chooseTraction>[2];
+
+  it('takes electric where a battery can do the day', () => {
+    expect(chooseTraction(120, 0.1, prices)).toBe('electric');
+    expect(chooseTraction(180, 0.9, prices)).toBe('electric');
+  });
+
+  it('will not put a battery on a route it cannot finish', () => {
+    // The binding constraint, and it is binding whatever anyone would prefer: a vehicle that
+    // runs 300 km between depot visits is not battery-electric without charging en route.
+    expect(chooseTraction(300, 0.9, prices)).not.toBe('electric');
+  });
+
+  it('takes hybrid on a long route with dense stops, diesel without them', () => {
+    // Regenerative braking earns its premium only where there is braking to recover.
+    expect(chooseTraction(300, 0.9, prices)).toBe('hybrid');
+    expect(chooseTraction(300, 0.05, prices)).toBe('diesel');
+  });
+
+  it('uses the winter range, not the average one', () => {
+    // A public service runs in January too. 240 km derated for cold is the number that decides
+    // whether a commune keeps its bus when it is minus fifteen.
+    expect(chooseTraction(200, 0.9, prices)).not.toBe('electric');
+  });
+});
+
+describe.skipIf(!ready)('the mix the routes ask for', () => {
+  const built = () => {
+    const c = assemble({
+      manifest: json('admin-manifest.json'),
+      attributes: json('admin-attributes.json'),
+      attributesBin: bin('admin-attributes.bin'),
+      adjacencyBin: bin('admin-adjacency.bin'),
+      candidacyBin: bin('admin-candidacy.bin'),
+      roadMeta: json('road-time.json'),
+      roadBin: bin('road-time.bin'),
+    });
+    return costNetwork(c, buildNetwork(c, c.defaults), loadPrices(simJson('cost-inputs.json')));
+  };
+
+  it('is a mix, not a monoculture', () => {
+    const mix = built().tractionMix;
+    const total = mix.electric + mix.hybrid + mix.diesel;
+    expect(total).toBeGreaterThan(0);
+    expect(mix.electric).toBeGreaterThan(0);
+  });
+
+  it('accounts for every vehicle exactly once', () => {
+    const r = built();
+    const total = r.tractionMix.electric + r.tractionMix.hybrid + r.tractionMix.diesel;
+    expect(Math.abs(total - r.fleetTotal)).toBeLessThanOrEqual(3);
   });
 });

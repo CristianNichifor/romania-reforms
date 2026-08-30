@@ -136,6 +136,54 @@
       "unit": "years",
       "confidence": "assumed",
       "note": "Durata de viață a unei autobaze. Mult peste cei 12 ani ai unui autobuz, ceea ce contează: clădirea se plătește o dată la trei generații de vehicule, deci anualizarea ei nu se face pe același orizont ca parcul."
+    },
+    "electricRangeKm": {
+      "value": 180,
+      "unit": "km/day",
+      "confidence": "assumed",
+      "note": "Cât poate face un autobuz electric într-o zi de serviciu, fără încărcare pe traseu. Autonomia raportată este de circa 240 km în condiții obișnuite, iar frigul o scade cu 20-40%; 180 km este valoarea de iarnă, pentru că un serviciu public trebuie să meargă și în ianuarie, nu doar în medie. Aceasta este REGULA care alege tracțiunea: un traseu sub prag poate fi electric, unul peste nu — nu o cotă de politică."
+    },
+    "electricPriceRatio": {
+      "value": 1.8,
+      "unit": "ratio to diesel",
+      "confidence": "assumed",
+      "note": "Prețul unui autobuz electric față de unul diesel echivalent: 1,5-2 ori, din comparații internaționale, bateria fiind 30-40% din preț. Se folosește RAPORTUL, nu prețul absolut din licitațiile românești (circa 480.000 euro la București), pentru că acelea sunt autobuze urbane de 12 m, iar referința diesel a acestui model este un interurban de 95.000 de euro. A împărți una la alta ar fi exact eroarea făcută la reperul Buzău: două cifre reale care nu se compară între ele."
+    },
+    "hybridPriceRatio": {
+      "value": 1.3,
+      "unit": "ratio to diesel",
+      "confidence": "assumed",
+      "note": "Un hibrid costă între diesel și electric, fără bateria mare a celui din urmă."
+    },
+    "electricKwhPerKm": {
+      "value": 1.3,
+      "unit": "kWh/km",
+      "confidence": "assumed",
+      "note": "Consumul unui autobuz electric interurban. Include încălzirea, care iarna este o parte reală din el."
+    },
+    "electricityPriceRonKwh": {
+      "value": 0.75,
+      "unit": "RON/kWh",
+      "confidence": "assumed",
+      "note": "Preț industrial fără TVA, la fel ca la partea feroviară, ca cele două să rămână comparabile."
+    },
+    "hybridFuelSaving": {
+      "value": 0.22,
+      "unit": "share",
+      "confidence": "assumed",
+      "note": "Cât motorină economisește un hibrid față de un diesel, prin frânare regenerativă. De aceea hibridul are sens exact acolo unde electricul nu ajunge dar traseul are multe opriri: câștigul vine din opriri, nu din kilometri."
+    },
+    "electricMaintenanceSaving": {
+      "value": 0.35,
+      "unit": "share",
+      "confidence": "assumed",
+      "note": "Întreținere mai ieftină la electric, 30-40% raportat: fără cutie de viteze, fără ambreiaj, frâne mai puțin uzate."
+    },
+    "stopsPerKmForHybrid": {
+      "value": 0.35,
+      "unit": "stops/km",
+      "confidence": "assumed",
+      "note": "De la câte opriri pe kilometru merită hibridul pe un traseu prea lung pentru electric. Sub prag, traseul este o cursă lungă între localități și un diesel simplu este mai ieftin; peste prag, opririle dese fac recuperarea la frânare să conteze."
     }
   },
   "vehicles": {
@@ -205,6 +253,14 @@
     {
       "id": "autobazele-domina-capexul",
       "text": "Investiția în autobaze nu are sursă românească directă pentru un parc diesel de dimensiunea modelată și este dedusă din două contracte pentru autobaze electrice, mult mai scumpe pe loc. Contează mult: la 150.000 de euro pe loc, autobazele costă mai mult decât autobuzele care stau în ele. Dacă cifra reală este jumătate sau dublă, costul total pe douăzeci de ani se mișcă cu miliarde. Se vede separat în model tocmai ca să poată fi contestată singură.",
+      "severity": "material",
+      "affects": [
+        "cost"
+      ]
+    },
+    {
+      "id": "tractiunea-e-o-regula-nu-o-masuratoare",
+      "text": "Alegerea între electric, hibrid și diesel se face după o regulă simplă — kilometri pe zi față de autonomia de iarnă, apoi opriri pe kilometru — nu după o analiză de exploatare. Ce lipsește: încărcarea pe traseu, care ar face electricul posibil pe trasee lungi; relieful, care în Carpați scade autonomia mult sub media de iarnă; și puterea disponibilă în rețea la fiecare autobază, care în multe localități este constrângerea reală, nu autonomia vehiculului. Și o consecință vizibilă: modelul nu enumeră opririle intermediare de pe traseele de trunchi, deci acestea apar ca alergări fără opriri și ajung toate la diesel. Zero hibride NU este un rezultat, este un artefact al acestei simplificări — un trunchi care leagă opt centre are opriri destule cât să merite recuperarea la frânare.",
       "severity": "material",
       "affects": [
         "cost"

@@ -209,7 +209,41 @@ export function fleetRequired(peakVehicles: number, spareRatio: number): number 
   return Math.ceil(peakVehicles * (1 + spareRatio));
 }
 
+export type Traction = 'electric' | 'hybrid' | 'diesel';
+
+/**
+ * Which traction a route needs — decided by the route, not by a policy quota.
+ *
+ * Two questions in order, because they are not equally binding:
+ *
+ * 1. **Can a battery do the day?** A vehicle that runs 300 km between depot visits cannot be
+ *    battery-electric without charging on the road, whatever anyone would prefer. The range
+ *    used is the WINTER range, because a public service has to run in January and not only on
+ *    average — that is the same principle that removed the flex tier.
+ * 2. **Do the stops pay for a hybrid?** Beyond battery range, regenerative braking earns its
+ *    premium only where there is braking to recover. A long run between two towns is a diesel;
+ *    a long run threading twenty villages is a hybrid.
+ *
+ * This is a rule, not an operations study. It has no charging on the road, no gradient, and no
+ * grid capacity at the depot — which in much of Romania is the real constraint rather than the
+ * vehicle. Declared in `tractiunea-e-o-regula-nu-o-masuratoare`.
+ */
+export function chooseTraction(
+  dailyKmPerVehicle: number,
+  stopsPerKm: number,
+  prices: Prices,
+): Traction {
+  if (dailyKmPerVehicle <= prices.electricRangeKm) return 'electric';
+  return stopsPerKm >= prices.stopsPerKmForHybrid ? 'hybrid' : 'diesel';
+}
+
 export interface Prices {
+  electricRangeKm: number;
+  stopsPerKmForHybrid: number;
+  /** Purchase price multiplier against the diesel vehicle of the same class. */
+  priceRatio: Record<Traction, number>;
+  /** Energy and maintenance per km, by traction and seat class. */
+  perKmByTraction: Record<Traction, Record<string, number>>;
   perBusHour: number;
   perBusKmByClass: Record<string, number>;
   perVehicleYear: number;
@@ -297,10 +331,26 @@ export function loadPrices(document: {
 
   const perKm: Record<string, number> = {};
   const price: Record<string, number> = {};
+  const perKmByTraction: Record<Traction, Record<string, number>> = {
+    electric: {},
+    hybrid: {},
+    diesel: {},
+  };
   for (const [name, spec] of Object.entries(document.vehicles)) {
-    perKm[name] =
-      (spec.dieselPer100Km / 100) * item('dieselPricePerLitre') + maintenance + item('tyresPerKm');
+    const fuel = (spec.dieselPer100Km / 100) * item('dieselPricePerLitre');
+    const tyres = item('tyresPerKm');
+    perKm[name] = fuel + maintenance + tyres;
     price[name] = spec.priceRon;
+
+    // Energy and maintenance both move with traction, and in opposite directions: electricity
+    // is cheaper per kilometre than diesel and an electric drivetrain needs less work, but the
+    // vehicle costs more to buy. Which way that lands is the whole question.
+    perKmByTraction.diesel[name] = perKm[name];
+    perKmByTraction.hybrid[name] = fuel * (1 - item('hybridFuelSaving')) + maintenance + tyres;
+    perKmByTraction.electric[name] =
+      item('electricKwhPerKm') * item('electricityPriceRonKwh') +
+      maintenance * (1 - item('electricMaintenanceSaving')) +
+      tyres;
   }
 
   return {
@@ -311,6 +361,14 @@ export function loadPrices(document: {
     adminShare: item('adminOverheadShare'),
     vehiclePrice: price,
     vehicleLifeYears: item('vehicleLifeYears'),
+    electricRangeKm: item('electricRangeKm'),
+    stopsPerKmForHybrid: item('stopsPerKmForHybrid'),
+    priceRatio: {
+      electric: item('electricPriceRatio'),
+      hybrid: item('hybridPriceRatio'),
+      diesel: 1,
+    },
+    perKmByTraction: perKmByTraction,
     spareRatio: 0.15,
     depotCapexPerBus: item('depotCapexPerBusRon'),
     depotLifeYears: item('depotLifeYears'),
@@ -371,6 +429,8 @@ export interface NetworkCost {
    * model with no demand in it.
    */
   ronPerSeatKm: number;
+  /** Peak vehicles by traction — the mix the routes asked for, not one anybody chose. */
+  tractionMix: Record<Traction, number>;
 }
 
 /**
@@ -454,18 +514,30 @@ export function costNetwork(
 
   const peakByClass: Record<string, number> = { basic: 0, feeder: 0, trunk: 0 };
   const kmByClass: Record<string, number> = { basic: 0, feeder: 0, trunk: 0 };
+  const peakByTraction: Record<Traction, number> = { electric: 0, hybrid: 0, diesel: 0 };
+  const runningRon: Record<string, number> = {};
   let hours = 0;
   let routeCount = 0;
   let withoutLength = 0;
   let busKm = 0;
 
-  const add = (name: string, roundTripMin: number, kmRoundTrip: number) => {
+  const add = (name: string, roundTripMin: number, kmRoundTrip: number, stops: number) => {
     const r = resourcesForRoute(roundTripMin, level.departures[name], kmRoundTrip);
     peakByClass[name] += r.peakVehicles;
     kmByClass[name] += r.busKm;
     hours += r.busHours;
     busKm += r.busKm;
     routeCount += 1;
+
+    // What this route needs, from what it does: kilometres a vehicle covers in a day, and how
+    // often it stops. Both come out of the resources just computed rather than being assumed.
+    const dailyKmPerVehicle = r.peakVehicles ? r.busKm / r.peakVehicles : 0;
+    const stopsPerKm = kmRoundTrip > 0 ? (2 * stops) / kmRoundTrip : 0;
+    const traction = chooseTraction(dailyKmPerVehicle, stopsPerKm, prices);
+    peakByTraction[traction] += r.peakVehicles;
+    runningRon[traction] =
+      (runningRon[traction] ?? 0) +
+      r.busKm * prices.weekdaysPerYear * (prices.perKmByTraction[traction][name] ?? 0);
   };
 
   // T3 feeders: every commune to the centre that absorbs it.
@@ -479,7 +551,7 @@ export function costNetwork(
       }
       const runningMin = (2 * route.oneWayMin) / prices.serviceSpeedFactor;
       const dwell = route.stops.length * prices.dwellMinPerStop;
-      add(name, runningMin + dwell, 2 * route.oneWayKm);
+      add(name, runningMin + dwell, 2 * route.oneWayKm, route.stops.length);
     }
   }
 
@@ -496,7 +568,7 @@ export function costNetwork(
     const runningMin = (2 * trunk) / prices.serviceSpeedFactor;
     // A trunk run stops at the centres between, which this model does not enumerate; two stops
     // is the pair it certainly has, so trunk dwell here is a floor. The kilometres are real.
-    add('trunk', runningMin + 2 * prices.dwellMinPerStop, 2 * km);
+    add('trunk', runningMin + 2 * prices.dwellMinPerStop, 2 * km, 2);
   }
 
   const peakTotal = Object.values(peakByClass).reduce((a, b) => a + b, 0);
@@ -515,13 +587,47 @@ export function costNetwork(
     (sum, [name, n]) => sum + n * (SERVICES[name]?.seats ?? 0),
     0,
   );
-  const totals = annualCost(hours, kmByClass, fleetByClass, prices);
+  // Vehicles cost what their traction costs. The mix is an output of the route rule, so the
+  // capital bill follows the network rather than a procurement decision made in advance.
+  const peakAll = Object.values(peakByTraction).reduce((a, b) => a + b, 0);
+  const fleetTotalAll = fleetRequired(peakAll, prices.spareRatio);
+  let capitalRon = 0;
+  const tractionMix: Record<Traction, number> = { electric: 0, hybrid: 0, diesel: 0 };
+  for (const t of ['electric', 'hybrid', 'diesel'] as Traction[]) {
+    const share = peakAll ? peakByTraction[t] / peakAll : 0;
+    const vehicles = Math.round(fleetTotalAll * share);
+    tractionMix[t] = vehicles;
+    // Base price is the fleet's own class mix, scaled by what this traction costs to buy.
+    const basePrice = fleetTotal
+      ? Object.entries(fleetByClass).reduce(
+          (sum, [name, n]) => sum + (prices.vehiclePrice[name] ?? 0) * n,
+          0,
+        ) / fleetTotal
+      : 0;
+    capitalRon += (vehicles * basePrice * prices.priceRatio[t]) / prices.vehicleLifeYears;
+  }
+
+  const running = Object.values(runningRon).reduce((a, b) => a + b, 0);
+  const driver = hours * prices.weekdaysPerYear * prices.perBusHour;
+  const standing = fleetTotal * prices.perVehicleYear;
+  const admin = (driver + running + standing) * prices.adminShare;
+  const operating = driver + running + standing + admin;
+  const totals: Cost = {
+    driverRon: driver,
+    runningRon: running,
+    standingRon: standing,
+    adminRon: admin,
+    capitalRon,
+    operatingRon: operating,
+    totalRon: operating + capitalRon,
+  };
 
   return {
     routes: routeCount,
     routesWithoutLength: withoutLength,
     seatKmPerYear,
     seatsOwned,
+    tractionMix,
     ronPerSeatKm: seatKmPerYear ? totals.totalRon / seatKmPerYear : 0,
     drivers: driversRequired(
       hours * prices.weekdaysPerYear,

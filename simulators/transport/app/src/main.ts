@@ -301,6 +301,11 @@ async function main() {
         .toFixed(3)
         .replace('.', ',')} lei</dd>
       <dt>Șoferi</dt><dd>${fmt.format(resourcesFor().drivers)}</dd>
+      <dt>Electric / hibrid / diesel</dt><dd>${fmt.format(
+        resourcesFor().tractionMix.electric,
+      )} / ${fmt.format(resourcesFor().tractionMix.hybrid)} / ${fmt.format(
+        resourcesFor().tractionMix.diesel,
+      )}</dd>
       <dt>Ore de autobuz pe zi</dt><dd>${fmt.format(
         Math.round(resourcesFor().busHoursPerWeekday),
       )}</dd>
@@ -312,13 +317,29 @@ async function main() {
     // The line nobody expects, and the least defensible input in the model. Both facts belong
     // next to it rather than in a limitations list further down the page.
     const ratio = life().depotCapexRon / life().fleetCapexRon;
+    const mix = resourcesFor().tractionMix;
+    const electricShare = mix.electric / (mix.electric + mix.hybrid + mix.diesel);
     el('cost-note').textContent =
+      `Tracțiunea o cere traseul, nu o alege o politică: ${(electricShare * 100).toFixed(0)}% ` +
+      `din parc poate fi electric pentru că face sub ${fmt.format(
+        Math.round(costInputs.items.electricRangeKm.value),
+      )} km pe zi — autonomia de iarnă, nu media. Restul sunt trasee prea lungi pentru baterie: ` +
+      `hibrid unde opririle dese plătesc recuperarea la frânare, diesel unde nu. ` +
+      (mix.hybrid === 0
+        ? 'Zero hibride este un artefact: modelul nu numără opririle intermediare de pe ' +
+          'trunchi, deci acestea par curse fără opriri. '
+        : '') +
+      elDepotNote();
+    function elDepotNote() {
+      return (
       `Autobazele costă mai mult decât autobuzele din ele — de ` +
       `${ratio.toFixed(1).replace('.', ',')} ori. Halele, canalele și spălătoriile se ` +
       `construiesc o dată la trei generații de vehicule și aproape nimeni nu le pune în ` +
       `factură. Este și cifra cea mai slab fundamentată de aici: dedusă din contracte pentru ` +
       `autobaze electrice, mai scumpe pe loc decât una diesel. Dacă e dublă sau pe jumătate, ` +
-      `totalul se mișcă cu miliarde — de aceea stă pe rând separat.`;
+      `totalul se mișcă cu miliarde — de aceea stă pe rând separat.`
+      );
+    }
 
     // What scenario the reader is actually on, and how to change it. The page used to offer
     // five presets; consolidation belongs to the administrative simulator, and this now says
