@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/scenarios.schema.json",
+  "title": "The same country under several consolidation scenarios",
+  "description": "One map is a point; the argument is a curve. Each scenario re-runs the whole chain — centres, routes, fleet, cost, journey — over the same travel-time matrix, which does not depend on the scenario. Four are settings of administrativ's own parameters; one is imposed directly, because those parameters never produce very few regions and the trade-off cannot show itself among four variations of the same shape.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "title", "publisher", "period", "provenance", "scenarios", "limitations"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "type": "string" },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "period": { "type": "string" },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+    "scenarios": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "label", "hubs", "routes", "fleet", "totalRon", "medianPulsedMin"],
+        "properties": {
+          "id": { "type": "string" },
+          "label": { "type": "string" },
+          "params": { "type": ["object", "null"], "additionalProperties": { "type": "number" } },
+          "hubs": { "type": "integer", "minimum": 1 },
+          "routes": { "type": "integer", "minimum": 1 },
+          "fleet": { "type": "integer", "minimum": 1 },
+          "meanSeats": { "type": "number", "exclusiveMinimum": 0 },
+          "busHoursWeekday": { "type": "number", "minimum": 0 },
+          "busKmWeekday": { "type": "number", "minimum": 0 },
+          "operatingRon": { "type": "number", "minimum": 0 },
+          "capitalRon": { "type": "number", "minimum": 0 },
+          "totalRon": { "type": "number", "minimum": 0 },
+          "ronPerBusKm": { "type": "number", "minimum": 0 },
+          "peopleWithJourney": { "type": "integer", "minimum": 0 },
+          "medianUncoordinatedMin": { "type": "number", "minimum": 0 },
+          "medianPulsedMin": { "type": "number", "minimum": 0 },
+          "administrativeSavingRon": {
+            "description": "Null for a map administrativ did not produce, which therefore has no saving of its own.",
+            "type": ["number", "null"]
+          },
+          "operatingSavingRon": { "type": ["number", "null"] }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+    }
+  }
+}

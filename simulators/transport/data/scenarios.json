@@ -1,0 +1,151 @@
+{
+  "$schema": "../schema/scenarios.schema.json",
+  "id": "scenarios",
+  "title": "Aceeași țară, sub mai multe scenarii de comasare",
+  "publisher": "Cristian Nichifor",
+  "period": "2026",
+  "provenance": {
+    "source": "administrativ-plus-retea",
+    "locator": "modelul administrativ rulat la parametrii din fiecare scenariu, apoi trasee, flotă și cost pe aceeași rețea rutieră",
+    "confidence": "derived",
+    "note": "Matricea de timpi de parcurs nu depinde de scenariu, deci scenariile diferă doar prin ce centre există. Tot ce se schimbă mai sus decurge din asta."
+  },
+  "scenarios": [
+    {
+      "hubs": 249,
+      "routes": 1707,
+      "fleet": 4058,
+      "meanSeats": 40.9,
+      "busHoursWeekday": 27671,
+      "busKmWeekday": 1018329,
+      "operatingRon": 1564356436,
+      "capitalRon": 152284942,
+      "totalRon": 1716641378,
+      "ronPerBusKm": 6.14,
+      "peopleWithJourney": 16850967,
+      "medianUncoordinatedMin": 98.4,
+      "medianPulsedMin": 73.4,
+      "id": "implicit",
+      "label": "Parametrii impliciți",
+      "params": {},
+      "administrativeSavingRon": 8727843155,
+      "operatingSavingRon": 32651674949
+    },
+    {
+      "hubs": 233,
+      "routes": 1664,
+      "fleet": 4009,
+      "meanSeats": 40.8,
+      "busHoursWeekday": 27519,
+      "busKmWeekday": 1012803,
+      "operatingRon": 1555719209,
+      "capitalRon": 150120921,
+      "totalRon": 1705840130,
+      "ronPerBusKm": 6.14,
+      "peopleWithJourney": 16876529,
+      "medianUncoordinatedMin": 95.0,
+      "medianPulsedMin": 70.0,
+      "id": "prag-inalt",
+      "label": "Prag de absorbție mai mare",
+      "params": {
+        "x": 15000
+      },
+      "administrativeSavingRon": 8807854131,
+      "operatingSavingRon": 32872122269
+    },
+    {
+      "hubs": 255,
+      "routes": 1695,
+      "fleet": 4017,
+      "meanSeats": 40.8,
+      "busHoursWeekday": 27439,
+      "busKmWeekday": 1008462,
+      "operatingRon": 1550046007,
+      "capitalRon": 150646912,
+      "totalRon": 1700692919,
+      "ronPerBusKm": 6.15,
+      "peopleWithJourney": 16850967,
+      "medianUncoordinatedMin": 100.1,
+      "medianPulsedMin": 75.1,
+      "id": "raze-mici",
+      "label": "Raze mai mici",
+      "params": {
+        "r_national_m": 10000,
+        "r_cap_m": 7500,
+        "r_town_m": 7500
+      },
+      "administrativeSavingRon": 8686667191,
+      "operatingSavingRon": 32419688468
+    },
+    {
+      "hubs": 347,
+      "routes": 1749,
+      "fleet": 4028,
+      "meanSeats": 41.0,
+      "busHoursWeekday": 27500,
+      "busKmWeekday": 1012612,
+      "operatingRon": 1559373624,
+      "capitalRon": 151054867,
+      "totalRon": 1710428491,
+      "ronPerBusKm": 6.16,
+      "peopleWithJourney": 16850967,
+      "medianUncoordinatedMin": 97.8,
+      "medianPulsedMin": 72.8,
+      "id": "fara-tinta",
+      "label": "Fără țintă de populație",
+      "params": {
+        "p_target": 0
+      },
+      "administrativeSavingRon": 8198657055,
+      "operatingSavingRon": 30024440965
+    },
+    {
+      "hubs": 41,
+      "routes": 1182,
+      "fleet": 4799,
+      "meanSeats": 39.8,
+      "busHoursWeekday": 37230,
+      "busKmWeekday": 1384309,
+      "operatingRon": 2095994832,
+      "capitalRon": 177936354,
+      "totalRon": 2273931187,
+      "ronPerBusKm": 6.06,
+      "peopleWithJourney": 17314254,
+      "medianUncoordinatedMin": 77.5,
+      "medianPulsedMin": 52.5,
+      "id": "un-centru-pe-judet",
+      "label": "Un centru pe județ",
+      "params": null,
+      "administrativeSavingRon": null,
+      "operatingSavingRon": null
+    }
+  ],
+  "limitations": [
+    {
+      "id": "compromisul-merge-invers",
+      "text": "Rezultatul contrazice premisa proiectului. Documentul de proiectare presupunea că a comasa mai tare costă timp de călătorie. Nu costă: între 233 și 347 de centre, costul transportului se mișcă sub 1% și mediana călătoriei sub 5%, în timp ce economia administrativă variază cu 7%. Iar la extrema de un singur centru pe județ — cu 84% mai puține centre — călătoria se scurtează cu 28%, la 52 de minute, iar transportul se scumpește cu 32%. Motivul este structural: cu un centru pe județ nu mai există nici traseu de trunchi, nici corespondență, deci fiecare merge direct. Compromisul real nu este între economie administrativă și timp de călătorie, ci între o rețea ieftină cu schimb și una scumpă și directă.",
+      "severity": "material",
+      "affects": [
+        "cost",
+        "access"
+      ]
+    },
+    {
+      "id": "patru-puncte-nu-o-curba",
+      "text": "Sunt patru setări, alese pentru că cineva le-ar putea susține, nu o explorare a spațiului de parametri. Între ele curba nu este cunoscută.",
+      "severity": "material",
+      "affects": [
+        "cost",
+        "access"
+      ]
+    },
+    {
+      "id": "economiile-nu-sunt-ale-noastre",
+      "text": "Economiile administrative sunt calculate de simulatorul administrativ, cu limitările lui, iar costurile de transport moștenesc modelul de viteze neverificat de aici.",
+      "severity": "material",
+      "affects": [
+        "cost"
+      ]
+    }
+  ]
+}
