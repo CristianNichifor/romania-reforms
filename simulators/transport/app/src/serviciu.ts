@@ -348,6 +348,44 @@ export interface NetworkCost {
    */
   drivers: number;
   cost: Cost;
+  /** Capacity the timetable offers, in seat-kilometres a year. */
+  seatKmPerYear: number;
+  /** Seats standing in the fleet — what the system owns, rather than what it moves. */
+  seatsOwned: number;
+  /**
+   * Cost per seat-kilometre offered, in lei.
+   *
+   * The unit a policy decision is actually made in, and the reason vehicle mix does not need
+   * to be a lever: a network is judged on the capacity it puts on the road and what that
+   * capacity costs, not on how it is packaged. It is also the one figure here that can be set
+   * beside another country's without converting anything but currency.
+   *
+   * Capacity OFFERED, not used. This is a fact about the timetable — seats past a stop — and
+   * says nothing about whether anyone is sitting in them. That is the honest boundary of a
+   * model with no demand in it.
+   */
+  ronPerSeatKm: number;
+}
+
+/**
+ * Whole-life cost over a horizon, undiscounted.
+ *
+ * `Cost.capitalRon` is the annualised slice of the fleet; a policy question wants the bill,
+ * so the vehicles are charged once at full price and the running cost is charged every year.
+ *
+ * **Undiscounted, in today's lei.** A discount rate is a political choice as much as a
+ * financial one — it decides how much a journey in 2038 is worth against one now — and
+ * picking one silently inside a model would bury that choice in arithmetic.
+ */
+export function lifetimeCost(cost: Cost, vehicleLifeYears: number, years: number): {
+  capexRon: number;
+  opexRon: number;
+  totalRon: number;
+  years: number;
+} {
+  const capex = cost.capitalRon * vehicleLifeYears;
+  const opex = cost.operatingRon * years;
+  return { capexRon: capex, opexRon: opex, totalRon: capex + opex, years };
 }
 
 /** Full-time drivers for a year of bus-hours. */
@@ -441,9 +479,23 @@ export function costNetwork(
   }
   const fleetTotal = Object.values(fleetByClass).reduce((a, b) => a + b, 0);
 
+  // Capacity offered: every kilometre a bus runs, multiplied by the seats it carries past.
+  const seatKmPerYear = Object.entries(kmByClass).reduce(
+    (sum, [name, km]) => sum + km * prices.weekdaysPerYear * (SERVICES[name]?.seats ?? 0),
+    0,
+  );
+  const seatsOwned = Object.entries(fleetByClass).reduce(
+    (sum, [name, n]) => sum + n * (SERVICES[name]?.seats ?? 0),
+    0,
+  );
+  const totals = annualCost(hours, kmByClass, fleetByClass, prices);
+
   return {
     routes: routeCount,
     routesWithoutLength: withoutLength,
+    seatKmPerYear,
+    seatsOwned,
+    ronPerSeatKm: seatKmPerYear ? totals.totalRon / seatKmPerYear : 0,
     drivers: driversRequired(
       hours * prices.weekdaysPerYear,
       prices.driverPaidHoursMonth,
@@ -454,7 +506,7 @@ export function costNetwork(
     busKmPerWeekday: busKm,
     fleetByClass,
     fleetTotal,
-    cost: annualCost(hours, kmByClass, fleetByClass, prices),
+    cost: totals,
   };
 }
 

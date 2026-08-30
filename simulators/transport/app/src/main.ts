@@ -15,6 +15,7 @@ import {
   costNetwork,
   farebox,
   levelById,
+  lifetimeCost,
   loadPrices,
 } from './serviciu';
 import { compareWithBus, loadRailAccess, trainHeadwayMin } from './feroviar';
@@ -93,6 +94,12 @@ async function main() {
     SERVICE_LEVELS.map((l) => [l.id, costNetwork(coupled, net, prices, l)] as const),
   );
   const resourcesFor = () => priced.get(level.id)!;
+
+  // The whole-life bill over one fleet renewal cycle: buy the vehicles once, run them for
+  // their life. Undiscounted and in today's lei — a discount rate decides how much a journey
+  // in 2038 is worth against one now, and that is a political choice, not a modelling detail.
+  const HORIZON_YEARS = prices.vehicleLifeYears;
+  const life = () => lifetimeCost(resourcesFor().cost, prices.vehicleLifeYears, HORIZON_YEARS);
 
   let scenario: Timetable = hash().get('s') === 'pulsed' ? 'pulsed' : 'uncoordinated';
 
@@ -280,14 +287,19 @@ async function main() {
     // Recomputed for the reader's network: routes generated from their centres, vehicles from
     // the service standard, lei from the same price file the pipeline argues from.
     el('cost').innerHTML = `
-      <dt>Trasee</dt><dd>${fmt.format(resourcesFor().routes)}</dd>
+      <dt>Capacitate oferită</dt><dd>${fmt.format(
+        Math.round(resourcesFor().seatKmPerYear / 1e6),
+      )} mil. locuri-km</dd>
+      <dt>Cost pe loc-km</dt><dd class="big">${resourcesFor().ronPerSeatKm
+        .toFixed(3)
+        .replace('.', ',')} lei</dd>
       <dt>Șoferi</dt><dd>${fmt.format(resourcesFor().drivers)}</dd>
       <dt>Ore de autobuz pe zi</dt><dd>${fmt.format(
         Math.round(resourcesFor().busHoursPerWeekday),
       )}</dd>
-      <dt>Funcționare</dt><dd>${bn(resourcesFor().cost.operatingRon)}</dd>
-      <dt>Investiție anualizată</dt><dd>${bn(resourcesFor().cost.capitalRon)}</dd>
-      <dt>Total pe an</dt><dd class="big">${bn(resourcesFor().cost.totalRon)}</dd>`;
+      <dt>OPEX pe an</dt><dd>${bn(resourcesFor().cost.operatingRon)}</dd>
+      <dt>CAPEX, parcul întreg</dt><dd>${bn(life().capexRon)}</dd>
+      <dt>Cost total pe ${life().years} ani</dt><dd class="big">${bn(life().totalRon)}</dd>`;
 
     // What scenario the reader is actually on, and how to change it. The page used to offer
     // five presets; consolidation belongs to the administrative simulator, and this now says
@@ -521,31 +533,32 @@ async function main() {
   function renderLevels() {
     const rows = SERVICE_LEVELS.map((l) => {
       const r = priced.get(l.id)!;
+      const lc = lifetimeCost(r.cost, prices.vehicleLifeYears, HORIZON_YEARS);
       return `<tr class="${l.id === level.id ? 'on' : ''}">
         <td>${l.label.split(' — ')[0]}</td>
-        <td>${fmt.format(r.fleetTotal)}</td>
-        <td>${fmt.format(r.drivers)}</td>
+        <td>${fmt.format(Math.round(r.seatKmPerYear / 1e6))}</td>
+        <td>${r.ronPerSeatKm.toFixed(3).replace('.', ',')}</td>
         <td>${bn(r.cost.operatingRon)}</td>
-        <td>${bn(r.cost.totalRon)}</td>
+        <td>${bn(lc.totalRon)}</td>
       </tr>`;
     }).join('');
     el('levels').innerHTML =
-      `<thead><tr><th>Nivel</th><th>Autobuze</th><th>Șoferi</th><th>Funcț.</th><th>Total</th></tr></thead>` +
+      `<thead><tr><th>Nivel</th><th>Mil. loc-km</th><th>Lei/loc-km</th>` +
+      `<th>OPEX/an</th><th>Total ${HORIZON_YEARS} ani</th></tr></thead>` +
       `<tbody>${rows}</tbody>`;
 
     // The marginal figure, which is the one worth arguing about. A total says what a network
     // costs; the step between two levels says what the next departure a day is worth.
     const floor = priced.get('minim')!;
-    const proposed = priced.get('implicit')!;
     const wide = priced.get('extins')!;
-    const step = (a: typeof floor, b: typeof floor) =>
-      bn(b.cost.totalRon - a.cost.totalRon);
+    const perSeat = (r: typeof floor) => r.ronPerSeatKm.toFixed(3).replace('.', ',');
     el('levels-note').textContent =
-      `Toate trei sunt calculate pe aceeași rețea și aceleași prețuri — diferă doar câte curse ` +
-      `se pun în orar. De la minim la standardul propus sunt ${step(floor, proposed)} în plus ` +
-      `pe an și ${fmt.format(proposed.drivers - floor.drivers)} de șoferi în plus; de acolo la ` +
-      `extins încă ${step(proposed, wide)}. Costul nu este un număr, este o funcție de ce alegi ` +
-      `să circule.`;
+      `Aceeași rețea, aceleași prețuri — diferă doar câte curse se pun în orar. Capacitatea ` +
+      `crește de ${(wide.seatKmPerYear / floor.seatKmPerYear).toFixed(1).replace('.', ',')} ori ` +
+      `de la minim la extins, iar costul pe loc-km scade de la ${perSeat(floor)} la ` +
+      `${perSeat(wide)} lei: un autobuz care circulă mai mult își împarte investiția și ` +
+      `garajul peste mai mulți kilometri. Capacitatea este cea OFERITĂ — locuri pe lângă o ` +
+      `stație — nu locuri ocupate; despre asta modelul nu are ce spune.`;
   }
 
   const levelSelect = el<HTMLSelectElement>('level');

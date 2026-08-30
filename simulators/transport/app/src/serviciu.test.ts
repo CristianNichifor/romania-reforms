@@ -25,6 +25,7 @@ import {
   cycleSlack,
   farebox,
   fleetRequired,
+  lifetimeCost,
   loadPrices,
   resourcesForRoute,
   vehiclesForPeriod,
@@ -256,5 +257,64 @@ describe('drivers', () => {
   it('returns none for a service that does not run', () => {
     expect(driversRequired(0, 165, 1.3)).toBe(0);
     expect(driversRequired(100, 0, 1.3)).toBe(0);
+  });
+});
+
+describe('capacity and whole-life cost', () => {
+  const cost = {
+    driverRon: 100,
+    runningRon: 100,
+    standingRon: 100,
+    adminRon: 100,
+    capitalRon: 50,
+    operatingRon: 400,
+    totalRon: 450,
+  };
+
+  it('charges the fleet once and the running cost every year', () => {
+    // capitalRon is the annualised slice; a policy question wants the bill, so the vehicles
+    // are bought at full price and the service is run for its life.
+    const lc = lifetimeCost(cost, 12, 12);
+    expect(lc.capexRon).toBe(50 * 12);
+    expect(lc.opexRon).toBe(400 * 12);
+    expect(lc.totalRon).toBe(lc.capexRon + lc.opexRon);
+  });
+
+  it('does not discount, and says which years it covers', () => {
+    // Undiscounted on purpose: a discount rate decides what a journey in 2038 is worth against
+    // one now, which is a political choice and must not be buried in arithmetic.
+    expect(lifetimeCost(cost, 12, 1).opexRon).toBe(400);
+    expect(lifetimeCost(cost, 12, 24).years).toBe(24);
+  });
+});
+
+describe.skipIf(!ready)('capacity on the real network', () => {
+  const level = (id: string) => {
+    const c = assemble({
+      manifest: json('admin-manifest.json'),
+      attributes: json('admin-attributes.json'),
+      attributesBin: bin('admin-attributes.bin'),
+      adjacencyBin: bin('admin-adjacency.bin'),
+      candidacyBin: bin('admin-candidacy.bin'),
+      roadMeta: json('road-time.json'),
+      roadBin: bin('road-time.bin'),
+    });
+    return costNetwork(c, buildNetwork(c, c.defaults), loadPrices(simJson('cost-inputs.json')), levelById(id));
+  };
+
+  it('offers more capacity at a higher service level', () => {
+    expect(level('extins').seatKmPerYear).toBeGreaterThan(level('minim').seatKmPerYear);
+  });
+
+  it('costs less per seat-km the more the fleet is used', () => {
+    // The result worth showing: running the same buses more spreads their purchase and their
+    // depot over more kilometres, so capacity gets cheaper as service gets denser.
+    expect(level('extins').ronPerSeatKm).toBeLessThan(level('minim').ronPerSeatKm);
+  });
+
+  it('reports capacity offered, in a plausible band for a national bus network', () => {
+    const perSeatKm = level('implicit').ronPerSeatKm;
+    expect(perSeatKm).toBeGreaterThan(0.05);
+    expect(perSeatKm).toBeLessThan(1);
   });
 });
