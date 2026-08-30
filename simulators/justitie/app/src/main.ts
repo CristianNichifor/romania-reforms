@@ -1264,8 +1264,16 @@ async function main(): Promise<void> {
   // rather than left for a reader to compare four columns by eye.
   // Four columns in a 314-pixel panel: the headers have to be one word each or they wrap into
   // two lines apiece and the table becomes taller than the figures in it.
-  const short = (grade: string): string =>
-    grade.replace(/^Judecător (cu grad de )?/, '').replace(/,.*$/, '');
+  // Both benches now: the pension bill covers magistrates, so procurors sit in this table
+  // beside judges. The rank prefix goes and a marker stays, or two rows read identically.
+  const short = (grade: string): string => {
+    const prosecutor = /^Procuror/.test(grade);
+    const bare = grade
+      .replace(/^(Judecător|Procuror) (cu grad de )?/, '')
+      .replace(/,.*$/, '')
+      .replace(/^PICCJ$/, 'ÎCCJ');
+    return prosecutor ? `${bare} (P)` : bare;
+  };
   el('#pensii-body').innerHTML =
     `<p class="note">Lei pe lună, la vârful grilei: pensia după regula de azi, pragul din
       proiectul Ministerului Justiției și plafonul propus de lucrare.</p>
