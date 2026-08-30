@@ -70,6 +70,9 @@ export interface Arondare {
   };
   /** Court row index per UAT, so the map can paint every commune by the court it answers to. */
   courtOf: Int16Array;
+  /** Seat index per UAT: which consolidated unit it belongs to. The map draws unit borders
+   *  from this, which is the only way a reader sees the new UATs rather than inferring them. */
+  unitOf: Uint16Array;
 }
 
 export interface Coupled {
@@ -241,6 +244,7 @@ export function assign(coupled: Coupled, params: Params, pins: Pin[] = []): Aron
   return {
     units,
     courtOf,
+    unitOf: regionOf,
     summary: {
       units: units.length,
       routed: routed.length,

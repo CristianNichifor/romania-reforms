@@ -548,6 +548,40 @@ async function main(): Promise<void> {
       .then((r) => r.json())
       .then((shapes) => {
         map.addSource('uats', { type: 'geojson', data: shapes });
+        // Commune outlines, faint. Without them a catchment is a flat blob and a reader
+        // cannot see that it is made of communes at all.
+        map.addLayer(
+          {
+            id: 'uat-outline',
+            type: 'line',
+            source: 'uats',
+            layout: { visibility: 'none' },
+            paint: { 'line-color': '#0f1216', 'line-width': 0.3, 'line-opacity': 0.5 },
+          },
+          'county-lines',
+        );
+        // And the consolidated units themselves, drawn on the communes that sit on a unit
+        // edge. This is the border the administrative map only draws for the selected unit;
+        // here every unit needs one, because the units *are* the subject.
+        map.addLayer(
+          {
+            id: 'unit-outline',
+            type: 'line',
+            source: 'uats',
+            layout: { visibility: 'none' },
+            paint: {
+              'line-color': '#f2f4f7',
+              'line-width': [
+                'case',
+                ['boolean', ['feature-state', 'unitEdge'], false],
+                1.1,
+                0,
+              ] as unknown as ExpressionSpecification,
+              'line-opacity': 0.55,
+            },
+          },
+          'county-lines',
+        );
       });
     return shapesLoaded;
   };
@@ -645,7 +679,7 @@ async function main(): Promise<void> {
             'fill-opacity': 0.72,
           },
         },
-        'county-lines',
+        'uat-outline',
       );
       paintArondare();
     })();
@@ -657,7 +691,21 @@ async function main(): Promise<void> {
     if (!couplingForMap) return;
     const result = assign(couplingForMap, scenario.params, scenario.pins);
     arondareForMap = result;
-    const { meta, distance } = couplingForMap;
+    const { meta, distance, data } = couplingForMap;
+    // A commune sits on a unit edge when any neighbour belongs to a different unit. The
+    // adjacency is the model's own compressed-row index, so this is a walk, not a lookup.
+    const { neighbours, neighbourStart, uatCount } = data;
+    for (let uat = 0; uat < uatCount; uat += 1) {
+      const unit = result.unitOf[uat];
+      let edge = false;
+      for (let i = neighbourStart[uat]!; i < neighbourStart[uat + 1]!; i += 1) {
+        if (result.unitOf[neighbours[i]!] !== unit) {
+          edge = true;
+          break;
+        }
+      }
+      map.setFeatureState({ source: 'uats', id: uat }, { unitEdge: edge });
+    }
     for (let uat = 0; uat < result.courtOf.length; uat += 1) {
       const court = result.courtOf[uat] ?? -1;
       const raw = court < 0 ? meta.unreachable : distance[court * meta.columns + uat]!;
@@ -863,7 +911,56 @@ async function main(): Promise<void> {
     const showArondareLayer = (visible: boolean): void => {
       if (!map.getLayer('arondare-fill')) return;
       map.setLayoutProperty('arondare-fill', 'visibility', visible ? 'visible' : 'none');
+      // Unit borders belong to this view alone: the access view is about distance, not units.
+      if (map.getLayer('unit-outline')) {
+        map.setLayoutProperty('unit-outline', 'visibility', visible ? 'visible' : 'none');
+      }
     };
+    // Commune outlines suit either polygon view.
+    const showOutline = (visible: boolean): void => {
+      if (!map.getLayer('uat-outline')) return;
+      map.setLayoutProperty('uat-outline', 'visibility', visible ? 'visible' : 'none');
+    };
+
+    /**
+     * The road network every distance on this page is measured on.
+     *
+     * 2,4 MB, so it loads when a reader asks and not before — but without it the kilometres
+     * are a claim about a network the map never shows. Drawn under the polygons' outlines so
+     * it reads as terrain rather than as another category of thing.
+     */
+    let roadsLoaded: Promise<void> | null = null;
+    const showRoads = (visible: boolean): void => {
+      if (!visible) {
+        if (map.getLayer('roads-line')) map.setLayoutProperty('roads-line', 'visibility', 'none');
+        return;
+      }
+      roadsLoaded ??= fetch(`${base}data/roads.geojson`)
+        .then((r) => r.json())
+        .then((roads) => {
+          map.addSource('roads', { type: 'geojson', data: roads });
+          map.addLayer(
+            {
+              id: 'roads-line',
+              type: 'line',
+              source: 'roads',
+              paint: {
+                'line-color': '#0d1014',
+                'line-width': ['interpolate', ['linear'], ['zoom'], 5, 0.6, 9, 2.2] as unknown as ExpressionSpecification,
+                'line-opacity': 0.75,
+              },
+            },
+            'courts',
+          );
+        });
+      void roadsLoaded.then(() => {
+        if (map.getLayer('roads-line')) {
+          map.setLayoutProperty('roads-line', 'visibility', 'visible');
+        }
+      });
+    };
+    const roadsToggle = document.querySelector<HTMLInputElement>('#roads-toggle');
+    roadsToggle?.addEventListener('change', () => showRoads(roadsToggle.checked));
 
     /**
      * What those judges would cost, at both readings of a question the paper leaves open.
@@ -1012,8 +1109,12 @@ async function main(): Promise<void> {
       // The old diverging ramp describes a comparison this view does not make; the access
       // view brings its own stepped legend with the summary.
       const noRamp = mode === 'acces' || mode === 'arondare';
-      el('.ramp').hidden = noRamp;
-      el('.ramp-ends').hidden = noRamp;
+      // All of them: the access view injects its own ramp, so there are three in the document
+      // and hiding the first left two behind — a legend for a colour scale this view does not
+      // use, sitting under one that it does.
+      for (const node of document.querySelectorAll<HTMLElement>('.ramp, .ramp-ends')) {
+        node.hidden = noRamp;
+      }
       // Its title too: a legend with no swatches under it reads as a broken legend.
       el('#ramp-title').hidden = noRamp;
       el('#size-note').hidden = mode === 'arondare';
@@ -1022,6 +1123,8 @@ async function main(): Promise<void> {
       el('#catchment-note').hidden = mode !== 'arondare';
       showAccesLayer(mode === 'acces');
       showArondareLayer(mode === 'arondare');
+      showOutline(mode === 'acces' || mode === 'arondare');
+      el('#roads-row').hidden = mode !== 'acces' && mode !== 'arondare';
       el<HTMLOutputElement>('#target-value').textContent = ro.format(Number(targetInput.value));
 
       if (mode === 'acces') {
