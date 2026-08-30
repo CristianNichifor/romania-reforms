@@ -89,6 +89,21 @@ interface Servicii {
   limitations: Limitation[];
 }
 
+interface Parchete {
+  levels: {
+    level: string;
+    posts: number;
+    filled: number;
+    vacant: number;
+    monthlyLei: number;
+    annualLei: number;
+  }[];
+  totals: { posts: number; filled: number; vacant: number; statedFilled: number; annualLei: number };
+  auxiliary: { posts: number; filled: number; vacant: number };
+  merger: { posts: number; filled: number; annualLei: number; proposedOffices: number };
+  limitations: Limitation[];
+}
+
 interface Eficienta {
   years: {
     year: number;
@@ -341,6 +356,7 @@ async function main(): Promise<void> {
     servicii,
     politie,
     eficienta,
+    parchete,
   ] = await Promise.all([
     fetch(`${base}data/instante.json`).then((r) => r.json() as Promise<Document>),
     fetch(`${base}data/counties.geojson`).then((r) => r.json()),
@@ -358,6 +374,7 @@ async function main(): Promise<void> {
     fetch(`${base}data/servicii.json`).then((r) => r.json() as Promise<Servicii>),
     fetch(`${base}data/politie.json`).then((r) => r.json() as Promise<Politie>),
     fetch(`${base}data/eficienta.json`).then((r) => r.json() as Promise<Eficienta>),
+    fetch(`${base}data/parchete.json`).then((r) => r.json() as Promise<Parchete>),
   ]);
   const countyName = (code: string): string => manifest.countyNames?.[code] ?? code;
 
@@ -892,6 +909,44 @@ async function main(): Promise<void> {
   // The tightest staffing target, where the grade choice costs the most. Sorted rather than
   // indexed, and the fold is skipped entirely if the document ships no targets at all.
   const [lowest] = [...proiect.gradeChoiceSwing].sort((a, b) => a.target - b.target);
+  const PARCHET_LABEL: Record<string, string> = {
+    piccj: 'PÎCCJ + DNA, DIICOT',
+    'curte-de-apel': 'pe lângă curți de apel',
+    tribunal: 'pe lângă tribunale',
+    judecatorie: 'pe lângă judecătorii',
+  };
+  el('#parchete-chev').textContent = `${ro.format(parchete.totals.filled)} procurori`;
+  el('#parchete-body').innerHTML =
+    `<p class="note">Capitolul 7.3 reorganizează parchetele în oglindă cu instanțele: 42 de
+       parchete județene care comasează nivelul judecătoriilor cu cel al tribunalelor, 15 de
+       apel, Ministerul Public deasupra. Aici sunt posturile și costul lor de bază.</p>
+     <div class="pens-row">
+       <span class="pens-head">nivel</span>
+       <span class="pens-head">posturi</span>
+       <span class="pens-head">ocupate</span>
+       <span class="pens-head">cost/an</span>
+       ${parchete.levels
+         .map(
+           (l) =>
+             `<span>${PARCHET_LABEL[l.level] ?? l.level}</span>
+              <span>${ro.format(l.posts)}</span>
+              <span class="${l.filled / l.posts < 0.75 ? 'pens-low' : ''}">${ro.format(l.filled)}</span>
+              <span>${milioane(l.annualLei)}</span>`,
+         )
+         .join('')}
+     </div>
+     <p class="disagree">Comasarea din 7.3 atinge ${ro.format(parchete.merger.posts)} de posturi
+       — cele de la judecătorii și tribunale — din care ${ro.format(parchete.merger.filled)}
+       ocupate, ${milioane(parchete.merger.annualLei)} lei pe an, care ar trece în
+       ${parchete.merger.proposedOffices} de parchete județene. Un post din patru e vacant pe
+       tot sistemul: ${ro.format(parchete.totals.vacant)} din
+       ${ro.format(parchete.totals.posts)}.</p>
+     <p class="disagree">Raportul nu se potrivește cu el însuși aici, iar cifrele sunt lăsate
+       cum sunt: tabelul dă ${ro.format(parchete.totals.filled)} posturi ocupate, proza de pe
+       aceeași pagină spune ${ro.format(parchete.totals.statedFilled)}; la auxiliari,
+       ${ro.format(parchete.auxiliary.filled)} ocupate plus ${parchete.auxiliary.vacant} vacante
+       fac mai mult decât cele ${ro.format(parchete.auxiliary.posts)} prevăzute.</p>`;
+
   const ef = eficienta.comparison;
   const cited = eficienta.years.find((y) => y.year === ef.citedYear)!;
   el('#eficienta-chev').textContent = `${ef.reportSaysEfficientOrBetter} din ${cited.judecatorii.classified}`;
@@ -1263,6 +1318,7 @@ async function main(): Promise<void> {
     ...servicii.limitations,
     ...politie.limitations,
     ...eficienta.limitations,
+    ...parchete.limitations,
   ];
   const blocking = allLimits.filter((l) => l.severity === 'blocking');
   const rest = allLimits.filter((l) => l.severity !== 'blocking');

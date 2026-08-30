@@ -1,0 +1,126 @@
+{
+  "$schema": "../schema/parchete.schema.json",
+  "id": "parchete-2025",
+  "title": "Parchetele: posturi la 31 decembrie 2025 și costul lor de bază",
+  "publisher": "Consiliul Superior al Magistraturii",
+  "period": "2025",
+  "provenance": {
+    "source": "csm-starea-justitiei-2025",
+    "locator": "Capitolul IV.1, p. 93-94",
+    "confidence": "verbatim",
+    "note": "Posturile sunt citate din raport. Costul este calculat aici, înmulțind posturile ocupate cu indemnizația de bază a gradului, din Legea 153/2017."
+  },
+  "levels": [
+    {
+      "level": "piccj",
+      "posts": 683,
+      "vacant": 149,
+      "filled": 534,
+      "monthlyLei": 25000.0,
+      "annualLei": 160200000
+    },
+    {
+      "level": "curte-de-apel",
+      "posts": 264,
+      "vacant": 59,
+      "filled": 205,
+      "monthlyLei": 21905.0,
+      "annualLei": 53886300
+    },
+    {
+      "level": "tribunal",
+      "posts": 719,
+      "vacant": 205,
+      "filled": 514,
+      "monthlyLei": 21429.0,
+      "annualLei": 132174072
+    },
+    {
+      "level": "judecatorie",
+      "posts": 1386,
+      "vacant": 352,
+      "filled": 1034,
+      "monthlyLei": 16429.0,
+      "annualLei": 203851032
+    }
+  ],
+  "totals": {
+    "posts": 3052,
+    "filled": 2287,
+    "vacant": 765,
+    "statedFilled": 2293,
+    "annualLei": 550111404
+  },
+  "auxiliary": {
+    "posts": 1435,
+    "filled": 1353,
+    "vacant": 137
+  },
+  "centralClerks": [
+    {
+      "office": "PÎCCJ",
+      "posts": 153,
+      "filled": 131,
+      "vacant": 22
+    },
+    {
+      "office": "DIICOT",
+      "posts": 251,
+      "filled": 236,
+      "vacant": 15
+    },
+    {
+      "office": "DNA",
+      "posts": 159,
+      "filled": 145,
+      "vacant": 14
+    }
+  ],
+  "merger": {
+    "posts": 2105,
+    "filled": 1548,
+    "annualLei": 336025104,
+    "proposedOffices": 42,
+    "provenance": {
+      "source": "reforma-sistem-judiciar-romania",
+      "locator": "Capitolul 7.3",
+      "confidence": "verbatim"
+    }
+  },
+  "limitations": [
+    {
+      "id": "raportul-nu-se-potriveste-cu-el-insusi",
+      "text": "Tabelul dă 3.052 de posturi și 765 vacante, deci 2.287 ocupate; proza de pe aceeași pagină spune 2.293. Diferența de șase posturi vine din cele acordate în temeiul art. 147, numărate altfel în cele două locuri. La auxiliari, 1.353 ocupate plus 137 vacante fac 1.490, nu 1.435 câte spune aceeași frază. Ambele sunt păstrate așa cum sunt: o sursă care nu se potrivește cu ea însăși e un fapt despre sursă.",
+      "severity": "material",
+      "affects": [
+        "cost",
+        "parchete"
+      ]
+    },
+    {
+      "id": "piccj-cuprinde-dna-si-diicot",
+      "text": "Linia PÎCCJ include DNA, DIICOT și Secția parchetelor militare, care nu sunt parchete de rând și nu intră în comasarea propusă. Cele 683 de posturi nu se pot citi ca personalul unui parchet general.",
+      "severity": "material",
+      "affects": [
+        "cost",
+        "parchete"
+      ]
+    },
+    {
+      "id": "doar-indemnizatia-de-baza-la-procurori",
+      "text": "Ca și la judecători, este indemnizația de bază la vârful grilei, în lei 2022, fără sporuri. Costul real e peste, iar anul grilei nu e anul posturilor.",
+      "severity": "material",
+      "affects": [
+        "cost"
+      ]
+    },
+    {
+      "id": "volumul-parchetelor-nu-e-modelat",
+      "text": "Raportul dă și volumul de activitate și încărcătura pe procuror, pe capitole întregi. Aici sunt luate doar posturile și costul lor; redistribuirea muncii între cele 42 de parchete propuse nu e calculată.",
+      "severity": "blocking",
+      "affects": [
+        "parchete"
+      ]
+    }
+  ]
+}

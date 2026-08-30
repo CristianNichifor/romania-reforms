@@ -78,7 +78,9 @@ def main() -> int:
         if len(filled) < 5 or not re.match(r"^\d+$", filled[0]):
             continue
         name = filled[1]
-        if not name.lower().startswith("judecător"):
+        # Section B of the same chapter pays procurors on a parallel scale. The paper
+        # reorganises the prosecution service alongside the courts, so both are read.
+        if not name.lower().startswith(("judecător", "procuror")):
             continue
         # Values are Romanian-formatted: 26.250 lei and a 10,50 coefficient. Pairs run from
         # the third cell onward, one per seniority step that the table actually fills.
@@ -111,6 +113,8 @@ def main() -> int:
 
     if not grades:
         raise SystemExit("no judge rows parsed; the table shape changed")
+    if not any(g["name"].lower().startswith("procuror") for g in grades):
+        raise SystemExit("no procuror rows parsed; section B of the chapter changed")
 
     # The four grades the court map uses must all be present, or a court tier ends up unpriced
     # and its wage bill silently reads as zero.

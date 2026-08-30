@@ -1,0 +1,202 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/parchete.schema.json",
+  "title": "Prosecution offices: posts and base wage bill",
+  "description": "The prosecution service, which section 7.3 reorganises in parallel with the courts and which this simulator had never modelled. Posts are quoted from the CSM report's December table; the cost is computed here. Two of the report's own totals do not reconcile and are carried as found.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "period",
+    "provenance",
+    "levels",
+    "totals",
+    "auxiliary",
+    "merger",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "const": "parchete-2025"
+    },
+    "title": {
+      "type": "string"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "period": {
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json#/$defs/provenance"
+    },
+    "levels": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "level",
+          "posts",
+          "filled",
+          "vacant",
+          "monthlyLei",
+          "annualLei"
+        ],
+        "properties": {
+          "level": {
+            "enum": [
+              "piccj",
+              "curte-de-apel",
+              "tribunal",
+              "judecatorie"
+            ]
+          },
+          "posts": {
+            "type": "integer",
+            "exclusiveMinimum": 0
+          },
+          "filled": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "vacant": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "monthlyLei": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "annualLei": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "totals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "posts",
+        "filled",
+        "vacant",
+        "statedFilled",
+        "annualLei"
+      ],
+      "properties": {
+        "posts": {
+          "type": "integer"
+        },
+        "filled": {
+          "description": "Posts minus vacancies, from the table.",
+          "type": "integer"
+        },
+        "vacant": {
+          "type": "integer"
+        },
+        "statedFilled": {
+          "description": "What the prose on the same page says. Differs by six; both are kept.",
+          "type": "integer"
+        },
+        "annualLei": {
+          "type": "number"
+        }
+      }
+    },
+    "auxiliary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "posts",
+        "filled",
+        "vacant"
+      ],
+      "properties": {
+        "posts": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "filled": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "vacant": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "centralClerks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "office",
+          "posts",
+          "filled",
+          "vacant"
+        ],
+        "properties": {
+          "office": {
+            "type": "string"
+          },
+          "posts": {
+            "type": "integer"
+          },
+          "filled": {
+            "type": "integer"
+          },
+          "vacant": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "merger": {
+      "description": "What 7.3 folds into 42 county offices: the judecatorie and tribunal levels.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "posts",
+        "filled",
+        "annualLei",
+        "proposedOffices",
+        "provenance"
+      ],
+      "properties": {
+        "posts": {
+          "type": "integer"
+        },
+        "filled": {
+          "type": "integer"
+        },
+        "annualLei": {
+          "type": "number"
+        },
+        "proposedOffices": {
+          "const": 42
+        },
+        "provenance": {
+          "$ref": "provenance.schema.json#/$defs/provenance"
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "provenance.schema.json#/$defs/limitation"
+      }
+    }
+  }
+}
