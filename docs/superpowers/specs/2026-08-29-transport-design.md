@@ -282,18 +282,33 @@ simulator should be able to price that claim rather than assert it.
 
 ### Two hard problems, accepted up front
 
-**Rail time is not geometry.** Romanian journey times are dominated by speed restrictions, not
-by distance; the same 100 km may run in 70 minutes or 180 depending on track condition.
-Computing rail time from OSM line geometry multiplied by a design speed would produce numbers
-that are plausible and quietly wrong — exactly the failure mode this repository's gates exist to
-catch, and the same class of error as administrativ's silently dropped court rows. Therefore:
+**Rail time is track condition, not distance — and not the current timetable either.** The same
+100 km runs in 70 minutes or in 180 depending on the state of the permanent way. An earlier
+version of this section concluded from that fact that rail times must come from the published
+*Mersul Trenurilor*, and it was wrong in a way that blocked the whole layer.
 
-> **Rail journey times for existing services come from the published timetable, never from the
-> map.** Reopened or modernised lines take an assumed design speed, marked `assumed`, and the
-> limitation is declared against every output that depends on it.
+The error is one of premise. This simulator models a **counterfactual**: what the network would
+be if Romania ran it the way Denmark does. CFR's current timetable describes the system being
+reformed. Using it as the input would hard-code today's speed restrictions, today's stopping
+patterns and today's frequencies into the answer, and the model could then never show a
+rehabilitated line as anything other than the slow line it is now. It is not the missing input;
+it is the wrong one.
 
-Geometry is nonetheless free — the Geofabrik Romania extract already downloaded for roads carries
-`railway=rail` and station nodes — it is simply not trustworthy for times.
+What is genuinely fixed is **the track**, because a speed restriction is a physical fact about
+worn rail and cannot be decreed away. So condition enters as an explicit lever with a price:
+
+> **Rail journey time = line geometry × the commercial speed of the track's condition class.**
+> Two classes ship: `as-is`, at the commercial speed CFR achieves on regional lines today, and
+> `rehabilitated`, at the Danish regional standard — each with its own capital cost per
+> kilometre to reach it. Both are `assumed` and carry a named source. A rail leg may not be
+> priced at a speed its condition class does not support.
+
+This is what makes §8's claim testable rather than rhetorical. "The cheapest new capacity is
+track already in the ground" is only true if rehabilitation cost per kilometre buys more journey
+time than new bus service does, and that comparison is now a number the model produces.
+
+Geometry is free — the Geofabrik Romania extract already downloaded for roads carries
+`railway=rail` and station nodes.
 
 **The station is not the village.** Halte sit two to five kilometres outside the settlement they
 are named for, and are frequently named for a different settlement altogether. Station-to-UAT is
@@ -452,9 +467,11 @@ and was quietly incorrect.
    check. The structural check is the one that goes here.
 3. **Station↔UAT join.** Fails loudly on unmatched rows, with a documented resolution for each
    mismatch, exactly as the SIRUTA crosswalk does.
-4. **Rail time provenance.** Any rail leg whose time is geometry-derived rather than
-   timetable-derived **must** be marked `assumed`, or the build fails. This is the automated
-   guard against the §8 failure mode.
+4. **Rail time provenance.** Every rail leg is geometry-derived and **must** carry both the
+   condition class it was priced at and `assumed` provenance, or the build fails. A leg whose
+   speed exceeds its class's commercial speed fails the build. This is the automated guard
+   against the §8 failure mode — which is not "geometry was used" but "a speed was claimed that
+   the track cannot deliver".
 5. **Determinism.** Same inputs produce a byte-identical resource vector. Note administrativ's
    lesson: GeoPackage embeds a `last_change` timestamp, so a changed `.gpkg` checksum on its own
    means nothing — hash content, not files.
