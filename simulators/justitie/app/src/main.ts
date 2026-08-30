@@ -58,6 +58,21 @@ interface Limitation {
   affects: string[];
 }
 
+interface Servicii {
+  summary: {
+    comparableUnits: number;
+    meanMetresToCourt: number;
+    meanMetresToHospitalAtMost: number;
+    medianMetresToCourt: number;
+    medianMetresToHospitalAtMost: number;
+    seatsThatAreHospitalTowns: number;
+    seatsThatAreCourtTowns: number;
+    peopleFurtherFromCourt: number;
+    comparablePeople: number;
+  };
+  limitations: Limitation[];
+}
+
 interface Spitale {
   summary: {
     registerHospitals: number;
@@ -256,6 +271,7 @@ async function main(): Promise<void> {
     proiect,
     arondare,
     spitale,
+    servicii,
   ] = await Promise.all([
     fetch(`${base}data/instante.json`).then((r) => r.json() as Promise<Document>),
     fetch(`${base}data/counties.geojson`).then((r) => r.json()),
@@ -270,6 +286,7 @@ async function main(): Promise<void> {
     fetch(`${base}data/proiect.json`).then((r) => r.json() as Promise<Proiect>),
     fetch(`${base}data/arondare-noua.json`).then((r) => r.json() as Promise<ArondareNoua>),
     fetch(`${base}data/spitale.json`).then((r) => r.json() as Promise<Spitale>),
+    fetch(`${base}data/servicii.json`).then((r) => r.json() as Promise<Servicii>),
   ]);
   const countyName = (code: string): string => manifest.countyNames?.[code] ?? code;
 
@@ -825,6 +842,14 @@ async function main(): Promise<void> {
        ${sp.countiesMissing.length} județe (${sp.countiesMissing.join(', ')}), iar registrul de
        acreditare al ANMCS listează ${sp.registerInMissingCounties} de spitale exact în ele:
        lipsește localizarea lor, nu existența.</p>
+     <p class="disagree">Aceleași ${ro.format(servicii.summary.comparableUnits)} de sedii,
+       măsurate față de ambele rețele: ${servicii.summary.seatsThatAreHospitalTowns} sunt deja
+       orașe cu spital, dar doar ${servicii.summary.seatsThatAreCourtTowns} ar fi orașe cu
+       instanță. Mediana drumului ar fi
+       ${Math.round(servicii.summary.medianMetresToCourt / 1000)} km până la instanță și
+       ${Math.round(servicii.summary.medianMetresToHospitalAtMost / 1000)} km până la spital —
+       rețeaua de justiție ar fi mult mai rară decât cea de sănătate. Distanțele la spital sunt
+       limite de sus: un spital nemarcat scurtează drumul, nu îl lungește.</p>
      <p class="disagree">Invers, ${Math.round(
        100 - (100 * sp.hospitalsInCourtSeatTowns) / sp.located,
      )}% dintre spitale nu sunt în orașul unui sediu. Concentrarea serviciilor în 42 de orașe
@@ -1073,6 +1098,7 @@ async function main(): Promise<void> {
     ...proiect.limitations,
     ...arondare.limitations,
     ...spitale.limitations,
+    ...servicii.limitations,
   ];
   const blocking = allLimits.filter((l) => l.severity === 'blocking');
   const rest = allLimits.filter((l) => l.severity !== 'blocking');

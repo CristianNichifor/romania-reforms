@@ -43,6 +43,7 @@ const sources = [
   [resolve(here, '../../data/court-distance.json'), 'court-distance.json'],
   // Hospitals, as the only county-scale service with a public national register.
   [resolve(here, '../../data/spitale-2026.json'), 'spitale.json'],
+  [resolve(here, '../../data/acces-servicii.json'), 'servicii.json'],
   [resolve(here, '../../data/court-distance.bin'), 'court-distance.bin'],
   // The administrative model's own payload, so the merge can be re-run here as the reader
   // moves the sliders. Copied rather than fetched across from the administrative site: 1,6 MB

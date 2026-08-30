@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/acces-servicii.schema.json",
+  "title": "Distance to a court against distance to a hospital",
+  "description": "The same consolidated units measured against two networks on the same road graph: 42 proposed courts and the located hospitals. Hospital distances are upper bounds, because the ministry's map omits 52 hospitals and an unplotted hospital can only shorten the true journey. Units in the six unmapped counties are kept and excluded from the comparison.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "title", "publisher", "period", "provenance", "summary", "units", "limitations"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "const": "acces-servicii" },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "period": { "type": "string" },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "units", "comparableUnits", "comparablePeople",
+        "meanMetresToCourt", "meanMetresToHospitalAtMost",
+        "medianMetresToCourt", "medianMetresToHospitalAtMost",
+        "seatsThatAreHospitalTowns", "seatsThatAreCourtTowns",
+        "unitsFurtherFromCourt", "peopleFurtherFromCourt", "hospitalTowns"
+      ],
+      "properties": {
+        "units": { "type": "integer", "exclusiveMinimum": 0 },
+        "comparableUnits": { "type": "integer", "exclusiveMinimum": 0 },
+        "comparablePeople": { "type": "integer", "exclusiveMinimum": 0 },
+        "meanMetresToCourt": { "type": "number", "minimum": 0 },
+        "meanMetresToHospitalAtMost": {
+          "description": "An upper bound. Unplotted hospitals can only shorten the real journey.",
+          "type": "number", "minimum": 0
+        },
+        "medianMetresToCourt": { "type": "number", "minimum": 0 },
+        "medianMetresToHospitalAtMost": { "type": "number", "minimum": 0 },
+        "seatsThatAreHospitalTowns": {
+          "description": "The comparison that cannot be an artefact of seat choice: one set of seats, both networks.",
+          "type": "integer", "minimum": 0
+        },
+        "seatsThatAreCourtTowns": { "type": "integer", "minimum": 0 },
+        "unitsFurtherFromCourt": { "type": "integer", "minimum": 0 },
+        "peopleFurtherFromCourt": { "type": "integer", "minimum": 0 },
+        "hospitalTowns": { "type": "integer", "exclusiveMinimum": 0 }
+      }
+    },
+    "units": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["siruta", "name", "county", "population", "courtMetres", "hospitalMetresAtMost", "comparable"],
+        "properties": {
+          "siruta": { "type": "string" },
+          "name": { "type": "string" },
+          "county": { "type": "string" },
+          "population": { "type": "integer", "minimum": 0 },
+          "courtMetres": { "type": "number", "minimum": 0 },
+          "hospitalMetresAtMost": { "type": "number", "minimum": 0 },
+          "comparable": { "type": "boolean" }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array", "minItems": 1,
+      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+    }
+  }
+}
