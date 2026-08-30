@@ -44,13 +44,15 @@ def main() -> int:
     from pipeline.reference_model import Params, load_data, run  # noqa: PLC0415
 
     spitale_file = ROOT / "data" / "spitale-2026.json"
+    politie_file = ROOT / "data" / "politie-osm.json"
     courts_file = ROOT / "data" / "court-distance.json"
     edges_file = ADMINISTRATIV / "data" / "processed" / "road_distance.parquet"
-    for path in (spitale_file, courts_file, edges_file):
+    for path in (spitale_file, politie_file, courts_file, edges_file):
         if not path.exists():
             raise SystemExit(f"Missing {path}")
 
     spitale = json.loads(spitale_file.read_text(encoding="utf-8"))
+    politie = json.loads(politie_file.read_text(encoding="utf-8"))
     courts = json.loads(courts_file.read_text(encoding="utf-8"))
     data = load_data()
 
@@ -81,6 +83,13 @@ def main() -> int:
         graph, directed=False, indices=[index_of[s] for s in hospital_seats], min_only=True
     )
 
+    police_seats = sorted(
+        {s["siruta"] for s in politie["stations"] if s["siruta"] and s["siruta"] in index_of}
+    )
+    to_police = dijkstra(
+        graph, directed=False, indices=[index_of[s] for s in police_seats], min_only=True
+    )
+
     court_seats = [c["siruta"] for c in courts["courts"]]
     county_of_seat = {c["siruta"]: c["county"] for c in courts["courts"]}
     court_matrix = dijkstra(graph, directed=False, indices=[index_of[s] for s in court_seats])
@@ -94,7 +103,8 @@ def main() -> int:
         column = index_of[seat]
         court_m = float(to_court[column])
         hospital_m = float(to_hospital[column])
-        if not np.isfinite(court_m) or not np.isfinite(hospital_m):
+        police_m = float(to_police[column])
+        if not all(np.isfinite(x) for x in (court_m, hospital_m, police_m)):
             continue
         units.append(
             {
@@ -104,6 +114,7 @@ def main() -> int:
                 "population": sum(data.population[m] for m in members),
                 "courtMetres": round(court_m),
                 "hospitalMetresAtMost": round(hospital_m),
+                "policeMetresAtMost": round(police_m),
                 # True only where the map is complete enough for the comparison to mean
                 # anything; a unit near an unplotted hospital would read as further from care
                 # than it is.
@@ -130,6 +141,10 @@ def main() -> int:
             return ordered[middle]
         return (ordered[middle - 1] + ordered[middle]) // 2
 
+    # Police cover all 42 counties, so unlike hospitals they need no county exclusion; the
+    # median is taken over every routed unit rather than the comparable subset.
+    median_police = median([u["policeMetresAtMost"] for u in units])
+    seat_has_police = sum(1 for u in units if u["policeMetresAtMost"] == 0)
     median_court = median([u["courtMetres"] for u in comparable])
     median_hospital = median([u["hospitalMetresAtMost"] for u in comparable])
     # The same seats measured against both networks: this is the comparison that cannot be an
@@ -145,6 +160,8 @@ def main() -> int:
           f"{median_hospital / 1000:.1f} km la spital")
     print(f"sedii care sunt deja oraș cu spital: {seat_has_hospital} din {len(comparable)}; "
           f"oraș cu instanță: {seat_has_court}")
+    print(f"sedii cu secție de poliție: {seat_has_police} din {len(units)}   "
+          f"mediana la poliție: cel mult {median_police / 1000:.1f} km")
     print(f"unități mai departe de instanță decât de spital: {len(further_to_court)} "
           f"({100 * people_further / people:.0f}% din locuitori)")
 
@@ -172,6 +189,9 @@ def main() -> int:
             "medianMetresToHospitalAtMost": median_hospital,
             "seatsThatAreHospitalTowns": seat_has_hospital,
             "seatsThatAreCourtTowns": seat_has_court,
+            "medianMetresToPoliceAtMost": median_police,
+            "seatsThatArePoliceTowns": seat_has_police,
+            "policeTowns": len(police_seats),
             "unitsFurtherFromCourt": len(further_to_court),
             "peopleFurtherFromCourt": people_further,
             "hospitalTowns": len(hospital_seats),
@@ -211,6 +231,16 @@ def main() -> int:
                 ),
                 "severity": "material",
                 "affects": ["acces"],
+            },
+            {
+                "id": "politia-e-din-osm",
+                "text": (
+                    "Punctele de poliție vin din OpenStreetMap, fiindcă niciun registru public "
+                    "nu le publică. Acoperirea e națională, dar colaborativă și neverificabilă, "
+                    "deci distanțele la poliție sunt tot limite de sus."
+                ),
+                "severity": "material",
+                "affects": ["acces", "colocare"],
             },
             {
                 "id": "o-instanta-nu-e-o-urgenta",

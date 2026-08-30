@@ -67,8 +67,22 @@ interface Servicii {
     medianMetresToHospitalAtMost: number;
     seatsThatAreHospitalTowns: number;
     seatsThatAreCourtTowns: number;
+    seatsThatArePoliceTowns: number;
+    medianMetresToPoliceAtMost: number;
+    units: number;
     peopleFurtherFromCourt: number;
     comparablePeople: number;
+  };
+  limitations: Limitation[];
+}
+
+interface Politie {
+  summary: {
+    stations: number;
+    countiesCovered: number;
+    uatsWithStation: number;
+    courtSeatsWithStation: number;
+    courtSeats: number;
   };
   limitations: Limitation[];
 }
@@ -272,6 +286,7 @@ async function main(): Promise<void> {
     arondare,
     spitale,
     servicii,
+    politie,
   ] = await Promise.all([
     fetch(`${base}data/instante.json`).then((r) => r.json() as Promise<Document>),
     fetch(`${base}data/counties.geojson`).then((r) => r.json()),
@@ -287,6 +302,7 @@ async function main(): Promise<void> {
     fetch(`${base}data/arondare-noua.json`).then((r) => r.json() as Promise<ArondareNoua>),
     fetch(`${base}data/spitale.json`).then((r) => r.json() as Promise<Spitale>),
     fetch(`${base}data/servicii.json`).then((r) => r.json() as Promise<Servicii>),
+    fetch(`${base}data/politie.json`).then((r) => r.json() as Promise<Politie>),
   ]);
   const countyName = (code: string): string => manifest.countyNames?.[code] ?? code;
 
@@ -842,14 +858,26 @@ async function main(): Promise<void> {
        ${sp.countiesMissing.length} județe (${sp.countiesMissing.join(', ')}), iar registrul de
        acreditare al ANMCS listează ${sp.registerInMissingCounties} de spitale exact în ele:
        lipsește localizarea lor, nu existența.</p>
-     <p class="disagree">Aceleași ${ro.format(servicii.summary.comparableUnits)} de sedii,
-       măsurate față de ambele rețele: ${servicii.summary.seatsThatAreHospitalTowns} sunt deja
-       orașe cu spital, dar doar ${servicii.summary.seatsThatAreCourtTowns} ar fi orașe cu
-       instanță. Mediana drumului ar fi
-       ${Math.round(servicii.summary.medianMetresToCourt / 1000)} km până la instanță și
-       ${Math.round(servicii.summary.medianMetresToHospitalAtMost / 1000)} km până la spital —
-       rețeaua de justiție ar fi mult mai rară decât cea de sănătate. Distanțele la spital sunt
-       limite de sus: un spital nemarcat scurtează drumul, nu îl lungește.</p>
+     <p class="disagree">Poliția, din OpenStreetMap fiindcă niciun registru nu o publică:
+       ${ro.format(politie.summary.stations)} de secții, în toate cele
+       ${politie.summary.countiesCovered} de județe și în
+       ${ro.format(politie.summary.uatsWithStation)} de UAT-uri. Toate cele
+       ${politie.summary.courtSeatsWithStation} din ${politie.summary.courtSeats} de sedii
+       propuse au deja secție — iar asta rezistă la o hartă incompletă: punctele lipsă ar face
+       potrivirea mai grea, nu mai ușoară.</p>
+     <p class="disagree">Aceleași sedii, față de toate trei rețelele:
+       ${servicii.summary.seatsThatArePoliceTowns} din ${ro.format(servicii.summary.units)} au
+       poliție, ${servicii.summary.seatsThatAreHospitalTowns} din
+       ${ro.format(servicii.summary.comparableUnits)} au spital, dar doar
+       ${servicii.summary.seatsThatAreCourtTowns} ar avea instanță. Orașele pe care reforma le
+       alege sunt deja centre de poliție și de sănătate; singurul lucru care le-ar lipsi e
+       instanța.</p>
+     <p class="disagree">În kilometri, mediana drumului ar fi
+       ${Math.round(servicii.summary.medianMetresToCourt / 1000)} km până la instanță, față de
+       ${Math.round(servicii.summary.medianMetresToPoliceAtMost / 1000)} km până la poliție și
+       ${Math.round(servicii.summary.medianMetresToHospitalAtMost / 1000)} km până la spital.
+       Rețeaua de justiție ar fi mult mai rară decât celelalte două. Ambele distanțe din urmă
+       sunt limite de sus: un punct nemarcat scurtează drumul, nu îl lungește.</p>
      <p class="disagree">Invers, ${Math.round(
        100 - (100 * sp.hospitalsInCourtSeatTowns) / sp.located,
      )}% dintre spitale nu sunt în orașul unui sediu. Concentrarea serviciilor în 42 de orașe
@@ -1099,6 +1127,7 @@ async function main(): Promise<void> {
     ...arondare.limitations,
     ...spitale.limitations,
     ...servicii.limitations,
+    ...politie.limitations,
   ];
   const blocking = allLimits.filter((l) => l.severity === 'blocking');
   const rest = allLimits.filter((l) => l.severity !== 'blocking');

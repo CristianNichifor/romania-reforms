@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/politie.schema.json",
+  "title": "Police stations, from OpenStreetMap",
+  "description": "No public register lists police stations, so these come from OSM — the same project the road graph comes from. Presence, not rank: the tagging does not reliably distinguish a county inspectorate from a village post. That every court seat has a station is robust to patchy mapping; any distance computed from these points is an upper bound.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "period",
+    "provenance",
+    "summary",
+    "stations",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "const": "politie-osm"
+    },
+    "title": {
+      "type": "string"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "period": {
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json#/$defs/provenance"
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stations",
+        "located",
+        "countiesCovered",
+        "countiesTotal",
+        "uatsWithStation",
+        "uatsTotal",
+        "courtSeatsWithStation",
+        "courtSeats",
+        "unnamed"
+      ],
+      "properties": {
+        "stations": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "located": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "countiesCovered": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "countiesTotal": {
+          "type": "integer",
+          "const": 42
+        },
+        "uatsWithStation": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "uatsTotal": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "courtSeatsWithStation": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "courtSeats": {
+          "type": "integer",
+          "const": 42
+        },
+        "unnamed": {
+          "description": "Features with no name tag. Kept: an unnamed station is still a station.",
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "stations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "operator",
+          "osm",
+          "lat",
+          "lng",
+          "siruta",
+          "uat",
+          "county"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string"
+          },
+          "osm": {
+            "type": "string"
+          },
+          "lat": {
+            "type": "number"
+          },
+          "lng": {
+            "type": "number"
+          },
+          "siruta": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "uat": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "county": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "provenance.schema.json#/$defs/limitation"
+      }
+    }
+  }
+}

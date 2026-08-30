@@ -5,65 +5,176 @@
   "description": "The same consolidated units measured against two networks on the same road graph: 42 proposed courts and the located hospitals. Hospital distances are upper bounds, because the ministry's map omits 52 hospitals and an unplotted hospital can only shorten the true journey. Units in the six unmapped counties are kept and excluded from the comparison.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "title", "publisher", "period", "provenance", "summary", "units", "limitations"],
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "period",
+    "provenance",
+    "summary",
+    "units",
+    "limitations"
+  ],
   "properties": {
-    "$schema": { "type": "string" },
-    "id": { "const": "acces-servicii" },
-    "title": { "type": "string" },
-    "publisher": { "type": "string" },
-    "period": { "type": "string" },
-    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "const": "acces-servicii"
+    },
+    "title": {
+      "type": "string"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "period": {
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json#/$defs/provenance"
+    },
     "summary": {
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "units", "comparableUnits", "comparablePeople",
-        "meanMetresToCourt", "meanMetresToHospitalAtMost",
-        "medianMetresToCourt", "medianMetresToHospitalAtMost",
-        "seatsThatAreHospitalTowns", "seatsThatAreCourtTowns",
-        "unitsFurtherFromCourt", "peopleFurtherFromCourt", "hospitalTowns"
+        "units",
+        "comparableUnits",
+        "comparablePeople",
+        "meanMetresToCourt",
+        "meanMetresToHospitalAtMost",
+        "medianMetresToCourt",
+        "medianMetresToHospitalAtMost",
+        "seatsThatAreHospitalTowns",
+        "seatsThatAreCourtTowns",
+        "unitsFurtherFromCourt",
+        "peopleFurtherFromCourt",
+        "hospitalTowns",
+        "medianMetresToPoliceAtMost",
+        "seatsThatArePoliceTowns",
+        "policeTowns"
       ],
       "properties": {
-        "units": { "type": "integer", "exclusiveMinimum": 0 },
-        "comparableUnits": { "type": "integer", "exclusiveMinimum": 0 },
-        "comparablePeople": { "type": "integer", "exclusiveMinimum": 0 },
-        "meanMetresToCourt": { "type": "number", "minimum": 0 },
+        "units": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "comparableUnits": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "comparablePeople": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "meanMetresToCourt": {
+          "type": "number",
+          "minimum": 0
+        },
         "meanMetresToHospitalAtMost": {
           "description": "An upper bound. Unplotted hospitals can only shorten the real journey.",
-          "type": "number", "minimum": 0
+          "type": "number",
+          "minimum": 0
         },
-        "medianMetresToCourt": { "type": "number", "minimum": 0 },
-        "medianMetresToHospitalAtMost": { "type": "number", "minimum": 0 },
+        "medianMetresToCourt": {
+          "type": "number",
+          "minimum": 0
+        },
+        "medianMetresToHospitalAtMost": {
+          "type": "number",
+          "minimum": 0
+        },
         "seatsThatAreHospitalTowns": {
           "description": "The comparison that cannot be an artefact of seat choice: one set of seats, both networks.",
-          "type": "integer", "minimum": 0
+          "type": "integer",
+          "minimum": 0
         },
-        "seatsThatAreCourtTowns": { "type": "integer", "minimum": 0 },
-        "unitsFurtherFromCourt": { "type": "integer", "minimum": 0 },
-        "peopleFurtherFromCourt": { "type": "integer", "minimum": 0 },
-        "hospitalTowns": { "type": "integer", "exclusiveMinimum": 0 }
+        "seatsThatAreCourtTowns": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unitsFurtherFromCourt": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "peopleFurtherFromCourt": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "hospitalTowns": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "medianMetresToPoliceAtMost": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Upper bound: an unmapped station can only shorten the journey."
+        },
+        "seatsThatArePoliceTowns": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Over every routed unit — police cover all 42 counties, so no exclusion applies."
+        },
+        "policeTowns": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        }
       }
     },
     "units": {
-      "type": "array", "minItems": 1,
+      "type": "array",
+      "minItems": 1,
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["siruta", "name", "county", "population", "courtMetres", "hospitalMetresAtMost", "comparable"],
+        "required": [
+          "siruta",
+          "name",
+          "county",
+          "population",
+          "courtMetres",
+          "hospitalMetresAtMost",
+          "comparable",
+          "policeMetresAtMost"
+        ],
         "properties": {
-          "siruta": { "type": "string" },
-          "name": { "type": "string" },
-          "county": { "type": "string" },
-          "population": { "type": "integer", "minimum": 0 },
-          "courtMetres": { "type": "number", "minimum": 0 },
-          "hospitalMetresAtMost": { "type": "number", "minimum": 0 },
-          "comparable": { "type": "boolean" }
+          "siruta": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "county": {
+            "type": "string"
+          },
+          "population": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "courtMetres": {
+            "type": "number",
+            "minimum": 0
+          },
+          "hospitalMetresAtMost": {
+            "type": "number",
+            "minimum": 0
+          },
+          "comparable": {
+            "type": "boolean"
+          },
+          "policeMetresAtMost": {
+            "type": "number",
+            "minimum": 0
+          }
         }
       }
     },
     "limitations": {
-      "type": "array", "minItems": 1,
-      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "provenance.schema.json#/$defs/limitation"
+      }
     }
   }
 }

@@ -80,6 +80,25 @@ def test_the_hospital_network_is_denser_than_the_proposed_court_network(servicii
     assert summary["medianMetresToHospitalAtMost"] < summary["medianMetresToCourt"]
 
 
+def test_police_join_the_comparison_without_a_county_exclusion(servicii):
+    """Police cover all 42 counties, so unlike hospitals every routed unit counts.
+
+    The three-way seat count is the finding: the towns the reform picks are already policing
+    and health centres, and the only thing they would not be is court towns.
+    """
+    summary = servicii["summary"]
+    units = servicii["units"]
+    assert summary["seatsThatArePoliceTowns"] == sum(
+        1 for u in units if u["policeMetresAtMost"] == 0
+    )
+    assert summary["seatsThatArePoliceTowns"] > summary["seatsThatAreCourtTowns"]
+    assert summary["medianMetresToPoliceAtMost"] < summary["medianMetresToCourt"]
+
+
+def test_the_police_source_is_declared(servicii):
+    assert "politia-e-din-osm" in {x["id"] for x in servicii["limitations"]}
+
+
 def test_hospital_distances_are_upper_bounds_and_say_so(servicii):
     """The direction of the error is the whole licence for the comparison: an unplotted
     hospital shortens the true journey, so a court that looks nearer here really is."""
