@@ -81,6 +81,7 @@ SIMULATED = {
         "arondare-noua",
         "parchete-2025",
         "parchete-comasare",
+        "parchete-regiuni",
         "acces-servicii",
     ],
     10: ["indemnizatii-2022", "sporuri-2025", "costuri-proiect-2026"],

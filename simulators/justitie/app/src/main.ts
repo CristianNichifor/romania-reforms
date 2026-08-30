@@ -179,6 +179,31 @@ interface Eficienta {
   limitations: Limitation[];
 }
 
+interface ParcheteRegiuni {
+  summary: {
+    officesBefore: number;
+    officesAfter: number;
+    absorbed: number;
+    totalVolume: number;
+    nationalPerProsecutor: number;
+    spreadBefore: { maxOverMin: number };
+    spreadAfter: { maxOverMin: number };
+    heaviestToday: string;
+    heaviestTodayPerProsecutor: number;
+    biggestToday: string;
+    biggestTodayVolume: number;
+    biggestTodayPerProsecutor: number;
+    structure: {
+      todayLower: number;
+      todayAppellate: number;
+      proposedCounty: number;
+      proposedRegional: number;
+    };
+  };
+  regions: { region: string; seat: string; volume: number; prosecutors: number; perProsecutor: number }[];
+  limitations: Limitation[];
+}
+
 interface Incarcatura {
   summary: {
     courtsBefore: number;
@@ -554,6 +579,7 @@ async function main(): Promise<void> {
     danemarca,
     comasare,
     incarcatura,
+    parcheteRegiuni,
   ] = await Promise.all([
     fetch(`${base}data/instante.json`).then((r) => r.json() as Promise<Document>),
     fetch(`${base}data/counties.geojson`).then((r) => r.json()),
@@ -578,6 +604,7 @@ async function main(): Promise<void> {
     fetch(`${base}data/danemarca.json`).then((r) => r.json() as Promise<Danemarca>),
     fetch(`${base}data/parchete-comasare.json`).then((r) => r.json() as Promise<ParcheteComasare>),
     fetch(`${base}data/incarcatura.json`).then((r) => r.json() as Promise<Incarcatura>),
+    fetch(`${base}data/parchete-regiuni.json`).then((r) => r.json() as Promise<ParcheteRegiuni>),
   ]);
   const countyName = (code: string): string => manifest.countyNames?.[code] ?? code;
 
@@ -1739,6 +1766,7 @@ async function main(): Promise<void> {
   // Presented with the concentration it also causes, because reporting only the favourable half
   // would be the same fault the page spends the rest of its length pointing at.
   const cm = comasare.summary;
+  const pr = parcheteRegiuni;
   el('#comasare-chev').textContent =
     `${dec(cm.spreadBefore.maxOverMin, 1)}× → ${dec(cm.spreadAfter.maxOverMin, 1)}×`;
   el('#comasare-body').innerHTML =
@@ -1781,7 +1809,47 @@ async function main(): Promise<void> {
        sunt adunate, deși unul de la tribunal nu e cât unul de la judecătorie — comasarea
        propusă exact asta presupune. Se numără dosare de soluționat, nu muncă dusă la capăt.
        Și comasarea e pe județ, fiindcă asta scrie în 7.3: spre deosebire de instanțe, parchetele
-       nu se pot aronda după distanță, pentru că nu se publică ce comune acoperă fiecare.</p>`;
+       nu se pot aronda după distanță, pentru că nu se publică ce comune acoperă fiecare.</p>
+     <h4 class="sub-head">Și nivelul de deasupra, pe regiuni</h4>
+     <p class="note"><strong>Variantă, nu lucrarea.</strong> 7.3 lasă cele
+       ${pr.summary.officesBefore} parchete de pe lângă curțile de apel neatinse. Dar
+       parchetele sunt organizate în oglinda instanțelor, iar pagina asta propune deja
+       ${pr.summary.officesAfter} curți de apel pe regiunile de dezvoltare: a regionaliza
+       instanțele și a lăsa parchetele pe harta veche ar rupe tocmai oglinda. Serviciul ar
+       arăta așa: <strong>${pr.summary.structure.proposedCounty} județene</strong> lângă
+       instanțele județene, <strong>${pr.summary.structure.proposedRegional} regionale</strong>
+       lângă curțile regionale, Ministerul Public deasupra — de la
+       ${pr.summary.structure.todayLower} + ${pr.summary.structure.todayAppellate} + 1 la
+       ${pr.summary.structure.proposedCounty} + ${pr.summary.structure.proposedRegional} + 1.</p>
+     <div class="pens-row">
+       <span class="pens-head">regiune</span>
+       <span class="pens-head">dosare</span>
+       <span class="pens-head">procurori</span>
+       <span class="pens-head">pe procuror</span>
+       ${[...pr.regions]
+         .sort((a, b) => b.volume - a.volume)
+         .map(
+           (r) =>
+             `<span>${r.region}</span>
+              <span>${ro.format(r.volume)}</span>
+              <span>${r.prosecutors}</span>
+              <span>${ro.format(Math.round(r.perProsecutor))}</span>`,
+         )
+         .join('')}
+     </div>
+     <p class="disagree"><strong>Aici e mai puțin de reparat decât un nivel mai jos.</strong>
+       Comasarea județeană a strâns împrăștierea de la ${dec(cm.spreadBefore.maxOverMin, 1)}× la
+       ${dec(cm.spreadAfter.maxOverMin, 1)}×. Nivelul de apel pornește deja de la
+       ${dec(pr.summary.spreadBefore.maxOverMin, 1)}× și ajunge la
+       ${dec(pr.summary.spreadAfter.maxOverMin, 1)}×. Merită făcut, dar argumentul de
+       încărcătură care susține comasarea județeană nu susține la fel regionalizarea apelului.</p>
+     <p class="disagree"><strong>Ciudățenia nivelului e că încărcătura merge invers.</strong>
+       ${town(pr.summary.biggestToday)} are cel mai mare volum din țară
+       (${ro.format(pr.summary.biggestTodayVolume)} de dosare) și <em>cea mai mică</em>
+       încărcătură — ${ro.format(Math.round(pr.summary.biggestTodayPerProsecutor))} de dosare pe
+       procuror — fiindcă are de departe cei mai mulți procurori. ${town(pr.summary.heaviestToday)} are
+       ${ro.format(Math.round(pr.summary.heaviestTodayPerProsecutor))}. Comasarea mută granițele,
+       nu oamenii: inversiunea rămâne și după. Ce ar fi de reparat nu e harta, ci schema.</p>`;
 
   // Chapters 4-5. The paper's judicial map rests on one sentence in 5.1, and the sentence can
   // be checked against the paper's own Danish counts — which is a narrower test than it looks,
@@ -2301,6 +2369,7 @@ async function main(): Promise<void> {
     ...danemarca.limitations,
     ...comasare.limitations,
     ...incarcatura.limitations,
+    ...parcheteRegiuni.limitations,
   ];
   const blocking = allLimits.filter((l) => l.severity === 'blocking');
   const rest = allLimits.filter((l) => l.severity !== 'blocking');
