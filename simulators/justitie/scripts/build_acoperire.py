@@ -86,7 +86,14 @@ SIMULATED = {
     10: ["indemnizatii-2022", "sporuri-2025", "costuri-proiect-2026"],
     11: ["pensii-2025", "pensii-comparatie"],
     16: ["resurse-necesare"],
-    12: ["costuri-2025", "acces-2025", "arondare-noua", "eficienta-csm", "personal-2025"],
+    12: [
+        "costuri-2025",
+        "acces-2025",
+        "arondare-noua",
+        "eficienta-csm",
+        "personal-2025",
+        "incarcatura-noua",
+    ],
 }
 
 # Carried as the paper's own text in design-reforma.

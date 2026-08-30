@@ -179,6 +179,28 @@ interface Eficienta {
   limitations: Limitation[];
 }
 
+interface Incarcatura {
+  summary: {
+    courtsBefore: number;
+    courtsAfter: number;
+    invariantShare: number;
+    totalVolume: number;
+    judgesNeeded: number;
+    loadPerJudge: number;
+    spreadToday: { min: number; max: number; median: number; maxOverMin: number; p90OverP10: number };
+    spreadAfter: { min: number; max: number; median: number; maxOverMin: number; p90OverP10: number };
+    spreadPerCapita: { maxOverMin: number; p90OverP10: number };
+    busiest: string;
+    busiestVolume: number;
+    busiestShareOfTotal: number;
+    busiestJudges: number;
+    quietest: string;
+    quietestVolume: number;
+  };
+  courts: { name: string; county: string; volume: number; judgesAtNationalLoad: number }[];
+  limitations: Limitation[];
+}
+
 interface ParcheteComasare {
   summary: {
     officesBefore: number;
@@ -531,6 +553,7 @@ async function main(): Promise<void> {
     resurse,
     danemarca,
     comasare,
+    incarcatura,
   ] = await Promise.all([
     fetch(`${base}data/instante.json`).then((r) => r.json() as Promise<Document>),
     fetch(`${base}data/counties.geojson`).then((r) => r.json()),
@@ -554,6 +577,7 @@ async function main(): Promise<void> {
     fetch(`${base}data/resurse.json`).then((r) => r.json() as Promise<Resurse>),
     fetch(`${base}data/danemarca.json`).then((r) => r.json() as Promise<Danemarca>),
     fetch(`${base}data/parchete-comasare.json`).then((r) => r.json() as Promise<ParcheteComasare>),
+    fetch(`${base}data/incarcatura.json`).then((r) => r.json() as Promise<Incarcatura>),
   ]);
   const countyName = (code: string): string => manifest.countyNames?.[code] ?? code;
 
@@ -1594,6 +1618,59 @@ async function main(): Promise<void> {
        )}% peste ele. Salariile nu sunt bugetul justiției, iar procentul din buget ar fi mai
        mic — dar este singurul numitor pe care pagina îl poate calcula din surse citabile.</p>`;
 
+  // The question a court president asks first, and the one the map never answered: not how many
+  // judges the country needs, but what this court would have to judge.
+  const ic = incarcatura.summary;
+  // Seat names arrive from the UAT register shouting — "MUNICIPIUL MIERCUREA CIUC" — which is
+  // fine in a table and wrong in the middle of a sentence.
+  const town = (name: string): string =>
+    name
+      .replace(/^(MUNICIPIUL|ORAȘ(?:UL)?|COMUNA)\s+/, '')
+      .toLocaleLowerCase('ro-RO')
+      .replace(/(^|[\s-])(\p{L})/gu, (_, sep: string, ch: string) => sep + ch.toLocaleUpperCase('ro-RO'));
+  el('#incarcatura-chev').textContent =
+    `${ro.format(Math.round(ic.spreadAfter.median))} dosare median`;
+  el('#incarcatura-body').innerHTML =
+    `<p class="note">Volumul fiecărei judecătorii, luat din raportul CSM, e împărțit pe comunele
+       pe care le arondează HG 1217/2023, mutat în unitățile consolidate și adunat pe cele
+       ${ic.courtsAfter} de sedii. Rezultă ${ro.format(ic.totalVolume)} de dosare și
+       ${ro.format(Math.round(ic.judgesNeeded))} de judecători la încărcătura medie de azi
+       (${ro.format(Math.round(ic.loadPerJudge))} de dosare).</p>
+     <div class="pens-row">
+       <span class="pens-head">dosare/instanță</span>
+       <span class="pens-head">min</span>
+       <span class="pens-head">mediana</span>
+       <span class="pens-head">max</span>
+       <span>azi, ${ic.courtsBefore} judecătorii</span>
+       <span>${ro.format(Math.round(ic.spreadToday.min))}</span>
+       <span>${ro.format(Math.round(ic.spreadToday.median))}</span>
+       <span>${ro.format(Math.round(ic.spreadToday.max))}</span>
+       <span>după, ${ic.courtsAfter} instanțe</span>
+       <span>${ro.format(Math.round(ic.spreadAfter.min))}</span>
+       <span>${ro.format(Math.round(ic.spreadAfter.median))}</span>
+       <span>${ro.format(Math.round(ic.spreadAfter.max))}</span>
+     </div>
+     <p class="disagree"><strong>Strânge mijlocul, lasă vârful.</strong> Între instanțele de
+       azi, a noua zecime duce de ${dec(ic.spreadToday.p90OverP10, 1)} ori mai multe dosare
+       decât prima; între cele ${ic.courtsAfter} propuse, de
+       ${dec(ic.spreadAfter.p90OverP10, 1)}. Dar raportul dintre cea mai mare și cea mai mică
+       scade doar de la ${dec(ic.spreadToday.maxOverMin, 1)} la
+       ${dec(ic.spreadAfter.maxOverMin, 1)}, fiindcă punând laolaltă cele șase judecătorii de
+       sector și tribunalul, Bucureștiul devine o singură instanță cu
+       ${ro.format(ic.busiestVolume)} de dosare — ${dec(ic.busiestShareOfTotal * 100, 1)}% din
+       țară și ${ro.format(Math.round(ic.busiestJudges))} de judecători. Cea mai liniștită,
+       ${town(ic.quietest)}, are ${ro.format(ic.quietestVolume)}.</p>
+     <p class="disagree"><strong>Inegalitatea rămasă e a hărții județene, nu a comasării.</strong>
+       Dosarele la mia de locuitori variază între instanțele propuse doar de
+       ${dec(ic.spreadPerCapita.p90OverP10, 2)} ori de la a noua zecime la prima — mult mai
+       puțin decât volumul. Mărimea unei instanțe ține deci de câți oameni deservește, nu de cât
+       se judecă acolo.</p>
+     <p class="disagree"><strong>Cât din asta e aritmetică.</strong> Dosarele unei judecătorii
+       se împart pe comune după populație, fiindcă nu se publică de unde vine fiecare dosar.
+       Dar ${dec(ic.invariantShare * 100, 1)}% din volum merge întreg la o singură instanță
+       propusă — pentru partea aceea, împărțirea nu contează deloc. Restul de
+       ${dec((1 - ic.invariantShare) * 100, 1)}% e singurul care depinde de ea.</p>`;
+
   // The one finding on this page that goes the paper's way — and an argument it never makes.
   // Presented with the concentration it also causes, because reporting only the favourable half
   // would be the same fault the page spends the rest of its length pointing at.
@@ -2133,6 +2210,7 @@ async function main(): Promise<void> {
     ['resurse-fold', 16, 'ambele'],
     ['danemarca-fold', 5, 'simulare'],
     ['comasare-fold', 7, 'simulare'],
+    ['incarcatura-fold', 12, 'simulare'],
   ].forEach(([id, chapter, kind]) =>
     badge(id as string, chapter as number, kind as 'politică' | 'simulare' | 'ambele'),
   );
@@ -2158,6 +2236,7 @@ async function main(): Promise<void> {
     ...resurse.limitations,
     ...danemarca.limitations,
     ...comasare.limitations,
+    ...incarcatura.limitations,
   ];
   const blocking = allLimits.filter((l) => l.severity === 'blocking');
   const rest = allLimits.filter((l) => l.severity !== 'blocking');
