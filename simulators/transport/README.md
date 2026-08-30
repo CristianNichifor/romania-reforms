@@ -154,20 +154,27 @@ the exact split no Romanian bus source would yield.
 ### Sanity checks
 
 ```
-driver share of operating     25%    expect ~24%        ok
+driver share of operating     29%    expect ~24%        ok
+operating cost per bus-km    6,87    expect ~9,0 RON    ok
 commercial speed             36,8    expect 25-40 km/h  ok
-operating cost per bus-km    6,47    0,92x Buzau at 20 seats
+km per bus per year         62.752   real range 60-80k  ok
 ```
 
-Two of these pass only because earlier versions were wrong, and the corrections are the useful
-part.
+All four pass, and two of them only because earlier versions were wrong. The corrections are
+the useful part.
 
-**The Buzău benchmark does not normalise across fleets.** ANRSC divides cost per vehicle-km by
-average **seats**, and cost per km does not scale with seats — a 40-seat bus does not cost what
-two 20-seat buses cost. An earlier version of this file claimed the model was 2,3× too low
-against that benchmark. It was comparing at *our* mean of 41 seats; county programmes specify
-capacities in the 20s, where the model sits at 0,92×. That bad comparison sent me chasing
-maintenance and utilisation for a gap that was an artefact of the comparison itself.
+**The Buzău benchmark is recorded, not used.** Consiliul Județean Buzău approved 0,35
+lei/km/loc in 2025 — the only Romanian operating figure this project found. It cannot be
+converted: ANRSC divides cost per vehicle-km by average **seats**, and cost per kilometre does
+not scale with seats, so multiplying by a seat count corresponds to nothing. Converting would
+need their fleet composition, which is in a scanned PDF.
+
+It was carried as a failing check for most of this project — first as "the model is 2,3× too
+low", which was wrong and was withdrawn, then as a band of ratios that still read as a failure.
+The checks that *do* convert all pass. An unconvertible number kept beside them gave a
+non-result the weight of a problem, so it is now a note.
+
+
 
 **Driver share was reported as failing** against a 35–55% band. That band was Western European.
 Wage-adjusted, Romania should sit near 22–24%, and the model does.

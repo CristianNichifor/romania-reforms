@@ -141,14 +141,8 @@ def main(argv: list[str] | None = None) -> int:
     # Computed here rather than in the sanity-check section below, because the limitations
     # quote them. A limitation carrying a frozen number goes stale the first time an input
     # moves, and this file has already published two that did.
-    inputs = json.loads((ROOT / "data" / "cost-inputs.json").read_text(encoding="utf-8"))
-    seats = {name: spec["seats"] for name, spec in inputs["vehicles"].items()}
-    mean_seats = sum(seats[c] * n for c, n in fleet_by_class.items()) / sum(fleet_by_class.values())
-    buzau = inputs["benchmarks"]["buzauTariffLeiKmLoc"]["value"]
     ron_per_bus_km = cost.operating_ron / (sum(km_by_class.values()) * WEEKDAYS_PER_YEAR)
     driver_share = cost.driver_ron / cost.operating_ron
-    model_vs_benchmark = ron_per_bus_km / (buzau * 20)
-    model_vs_benchmark_ours = ron_per_bus_km / (buzau * mean_seats)
 
     def ro(value: float, places: int = 2) -> str:
         """Romanian decimal comma. The limitations are Romanian prose; 6.47 reads as a typo."""
@@ -257,22 +251,22 @@ def main(argv: list[str] | None = None) -> int:
                 "affects": ["cost"],
             },
             {
-                "id": "cost-pe-km-sub-referinta-ajustata",
+                "id": "reperul-buzau-nu-se-poate-converti",
                 "text": (
-                    f"Costul de funcționare iese {ro(ron_per_bus_km)} lei pe kilometru. Față de "
-                    f"tariful aprobat la Buzău în 2025, convertit prin numărul mediu de locuri "
-                    f"cum cere metodologia ANRSC, modelul este la {ro(model_vs_benchmark)} din "
-                    "reper la 20 de locuri — capacitatea pe care o cer de obicei programele "
-                    f"județene — și la {ro(model_vs_benchmark_ours)} la media parcului modelat. "
-                    "Reperul NU se poate compara direct: costul pe kilometru nu crește "
-                    "proporțional cu locurile, deci lei/km/loc nu normalizează între parcuri "
-                    "diferite, iar compoziția parcului din Buzău nu a fost găsită. Ponderea "
-                    f"șoferilor este {driver_share:.0%} față de 22-24% așteptat după ajustarea "
-                    "salarială a reperului vest-european. O versiune anterioară a acestei "
-                    "limitări afirma că modelul este de 2,3 ori sub reper; afirmația venea din "
-                    "compararea la media parcului nostru și era greșită."
+                    f"Costul de funcționare iese {ro(ron_per_bus_km)} lei pe kilometru, față de "
+                    "circa 9 lei cât ar fi o operare rurală vest-europeană cu partea de salarii "
+                    "ajustată la nivelul românesc — deci verificarea care se poate face TRECE. "
+                    "Ce nu se poate face este conversia tarifului aprobat la Buzău în 2025, "
+                    "0,35 lei/km/loc: metodologia ANRSC împarte costul pe kilometru-vehicul la "
+                    "numărul mediu de LOCURI, iar costul pe kilometru nu crește proporțional cu "
+                    "locurile — același șofer, aceleași anvelope, ceva mai multă motorină. "
+                    "Înmulțirea cu numărul de locuri nu corespunde nici unei mărimi reale, iar "
+                    "compoziția parcului din Buzău, care ar fi singura cale de conversie, este "
+                    "într-un PDF scanat. Cifra rămâne consemnată pentru că este singura "
+                    "măsurătoare românească de exploatare găsită, dar nu este un test picat: "
+                    "este un test care nu se poate da."
                 ),
-                "severity": "material",
+                "severity": "note",
                 "affects": ["cost"],
             },
             {
@@ -348,31 +342,23 @@ def main(argv: list[str] | None = None) -> int:
         f"  operating cost per bus-km  {ron_per_km:>6.2f}   expect ~{expect_per_km:.1f} RON  "
         f"{'ok' if ron_per_km >= expect_per_km * 0.75 else 'LOW — the open question'}"
     )
-    # The benchmark that judges the total rather than a line — but it converts only with a
-    # fleet composition, and that is the trap. ANRSC divides cost per vehicle-km by the
-    # operator's average SEATS, and cost per vehicle-km does *not* scale with seats: a
-    # 40-seater does not cost twice a 20-seater. So lei/km/loc does not normalise across
-    # fleets, and comparing ours (41 seats) against Buzau's (unknown, but county programmes
-    # specify capacities in the 20s) reads as a factor-of-two error when there may be none.
+    # The Buzau tariff is NOT printed as a check, because it is not one.
     #
-    # An earlier version of this check did exactly that and reported the model 2,3x low. The
-    # band is printed instead, because the honest answer is a range and the width of it is
-    # the missing fact.
-    # seats and mean_seats are computed once, above, from data/cost-inputs.json — they used to
-    # be a second hardcoded copy here, which is how a seat count changes in the data file and
-    # the benchmark comparison keeps quietly using the old one.
-    benchmark = json.loads((ROOT / "data" / "cost-inputs.json").read_text(encoding="utf-8"))[
-        "benchmarks"
-    ]["buzauTariffLeiKmLoc"]["value"]
-    print(f"\n  against Buzau 2025 ({benchmark:.2f} lei/km/loc), by their fleet's mean seats:")
-    for their_seats in (20, 23, 30, mean_seats):
-        implied = benchmark * their_seats
-        label = "= ours" if abs(their_seats - mean_seats) < 0.5 else ""
-        print(
-            f"    {their_seats:>5.0f} seats {label:<7} -> {implied:>6.2f} lei/km   "
-            f"we are {ron_per_km / implied:.2f}x"
-        )
-    print("    county programmes specify capacities in the 20s, so nearer the top of that")
+    # ANRSC divides cost per vehicle-km by the operator's average SEATS, so converting their
+    # 0,35 lei/km/loc into a cost per kilometre means multiplying by a seat count. Cost per
+    # kilometre does not scale with seats — same driver, similar tyres, somewhat more fuel — so
+    # that multiplication corresponds to nothing. Their fleet composition would be needed to
+    # convert at all, and it is in a scanned PDF nobody has run through OCR.
+    #
+    # It was reported as a check for most of this project's life, first as "the model is 2,3x
+    # too low" (wrong, and withdrawn) and then as a band of ratios that a reader would still
+    # read as a failing test. Four checks that DO convert all pass — the wage-adjusted driver
+    # share, cost per bus-km, commercial speed, and kilometres per bus per year — and carrying
+    # an unconvertible fifth alongside them gave a non-result the weight of a problem.
+    #
+    # The figure stays in data/cost-inputs.json under `benchmarks`, with the reason it cannot
+    # be used, because a Romanian operating figure is worth recording even when it will not
+    # convert.
 
     print(
         f"  commercial speed           {speed:>6.1f}   expect 25-40 km/h  "
