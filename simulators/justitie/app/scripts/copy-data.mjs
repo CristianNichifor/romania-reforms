@@ -60,6 +60,8 @@ const sources = [
   [ADMIN('attributes.bin'), 'admin-attributes.bin'],
   [ADMIN('adjacency.bin'), 'admin-adjacency.bin'],
   [ADMIN('candidacy.bin'), 'admin-candidacy.bin'],
+  // The road network the distances are measured on, for the map to show on request.
+  [ADMIN('roads.geojson'), 'roads.geojson'],
   // County codes to full names, so a merged court is "Tribunalul Covasna" and not "CV".
   [resolve(here, '../../../administrativ/web/public/data/manifest.json'), 'manifest.json'],
 ];
