@@ -5,18 +5,18 @@
   "publisher": "Cristian Nichifor",
   "period": "2026",
   "provenance": {
-    "source": "estimari-de-lucru",
-    "locator": "valori de lucru, fiecare cu proveniența ei; niciuna nu este încă citată dintr-o sursă publică",
-    "confidence": "assumed",
-    "note": "Structura este verificabilă, cifrele nu sunt. Fiecare poziție are propria proveniență și poate fi înlocuită separat, fără să atingă motorul de calcul."
+    "source": "surse-mixte",
+    "locator": "salariul șoferului din agregatoare de salarii 2026; motorina din prețul la pompă raportat pe 30 august 2026, fără TVA; restul, estimări de lucru",
+    "confidence": "derived",
+    "note": "Structura este verificabilă. Salariul șoferului și motorina au acum sursă numită; întreținerea, anvelopele, asigurarea, garajul și prețurile vehiculelor rămân estimări de lucru. Fiecare poziție are propria proveniență și poate fi înlocuită separat."
   },
   "currency": "RON",
   "items": {
     "driverGrossMonthly": {
-      "value": 7000,
+      "value": 7489,
       "unit": "RON/month",
-      "confidence": "assumed",
-      "note": "Salariu brut lunar al unui șofer de autobuz interurban. De înlocuit cu seria INS Tempo pe CAEN 4939 (alte transporturi terestre de călători); CAEN 4931 este transportul urban și ar fi altă cifră."
+      "confidence": "derived",
+      "note": "Salariu brut lunar al unui șofer de autobuz, România 2026, din agregatoare de salarii (GhidSalariu.ro, Paylab). Nu este o serie INS: agregatoarele se bazează pe anunțuri și pe raportări voluntare, deci cifra este orientativă. Pentru comparație, câștigul mediu brut pe economie era 9.564 lei în iunie 2026 (INS), deci un șofer câștigă circa 78% din media pe economie. De înlocuit cu seria INS Tempo pe CAEN 4939."
     },
     "employerContributionRate": {
       "value": 0.0225,
@@ -37,10 +37,10 @@
       "note": "Ore plătite pentru fiecare oră de autobuz în circulație: luare în primire, pauze, deplasări fără călători. Sub 1 ar însemna că șoferul e plătit mai puțin decât conduce."
     },
     "dieselPricePerLitre": {
-      "value": 7.5,
+      "value": 8.38,
       "unit": "RON/litre",
-      "confidence": "assumed",
-      "note": "Motorină la pompă, cu accize. De înlocuit cu media anuală publicată."
+      "confidence": "derived",
+      "note": "Preț fără TVA, pentru că un operator își deduce TVA-ul. Calculat din 10,14 lei/litru la pompă — minimul național raportat de stații pe 30 august 2026, dosar-auto.ro — împărțit la 1,21, cota standard de TVA în vigoare de la 1 august 2025. Folosirea prețului de la pompă ar umfla costul cu 21% pentru o taxă pe care operatorul nu o suportă."
     },
     "maintenancePerKm": {
       "value": 1.2,
@@ -88,6 +88,12 @@
       "unit": "years",
       "confidence": "assumed",
       "note": "Durata de folosință a unui autobuz interurban înainte de înlocuire."
+    },
+    "vatStandardRate": {
+      "value": 0.21,
+      "unit": "share",
+      "confidence": "verbatim",
+      "note": "Cota standard de TVA, 21% de la 1 august 2025. Folosită doar pentru a scoate TVA-ul din prețul de la pompă."
     }
   },
   "vehicles": {
@@ -114,22 +120,28 @@
   },
   "limitations": [
     {
-      "id": "niciun-pret-nu-este-citat",
-      "text": "Niciuna dintre valorile de aici nu provine dintr-o sursă publică citată. Sunt estimări de lucru, plauzibile ca ordin de mărime și nimic mai mult. Costul total moștenește această incertitudine în întregime și nu trebuie citat ca o cifră a cuiva.",
+      "id": "unele-preturi-nu-sunt-citate",
+      "text": "Salariul șoferului și prețul motorinei au sursă; restul — întreținere, anvelope, asigurare, garare, prețul vehiculelor — sunt estimări de lucru fără sursă publică. Cum acestea sunt tocmai costurile care nu depind de salarii, ele sunt și explicația cea mai probabilă pentru costul pe kilometru rămas sub referința ajustată.",
       "severity": "blocking",
-      "affects": ["cost"]
+      "affects": [
+        "cost"
+      ]
     },
     {
       "id": "fara-venituri",
       "text": "Se calculează costul, nu subvenția. Nu există model de cerere și niciun venit din bilete, deci cifra este ce costă serviciul, nu ce ar rămâne de acoperit din buget public.",
       "severity": "material",
-      "affects": ["cost"]
+      "affects": [
+        "cost"
+      ]
     },
     {
       "id": "diesel-si-atat",
       "text": "Doar motorină. Autobuzele electrice schimbă complet raportul dintre investiție și funcționare, iar finanțarea PNRR pentru ele nu apare aici.",
       "severity": "material",
-      "affects": ["cost"]
+      "affects": [
+        "cost"
+      ]
     }
   ]
 }

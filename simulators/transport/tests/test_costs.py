@@ -101,13 +101,30 @@ def test_every_price_carries_its_own_confidence():
         assert entry["confidence"] in ("verbatim", "derived", "assumed"), name
 
 
-def test_the_file_admits_that_nothing_is_sourced():
-    """Load-bearing. If this ever passes silently because someone removed the caveat rather
-    than sourcing the numbers, the whole document starts reading as though it were cited."""
+def test_the_file_says_which_prices_are_sourced_and_which_are_not():
+    """Load-bearing. Two inputs now carry a source and the rest do not, and the document has
+    to keep saying which is which — if the caveat is ever dropped rather than earned by
+    sourcing the remaining prices, the whole thing starts reading as though it were cited."""
     document = json.loads((ROOT / "data" / "cost-inputs.json").read_text(encoding="utf-8"))
-    assert document["provenance"]["confidence"] == "assumed"
     ids = {limitation["id"] for limitation in document["limitations"]}
-    assert "niciun-pret-nu-este-citat" in ids
+    assert "unele-preturi-nu-sunt-citate" in ids
+    sourced = {"driverGrossMonthly", "dieselPricePerLitre"}
+    for name in sourced:
+        assert document["items"][name]["confidence"] == "derived", name
+    unsourced = {"maintenancePerKm", "tyresPerKm", "insurancePerVehicleYear"}
+    for name in unsourced:
+        assert document["items"][name]["confidence"] == "assumed", name
+
+
+def test_diesel_is_priced_without_vat():
+    """An operator reclaims VAT, so the pump price is not its cost. Using the pump figure
+    would inflate the largest running line by 21% for a tax nobody in this model pays."""
+    document = json.loads((ROOT / "data" / "cost-inputs.json").read_text(encoding="utf-8"))
+    items = document["items"]
+    vat = items["vatStandardRate"]["value"]
+    assert vat == 0.21
+    # 10,14 at the pump on 30 August 2026, ex-VAT.
+    assert items["dieselPricePerLitre"]["value"] == pytest.approx(10.14 / (1 + vat), abs=0.02)
 
 
 @pytest.fixture(scope="module")
