@@ -581,7 +581,10 @@ async function main(): Promise<void> {
             type: 'line',
             source: 'uats',
             layout: { visibility: 'none' },
-            paint: { 'line-color': '#0f1216', 'line-width': 0.3, 'line-opacity': 0.5 },
+            // Mid grey, not ink. These were near-black when they only ever appeared over the
+            // pale catchment fills; now that a reader can ask for them in the default views
+            // too, dark ink means a 2,9 MB download that shows nothing on the dark map.
+            paint: { 'line-color': '#7d8794', 'line-width': 0.35, 'line-opacity': 0.6 },
           },
           'county-lines',
         );
@@ -596,6 +599,11 @@ async function main(): Promise<void> {
             layout: { visibility: 'none' },
             paint: {
               'line-color': '#f2f4f7',
+              // Deliberately light. Weighting these up to distinguish them from the road
+              // network was tried and made it worse: at 1.7px the white boundaries read as
+              // crazy-paving and drowned the catchment colours they exist to divide. Roads
+              // and boundaries separate by shape — a network against closed loops — not by
+              // weight, and only one of the two is ever on by default.
               'line-width': [
                 'case',
                 ['boolean', ['feature-state', 'unitEdge'], false],
@@ -788,7 +796,7 @@ async function main(): Promise<void> {
       id: 'county-lines',
       type: 'line',
       source: 'counties',
-      paint: { 'line-color': '#2b333c', 'line-width': 1 },
+      paint: { 'line-color': '#3d4854', 'line-width': 1 },
     });
 
     map.addSource('courts', {
@@ -950,11 +958,35 @@ async function main(): Promise<void> {
         map.setLayoutProperty('unit-outline', 'visibility', visible ? 'visible' : 'none');
       }
     };
-    // Commune outlines suit either polygon view.
+    /**
+     * Commune outlines, in any view a reader wants them in.
+     *
+     * They used to be tied to the two polygon views, which left the two views a reader lands
+     * on as 241 circles floating over a bare county outline — the sparsest thing on the page
+     * was the first thing seen. But the shapes are 2,9 MB and the default views do not
+     * otherwise need them, so this cannot simply be switched on: it is a checkbox with the
+     * cost printed on it, like the roads.
+     *
+     * `outlineWanted` is the reader's answer, and it persists across views. Entering a
+     * catchment view sets it, because those views download the shapes regardless and the
+     * outline is free from then on; leaving does not clear it.
+     */
+    let outlineWanted = false;
+    const outlineToggle = document.querySelector<HTMLInputElement>('#outline-toggle');
     const showOutline = (visible: boolean): void => {
       if (!map.getLayer('uat-outline')) return;
       map.setLayoutProperty('uat-outline', 'visibility', visible ? 'visible' : 'none');
     };
+    const wantOutline = (wanted: boolean): void => {
+      outlineWanted = wanted;
+      if (outlineToggle) outlineToggle.checked = wanted;
+      if (!wanted) {
+        showOutline(false);
+        return;
+      }
+      void ensureShapes().then(() => showOutline(true));
+    };
+    outlineToggle?.addEventListener('change', () => wantOutline(outlineToggle.checked));
 
     /**
      * The road network every distance on this page is measured on.
@@ -979,9 +1011,13 @@ async function main(): Promise<void> {
               type: 'line',
               source: 'roads',
               paint: {
-                'line-color': '#0d1014',
-                'line-width': ['interpolate', ['linear'], ['zoom'], 5, 0.6, 9, 2.2] as unknown as ExpressionSpecification,
-                'line-opacity': 0.75,
+                // Legible on both backgrounds it has to sit on: the dark map of the default
+                // views, and the saturated catchment fills. Dark ink was chosen while the
+                // roads were still being drawn *under* the fill by a layer-order bug — once
+                // that was fixed, dark ink meant invisible everywhere the fill is absent.
+                'line-color': '#95a1af',
+                'line-width': ['interpolate', ['linear'], ['zoom'], 5, 0.5, 9, 1.8] as unknown as ExpressionSpecification,
+                'line-opacity': 0.55,
               },
             },
             'courts',
@@ -1157,8 +1193,10 @@ async function main(): Promise<void> {
       el('#catchment-note').hidden = mode !== 'arondare';
       showAccesLayer(mode === 'acces');
       showArondareLayer(mode === 'arondare');
-      showOutline(mode === 'acces' || mode === 'arondare');
-      el('#roads-row').hidden = mode !== 'acces' && mode !== 'arondare';
+      // A catchment view has paid for the shapes anyway, so it turns the outline on; it never
+      // turns it back off, because a reader who asked for it in one view still wants it.
+      if (mode === 'acces' || mode === 'arondare') wantOutline(true);
+      else showOutline(outlineWanted);
       el<HTMLOutputElement>('#target-value').textContent = ro.format(Number(targetInput.value));
 
       if (mode === 'acces') {
