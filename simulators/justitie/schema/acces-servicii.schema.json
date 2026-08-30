@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cristiannichifor.github.io/romania-reforms/schema/acces-servicii.schema.json",
   "title": "Distance to a court against distance to a hospital",
-  "description": "The same consolidated units measured against two networks on the same road graph: 42 proposed courts and the located hospitals. Hospital distances are upper bounds, because the ministry's map omits 52 hospitals and an unplotted hospital can only shorten the true journey. Units in the six unmapped counties are kept and excluded from the comparison.",
+  "description": "The same consolidated units measured against four networks on one road graph: today's 175 judecatorii, the 42 proposed courts, located hospitals and OSM police stations. The baseline is what makes the proposed distance legible — without it, 38 km could be a doubling of today's travel or roughly what already exists.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -52,7 +52,19 @@
         "hospitalTowns",
         "medianMetresToPoliceAtMost",
         "seatsThatArePoliceTowns",
-        "policeTowns"
+        "policeTowns",
+        "todayCourts",
+        "medianMetresToTodayCourt",
+        "medianMetresToProposedCourt",
+        "seatsThatAreTodayCourtTowns",
+        "allPeople",
+        "meanMetresToTodayCourt",
+        "meanMetresToProposedCourt",
+        "unitsFurtherThanToday",
+        "peopleFurtherThanToday",
+        "unitsLosingTheirLocalCourt",
+        "peopleLosingTheirLocalCourt",
+        "beyond"
       ],
       "properties": {
         "units": {
@@ -118,6 +130,84 @@
         "policeTowns": {
           "type": "integer",
           "exclusiveMinimum": 0
+        },
+        "todayCourts": {
+          "description": "The judecatorii that exist now, located. The baseline the proposed figure means nothing without.",
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "medianMetresToTodayCourt": {
+          "type": "number",
+          "minimum": 0
+        },
+        "medianMetresToProposedCourt": {
+          "type": "number",
+          "minimum": 0
+        },
+        "meanMetresToTodayCourt": {
+          "type": "number",
+          "minimum": 0
+        },
+        "meanMetresToProposedCourt": {
+          "type": "number",
+          "minimum": 0
+        },
+        "seatsThatAreTodayCourtTowns": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unitsFurtherThanToday": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "peopleFurtherThanToday": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unitsLosingTheirLocalCourt": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Units with a court in their own town today and a drive tomorrow."
+        },
+        "peopleLosingTheirLocalCourt": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "allPeople": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "beyond": {
+          "description": "Units and people further than N km from a first-level court, now and under the proposal.",
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "todayUnits",
+              "todayPeople",
+              "proposedUnits",
+              "proposedPeople"
+            ],
+            "properties": {
+              "todayUnits": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "todayPeople": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "proposedUnits": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "proposedPeople": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
         }
       }
     },
@@ -135,7 +225,8 @@
           "courtMetres",
           "hospitalMetresAtMost",
           "comparable",
-          "policeMetresAtMost"
+          "policeMetresAtMost",
+          "todayCourtMetres"
         ],
         "properties": {
           "siruta": {
@@ -163,6 +254,10 @@
             "type": "boolean"
           },
           "policeMetresAtMost": {
+            "type": "number",
+            "minimum": 0
+          },
+          "todayCourtMetres": {
             "type": "number",
             "minimum": 0
           }

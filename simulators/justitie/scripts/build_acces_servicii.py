@@ -45,14 +45,16 @@ def main() -> int:
 
     spitale_file = ROOT / "data" / "spitale-2026.json"
     politie_file = ROOT / "data" / "politie-osm.json"
+    located_file = ROOT / "data" / "instante-localizate-2025.json"
     courts_file = ROOT / "data" / "court-distance.json"
     edges_file = ADMINISTRATIV / "data" / "processed" / "road_distance.parquet"
-    for path in (spitale_file, politie_file, courts_file, edges_file):
+    for path in (spitale_file, politie_file, located_file, courts_file, edges_file):
         if not path.exists():
             raise SystemExit(f"Missing {path}")
 
     spitale = json.loads(spitale_file.read_text(encoding="utf-8"))
     politie = json.loads(politie_file.read_text(encoding="utf-8"))
+    located = json.loads(located_file.read_text(encoding="utf-8"))["courts"]
     courts = json.loads(courts_file.read_text(encoding="utf-8"))
     data = load_data()
 
@@ -90,6 +92,19 @@ def main() -> int:
         graph, directed=False, indices=[index_of[s] for s in police_seats], min_only=True
     )
 
+    # Today's first-level network: the 175 judecatorii that actually exist. Without it, "38 km
+    # to a court" is a number with nothing to be compared against — it could be a doubling of
+    # what people drive now or roughly what they already do, and the figure cannot say which.
+    today_seats = sorted(
+        {c["siruta"] for c in located if c["tier"] == "judecatorie" and c["siruta"]}
+    )
+    if len(today_seats) < 100:
+        print(f"only {len(today_seats)} judecatorii located; the baseline would lie", file=sys.stderr)
+        return 1
+    to_today = dijkstra(
+        graph, directed=False, indices=[index_of[s] for s in today_seats], min_only=True
+    )
+
     court_seats = [c["siruta"] for c in courts["courts"]]
     county_of_seat = {c["siruta"]: c["county"] for c in courts["courts"]}
     court_matrix = dijkstra(graph, directed=False, indices=[index_of[s] for s in court_seats])
@@ -104,7 +119,8 @@ def main() -> int:
         court_m = float(to_court[column])
         hospital_m = float(to_hospital[column])
         police_m = float(to_police[column])
-        if not all(np.isfinite(x) for x in (court_m, hospital_m, police_m)):
+        today_m = float(to_today[column])
+        if not all(np.isfinite(x) for x in (court_m, hospital_m, police_m, today_m)):
             continue
         units.append(
             {
@@ -115,6 +131,7 @@ def main() -> int:
                 "courtMetres": round(court_m),
                 "hospitalMetresAtMost": round(hospital_m),
                 "policeMetresAtMost": round(police_m),
+                "todayCourtMetres": round(today_m),
                 # True only where the map is complete enough for the comparison to mean
                 # anything; a unit near an unplotted hospital would read as further from care
                 # than it is.
@@ -144,6 +161,26 @@ def main() -> int:
     # Police cover all 42 counties, so unlike hospitals they need no county exclusion; the
     # median is taken over every routed unit rather than the comparable subset.
     median_police = median([u["policeMetresAtMost"] for u in units])
+    median_today = median([u["todayCourtMetres"] for u in units])
+    seat_has_today_court = sum(1 for u in units if u["todayCourtMetres"] == 0)
+    median_proposed_all = median([u["courtMetres"] for u in units])
+    all_people = sum(u["population"] for u in units) or 1
+    mean_today = sum(u["todayCourtMetres"] * u["population"] for u in units) / all_people
+    mean_proposed_all = sum(u["courtMetres"] * u["population"] for u in units) / all_people
+    further_than_today = [u for u in units if u["courtMetres"] > u["todayCourtMetres"]]
+    # The sharpest number: a court in your own town today, and a drive tomorrow.
+    lose_local = [u for u in units if u["todayCourtMetres"] == 0 and u["courtMetres"] > 0]
+    bands = {}
+    for km in (25, 50, 75):
+        limit = km * 1000
+        now = [u for u in units if u["todayCourtMetres"] > limit]
+        after = [u for u in units if u["courtMetres"] > limit]
+        bands[str(km)] = {
+            "todayUnits": len(now),
+            "todayPeople": sum(u["population"] for u in now),
+            "proposedUnits": len(after),
+            "proposedPeople": sum(u["population"] for u in after),
+        }
     seat_has_police = sum(1 for u in units if u["policeMetresAtMost"] == 0)
     median_court = median([u["courtMetres"] for u in comparable])
     median_hospital = median([u["hospitalMetresAtMost"] for u in comparable])
@@ -162,6 +199,20 @@ def main() -> int:
           f"oraș cu instanță: {seat_has_court}")
     print(f"sedii cu secție de poliție: {seat_has_police} din {len(units)}   "
           f"mediana la poliție: cel mult {median_police / 1000:.1f} km")
+    # A ratio is the wrong shape here: the median today is zero, so there is nothing to divide
+    # by, and writing the guard as a ternary around the whole print swallowed the line entirely.
+    print(f"azi, {len(today_seats)} judecătorii: {seat_has_today_court} din {len(units)} sedii "
+          f"au deja una în oraș, mediana {median_today / 1000:.1f} km")
+    print(f"după reformă, 42: {seat_has_court} sedii, mediana "
+          f"{median_proposed_all / 1000:.1f} km")
+    print(f"media ponderată: {mean_today / 1000:.1f} km azi -> "
+          f"{mean_proposed_all / 1000:.1f} km după")
+    print(f"pierd instanța din oraș: {len(lose_local)} unități "
+          f"({100 * sum(u['population'] for u in lose_local) / all_people:.0f}% din locuitori)")
+    for km, band in bands.items():
+        print(f"  peste {km:>2} km: azi {band['todayUnits']:>3} unități / "
+              f"{100 * band['todayPeople'] / all_people:4.1f}%   după "
+              f"{band['proposedUnits']:>3} / {100 * band['proposedPeople'] / all_people:4.1f}%")
     print(f"unități mai departe de instanță decât de spital: {len(further_to_court)} "
           f"({100 * people_further / people:.0f}% din locuitori)")
 
@@ -192,6 +243,18 @@ def main() -> int:
             "medianMetresToPoliceAtMost": median_police,
             "seatsThatArePoliceTowns": seat_has_police,
             "policeTowns": len(police_seats),
+            "todayCourts": len(today_seats),
+            "medianMetresToTodayCourt": median_today,
+            "medianMetresToProposedCourt": median_proposed_all,
+            "seatsThatAreTodayCourtTowns": seat_has_today_court,
+            "allPeople": all_people,
+            "meanMetresToTodayCourt": round(mean_today),
+            "meanMetresToProposedCourt": round(mean_proposed_all),
+            "unitsFurtherThanToday": len(further_than_today),
+            "peopleFurtherThanToday": sum(u["population"] for u in further_than_today),
+            "unitsLosingTheirLocalCourt": len(lose_local),
+            "peopleLosingTheirLocalCourt": sum(u["population"] for u in lose_local),
+            "beyond": bands,
             "unitsFurtherFromCourt": len(further_to_court),
             "peopleFurtherFromCourt": people_further,
             "hospitalTowns": len(hospital_seats),
@@ -228,6 +291,18 @@ def main() -> int:
                     "sunt publicate și medianele, și de aceea comparația care contează e "
                     "aceeași mulțime de sedii măsurată față de ambele rețele: 133 din 214 au "
                     "spital în oraș, 36 au instanță."
+                ),
+                "severity": "material",
+                "affects": ["acces"],
+            },
+            {
+                "id": "azi-inseamna-cea-mai-apropiata-nu-cea-arondata",
+                "text": (
+                    "Pentru reperul de azi se ia cea mai apropiată judecătorie pe drum, nu cea "
+                    "de care UAT-ul este arondat legal. Arondarea de azi trimite uneori mai "
+                    "departe decât cea mai apropiată instanță, așa că drumul real de azi este "
+                    "cel puțin cât arată aici — comparația cu reforma e deci conservatoare, nu "
+                    "generoasă."
                 ),
                 "severity": "material",
                 "affects": ["acces"],

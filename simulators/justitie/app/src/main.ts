@@ -70,6 +70,19 @@ interface Servicii {
     seatsThatArePoliceTowns: number;
     medianMetresToPoliceAtMost: number;
     units: number;
+    todayCourts: number;
+    medianMetresToTodayCourt: number;
+    medianMetresToProposedCourt: number;
+    seatsThatAreTodayCourtTowns: number;
+    meanMetresToTodayCourt: number;
+    meanMetresToProposedCourt: number;
+    unitsLosingTheirLocalCourt: number;
+    peopleLosingTheirLocalCourt: number;
+    allPeople: number;
+    beyond: Record<
+      string,
+      { todayUnits: number; todayPeople: number; proposedUnits: number; proposedPeople: number }
+    >;
     peopleFurtherFromCourt: number;
     comparablePeople: number;
   };
@@ -910,8 +923,30 @@ async function main(): Promise<void> {
     live: boolean,
   ): void => {
     el('#arondare-chev').textContent = `${sum.crossingCounty} peste județ`;
+    const sv = servicii.summary;
+    const pctPeople = (n: number): string => `${Math.round((100 * n) / sv.allPeople)}%`;
     el('#arondare-body').innerHTML =
-      `<p class="note">Cele ${ro.format(sum.units)} de unități consolidate din reforma
+      `<p class="disagree">Azi există ${sv.todayCourts} de judecătorii, iar
+         ${sv.seatsThatAreTodayCourtTowns} din ${ro.format(sv.units)} de unități consolidate au
+         una chiar în oraș: mediana drumului e ${Math.round(
+           sv.medianMetresToTodayCourt / 1000,
+         )} km. După comasare ar rămâne 42, în ${sv.seatsThatAreCourtTowns} dintre orașele
+         acestea, iar mediana ar urca la ${Math.round(
+           sv.medianMetresToProposedCourt / 1000,
+         )} km — media ponderată de la ${(sv.meanMetresToTodayCourt / 1000)
+        .toFixed(1)
+        .replace('.', ',')} la ${(sv.meanMetresToProposedCourt / 1000)
+        .toFixed(1)
+        .replace('.', ',')} km.</p>
+       <p class="disagree">${ro.format(sv.unitsLosingTheirLocalCourt)} de unități —
+         ${pctPeople(sv.peopleLosingTheirLocalCourt)} din locuitori — ar pierde instanța pe care
+         o au acum în oraș. Peste 50 km de mers sunt azi ${sv.beyond['50']?.todayUnits} unități
+         (${pctPeople(sv.beyond['50']?.todayPeople ?? 0)}), după reformă
+         ${sv.beyond['50']?.proposedUnits} (${pctPeople(sv.beyond['50']?.proposedPeople ?? 0)});
+         peste 75 km azi nu e nimeni, după reformă
+         ${pctPeople(sv.beyond['75']?.proposedPeople ?? 0)} din țară. Nu e o înrăutățire de
+         grad, e una de fel.</p>
+       <p class="note">Cele ${ro.format(sum.units)} de unități consolidate din reforma
          administrativă, arondate fiecare la cea mai apropiată dintre cele
          ${arondare.courtSeats} de instanțe, pe drum, fără să conteze granița de județ.</p>
        <div class="pens-row">

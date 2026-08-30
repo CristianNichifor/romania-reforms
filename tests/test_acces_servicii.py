@@ -80,6 +80,70 @@ def test_the_hospital_network_is_denser_than_the_proposed_court_network(servicii
     assert summary["medianMetresToHospitalAtMost"] < summary["medianMetresToCourt"]
 
 
+def test_the_baseline_is_todays_real_court_network(servicii):
+    """Without it the proposed distance is unreadable.
+
+    38 km to a court could be a doubling of what people drive now or roughly what they already
+    do. It is neither: today's median is zero, because 153 of 248 consolidated seats already
+    hold a judecatorie. The comparison is only meaningful if the baseline is the courts that
+    exist, so the count is pinned near 175 rather than left to whatever the file happens to
+    carry.
+    """
+    summary = servicii["summary"]
+    assert 150 < summary["todayCourts"] < 200, summary["todayCourts"]
+    assert summary["seatsThatAreTodayCourtTowns"] == sum(
+        1 for u in servicii["units"] if u["todayCourtMetres"] == 0
+    )
+    assert summary["seatsThatAreTodayCourtTowns"] > 4 * summary["seatsThatAreCourtTowns"]
+
+
+def test_consolidation_can_only_lengthen_the_journey_to_a_first_level_court(servicii):
+    """Closing courts cannot bring one nearer.
+
+    Every proposed seat is also a judecatorie town today, so the 42 are a subset of the 175 and
+    no unit can come out closer. If one did, the two networks would not be nested and the
+    comparison would be measuring something else.
+    """
+    closer = [
+        u["siruta"] for u in servicii["units"] if u["courtMetres"] < u["todayCourtMetres"]
+    ]
+    assert closer == [], closer[:10]
+
+
+def test_the_bands_show_a_change_in_kind_not_degree(servicii):
+    """Recomputed from the rows, and asserted in the direction the finding claims."""
+    units = servicii["units"]
+    for km, band in servicii["summary"]["beyond"].items():
+        limit = int(km) * 1000
+        now = [u for u in units if u["todayCourtMetres"] > limit]
+        after = [u for u in units if u["courtMetres"] > limit]
+        assert band["todayUnits"] == len(now), km
+        assert band["proposedUnits"] == len(after), km
+        assert band["todayPeople"] == sum(u["population"] for u in now), km
+        assert band["proposedPeople"] == sum(u["population"] for u in after), km
+        assert band["proposedUnits"] >= band["todayUnits"], km
+    # Nobody is beyond 75 km from a judecatorie today; that is what makes the tail new rather
+    # than merely worse.
+    assert servicii["summary"]["beyond"]["75"]["todayUnits"] == 0
+
+
+def test_losing_a_local_court_is_counted_from_the_rows(servicii):
+    units = servicii["units"]
+    lose = [u for u in units if u["todayCourtMetres"] == 0 and u["courtMetres"] > 0]
+    summary = servicii["summary"]
+    assert summary["unitsLosingTheirLocalCourt"] == len(lose)
+    assert summary["peopleLosingTheirLocalCourt"] == sum(u["population"] for u in lose)
+    assert summary["unitsLosingTheirLocalCourt"] > 0
+
+
+def test_the_baseline_uses_the_nearest_court_and_says_so(servicii):
+    """Today's legal arondare sometimes sends a commune past a nearer courthouse, so nearest-of
+    understates today's real journey and the comparison is conservative."""
+    assert "azi-inseamna-cea-mai-apropiata-nu-cea-arondata" in {
+        x["id"] for x in servicii["limitations"]
+    }
+
+
 def test_police_join_the_comparison_without_a_county_exclusion(servicii):
     """Police cover all 42 counties, so unlike hospitals every routed unit counts.
 
