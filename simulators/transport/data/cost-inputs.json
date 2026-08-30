@@ -1,0 +1,129 @@
+{
+  "$schema": "../schema/cost-inputs.schema.json",
+  "id": "cost-inputs",
+  "title": "Prețurile unitare din care se compune costul rețelei",
+  "publisher": "Cristian Nichifor",
+  "period": "2026",
+  "provenance": {
+    "source": "estimari-de-lucru",
+    "locator": "valori de lucru, fiecare cu proveniența ei; niciuna nu este încă citată dintr-o sursă publică",
+    "confidence": "assumed",
+    "note": "Structura este verificabilă, cifrele nu sunt. Fiecare poziție are propria proveniență și poate fi înlocuită separat, fără să atingă motorul de calcul."
+  },
+  "currency": "RON",
+  "items": {
+    "driverGrossMonthly": {
+      "value": 7000,
+      "unit": "RON/month",
+      "confidence": "assumed",
+      "note": "Salariu brut lunar al unui șofer de autobuz interurban. De înlocuit cu seria INS Tempo pe CAEN 4939 (alte transporturi terestre de călători); CAEN 4931 este transportul urban și ar fi altă cifră."
+    },
+    "employerContributionRate": {
+      "value": 0.0225,
+      "unit": "share of gross",
+      "confidence": "verbatim",
+      "note": "Contribuția asiguratorie pentru muncă, 2,25% din brut (Codul fiscal, Legea 227/2015 art. 220^3)."
+    },
+    "driverPaidHoursMonth": {
+      "value": 165,
+      "unit": "hours/month",
+      "confidence": "assumed",
+      "note": "Ore plătite lunar, normă întreagă. Timpul de conducere este limitat separat de Regulamentul (CE) 561/2006."
+    },
+    "platformToPaidRatio": {
+      "value": 1.3,
+      "unit": "ratio",
+      "confidence": "assumed",
+      "note": "Ore plătite pentru fiecare oră de autobuz în circulație: luare în primire, pauze, deplasări fără călători. Sub 1 ar însemna că șoferul e plătit mai puțin decât conduce."
+    },
+    "dieselPricePerLitre": {
+      "value": 7.5,
+      "unit": "RON/litre",
+      "confidence": "assumed",
+      "note": "Motorină la pompă, cu accize. De înlocuit cu media anuală publicată."
+    },
+    "maintenancePerKm": {
+      "value": 1.2,
+      "unit": "RON/km",
+      "confidence": "assumed",
+      "note": "Întreținere și reparații, fără anvelope. Drumurile comunale uzează mai repede decât cele naționale, iar aici nu se face distincție."
+    },
+    "tyresPerKm": {
+      "value": 0.15,
+      "unit": "RON/km",
+      "confidence": "assumed"
+    },
+    "insurancePerVehicleYear": {
+      "value": 6000,
+      "unit": "RON/vehicle/year",
+      "confidence": "assumed",
+      "note": "RCA și CASCO pentru un autobuz de transport public."
+    },
+    "depotPerVehicleYear": {
+      "value": 4000,
+      "unit": "RON/vehicle/year",
+      "confidence": "assumed",
+      "note": "Garare, spălare, utilități. Nu include construcția unei autobaze noi, care ar fi investiție."
+    },
+    "adminOverheadShare": {
+      "value": 0.12,
+      "unit": "share of direct cost",
+      "confidence": "assumed",
+      "note": "Dispecerat, administrație, vânzare de bilete, control. Ca procent din costul direct, pentru că nu depinde nici de oră, nici de kilometru."
+    },
+    "dwellMinPerStop": {
+      "value": 0.75,
+      "unit": "minutes/stop",
+      "confidence": "assumed",
+      "note": "Timp de oprire în fiecare localitate de pe traseu, pentru urcare și coborâre. Fără el autobuzul parcurge traseul ca o mașină care nu oprește nicăieri, iar orele — deci și costul șoferilor — ies prea mici."
+    },
+    "vehicleLifeYears": {
+      "value": 12,
+      "unit": "years",
+      "confidence": "assumed",
+      "note": "Durata de folosință a unui autobuz interurban înainte de înlocuire."
+    }
+  },
+  "vehicles": {
+    "basic": {
+      "seats": 20,
+      "priceRon": 250000,
+      "dieselPer100Km": 18,
+      "confidence": "assumed",
+      "note": "Microbuz. Clasa cu cele mai multe trasee și cei mai puțini călători."
+    },
+    "feeder": {
+      "seats": 40,
+      "priceRon": 700000,
+      "dieselPer100Km": 25,
+      "confidence": "assumed"
+    },
+    "trunk": {
+      "seats": 50,
+      "priceRon": 1100000,
+      "dieselPer100Km": 30,
+      "confidence": "assumed",
+      "note": "Autobuz interurban. Traseele de trunchi sunt lungi și dese, deci aici se duce cea mai mare parte a motorinei."
+    }
+  },
+  "limitations": [
+    {
+      "id": "niciun-pret-nu-este-citat",
+      "text": "Niciuna dintre valorile de aici nu provine dintr-o sursă publică citată. Sunt estimări de lucru, plauzibile ca ordin de mărime și nimic mai mult. Costul total moștenește această incertitudine în întregime și nu trebuie citat ca o cifră a cuiva.",
+      "severity": "blocking",
+      "affects": ["cost"]
+    },
+    {
+      "id": "fara-venituri",
+      "text": "Se calculează costul, nu subvenția. Nu există model de cerere și niciun venit din bilete, deci cifra este ce costă serviciul, nu ce ar rămâne de acoperit din buget public.",
+      "severity": "material",
+      "affects": ["cost"]
+    },
+    {
+      "id": "diesel-si-atat",
+      "text": "Doar motorină. Autobuzele electrice schimbă complet raportul dintre investiție și funcționare, iar finanțarea PNRR pentru ele nu apare aici.",
+      "severity": "material",
+      "affects": ["cost"]
+    }
+  ]
+}

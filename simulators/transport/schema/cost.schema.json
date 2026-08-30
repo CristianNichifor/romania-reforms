@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/cost.schema.json",
+  "title": "The annual cost of the network, beside what the consolidation claims to save",
+  "description": "The page the simulator exists to produce. Consolidation is argued as an administrative saving; to the person who has to reach the centre it is a journey with a price. Both come from the same scenario and sit in one document so neither can be quoted without the other. This is a cost and not a subsidy: no demand model and no fare revenue exist anywhere in this repository.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "title", "publisher", "period", "provenance", "perWeekday", "fleet", "annualRon", "ledgerRon", "limitations"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "type": "string" },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "period": { "type": "string" },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+    "perWeekday": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["busHours", "busKm", "kmPerBusHour", "routesCosted", "routesWithoutLength"],
+      "properties": {
+        "busHours": { "type": "number", "exclusiveMinimum": 0 },
+        "busKm": { "type": "number", "exclusiveMinimum": 0 },
+        "kmPerBusHour": {
+          "description": "Commercial speed. A stopping rural service usually runs 25-40 km/h; well above that means the timetable is faster than a bus.",
+          "type": "number", "exclusiveMinimum": 0
+        },
+        "routesCosted": { "type": "integer", "minimum": 1 },
+        "routesWithoutLength": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "fleet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["byClass", "peakByClass", "total", "spareRatio"],
+      "properties": {
+        "byClass": { "type": "object", "additionalProperties": { "type": "integer", "minimum": 0 } },
+        "peakByClass": { "type": "object", "additionalProperties": { "type": "integer", "minimum": 0 } },
+        "total": { "type": "integer", "minimum": 1 },
+        "spareRatio": { "type": "number", "minimum": 0 }
+      }
+    },
+    "annualRon": {
+      "description": "Kept in the pieces it was built from, because a reader disputing the driver wage should not have to unpick a single total.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["driver", "running", "standing", "admin", "operating", "capital", "total"],
+      "properties": {
+        "driver": { "type": "number", "minimum": 0 },
+        "running": { "type": "number", "minimum": 0 },
+        "standing": { "type": "number", "minimum": 0 },
+        "admin": { "type": "number", "minimum": 0 },
+        "operating": { "type": "number", "minimum": 0 },
+        "capital": { "type": "number", "minimum": 0 },
+        "total": { "type": "number", "minimum": 0 }
+      }
+    },
+    "ledgerRon": {
+      "description": "Both columns of the argument, from one consolidation scenario.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["transportCost", "administrativeSaving", "operatingSaving", "netAgainstAdministrativeSaving"],
+      "properties": {
+        "transportCost": { "type": "number", "minimum": 0 },
+        "administrativeSaving": { "type": "number" },
+        "operatingSaving": { "type": "number" },
+        "netAgainstAdministrativeSaving": { "type": "number" }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+    }
+  }
+}

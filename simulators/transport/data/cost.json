@@ -1,0 +1,107 @@
+{
+  "$schema": "../schema/cost.schema.json",
+  "id": "cost",
+  "title": "Costul anual al rețelei, față de economia pe care o revendică comasarea",
+  "publisher": "Cristian Nichifor",
+  "period": "2026",
+  "provenance": {
+    "source": "retea-plus-preturi-unitare",
+    "locator": "orele și kilometrii din data/network.json, prețurile unitare din data/cost-inputs.json, economiile din data/hubs.json",
+    "confidence": "derived",
+    "note": "Derivat dintr-un lanț în care nimic nu este verificat pe teren: vitezele sunt modelate, prețurile unitare sunt estimate, iar economiile vin de la simulatorul administrativ cu limitările lui."
+  },
+  "perWeekday": {
+    "busHours": 20970.3,
+    "busKm": 1018343.8,
+    "kmPerBusHour": 48.6,
+    "routesCosted": 1707,
+    "routesWithoutLength": 1
+  },
+  "fleet": {
+    "byClass": {
+      "feeder": 1613,
+      "basic": 495,
+      "trunk": 1253
+    },
+    "peakByClass": {
+      "feeder": 1402,
+      "basic": 430,
+      "trunk": 1089
+    },
+    "total": 3361,
+    "spareRatio": 0.15
+  },
+  "annualRon": {
+    "driver": 295641290,
+    "running": 866218219,
+    "standing": 33610000,
+    "admin": 143456341,
+    "operating": 1338925850,
+    "capital": 219262500,
+    "total": 1558188350
+  },
+  "ledgerRon": {
+    "transportCost": 1558188350,
+    "administrativeSaving": 8727843155,
+    "operatingSaving": 32651674949,
+    "netAgainstAdministrativeSaving": 7169654805
+  },
+  "limitations": [
+    {
+      "id": "cost-nu-subventie",
+      "text": "Este costul serviciului, nu subvenția. Nu există model de cerere și niciun venit din bilete în acest depozit, deci diferența dintre cifra de aici și ce ar rămâne de acoperit din buget public nu este cunoscută.",
+      "severity": "blocking",
+      "affects": [
+        "cost"
+      ]
+    },
+    {
+      "id": "preturile-nu-sunt-citate",
+      "text": "Niciun preț unitar din data/cost-inputs.json nu provine dintr-o sursă publică citată. Sunt estimări de lucru și costul total le moștenește incertitudinea în întregime.",
+      "severity": "blocking",
+      "affects": [
+        "cost"
+      ]
+    },
+    {
+      "id": "vitezele-nu-sunt-verificate",
+      "text": "Orele de autobuz vin din timpi de parcurs modelați, niciodată comparați cu o călătorie reală. O eroare sistematică de viteză se transmite direct în ore și în costul șoferilor, care este cea mai mare poziție.",
+      "severity": "material",
+      "affects": [
+        "cost"
+      ]
+    },
+    {
+      "id": "viteza-comerciala-prea-mare",
+      "text": "Rețeaua rulează la circa 49 km/h comercial, în timp ce un serviciu rural cu opriri merge de obicei cu 25-40. Timpii vin din profilul auto al lui L0, iar opririle sunt contorizate doar ca staționare, fără frânarea și repornirea din fiecare stație. Orele — deci costul șoferilor — sunt subestimate, probabil cu ordinul zecilor de procente.",
+      "severity": "material",
+      "affects": [
+        "cost"
+      ]
+    },
+    {
+      "id": "structura-costului-nu-seamana-cu-realitatea",
+      "text": "Șoferii ies 22% din costul de funcționare și carburantul cu întreținerea 65%, când într-o operare de autobuz raportul este de obicei invers, 35-55% șoferi. O parte se explică prin trasee interurbane lungi și rapide, restul este viteza de mai sus. Cifrele nu au fost ajustate ca să pară corecte.",
+      "severity": "material",
+      "affects": [
+        "cost"
+      ]
+    },
+    {
+      "id": "cost-pe-km-sub-referintele-europene",
+      "text": "Costul de funcționare iese în jur de 5 lei pe kilometru, sub ordinul de 10-15 lei al serviciilor rurale europene. Costurile românești sunt real mai mici, dar diferența este prea mare ca să fie explicată doar prin asta, iar prețurile unitare nu sunt citate din nicio sursă.",
+      "severity": "material",
+      "affects": [
+        "cost"
+      ]
+    },
+    {
+      "id": "economiile-sunt-ale-altui-simulator",
+      "text": "Economiile administrative și de funcționare sunt calculate de simulatorul administrativ, preluate ca atare, cu limitările lui. Comparația are sens doar în cadrul aceluiași scenariu de comasare.",
+      "severity": "material",
+      "affects": [
+        "cost"
+      ]
+    }
+  ]
+}

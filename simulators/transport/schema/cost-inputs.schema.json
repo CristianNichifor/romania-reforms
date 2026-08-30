@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/cost-inputs.schema.json",
+  "title": "Unit prices the network cost is assembled from",
+  "description": "Every line item carries its own confidence and note, so a reader who disputes the driver wage argues with one row rather than with the model. The engine that consumes this is pure arithmetic; replacing a figure with a sourced one requires no code change. As shipped, none of these is cited from a public source — the structure is checkable and the numbers are not, which the limitations say in as many words.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "title", "publisher", "period", "provenance", "currency", "items", "vehicles", "limitations"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "type": "string" },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "period": { "type": "string" },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+    "currency": { "const": "RON" },
+    "items": {
+      "description": "Named unit prices. Each is separately disputable.",
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["value", "unit", "confidence"],
+        "properties": {
+          "value": { "type": "number", "minimum": 0 },
+          "unit": { "type": "string", "minLength": 1 },
+          "confidence": { "enum": ["verbatim", "derived", "assumed"] },
+          "note": { "type": "string" }
+        }
+      }
+    },
+    "vehicles": {
+      "description": "One entry per service class in tiers.py. Seats, purchase price and fuel burn.",
+      "type": "object",
+      "required": ["basic", "feeder", "trunk"],
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["seats", "priceRon", "dieselPer100Km", "confidence"],
+        "properties": {
+          "seats": { "type": "integer", "exclusiveMinimum": 0 },
+          "priceRon": { "type": "number", "exclusiveMinimum": 0 },
+          "dieselPer100Km": { "type": "number", "exclusiveMinimum": 0 },
+          "confidence": { "enum": ["verbatim", "derived", "assumed"] },
+          "note": { "type": "string" }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+    }
+  }
+}
