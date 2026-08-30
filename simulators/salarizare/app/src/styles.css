@@ -756,3 +756,25 @@ i.k-measured { background: var(--series-1); border-radius: 50% !important; }
 .home-sources li b { color: var(--text-primary); }
 .home-sources li em { color: var(--text-muted); font-style: normal; }
 .home-sources p { margin: 14px 0 0; font-size: 13px; color: var(--text-muted); }
+
+
+/* Back to the landing page.
+ *
+ * Every simulator was a dead end: you could reach one from the index and never get back, so
+ * the three sat in one repository and behaved like three unrelated sites. Relative rather than
+ * absolute, because the deployed base is /romania-reforms/<simulator>/ and the index is one
+ * level up wherever it is served from. */
+.to-index {
+  display: inline-block;
+  margin-bottom: 0.4rem;
+  font-size: 0.76rem;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  color: inherit;
+  opacity: 0.62;
+}
+.to-index:hover,
+.to-index:focus-visible {
+  opacity: 1;
+  text-decoration: underline;
+}
