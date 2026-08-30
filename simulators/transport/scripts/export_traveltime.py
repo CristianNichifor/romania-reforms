@@ -8,20 +8,25 @@ here, exactly as `justitie` already lets them.
 
 **The reason that was not done is gone.** It looked as though live journey times needed a
 3.186 x 3.186 matrix in the browser. They do not. The road model is a graph of adjacent UATs —
-9.281 edges — and Dijkstra over it in JavaScript is milliseconds. Better still, administrativ
-already ships that graph: `admin-adjacency.bin` holds exactly these 9.281 edges, in this order.
-So this file ships **only the times**, one float per edge, and the browser gets a routable
-network for 37 KB by reusing a payload it has already downloaded.
+9.281 edges — and Dijkstra over it in JavaScript is milliseconds. So this ships the graph
+itself: both endpoints and the time, 73 KB, and the browser can route the whole country.
 
-**The alignment is the whole risk.** These times are positional: index `i` here means edge `i`
-there. If the two ever diverge — a rebuilt adjacency, a changed sort — every commune in the
-country would be painted with some other commune's journey and nothing would look wrong. So
-the pairs are compared explicitly and a mismatch is fatal. This is the same failure that made
-`uats.geojson` join zero of 3.186 rows and render a plausible grey map.
+**Self-describing on purpose.** The first draft shipped the times alone, positionally against
+`adjacency.parquet`, at half the size. That was wrong: the browser never sees that file. It
+sees `ModelData.neighbours`, a compressed-row graph built by other code in another order.
+Times laid against the wrong graph give every commune some other commune's journey and look
+entirely plausible — the failure that made `uats.geojson` join 0 of 3.186 rows and render a
+convincing grey map. Carrying the endpoints costs 37 KB and removes the coupling: the consumer
+builds its own graph and assumes nothing about anyone else's ordering.
+
+What still has to be checked is the UAT order itself, because the endpoints are indices into
+administrativ's `attributes.json`. The manifest publishes a checksum of the pair order for
+that, and the exporter refuses to run if a siruta in the road graph is unknown there.
 
 Output:
-    data/road-time.bin      float32 per adjacency edge, seconds; NaN where impassable
-    data/road-time.json     the manifest: count, checksum of the pair order, units
+    data/road-time.bin      uint16 a[], uint16 b[], float32 seconds[] — indices into
+                            administrativ's UAT order; NaN where impassable
+    data/road-time.json     the manifest: count, layout, checksum of the pair order
 
 Usage:
     uv run python -m scripts.export_traveltime
@@ -92,8 +97,38 @@ def main(argv: list[str] | None = None) -> int:
             f"({a_adj[bad]}, {b_adj[bad]}), times have ({a_time[bad]}, {b_time[bad]})"
         )
 
+    # Emit the endpoints as well as the times, as indices into administrativ's UAT order.
+    #
+    # The first version of this file shipped times alone, positionally against
+    # adjacency.parquet. That was 36 KB instead of 74 and it was wrong: the browser does not
+    # see adjacency.parquet, it sees ModelData's compressed-row `neighbours`, which is a
+    # different ordering built by different code. Times lined up against the wrong graph would
+    # give every commune another commune's journey and look entirely plausible — the same
+    # failure as the geojson join that matched 0 of 3.186 rows.
+    #
+    # Carrying the endpoints costs 37 KB and removes the coupling entirely: the consumer builds
+    # its own graph and depends on nothing about how anyone else ordered theirs.
+    attributes = json.loads(
+        (ADMINISTRATIV / "web" / "public" / "data" / "attributes.json").read_text("utf-8")
+    )
+    index_of = {str(s): i for i, s in enumerate(attributes["siruta"])}
+    missing = {s for s in (*a_time, *b_time) if s not in index_of}
+    if missing:
+        raise SystemExit(
+            f"{len(missing)} siruta codes in the road graph are not in administrativ's "
+            f"attribute order, e.g. {sorted(missing)[:3]} — the two are describing "
+            "different countries"
+        )
+
+    a_index = np.array([index_of[s] for s in a_time], dtype=np.uint16)
+    b_index = np.array([index_of[s] for s in b_time], dtype=np.uint16)
+    # NOT filtered by adjacency's `traversable` flag. That column marks whether a road crosses
+    # the shared border (5.912 of 9.281); road_time measures seat-to-seat travel over the whole
+    # network, which can be finite even where the border itself has no crossing. build_access
+    # uses every finite time, so this must too — filtering here removed a third of the roads
+    # and modelled a country nobody had built.
     seconds = times["road_s"].to_numpy(dtype=np.float32)
-    OUT_BIN.write_bytes(seconds.tobytes())
+    OUT_BIN.write_bytes(a_index.tobytes() + b_index.tobytes() + seconds.tobytes())
 
     finite = np.isfinite(seconds)
     manifest = {
@@ -119,18 +154,19 @@ def main(argv: list[str] | None = None) -> int:
         "pairChecksum": pair_checksum(a_adj, b_adj),
         "unit": "seconds",
         "dtype": "float32",
+        "layout": "uint16 a[edgeCount], uint16 b[edgeCount], float32 seconds[edgeCount]",
         "impassableEdges": int((~finite).sum()),
         "medianSeconds": round(float(np.median(seconds[finite])), 1),
         "limitations": [
             {
                 "id": "timpii-sunt-pozitionali",
                 "text": (
-                    "Fișierul nu conține perechile de UAT-uri, ci doar timpii, în ordinea "
-                    "muchiilor din graful administrativ. Este ieftin — 37 KB în loc de o "
-                    "matrice — dar înseamnă că o reconstrucție a adiacenței fără "
-                    "regenerarea acestui fișier ar asocia fiecărei muchii timpul altei muchii, "
-                    "fără ca ceva să pară greșit. De aceea manifestul publică o sumă de "
-                    "control a ordinii perechilor, iar consumatorul trebuie să o verifice."
+                    "Capetele muchiilor sunt indici în ordinea UAT-urilor din "
+                    "attributes.json al simulatorului administrativ, nu coduri SIRUTA. "
+                    "Dacă acea ordine se schimbă fără regenerarea acestui fișier, fiecare "
+                    "muchie ajunge între alte două comune, iar harta rezultată arată "
+                    "perfect plauzibil. Suma de control din manifest există exact pentru "
+                    "asta și trebuie verificată de consumator."
                 ),
                 "severity": "material",
                 "affects": ["road-time"],
@@ -141,7 +177,10 @@ def main(argv: list[str] | None = None) -> int:
         json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
 
-    print(f"  {len(seconds):,} edges, {OUT_BIN.stat().st_size / 1024:.0f} KB")
+    print(
+        f"  {len(seconds):,} edges, {OUT_BIN.stat().st_size / 1024:.0f} KB "
+        f"(a+b indices and seconds)"
+    )
     print(f"  impassable {int((~finite).sum()):,}   median {manifest['medianSeconds']:.0f} s")
     print(f"  pair checksum {manifest['pairChecksum']}")
     print(f"Wrote {OUT_BIN} and {OUT_MANIFEST}")

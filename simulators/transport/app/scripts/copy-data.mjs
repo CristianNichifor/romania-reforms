@@ -24,6 +24,15 @@ for (const [from, name] of [
   // about where a road is. Fetched only when the reader asks for them: 6,5 MB together.
   [join(administrativ, 'web/public/data/roads.geojson'), 'roads.geojson'],
   [join(administrativ, 'web/public/data/roads-county.geojson'), 'roads-county.geojson'],
+  // The administrative model's own payload. The map re-runs that model in the browser so it
+  // can follow whatever scenario the reader built next door, rather than a preset frozen here.
+  // Copied rather than fetched across apps: a cross-app relative fetch breaks in preview and
+  // in any single-simulator build.
+  [join(administrativ, 'web/public/data/manifest.json'), 'admin-manifest.json'],
+  [join(administrativ, 'web/public/data/attributes.json'), 'admin-attributes.json'],
+  [join(administrativ, 'web/public/data/attributes.bin'), 'admin-attributes.bin'],
+  [join(administrativ, 'web/public/data/adjacency.bin'), 'admin-adjacency.bin'],
+  [join(administrativ, 'web/public/data/candidacy.bin'), 'admin-candidacy.bin'],
 ]) {
   copyFileSync(from, join(out, name));
 }
@@ -38,7 +47,9 @@ const fares = JSON.parse(readFileSync(join(sim, 'data/fares.json'), 'utf8'));
 
 // The track and its stations. Copied rather than joined to anything: rail is its own layer,
 // and the whole point of the station geometry is that it does NOT line up with the settlements.
-for (const name of ['rail-lines.geojson', 'rail-stations.geojson']) {
+// The road-time graph: both endpoints and the seconds for each of the 9.281 edges. This is
+// what lets the browser route a scenario nobody precomputed.
+for (const name of ['rail-lines.geojson', 'rail-stations.geojson', 'road-time.bin', 'road-time.json']) {
   copyFileSync(join(sim, 'data', name), join(out, name));
 }
 

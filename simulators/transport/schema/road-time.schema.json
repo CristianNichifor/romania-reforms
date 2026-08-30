@@ -2,35 +2,84 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cristiannichifor.github.io/romania-reforms/schema/road-time.schema.json",
   "title": "Travel times over the administrative adjacency graph",
-  "description": "The manifest for road-time.bin: one float32 per edge, in the administrative graph's own edge order. This is what lets the map follow a consolidation scenario built next door rather than a preset frozen at build time — the browser gets a routable national network for 37 KB by reusing the adjacency administrativ already ships. Because the times are positional, the manifest MUST publish a checksum of the pair order so a consumer can refuse a graph it does not recognise instead of pairing every commune with another commune's journey.",
+  "description": "The manifest for road-time.bin — the graph itself: both endpoints and the time for each of the 9.281 edges between adjacent UATs, 73 KB. This is what lets the map follow a consolidation scenario the reader built next door instead of a preset frozen at build time; Dijkstra over it in the browser is milliseconds. The endpoints travel with the times deliberately: shipping times alone, positioned against a graph the consumer cannot see, would give every commune some other commune's journey and look entirely plausible. The endpoints are still indices into administrativ's UAT order, so the manifest MUST publish a checksum of the pair order for a consumer to check.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "title", "publisher", "period", "provenance", "edgeCount", "pairChecksum", "unit", "dtype", "impassableEdges", "medianSeconds", "limitations"],
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "period",
+    "provenance",
+    "edgeCount",
+    "pairChecksum",
+    "unit",
+    "dtype",
+    "impassableEdges",
+    "medianSeconds",
+    "limitations",
+    "layout"
+  ],
   "properties": {
-    "$schema": { "type": "string" },
-    "id": { "type": "string" },
-    "title": { "type": "string" },
-    "publisher": { "type": "string" },
-    "period": { "type": "string" },
-    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
-    "edgeCount": { "type": "integer", "exclusiveMinimum": 0 },
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "period": {
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json#/$defs/provenance"
+    },
+    "edgeCount": {
+      "type": "integer",
+      "exclusiveMinimum": 0
+    },
     "pairChecksum": {
       "description": "Hash of the (a, b) siruta order the times were written against. Required, and the point of the file: without it a rebuilt adjacency silently remaps every journey.",
       "type": "string",
       "minLength": 8
     },
-    "unit": { "type": "string", "enum": ["seconds"] },
-    "dtype": { "type": "string", "enum": ["float32"] },
+    "unit": {
+      "type": "string",
+      "enum": [
+        "seconds"
+      ]
+    },
+    "dtype": {
+      "type": "string",
+      "enum": [
+        "float32"
+      ]
+    },
     "impassableEdges": {
       "description": "Edges with no measured road time. Left as NaN rather than as a straight-line guess — an unmeasured edge must not become a shortcut.",
       "type": "integer",
       "minimum": 0
     },
-    "medianSeconds": { "type": "number", "exclusiveMinimum": 0 },
+    "medianSeconds": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
     "limitations": {
       "type": "array",
       "minItems": 1,
-      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+      "items": {
+        "$ref": "provenance.schema.json#/$defs/limitation"
+      }
+    },
+    "layout": {
+      "description": "Byte layout of road-time.bin. Endpoints travel with the times so the consumer can build its own graph rather than trusting an ordering it cannot see.",
+      "type": "string",
+      "minLength": 10
     }
   }
 }
