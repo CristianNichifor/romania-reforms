@@ -11,40 +11,40 @@
     "note": "Derivat dintr-un lanț în care nimic nu este verificat pe teren: vitezele sunt modelate, prețurile unitare sunt estimate, iar economiile vin de la simulatorul administrativ cu limitările lui."
   },
   "perWeekday": {
-    "busHours": 20970.3,
+    "busHours": 27670.3,
     "busKm": 1018343.8,
-    "kmPerBusHour": 48.6,
+    "kmPerBusHour": 36.8,
     "routesCosted": 1707,
     "routesWithoutLength": 1
   },
   "fleet": {
     "byClass": {
-      "feeder": 1613,
-      "basic": 495,
-      "trunk": 1253
+      "feeder": 1930,
+      "basic": 594,
+      "trunk": 1533
     },
     "peakByClass": {
-      "feeder": 1402,
-      "basic": 430,
-      "trunk": 1089
+      "feeder": 1678,
+      "basic": 516,
+      "trunk": 1333
     },
-    "total": 3361,
+    "total": 4057,
     "spareRatio": 0.15
   },
   "annualRon": {
-    "driver": 295641290,
+    "driver": 390099055,
     "running": 866218219,
-    "standing": 33610000,
-    "admin": 143456341,
-    "operating": 1338925850,
-    "capital": 219262500,
-    "total": 1558188350
+    "standing": 40570000,
+    "admin": 155626473,
+    "operating": 1452513747,
+    "capital": 265483333,
+    "total": 1717997080
   },
   "ledgerRon": {
-    "transportCost": 1558188350,
+    "transportCost": 1717997080,
     "administrativeSaving": 8727843155,
     "operatingSaving": 32651674949,
-    "netAgainstAdministrativeSaving": 7169654805
+    "netAgainstAdministrativeSaving": 7009846075
   },
   "limitations": [
     {
@@ -72,24 +72,16 @@
       ]
     },
     {
-      "id": "viteza-comerciala-prea-mare",
-      "text": "Rețeaua rulează la circa 49 km/h comercial, în timp ce un serviciu rural cu opriri merge de obicei cu 25-40. Timpii vin din profilul auto al lui L0, iar opririle sunt contorizate doar ca staționare, fără frânarea și repornirea din fiecare stație. Orele — deci costul șoferilor — sunt subestimate, probabil cu ordinul zecilor de procente.",
+      "id": "factorul-de-viteza-de-serviciu",
+      "text": "Timpii de drum liber sunt împărțiți la un factor de 0,75 ca să devină timpi de serviciu — intersecții, marja pusă în orar ca traseul să poată fi respectat, conducerea unui vehicul greu. Factorul este presupus, calibrat astfel încât viteza comercială să cadă în intervalul observat de 25-40 km/h, și este presupunerea cu cea mai mare influență asupra orelor. Opririle nu sunt în el: staționarea se socotește separat, iar frânarea și repornirea din stație au fost măsurate și fac 3%.",
       "severity": "material",
       "affects": [
         "cost"
       ]
     },
     {
-      "id": "structura-costului-nu-seamana-cu-realitatea",
-      "text": "Șoferii ies 22% din costul de funcționare și carburantul cu întreținerea 65%, când într-o operare de autobuz raportul este de obicei invers, 35-55% șoferi. O parte se explică prin trasee interurbane lungi și rapide, restul este viteza de mai sus. Cifrele nu au fost ajustate ca să pară corecte.",
-      "severity": "material",
-      "affects": [
-        "cost"
-      ]
-    },
-    {
-      "id": "cost-pe-km-sub-referintele-europene",
-      "text": "Costul de funcționare iese în jur de 5 lei pe kilometru, sub ordinul de 10-15 lei al serviciilor rurale europene. Costurile românești sunt real mai mici, dar diferența este prea mare ca să fie explicată doar prin asta, iar prețurile unitare nu sunt citate din nicio sursă.",
+      "id": "cost-pe-km-sub-referinta-ajustata",
+      "text": "Costul de funcționare iese 5,7 lei pe kilometru, față de circa 8,8 lei cât ar fi o operare rurală vest-europeană cu partea de salarii ajustată la nivelul românesc. Ponderea șoferilor, ajustată la fel, se potrivește — 27% față de 22% așteptat — deci diferența stă în costurile care nu depind de salarii. Este întrebarea deschisă a acestui nivel.",
       "severity": "material",
       "affects": [
         "cost"

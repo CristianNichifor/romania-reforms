@@ -98,6 +98,43 @@ Chilia Veche, Crișan, C.A. Rosetti, Maliuc, Pardina and Ceatalchioi in the Danu
 Frecăței and Mărașu on the Brăila river islands. Reachable only by water, found without being
 told they exist. Every cost figure here therefore describes the country **minus** those places.
 
+## L2: what it costs a year
+
+```
+operating   1,45 mld RON      capital  0,27 mld      total  1,72 mld
+against an administrative saving of 8,73 mld claimed by the same map
+```
+
+Every unit price sits in `data/cost-inputs.json` with its own confidence and note, so a reader
+disputing the driver wage argues with one row rather than with the model. **None of them is
+cited from a public source**, and the file says so in a blocking limitation. The engine is pure
+arithmetic over that file: replacing a guess with a sourced figure needs no code change.
+
+### The checks, and the one that still fails
+
+Benchmarks have to be wage-adjusted or they answer a question about a different country. A
+western rural operation runs near 2,5 EUR/km at ~45% driver — but its drivers cost about
+32 EUR/h against ours at 11,3.
+
+```
+driver share of operating     27%    expect ~22%        ok
+commercial speed             36,8    expect 25-40 km/h  ok
+operating cost per bus-km    5,71    expect ~8,8 RON    LOW — the open question
+```
+
+Two of these only pass because earlier versions were wrong, and the corrections are worth
+recording. **Commercial speed** was 48,6 km/h, because free-flow road time is not service time;
+it is now divided by an explicit, disputable factor of 0,75 calibrated against the observed
+25-40 range. Stops are not in that factor — dwell is charged separately, and braking away from
+a stop was measured against the kinematics in `speeds.py` at 14,5 s, which over a median three
+stops is 3% and nowhere near the gap.
+
+**Driver share** was reported as failing against a 35-55% band. That band was Western European
+and the model was right: wage-adjusted, Romania should sit near 22%.
+
+What genuinely remains open is cost per kilometre. The driver half now matches, so the shortfall
+is in the costs that do not depend on wages, and none of those prices is sourced.
+
 ## What L0 is
 
 `simulators/administrativ` measures the road **distance** between the seats of adjacent UATs.

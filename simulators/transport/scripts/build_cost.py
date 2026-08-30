@@ -74,9 +74,9 @@ def main(argv: list[str] | None = None) -> int:
     network = json.loads(network_file.read_text(encoding="utf-8"))
     hubs = json.loads(hubs_file.read_text(encoding="utf-8"))
     prices = load_prices()
-    dwell_per_stop = json.loads((ROOT / "data" / "cost-inputs.json").read_text(encoding="utf-8"))[
-        "items"
-    ]["dwellMinPerStop"]["value"]
+    items = json.loads((ROOT / "data" / "cost-inputs.json").read_text(encoding="utf-8"))["items"]
+    dwell_per_stop = items["dwellMinPerStop"]["value"]
+    service_factor = items["serviceSpeedFactor"]["value"]
 
     uats = gpd.read_file(ADMINISTRATIV / "data/processed/uat_geometry.gpkg", layer="uat")
     population = dict(zip(uats.siruta, uats.population, strict=True))
@@ -96,8 +96,15 @@ def main(argv: list[str] | None = None) -> int:
         # cycle rather than into the cost, because standing at a stop lengthens the round trip
         # and can therefore buy a vehicle as well as a driver-hour.
         dwell = len(route["stops"]) * dwell_per_stop
+        # Free-flow road time is not service time. The road model gives a car an unobstructed
+        # run; a scheduled bus loses a quarter of that to junctions, to the padding a
+        # timetable needs to be keepable, and to being a heavy vehicle on a communal road.
+        # Stops are *not* in this factor — standing is `dwell`, and braking away from a stop
+        # was measured against the kinematics in speeds.py at 14,5 s, which over a median
+        # three stops is 3% and nowhere near the gap.
+        running_min = 2 * route["oneWayMin"] / service_factor
         resources = resources_for_route(
-            round_trip_min=2 * route["oneWayMin"] + dwell,
+            round_trip_min=running_min + dwell,
             layover_min=LAYOVER_MIN,
             departures=service.departures,
             period_hours=DAY_PROFILE,
@@ -194,36 +201,27 @@ def main(argv: list[str] | None = None) -> int:
                 "affects": ["cost"],
             },
             {
-                "id": "viteza-comerciala-prea-mare",
+                "id": "factorul-de-viteza-de-serviciu",
                 "text": (
-                    "Rețeaua rulează la circa 49 km/h comercial, în timp ce un serviciu "
-                    "rural cu opriri merge de obicei cu 25-40. Timpii vin din profilul auto "
-                    "al lui L0, iar opririle sunt contorizate doar ca staționare, fără "
-                    "frânarea și repornirea din fiecare stație. Orele — deci costul "
-                    "șoferilor — sunt subestimate, probabil cu ordinul zecilor de procente."
+                    "Timpii de drum liber sunt împărțiți la un factor de 0,75 ca să devină "
+                    "timpi de serviciu — intersecții, marja pusă în orar ca traseul să poată "
+                    "fi respectat, conducerea unui vehicul greu. Factorul este presupus, "
+                    "calibrat astfel încât viteza comercială să cadă în intervalul observat "
+                    "de 25-40 km/h, și este presupunerea cu cea mai mare influență asupra "
+                    "orelor. Opririle nu sunt în el: staționarea se socotește separat, iar "
+                    "frânarea și repornirea din stație au fost măsurate și fac 3%."
                 ),
                 "severity": "material",
                 "affects": ["cost"],
             },
             {
-                "id": "structura-costului-nu-seamana-cu-realitatea",
+                "id": "cost-pe-km-sub-referinta-ajustata",
                 "text": (
-                    "Șoferii ies 22% din costul de funcționare și carburantul cu întreținerea "
-                    "65%, când într-o operare de autobuz raportul este de obicei invers, "
-                    "35-55% șoferi. O parte se explică prin trasee interurbane lungi și "
-                    "rapide, restul este viteza de mai sus. Cifrele nu au fost ajustate ca "
-                    "să pară corecte."
-                ),
-                "severity": "material",
-                "affects": ["cost"],
-            },
-            {
-                "id": "cost-pe-km-sub-referintele-europene",
-                "text": (
-                    "Costul de funcționare iese în jur de 5 lei pe kilometru, sub ordinul de "
-                    "10-15 lei al serviciilor rurale europene. Costurile românești sunt "
-                    "real mai mici, dar diferența este prea mare ca să fie explicată doar "
-                    "prin asta, iar prețurile unitare nu sunt citate din nicio sursă."
+                    "Costul de funcționare iese 5,7 lei pe kilometru, față de circa 8,8 lei "
+                    "cât ar fi o operare rurală vest-europeană cu partea de salarii ajustată "
+                    "la nivelul românesc. Ponderea șoferilor, ajustată la fel, se potrivește "
+                    "— 27% față de 22% așteptat — deci diferența stă în costurile care nu "
+                    "depind de salarii. Este întrebarea deschisă a acestui nivel."
                 ),
                 "severity": "material",
                 "affects": ["cost"],
@@ -273,18 +271,37 @@ def main(argv: list[str] | None = None) -> int:
     driver_share = cost.driver_ron / cost.operating_ron
     ron_per_km = cost.operating_ron / (sum(km_by_class.values()) * WEEKDAYS_PER_YEAR)
     speed = sum(km_by_class.values()) / hours
-    print("\nSanity, against what bus operations usually look like:")
+
+    # The benchmarks have to be wage-adjusted or they are answers about a different country.
+    # A western rural operation runs near 2,5 EUR/km at roughly 45% driver — but its drivers
+    # cost about 32 EUR/hour against ours at 11,3. Scaling only the driver half by that ratio
+    # gives what Romania should look like, and it moves the expected driver share from 45% to
+    # about 22%. An earlier version of this check used the unadjusted western figures and
+    # reported the model as wrong when it was the benchmark that was.
+    ron_per_eur = 4.97
+    western_per_km_eur, western_driver_share, western_driver_eur_h = 2.5, 0.45, 32.0
+    wage_ratio = (prices.per_bus_hour / ron_per_eur) / western_driver_eur_h
+    scaled_driver = western_per_km_eur * western_driver_share * wage_ratio
+    other = western_per_km_eur * (1 - western_driver_share)
+    expect_share = scaled_driver / (scaled_driver + other)
+    expect_per_km = (scaled_driver + other) * ron_per_eur
+
+    print("\nSanity, against bus operations wage-adjusted to Romanian pay:")
     print(
-        f"  driver share of operating   {driver_share:>6.0%}   "
-        f"{'ok' if 0.35 <= driver_share <= 0.55 else 'OUTSIDE the usual 35-55%'}"
+        f"  driver cost                {prices.per_bus_hour:>6.1f} RON/bus-hour"
+        f" = {prices.per_bus_hour / ron_per_eur:.1f} EUR/h, {wage_ratio:.0%} of western"
     )
     print(
-        f"  operating cost per bus-km   {ron_per_km:>6.2f} RON   "
-        f"{'ok' if ron_per_km >= 8 else 'LOW against European rural bus, ~10-15 RON/km'}"
+        f"  driver share of operating  {driver_share:>6.0%}   expect ~{expect_share:.0%}   "
+        f"{'ok' if abs(driver_share - expect_share) < 0.12 else 'OUTSIDE'}"
     )
     print(
-        f"  commercial speed            {speed:>6.1f} km/h  "
-        f"{'ok' if speed <= 40 else 'HIGH for a stopping rural service, usually 25-40'}"
+        f"  operating cost per bus-km  {ron_per_km:>6.2f}   expect ~{expect_per_km:.1f} RON  "
+        f"{'ok' if ron_per_km >= expect_per_km * 0.75 else 'LOW — the open question'}"
+    )
+    print(
+        f"  commercial speed           {speed:>6.1f}   expect 25-40 km/h  "
+        f"{'ok' if 25 <= speed <= 40 else 'OUTSIDE'}"
     )
 
     print(f"\nWrote {OUT.relative_to(ROOT)}")

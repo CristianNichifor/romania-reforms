@@ -145,5 +145,5 @@ def test_the_failing_sanity_checks_are_declared(built):
     per kilometre and the commercial speed. They are declared rather than tuned away, and if
     someone fixes the model these limitations should go with the fix."""
     ids = {limitation["id"] for limitation in built["limitations"]}
-    assert "viteza-comerciala-prea-mare" in ids
-    assert "structura-costului-nu-seamana-cu-realitatea" in ids
+    assert "factorul-de-viteza-de-serviciu" in ids
+    assert "cost-pe-km-sub-referinta-ajustata" in ids

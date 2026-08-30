@@ -71,6 +71,12 @@
       "confidence": "assumed",
       "note": "Dispecerat, administrație, vânzare de bilete, control. Ca procent din costul direct, pentru că nu depinde nici de oră, nici de kilometru."
     },
+    "serviceSpeedFactor": {
+      "value": 0.75,
+      "unit": "ratio",
+      "confidence": "assumed",
+      "note": "Cât din viteza de circulație liberă atinge efectiv un serviciu de autobuz. Restul se duce în intersecții, în marja de timp pusă în orar ca traseul să fie respectat, în trafic și în conducerea unui vehicul greu pe drum comunal. Opririle NU sunt aici: staționarea este dwellMinPerStop, iar frânarea și repornirea din stație s-au măsurat separat și fac doar 3%. Calibrat astfel încât viteza comercială să cadă în intervalul observat de 25-40 km/h pentru un serviciu rural cu opriri — nu ca să iasă un cost anume."
+    },
     "dwellMinPerStop": {
       "value": 0.75,
       "unit": "minutes/stop",
