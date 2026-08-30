@@ -153,6 +153,14 @@ h1 {
   margin-bottom: 1.1rem;
 }
 
+/* Waiting for a hover, it reserved eight and a half rems of nothing and pushed the sections
+ * below off the screen. It keeps its height only once it has something to hold. */
+.detail:has(> .hint:only-child) {
+  min-height: 0;
+  padding: 0.5rem 0.9rem;
+  margin-bottom: 0.9rem;
+}
+
 .hint {
   margin: 0;
   color: var(--muted);
@@ -512,3 +520,17 @@ dd {
   color: var(--muted);
   cursor: pointer;
 }
+
+/* Twelve folds in one stack is a list nobody reads to the end of. Grouped under headings so a
+ * reader can find the money without scrolling past the geography, and so the caveats read as a
+ * section rather than as more of the same. */
+.fold-group {
+  margin: 1.1rem 0 0.15rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--muted);
+  opacity: 0.75;
+}
+.fold-group:first-of-type { margin-top: 0.8rem; }

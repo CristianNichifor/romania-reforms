@@ -556,6 +556,7 @@ async function main(): Promise<void> {
   // Held for the map: the catchment view repaints from these whenever the scenario moves.
   let couplingForMap: Coupled | null = null;
   let arondareForMap: Arondare | null = null;
+  let seatTown: Map<string, string> | null = null;
 
   /**
    * The access view, loaded only when asked for.
@@ -886,6 +887,13 @@ async function main(): Promise<void> {
       const court = state.court ?? -1;
       const seat = court >= 0 ? couplingForMap.meta.courts[court] : undefined;
       const attributes = couplingForMap.data.attributes;
+      // "Tribunalul ARGEŞ" names the court; a reader wants the town they would travel to,
+      // which is Piteşti. The seat's SIRUTA is in the court record, so look up its name once
+      // and cache the index — the alternative reads as a county, not a destination.
+      seatTown ??= new Map(attributes.siruta.map((code, i) => [code, attributes.name[i] ?? '']));
+      const town = seat
+        ? (seatTown.get(seat.siruta) ?? '').replace(/^(MUNICIPIUL|ORAȘ|ORAŞ)\s+/, '')
+        : '';
       const unitSeat = arondareForMap.units.find((u) =>
         u.seatIndex === index ? true : false,
       );
@@ -897,10 +905,8 @@ async function main(): Promise<void> {
          <p class="sub">${county}${unitSeat ? ' · sediu de unitate' : ''}</p>
          ${
            seat
-             ? `<div class="figure">se judecă la <strong>${seat.name.replace(
-                 /^Tribunalul /,
-                 '',
-               )}</strong> <span class="vs">(${seat.county})</span></div>
+             ? `<div class="figure">se judecă la <strong>${town || seat.name}</strong>
+                  <span class="vs">(${seat.county})</span></div>
                 <div class="figure">${
                   metres < 0
                     ? 'fără drum'
@@ -924,6 +930,10 @@ async function main(): Promise<void> {
     });
     map.on('mouseleave', 'courts', () => {
       map.getCanvas().style.cursor = '';
+      // In the catchment view the polygons own this panel. Resetting here overwrote a commune
+      // the reader was still pointing at with the hint for a court they had just left — and
+      // with the wrong noun besides, since that hint says "instanță".
+      if (mode === 'arondare') return;
       show(null);
     });
 
@@ -1157,9 +1167,7 @@ async function main(): Promise<void> {
       }
 
       if (mode === 'arondare') {
-        if (!el('#detail').dataset.arondare) {
-          el('#detail').innerHTML = '<p class="hint">Treci cu mouse-ul peste o comună.</p>';
-        }
+        el('#detail').innerHTML = '<p class="hint">Treci cu mouse-ul peste o comună.</p>';
         el('#summary').innerHTML = arondareForMap
           ? renderArondareSummary(arondareForMap)
           : '<div class="figure">Se încarcă modelul administrativ…</div>';
