@@ -14,7 +14,21 @@ import './style.css';
  * on, not a smooth ramp nobody can read off a legend.
  */
 
-type Scenario = 'uncoordinated' | 'pulsed';
+type Timetable = 'uncoordinated' | 'pulsed';
+
+/** One consolidation scenario, with a journey time per polygon. */
+interface Consolidation {
+  id: string;
+  label: string;
+  hubs: number;
+  fleet: number;
+  totalRon: number;
+  operatingRon: number;
+  medianUncoordinatedMin: number;
+  medianPulsedMin: number;
+  administrativeSavingRon: number | null;
+  journey: Array<[number, number] | null>;
+}
 
 const BANDS: Array<{ upTo: number; colour: string; label: string }> = [
   { upTo: 45, colour: '#1a9850', label: 'sub 45 min' },
@@ -30,30 +44,32 @@ const asset = (name: string) => `${base}data/${name}`;
 
 const fmt = new Intl.NumberFormat('ro-RO');
 const min = (v: number) => `${fmt.format(Math.round(v))} min`;
-const pct = (v: number) => `${v.toFixed(1).replace('.', ',')}%`;
 const bn = (v: number) => `${(v / 1e9).toFixed(2).replace('.', ',')} mld lei`;
 
-function scenarioFromHash(): Scenario {
-  return new URLSearchParams(location.hash.slice(1)).get('s') === 'pulsed'
-    ? 'pulsed'
-    : 'uncoordinated';
+function hash() {
+  return new URLSearchParams(location.hash.slice(1));
 }
 
-function writeHash(scenario: Scenario) {
+function writeHash(timetable: Timetable, consolidation: string) {
   // A scenario is a link you can paste into an argument — that is the whole point of the
-  // repository, so the toggle lives in the URL rather than only in memory.
-  const params = new URLSearchParams(location.hash.slice(1));
-  params.set('s', scenario);
+  // repository, so both choices live in the URL rather than only in memory.
+  const params = hash();
+  params.set('s', timetable);
+  params.set('c', consolidation);
   history.replaceState(null, '', `#${params}`);
 }
 
 async function main() {
-  const [summary, journey] = await Promise.all([
+  const [summary, consolidations] = await Promise.all([
     fetch(asset('summary.json')).then((r) => r.json()),
-    fetch(asset('journey.json')).then((r) => r.json() as Promise<Array<[number, number] | null>>),
+    fetch(asset('scenarios.json')).then((r) => r.json() as Promise<Consolidation[]>),
   ]);
 
-  let scenario = scenarioFromHash();
+  const base = consolidations[0];
+  let scenario: Timetable = hash().get('s') === 'pulsed' ? 'pulsed' : 'uncoordinated';
+  let chosen =
+    consolidations.find((c) => c.id === hash().get('c')) ?? base;
+  const journeyOf = () => chosen.journey;
 
   const map = new maplibregl.Map({
     container: 'map',
@@ -79,19 +95,24 @@ async function main() {
   // The journey times are keyed by polygon position, not by a property: uats.geojson carries
   // no properties at all. Writing them onto the features here keeps the paint expression
   // simple and the join in one place.
-  uats.features.forEach((f: { properties: Record<string, number> }, i: number) => {
-    const row = journey[i];
-    f.properties = {
-      idx: i,
-      u: row ? row[0] : -1,
-      p: row ? row[1] : -1,
-    };
-  });
+  // Journey times are written onto the features rather than looked up in the paint
+  // expression, and rewritten whenever the consolidation changes. Setting the source data
+  // again is what makes the map redraw.
+  const applyJourneys = () => {
+    const rows = journeyOf();
+    uats.features.forEach((f: { properties: Record<string, number> }, i: number) => {
+      const row = rows[i];
+      f.properties = { idx: i, u: row ? row[0] : -1, p: row ? row[1] : -1 };
+    });
+    const source = map.getSource('uats') as maplibregl.GeoJSONSource | undefined;
+    source?.setData(uats);
+  };
+  applyJourneys();
 
   map.addSource('uats', { type: 'geojson', data: uats });
   map.addSource('counties', { type: 'geojson', data: counties });
 
-  const paint = (s: Scenario): maplibregl.DataDrivenPropertyValueSpecification<string> => {
+  const paint = (s: Timetable): maplibregl.DataDrivenPropertyValueSpecification<string> => {
     const key = s === 'pulsed' ? 'p' : 'u';
     const steps: unknown[] = ['step', ['get', key], NO_DATA];
     for (const band of BANDS) {
@@ -128,7 +149,7 @@ async function main() {
     if (!f) return;
     map.getCanvas().style.cursor = 'pointer';
     const i = f.properties!.idx as number;
-    const row = journey[i];
+    const row = journeyOf()[i];
     popup
       .setLngLat(e.lngLat)
       .setHTML(
@@ -152,32 +173,58 @@ async function main() {
   ].join('');
 
   const a = summary.access;
-  const c = summary.cost;
+  const relative = (now: number, was: number) => {
+    const d = now / was - 1;
+    return Math.abs(d) < 0.005 ? 'la fel' : `${d > 0 ? '+' : ''}${(d * 100).toFixed(0)}%`;
+  };
 
   function renderStats() {
-    const median = scenario === 'pulsed' ? a.medianPulsedMin : a.medianUncoordinatedMin;
-    const key = scenario === 'pulsed' ? 'pulsedPct' : 'uncoordinatedPct';
-    const saved = a.medianUncoordinatedMin - a.medianPulsedMin;
+    const median = scenario === 'pulsed' ? chosen.medianPulsedMin : chosen.medianUncoordinatedMin;
     el('stats').innerHTML = `
-      <dt>Călătorie mediană</dt><dd class="big">${min(median)}</dd>
+      <dt>Mediană, ponderată cu populația</dt><dd class="big">${min(median)}</dd>
       <dt>Așteptare la schimb</dt><dd>${min(
         scenario === 'pulsed' ? a.waitPulsedMin : a.waitUncoordinatedMin,
       )}</dd>
-      <dt>Populație sub 60 min</dt><dd>${pct(a.within['60'][key])}</dd>
-      <dt>Populație sub 90 min</dt><dd>${pct(a.within['90'][key])}</dd>
-      <dt>Populație sub 120 min</dt><dd>${pct(a.within['120'][key])}</dd>`;
+      <dt>Centre</dt><dd>${fmt.format(chosen.hubs)}</dd>
+      <dt>Autobuze</dt><dd>${fmt.format(chosen.fleet)}</dd>`;
+    // The map is per commune and the median is per person. Most communes are small and far,
+    // so the typical polygon is redder than the median — saying so stops the map and the
+    // number looking like they disagree.
     el('scenario-note').textContent =
       scenario === 'pulsed'
-        ? `Rabaterile sunt cronometrate să prindă trunchiul: se așteaptă ${min(a.waitPulsedMin)}. Aceleași autobuze, aceiași kilometri — se câștigă ${min(saved)} din orar.`
-        : `Fiecare traseu are orarul lui, deci așteptarea medie este jumătate din interval, ${min(a.waitUncoordinatedMin)}.`;
+        ? `Rabaterile sunt cronometrate să prindă trunchiul: se așteaptă ${min(a.waitPulsedMin)}. Aceleași autobuze, aceiași kilometri. Mediana este pe om, harta este pe comună — comunele mici și îndepărtate sunt multe, deci harta arată mai roșu decât mediana.`
+        : `Fiecare traseu are orarul lui, deci așteptarea medie este jumătate din interval, ${min(a.waitUncoordinatedMin)}. Mediana este pe om, harta este pe comună.`;
+
+    el('cost').innerHTML = `
+      <dt>Funcționare</dt><dd>${bn(chosen.operatingRon)}</dd>
+      <dt>Total pe an</dt><dd class="big">${bn(chosen.totalRon)}</dd>
+      <dt>Economia administrativă</dt><dd>${
+        chosen.administrativeSavingRon ? bn(chosen.administrativeSavingRon) : '—'
+      }</dd>`;
+
+    el('consolidation-note').textContent =
+      chosen.id === base.id
+        ? `${fmt.format(chosen.hubs)} de centre. Celelalte scenarii se compară cu acesta.`
+        : `${relative(chosen.hubs, base.hubs)} centre, transport ${relative(
+            chosen.totalRon,
+            base.totalRon,
+          )}, călătoria ${relative(chosen.medianPulsedMin, base.medianPulsedMin)}. ` +
+          (chosen.medianPulsedMin < base.medianPulsedMin && chosen.hubs < base.hubs
+            ? 'Mai puține centre și drum mai scurt: fără trunchi nu mai există schimb.'
+            : '');
   }
 
-  el('cost').innerHTML = `
-    <dt>Funcționare</dt><dd>${bn(c.annualRon.operating)}</dd>
-    <dt>Investiție anualizată</dt><dd>${bn(c.annualRon.capital)}</dd>
-    <dt>Total</dt><dd class="big">${bn(c.annualRon.total)}</dd>
-    <dt>Autobuze</dt><dd>${fmt.format(c.fleet.total)}</dd>
-    <dt>Economia administrativă revendicată</dt><dd>${bn(summary.ledger.administrativeSaving)}</dd>`;
+  const select = el<HTMLSelectElement>('scenario');
+  select.innerHTML = consolidations
+    .map((c) => `<option value="${c.id}">${c.label} — ${fmt.format(c.hubs)} centre</option>`)
+    .join('');
+  select.value = chosen.id;
+  select.addEventListener('change', () => {
+    chosen = consolidations.find((c) => c.id === select.value) ?? base;
+    applyJourneys();
+    writeHash(scenario, chosen.id);
+    renderStats();
+  });
 
   el('caveats').innerHTML = summary.limitations
     .filter((l: { severity: string }) => l.severity === 'blocking' || l.severity === 'material')
@@ -187,18 +234,18 @@ async function main() {
 
   document.querySelectorAll<HTMLButtonElement>('#toggle button').forEach((button) => {
     button.addEventListener('click', () => {
-      scenario = button.dataset.scenario as Scenario;
+      scenario = button.dataset.scenario as Timetable;
       document
         .querySelectorAll('#toggle button')
         .forEach((b) => b.classList.toggle('on', b === button));
       map.setPaintProperty('uat-fill', 'fill-color', paint(scenario));
-      writeHash(scenario);
+      writeHash(scenario, chosen.id);
       renderStats();
     });
     button.classList.toggle('on', button.dataset.scenario === scenario);
   });
 
-  writeHash(scenario);
+  writeHash(scenario, chosen.id);
   renderStats();
 }
 

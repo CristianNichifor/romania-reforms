@@ -24,6 +24,7 @@ for (const [from, name] of [
 }
 
 const access = JSON.parse(readFileSync(join(sim, 'data/access.json'), 'utf8'));
+const sweep = JSON.parse(readFileSync(join(sim, 'data/scenarios.json'), 'utf8'));
 const cost = JSON.parse(readFileSync(join(sim, 'data/cost.json'), 'utf8'));
 const hubs = JSON.parse(readFileSync(join(sim, 'data/hubs.json'), 'utf8'));
 
@@ -52,6 +53,22 @@ const joined = attributes.siruta.map((siruta) => {
   return u ? [u.uncoordinatedMin, u.pulsedMin] : null;
 });
 writeFileSync(join(out, 'journey.json'), JSON.stringify(joined));
+
+// One array per consolidation scenario, aligned the same way. This is what lets the map show
+// that consolidating harder makes the journey *shorter* — a result that reads as a mistake in
+// a table and as an obvious fact on a map.
+writeFileSync(
+  join(out, 'scenarios.json'),
+  JSON.stringify(
+    sweep.scenarios.map((s) => {
+      const { journeyByUat, ...stats } = s;
+      return {
+        ...stats,
+        journey: attributes.siruta.map((siruta) => journeyByUat[String(siruta)] ?? null),
+      };
+    }),
+  ),
+);
 
 const geo = JSON.parse(readFileSync(join(out, 'uats.geojson'), 'utf8'));
 if (attributes.siruta.length !== geo.features.length) {

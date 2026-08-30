@@ -41,7 +41,15 @@
             "description": "Null for a map administrativ did not produce, which therefore has no saving of its own.",
             "type": ["number", "null"]
           },
-          "operatingSavingRon": { "type": ["number", "null"] }
+          "operatingSavingRon": { "type": ["number", "null"] },
+          "journeyByUat": {
+            "description": "SIRUTA -> [uncoordinated, pulsed] whole minutes. Kept so the map can show the difference rather than only report it.",
+            "type": "object",
+            "additionalProperties": {
+              "type": "array", "minItems": 2, "maxItems": 2,
+              "items": { "type": "integer", "minimum": 0 }
+            }
+          }
         }
       }
     },

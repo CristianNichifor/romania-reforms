@@ -146,6 +146,9 @@ def cost_one(
     }
     headway = sum(DAY_PROFILE.values()) * 60.0 / sum(service_for("trunk").departures.values())
     journeys: list[tuple[float, float, int]] = []
+    # Kept per UAT as well as aggregated: the map needs to be able to show the difference,
+    # not only report it. Rounded to whole minutes because that is all a colour band uses.
+    per_uat: dict[str, tuple[int, int]] = {}
     for centre, group in members.items():
         reach = county_times(county, neighbours, edge_s, county[centre], [centre])
         trunk = trunk_by_centre.get(centre, 0.0 if centre in capitals else None)
@@ -164,6 +167,10 @@ def cost_one(
                     feeder + free * PULSE_DWELL_MIN + trunk,
                     int(population[uat]),
                 )
+            )
+            per_uat[uat] = (
+                round(feeder + free * headway / 2 + trunk),
+                round(feeder + free * PULSE_DWELL_MIN + trunk),
             )
 
     people = sum(p for _u, _p, p in journeys)
@@ -192,6 +199,7 @@ def cost_one(
         "peopleWithJourney": people,
         "medianUncoordinatedMin": weighted_median(0),
         "medianPulsedMin": weighted_median(1),
+        "journeyByUat": per_uat,
     }
 
 
