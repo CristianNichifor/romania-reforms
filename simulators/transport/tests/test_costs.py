@@ -200,3 +200,53 @@ def test_maintenance_at_parity_wages_is_the_benchmark():
         "ronPerEur": 4.97,
     }
     assert maintenance_per_km(item) == pytest.approx(0.45 * 4.97)
+
+
+def test_the_depot_figure_has_a_source_that_publishes_its_denominator():
+    """For most of this project the depot cost per space was a division with an invented
+    denominator: Oradea published 18 million euro and never said how many buses fitted. That
+    made the single largest capital line unfalsifiable — a reader could not tell whether it
+    was half or double.
+
+    Chitila publishes both, for a depot with the same functions this model assumes. Because
+    its 21 buses are a stated MINIMUM, cost over 21 is a ceiling on cost per space, so the
+    model must sit at or below it rather than merely near it.
+    """
+    document = json.loads((ROOT / "data" / "cost-inputs.json").read_text(encoding="utf-8"))
+    items, benchmarks = document["items"], document["benchmarks"]
+    ceiling = benchmarks["chitilaDepotRonPerElectricSpace"]["value"]
+    modelled = (
+        items["depotCapexPerBusRon"]["value"] + items["depotElectricPremiumPerBusRon"]["value"]
+    )
+    assert modelled <= ceiling
+    assert modelled / ceiling > 0.8, "far under the ceiling means the ceiling is not binding"
+
+
+def test_the_electric_premium_stays_under_the_charging_only_benchmark():
+    """Bucharest's 786 885 lei per station is charging infrastructure alone, at urban prices
+    for articulated buses. A county depot premium above that would be charging a rural
+    network more for a socket than the capital pays."""
+    document = json.loads((ROOT / "data" / "cost-inputs.json").read_text(encoding="utf-8"))
+    premium = document["items"]["depotElectricPremiumPerBusRon"]["value"]
+    assert premium < document["benchmarks"]["bucurestiChargingRonPerStation"]["value"]
+
+
+def test_demand_is_a_share_of_a_measured_national_total():
+    """175 pkm/person was a free-floating assumption. It is now positioned: the county layer
+    it describes is a minority of all Romanian bus travel, which is the only claim that makes
+    the figure arguable rather than merely asserted."""
+    document = json.loads((ROOT / "data" / "cost-inputs.json").read_text(encoding="utf-8"))
+    rate = document["items"]["passengerKmPerPersonYear"]["value"]
+    national = document["benchmarks"]["romaniaBusPkmPerPersonYear"]["value"]
+    assert 0 < rate < national, "the county layer cannot exceed all bus travel in the country"
+    # Denmark is the counterfactual, so it has to be recorded as well as Romania's own figure.
+    assert document["benchmarks"]["denmarkBusPkmPerPersonYear"]["value"] > 0
+
+
+def test_every_benchmark_says_where_it_came_from():
+    """A benchmark without a source is a number the model was tuned against with no way to
+    check it — worse than no benchmark, because it looks like evidence."""
+    document = json.loads((ROOT / "data" / "cost-inputs.json").read_text(encoding="utf-8"))
+    for name, entry in document["benchmarks"].items():
+        assert entry["confidence"] in ("verbatim", "derived", "assumed"), name
+        assert len(entry.get("note", "")) > 80, name
