@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/access.schema.json",
+  "title": "Journey time to the county seat, with and without coordinated transfers",
+  "description": "A journey is a feeder, a wait, and a trunk. The wait is the part a timetable controls and the part a passenger notices most: uncoordinated it averages half the trunk headway, pulsed it is the minutes the trunk stands at the interchange. Both scenarios run the same buses over the same kilometres — the difference is entirely in when the departures are written.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "title", "publisher", "period", "provenance", "summary", "uats", "limitations"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "type": "string" },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "period": { "type": "string" },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["uats", "people", "trunkHeadwayMin", "waitUncoordinatedMin", "waitPulsedMin", "medianUncoordinatedMin", "medianPulsedMin", "within"],
+      "properties": {
+        "uats": { "type": "integer", "minimum": 1 },
+        "people": { "type": "integer", "minimum": 1 },
+        "trunkHeadwayMin": { "type": "number", "exclusiveMinimum": 0 },
+        "waitUncoordinatedMin": { "type": "number", "minimum": 0 },
+        "waitPulsedMin": { "type": "number", "minimum": 0 },
+        "medianUncoordinatedMin": { "type": "number", "minimum": 0 },
+        "medianPulsedMin": { "type": "number", "minimum": 0 },
+        "within": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["uncoordinatedPct", "pulsedPct"],
+            "properties": {
+              "uncoordinatedPct": { "type": "number", "minimum": 0, "maximum": 100 },
+              "pulsedPct": { "type": "number", "minimum": 0, "maximum": 100 }
+            }
+          }
+        }
+      }
+    },
+    "uats": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["siruta", "name", "county", "population", "feederMin", "trunkMin", "uncoordinatedMin", "pulsedMin"],
+        "properties": {
+          "siruta": { "type": "string", "minLength": 1 },
+          "name": { "type": "string", "minLength": 1 },
+          "county": { "type": "string", "minLength": 1 },
+          "population": { "type": "integer", "minimum": 0 },
+          "feederMin": { "type": "number", "minimum": 0 },
+          "trunkMin": { "type": "number", "minimum": 0 },
+          "uncoordinatedMin": { "type": "number", "minimum": 0 },
+          "pulsedMin": { "type": "number", "minimum": 0 }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+    }
+  }
+}
