@@ -58,6 +58,7 @@ jobs:
         run: |
           npm ci
           npm run build
+          npm test
 
       - name: Assemble the site
         run: |
@@ -92,6 +93,14 @@ jobs:
           if [ ! -s dist/justitie/data/instante.json ]; then
             echo "MISSING dist/justitie/data/instante.json"; fail=1
           fi
+          # The judicial map re-runs the administrative merge in the browser, so justitie
+          # carries a copy of that model's payload and the court distance matrix. Without them
+          # the page still renders — it just silently loses the coupling, which is the kind of
+          # failure a deploy should catch rather than a reader.
+          for path in admin-attributes.bin admin-adjacency.bin admin-candidacy.bin \
+                      admin-manifest.json admin-attributes.json court-distance.bin; do
+            [ -s "dist/justitie/data/$path" ] || { echo "MISSING dist/justitie/data/$path"; fail=1; }
+          done
           # Every link on the landing page must resolve to something that was built.
           for href in $(grep -o 'href="[a-z]*/"' site/index.html | cut -d'"' -f2); do
             [ -s "dist/${href}index.html" ] || { echo "landing page links to missing $href"; fail=1; }

@@ -22,6 +22,7 @@ import {
   type MapMouseEvent,
 } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import { assign, loadCoupling, type Arondare, type Coupled } from './arondare';
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 
 // MapLibre 6 ships its worker as a separate file rather than inlining it, and a bundled app
@@ -764,41 +765,107 @@ async function main(): Promise<void> {
   // Assignment by distance rather than by county line, on the consolidated units rather than
   // on today's communes. The split count leads because it is the part that only appears once
   // the unit, not the commune, is the thing being assigned.
+  //
+  // Rendered from a shape both the shipped document and the browser's own recomputation
+  // satisfy, so the reader sees one table whichever produced it.
   const arKm = (metres: number): string => `${Math.round(metres / 1000)} km`;
-  const arSum = arondare.summary;
-  const arWorst = arondare.units
-    .filter((u) => u.crossesCounty && u.metres !== null && u.ownCountyMetres !== null)
-    .sort((x, y) => y.ownCountyMetres! - y.metres! - (x.ownCountyMetres! - x.metres!))
-    .slice(0, 6);
-  el('#arondare-chev').textContent = `${arSum.crossingCounty} peste județ`;
-  el('#arondare-body').innerHTML =
-    `<p class="note">Cele ${ro.format(arSum.units)} de unități consolidate din reforma
-       administrativă, arondate fiecare la cea mai apropiată dintre cele
-       ${arondare.courtSeats} de instanțe, pe drum, fără să conteze granița de județ.</p>
-     <div class="pens-row">
-       <span class="pens-head">unitate</span>
-       <span class="pens-head">jud.</span>
-       <span class="pens-head">instanța</span>
-       <span class="pens-head">în jud.</span>
-       ${arWorst
-         .map(
-           (u) =>
-             `<span>${u.name.replace(/^(ORAȘ|MUNICIPIUL) /, '')}</span>
-              <span>${u.county}</span>
-              <span class="pens-low">${arKm(u.metres!)} (${u.courtCounty})</span>
-              <span>${arKm(u.ownCountyMetres!)}</span>`,
-         )
-         .join('')}
-     </div>
-     <p class="disagree">Reședințele de județ nu sunt așezate uniform, așa că
-       ${arSum.crossingCounty} de unități — ${ro.format(arSum.peopleCrossingCounty)} de
-       locuitori — au o instanță mai apropiată în alt județ decât în al lor. Pentru ei drumul e
-       mai scurt cu ${arKm(arSum.metresSavedEachCrossing)} în medie, iar pe țară media scade de
-       la ${arKm(arSum.meanMetresOwnCounty)} la ${arKm(arSum.meanMetresNearest)}.</p>
-     <p class="disagree">Unitatea se arondează întreagă, nu comună cu comună. Dacă fiecare
-       comună și-ar alege singură instanța cea mai apropiată,
-       ${arSum.wouldSplitByCommune} din ${ro.format(arSum.units)} de unități noi s-ar rupe
-       între două instanțe — o arondare pe care nicio administrație nu ar putea-o ține.</p>`;
+  interface ArondareRow {
+    name: string;
+    county: string;
+    courtCounty: string | null;
+    metres: number | null;
+    ownCountyMetres: number | null;
+    crossesCounty: boolean;
+  }
+  const arTop = (rows: ArondareRow[]): ArondareRow[] =>
+    rows
+      .filter((u) => u.crossesCounty && u.metres !== null && u.ownCountyMetres !== null)
+      .sort((x, y) => y.ownCountyMetres! - y.metres! - (x.ownCountyMetres! - x.metres!))
+      .slice(0, 6);
+
+  const renderArondare = (
+    sum: ArondareNoua['summary'],
+    rows: ArondareRow[],
+    live: boolean,
+  ): void => {
+    el('#arondare-chev').textContent = `${sum.crossingCounty} peste județ`;
+    el('#arondare-body').innerHTML =
+      `<p class="note">Cele ${ro.format(sum.units)} de unități consolidate din reforma
+         administrativă, arondate fiecare la cea mai apropiată dintre cele
+         ${arondare.courtSeats} de instanțe, pe drum, fără să conteze granița de județ.</p>
+       <div class="pens-row">
+         <span class="pens-head">unitate</span>
+         <span class="pens-head">jud.</span>
+         <span class="pens-head">instanța</span>
+         <span class="pens-head">în jud.</span>
+         ${arTop(rows)
+           .map(
+             (u) =>
+               `<span>${u.name.replace(/^(ORAȘ|MUNICIPIUL) /, '')}</span>
+                <span>${u.county}</span>
+                <span class="pens-low">${arKm(u.metres!)} (${u.courtCounty ?? '—'})</span>
+                <span>${arKm(u.ownCountyMetres!)}</span>`,
+           )
+           .join('')}
+       </div>
+       <p class="disagree">Reședințele de județ nu sunt așezate uniform, așa că
+         ${sum.crossingCounty} de unități — ${ro.format(sum.peopleCrossingCounty)} de
+         locuitori — au o instanță mai apropiată în alt județ decât în al lor. Pentru ei drumul
+         e mai scurt cu ${arKm(sum.metresSavedEachCrossing)} în medie, iar pe țară media scade
+         de la ${arKm(sum.meanMetresOwnCounty)} la ${arKm(sum.meanMetresNearest)}.</p>
+       <p class="disagree">Unitatea se arondează întreagă, nu comună cu comună. Dacă fiecare
+         comună și-ar alege singură instanța cea mai apropiată,
+         ${sum.wouldSplitByCommune} din ${ro.format(sum.units)} de unități noi s-ar rupe între
+         două instanțe — o arondare pe care nicio administrație nu ar putea-o ține.</p>
+       <div id="arondare-live">${
+         live
+           ? `<label class="slider">Populația-țintă a unei unități
+                <input type="range" id="p-target" min="20000" max="120000" step="5000" />
+                <output id="p-target-out"></output></label>`
+           : `<p class="note"><button id="arondare-couple" type="button">Recalculează cu
+                propriile praguri</button> — rulează modelul administrativ aici (1,9 MB) și
+                reface arondarea la fiecare mișcare.</p>`
+       }</div>`;
+  };
+
+  renderArondare(arondare.summary, arondare.units, false);
+
+  // The two reforms, coupled: the merge is re-run in the browser so the judicial map follows
+  // whatever administrative map the reader has built, not only the shipped defaults. Loaded on
+  // demand — most readers never open this fold, and the payload is most of the page's weight.
+  let coupled: Coupled | null = null;
+  const showLive = (result: Arondare, target: number): void => {
+    renderArondare(
+      result.summary,
+      result.units.map((u) => ({
+        ...u,
+        courtCounty: u.courtRow === null ? null : (coupled?.meta.courts[u.courtRow]?.county ?? null),
+      })),
+      true,
+    );
+    const input = document.querySelector<HTMLInputElement>('#p-target');
+    if (!input) return;
+    input.value = String(target);
+    el('#p-target-out').textContent = `${ro.format(target)} loc.`;
+    input.addEventListener('input', () => {
+      const next = Number(input.value);
+      el('#p-target-out').textContent = `${ro.format(next)} loc.`;
+      if (coupled) showLive(assign(coupled, { ...coupled.defaults, pTarget: next }), next);
+    });
+  };
+  el('#arondare-body').addEventListener('click', (event) => {
+    if (!(event.target as HTMLElement).closest('#arondare-couple')) return;
+    el('#arondare-live').innerHTML = '<p class="note">Se încarcă modelul administrativ…</p>';
+    void loadCoupling(base)
+      .then((ready) => {
+        coupled = ready;
+        showLive(assign(ready, ready.defaults), ready.defaults.pTarget);
+      })
+      .catch((error: unknown) => {
+        el('#arondare-live').innerHTML =
+          `<p class="note">Nu s-a putut încărca modelul: ${String(error)}</p>`;
+      });
+  });
 
   el('#proiect-chev').textContent = proiect.spread.compresses
     ? 'comprimă grila'

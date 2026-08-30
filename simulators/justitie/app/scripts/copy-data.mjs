@@ -16,6 +16,8 @@ const here = dirname(fileURLToPath(import.meta.url));
 const out = resolve(here, '../public/data');
 mkdirSync(out, { recursive: true });
 
+const ADMIN = (name) => resolve(here, `../../../administrativ/web/public/data/${name}`);
+
 const sources = [
   // The latest edition. Older ones stay in data/ so the two years can be compared.
   [resolve(here, '../../data/instante-localizate-2025.json'), 'instante.json'],
@@ -38,6 +40,15 @@ const sources = [
   [resolve(here, '../../data/costuri-proiect-2026.json'), 'proiect.json'],
   // Consolidated UATs assigned to courts by distance, county lines ignored.
   [resolve(here, '../../data/arondare-noua.json'), 'arondare-noua.json'],
+  [resolve(here, '../../data/court-distance.json'), 'court-distance.json'],
+  // The administrative model's own payload, so the merge can be re-run here as the reader
+  // moves the sliders. Copied rather than fetched across from the administrative site: 1,6 MB
+  // is the price of this page working when it is the only one deployed.
+  [ADMIN('manifest.json'), 'admin-manifest.json'],
+  [ADMIN('attributes.json'), 'admin-attributes.json'],
+  [ADMIN('attributes.bin'), 'admin-attributes.bin'],
+  [ADMIN('adjacency.bin'), 'admin-adjacency.bin'],
+  [ADMIN('candidacy.bin'), 'admin-candidacy.bin'],
   // County codes to full names, so a merged court is "Tribunalul Covasna" and not "CV".
   [resolve(here, '../../../administrativ/web/public/data/manifest.json'), 'manifest.json'],
 ];

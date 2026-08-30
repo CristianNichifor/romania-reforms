@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/court-distance.schema.json",
+  "title": "Road distance from every UAT to each of the 42 court seats",
+  "description": "The sidecar for a binary matrix the browser reads directly. It exists so the page can re-run the administrative merge and re-assign courts as the reader moves the sliders, without routing in the browser. Rows are court seats in county-code order; columns are UATs in SIRUTA ascending order, the same index the administrative model's own binaries use.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "period",
+    "provenance",
+    "file",
+    "dtype",
+    "scaleMetres",
+    "unreachable",
+    "rows",
+    "columns",
+    "bytes",
+    "courts",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "const": "court-distance" },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "period": { "type": "string" },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+    "file": {
+      "description": "The binary, alongside this file in the app's data directory.",
+      "type": "string"
+    },
+    "dtype": { "const": "uint16" },
+    "scaleMetres": {
+      "description": "Stored value times this is metres. 100 keeps the matrix in half the space and moves no assignment.",
+      "type": "integer",
+      "exclusiveMinimum": 0
+    },
+    "unreachable": {
+      "description": "Sentinel for a UAT no road reaches from that seat. Must not be mistaken for a distance — reading it as one is how a Delta commune gets handed the first court in the array.",
+      "type": "integer",
+      "exclusiveMinimum": 0
+    },
+    "rows": {
+      "description": "Court seats. One per county plus Bucharest.",
+      "type": "integer",
+      "exclusiveMinimum": 0
+    },
+    "columns": {
+      "description": "UATs. Must equal the administrative model's uatCount, or the join is silently off by a column.",
+      "type": "integer",
+      "exclusiveMinimum": 0
+    },
+    "bytes": { "type": "integer", "exclusiveMinimum": 0 },
+    "courts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["county", "siruta", "name"],
+        "properties": {
+          "county": { "type": "string" },
+          "siruta": { "type": "string" },
+          "name": { "type": "string" }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+    }
+  }
+}
