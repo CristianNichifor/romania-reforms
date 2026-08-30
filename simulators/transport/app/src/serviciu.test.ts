@@ -20,6 +20,7 @@ import {
   classify,
   costNetwork,
   cycleSlack,
+  farebox,
   fleetRequired,
   loadPrices,
   resourcesForRoute,
@@ -167,5 +168,41 @@ describe.skipIf(!ready)('against the Python pipeline at default parameters', () 
   it('pays for the trunk tier in kilometres, not only in hours', () => {
     // The specific regression: a trunk leg counted in minutes and zero kilometres.
     expect(built().busKmPerWeekday).toBeGreaterThan(simJson('cost.json').perWeekday.busKm * 0.9);
+  });
+});
+
+describe('the farebox', () => {
+  const fleet = { basic: 100, feeder: 100, trunk: 100 };
+
+  it('reports recovery as an output, not an assumption', () => {
+    // Revenue is built from a fare and a quantity. Assuming the ratio would make the subsidy a
+    // restatement of the cost, and the benchmark could never disagree with it.
+    const f = farebox(1000, fleet, 1_000_000, 100, 0.35, 0.22, 250);
+    expect(f.recovery).toBeCloseTo(f.revenueRon / 1_000_000);
+  });
+
+  it('scales revenue with the load factor and nothing else does the work', () => {
+    const low = farebox(1000, fleet, 1, 100, 0.35, 0.1, 250);
+    const high = farebox(1000, fleet, 1, 100, 0.35, 0.2, 250);
+    expect(high.revenueRon).toBeCloseTo(2 * low.revenueRon);
+  });
+
+  it('does not report a surplus as a negative subsidy', () => {
+    const f = farebox(1_000_000, fleet, 1, 100, 0.35, 0.22, 250);
+    expect(f.revenueRon).toBeGreaterThan(1);
+    expect(f.subsidyRon).toBe(0);
+  });
+
+  it('uses the fleet it was given to find the average seat count', () => {
+    // A network of minibuses earns less per kilometre than one of coaches at the same load.
+    const small = farebox(1000, { basic: 300 }, 1, 100, 0.35, 0.22, 250);
+    const large = farebox(1000, { trunk: 300 }, 1, 100, 0.35, 0.22, 250);
+    expect(large.revenueRon).toBeGreaterThan(small.revenueRon);
+  });
+
+  it('survives an empty fleet without dividing by zero', () => {
+    const f = farebox(0, {}, 0, 0, 0.35, 0.22, 250);
+    expect(f.passengerKm).toBe(0);
+    expect(Number.isFinite(f.subsidyPerPersonYearRon)).toBe(true);
   });
 });

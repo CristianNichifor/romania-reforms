@@ -116,11 +116,14 @@ jobs:
           if [ ! -s dist/transport/data/journey.json ]; then
             echo "MISSING dist/transport/data/journey.json"; fail=1
           fi
-          # The scenario selector is the argument: without this file the map shows one map
-          # and the finding that consolidating harder shortens the journey disappears.
-          if [ ! -s dist/transport/data/scenarios.json ]; then
-            echo "MISSING dist/transport/data/scenarios.json"; fail=1
-          fi
+          # The consolidation now arrives from the administrative simulator's own URL, so the
+          # payload that model needs must be present or the map has no country to draw.
+          for name in admin-manifest.json admin-attributes.bin admin-adjacency.bin \
+                      admin-candidacy.bin road-time.bin road-time.json cost-inputs.json; do
+            if [ ! -s "dist/transport/data/$name" ]; then
+              echo "MISSING dist/transport/data/$name"; fail=1
+            fi
+          done
           # Rail and roads are fetched only when the reader ticks a box, so a missing file
           # fails silently at click time rather than at load — the box would simply never fill
           # in. The roads are copied from administrativ at build time and are not in git, which

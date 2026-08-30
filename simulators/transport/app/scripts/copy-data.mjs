@@ -38,7 +38,6 @@ for (const [from, name] of [
 }
 
 const access = JSON.parse(readFileSync(join(sim, 'data/access.json'), 'utf8'));
-const sweep = JSON.parse(readFileSync(join(sim, 'data/scenarios.json'), 'utf8'));
 const cost = JSON.parse(readFileSync(join(sim, 'data/cost.json'), 'utf8'));
 const hubs = JSON.parse(readFileSync(join(sim, 'data/hubs.json'), 'utf8'));
 const railnet = JSON.parse(readFileSync(join(sim, 'data/railnet.json'), 'utf8'));
@@ -51,7 +50,7 @@ const fares = JSON.parse(readFileSync(join(sim, 'data/fares.json'), 'utf8'));
 // what lets the browser route a scenario nobody precomputed.
 // cost-inputs travels with them: the browser now prices the reader's own network, and the
 // prices must be the same file the pipeline argues from, not a copy of its numbers.
-for (const name of ['rail-lines.geojson', 'rail-stations.geojson', 'road-time.bin', 'road-time.json', 'cost-inputs.json']) {
+for (const name of ['rail-lines.geojson', 'rail-stations.geojson', 'road-time.bin', 'road-time.json', 'cost-inputs.json', 'rail-access.bin']) {
   copyFileSync(join(sim, 'data', name), join(out, name));
 }
 
@@ -73,7 +72,14 @@ writeFileSync(
       againstPulsing: railCost.againstPulsing,
       reference: railCost.reference,
     },
-    fares: { central: fares.central, band: fares.band, benchmark: fares.benchmark },
+    fares: {
+      central: fares.central,
+      band: fares.band,
+      benchmark: fares.benchmark,
+      // The browser reprices the reader's own network, so it needs the assumption itself and
+      // not only the result the pipeline reached with it.
+      assumedLoadFactor: fares.assumptions.loadFactor,
+    },
     // The service standard the browser needs to turn road time into service time. Free-flow
     // road time is not a timetable: the pipeline divides by this factor and the map must too,
     // or every commune reads about a quarter closer to its centre than it is.
@@ -101,21 +107,9 @@ const joined = attributes.siruta.map((siruta) => {
 });
 writeFileSync(join(out, 'journey.json'), JSON.stringify(joined));
 
-// One array per consolidation scenario, aligned the same way. This is what lets the map show
-// that consolidating harder makes the journey *shorter* — a result that reads as a mistake in
-// a table and as an obvious fact on a map.
-writeFileSync(
-  join(out, 'scenarios.json'),
-  JSON.stringify(
-    sweep.scenarios.map((s) => {
-      const { journeyByUat, ...stats } = s;
-      return {
-        ...stats,
-        journey: attributes.siruta.map((siruta) => journeyByUat[String(siruta)] ?? null),
-      };
-    }),
-  ),
-);
+// scenarios.json is gone. The page reads the reader's administrative scenario from the URL
+// and recomputes the network, so five presets frozen at build time are not an alternative
+// to that — they are a second answer to a question this app no longer asks.
 
 const geo = JSON.parse(readFileSync(join(out, 'uats.geojson'), 'utf8'));
 if (attributes.siruta.length !== geo.features.length) {

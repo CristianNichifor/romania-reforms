@@ -251,6 +251,42 @@ def write_uat_rail_access(seats, county_seats, station_tree, station_node, from_
 
     frame = pd.DataFrame(rows)
     frame.to_parquet(OUT_DIR / "rail_access.parquet", index=False)
+
+    # And the same thing the browser can read: three float32 per UAT, in administrativ's UAT
+    # order, so the page can decide mode for itself.
+    #
+    # The rail journey does not depend on the consolidation — a train runs to the COUNTY
+    # capital whatever centres a scenario invents. What does depend on it is whether the train
+    # beats the bus, and that comparison belongs where the bus journey is computed. So this
+    # ships the ingredients rather than a verdict.
+    attributes = json.loads(
+        (ADMINISTRATIV / "web" / "public" / "data" / "attributes.json").read_text("utf-8")
+    )
+    order = {str(code): i for i, code in enumerate(attributes["siruta"])}
+    count = len(order)
+    station = np.full(count, np.nan, dtype=np.float32)
+    seat_station = np.full(count, np.nan, dtype=np.float32)
+    rail_km = np.full(count, np.nan, dtype=np.float32)
+    unknown = 0
+    for row in rows:
+        index = order.get(str(row["siruta"]))
+        if index is None:
+            unknown += 1
+            continue
+        station[index] = row["station_km"]
+        if row["seat_station_km"] is not None:
+            seat_station[index] = row["seat_station_km"]
+        if row["rail_km"] is not None:
+            rail_km[index] = row["rail_km"]
+    if unknown:
+        raise SystemExit(f"{unknown} UATs are not in administrativ's order — different countries")
+    (OUT_DIR / "rail-access.bin").write_bytes(
+        station.tobytes() + seat_station.tobytes() + rail_km.tobytes()
+    )
+    print(
+        f"  wrote rail-access.bin  {(OUT_DIR / 'rail-access.bin').stat().st_size / 1024:.0f} KB "
+        f"for {count:,} UATs"
+    )
     served = frame["rail_km"].notna() & (frame["station_km"] <= STATION_WALK_KM)
     print(
         f"  rail access: {int(served.sum()):,}/{len(frame):,} UATs have a station within "

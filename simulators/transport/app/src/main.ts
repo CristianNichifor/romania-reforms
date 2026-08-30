@@ -9,7 +9,8 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 maplibregl.setWorkerUrl(workerUrl);
 import './style.css';
 import { buildNetwork, changedParams, loadCoupling, readScenario } from './consolidare';
-import { costNetwork, loadPrices } from './serviciu';
+import { DAY_PROFILE, costNetwork, farebox, loadPrices } from './serviciu';
+import { compareWithBus, loadRailAccess, trainHeadwayMin } from './feroviar';
 import {
   BANDS,
   NO_DATA,
@@ -64,10 +65,11 @@ async function main() {
   // The consolidation is no longer chosen here. It is read from the URL — the same hash the
   // administrative simulator writes — and the whole network is recomputed from it. A reader
   // who moves those sliders is looking at a different country, and this map now follows.
-  const [summary, coupled, costInputs] = await Promise.all([
+  const [summary, coupled, costInputs, railBin] = await Promise.all([
     fetch(asset('summary.json')).then((r) => r.json()),
     loadCoupling(base),
     fetch(asset('cost-inputs.json')).then((r) => r.json()),
+    fetch(asset('rail-access.bin')).then((r) => r.arrayBuffer()),
   ]);
 
   const { params, pins } = readScenario(location.hash);
@@ -97,6 +99,24 @@ async function main() {
     return [moving + wait * waits.uncoordinated, moving + wait * waits.pulsed];
   });
   const journeyOf = () => journeys;
+
+  // The train, judged against THIS network's bus journeys. A verdict computed against the
+  // default centres and shown beside a map drawn from the reader's would be a true statement
+  // about a country they are not looking at.
+  const railAccess = loadRailAccess(railBin, coupled.data.uatCount);
+  const railHeadway = trainHeadwayMin(
+    summary.rail.reference.trainsPerWeekday,
+    Object.values(DAY_PROFILE).reduce((a: number, b: number) => a + b, 0),
+  );
+  const railWaits = { uncoordinated: railHeadway / 2, pulsed: waits.pulsed };
+  const railVerdict = (s: Timetable) =>
+    compareWithBus(
+      railAccess,
+      journeys.map((row) => (row ? row[s === 'pulsed' ? 1 : 0] : null)),
+      coupled.data.population,
+      summary.rail.conditions.as_is.commercialKmh,
+      railWaits[s],
+    );
 
   const map = new maplibregl.Map({
     container: 'map',
@@ -386,13 +406,25 @@ async function main() {
   function renderFares() {
     const f = summary.fares;
     if (!f) return;
+    // Recomputed against this network's own operating cost, so the recovery ratio describes
+    // the service on screen rather than the one the pipeline happened to publish.
+    const people = coupled.data.population.reduce((a: number, b: number) => a + b, 0);
+    const live = farebox(
+      resources.busKmPerWeekday,
+      resources.fleetByClass,
+      resources.cost.operatingRon,
+      people,
+      f.central.revenueRon / f.central.passengerKm,
+      summary.fares.assumedLoadFactor,
+      prices.weekdaysPerYear,
+    );
     el('fares').innerHTML = `
-      <dt>Venit din bilete</dt><dd>${bn(f.central.revenueRon)}</dd>
-      <dt>Rămâne de acoperit</dt><dd class="big">${bn(f.central.subsidyRon)}</dd>
+      <dt>Venit din bilete</dt><dd>${bn(live.revenueRon)}</dd>
+      <dt>Rămâne de acoperit</dt><dd class="big">${bn(live.subsidyRon)}</dd>
       <dt>Pe om, pe an</dt><dd>${fmt.format(
-        Math.round(f.central.subsidyPerPersonYearRon),
+        Math.round(live.subsidyPerPersonYearRon),
       )} lei</dd>
-      <dt>Acoperire din bilete</dt><dd>${(f.central.recovery * 100).toFixed(0)}%</dd>`;
+      <dt>Acoperire din bilete</dt><dd>${(live.recovery * 100).toFixed(0)}%</dd>`;
 
     // The band, not just the central case. Occupancy is assumed and it is the only number that
     // moves this result, so quoting one recovery ratio alone would read as a measurement.
@@ -411,6 +443,8 @@ async function main() {
   function renderRail() {
     const r = summary.rail;
     if (!r) return;
+    // Recomputed for the timetable and the network on screen, not read from the pipeline.
+    const verdict = railVerdict(scenario);
     const hours = (v: number) => `${fmt.format(Math.round(v / 1000))} mii ore`;
     el('rail').innerHTML = `
       <dt>Linie de călători</dt><dd>${fmt.format(Math.round(r.network.passengerLineKm))} km</dd>
@@ -423,8 +457,8 @@ async function main() {
         Math.round(r.rehabilitation.ronPerPassengerHour),
       )} lei</dd>
       <dt>UAT-uri mai rapide cu trenul</dt><dd>${fmt.format(
-        a.rail.uatsFasterByRail,
-      )} din ${fmt.format(a.rail.uatsWithOption)}</dd>`;
+        verdict.faster,
+      )} din ${fmt.format(verdict.withOption)}</dd>`;
 
     const seatsOff = r.seats.considered - r.seats.withinWalkOfStation;
     el('rail-note').textContent =
@@ -432,12 +466,12 @@ async function main() {
       `pragurile după care CFR își tarifează propria rețea. ${seatsOff} din ` +
       `${r.seats.considered} de reședințe au gara la peste ${r.seats.walkKm} km, deci au nevoie ` +
       `de autobuz ca să ajungă la propria cale ferată. ` +
-      `Doar ${fmt.format(a.rail.uatsWithOption)} de UAT-uri au gară la mai puțin de ` +
+      `Doar ${fmt.format(verdict.withOption)} de UAT-uri au gară la mai puțin de ` +
       `${r.seats.walkKm} km la ambele capete ale drumului, iar pentru ` +
-      `${fmt.format(a.rail.uatsFasterByRail)} dintre ele trenul este mai rapid decât autobuzul ` +
-      `— ${fmt.format(a.rail.peopleFasterByRail)} de oameni. Mediana pe țară scade de la ` +
-      `${min(a.medianPulsedMin)} la ${min(a.rail.medianBestPulsedMin)}: calea ferată ajunge la ` +
-      `puține locuri și le schimbă mult.`;
+      `${fmt.format(verdict.faster)} dintre ele trenul este mai rapid decât autobuzul ` +
+      `— ${fmt.format(verdict.people)} de oameni. Calea ferată ajunge la puține locuri și le ` +
+      `schimbă mult. Cifrele se recalculează pentru scenariul și orarul de pe ecran: trenul ` +
+      `merge la reședința de județ oricare ar fi centrele, dar dacă bate autobuzul depinde de ele.`;
 
     // The comparison the rail layer exists to make. Kept next to the number rather than in a
     // footnote, and stated as a unit price so nobody reads it as one mode replacing the other.
@@ -483,6 +517,9 @@ async function main() {
       map.setPaintProperty('uat-fill', 'fill-color', paint(scenario));
       writeHash(scenario);
       renderStats();
+      // The rail verdict depends on the timetable too: a train at a 48-minute headway loses to
+      // a pulsed bus far more often than to an uncoordinated one.
+      renderRail();
     });
     button.classList.toggle('on', button.dataset.scenario === scenario);
   });

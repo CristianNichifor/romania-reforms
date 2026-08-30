@@ -361,3 +361,52 @@ export function costNetwork(coupled: Coupled, net: Network, prices: Prices): Net
     cost: annualCost(hours, kmByClass, fleetByClass, prices),
   };
 }
+
+
+export interface Farebox {
+  passengerKm: number;
+  revenueRon: number;
+  subsidyRon: number;
+  recovery: number;
+  subsidyPerPersonYearRon: number;
+}
+
+/**
+ * Ticket revenue and the subsidy left over, for the reader's own network.
+ *
+ * The recovery ratio is an OUTPUT. Assuming Denmark's ~50% and multiplying would be circular:
+ * it says subsidy = cost x (1 - r) and the benchmark could never disagree with it. So revenue
+ * is built from a fare and a quantity, and the ratio falls out where Movia can check it.
+ *
+ * The quantity is the weak half and weak in a specific way: passenger-kilometres come from the
+ * capacity the network offers times an assumed load factor. That means this can say what a
+ * given service would earn and cannot say whether anyone would ride it — and revenue is exactly
+ * proportional to that assumption.
+ */
+export function farebox(
+  busKmPerWeekday: number,
+  fleetByClass: Record<string, number>,
+  operatingRon: number,
+  people: number,
+  fare: number,
+  loadFactor: number,
+  weekdaysPerYear: number,
+): Farebox {
+  const fleet = Object.values(fleetByClass).reduce((a, b) => a + b, 0);
+  const seats = fleet
+    ? Object.entries(fleetByClass).reduce((sum, [name, n]) => sum + (SERVICES[name]?.seats ?? 0) * n, 0) / fleet
+    : 0;
+
+  const passengerKm = busKmPerWeekday * weekdaysPerYear * seats * loadFactor;
+  const revenue = passengerKm * fare;
+  // Clamped at zero: a service earning more than it costs needs no subsidy, and a negative
+  // subsidy is a surplus — a different claim that must not arrive disguised as this one.
+  const subsidy = Math.max(0, operatingRon - revenue);
+  return {
+    passengerKm,
+    revenueRon: revenue,
+    subsidyRon: subsidy,
+    recovery: operatingRon ? revenue / operatingRon : 0,
+    subsidyPerPersonYearRon: people ? subsidy / people : 0,
+  };
+}
