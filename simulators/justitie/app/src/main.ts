@@ -179,6 +179,33 @@ interface Eficienta {
   limitations: Limitation[];
 }
 
+interface ParcheteComasare {
+  summary: {
+    officesBefore: number;
+    officesAfter: number;
+    totalVolume: number;
+    totalProsecutors: number;
+    nationalPerProsecutor: number;
+    spreadBefore: { min: number; max: number; median: number; maxOverMin: number; p90OverP10: number };
+    spreadAfter: { min: number; max: number; median: number; maxOverMin: number; p90OverP10: number };
+    busiestCounty: string;
+    busiestVolume: number;
+    busiestShareOfTotal: number;
+    heaviestCounty: string;
+    heaviestPerProsecutor: number;
+    dormantOffices: string[];
+  };
+  merged: {
+    county: string;
+    name: string;
+    officesBefore: number;
+    volume: number;
+    prosecutors: number;
+    perProsecutor: number;
+  }[];
+  limitations: Limitation[];
+}
+
 interface Danemarca {
   population: { romania: number; denmark: number; year: number };
   denmark: { firstInstance: number; appellate: number; supreme: number };
@@ -503,6 +530,7 @@ async function main(): Promise<void> {
     curtiApel,
     resurse,
     danemarca,
+    comasare,
   ] = await Promise.all([
     fetch(`${base}data/instante.json`).then((r) => r.json() as Promise<Document>),
     fetch(`${base}data/counties.geojson`).then((r) => r.json()),
@@ -525,6 +553,7 @@ async function main(): Promise<void> {
     fetch(`${base}data/curti-apel.json`).then((r) => r.json() as Promise<CurtiApel>),
     fetch(`${base}data/resurse.json`).then((r) => r.json() as Promise<Resurse>),
     fetch(`${base}data/danemarca.json`).then((r) => r.json() as Promise<Danemarca>),
+    fetch(`${base}data/parchete-comasare.json`).then((r) => r.json() as Promise<ParcheteComasare>),
   ]);
   const countyName = (code: string): string => manifest.countyNames?.[code] ?? code;
 
@@ -1565,6 +1594,54 @@ async function main(): Promise<void> {
        )}% peste ele. Salariile nu sunt bugetul justiției, iar procentul din buget ar fi mai
        mic — dar este singurul numitor pe care pagina îl poate calcula din surse citabile.</p>`;
 
+  // The one finding on this page that goes the paper's way — and an argument it never makes.
+  // Presented with the concentration it also causes, because reporting only the favourable half
+  // would be the same fault the page spends the rest of its length pointing at.
+  const cm = comasare.summary;
+  el('#comasare-chev').textContent =
+    `${dec(cm.spreadBefore.maxOverMin, 1)}× → ${dec(cm.spreadAfter.maxOverMin, 1)}×`;
+  el('#comasare-body').innerHTML =
+    `<p class="note">Capitolul 7.3 comasează parchetele de pe lângă judecătorii și tribunale în
+       ${cm.officesAfter} de parchete județene. Raportul CSM publică pe anexe cât are de lucru
+       fiecare parchet, așa că această comasare se poate rula pe volume reale:
+       ${cm.officesBefore} de parchete, ${ro.format(cm.totalVolume)} de dosare,
+       ${ro.format(cm.totalProsecutors)} de procurori.</p>
+     <div class="pens-row">
+       <span class="pens-head">dosare/procuror</span>
+       <span class="pens-head">min</span>
+       <span class="pens-head">mediana</span>
+       <span class="pens-head">max</span>
+       <span>azi, la judecătorii</span>
+       <span>${ro.format(Math.round(cm.spreadBefore.min))}</span>
+       <span>${ro.format(Math.round(cm.spreadBefore.median))}</span>
+       <span>${ro.format(Math.round(cm.spreadBefore.max))}</span>
+       <span>după comasare</span>
+       <span>${ro.format(Math.round(cm.spreadAfter.min))}</span>
+       <span>${ro.format(Math.round(cm.spreadAfter.median))}</span>
+       <span>${ro.format(Math.round(cm.spreadAfter.max))}</span>
+     </div>
+     <p class="disagree"><strong>Aici lucrarea are dreptate.</strong> Azi, cel mai încărcat
+       parchet de pe lângă o judecătorie are de
+       ${dec(cm.spreadBefore.maxOverMin, 1)} ori mai multe dosare pe procuror decât cel mai
+       liniștit. Comasate pe județ, raportul scade la
+       ${dec(cm.spreadAfter.maxOverMin, 1)}. Nu e un efect al celor două extreme: și măsura
+       robustă, p90/p10, scade de la ${dec(cm.spreadBefore.p90OverP10, 2)} la
+       ${dec(cm.spreadAfter.p90OverP10, 2)}. Este cel mai puternic argument pentru comasare pe
+       care l-a găsit pagina asta — și e unul pe care lucrarea nu îl folosește: și-a construit
+       cazul pe eficiență și pe numărul de instanțe, care nu se susțin.</p>
+     <p class="disagree"><strong>Dar egalizează mijlocul, nu vârful.</strong> Punând laolaltă
+       cele șase parchete de sector și pe cel de pe lângă tribunal, București devine un singur
+       parchet cu ${ro.format(cm.busiestVolume)} de dosare — ${dec(cm.busiestShareOfTotal * 100, 1)}%
+       din toată țara. Iar cea mai mare încărcătură pe procuror de după comasare nu e la
+       București, ci în ${comasare.merged.find((o) => o.county === cm.heaviestCounty)?.name ?? cm.heaviestCounty},
+       la ${ro.format(Math.round(cm.heaviestPerProsecutor))} de dosare: comasarea mută dosarele,
+       nu procurorii.</p>
+     <p class="disagree"><strong>Ce nu spune calculul.</strong> Dosarele celor două niveluri
+       sunt adunate, deși unul de la tribunal nu e cât unul de la judecătorie — comasarea
+       propusă exact asta presupune. Se numără dosare de soluționat, nu muncă dusă la capăt.
+       Și comasarea e pe județ, fiindcă asta scrie în 7.3: spre deosebire de instanțe, parchetele
+       nu se pot aronda după distanță, pentru că nu se publică ce comune acoperă fiecare.</p>`;
+
   // Chapters 4-5. The paper's judicial map rests on one sentence in 5.1, and the sentence can
   // be checked against the paper's own Danish counts — which is a narrower test than it looks,
   // and the fold says so rather than letting a reader think Denmark was audited here.
@@ -2055,6 +2132,7 @@ async function main(): Promise<void> {
     ['pensii-fold', 11, 'ambele'],
     ['resurse-fold', 16, 'ambele'],
     ['danemarca-fold', 5, 'simulare'],
+    ['comasare-fold', 7, 'simulare'],
   ].forEach(([id, chapter, kind]) =>
     badge(id as string, chapter as number, kind as 'politică' | 'simulare' | 'ambele'),
   );
@@ -2079,6 +2157,7 @@ async function main(): Promise<void> {
     ...curtiApel.limitations,
     ...resurse.limitations,
     ...danemarca.limitations,
+    ...comasare.limitations,
   ];
   const blocking = allLimits.filter((l) => l.severity === 'blocking');
   const rest = allLimits.filter((l) => l.severity !== 'blocking');

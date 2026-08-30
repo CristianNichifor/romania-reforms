@@ -76,7 +76,13 @@ CHAPTERS = {
 SIMULATED = {
     4: ["danemarca-comparatie"],
     5: ["danemarca-comparatie"],
-    7: ["instante-localizate-2025", "arondare-noua", "parchete-2025", "acces-servicii"],
+    7: [
+        "instante-localizate-2025",
+        "arondare-noua",
+        "parchete-2025",
+        "parchete-comasare",
+        "acces-servicii",
+    ],
     10: ["indemnizatii-2022", "sporuri-2025", "costuri-proiect-2026"],
     11: ["pensii-2025", "pensii-comparatie"],
     16: ["resurse-necesare"],

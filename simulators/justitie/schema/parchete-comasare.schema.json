@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/parchete-comasare.schema.json",
+  "title": "Prosecution workload redistributed over the 42 county offices section 7.3 proposes",
+  "description": "The CSM report publishes what every prosecution office actually handles — 176 attached to judecatorii in Anexa 2, 42 attached to tribunals in the annex after it. Section 7.3 merges those two levels into 42 county offices. This document runs that merger on the published volumes and reports what it does to the spread of work per prosecutor, which is the one argument for consolidation the paper never makes and the only one this repository has found to hold. Volumes from the two levels are summed because the merger implies exactly that, but they are not the same kind of case, and the limitations say so.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "title", "publisher", "period", "provenance", "summary", "merged", "limitations"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "const": "parchete-comasare" },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "period": { "type": "string" },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "officesBefore",
+        "officesAfter",
+        "totalVolume",
+        "totalProsecutors",
+        "nationalPerProsecutor",
+        "spreadBefore",
+        "spreadAfter",
+        "maxOverMinFalls",
+        "busiestCounty",
+        "busiestVolume",
+        "busiestShareOfTotal",
+        "heaviestCounty",
+        "heaviestPerProsecutor",
+        "dormantOffices",
+        "activeOfficesBefore",
+        "resolvedByUat",
+        "specialisedAbsorbed"
+      ],
+      "properties": {
+        "officesBefore": { "type": "integer", "exclusiveMinimum": 0 },
+        "officesAfter": { "const": 42 },
+        "totalVolume": { "type": "integer", "exclusiveMinimum": 0 },
+        "totalProsecutors": { "type": "integer", "exclusiveMinimum": 0 },
+        "nationalPerProsecutor": { "type": "number", "exclusiveMinimum": 0 },
+        "spreadBefore": { "$ref": "#/$defs/spread" },
+        "spreadAfter": { "$ref": "#/$defs/spread" },
+        "maxOverMinFalls": { "type": "number" },
+        "busiestCounty": { "type": "string", "minLength": 1, "maxLength": 2 },
+        "busiestVolume": { "type": "integer", "exclusiveMinimum": 0 },
+        "busiestShareOfTotal": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "heaviestCounty": { "type": "string", "minLength": 1, "maxLength": 2 },
+        "heaviestPerProsecutor": { "type": "number", "exclusiveMinimum": 0 },
+        "dormantOffices": {
+          "description": "Offices the report prints with zeros across the row. Kept in the register, kept out of the spread.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "activeOfficesBefore": { "type": "integer", "exclusiveMinimum": 0 },
+        "resolvedByUat": {
+          "description": "Offices whose county came from the UAT register because the court annex has no matching judecătorie.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "specialisedAbsorbed": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+
+    "merged": {
+      "description": "One entry per proposed county office.",
+      "type": "array",
+      "minItems": 42,
+      "maxItems": 42,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "county",
+          "name",
+          "officesBefore",
+          "volume",
+          "prosecutors",
+          "perProsecutor",
+          "lowerVolume",
+          "upperVolume"
+        ],
+        "properties": {
+          "county": { "type": "string", "minLength": 1, "maxLength": 2 },
+          "name": { "type": "string" },
+          "officesBefore": { "type": "integer", "exclusiveMinimum": 0 },
+          "volume": { "type": "integer", "minimum": 0 },
+          "prosecutors": { "type": "integer", "exclusiveMinimum": 0 },
+          "perProsecutor": { "type": "number", "minimum": 0 },
+          "lowerVolume": { "type": "integer", "minimum": 0 },
+          "upperVolume": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+    }
+  },
+
+  "$defs": {
+    "spread": {
+      "description": "How unevenly work sits across offices. maxOverMin is the headline; p90OverP10 is the same question asked without the two extremes, because the report carries single-prosecutor oddities.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["min", "max", "median", "maxOverMin", "p90OverP10"],
+      "properties": {
+        "min": { "type": "number", "exclusiveMinimum": 0 },
+        "max": { "type": "number", "exclusiveMinimum": 0 },
+        "median": { "type": "number", "exclusiveMinimum": 0 },
+        "maxOverMin": { "type": "number", "exclusiveMinimum": 0 },
+        "p90OverP10": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    }
+  }
+}

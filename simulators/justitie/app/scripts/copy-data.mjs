@@ -49,6 +49,8 @@ const sources = [
   [resolve(here, '../../data/eficienta-csm.json'), 'eficienta.json'],
   // The prosecution service, reorganised in parallel by 7.3.
   [resolve(here, '../../data/parchete-2025.json'), 'parchete.json'],
+  // What 7.3's merger does to prosecution workload, on the CSM's published volumes.
+  [resolve(here, '../../data/parchete-comasare.json'), 'parchete-comasare.json'],
   // Chapters 4-5: the Danish comparison the paper's judicial map rests on.
   [resolve(here, '../../data/danemarca-comparatie.json'), 'danemarca.json'],
   // Chapter 16's resource figures, against the pay grid and estate they have to agree with.
