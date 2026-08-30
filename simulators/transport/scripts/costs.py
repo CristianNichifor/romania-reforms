@@ -23,9 +23,11 @@ in a way nobody can see.
 hours exceed platform hours by the `platformToPaidRatio`; costing a driver at bus-hours alone
 would understate the largest single line by roughly a third.
 
-**This produces cost, not subsidy.** There is no demand model and no fare revenue anywhere in
-this repository, so what comes out is what the service costs to run — not what would remain for
-a public budget after tickets. Calling it a subsidy would be a category error.
+**This module produces cost, not subsidy.** What comes out here is what the service costs to
+run. Fares and the residual public contribution are a separate layer — `build_fares.py` and
+`data/fares.json` — deliberately downstream of this one, because the cost of running a bus does
+not depend on what is charged to sit in it. Quoting a figure from this file as a subsidy is a
+category error; the subsidy is in `fares.json`, and it is smaller.
 """
 
 from __future__ import annotations

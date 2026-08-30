@@ -1,8 +1,17 @@
 """Gate 1: modelled travel times against real drive times, in one county.
 
-The speed table in `speeds.py` is assumed. This is the only thing that makes it defensible,
-and it is deliberately small and manual: a dozen seat-to-seat drives in Vâlcea, recorded by a
-human from a public routing service and committed with their source.
+The speed table in `speeds.py` is assumed. This gate is deliberately small and manual: a dozen
+seat-to-seat drives in Vâlcea, recorded by a human from a public routing service and committed
+with their source.
+
+**This is no longer the only check on travel time, and it is still the only one that can reach
+the decomposition.** `data/observed-journeys.json` now compares the model's commercial speed
+against 552 timetabled county bus runs, and it agrees within 4%. But that is a *bus* journey
+end to end: road speed, routing, the service factor and dwell, collapsed into one number. A
+table that ran the roads too fast while standing too long at stops would pass it. These drives
+are car journeys against the raw road layer, which is exactly the term the bus observations
+cannot isolate — so filling this file in remains worth doing, and the two checks answer
+different questions rather than one superseding the other.
 
 Vâlcea because it has both the Olt valley and real mountain roads, so the table's weakest
 assumption — that a road class implies a speed regardless of terrain — is exercised rather

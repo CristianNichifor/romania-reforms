@@ -218,7 +218,13 @@ no limits section, because it has been believed once already.
 Seven `blocking` and `material` limitations travel with the data and reach the page. The ones
 that would change a conclusion:
 
-- **This is cost, not subsidy.** There is no demand model and no fare revenue anywhere here.
+- **Demand is population times a flat rate.** The level is anchored — the county layer is
+  13,4% of Romania's measured bus passenger-km — but the rate does not fall with distance, so
+  route-level occupancy is wrong in a known direction: long routes to isolated communes are
+  emptier than modelled, short periurban ones fuller.
+- **The institutional design is checked against nothing.** `INSTITUTIONS.md` argues it from
+  the model's own constraints and from Danish practice. Everything else here has a benchmark;
+  that document does not, and it does not cost the authorities it proposes.
 - **Train loading is assumed.** At 96 passengers a passenger-hour costs 356 lei; at half that,
   double. It is the single number that can overturn the rail comparison's order of magnitude.
 - **The line class is deduced, not read.** CFR's official section-to-class list was not taken;
@@ -228,6 +234,15 @@ that would change a conclusion:
 - **14 UATs have no road route** — the Danube Delta and the Brăila river islands. Every figure
   here describes the country *minus* those places. They are named in `data/network.json` rather
   than counted, and they were found without being told they exist.
+
+## Who would run it
+
+A cost model without an institutional design is a spreadsheet that assumes someone will sort
+this out. [`INSTITUTIONS.md`](INSTITUTIONS.md) names the buyer, the contract and the payer: a
+county transport authority constituted as an ADI under Legea 92/2007, buying operations on
+gross-cost contracts tendered in lots under Reg. (CE) 1370/2007, owning the vehicles and depots
+itself. Its central finding is that **no new primary legislation is required** — the authority,
+the contract form and the regulator all exist. What is missing is the network to put in them.
 
 ## Running it
 
