@@ -8,6 +8,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 
 maplibregl.setWorkerUrl(workerUrl);
 import './style.css';
+import { buildNetwork, changedParams, loadCoupling, readScenario } from './consolidare';
 import {
   BANDS,
   NO_DATA,
@@ -38,20 +39,6 @@ import {
 
 type Timetable = 'uncoordinated' | 'pulsed';
 
-/** One consolidation scenario, with a journey time per polygon. */
-interface Consolidation {
-  id: string;
-  label: string;
-  hubs: number;
-  fleet: number;
-  totalRon: number;
-  operatingRon: number;
-  medianUncoordinatedMin: number;
-  medianPulsedMin: number;
-  administrativeSavingRon: number | null;
-  journey: Array<[number, number] | null>;
-}
-
 const base = import.meta.env.BASE_URL;
 const asset = (name: string) => `${base}data/${name}`;
 
@@ -63,26 +50,48 @@ function hash() {
   return new URLSearchParams(location.hash.slice(1));
 }
 
-function writeHash(timetable: Timetable, consolidation: string) {
-  // A scenario is a link you can paste into an argument — that is the whole point of the
-  // repository, so both choices live in the URL rather than only in memory.
+function writeHash(timetable: Timetable) {
+  // Only the timetable belongs to this page. The consolidation parameters in the hash are the
+  // administrative simulator's, and are preserved untouched so the link keeps working in both
+  // directions — a reader can carry one URL between the two maps.
   const params = hash();
   params.set('s', timetable);
-  params.set('c', consolidation);
   history.replaceState(null, '', `#${params}`);
 }
 
 async function main() {
-  const [summary, consolidations] = await Promise.all([
+  // The consolidation is no longer chosen here. It is read from the URL — the same hash the
+  // administrative simulator writes — and the whole network is recomputed from it. A reader
+  // who moves those sliders is looking at a different country, and this map now follows.
+  const [summary, coupled] = await Promise.all([
     fetch(asset('summary.json')).then((r) => r.json()),
-    fetch(asset('scenarios.json')).then((r) => r.json() as Promise<Consolidation[]>),
+    loadCoupling(base),
   ]);
 
-  const base = consolidations[0];
+  const { params, pins } = readScenario(location.hash);
+  const moved = changedParams(params);
+  const net = buildNetwork(coupled, params, pins);
+
   let scenario: Timetable = hash().get('s') === 'pulsed' ? 'pulsed' : 'uncoordinated';
-  let chosen =
-    consolidations.find((c) => c.id === hash().get('c')) ?? base;
-  const journeyOf = () => chosen.journey;
+
+  // Free-flow road time is not service time. The pipeline divides by this factor before
+  // calling anything a journey, and so must this — otherwise every commune reads about a
+  // quarter closer to its centre than a bus could ever bring it.
+  const factor = summary.serviceSpeedFactor as number;
+  const waits = {
+    uncoordinated: summary.access.waitUncoordinatedMin as number,
+    pulsed: summary.access.waitPulsedMin as number,
+  };
+
+  // [uncoordinated, pulsed] minutes per UAT index, in administrativ's order — which is the
+  // order uats.geojson is drawn in, so no join is needed at all.
+  const journeys: Array<[number, number] | null> = net.journeys.map((j) => {
+    if (!j.reachable) return null;
+    const moving = (j.feeder + j.trunk) / factor;
+    const wait = j.feeder === 0 && j.trunk === 0 ? 0 : 1;
+    return [moving + wait * waits.uncoordinated, moving + wait * waits.pulsed];
+  });
+  const journeyOf = () => journeys;
 
   const map = new maplibregl.Map({
     container: 'map',
@@ -179,26 +188,47 @@ async function main() {
 
   const el = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
+  /**
+   * Median journey, weighted by the people who make it.
+   *
+   * Weighted rather than plain because the map is per commune and the country is not: small
+   * remote communes are numerous, so an unweighted median describes the map rather than the
+   * population. The note under the toggle says which is which.
+   */
+  function weightedMedian(column: 0 | 1): number {
+    const rows: Array<[number, number]> = [];
+    let total = 0;
+    journeys.forEach((row, i) => {
+      if (!row) return;
+      const people = coupled.data.population[i];
+      rows.push([row[column], people]);
+      total += people;
+    });
+    rows.sort((a, b) => a[0] - b[0]);
+    let seen = 0;
+    for (const [value, people] of rows) {
+      seen += people;
+      if (seen >= total / 2) return value;
+    }
+    return 0;
+  }
+
   el('legend').innerHTML = [
     ...BANDS.map((b) => `<li><i style="background:${b.colour}"></i>${b.label}</li>`),
     `<li><i style="background:${NO_DATA}"></i>fără traseu rutier</li>`,
   ].join('');
 
   const a = summary.access;
-  const relative = (now: number, was: number) => {
-    const d = now / was - 1;
-    return Math.abs(d) < 0.005 ? 'la fel' : `${d > 0 ? '+' : ''}${(d * 100).toFixed(0)}%`;
-  };
 
   function renderStats() {
-    const median = scenario === 'pulsed' ? chosen.medianPulsedMin : chosen.medianUncoordinatedMin;
+    const median = weightedMedian(scenario === 'pulsed' ? 1 : 0);
     el('stats').innerHTML = `
       <dt>Mediană, ponderată cu populația</dt><dd class="big">${min(median)}</dd>
       <dt>Așteptare la schimb</dt><dd>${min(
         scenario === 'pulsed' ? a.waitPulsedMin : a.waitUncoordinatedMin,
       )}</dd>
-      <dt>Centre</dt><dd>${fmt.format(chosen.hubs)}</dd>
-      <dt>Autobuze</dt><dd>${fmt.format(chosen.fleet)}</dd>`;
+      <dt>Centre</dt><dd>${fmt.format(net.centres.length)}</dd>
+      <dt>Fără traseu</dt><dd>${fmt.format(net.unroutable)}</dd>`;
     // The map is per commune and the median is per person. Most communes are small and far,
     // so the typical polygon is redder than the median — saying so stops the map and the
     // number looking like they disagree.
@@ -207,36 +237,28 @@ async function main() {
         ? `Rabaterile sunt cronometrate să prindă trunchiul: se așteaptă ${min(a.waitPulsedMin)}. Aceleași autobuze, aceiași kilometri. Mediana este pe om, harta este pe comună — comunele mici și îndepărtate sunt multe, deci harta arată mai roșu decât mediana.`
         : `Fiecare traseu are orarul lui, deci așteptarea medie este jumătate din interval, ${min(a.waitUncoordinatedMin)}. Mediana este pe om, harta este pe comună.`;
 
+    // Cost is still the pipeline's, computed for the DEFAULT consolidation. Journeys follow
+    // the reader's scenario; money does not yet, because costing needs routes — with stops and
+    // kilometres — and the route generator is not ported. Saying so is the only honest option:
+    // a live map beside a frozen price reads as one number when it is two.
     el('cost').innerHTML = `
-      <dt>Funcționare</dt><dd>${bn(chosen.operatingRon)}</dd>
-      <dt>Total pe an</dt><dd class="big">${bn(chosen.totalRon)}</dd>
-      <dt>Economia administrativă</dt><dd>${
-        chosen.administrativeSavingRon ? bn(chosen.administrativeSavingRon) : '—'
-      }</dd>`;
+      <dt>Funcționare</dt><dd>${bn(summary.cost.annualRon.operating)}</dd>
+      <dt>Total pe an</dt><dd class="big">${bn(summary.cost.annualRon.total)}</dd>
+      <dt>Autobuze</dt><dd>${fmt.format(summary.cost.fleet.total)}</dd>`;
 
-    el('consolidation-note').textContent =
-      chosen.id === base.id
-        ? `${fmt.format(chosen.hubs)} de centre. Celelalte scenarii se compară cu acesta.`
-        : `${relative(chosen.hubs, base.hubs)} centre, transport ${relative(
-            chosen.totalRon,
-            base.totalRon,
-          )}, călătoria ${relative(chosen.medianPulsedMin, base.medianPulsedMin)}. ` +
-          (chosen.medianPulsedMin < base.medianPulsedMin && chosen.hubs < base.hubs
-            ? 'Mai puține centre și drum mai scurt: fără trunchi nu mai există schimb.'
-            : '');
+    // What scenario the reader is actually on, and how to change it. The page used to offer
+    // five presets; consolidation belongs to the administrative simulator, and this now says
+    // so rather than re-deciding it.
+    el('consolidation-note').innerHTML =
+      moved.length === 0
+        ? `Ești pe parametrii impliciți ai reformei administrative: ` +
+          `${fmt.format(net.centres.length)} de centre. ` +
+          `<a href="../administrativ/">Construiește altă hartă</a> și adu linkul înapoi aici — ` +
+          `pagina îl citește și recalculează toate traseele.`
+        : `Scenariu adus din reforma administrativă: ${fmt.format(net.centres.length)} de ` +
+          `centre, ${moved.length} parametri mutați. Traseele și timpii de mai sus sunt ` +
+          `recalculate pentru acest scenariu.`;
   }
-
-  const select = el<HTMLSelectElement>('scenario');
-  select.innerHTML = consolidations
-    .map((c) => `<option value="${c.id}">${c.label} — ${fmt.format(c.hubs)} centre</option>`)
-    .join('');
-  select.value = chosen.id;
-  select.addEventListener('change', () => {
-    chosen = consolidations.find((c) => c.id === select.value) ?? base;
-    applyJourneys();
-    writeHash(scenario, chosen.id);
-    renderStats();
-  });
 
   // Roads. The network the travel-time model is measured over, so a reader can see why a
   // commune two ridges from its centre takes ninety minutes. Same files and same styling as
@@ -453,13 +475,13 @@ async function main() {
         .querySelectorAll('#toggle button')
         .forEach((b) => b.classList.toggle('on', b === button));
       map.setPaintProperty('uat-fill', 'fill-color', paint(scenario));
-      writeHash(scenario, chosen.id);
+      writeHash(scenario);
       renderStats();
     });
     button.classList.toggle('on', button.dataset.scenario === scenario);
   });
 
-  writeHash(scenario, chosen.id);
+  writeHash(scenario);
   renderStats();
   // The geometry is several MB and the map is blank until it lands. `role="status"` means a
   // screen reader announces it without stealing focus; removing the node is what tells a

@@ -72,6 +72,11 @@ writeFileSync(
       reference: railCost.reference,
     },
     fares: { central: fares.central, band: fares.band, benchmark: fares.benchmark },
+    // The service standard the browser needs to turn road time into service time. Free-flow
+    // road time is not a timetable: the pipeline divides by this factor and the map must too,
+    // or every commune reads about a quarter closer to its centre than it is.
+    serviceSpeedFactor: JSON.parse(readFileSync(join(sim, 'data/cost-inputs.json'), 'utf8'))
+      .items.serviceSpeedFactor.value,
     limitations: [
       ...access.limitations,
       ...cost.limitations,
