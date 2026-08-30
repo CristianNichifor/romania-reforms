@@ -33,7 +33,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 ADMINISTRATIV = ROOT.parent / "administrativ"
-OUT_BIN = ROOT / "app" / "public" / "data" / "court-distance.bin"
+# Written to data/, not straight into the app's public/data: that directory is generated and
+# gitignored, so a binary written there exists on the machine that built it and nowhere else.
+# CI has no parquet and no road graph, and the parity test that reads it failed on the runner
+# while passing locally.
+OUT_BIN = ROOT / "data" / "court-distance.bin"
 OUT_META = ROOT / "data" / "court-distance.json"
 
 sys.path.insert(0, str(ADMINISTRATIV))
