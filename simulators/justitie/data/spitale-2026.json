@@ -11,6 +11,9 @@
     "note": "Numele și coordonatele sunt citite din marcajele hărții din pagină. Încadrarea în UAT este calculată aici, prin intersecție cu limitele administrative."
   },
   "summary": {
+    "registerHospitals": 593,
+    "registerCounties": 42,
+    "registerInMissingCounties": 52,
     "hospitals": 301,
     "located": 300,
     "countiesCovered": 36,
@@ -2439,11 +2442,19 @@
   ],
   "limitations": [
     {
-      "id": "registrul-e-incomplet",
-      "text": "Șase județe lipsesc cu totul din listă — Bistrița-Năsăud, Galați, Ilfov, Mureș, Neamț și Sălaj. Galațiul și Târgu Mureșul au evident spitale județene, iar Târgu Mureșul e unul dintre centrele medicale universitare ale țării. Nimic la nivel național nu se poate calcula din acest fișier; cifrele de aici sunt pe cele 36 de județe pe care lista le acoperă.",
+      "id": "harta-ministerului-e-incompleta",
+      "text": "Harta Ministerului Sănătății nu are deloc șase județe — Bistrița-Năsăud, Galați, Ilfov, Mureș, Neamț și Sălaj. Nu sunt județe fără spitale: registrul de acreditare al ANMCS, de pe data.gov.ro, listează 52 de spitale exact în ele. Lipsește localizarea lor, nu existența, deci colocarea se poate verifica doar în celelalte 36 de județe.",
       "severity": "blocking",
       "affects": [
         "acces",
+        "colocare"
+      ]
+    },
+    {
+      "id": "registrul-complet-nu-are-localitate",
+      "text": "Registrul ANMCS acoperă toate cele 42 de județe, dar are doar județul, nu și localitatea, iar spitalele județene sunt numite după hramul lor, nu după oraș — cel din Suceava e „Sfântul Ioan cel Nou”, cel din Sfântu Gheorghe e „Dr. Fogolyán Kristóf”. Nicio potrivire după nume nu le poate așeza pe hartă, așa că registrul spune câte sunt, nu unde.",
+      "severity": "material",
+      "affects": [
         "colocare"
       ]
     },

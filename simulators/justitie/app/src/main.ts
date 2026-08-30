@@ -60,6 +60,9 @@ interface Limitation {
 
 interface Spitale {
   summary: {
+    registerHospitals: number;
+    registerCounties: number;
+    registerInMissingCounties: number;
     hospitals: number;
     located: number;
     countiesCovered: number;
@@ -807,16 +810,21 @@ async function main(): Promise<void> {
        <span>${sp.hospitalsInCourtSeatTowns}</span>
        <span>${sp.located}</span>
        <span>${Math.round((100 * sp.hospitalsInCourtSeatTowns) / sp.located)}%</span>
-       <span>județe în registru</span>
+       <span>județe pe hartă</span>
        <span class="pens-low">${sp.countiesCovered}</span>
        <span>${sp.countiesTotal}</span>
        <span class="pens-low">lipsesc ${sp.countiesMissing.length}</span>
+       <span>în registrul ANMCS</span>
+       <span>${ro.format(sp.registerHospitals)}</span>
+       <span>${sp.registerCounties}</span>
+       <span>județe</span>
      </div>
-     <p class="disagree">Fiecare sediu de instanță pe care registrul îl acoperă are un spital —
+     <p class="disagree">Fiecare sediu de instanță pe care harta îl acoperă are un spital —
        ${sp.courtSeatsWithHospital} din ${sp.courtSeatsCheckable}. Sediile propuse sunt deci
-       deja centre de servicii. Dar registrul nu acoperă ${sp.countiesMissing.length} județe
-       (${sp.countiesMissing.join(', ')}), iar Galațiul și Târgu Mureșul au evident spitale
-       județene: lipsa lor e o gaură în sursă, nu în țară.</p>
+       deja centre de servicii. Harta ministerului nu are însă
+       ${sp.countiesMissing.length} județe (${sp.countiesMissing.join(', ')}), iar registrul de
+       acreditare al ANMCS listează ${sp.registerInMissingCounties} de spitale exact în ele:
+       lipsește localizarea lor, nu existența.</p>
      <p class="disagree">Invers, ${Math.round(
        100 - (100 * sp.hospitalsInCourtSeatTowns) / sp.located,
      )}% dintre spitale nu sunt în orașul unui sediu. Concentrarea serviciilor în 42 de orașe

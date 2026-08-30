@@ -26,18 +26,34 @@ def spitale() -> dict:
     return json.loads(SPITALE.read_text(encoding="utf-8"))
 
 
-def test_the_register_is_declared_incomplete(spitale):
-    """The gap is the headline, and it must stay blocking.
+def test_the_map_gap_is_declared_and_shown_not_to_be_a_real_gap(spitale):
+    """The gap is the headline, and it must stay blocking — but it is a gap in the map.
 
-    Six counties are absent entirely — including Galati and Mures, which plainly have county
-    hospitals. Any national statement from this file would be wrong in the flattering
-    direction: it would read absence of data as absence of hospitals.
+    Six counties never appear on the ministry's map. Reading that as "counties without
+    hospitals" would be wrong in the flattering direction, so a second source has to contradict
+    it: the ANMCS register lists hospitals in exactly those counties. If that count were ever
+    zero, the map's silence would have become evidence, which is what this guards against.
     """
+    summary = spitale["summary"]
     blocking = {x["id"] for x in spitale["limitations"] if x["severity"] == "blocking"}
-    assert "registrul-e-incomplet" in blocking
-    missing = spitale["summary"]["countiesMissing"]
+    assert "harta-ministerului-e-incompleta" in blocking
+    missing = summary["countiesMissing"]
     assert len(missing) > 0
-    assert spitale["summary"]["countiesCovered"] + len(missing) == spitale["summary"]["countiesTotal"]
+    assert summary["countiesCovered"] + len(missing) == summary["countiesTotal"]
+    assert summary["registerInMissingCounties"] > 0, "the map's gap would read as a real gap"
+
+
+def test_the_complete_register_covers_every_county(spitale):
+    """It is the completeness backbone; a hole in it would put the map's gaps beyond checking."""
+    summary = spitale["summary"]
+    assert summary["registerCounties"] == summary["countiesTotal"] == 42
+    assert summary["registerHospitals"] > summary["located"]
+
+
+def test_the_register_cannot_place_hospitals_and_says_so(spitale):
+    """County only, and county hospitals named after their patron rather than their town. The
+    caveat is what stops someone trying to name-match their way to a national figure."""
+    assert "registrul-complet-nu-are-localitate" in {x["id"] for x in spitale["limitations"]}
 
 
 def test_the_colocation_figure_only_speaks_for_covered_counties(spitale):

@@ -16,15 +16,22 @@ moved 26 of the 301: Suceava's county emergency hospital sits nearer the seat of
 commune next door, than to Suceava's own, so nearest-seat filed it under Șcheia and reported
 that the county capital had no hospital.
 
-**The register is incomplete, and that is the first thing to say about it.** Six counties do
-not appear at all — Bistrița-Năsăud, Galați, Ilfov, Mureș, Neamț and Sălaj. Galați and Târgu
-Mureș plainly have county hospitals; Târgu Mureș is one of the country's teaching centres. So
-nothing national can be computed from this file, and the co-location figure is reported over
-the 36 counties the register actually covers, labelled as such.
+**The ministry's map is incomplete, and a second source proves it rather than suspecting it.**
+Six counties never appear on it — Bistrița-Năsăud, Galați, Ilfov, Mureș, Neamț, Sălaj. The
+ANMCS accreditation register, published through data.gov.ro, lists 52 hospitals in exactly
+those six, including 17 in Mureș. So the hole is in the map, not in the country, and the
+distinction is the difference between "these counties have no hospitals" and "nobody plotted
+them".
 
-Within those 36: every single court seat has a hospital. What that supports is narrow — the
-proposed seats are already service centres — and it says nothing about the six counties whose
-data is missing.
+The two sources do different jobs and neither does both. ANMCS is complete — 593 hospitals,
+all 42 counties — but it carries county only, and it names county hospitals after their patron
+rather than their town: Suceava's is "SPITALUL JUDEȚEAN DE URGENȚĂ «SFÂNTUL IOAN CEL NOU»",
+Sfântu Gheorghe's is "DR. FOGOLYÁN KRISTÓF". No town appears, so no name match can place them.
+The ministry's map carries coordinates but only for 36 counties.
+
+So co-location is answered where coordinates exist and declared unanswerable elsewhere: within
+those 36 counties every court seat has a hospital, and for the other six the register proves
+hospitals exist without saying which town holds them.
 
 Usage:
     uv run python scripts/import_spitale.py
@@ -37,6 +44,7 @@ import html
 import json
 import re
 import sys
+import unicodedata
 import urllib.request
 from pathlib import Path
 
@@ -45,6 +53,15 @@ ADMINISTRATIV = ROOT.parent / "administrativ"
 SOURCE = ROOT / "sources" / "ms-unitati-sanitare.html"
 OUT = ROOT / "data" / "spitale-2026.json"
 URL = "https://ms.ro/ro/unitati-sanitare/"
+# The ANMCS accreditation register, through the national open data portal. Complete by county,
+# which is what the ministry's map is not.
+ANMCS_SOURCE = ROOT / "sources" / "anmcs-acreditare-2025.json"
+ANMCS_URL = (
+    "https://data.gov.ro/dataset/9d218668-6a1d-4f3b-b889-cfb73d062f90/resource/"
+    "0b9b6012-5dcf-4e8f-90be-3b2443c06ac4/download/anmcs-acreditare-unitati-sanitare-dec2025.json"
+)
+ANMCS_NAME = "Denumirea unității sanitare cu paturi"
+ANMCS_COUNTY = "Județul"
 UA = "romania-reforms/0.1 (+https://github.com/CristianNichifor)"
 
 sys.path.insert(0, str(ADMINISTRATIV))
@@ -74,6 +91,47 @@ def markers(page: str) -> list[dict]:
         if lines:
             found.append({"name": lines[0], "lat": float(lat), "lng": float(lng)})
     return found
+
+
+def fold(text: str) -> str:
+    stripped = unicodedata.normalize("NFD", str(text).lower())
+    stripped = "".join(c for c in stripped if unicodedata.category(c) != "Mn")
+    return re.sub(r"\s+", " ", re.sub(r"[^a-z]+", " ", stripped)).strip()
+
+
+def anmcs_by_county(county_names: dict[str, str]) -> collections.Counter:
+    """Accredited hospitals per county code, from the open data portal's register."""
+    if not ANMCS_SOURCE.exists():
+        print(f"downloading {ANMCS_URL} ...")
+        request = urllib.request.Request(ANMCS_URL, headers={"User-Agent": UA})
+        with urllib.request.urlopen(request, timeout=300) as response:  # noqa: S310
+            ANMCS_SOURCE.parent.mkdir(parents=True, exist_ok=True)
+            ANMCS_SOURCE.write_bytes(response.read())
+    rows = json.loads(ANMCS_SOURCE.read_text(encoding="utf-8"))
+
+    code_of = {fold(name): code for code, name in county_names.items()}
+    code_of["bucuresti"] = "B"
+    # One row spells Caraș-Severin without its first A. Aliased rather than dropped: a source
+    # typo should not become a county with one hospital fewer.
+    code_of["cars severin"] = code_of.get("caras severin", "CS")
+
+    counts: collections.Counter = collections.Counter()
+    unmatched: collections.Counter = collections.Counter()
+    for row in rows:
+        # Section headers and the two-row table head carry no number in the first column.
+        if not str(row.get("Nr.crt.", "")).strip().isdigit():
+            continue
+        if not row.get(ANMCS_NAME) or not row.get(ANMCS_COUNTY):
+            continue
+        code = code_of.get(fold(row[ANMCS_COUNTY]).replace(" - ", " "))
+        if code:
+            counts[code] += 1
+        else:
+            unmatched[row[ANMCS_COUNTY]] += 1
+    if unmatched:
+        print(f"county labels the register uses that we do not know: {dict(unmatched)}",
+              file=sys.stderr)
+    return counts
 
 
 def main() -> int:
@@ -121,6 +179,16 @@ def main() -> int:
     seat_of = {c["county"]: c["siruta"] for c in courts["courts"]}
     per_uat = collections.Counter(r["siruta"] for r in located)
 
+    # The completeness backbone. The map cannot say where a hospital is in the six counties it
+    # omits; the register can at least say how many there are, which is what turns "no data"
+    # into "not plotted".
+    county_names = {
+        code: name
+        for code, name in zip(uats["county_code"], uats["county_name"], strict=True)
+    }
+    register = anmcs_by_county(county_names)
+    in_missing = sum(register[c] for c in missing)
+
     checkable = [c for c in seat_of if c in covered]
     seats_with = [c for c in checkable if per_uat.get(seat_of[c], 0) > 0]
     at_seats = sum(n for s, n in per_uat.items() if s in seat_of.values())
@@ -130,6 +198,8 @@ def main() -> int:
     print(f"sedii de instanță cu spital: {len(seats_with)} din {len(checkable)} verificabile")
     print(f"spitale în orașul unui sediu de instanță: {at_seats} din {len(located)} "
           f"({100 * at_seats / len(located):.0f}%)")
+    print(f"registrul ANMCS: {sum(register.values())} spitale în {len(register)} județe; "
+          f"{in_missing} dintre ele în cele {len(missing)} județe lipsă de pe hartă")
 
     document = {
         "$schema": "../schema/spitale.schema.json",
@@ -148,6 +218,9 @@ def main() -> int:
             ),
         },
         "summary": {
+            "registerHospitals": sum(register.values()),
+            "registerCounties": len(register),
+            "registerInMissingCounties": in_missing,
             "hospitals": len(rows),
             "located": len(located),
             "countiesCovered": len(covered),
@@ -160,16 +233,29 @@ def main() -> int:
         "hospitals": rows,
         "limitations": [
             {
-                "id": "registrul-e-incomplet",
+                "id": "harta-ministerului-e-incompleta",
                 "text": (
-                    "Șase județe lipsesc cu totul din listă — Bistrița-Năsăud, Galați, Ilfov, "
-                    "Mureș, Neamț și Sălaj. Galațiul și Târgu Mureșul au evident spitale "
-                    "județene, iar Târgu Mureșul e unul dintre centrele medicale universitare "
-                    "ale țării. Nimic la nivel național nu se poate calcula din acest fișier; "
-                    "cifrele de aici sunt pe cele 36 de județe pe care lista le acoperă."
+                    "Harta Ministerului Sănătății nu are deloc șase județe — Bistrița-Năsăud, "
+                    "Galați, Ilfov, Mureș, Neamț și Sălaj. Nu sunt județe fără spitale: "
+                    "registrul de acreditare al ANMCS, de pe data.gov.ro, listează "
+                    f"{in_missing} de spitale exact în ele. Lipsește localizarea lor, nu "
+                    "existența, deci colocarea se poate verifica doar în celelalte 36 de "
+                    "județe."
                 ),
                 "severity": "blocking",
                 "affects": ["acces", "colocare"],
+            },
+            {
+                "id": "registrul-complet-nu-are-localitate",
+                "text": (
+                    "Registrul ANMCS acoperă toate cele 42 de județe, dar are doar județul, nu "
+                    "și localitatea, iar spitalele județene sunt numite după hramul lor, nu "
+                    "după oraș — cel din Suceava e „Sfântul Ioan cel Nou”, cel din Sfântu "
+                    "Gheorghe e „Dr. Fogolyán Kristóf”. Nicio potrivire după nume nu le poate "
+                    "așeza pe hartă, așa că registrul spune câte sunt, nu unde."
+                ),
+                "severity": "material",
+                "affects": ["colocare"],
             },
             {
                 "id": "spitalele-nu-sunt-parchete",
