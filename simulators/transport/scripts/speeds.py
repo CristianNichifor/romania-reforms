@@ -30,9 +30,19 @@ having to accept the others:
 each other, because those roads are limited by their geometry rather than by the vehicle.
 The bus penalty is real only on motorway and trunk. That is a result, not an oversight.
 
-**Nothing here is verified against a recorded journey.** No observations of real Romanian
-travel time exist in this repository. The model is defensible in its parts and unvalidated as
-a whole; see `check_gate.py` and the limitation it declares.
+**What is checked, and at which end.** Nothing in *this* file is verified against a recorded
+journey — there is no published dataset of Romanian free-flow road speeds by class to check it
+against. What is now checked is the other end of the chain: `data/observed-journeys.json`
+holds 552 timetabled county bus runs read out of six county councils' transport programmes,
+and the commercial speed this model eventually produces, 36,8 km/h, sits 3,7% below their
+kilometre-weighted 38,2 and inside their interquartile range.
+
+That is a real test and a limited one. It constrains the *composite* — these speeds, plus
+routing, plus the service factor, plus dwell — and cannot separate the terms. A model running
+the roads too fast and standing too long at stops would land in the same place. So the honest
+statement is no longer "unvalidated as a whole" but its inverse: **validated as a whole,
+unvalidated in its parts.** The per-class efficiency figures below remain the assumed term and
+the first thing to argue with.
 """
 
 from __future__ import annotations
@@ -205,8 +215,10 @@ SPEED_PROVENANCE: Final[dict[str, str]] = {
     "confidence": "derived",
     "note": (
         "Limitele sunt măsurate, cinematica este calculată, iar randamentul pe clasă de drum "
-        "este presupus. Niciun element nu este verificat față de un timp de parcurs "
-        "înregistrat — nu există astfel de date în acest depozit."
+        "este presupus. Nicio clasă nu este verificată separat, pentru că nu există o "
+        "măsurătoare publică a vitezelor de drum liber pe clase în România. Verificarea "
+        "există la celălalt capăt al lanțului: viteza comercială rezultată se compară cu "
+        "552 de curse reale din data/observed-journeys.json și cade în intervalul lor."
     ),
 }
 

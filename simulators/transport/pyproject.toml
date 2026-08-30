@@ -18,6 +18,10 @@ dependencies = [
     "pyogrio>=0.9",
     "pyarrow>=25.0.1",
     "scipy>=1.14",
+    # Reads the county transport programmes in scripts/build_observed.py. Needed only to
+    # rebuild data/observed-journeys.json, which is committed; the model itself never opens
+    # a PDF.
+    "pypdf>=5.0",
 ]
 
 [dependency-groups]

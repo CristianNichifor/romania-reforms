@@ -43,6 +43,20 @@ from scripts.tiers import DAY_PROFILE, classify, duty_span_hours, service_for  #
 LAYOVER_MIN: Final[float] = 10.0
 SPARE_RATIO: Final[float] = 0.15
 
+OBSERVED = ROOT / "data" / "observed-journeys.json"
+
+
+def observed_speeds() -> dict:
+    """The measured commercial-speed distribution from `data/observed-journeys.json`.
+
+    This is the one check in this file that compares the model against a recorded Romanian
+    journey rather than against a western benchmark scaled to Romanian wages. It is also the
+    check most easily corrupted: the temptation is to move `serviceSpeedFactor` until the gap
+    closes, which would convert the only independent test in the repository into a fit. The
+    factor stays where it was set before these observations existed.
+    """
+    return json.loads(OBSERVED.read_text(encoding="utf-8"))["summary"]
+
 
 def class_of(route: dict, population: dict[str, int]) -> str:
     """Which vehicle a route runs.
@@ -143,6 +157,8 @@ def main(argv: list[str] | None = None) -> int:
     # moves, and this file has already published two that did.
     ron_per_bus_km = cost.operating_ron / (sum(km_by_class.values()) * WEEKDAYS_PER_YEAR)
     driver_share = cost.driver_ron / cost.operating_ron
+    speed = sum(km_by_class.values()) / hours
+    observed = observed_speeds()
 
     def ro(value: float, places: int = 2) -> str:
         """Romanian decimal comma. The limitations are Romanian prose; 6.47 reads as a typo."""
@@ -162,9 +178,10 @@ def main(argv: list[str] | None = None) -> int:
             ),
             "confidence": "derived",
             "note": (
-                "Derivat dintr-un lanț în care nimic nu este verificat pe teren: vitezele "
-                "sunt modelate, prețurile unitare sunt estimate, iar economiile vin de la "
-                "simulatorul administrativ cu limitările lui."
+                "Derivat dintr-un lanț verificat în ansamblu, nu pe verigi: viteza comercială "
+                f"care rezultă se compară cu {observed['count']} curse reale din programele "
+                "județene și cade în intervalul lor, însă prețurile unitare rămân în parte "
+                "estimate, iar economiile vin de la simulatorul administrativ cu limitările lui."
             ),
         },
         "drivers": drivers_required(
@@ -184,6 +201,19 @@ def main(argv: list[str] | None = None) -> int:
             "peakByClass": dict(peak_by_class),
             "total": sum(fleet_by_class.values()),
             "spareRatio": SPARE_RATIO,
+        },
+        # Published rather than only printed, so the one check against recorded Romanian
+        # journeys is quotable and can be regression-tested. Both figures are the same
+        # quantity — total kilometres over total hours — which is what makes them comparable.
+        "speedCheck": {
+            "modelledKmh": round(speed, 1),
+            "observedKmh": observed["kmhWeighted"],
+            "observedP25Kmh": observed["kmhP25"],
+            "observedP75Kmh": observed["kmhP75"],
+            "observedJourneys": observed["count"],
+            "gap": round(speed / observed["kmhWeighted"] - 1, 4),
+            "source": "data/observed-journeys.json",
+            "tuned": False,
         },
         "annualRon": {
             "driver": round(cost.driver_ron),
@@ -227,13 +257,22 @@ def main(argv: list[str] | None = None) -> int:
                 "affects": ["cost"],
             },
             {
-                "id": "vitezele-nu-sunt-verificate",
+                "id": "vitezele-sunt-verificate-doar-in-ansamblu",
                 "text": (
-                    "Orele de autobuz vin din timpi de parcurs modelați, niciodată comparați "
-                    "cu o călătorie reală. O eroare sistematică de viteză se transmite direct "
-                    "în ore și în costul șoferilor, care este cea mai mare poziție."
+                    f"Viteza comercială a modelului este {ro(speed)} km/h, față de "
+                    f"{ro(observed['kmhWeighted'])} km/h măsurați pe {observed['count']} curse "
+                    "reale din programele de transport a șase consilii județene "
+                    f"(data/observed-journeys.json), adică o abatere de "
+                    f"{speed / observed['kmhWeighted'] - 1:+.1%}, în interiorul intervalului "
+                    f"intercuartilic observat de {ro(observed['kmhP25'])}-"
+                    f"{ro(observed['kmhP75'])} km/h. Factorul de viteză de serviciu NU a fost "
+                    "ajustat ca să închidă diferența — altfel singura verificare independentă "
+                    "din depozit ar fi devenit o potrivire. Ce rămâne neverificat este "
+                    "descompunerea: lanțul se verifică în ansamblu, iar un model care ar merge "
+                    "prea repede pe drum și ar staționa prea mult în stație ar cădea în același "
+                    "loc. Vezi și limitările din data/observed-journeys.json privind eșantionul."
                 ),
-                "severity": "material",
+                "severity": "note",
                 "affects": ["cost"],
             },
             {
@@ -242,10 +281,12 @@ def main(argv: list[str] | None = None) -> int:
                     "Timpii de drum liber sunt împărțiți la un factor de 0,75 ca să devină "
                     "timpi de serviciu — intersecții, marja pusă în orar ca traseul să poată "
                     "fi respectat, conducerea unui vehicul greu. Factorul este presupus, "
-                    "calibrat astfel încât viteza comercială să cadă în intervalul observat "
-                    "de 25-40 km/h, și este presupunerea cu cea mai mare influență asupra "
-                    "orelor. Opririle nu sunt în el: staționarea se socotește separat, iar "
-                    "frânarea și repornirea din stație au fost măsurate și fac 3%."
+                    "presupus, fixat înainte să existe observațiile, și este presupunerea cu "
+                    "cea mai mare influență asupra orelor. Nu a fost mutat după ce au apărut "
+                    f"cele {observed['count']} curse măsurate, tocmai ca verificarea vitezei "
+                    "comerciale să rămână un test și să nu devină o potrivire. Opririle nu "
+                    "sunt în el: staționarea se socotește separat, iar frânarea și repornirea "
+                    "din stație au fost măsurate și fac 3%."
                 ),
                 "severity": "material",
                 "affects": ["cost"],
@@ -311,9 +352,7 @@ def main(argv: list[str] | None = None) -> int:
     # printed so that a number outside its band is argued with rather than quoted. Tuning the
     # inputs until these land inside would be fitting the model to a prior, which is the
     # failure the whole repository is built to avoid.
-    driver_share = cost.driver_ron / cost.operating_ron
-    ron_per_km = cost.operating_ron / (sum(km_by_class.values()) * WEEKDAYS_PER_YEAR)
-    speed = sum(km_by_class.values()) / hours
+    ron_per_km = ron_per_bus_km
 
     # The benchmarks have to be wage-adjusted or they are answers about a different country.
     # A western rural operation runs near 2,5 EUR/km at roughly 45% driver — but its drivers
@@ -360,9 +399,17 @@ def main(argv: list[str] | None = None) -> int:
     # be used, because a Romanian operating figure is worth recording even when it will not
     # convert.
 
+    # Against 552 real journeys rather than against a prior. Both sides are the same
+    # quantity — total kilometres over total hours — so they compare directly.
+    inside = observed["kmhP25"] <= speed <= observed["kmhP75"]
     print(
-        f"  commercial speed           {speed:>6.1f}   expect 25-40 km/h  "
-        f"{'ok' if 25 <= speed <= 40 else 'OUTSIDE'}"
+        f"  commercial speed           {speed:>6.1f}   observed {observed['kmhWeighted']} km/h "
+        f"({observed['count']} curse reale, IQR {observed['kmhP25']}-{observed['kmhP75']})  "
+        f"{'ok' if inside else 'OUTSIDE'}"
+    )
+    print(
+        f"    gap vs observed          {speed / observed['kmhWeighted'] - 1:>+6.1%}   "
+        "the factor was NOT tuned to close this"
     )
 
     print(f"\nWrote {OUT.relative_to(ROOT)}")

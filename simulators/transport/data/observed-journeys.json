@@ -1,0 +1,2857 @@
+{
+  "$schema": "../schema/observed-journeys.schema.json",
+  "what": "Timpi de parcurs observați, citiți din programele de transport județean publicate de consiliile județene. Fiecare rând al programului dă distanța pe sens și orele de plecare și sosire, iar raportul lor este viteza comercială reală a unei curse rurale, cu opriri incluse.",
+  "provenance": {
+    "source": "programe-transport-judetean",
+    "locator": "Programele de transport public județean adoptate prin hotărâre de consiliu județean, coloanele „Km pe sens” și „Plecare/Sosire”; documentele și adresele lor sunt listate în câmpul sources al acestui fișier",
+    "confidence": "verbatim",
+    "note": "Distanța și orele sunt copiate din tabel fără ajustare. Viteza este raportul lor, deci derivată aritmetic din două cifre verbatim."
+  },
+  "note": "Cifrele sunt citite direct din documentele oficiale, fără ajustare. Ce nu sunt: un eșantion aleatoriu. Sunt traseele care există, iar un traseu comercial există unde este cerere, deci pe drumurile mai bune. Rețeaua construită aici trebuie să deservească și comune pe care niciun operator nu le-a ales. Dacă eșantionul este deplasat, este deplasat spre rapid.",
+  "sources": [
+    {
+      "county": "Sibiu",
+      "url": "https://www.cjsibiu.ro/wp-content/uploads/2020/09/ANEXA-1-14092020.pdf",
+      "title": "Programul de transport rutier județean de persoane prin curse regulate, județul Sibiu (Anexa 1 la HCJ, 14.09.2020)",
+      "journeys": 112
+    },
+    {
+      "county": "Brăila",
+      "url": "https://www.cjbraila.ro/dm_cj/portal.nsf/131A843C6093D69DC2258B700046ECD9/$FILE/Programul%20de%20transport%20public%20judetean%20de%20persoane-%20de%20la%2030.07.2024.pdf",
+      "title": "Programul de transport public județean de persoane, județul Brăila, de la 30.07.2024",
+      "journeys": 82
+    },
+    {
+      "county": "Dolj",
+      "url": "https://www.cjdolj.ro/portal/siteweb/documente%202021/PROGRAM%20TRANSPORT%202022-2032.pdf",
+      "title": "Programul de transport public rutier de persoane prin curse regulate, județul Dolj, 2022-2032",
+      "journeys": 191
+    },
+    {
+      "county": "Bacău",
+      "url": "https://www.csjbacau.ro/dm_cj/portalweb.nsf/5DCD1CF489BC8373C225881E00362E1E/$FILE/Final%20Anexa%201%20HCJ%20-%20program%20transport%202023-2032%20corectat%20%20transparenta.pdf",
+      "title": "Programul de transport județean, județul Bacău, 2023-2032 (Anexa 1 la HCJ)",
+      "journeys": 14
+    },
+    {
+      "county": "Caraș-Severin",
+      "url": "https://cjcs.ro/data_files/content/program-transport-040918.pdf",
+      "title": "Programul de transport pentru traseele din județul Caraș-Severin, 01.01.2014-30.06.2019",
+      "journeys": 144
+    },
+    {
+      "county": "Sălaj",
+      "url": "https://www.cjsj.ro/date/pdfuri/Transport%20public/program%20transport%20actualizat%20iunie%202024.pdf",
+      "title": "Programul de transport public județean, județul Sălaj, actualizat iunie 2024",
+      "journeys": 9
+    }
+  ],
+  "summary": {
+    "count": 552,
+    "byCounty": {
+      "Bacău": 14,
+      "Brăila": 82,
+      "Caraș-Severin": 144,
+      "Dolj": 191,
+      "Sibiu": 112,
+      "Sălaj": 9
+    },
+    "kmhWeighted": 38.2,
+    "kmhMean": 37.9,
+    "kmhMedian": 37.8,
+    "kmhP10": 24.0,
+    "kmhP25": 31.6,
+    "kmhP75": 45.0,
+    "kmhP90": 51.4,
+    "totalKm": 23664,
+    "totalHours": 619.5
+  },
+  "journeys": [
+    {
+      "county": "Sibiu",
+      "km": 15,
+      "minutes": 25
+    },
+    {
+      "county": "Sibiu",
+      "km": 15,
+      "minutes": 25
+    },
+    {
+      "county": "Sibiu",
+      "km": 21,
+      "minutes": 50
+    },
+    {
+      "county": "Sibiu",
+      "km": 21,
+      "minutes": 50
+    },
+    {
+      "county": "Sibiu",
+      "km": 47,
+      "minutes": 113
+    },
+    {
+      "county": "Sibiu",
+      "km": 47,
+      "minutes": 113
+    },
+    {
+      "county": "Sibiu",
+      "km": 69,
+      "minutes": 90
+    },
+    {
+      "county": "Sibiu",
+      "km": 69,
+      "minutes": 90
+    },
+    {
+      "county": "Sibiu",
+      "km": 40,
+      "minutes": 60
+    },
+    {
+      "county": "Sibiu",
+      "km": 40,
+      "minutes": 60
+    },
+    {
+      "county": "Sibiu",
+      "km": 30,
+      "minutes": 45
+    },
+    {
+      "county": "Sibiu",
+      "km": 30,
+      "minutes": 40
+    },
+    {
+      "county": "Sibiu",
+      "km": 32,
+      "minutes": 50
+    },
+    {
+      "county": "Sibiu",
+      "km": 32,
+      "minutes": 50
+    },
+    {
+      "county": "Sibiu",
+      "km": 39,
+      "minutes": 50
+    },
+    {
+      "county": "Sibiu",
+      "km": 39,
+      "minutes": 50
+    },
+    {
+      "county": "Sibiu",
+      "km": 57,
+      "minutes": 106
+    },
+    {
+      "county": "Sibiu",
+      "km": 57,
+      "minutes": 106
+    },
+    {
+      "county": "Sibiu",
+      "km": 32,
+      "minutes": 60
+    },
+    {
+      "county": "Sibiu",
+      "km": 32,
+      "minutes": 60
+    },
+    {
+      "county": "Sibiu",
+      "km": 24,
+      "minutes": 30
+    },
+    {
+      "county": "Sibiu",
+      "km": 24,
+      "minutes": 30
+    },
+    {
+      "county": "Sibiu",
+      "km": 12,
+      "minutes": 20
+    },
+    {
+      "county": "Sibiu",
+      "km": 12,
+      "minutes": 20
+    },
+    {
+      "county": "Sibiu",
+      "km": 60,
+      "minutes": 90
+    },
+    {
+      "county": "Sibiu",
+      "km": 60,
+      "minutes": 90
+    },
+    {
+      "county": "Sibiu",
+      "km": 53,
+      "minutes": 103
+    },
+    {
+      "county": "Sibiu",
+      "km": 53,
+      "minutes": 103
+    },
+    {
+      "county": "Sibiu",
+      "km": 26,
+      "minutes": 60
+    },
+    {
+      "county": "Sibiu",
+      "km": 26,
+      "minutes": 60
+    },
+    {
+      "county": "Sibiu",
+      "km": 28,
+      "minutes": 46
+    },
+    {
+      "county": "Sibiu",
+      "km": 28,
+      "minutes": 46
+    },
+    {
+      "county": "Sibiu",
+      "km": 19,
+      "minutes": 35
+    },
+    {
+      "county": "Sibiu",
+      "km": 19,
+      "minutes": 35
+    },
+    {
+      "county": "Sibiu",
+      "km": 48,
+      "minutes": 85
+    },
+    {
+      "county": "Sibiu",
+      "km": 48,
+      "minutes": 85
+    },
+    {
+      "county": "Sibiu",
+      "km": 24,
+      "minutes": 55
+    },
+    {
+      "county": "Sibiu",
+      "km": 24,
+      "minutes": 55
+    },
+    {
+      "county": "Sibiu",
+      "km": 22,
+      "minutes": 40
+    },
+    {
+      "county": "Sibiu",
+      "km": 22,
+      "minutes": 40
+    },
+    {
+      "county": "Sibiu",
+      "km": 29,
+      "minutes": 60
+    },
+    {
+      "county": "Sibiu",
+      "km": 29,
+      "minutes": 60
+    },
+    {
+      "county": "Sibiu",
+      "km": 28,
+      "minutes": 55
+    },
+    {
+      "county": "Sibiu",
+      "km": 28,
+      "minutes": 50
+    },
+    {
+      "county": "Sibiu",
+      "km": 60,
+      "minutes": 150
+    },
+    {
+      "county": "Sibiu",
+      "km": 60,
+      "minutes": 135
+    },
+    {
+      "county": "Sibiu",
+      "km": 55,
+      "minutes": 90
+    },
+    {
+      "county": "Sibiu",
+      "km": 55,
+      "minutes": 90
+    },
+    {
+      "county": "Sibiu",
+      "km": 14,
+      "minutes": 25
+    },
+    {
+      "county": "Sibiu",
+      "km": 14,
+      "minutes": 25
+    },
+    {
+      "county": "Sibiu",
+      "km": 27,
+      "minutes": 40
+    },
+    {
+      "county": "Sibiu",
+      "km": 27,
+      "minutes": 40
+    },
+    {
+      "county": "Sibiu",
+      "km": 9,
+      "minutes": 25
+    },
+    {
+      "county": "Sibiu",
+      "km": 9,
+      "minutes": 25
+    },
+    {
+      "county": "Sibiu",
+      "km": 14,
+      "minutes": 25
+    },
+    {
+      "county": "Sibiu",
+      "km": 14,
+      "minutes": 30
+    },
+    {
+      "county": "Sibiu",
+      "km": 17,
+      "minutes": 35
+    },
+    {
+      "county": "Sibiu",
+      "km": 17,
+      "minutes": 25
+    },
+    {
+      "county": "Sibiu",
+      "km": 10,
+      "minutes": 20
+    },
+    {
+      "county": "Sibiu",
+      "km": 10,
+      "minutes": 20
+    },
+    {
+      "county": "Sibiu",
+      "km": 17,
+      "minutes": 40
+    },
+    {
+      "county": "Sibiu",
+      "km": 17,
+      "minutes": 40
+    },
+    {
+      "county": "Sibiu",
+      "km": 16,
+      "minutes": 50
+    },
+    {
+      "county": "Sibiu",
+      "km": 16,
+      "minutes": 50
+    },
+    {
+      "county": "Sibiu",
+      "km": 22,
+      "minutes": 40
+    },
+    {
+      "county": "Sibiu",
+      "km": 22,
+      "minutes": 40
+    },
+    {
+      "county": "Sibiu",
+      "km": 30,
+      "minutes": 40
+    },
+    {
+      "county": "Sibiu",
+      "km": 30,
+      "minutes": 30
+    },
+    {
+      "county": "Sibiu",
+      "km": 16,
+      "minutes": 30
+    },
+    {
+      "county": "Sibiu",
+      "km": 16,
+      "minutes": 40
+    },
+    {
+      "county": "Sibiu",
+      "km": 16,
+      "minutes": 40
+    },
+    {
+      "county": "Sibiu",
+      "km": 16,
+      "minutes": 40
+    },
+    {
+      "county": "Sibiu",
+      "km": 15,
+      "minutes": 45
+    },
+    {
+      "county": "Sibiu",
+      "km": 15,
+      "minutes": 30
+    },
+    {
+      "county": "Sibiu",
+      "km": 14,
+      "minutes": 30
+    },
+    {
+      "county": "Sibiu",
+      "km": 14,
+      "minutes": 30
+    },
+    {
+      "county": "Sibiu",
+      "km": 18,
+      "minutes": 30
+    },
+    {
+      "county": "Sibiu",
+      "km": 18,
+      "minutes": 30
+    },
+    {
+      "county": "Sibiu",
+      "km": 14,
+      "minutes": 30
+    },
+    {
+      "county": "Sibiu",
+      "km": 14,
+      "minutes": 30
+    },
+    {
+      "county": "Sibiu",
+      "km": 12,
+      "minutes": 25
+    },
+    {
+      "county": "Sibiu",
+      "km": 12,
+      "minutes": 25
+    },
+    {
+      "county": "Sibiu",
+      "km": 15,
+      "minutes": 30
+    },
+    {
+      "county": "Sibiu",
+      "km": 15,
+      "minutes": 30
+    },
+    {
+      "county": "Sibiu",
+      "km": 50,
+      "minutes": 93
+    },
+    {
+      "county": "Sibiu",
+      "km": 50,
+      "minutes": 63
+    },
+    {
+      "county": "Sibiu",
+      "km": 34,
+      "minutes": 80
+    },
+    {
+      "county": "Sibiu",
+      "km": 34,
+      "minutes": 75
+    },
+    {
+      "county": "Sibiu",
+      "km": 20,
+      "minutes": 30
+    },
+    {
+      "county": "Sibiu",
+      "km": 20,
+      "minutes": 30
+    },
+    {
+      "county": "Sibiu",
+      "km": 37,
+      "minutes": 50
+    },
+    {
+      "county": "Sibiu",
+      "km": 37,
+      "minutes": 50
+    },
+    {
+      "county": "Sibiu",
+      "km": 22,
+      "minutes": 54
+    },
+    {
+      "county": "Sibiu",
+      "km": 22,
+      "minutes": 55
+    },
+    {
+      "county": "Sibiu",
+      "km": 21,
+      "minutes": 30
+    },
+    {
+      "county": "Sibiu",
+      "km": 21,
+      "minutes": 30
+    },
+    {
+      "county": "Sibiu",
+      "km": 21,
+      "minutes": 35
+    },
+    {
+      "county": "Sibiu",
+      "km": 21,
+      "minutes": 35
+    },
+    {
+      "county": "Sibiu",
+      "km": 10,
+      "minutes": 15
+    },
+    {
+      "county": "Sibiu",
+      "km": 10,
+      "minutes": 15
+    },
+    {
+      "county": "Sibiu",
+      "km": 33,
+      "minutes": 40
+    },
+    {
+      "county": "Sibiu",
+      "km": 33,
+      "minutes": 40
+    },
+    {
+      "county": "Sibiu",
+      "km": 24,
+      "minutes": 45
+    },
+    {
+      "county": "Sibiu",
+      "km": 24,
+      "minutes": 45
+    },
+    {
+      "county": "Sibiu",
+      "km": 16,
+      "minutes": 30
+    },
+    {
+      "county": "Sibiu",
+      "km": 16,
+      "minutes": 30
+    },
+    {
+      "county": "Sibiu",
+      "km": 14,
+      "minutes": 15
+    },
+    {
+      "county": "Sibiu",
+      "km": 14,
+      "minutes": 15
+    },
+    {
+      "county": "Sibiu",
+      "km": 26,
+      "minutes": 40
+    },
+    {
+      "county": "Sibiu",
+      "km": 26,
+      "minutes": 45
+    },
+    {
+      "county": "Sibiu",
+      "km": 32,
+      "minutes": 50
+    },
+    {
+      "county": "Sibiu",
+      "km": 32,
+      "minutes": 50
+    },
+    {
+      "county": "Brăila",
+      "km": 41,
+      "minutes": 80
+    },
+    {
+      "county": "Brăila",
+      "km": 41,
+      "minutes": 80
+    },
+    {
+      "county": "Brăila",
+      "km": 62,
+      "minutes": 105
+    },
+    {
+      "county": "Brăila",
+      "km": 62,
+      "minutes": 105
+    },
+    {
+      "county": "Brăila",
+      "km": 30,
+      "minutes": 55
+    },
+    {
+      "county": "Brăila",
+      "km": 30,
+      "minutes": 55
+    },
+    {
+      "county": "Brăila",
+      "km": 107,
+      "minutes": 143
+    },
+    {
+      "county": "Brăila",
+      "km": 107,
+      "minutes": 143
+    },
+    {
+      "county": "Brăila",
+      "km": 16,
+      "minutes": 45
+    },
+    {
+      "county": "Brăila",
+      "km": 16,
+      "minutes": 45
+    },
+    {
+      "county": "Brăila",
+      "km": 50,
+      "minutes": 55
+    },
+    {
+      "county": "Brăila",
+      "km": 50,
+      "minutes": 55
+    },
+    {
+      "county": "Brăila",
+      "km": 14,
+      "minutes": 15
+    },
+    {
+      "county": "Brăila",
+      "km": 14,
+      "minutes": 15
+    },
+    {
+      "county": "Brăila",
+      "km": 104,
+      "minutes": 145
+    },
+    {
+      "county": "Brăila",
+      "km": 104,
+      "minutes": 145
+    },
+    {
+      "county": "Brăila",
+      "km": 82,
+      "minutes": 130
+    },
+    {
+      "county": "Brăila",
+      "km": 82,
+      "minutes": 130
+    },
+    {
+      "county": "Brăila",
+      "km": 105,
+      "minutes": 155
+    },
+    {
+      "county": "Brăila",
+      "km": 105,
+      "minutes": 155
+    },
+    {
+      "county": "Brăila",
+      "km": 116,
+      "minutes": 148
+    },
+    {
+      "county": "Brăila",
+      "km": 116,
+      "minutes": 148
+    },
+    {
+      "county": "Brăila",
+      "km": 88,
+      "minutes": 130
+    },
+    {
+      "county": "Brăila",
+      "km": 88,
+      "minutes": 130
+    },
+    {
+      "county": "Brăila",
+      "km": 96,
+      "minutes": 108
+    },
+    {
+      "county": "Brăila",
+      "km": 96,
+      "minutes": 108
+    },
+    {
+      "county": "Brăila",
+      "km": 25,
+      "minutes": 30
+    },
+    {
+      "county": "Brăila",
+      "km": 25,
+      "minutes": 30
+    },
+    {
+      "county": "Brăila",
+      "km": 85,
+      "minutes": 120
+    },
+    {
+      "county": "Brăila",
+      "km": 85,
+      "minutes": 120
+    },
+    {
+      "county": "Brăila",
+      "km": 78,
+      "minutes": 115
+    },
+    {
+      "county": "Brăila",
+      "km": 78,
+      "minutes": 115
+    },
+    {
+      "county": "Brăila",
+      "km": 82,
+      "minutes": 140
+    },
+    {
+      "county": "Brăila",
+      "km": 82,
+      "minutes": 140
+    },
+    {
+      "county": "Brăila",
+      "km": 86,
+      "minutes": 115
+    },
+    {
+      "county": "Brăila",
+      "km": 86,
+      "minutes": 115
+    },
+    {
+      "county": "Brăila",
+      "km": 50,
+      "minutes": 85
+    },
+    {
+      "county": "Brăila",
+      "km": 50,
+      "minutes": 85
+    },
+    {
+      "county": "Brăila",
+      "km": 35,
+      "minutes": 50
+    },
+    {
+      "county": "Brăila",
+      "km": 35,
+      "minutes": 50
+    },
+    {
+      "county": "Brăila",
+      "km": 9,
+      "minutes": 25
+    },
+    {
+      "county": "Brăila",
+      "km": 9,
+      "minutes": 25
+    },
+    {
+      "county": "Brăila",
+      "km": 71,
+      "minutes": 95
+    },
+    {
+      "county": "Brăila",
+      "km": 71,
+      "minutes": 95
+    },
+    {
+      "county": "Brăila",
+      "km": 123,
+      "minutes": 180
+    },
+    {
+      "county": "Brăila",
+      "km": 123,
+      "minutes": 180
+    },
+    {
+      "county": "Brăila",
+      "km": 46,
+      "minutes": 50
+    },
+    {
+      "county": "Brăila",
+      "km": 46,
+      "minutes": 50
+    },
+    {
+      "county": "Brăila",
+      "km": 61,
+      "minutes": 60
+    },
+    {
+      "county": "Brăila",
+      "km": 61,
+      "minutes": 60
+    },
+    {
+      "county": "Brăila",
+      "km": 48,
+      "minutes": 60
+    },
+    {
+      "county": "Brăila",
+      "km": 48,
+      "minutes": 60
+    },
+    {
+      "county": "Brăila",
+      "km": 25,
+      "minutes": 45
+    },
+    {
+      "county": "Brăila",
+      "km": 25,
+      "minutes": 45
+    },
+    {
+      "county": "Brăila",
+      "km": 67,
+      "minutes": 60
+    },
+    {
+      "county": "Brăila",
+      "km": 67,
+      "minutes": 60
+    },
+    {
+      "county": "Brăila",
+      "km": 30,
+      "minutes": 45
+    },
+    {
+      "county": "Brăila",
+      "km": 30,
+      "minutes": 45
+    },
+    {
+      "county": "Brăila",
+      "km": 65,
+      "minutes": 95
+    },
+    {
+      "county": "Brăila",
+      "km": 65,
+      "minutes": 95
+    },
+    {
+      "county": "Brăila",
+      "km": 11,
+      "minutes": 30
+    },
+    {
+      "county": "Brăila",
+      "km": 11,
+      "minutes": 30
+    },
+    {
+      "county": "Brăila",
+      "km": 25,
+      "minutes": 40
+    },
+    {
+      "county": "Brăila",
+      "km": 25,
+      "minutes": 40
+    },
+    {
+      "county": "Brăila",
+      "km": 72,
+      "minutes": 180
+    },
+    {
+      "county": "Brăila",
+      "km": 72,
+      "minutes": 180
+    },
+    {
+      "county": "Brăila",
+      "km": 25,
+      "minutes": 30
+    },
+    {
+      "county": "Brăila",
+      "km": 25,
+      "minutes": 30
+    },
+    {
+      "county": "Brăila",
+      "km": 50,
+      "minutes": 60
+    },
+    {
+      "county": "Brăila",
+      "km": 50,
+      "minutes": 60
+    },
+    {
+      "county": "Brăila",
+      "km": 10,
+      "minutes": 30
+    },
+    {
+      "county": "Brăila",
+      "km": 10,
+      "minutes": 30
+    },
+    {
+      "county": "Brăila",
+      "km": 12,
+      "minutes": 40
+    },
+    {
+      "county": "Brăila",
+      "km": 12,
+      "minutes": 40
+    },
+    {
+      "county": "Brăila",
+      "km": 85,
+      "minutes": 150
+    },
+    {
+      "county": "Brăila",
+      "km": 85,
+      "minutes": 150
+    },
+    {
+      "county": "Brăila",
+      "km": 39,
+      "minutes": 60
+    },
+    {
+      "county": "Brăila",
+      "km": 39,
+      "minutes": 60
+    },
+    {
+      "county": "Brăila",
+      "km": 53,
+      "minutes": 70
+    },
+    {
+      "county": "Brăila",
+      "km": 53,
+      "minutes": 70
+    },
+    {
+      "county": "Brăila",
+      "km": 34,
+      "minutes": 35
+    },
+    {
+      "county": "Brăila",
+      "km": 34,
+      "minutes": 35
+    },
+    {
+      "county": "Dolj",
+      "km": 38,
+      "minutes": 40
+    },
+    {
+      "county": "Dolj",
+      "km": 38,
+      "minutes": 40
+    },
+    {
+      "county": "Dolj",
+      "km": 22,
+      "minutes": 35
+    },
+    {
+      "county": "Dolj",
+      "km": 22,
+      "minutes": 35
+    },
+    {
+      "county": "Dolj",
+      "km": 14,
+      "minutes": 25
+    },
+    {
+      "county": "Dolj",
+      "km": 14,
+      "minutes": 25
+    },
+    {
+      "county": "Dolj",
+      "km": 45,
+      "minutes": 60
+    },
+    {
+      "county": "Dolj",
+      "km": 45,
+      "minutes": 60
+    },
+    {
+      "county": "Dolj",
+      "km": 22,
+      "minutes": 45
+    },
+    {
+      "county": "Dolj",
+      "km": 17,
+      "minutes": 30
+    },
+    {
+      "county": "Dolj",
+      "km": 17,
+      "minutes": 30
+    },
+    {
+      "county": "Dolj",
+      "km": 39,
+      "minutes": 70
+    },
+    {
+      "county": "Dolj",
+      "km": 39,
+      "minutes": 70
+    },
+    {
+      "county": "Dolj",
+      "km": 38,
+      "minutes": 60
+    },
+    {
+      "county": "Dolj",
+      "km": 38,
+      "minutes": 60
+    },
+    {
+      "county": "Dolj",
+      "km": 23,
+      "minutes": 40
+    },
+    {
+      "county": "Dolj",
+      "km": 23,
+      "minutes": 40
+    },
+    {
+      "county": "Dolj",
+      "km": 23,
+      "minutes": 40
+    },
+    {
+      "county": "Dolj",
+      "km": 23,
+      "minutes": 40
+    },
+    {
+      "county": "Dolj",
+      "km": 18,
+      "minutes": 30
+    },
+    {
+      "county": "Dolj",
+      "km": 18,
+      "minutes": 30
+    },
+    {
+      "county": "Dolj",
+      "km": 19,
+      "minutes": 30
+    },
+    {
+      "county": "Dolj",
+      "km": 19,
+      "minutes": 30
+    },
+    {
+      "county": "Dolj",
+      "km": 16,
+      "minutes": 30
+    },
+    {
+      "county": "Dolj",
+      "km": 16,
+      "minutes": 25
+    },
+    {
+      "county": "Dolj",
+      "km": 25,
+      "minutes": 40
+    },
+    {
+      "county": "Dolj",
+      "km": 25,
+      "minutes": 40
+    },
+    {
+      "county": "Dolj",
+      "km": 42,
+      "minutes": 60
+    },
+    {
+      "county": "Dolj",
+      "km": 42,
+      "minutes": 60
+    },
+    {
+      "county": "Dolj",
+      "km": 42,
+      "minutes": 60
+    },
+    {
+      "county": "Dolj",
+      "km": 42,
+      "minutes": 60
+    },
+    {
+      "county": "Dolj",
+      "km": 30,
+      "minutes": 45
+    },
+    {
+      "county": "Dolj",
+      "km": 30,
+      "minutes": 45
+    },
+    {
+      "county": "Dolj",
+      "km": 43,
+      "minutes": 50
+    },
+    {
+      "county": "Dolj",
+      "km": 43,
+      "minutes": 50
+    },
+    {
+      "county": "Dolj",
+      "km": 19,
+      "minutes": 20
+    },
+    {
+      "county": "Dolj",
+      "km": 19,
+      "minutes": 20
+    },
+    {
+      "county": "Dolj",
+      "km": 31,
+      "minutes": 40
+    },
+    {
+      "county": "Dolj",
+      "km": 31,
+      "minutes": 40
+    },
+    {
+      "county": "Dolj",
+      "km": 77,
+      "minutes": 105
+    },
+    {
+      "county": "Dolj",
+      "km": 77,
+      "minutes": 105
+    },
+    {
+      "county": "Dolj",
+      "km": 77,
+      "minutes": 120
+    },
+    {
+      "county": "Dolj",
+      "km": 77,
+      "minutes": 120
+    },
+    {
+      "county": "Dolj",
+      "km": 50,
+      "minutes": 60
+    },
+    {
+      "county": "Dolj",
+      "km": 50,
+      "minutes": 60
+    },
+    {
+      "county": "Dolj",
+      "km": 24,
+      "minutes": 40
+    },
+    {
+      "county": "Dolj",
+      "km": 24,
+      "minutes": 40
+    },
+    {
+      "county": "Dolj",
+      "km": 10,
+      "minutes": 20
+    },
+    {
+      "county": "Dolj",
+      "km": 10,
+      "minutes": 20
+    },
+    {
+      "county": "Dolj",
+      "km": 22,
+      "minutes": 30
+    },
+    {
+      "county": "Dolj",
+      "km": 22,
+      "minutes": 30
+    },
+    {
+      "county": "Dolj",
+      "km": 70,
+      "minutes": 85
+    },
+    {
+      "county": "Dolj",
+      "km": 70,
+      "minutes": 85
+    },
+    {
+      "county": "Dolj",
+      "km": 48,
+      "minutes": 70
+    },
+    {
+      "county": "Dolj",
+      "km": 48,
+      "minutes": 70
+    },
+    {
+      "county": "Dolj",
+      "km": 31,
+      "minutes": 45
+    },
+    {
+      "county": "Dolj",
+      "km": 31,
+      "minutes": 45
+    },
+    {
+      "county": "Dolj",
+      "km": 19,
+      "minutes": 30
+    },
+    {
+      "county": "Dolj",
+      "km": 19,
+      "minutes": 30
+    },
+    {
+      "county": "Dolj",
+      "km": 17,
+      "minutes": 30
+    },
+    {
+      "county": "Dolj",
+      "km": 17,
+      "minutes": 30
+    },
+    {
+      "county": "Dolj",
+      "km": 12,
+      "minutes": 30
+    },
+    {
+      "county": "Dolj",
+      "km": 12,
+      "minutes": 30
+    },
+    {
+      "county": "Dolj",
+      "km": 28,
+      "minutes": 50
+    },
+    {
+      "county": "Dolj",
+      "km": 28,
+      "minutes": 50
+    },
+    {
+      "county": "Dolj",
+      "km": 75,
+      "minutes": 90
+    },
+    {
+      "county": "Dolj",
+      "km": 83,
+      "minutes": 105
+    },
+    {
+      "county": "Dolj",
+      "km": 83,
+      "minutes": 105
+    },
+    {
+      "county": "Dolj",
+      "km": 80,
+      "minutes": 105
+    },
+    {
+      "county": "Dolj",
+      "km": 80,
+      "minutes": 105
+    },
+    {
+      "county": "Dolj",
+      "km": 70,
+      "minutes": 90
+    },
+    {
+      "county": "Dolj",
+      "km": 70,
+      "minutes": 90
+    },
+    {
+      "county": "Dolj",
+      "km": 66,
+      "minutes": 90
+    },
+    {
+      "county": "Dolj",
+      "km": 66,
+      "minutes": 90
+    },
+    {
+      "county": "Dolj",
+      "km": 66,
+      "minutes": 90
+    },
+    {
+      "county": "Dolj",
+      "km": 66,
+      "minutes": 90
+    },
+    {
+      "county": "Dolj",
+      "km": 89,
+      "minutes": 120
+    },
+    {
+      "county": "Dolj",
+      "km": 89,
+      "minutes": 120
+    },
+    {
+      "county": "Dolj",
+      "km": 71,
+      "minutes": 90
+    },
+    {
+      "county": "Dolj",
+      "km": 71,
+      "minutes": 90
+    },
+    {
+      "county": "Dolj",
+      "km": 37,
+      "minutes": 30
+    },
+    {
+      "county": "Dolj",
+      "km": 37,
+      "minutes": 30
+    },
+    {
+      "county": "Dolj",
+      "km": 40,
+      "minutes": 60
+    },
+    {
+      "county": "Dolj",
+      "km": 40,
+      "minutes": 60
+    },
+    {
+      "county": "Dolj",
+      "km": 37,
+      "minutes": 45
+    },
+    {
+      "county": "Dolj",
+      "km": 37,
+      "minutes": 45
+    },
+    {
+      "county": "Dolj",
+      "km": 106,
+      "minutes": 120
+    },
+    {
+      "county": "Dolj",
+      "km": 106,
+      "minutes": 120
+    },
+    {
+      "county": "Dolj",
+      "km": 88,
+      "minutes": 105
+    },
+    {
+      "county": "Dolj",
+      "km": 88,
+      "minutes": 105
+    },
+    {
+      "county": "Dolj",
+      "km": 92,
+      "minutes": 120
+    },
+    {
+      "county": "Dolj",
+      "km": 92,
+      "minutes": 120
+    },
+    {
+      "county": "Dolj",
+      "km": 92,
+      "minutes": 120
+    },
+    {
+      "county": "Dolj",
+      "km": 92,
+      "minutes": 120
+    },
+    {
+      "county": "Dolj",
+      "km": 30,
+      "minutes": 45
+    },
+    {
+      "county": "Dolj",
+      "km": 30,
+      "minutes": 45
+    },
+    {
+      "county": "Dolj",
+      "km": 64,
+      "minutes": 85
+    },
+    {
+      "county": "Dolj",
+      "km": 64,
+      "minutes": 85
+    },
+    {
+      "county": "Dolj",
+      "km": 64,
+      "minutes": 85
+    },
+    {
+      "county": "Dolj",
+      "km": 64,
+      "minutes": 85
+    },
+    {
+      "county": "Dolj",
+      "km": 60,
+      "minutes": 85
+    },
+    {
+      "county": "Dolj",
+      "km": 60,
+      "minutes": 85
+    },
+    {
+      "county": "Dolj",
+      "km": 52,
+      "minutes": 60
+    },
+    {
+      "county": "Dolj",
+      "km": 52,
+      "minutes": 60
+    },
+    {
+      "county": "Dolj",
+      "km": 30,
+      "minutes": 45
+    },
+    {
+      "county": "Dolj",
+      "km": 30,
+      "minutes": 45
+    },
+    {
+      "county": "Dolj",
+      "km": 47,
+      "minutes": 50
+    },
+    {
+      "county": "Dolj",
+      "km": 47,
+      "minutes": 50
+    },
+    {
+      "county": "Dolj",
+      "km": 40,
+      "minutes": 45
+    },
+    {
+      "county": "Dolj",
+      "km": 40,
+      "minutes": 45
+    },
+    {
+      "county": "Dolj",
+      "km": 40,
+      "minutes": 45
+    },
+    {
+      "county": "Dolj",
+      "km": 40,
+      "minutes": 45
+    },
+    {
+      "county": "Dolj",
+      "km": 27,
+      "minutes": 30
+    },
+    {
+      "county": "Dolj",
+      "km": 27,
+      "minutes": 30
+    },
+    {
+      "county": "Dolj",
+      "km": 107,
+      "minutes": 180
+    },
+    {
+      "county": "Dolj",
+      "km": 107,
+      "minutes": 150
+    },
+    {
+      "county": "Dolj",
+      "km": 107,
+      "minutes": 150
+    },
+    {
+      "county": "Dolj",
+      "km": 107,
+      "minutes": 160
+    },
+    {
+      "county": "Dolj",
+      "km": 21,
+      "minutes": 30
+    },
+    {
+      "county": "Dolj",
+      "km": 21,
+      "minutes": 25
+    },
+    {
+      "county": "Dolj",
+      "km": 11,
+      "minutes": 15
+    },
+    {
+      "county": "Dolj",
+      "km": 11,
+      "minutes": 15
+    },
+    {
+      "county": "Dolj",
+      "km": 90,
+      "minutes": 105
+    },
+    {
+      "county": "Dolj",
+      "km": 90,
+      "minutes": 105
+    },
+    {
+      "county": "Dolj",
+      "km": 64,
+      "minutes": 75
+    },
+    {
+      "county": "Dolj",
+      "km": 64,
+      "minutes": 75
+    },
+    {
+      "county": "Dolj",
+      "km": 87,
+      "minutes": 90
+    },
+    {
+      "county": "Dolj",
+      "km": 87,
+      "minutes": 90
+    },
+    {
+      "county": "Dolj",
+      "km": 25,
+      "minutes": 25
+    },
+    {
+      "county": "Dolj",
+      "km": 25,
+      "minutes": 25
+    },
+    {
+      "county": "Dolj",
+      "km": 103,
+      "minutes": 120
+    },
+    {
+      "county": "Dolj",
+      "km": 103,
+      "minutes": 120
+    },
+    {
+      "county": "Dolj",
+      "km": 86,
+      "minutes": 105
+    },
+    {
+      "county": "Dolj",
+      "km": 86,
+      "minutes": 105
+    },
+    {
+      "county": "Dolj",
+      "km": 71,
+      "minutes": 90
+    },
+    {
+      "county": "Dolj",
+      "km": 71,
+      "minutes": 90
+    },
+    {
+      "county": "Dolj",
+      "km": 50,
+      "minutes": 60
+    },
+    {
+      "county": "Dolj",
+      "km": 50,
+      "minutes": 60
+    },
+    {
+      "county": "Dolj",
+      "km": 41,
+      "minutes": 60
+    },
+    {
+      "county": "Dolj",
+      "km": 41,
+      "minutes": 60
+    },
+    {
+      "county": "Dolj",
+      "km": 45,
+      "minutes": 60
+    },
+    {
+      "county": "Dolj",
+      "km": 45,
+      "minutes": 60
+    },
+    {
+      "county": "Dolj",
+      "km": 54,
+      "minutes": 70
+    },
+    {
+      "county": "Dolj",
+      "km": 54,
+      "minutes": 70
+    },
+    {
+      "county": "Dolj",
+      "km": 40,
+      "minutes": 60
+    },
+    {
+      "county": "Dolj",
+      "km": 40,
+      "minutes": 60
+    },
+    {
+      "county": "Dolj",
+      "km": 37,
+      "minutes": 50
+    },
+    {
+      "county": "Dolj",
+      "km": 37,
+      "minutes": 50
+    },
+    {
+      "county": "Dolj",
+      "km": 66,
+      "minutes": 90
+    },
+    {
+      "county": "Dolj",
+      "km": 66,
+      "minutes": 90
+    },
+    {
+      "county": "Dolj",
+      "km": 66,
+      "minutes": 90
+    },
+    {
+      "county": "Dolj",
+      "km": 66,
+      "minutes": 90
+    },
+    {
+      "county": "Dolj",
+      "km": 63,
+      "minutes": 80
+    },
+    {
+      "county": "Dolj",
+      "km": 63,
+      "minutes": 80
+    },
+    {
+      "county": "Dolj",
+      "km": 54,
+      "minutes": 65
+    },
+    {
+      "county": "Dolj",
+      "km": 54,
+      "minutes": 65
+    },
+    {
+      "county": "Dolj",
+      "km": 45,
+      "minutes": 75
+    },
+    {
+      "county": "Dolj",
+      "km": 45,
+      "minutes": 75
+    },
+    {
+      "county": "Dolj",
+      "km": 16,
+      "minutes": 30
+    },
+    {
+      "county": "Dolj",
+      "km": 16,
+      "minutes": 30
+    },
+    {
+      "county": "Dolj",
+      "km": 16,
+      "minutes": 30
+    },
+    {
+      "county": "Dolj",
+      "km": 16,
+      "minutes": 30
+    },
+    {
+      "county": "Dolj",
+      "km": 60,
+      "minutes": 75
+    },
+    {
+      "county": "Dolj",
+      "km": 60,
+      "minutes": 75
+    },
+    {
+      "county": "Dolj",
+      "km": 32,
+      "minutes": 60
+    },
+    {
+      "county": "Dolj",
+      "km": 32,
+      "minutes": 60
+    },
+    {
+      "county": "Dolj",
+      "km": 27,
+      "minutes": 45
+    },
+    {
+      "county": "Dolj",
+      "km": 27,
+      "minutes": 45
+    },
+    {
+      "county": "Dolj",
+      "km": 19,
+      "minutes": 30
+    },
+    {
+      "county": "Dolj",
+      "km": 19,
+      "minutes": 30
+    },
+    {
+      "county": "Dolj",
+      "km": 11,
+      "minutes": 20
+    },
+    {
+      "county": "Dolj",
+      "km": 11,
+      "minutes": 20
+    },
+    {
+      "county": "Dolj",
+      "km": 48,
+      "minutes": 90
+    },
+    {
+      "county": "Dolj",
+      "km": 48,
+      "minutes": 90
+    },
+    {
+      "county": "Dolj",
+      "km": 42,
+      "minutes": 60
+    },
+    {
+      "county": "Dolj",
+      "km": 42,
+      "minutes": 60
+    },
+    {
+      "county": "Dolj",
+      "km": 55,
+      "minutes": 75
+    },
+    {
+      "county": "Dolj",
+      "km": 55,
+      "minutes": 75
+    },
+    {
+      "county": "Dolj",
+      "km": 44,
+      "minutes": 60
+    },
+    {
+      "county": "Dolj",
+      "km": 44,
+      "minutes": 60
+    },
+    {
+      "county": "Dolj",
+      "km": 57,
+      "minutes": 85
+    },
+    {
+      "county": "Dolj",
+      "km": 57,
+      "minutes": 85
+    },
+    {
+      "county": "Dolj",
+      "km": 53,
+      "minutes": 75
+    },
+    {
+      "county": "Dolj",
+      "km": 53,
+      "minutes": 75
+    },
+    {
+      "county": "Dolj",
+      "km": 44,
+      "minutes": 75
+    },
+    {
+      "county": "Dolj",
+      "km": 44,
+      "minutes": 75
+    },
+    {
+      "county": "Dolj",
+      "km": 43,
+      "minutes": 70
+    },
+    {
+      "county": "Dolj",
+      "km": 36,
+      "minutes": 55
+    },
+    {
+      "county": "Dolj",
+      "km": 36,
+      "minutes": 55
+    },
+    {
+      "county": "Dolj",
+      "km": 21,
+      "minutes": 40
+    },
+    {
+      "county": "Dolj",
+      "km": 21,
+      "minutes": 40
+    },
+    {
+      "county": "Bacău",
+      "km": 48,
+      "minutes": 80
+    },
+    {
+      "county": "Bacău",
+      "km": 48,
+      "minutes": 80
+    },
+    {
+      "county": "Bacău",
+      "km": 10,
+      "minutes": 19
+    },
+    {
+      "county": "Bacău",
+      "km": 10,
+      "minutes": 19
+    },
+    {
+      "county": "Bacău",
+      "km": 39,
+      "minutes": 79
+    },
+    {
+      "county": "Bacău",
+      "km": 39,
+      "minutes": 79
+    },
+    {
+      "county": "Bacău",
+      "km": 28,
+      "minutes": 48
+    },
+    {
+      "county": "Bacău",
+      "km": 28,
+      "minutes": 50
+    },
+    {
+      "county": "Bacău",
+      "km": 9,
+      "minutes": 29
+    },
+    {
+      "county": "Bacău",
+      "km": 9,
+      "minutes": 29
+    },
+    {
+      "county": "Bacău",
+      "km": 12,
+      "minutes": 39
+    },
+    {
+      "county": "Bacău",
+      "km": 12,
+      "minutes": 39
+    },
+    {
+      "county": "Bacău",
+      "km": 18,
+      "minutes": 30
+    },
+    {
+      "county": "Bacău",
+      "km": 18,
+      "minutes": 30
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 25,
+      "minutes": 45
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 25,
+      "minutes": 45
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 29,
+      "minutes": 70
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 29,
+      "minutes": 70
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 17,
+      "minutes": 40
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 17,
+      "minutes": 40
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 13,
+      "minutes": 30
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 13,
+      "minutes": 30
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 15,
+      "minutes": 25
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 15,
+      "minutes": 25
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 40,
+      "minutes": 60
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 40,
+      "minutes": 60
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 65,
+      "minutes": 120
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 65,
+      "minutes": 120
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 17,
+      "minutes": 30
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 17,
+      "minutes": 30
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 18,
+      "minutes": 30
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 18,
+      "minutes": 30
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 19,
+      "minutes": 45
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 19,
+      "minutes": 45
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 40,
+      "minutes": 70
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 40,
+      "minutes": 70
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 14,
+      "minutes": 40
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 14,
+      "minutes": 40
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 160,
+      "minutes": 195
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 160,
+      "minutes": 195
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 115,
+      "minutes": 150
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 115,
+      "minutes": 150
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 125,
+      "minutes": 205
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 125,
+      "minutes": 195
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 103,
+      "minutes": 165
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 103,
+      "minutes": 165
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 32,
+      "minutes": 60
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 32,
+      "minutes": 60
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 20,
+      "minutes": 45
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 20,
+      "minutes": 45
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 46,
+      "minutes": 75
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 46,
+      "minutes": 75
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 70,
+      "minutes": 110
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 70,
+      "minutes": 110
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 25,
+      "minutes": 60
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 25,
+      "minutes": 60
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 26,
+      "minutes": 50
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 26,
+      "minutes": 50
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 17,
+      "minutes": 55
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 17,
+      "minutes": 55
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 54,
+      "minutes": 105
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 54,
+      "minutes": 105
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 99,
+      "minutes": 170
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 99,
+      "minutes": 170
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 70,
+      "minutes": 165
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 70,
+      "minutes": 160
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 139,
+      "minutes": 250
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 139,
+      "minutes": 250
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 50,
+      "minutes": 110
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 50,
+      "minutes": 110
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 15,
+      "minutes": 40
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 15,
+      "minutes": 40
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 83,
+      "minutes": 135
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 83,
+      "minutes": 135
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 15,
+      "minutes": 40
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 15,
+      "minutes": 40
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 25,
+      "minutes": 60
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 25,
+      "minutes": 60
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 27,
+      "minutes": 65
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 27,
+      "minutes": 65
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 8,
+      "minutes": 35
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 8,
+      "minutes": 25
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 75,
+      "minutes": 165
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 75,
+      "minutes": 205
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 103,
+      "minutes": 180
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 103,
+      "minutes": 180
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 57,
+      "minutes": 105
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 57,
+      "minutes": 105
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 31,
+      "minutes": 45
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 31,
+      "minutes": 45
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 18,
+      "minutes": 20
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 18,
+      "minutes": 20
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 36,
+      "minutes": 45
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 36,
+      "minutes": 45
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 115,
+      "minutes": 150
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 115,
+      "minutes": 150
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 13,
+      "minutes": 15
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 13,
+      "minutes": 15
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 45,
+      "minutes": 50
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 45,
+      "minutes": 50
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 40,
+      "minutes": 40
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 40,
+      "minutes": 40
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 45,
+      "minutes": 50
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 45,
+      "minutes": 50
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 32,
+      "minutes": 80
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 32,
+      "minutes": 80
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 25,
+      "minutes": 30
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 25,
+      "minutes": 30
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 10,
+      "minutes": 20
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 10,
+      "minutes": 20
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 8,
+      "minutes": 15
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 8,
+      "minutes": 15
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 21,
+      "minutes": 30
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 21,
+      "minutes": 30
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 9,
+      "minutes": 20
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 9,
+      "minutes": 20
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 12,
+      "minutes": 40
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 12,
+      "minutes": 40
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 14,
+      "minutes": 25
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 14,
+      "minutes": 25
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 148,
+      "minutes": 225
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 148,
+      "minutes": 225
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 21,
+      "minutes": 75
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 21,
+      "minutes": 75
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 56,
+      "minutes": 75
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 56,
+      "minutes": 75
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 70,
+      "minutes": 120
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 70,
+      "minutes": 120
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 118,
+      "minutes": 195
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 118,
+      "minutes": 195
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 25,
+      "minutes": 60
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 25,
+      "minutes": 60
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 45,
+      "minutes": 60
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 45,
+      "minutes": 60
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 15,
+      "minutes": 30
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 15,
+      "minutes": 30
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 150,
+      "minutes": 225
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 150,
+      "minutes": 225
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 30,
+      "minutes": 50
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 30,
+      "minutes": 50
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 48,
+      "minutes": 95
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 48,
+      "minutes": 95
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 60,
+      "minutes": 150
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 60,
+      "minutes": 105
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 40,
+      "minutes": 100
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 40,
+      "minutes": 125
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 36,
+      "minutes": 45
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 36,
+      "minutes": 45
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 21,
+      "minutes": 30
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 21,
+      "minutes": 30
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 32,
+      "minutes": 75
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 32,
+      "minutes": 75
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 13,
+      "minutes": 19
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 13,
+      "minutes": 20
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 12,
+      "minutes": 14
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 12,
+      "minutes": 14
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 15,
+      "minutes": 60
+    },
+    {
+      "county": "Caraș-Severin",
+      "km": 15,
+      "minutes": 60
+    },
+    {
+      "county": "Sălaj",
+      "km": 10,
+      "minutes": 75
+    },
+    {
+      "county": "Sălaj",
+      "km": 10,
+      "minutes": 75
+    },
+    {
+      "county": "Sălaj",
+      "km": 10,
+      "minutes": 60
+    },
+    {
+      "county": "Sălaj",
+      "km": 10,
+      "minutes": 60
+    },
+    {
+      "county": "Sălaj",
+      "km": 10,
+      "minutes": 60
+    },
+    {
+      "county": "Sălaj",
+      "km": 10,
+      "minutes": 30
+    },
+    {
+      "county": "Sălaj",
+      "km": 10,
+      "minutes": 30
+    },
+    {
+      "county": "Sălaj",
+      "km": 10,
+      "minutes": 20
+    },
+    {
+      "county": "Sălaj",
+      "km": 10,
+      "minutes": 20
+    }
+  ],
+  "limitations": [
+    {
+      "id": "esantionul-e-al-traseelor-existente",
+      "text": "Observațiile vin de pe traseele care se operează astăzi, nu de pe rețeaua propusă. Un traseu comercial urmează cererea, iar cererea urmează drumul bun; comunele fără serviciu sunt, în medie, pe drumuri mai proaste. Eșantionul este deci mai degrabă optimist decât pesimist, iar un model care îl nimerește este cel mult la fel de rapid ca realitatea.",
+      "severity": "material",
+      "affects": [
+        "observed-journeys"
+      ]
+    },
+    {
+      "id": "sase-judete-dintre-care-patru-cantaresc",
+      "text": "Șase județe, dintre care patru dau aproape toate rândurile: Bacăul și Sălajul își scriu distanța pe alt rând decât orele, iar rândul de continuare nu poate fi legat de distanța de deasupra fără a ghici. Restul județelor publică programul scanat. Eșantionul acoperă câmpie (Brăila, Dolj), deal (Sibiu, Sălaj) și munte (Caraș-Severin), dar nu este ponderat pe țară.",
+      "severity": "material",
+      "affects": [
+        "observed-journeys"
+      ]
+    },
+    {
+      "id": "orarul-nu-e-parcursul-real",
+      "text": "Ora de sosire din program este ora planificată, nu cea realizată. Un operator își pune marjă în orar ca traseul să poată fi respectat, deci timpul publicat conține deja acea marjă — ceea ce este exact mărimea de care are nevoie un model de cost, pentru că vehiculul și șoferul sunt ocupați pe durata din orar, nu pe cea realizată.",
+      "severity": "note",
+      "affects": [
+        "observed-journeys"
+      ]
+    }
+  ]
+}

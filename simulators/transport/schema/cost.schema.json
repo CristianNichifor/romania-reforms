@@ -15,6 +15,7 @@
     "fleet",
     "annualRon",
     "ledgerRon",
+    "speedCheck",
     "limitations",
     "drivers"
   ],
@@ -81,6 +82,22 @@
           "type": "integer",
           "minimum": 0
         }
+      }
+    },
+    "speedCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "The model's commercial speed against recorded Romanian journeys. Published rather than only printed so the check is quotable and can be regression-tested. `tuned` records that the service-speed factor was fixed before the observations existed and was not moved to close the gap — if it ever is, this is a fit and not a test, and the flag must change with it.",
+      "required": ["modelledKmh", "observedKmh", "observedP25Kmh", "observedP75Kmh", "observedJourneys", "gap", "source", "tuned"],
+      "properties": {
+        "modelledKmh": { "type": "number", "exclusiveMinimum": 0 },
+        "observedKmh": { "type": "number", "exclusiveMinimum": 0 },
+        "observedP25Kmh": { "type": "number", "exclusiveMinimum": 0 },
+        "observedP75Kmh": { "type": "number", "exclusiveMinimum": 0 },
+        "observedJourneys": { "type": "integer", "exclusiveMinimum": 0 },
+        "gap": { "type": "number" },
+        "source": { "type": "string" },
+        "tuned": { "type": "boolean" }
       }
     },
     "fleet": {

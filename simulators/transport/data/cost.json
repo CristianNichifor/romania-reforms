@@ -8,7 +8,7 @@
     "source": "retea-plus-preturi-unitare",
     "locator": "orele și kilometrii din data/network.json, prețurile unitare din data/cost-inputs.json, economiile din data/hubs.json",
     "confidence": "derived",
-    "note": "Derivat dintr-un lanț în care nimic nu este verificat pe teren: vitezele sunt modelate, prețurile unitare sunt estimate, iar economiile vin de la simulatorul administrativ cu limitările lui."
+    "note": "Derivat dintr-un lanț verificat în ansamblu, nu pe verigi: viteza comercială care rezultă se compară cu 552 curse reale din programele județene și cade în intervalul lor, însă prețurile unitare rămân în parte estimate, iar economiile vin de la simulatorul administrativ cu limitările lui."
   },
   "drivers": 5552,
   "perWeekday": {
@@ -33,6 +33,16 @@
     },
     "total": 4057,
     "spareRatio": 0.15
+  },
+  "speedCheck": {
+    "modelledKmh": 36.8,
+    "observedKmh": 38.2,
+    "observedP25Kmh": 31.6,
+    "observedP75Kmh": 45.0,
+    "observedJourneys": 552,
+    "gap": -0.0366,
+    "source": "data/observed-journeys.json",
+    "tuned": false
   },
   "annualRon": {
     "driver": 510092298,
@@ -67,16 +77,16 @@
       ]
     },
     {
-      "id": "vitezele-nu-sunt-verificate",
-      "text": "Orele de autobuz vin din timpi de parcurs modelați, niciodată comparați cu o călătorie reală. O eroare sistematică de viteză se transmite direct în ore și în costul șoferilor, care este cea mai mare poziție.",
-      "severity": "material",
+      "id": "vitezele-sunt-verificate-doar-in-ansamblu",
+      "text": "Viteza comercială a modelului este 36,80 km/h, față de 38,20 km/h măsurați pe 552 curse reale din programele de transport a șase consilii județene (data/observed-journeys.json), adică o abatere de -3.7%, în interiorul intervalului intercuartilic observat de 31,60-45,00 km/h. Factorul de viteză de serviciu NU a fost ajustat ca să închidă diferența — altfel singura verificare independentă din depozit ar fi devenit o potrivire. Ce rămâne neverificat este descompunerea: lanțul se verifică în ansamblu, iar un model care ar merge prea repede pe drum și ar staționa prea mult în stație ar cădea în același loc. Vezi și limitările din data/observed-journeys.json privind eșantionul.",
+      "severity": "note",
       "affects": [
         "cost"
       ]
     },
     {
       "id": "factorul-de-viteza-de-serviciu",
-      "text": "Timpii de drum liber sunt împărțiți la un factor de 0,75 ca să devină timpi de serviciu — intersecții, marja pusă în orar ca traseul să poată fi respectat, conducerea unui vehicul greu. Factorul este presupus, calibrat astfel încât viteza comercială să cadă în intervalul observat de 25-40 km/h, și este presupunerea cu cea mai mare influență asupra orelor. Opririle nu sunt în el: staționarea se socotește separat, iar frânarea și repornirea din stație au fost măsurate și fac 3%.",
+      "text": "Timpii de drum liber sunt împărțiți la un factor de 0,75 ca să devină timpi de serviciu — intersecții, marja pusă în orar ca traseul să poată fi respectat, conducerea unui vehicul greu. Factorul este presupus, presupus, fixat înainte să existe observațiile, și este presupunerea cu cea mai mare influență asupra orelor. Nu a fost mutat după ce au apărut cele 552 curse măsurate, tocmai ca verificarea vitezei comerciale să rămână un test și să nu devină o potrivire. Opririle nu sunt în el: staționarea se socotește separat, iar frânarea și repornirea din stație au fost măsurate și fac 3%.",
       "severity": "material",
       "affects": [
         "cost"

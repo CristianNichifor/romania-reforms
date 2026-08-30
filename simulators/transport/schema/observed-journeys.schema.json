@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/observed-journeys.schema.json",
+  "title": "Observed Romanian bus journey times, from published county transport programmes",
+  "description": "The only measurement of real Romanian travel time in this repository. County councils publish their regulated route network as a table carrying distance per direction beside departure and arrival time; the ratio is an observed commercial speed, dwell included, on exactly the kind of rural route this simulator builds. It exists to test the modelled speed against something recorded rather than against a western benchmark. It validates the composite chain and not its individual terms, and it is a sample of the routes that happen to exist, which follow the better roads.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["what", "provenance", "sources", "summary", "journeys", "limitations"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "what": { "type": "string" },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+    "note": { "type": "string" },
+    "sources": {
+      "type": "array",
+      "minItems": 2,
+      "description": "Every observation must be traceable to a named public document. One county would measure that county's terrain rather than Romania's.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["county", "url", "title", "journeys"],
+        "properties": {
+          "county": { "type": "string" },
+          "url": { "type": "string", "pattern": "^https://" },
+          "title": { "type": "string" },
+          "journeys": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "count",
+        "byCounty",
+        "kmhWeighted",
+        "kmhMean",
+        "kmhMedian",
+        "kmhP10",
+        "kmhP25",
+        "kmhP75",
+        "kmhP90",
+        "totalKm",
+        "totalHours"
+      ],
+      "properties": {
+        "count": { "type": "integer", "exclusiveMinimum": 0 },
+        "byCounty": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        },
+        "kmhWeighted": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "The headline. Total kilometres over total hours — the same quantity the cost model produces, which is what makes the two comparable. The mean of the per-route ratios is a different number and is published beside it so the difference cannot be hidden."
+        },
+        "kmhMean": { "type": "number", "exclusiveMinimum": 0 },
+        "kmhMedian": { "type": "number", "exclusiveMinimum": 0 },
+        "kmhP10": { "type": "number", "exclusiveMinimum": 0 },
+        "kmhP25": { "type": "number", "exclusiveMinimum": 0 },
+        "kmhP75": { "type": "number", "exclusiveMinimum": 0 },
+        "kmhP90": { "type": "number", "exclusiveMinimum": 0 },
+        "totalKm": { "type": "number", "exclusiveMinimum": 0 },
+        "totalHours": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "journeys": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Kept row by row rather than only as a summary, so a reader can recompute the distribution or reject rows they distrust without re-reading six PDFs.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["county", "km", "minutes"],
+        "properties": {
+          "county": { "type": "string" },
+          "km": { "type": "integer", "minimum": 8, "maximum": 200 },
+          "minutes": { "type": "integer", "minimum": 5, "maximum": 300 }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+    }
+  }
+}
