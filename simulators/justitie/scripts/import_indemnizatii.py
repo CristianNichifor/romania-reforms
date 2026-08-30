@@ -36,6 +36,14 @@ LAW = ROOT.parent / "salarizare" / "sources" / "legea-153-2017.html"
 OUT = ROOT / "data" / "indemnizatii-2022.json"
 
 HEADING = "Indemnizația de încadrare pentru judecători, procurori"
+# Chapter II of the same annex pays the auxiliary staff — the 8.001 people the CSM report
+# counts beside the judges, and most of the payroll this simulator could not price.
+AUXILIARY_ANCHOR = "funcții auxiliare de specialitate din cadrul instanțelor"
+AUXILIARY_ROWS = {
+    "grefier-sef": "Prim-grefier, grefier-șef secție, grefier-șef, grefier-șef cabinet",
+    "grefier-s": "specialist criminalist gradul I",
+    "grefier-debutant": "specialist criminalist debutant",
+}
 
 # Court tier to the grade the law pays it. A judge's grade tracks the level of the court, which
 # is what makes the join to the caseload data possible at all.
@@ -120,6 +128,43 @@ def main() -> int:
         print(f"  {grade['coefficient']:>6.2f} × ref   {grade['monthlyLei']:>9,.0f} lei   "
               f"({len(grade['steps'])} treaptă/trepte)   {grade['name'][:48]}")
 
+    # Read backwards from the chapter's closing note: the table has no heading of its own that
+    # survives the HTML, but the note defining "vechime în funcție" sits immediately after it.
+    auxiliary: list[dict] = []
+    end = html.lower().find(AUXILIARY_ANCHOR)
+    if end < 0:
+        print("Chapter II of Annex V not found; auxiliary staff cannot be priced", file=sys.stderr)
+        return 1
+    for row in re.findall(r"<tr[^>]*>(.*?)</tr>", html[max(0, end - 160_000) : end], re.S):
+        filled = [c for c in cells_of(row) if c]
+        if len(filled) < 4 or not re.match(r"^\d+$", filled[0]):
+            continue
+        name = filled[1]
+        lei = next((c for c in filled[3:] if re.fullmatch(r"\d{4,5}", c)), None)
+        if lei is None or "grefier" not in name.lower():
+            continue
+        for key, needle in AUXILIARY_ROWS.items():
+            if needle.lower() in name.lower() and not any(a["key"] == key for a in auxiliary):
+                auxiliary.append(
+                    {
+                        "key": key,
+                        "name": name,
+                        "monthlyLei": float(lei),
+                        "provenance": {
+                            "source": "legea-153-2017",
+                            "locator": f"Anexa nr. V, Capitolul II, rândul {filled[0]}",
+                            "confidence": "verbatim",
+                        },
+                    }
+                )
+    missing_aux = [k for k in AUXILIARY_ROWS if not any(a["key"] == k for a in auxiliary)]
+    if missing_aux:
+        print(f"auxiliary rows not found: {missing_aux}", file=sys.stderr)
+        return 1
+    print("\nauxiliar (Anexa V, Cap. II):")
+    for row in auxiliary:
+        print(f"  {row['monthlyLei']:>9,.0f} lei   {row['name'][:60]}")
+
     document = {
         "$schema": "../schema/indemnizatii.schema.json",
         "id": "indemnizatii-2022",
@@ -138,6 +183,7 @@ def main() -> int:
             ),
         },
         "grades": grades,
+        "auxiliary": auxiliary,
         "tierToGrade": GRADE_OF_TIER,
         "limitations": [
             {

@@ -73,18 +73,46 @@ def test_both_grade_readings_are_computed(costuri):
         assert len(at_target) == 2, target
 
 
-def test_at_the_papers_own_grade_consolidation_never_saves(costuri):
-    """The finding that appeared once the grade stopped being open.
+def test_at_the_papers_grade_the_answer_turns_on_the_caseload_target(costuri):
+    """A claim this file made and this file now withdraws.
 
-    While both grades were live, the wage bill ran from money saved to money spent and nothing
-    could be concluded. The paper abolishes judecatoriile and hands their work to tribunale, so
-    the merged court is a tribunal — and at tribunal grade every staffing target the paper
-    entertains costs more than today. The saving only ever existed in the counterfactual.
+    It previously asserted that at tribunal grade every staffing target costs more than today.
+    That was an artefact of counting judges by dividing caseload by volume — about 2.960 — when
+    the CSM report prints 4.319 filled posts. Against the real current payroll, the tightest
+    target still costs more, but the two looser ones save. The direction of the answer was
+    being set by an understated baseline, not by the reform.
+
+    So the assertion is now the honest one: the sign is not fixed, and it is the caseload target
+    that decides it.
     """
     paper = [s for s in costuri["scenarios"] if s["isPaperGrade"]]
     assert paper, "no scenario is marked as the paper's grade"
     assert all(s["gradePaid"] == costuri["resolvedGrade"]["grade"] for s in paper)
-    assert all(s["differenceLei"] > 0 for s in paper), [s["differenceLei"] for s in paper]
+    differences = [s["differenceLei"] for s in paper]
+    assert min(differences) < 0 < max(differences), differences
+    # And the ordering that must hold whatever the level: a tighter caseload target needs more
+    # judges, so it cannot come out cheaper.
+    ordered = sorted(paper, key=lambda s: s["target"])
+    assert [s["differenceLei"] for s in ordered] == sorted(
+        [s["differenceLei"] for s in ordered], reverse=True
+    )
+
+
+def test_today_is_priced_on_published_posts_not_derived_ones(costuri):
+    """The correction itself, pinned so it cannot quietly revert.
+
+    Filled posts are what the judiciary costs; the caseload-derived count is what a target would
+    need. Mixing them made every "against today" difference subtract an establishment from a
+    payroll.
+    """
+    by_tier = {row["tier"]: row for row in costuri["today"]["byTier"]}
+    assert by_tier["iccj"]["judges"] > by_tier["iccj"]["judgesDerived"]
+    total = sum(row["judges"] for row in costuri["today"]["byTier"])
+    assert total == 4319, total
+    # Level one must sit on the same basis, or the differences compare unlike things.
+    assert costuri["today"]["levelOne"]["judges"] == (
+        by_tier["tribunal"]["judges"] + by_tier["judecatorie"]["judges"]
+    )
 
 
 def test_the_counterfactual_grade_is_kept(costuri):

@@ -101,6 +101,35 @@
       "items": {
         "$ref": "provenance.schema.json#/$defs/limitation"
       }
+    },
+    "auxiliary": {
+      "description": "Annex V Chapter II — the auxiliary corps, priced separately from the bench.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "key",
+          "name",
+          "monthlyLei",
+          "provenance"
+        ],
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "monthlyLei": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "provenance": {
+            "$ref": "provenance.schema.json#/$defs/provenance"
+          }
+        }
+      }
     }
   }
 }

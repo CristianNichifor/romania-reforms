@@ -134,6 +134,77 @@
           "$ref": "provenance.schema.json#/$defs/provenance"
         }
       }
+    },
+    "auxiliary": {
+      "description": "The other half of the payroll: 8.001 posts the CSM counts, priced as a band because the report does not say which grade each holds.",
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "posts",
+        "lowMonthlyLei",
+        "highMonthlyLei",
+        "annualLowLei",
+        "annualHighLei"
+      ],
+      "properties": {
+        "posts": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "lowMonthlyLei": {
+          "type": "number"
+        },
+        "highMonthlyLei": {
+          "type": "number"
+        },
+        "annualLowLei": {
+          "type": "number"
+        },
+        "annualHighLei": {
+          "type": "number"
+        }
+      }
+    },
+    "reconciliation": {
+      "description": "What the two headcount sources account for, and what neither does.",
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "payrollPosts",
+        "judgesFilled",
+        "auxiliaryFilled",
+        "unaccounted",
+        "executionBaseAnnualLei"
+      ],
+      "properties": {
+        "payrollPosts": {
+          "type": "integer"
+        },
+        "judgesFilled": {
+          "type": "integer"
+        },
+        "auxiliaryFilled": {
+          "type": "integer"
+        },
+        "magistrateAssistants": {
+          "type": "integer"
+        },
+        "judicialAssistants": {
+          "type": "integer"
+        },
+        "unaccounted": {
+          "type": "integer"
+        },
+        "executionBaseAnnualLei": {
+          "type": "number"
+        }
+      }
     }
   }
 }

@@ -82,14 +82,22 @@ def main() -> int:
             return 1
         pay_of_tier[tier] = match["monthlyLei"]
 
+    # The CSM report prints the headcount outright, four chapters after the caseload tables
+    # this file was built from. Filled posts replace the derived count for what the judiciary
+    # costs today; the derived one stays for the scenarios, which ask how many judges a
+    # caseload target would need rather than how many exist.
+    personal_file = ROOT / "data" / "personal-2025.json"
+    published = {}
+    if personal_file.exists():
+        personal = json.loads(personal_file.read_text(encoding="utf-8"))
+        published = {row["tier"]: row["filled"] for row in personal["judges"]}
+
     by_tier = []
     today_total = 0.0
     for tier in ("iccj", "curte-de-apel", "tribunal", "judecatorie"):
         selected = [c for c in courts if c["tier"] == tier]
-        # Rounded first, then multiplied. Storing a rounded headcount beside a total computed
-        # from the unrounded one leaves the document unable to reproduce its own arithmetic,
-        # which is exactly what a reader checking it would try.
-        judges = round(sum(c.get("judges") or 0 for c in selected), 1)
+        derived = round(sum(c.get("judges") or 0 for c in selected), 1)
+        judges = float(published.get(tier, derived))
         annual = judges * pay_of_tier[tier] * MONTHS
         today_total += annual
         by_tier.append(
@@ -97,18 +105,49 @@ def main() -> int:
                 "tier": tier,
                 "courts": len(selected),
                 "judges": judges,
+                "judgesDerived": derived,
                 "monthlyLei": pay_of_tier[tier],
                 "annualLei": round(annual),
             }
         )
 
+    # The rest of the payroll. Judges were never most of it: the CSM counts 8.001 auxiliary
+    # posts against 4.319 judges, and until now this file priced only the smaller half.
+    auxiliary_bill = None
+    if published and personal.get("auxiliary"):
+        aux_rates = {a["key"]: a["monthlyLei"] for a in grades.get("auxiliary", [])}
+        heads = personal["auxiliaryTotal"]["filled"] + (personal["iccjClerks"] or {}).get("filled", 0)
+        # A band, not a point: the report counts clerks without saying which pay grade or
+        # seniority each holds, so the floor is the entry rate and the ceiling the top of the
+        # ordinary clerk scale. Chief-clerk posts exist and are not counted separately, so even
+        # the ceiling is short.
+        if {"grefier-s", "grefier-debutant"} <= aux_rates.keys():
+            auxiliary_bill = {
+                "posts": heads,
+                "lowMonthlyLei": aux_rates["grefier-debutant"],
+                "highMonthlyLei": aux_rates["grefier-s"],
+                "annualLowLei": round(heads * aux_rates["grefier-debutant"] * MONTHS),
+                "annualHighLei": round(heads * aux_rates["grefier-s"] * MONTHS),
+            }
+
     # Level 1 is what the proposal reorganises: judecatorii and tribunale become 42 courts.
     level_one = [c for c in courts if c["tier"] in ("judecatorie", "tribunal")]
     volume = sum(c["volume"] for c in level_one)
-    judges_today = sum(c.get("judges") or 0 for c in level_one)
-    today_level_one = sum(
-        (c.get("judges") or 0) * pay_of_tier[c["tier"]] * MONTHS for c in level_one
-    )
+    # Level 1 today, on the same published basis as the totals above. Leaving it derived while
+    # the totals moved to filled posts would make every "față de azi" difference compare a
+    # caseload-implied establishment against a real payroll — two different quantities
+    # subtracted from each other.
+    if published:
+        judges_today = float(published["tribunal"] + published["judecatorie"])
+        today_level_one = (
+            published["tribunal"] * pay_of_tier["tribunal"]
+            + published["judecatorie"] * pay_of_tier["judecatorie"]
+        ) * MONTHS
+    else:
+        judges_today = sum(c.get("judges") or 0 for c in level_one)
+        today_level_one = sum(
+            (c.get("judges") or 0) * pay_of_tier[c["tier"]] * MONTHS for c in level_one
+        )
 
     scenarios = []
     for label, target in TARGETS.items():
@@ -132,6 +171,11 @@ def main() -> int:
         print(f"{row['tier']:<16}{row['courts']:>9}{row['judges']:>12,.0f}"
               f"{row['monthlyLei']:>11,.0f}{row['annualLei']:>17,.0f}")
     print(f"{'TOTAL':<16}{'':>9}{'':>12}{'':>11}{today_total:>17,.0f} lei/an")
+    if auxiliary_bill:
+        print(f"\nauxiliari: {auxiliary_bill['posts']:,} posturi   "
+              f"{auxiliary_bill['annualLowLei']:,.0f} - {auxiliary_bill['annualHighLei']:,.0f} lei/an")
+        print(f"total instanțe: {today_total + auxiliary_bill['annualLowLei']:,.0f} - "
+              f"{today_total + auxiliary_bill['annualHighLei']:,.0f} lei/an")
     print(f"\nnivelul 1 azi: {judges_today:,.0f} judecători, {today_level_one:,.0f} lei/an")
     print(f"{'țintă':<12}{'grad plătit':<14}{'judecători':>12}{'cost anual':>17}{'față de azi':>17}")
     for s in scenarios:
@@ -163,6 +207,28 @@ def main() -> int:
                 "annualLei": round(today_level_one),
             },
         },
+        "auxiliary": auxiliary_bill,
+        # What the two sources say about the same payroll, and what is left over. The pay
+        # simulator's headcount counts every post under the courts' ordonator principal; the
+        # CSM report counts judges and auxiliary staff. The remainder is neither — drivers,
+        # contract staff, IT outside the auxiliary corps.
+        "reconciliation": (
+            {
+                "payrollPosts": 14650,
+                "judgesFilled": personal["judgesTotal"]["filled"],
+                "auxiliaryFilled": auxiliary_bill["posts"],
+                "magistrateAssistants": (personal.get("magistrateAssistants") or {}).get("filled", 0),
+                "judicialAssistants": (personal.get("judicialAssistants") or {}).get("filled", 0),
+                "unaccounted": 14650
+                - personal["judgesTotal"]["filled"]
+                - auxiliary_bill["posts"]
+                - (personal.get("magistrateAssistants") or {}).get("filled", 0)
+                - (personal.get("judicialAssistants") or {}).get("filled", 0),
+                "executionBaseAnnualLei": 2457065665,
+            }
+            if auxiliary_bill and published
+            else None
+        ),
         "resolvedGrade": RESOLVED_GRADE,
         "scenarios": scenarios,
         "limitations": [
@@ -195,9 +261,11 @@ def main() -> int:
             {
                 "id": "numarul-de-judecatori-e-derivat",
                 "text": (
-                    "Numărul de judecători nu e tipărit în raport, ci reconstituit împărțind "
-                    "volumul la încărcătura pe judecător, deci e un efectiv mediu pe an, nu un "
-                    "cap de om la o dată anume."
+                    "Costul de azi folosește posturile ocupate tipărite de CSM la 31 decembrie "
+                    "2025 — 4.319 judecători. Scenariile folosesc în continuare numărul dedus "
+                    "din volum împărțit la încărcătură, fiindcă ele întreabă de câți judecători "
+                    "ar fi nevoie, nu câți sunt. Cele două nu măsoară același lucru: cel dedus "
+                    "e de circa 2.960, un efectiv mediu pe an, nu un cap de om la o dată."
                 ),
                 "severity": "material",
                 "affects": ["cost"],

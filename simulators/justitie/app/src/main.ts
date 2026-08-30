@@ -189,7 +189,23 @@ interface Pensii {
 
 interface Costuri {
   monthlyLeiByTier: Record<string, number>;
-  today: { annualLei: number; levelOne: { judges: number; annualLei: number } };
+  today: {
+    annualLei: number;
+    levelOne: { judges: number; annualLei: number };
+    byTier: { tier: string; judges: number; judgesDerived: number }[];
+  };
+  auxiliary: {
+    posts: number;
+    annualLowLei: number;
+    annualHighLei: number;
+  } | null;
+  reconciliation: {
+    payrollPosts: number;
+    judgesFilled: number;
+    auxiliaryFilled: number;
+    unaccounted: number;
+    executionBaseAnnualLei: number;
+  } | null;
   limitations: Limitation[];
 }
 
@@ -651,11 +667,24 @@ async function main(): Promise<void> {
           `<span class="vs">(${delta >= 0 ? '+' : '−'}${milioane(Math.abs(delta))} față de azi)</span></div>`
         );
       };
+      const aux = costuri.auxiliary;
+      const rec = costuri.reconciliation;
       return (
         `<div class="figure" style="margin-top:.5rem">indemnizația de bază a judecătorilor de
           nivel 1, azi <strong>${milioane(today)}</strong> lei/an</div>` +
         at('judecatorie') +
-        at('tribunal')
+        at('tribunal') +
+        (aux && rec
+          ? `<p class="note">Judecătorii nu sunt cea mai mare parte a statului de plată.
+               CSM numără ${ro.format(rec.judgesFilled)} de posturi de judecător ocupate și
+               ${ro.format(rec.auxiliaryFilled)} de posturi auxiliare; toată grila de bază a
+               instanțelor iese la ${milioane(costuri.today.annualLei + aux.annualLowLei)}–${milioane(
+                 costuri.today.annualLei + aux.annualHighLei,
+               )} lei/an, față de ${milioane(rec.executionBaseAnnualLei)} cheltuiți efectiv în
+               2025. Diferența e în anii diferiți — grila e din 2022 — și în cele
+               ${ro.format(rec.unaccounted)} de posturi pe care niciuna dintre cele două surse
+               nu le numără.</p>`
+          : '')
       );
     };
 
