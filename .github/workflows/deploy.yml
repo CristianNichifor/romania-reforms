@@ -128,6 +128,21 @@ jobs:
               echo "MISSING dist/transport/data/$name"; fail=1
             fi
           done
+          # Every simulator must offer a way back to the index. Without it each one is a
+          # dead end: reachable from the landing page and never returning, which is how a
+          # repository of simulators ends up behaving like a set of unrelated sites.
+          #
+          # Matched on the visible text rather than the class. Salarizare is React: className
+          # survives minification as `className:"up"` and never as `class="up"`, so a check on
+          # the attribute passed for three apps and failed for the one whose link is built by a
+          # framework. The words a reader clicks are the thing being guaranteed anyway.
+          for sim in salarizare administrativ justitie transport; do
+            if grep -rqs 'Toate simulatoarele' "dist/$sim/index.html" dist/$sim/assets/*.js; then
+              echo "ok   dist/$sim has a link back"
+            else
+              echo "MISSING back link in dist/$sim"; fail=1
+            fi
+          done
           # Every link on the landing page must resolve to something that was built.
           for href in $(grep -o 'href="[a-z]*/"' site/index.html | cut -d'"' -f2); do
             [ -s "dist/${href}index.html" ] || { echo "landing page links to missing $href"; fail=1; }

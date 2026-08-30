@@ -92,6 +92,9 @@ export default function HomeView({
   return (
     <>
       <header className="masthead home-masthead">
+        <a className="up" href="../" title="Toate simulatoarele de reformă">
+          ← Toate simulatoarele
+        </a>
         <h1>Cum își plătește România angajații publici</h1>
         <p>
           Un instrument pentru dezbaterea publică despre proiectul de lege al salarizării din 16
