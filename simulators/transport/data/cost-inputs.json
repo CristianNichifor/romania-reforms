@@ -42,11 +42,23 @@
       "confidence": "derived",
       "note": "Preț fără TVA, pentru că un operator își deduce TVA-ul. Calculat din 10,14 lei/litru la pompă — minimul național raportat de stații pe 30 august 2026, dosar-auto.ro — împărțit la 1,21, cota standard de TVA în vigoare de la 1 august 2025. Folosirea prețului de la pompă ar umfla costul cu 21% pentru o taxă pe care operatorul nu o suportă."
     },
-    "maintenancePerKm": {
-      "value": 1.2,
-      "unit": "RON/km",
+    "maintenanceEurPerKm": {
+      "value": 0.45,
+      "unit": "EUR/km",
       "confidence": "assumed",
-      "note": "Întreținere și reparații. Documentația Constanța pune anvelopele în aceeași poziție cu service-ul auto, deci linia separată de anvelope de aici dublează parțial. Rămâne nefundamentată pe o cifră publică și este, împreună cu celelalte costuri care nu depind de salarii, explicația cea mai probabilă pentru diferența față de reperul Buzău."
+      "note": "Întreținere și reparații pe kilometru la un operator vest-european, cifră de lucru din intervalul uzual de 0,35-0,55 EUR/km. NU este preluată dintr-un document anume: este reperul de bună practică folosit ca punct de plecare, pentru că acest depozit simulează o rețea care nu există încă, iar o cifră românească de exploatare pentru ea nu poate exista. De înlocuit cu o raportare UITP sau cu bilanțul unui operator."
+    },
+    "maintenanceLabourShare": {
+      "value": 0.55,
+      "unit": "share",
+      "confidence": "assumed",
+      "note": "Partea din costul de întreținere care este manoperă, restul fiind piese și materiale. Separarea contează: manopera se ajustează cu salariile din România, piesele nu — un rulment sau un injector se cumpără la preț mondial, indiferent unde e montat. A aplica reducerea salarială pe tot costul de întreținere ar fi exact eroarea făcută mai devreme la reperul de pondere a șoferilor."
+    },
+    "maintenanceWageRatio": {
+      "value": 0.39,
+      "unit": "ratio",
+      "confidence": "derived",
+      "note": "Salariul unui șofer român față de unul vest-european: 7.489 lei brut pe lună, adică circa 1.507 euro la cursul de lucru, împărțit la aproximativ 3.900 euro brut lunar în Danemarca. Folosit ca aproximare pentru raportul salariilor mecanicilor, care nu a fost căutat separat."
     },
     "tyresPerKm": {
       "value": 0.15,

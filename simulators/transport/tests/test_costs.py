@@ -111,7 +111,7 @@ def test_the_file_says_which_prices_are_sourced_and_which_are_not():
     sourced = {"driverGrossMonthly", "dieselPricePerLitre"}
     for name in sourced:
         assert document["items"][name]["confidence"] == "derived", name
-    unsourced = {"maintenancePerKm", "tyresPerKm", "insurancePerVehicleYear"}
+    unsourced = {"maintenanceEurPerKm", "tyresPerKm", "insurancePerVehicleYear"}
     for name in unsourced:
         assert document["items"][name]["confidence"] == "assumed", name
 
@@ -164,3 +164,35 @@ def test_the_failing_sanity_checks_are_declared(built):
     ids = {limitation["id"] for limitation in built["limitations"]}
     assert "factorul-de-viteza-de-serviciu" in ids
     assert "cost-pe-km-sub-referinta-ajustata" in ids
+
+
+def test_maintenance_adjusts_only_the_labour_half():
+    """The wage discount must not be applied to parts.
+
+    Discounting the whole benchmark is the error made against the driver-share figure. If it
+    ever returns here, maintenance drops toward the wage ratio and the model quietly gets
+    cheaper by roughly a third of its running cost.
+    """
+    from scripts.costs import maintenance_per_km
+
+    item = {
+        "maintenanceEurPerKm": 1.0,
+        "maintenanceLabourShare": 0.5,
+        "maintenanceWageRatio": 0.4,
+        "ronPerEur": 5.0,
+    }
+    # Half at 0,4 plus half at full price is 0,7 of the benchmark, not 0,4.
+    assert maintenance_per_km(item) == pytest.approx(0.7 * 5.0)
+
+
+def test_maintenance_at_parity_wages_is_the_benchmark():
+    """With no wage gap the adjustment must vanish rather than leave a residue."""
+    from scripts.costs import maintenance_per_km
+
+    item = {
+        "maintenanceEurPerKm": 0.45,
+        "maintenanceLabourShare": 0.55,
+        "maintenanceWageRatio": 1.0,
+        "ronPerEur": 4.97,
+    }
+    assert maintenance_per_km(item) == pytest.approx(0.45 * 4.97)

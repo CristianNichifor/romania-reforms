@@ -1,0 +1,70 @@
+{
+  "$schema": "../schema/railnet.schema.json",
+  "id": "railnet",
+  "title": "Rețeaua feroviară: infrastructura existentă și serviciul derivat",
+  "publisher": "Cristian Nichifor",
+  "period": "2026",
+  "provenance": {
+    "source": "osm-maxspeed-feroviar-plus-cinematica",
+    "locator": "maxspeed măsurat pe liniile OSM railway=rail cu usage main/branch (8.485 segmente etichetate, media 88 km/h pe linie principală); viteza comercială observată de 45 km/h raportată public pentru trenurile de călători din România",
+    "confidence": "derived",
+    "note": "Viteza de linie este măsurată, cinematica este calculată, iar penalizarea de stare a infrastructurii este dedusă ca reziduu între cele două — nu presupusă. Mersul Trenurilor NU este folosit: el descrie sistemul care se reformează, deci ar fixa în model exact restricțiile pe care reforma le elimină."
+  },
+  "network": {
+    "passengerLineKm": 12516.2,
+    "wayCount": 9145,
+    "taggedSpeedShare": 0.928,
+    "stationCount": 1993,
+    "electrifiedShare": 0.605
+  },
+  "pairs": {
+    "connected": 1722,
+    "possible": 1722,
+    "medianDetour": 1.64
+  },
+  "seats": {
+    "considered": 42,
+    "withinWalkOfStation": 37,
+    "walkKm": 2.0,
+    "medianSeatToStationKm": 1.19
+  },
+  "conditions": {
+    "as_is": {
+      "commercialKmh": 45.0,
+      "medianPairMin": 570.5,
+      "longestPairMin": 1467.0
+    },
+    "rehabilitated": {
+      "commercialKmh": 74.3,
+      "medianPairMin": 345.7,
+      "longestPairMin": 888.9
+    }
+  },
+  "limitations": [
+    {
+      "id": "gara-nu-e-satul",
+      "text": "Gara nu este localitatea. Mediana distanței de la reședință la cea mai apropiată stație este 1.19 km, iar 5 din 42 reședințe au stația la peste 2.0 km — au nevoie de autobuz ca să ajungă la propria cale ferată. Distanța este raportată, nu adăugată încă la timpul de călătorie.",
+      "severity": "material",
+      "affects": [
+        "railnet"
+      ]
+    },
+    {
+      "id": "viteza-comerciala-din-presa",
+      "text": "Viteza comercială observată de 45 km/h, care calibrează clasa as_is, este o cifră raportată public pentru trenurile de călători, nu o serie oficială CFR. Este singurul reper măsurat al modelului feroviar și ar trebui înlocuită cu o raportare a administratorului de infrastructură.",
+      "severity": "material",
+      "affects": [
+        "railnet"
+      ]
+    },
+    {
+      "id": "fara-cost-feroviar",
+      "text": "Se calculează timpul, nu costul. Tariful de utilizare a infrastructurii, energia, personalul de tren și materialul rulant nu sunt încă modelate, deci comparația dintre reabilitarea liniei și autobuze suplimentare nu se poate încă face în lei.",
+      "severity": "blocking",
+      "affects": [
+        "railnet",
+        "cost"
+      ]
+    }
+  ]
+}

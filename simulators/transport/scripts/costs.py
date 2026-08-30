@@ -81,6 +81,25 @@ class Cost:
         )
 
 
+def maintenance_per_km(item: dict[str, float]) -> float:
+    """Maintenance in lei per km, wage-adjusted from a European benchmark.
+
+    This repository simulates a network that does not exist, so a Romanian operating figure for
+    it cannot exist either. The benchmark is therefore the starting point rather than a
+    fallback — but it may not be imported whole. Maintenance is roughly half labour and half
+    parts, and only the labour half is cheaper in Romania: a bearing costs what a bearing costs.
+
+    Discounting the entire figure by the wage ratio is precisely the error made earlier against
+    the driver-share benchmark, where a Western European share was taken at face value and
+    turned out to be about twice the wage-adjusted expectation. Split, then adjust one half.
+    """
+    labour = item["maintenanceLabourShare"]
+    adjusted_eur = item["maintenanceEurPerKm"] * (
+        labour * item["maintenanceWageRatio"] + (1 - labour)
+    )
+    return adjusted_eur * item["ronPerEur"]
+
+
 def load_prices(path: Path = COST_INPUTS) -> Prices:
     """Resolve the data file into rates.
 
@@ -96,9 +115,10 @@ def load_prices(path: Path = COST_INPUTS) -> Prices:
     per_paid_hour = employer_monthly / item["driverPaidHoursMonth"]
     per_bus_hour = per_paid_hour * item["platformToPaidRatio"]
 
+    maintenance = maintenance_per_km(item)
     per_km = {
         name: (spec["dieselPer100Km"] / 100) * item["dieselPricePerLitre"]
-        + item["maintenancePerKm"]
+        + maintenance
         + item["tyresPerKm"]
         for name, spec in vehicles.items()
     }
