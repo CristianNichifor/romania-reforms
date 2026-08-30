@@ -31,7 +31,10 @@ body {
   left: 0;
   bottom: 0;
   width: min(22rem, 92vw);
-  padding: 1.25rem 1.1rem 1.5rem;
+  /* No bottom padding: the pinned hover bar is the last element and provides that space
+   * itself, so it can sit flush with the foot of the panel instead of floating above a gap
+   * with the caveats showing through underneath. */
+  padding: 0 1.1rem 0;
   background: color-mix(in srgb, var(--panel) 94%, transparent);
   border-right: 1px solid var(--line);
   overflow-y: auto;
@@ -48,12 +51,6 @@ h1 {
   margin: 0 0 1.1rem;
   color: var(--muted);
   font-size: 0.88rem;
-}
-
-.modes {
-  display: flex;
-  gap: 0.4rem;
-  margin-bottom: 1rem;
 }
 
 .modes button {
@@ -145,20 +142,29 @@ h1 {
   color: var(--muted);
 }
 
+/* Pinned to the foot of the panel while it holds something.
+ *
+ * Hovering a court is a question asked on the map and answered in the sidebar, and the answer
+ * used to sit at a fixed place in a three-screen scroll: anyone reading the folds and moving
+ * the mouse over the map got no reply at all. It sticks to the bottom instead, so the answer is
+ * wherever the reader is. */
 .detail {
+  position: sticky;
+  bottom: 0;
+  z-index: 4;
   min-height: 8.5rem;
-  padding: 0.85rem 0.9rem;
-  border: 1px solid var(--line);
-  border-radius: 9px;
-  margin-bottom: 1.1rem;
+  padding: 0.85rem 1.1rem 1.2rem;
+  margin: 0 -1.1rem;
+  border-top: 1px solid var(--line);
+  background: var(--panel);
+  box-shadow: 0 -10px 18px -14px #000;
 }
 
-/* Waiting for a hover, it reserved eight and a half rems of nothing and pushed the sections
- * below off the screen. It keeps its height only once it has something to hold. */
+/* Waiting for a hover it holds one line of instruction, and a pinned bar of instruction is
+ * clutter. Empty, it drops out of the way and scrolls like anything else. */
 .detail:has(> .hint:only-child) {
   min-height: 0;
-  padding: 0.5rem 0.9rem;
-  margin-bottom: 0.9rem;
+  padding: 0.55rem 1.1rem 0.7rem;
 }
 
 .hint {
@@ -341,11 +347,11 @@ dd {
   margin-top: 0.4rem;
 }
 
-.fold > details {
+.fold details {
   border-bottom: 1px solid var(--line);
 }
 
-.fold > details > summary {
+.fold details > summary {
   cursor: pointer;
   list-style: none;
   display: flex;
@@ -357,22 +363,22 @@ dd {
   font-weight: 600;
 }
 
-.fold > details > summary::-webkit-details-marker {
+.fold details > summary::-webkit-details-marker {
   display: none;
 }
 
-.fold > details > summary .chev {
+.fold details > summary .chev {
   font-weight: 400;
   font-size: 0.76rem;
   color: var(--muted);
   flex: none;
 }
 
-.fold > details[open] > summary {
+.fold details[open] > summary {
   color: var(--accent);
 }
 
-.fold > details > *:not(summary) {
+.fold details > *:not(summary) {
   padding-bottom: 0.8rem;
 }
 
@@ -486,27 +492,64 @@ dd {
  * the three sat in one repository and behaved like three unrelated sites. Relative rather than
  * absolute, because the deployed base is /romania-reforms/<simulator>/ and the index is one
  * level up wherever it is served from. */
+/* --- the sticky toolbar --------------------------------------------------------------
+ *
+ * The back link and the four view buttons used to scroll away with the header, so a reader
+ * three screens down the sidebar could neither switch views nor leave. Both are the controls
+ * people reach for most often and neither belongs in the scroll.
+ */
+.toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  margin: 0 -1.1rem 0.9rem;
+  padding: 0.85rem 1.1rem 0.7rem;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+}
+
+/* A target, not a line of prose. It was 12px of dimmed text and the smallest thing on a page
+ * whose other controls are all buttons. */
 .up {
-  display: inline-block;
-  margin-bottom: 0.4rem;
-  font-size: 0.76rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.6rem;
+  padding: 0.3rem 0.6rem 0.3rem 0.45rem;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  font-size: 0.78rem;
   letter-spacing: 0.01em;
   text-decoration: none;
-  color: inherit;
-  opacity: 0.62;
+  color: var(--muted);
+  background: transparent;
+  transition: color 0.12s, border-color 0.12s, background 0.12s;
 }
+
+.up .up-arrow {
+  font-size: 0.9rem;
+  line-height: 1;
+  transition: transform 0.12s;
+}
+
 .up:hover,
 .up:focus-visible {
-  opacity: 1;
-  text-decoration: underline;
+  color: var(--fg);
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.up:hover .up-arrow,
+.up:focus-visible .up-arrow {
+  transform: translateX(-2px);
 }
 
 
 /* Four view buttons no longer fit one line in a 314-pixel panel, and a horizontal scrollbar
  * under the map controls is the worst possible place to hide one. */
 .modes {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 0.35rem;
 }
 
@@ -521,16 +564,54 @@ dd {
   cursor: pointer;
 }
 
-/* Twelve folds in one stack is a list nobody reads to the end of. Grouped under headings so a
- * reader can find the money without scrolling past the geography, and so the caveats read as a
- * section rather than as more of the same. */
+
+/* --- navigating sixteen folds ------------------------------------------------------------
+ *
+ * The group a fold belongs to is the only thing that makes sixteen of them navigable, and it
+ * used to scroll off the moment you entered the group. --toolbar-h is measured in main.ts
+ * rather than guessed here, because the toolbar's height depends on how the view buttons wrap.
+ */
 .fold-group {
-  margin: 1.1rem 0 0.15rem;
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
+  position: sticky;
+  top: var(--toolbar-h, 5.5rem);
+  z-index: 3;
+  margin: 1.4rem -1.1rem 0.2rem;
+  padding: 0.45rem 1.1rem 0.35rem;
+  background: var(--panel);
   color: var(--muted);
-  opacity: 0.75;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
 }
-.fold-group:first-of-type { margin-top: 0.8rem; }
+
+.fold-group:first-of-type {
+  margin-top: 0.8rem;
+}
+
+/* A title that wraps to four ragged lines beside its badge is why the list stopped being
+ * scannable. Two lines is the ceiling; the badge and the value give way before the words do. */
+.fold details > summary > span:first-child {
+  min-width: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.fold details > summary:hover {
+  color: var(--fg);
+}
+
+.fold details > summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Each group is its own containing block, which is what makes one heading pin at a time.
+ * As siblings in a single list all four stuck at the same offset and painted over each other,
+ * so a reader in the first group saw the last group's name over their content. */
+.fold-set {
+  display: block;
+}

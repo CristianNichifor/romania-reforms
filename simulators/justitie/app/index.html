@@ -15,18 +15,22 @@
     <div id="map"></div>
 
     <aside id="panel">
+      <div class="toolbar">
+        <a class="up" href="../" title="Înapoi la toate simulatoarele de reformă">
+          <span class="up-arrow" aria-hidden="true">←</span> Toate simulatoarele
+        </a>
+        <section class="modes" aria-label="Ce arată harta">
+          <button data-mode="today" class="on">Astăzi</button>
+          <button data-mode="proposed">Propunerea</button>
+          <button data-mode="acces">Accesul</button>
+          <button data-mode="arondare">Arondarea</button>
+        </section>
+      </div>
+
       <header>
-        <a class="up" href="../" title="Toate simulatoarele de reformă">← Toate simulatoarele</a>
         <h1>Harta instanțelor</h1>
         <p class="sub" id="sub"></p>
       </header>
-
-      <section class="modes">
-        <button data-mode="today" class="on">Astăzi</button>
-        <button data-mode="proposed">Propunerea</button>
-        <button data-mode="acces">Accesul</button>
-        <button data-mode="arondare">Arondarea</button>
-      </section>
 
       <section id="authorship" hidden></section>
 
@@ -72,87 +76,99 @@
           care se judecă acolo. Culorile se repetă; două zone alăturate nu au aceeași.</div>
       </section>
 
-      <section id="detail" class="detail">
-        <p class="hint">Treci cu mouse-ul peste o instanță.</p>
-      </section>
-
       <section class="fold">
         <details id="acoperire-fold">
-        <summary><span>Ce verifică pagina din lucrare</span><span class="chev" id="acoperire-chev"></span></summary>
+        <summary><span>Ce verifică pagina</span><span class="chev" id="acoperire-chev"></span></summary>
         <div id="acoperire-body"></div>
         </details>
+        <section class="fold-set">
         <h3 class="fold-group">Ce se schimbă pe hartă</h3>
-        <details id="arondare-fold">
-        <summary><span>Dacă decide distanța</span><span class="chev" id="arondare-chev"></span></summary>
-        <div id="arondare-body"></div>
-        </details>
-        <details id="apel-fold">
-        <summary><span>Curțile de apel</span><span class="chev" id="apel-chev"></span></summary>
-        <div id="apel-body"></div>
-        </details>
-        <details id="parchete-fold">
-        <summary><span>Parchetele</span><span class="chev" id="parchete-chev"></span></summary>
-        <div id="parchete-body"></div>
-        </details>
-        <details id="incarcatura-fold">
-        <summary><span>Cât ar avea de judecat fiecare instanță</span><span class="chev" id="incarcatura-chev"></span></summary>
-        <div id="incarcatura-body"></div>
-        </details>
-        <details id="comasare-fold">
-        <summary><span>Ce face comasarea cu munca</span><span class="chev" id="comasare-chev"></span></summary>
-        <div id="comasare-body"></div>
-        </details>
-        <details id="spitale-fold">
-        <summary><span>Sediile și celelalte servicii</span><span class="chev" id="spitale-chev"></span></summary>
-        <div id="spitale-body"></div>
-        </details>
+
+          <details id="arondare-fold">
+          <summary><span>Dacă decide distanța</span><span class="chev" id="arondare-chev"></span></summary>
+          <div id="arondare-body"></div>
+          </details>
+          <details id="apel-fold">
+          <summary><span>Curțile de apel</span><span class="chev" id="apel-chev"></span></summary>
+          <div id="apel-body"></div>
+          </details>
+          <details id="parchete-fold">
+          <summary><span>Parchetele</span><span class="chev" id="parchete-chev"></span></summary>
+          <div id="parchete-body"></div>
+          </details>
+          <details id="incarcatura-fold">
+          <summary><span>Încărcătura pe instanță</span><span class="chev" id="incarcatura-chev"></span></summary>
+          <div id="incarcatura-body"></div>
+          </details>
+          <details id="comasare-fold">
+          <summary><span>Comasarea și munca</span><span class="chev" id="comasare-chev"></span></summary>
+          <div id="comasare-body"></div>
+          </details>
+          <details id="spitale-fold">
+          <summary><span>Sediile și serviciile</span><span class="chev" id="spitale-chev"></span></summary>
+          <div id="spitale-body"></div>
+          </details>
+        </section>
+        <section class="fold-set">
         <h3 class="fold-group">Ce costă</h3>
-        <details id="sporuri-fold">
-        <summary><span>Sporurile</span><span class="chev" id="sporuri-chev"></span></summary>
-        <div id="sporuri-body"></div>
-        </details>
-        <details id="proiect-fold">
-        <summary><span>Noua grilă de salarizare</span><span class="chev" id="proiect-chev"></span></summary>
-        <div id="proiect-body"></div>
-        </details>
-        <details id="pensii-fold">
-        <summary><span>Pensiile de serviciu</span><span class="chev">Două reforme</span></summary>
-        <div id="pensii-body"></div>
-        </details>
-        <details id="resurse-fold">
-        <summary><span>Ce cere reforma ca resurse</span><span class="chev" id="resurse-chev"></span></summary>
-        <div id="resurse-body"></div>
-        </details>
+
+          <details id="sporuri-fold">
+          <summary><span>Sporurile</span><span class="chev" id="sporuri-chev"></span></summary>
+          <div id="sporuri-body"></div>
+          </details>
+          <details id="proiect-fold">
+          <summary><span>Noua grilă de salarizare</span><span class="chev" id="proiect-chev"></span></summary>
+          <div id="proiect-body"></div>
+          </details>
+          <details id="pensii-fold">
+          <summary><span>Pensiile de serviciu</span><span class="chev">Două reforme</span></summary>
+          <div id="pensii-body"></div>
+          </details>
+          <details id="resurse-fold">
+          <summary><span>Resursele cerute</span><span class="chev" id="resurse-chev"></span></summary>
+          <div id="resurse-body"></div>
+          </details>
+        </section>
+        <section class="fold-set">
         <h3 class="fold-group">Ce nu se susține</h3>
-        <details id="eficienta-fold">
-        <summary><span>Premisa: „doar 20 eficiente”</span><span class="chev" id="eficienta-chev"></span></summary>
-        <div id="eficienta-body"></div>
-        </details>
-        <details id="danemarca-fold">
-        <summary><span>Premisa: „de trei ori mai multe instanțe”</span><span class="chev" id="danemarca-chev"></span></summary>
-        <div id="danemarca-body"></div>
-        </details>
+
+          <details id="eficienta-fold">
+          <summary><span>Premisa: „doar 20”</span><span class="chev" id="eficienta-chev"></span></summary>
+          <div id="eficienta-body"></div>
+          </details>
+          <details id="danemarca-fold">
+          <summary><span>Premisa: „de trei ori”</span><span class="chev" id="danemarca-chev"></span></summary>
+          <div id="danemarca-body"></div>
+          </details>
+        </section>
+        <section class="fold-set">
         <h3 class="fold-group">Ce rămâne nespus</h3>
-        <details id="design-fold">
-        <summary><span>Ce mai propune reforma</span><span class="chev">8 capitole</span></summary>
-        <p class="note">
-        Capitole care nu se pot calcula: arhitectură, administrație, carieră, tranziție.
-        Simulatorul poate arăta ce costă o decizie de acest fel, nu dacă e bună. Citate din
-        propunere, cu pagina.
-        </p>
-        <div id="design-list"></div>
-        </details>
-        <details id="gaps-fold">
-        <summary><span>Ce nu e acoperit deloc</span><span class="chev" id="gaps-count"></span></summary>
-        <div id="gaps"></div>
-        </details>
-        <details id="limits-fold">
-        <summary><span>Ce nu putem calcula</span><span class="chev" id="limits-count"></span></summary>
-        <div id="limits"></div>
-        </details>
+
+          <details id="design-fold">
+          <summary><span>Ce mai propune reforma</span><span class="chev">8 capitole</span></summary>
+          <p class="note">
+          Capitole care nu se pot calcula: arhitectură, administrație, carieră, tranziție.
+          Simulatorul poate arăta ce costă o decizie de acest fel, nu dacă e bună. Citate din
+          propunere, cu pagina.
+          </p>
+          <div id="design-list"></div>
+          </details>
+          <details id="gaps-fold">
+          <summary><span>Ce nu e acoperit</span><span class="chev" id="gaps-count"></span></summary>
+          <div id="gaps"></div>
+          </details>
+          <details id="limits-fold">
+          <summary><span>Ce nu putem calcula</span><span class="chev" id="limits-count"></span></summary>
+          <div id="limits"></div>
+          </details>
+        </section>
       </section>
 
       <footer id="blocking"></footer>
+
+      <section id="detail" class="detail">
+        <p class="hint">Treci cu mouse-ul peste o instanță.</p>
+      </section>
     </aside>
 
     <script type="module" src="/src/main.ts"></script>

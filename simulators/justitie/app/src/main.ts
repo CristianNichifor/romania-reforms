@@ -689,6 +689,21 @@ async function main(): Promise<void> {
     }),
   });
 
+  // The group headings stick just below the toolbar, and the toolbar's height depends on how
+  // the four view buttons wrap at the reader's font size. Measured rather than guessed: a
+  // hard-coded offset leaves either a gap or an overlap on every viewport but one.
+  const toolbar = document.querySelector<HTMLElement>('.toolbar');
+  if (toolbar) {
+    const measure = (): void => {
+      document.documentElement.style.setProperty(
+        '--toolbar-h',
+        `${Math.round(toolbar.getBoundingClientRect().height)}px`,
+      );
+    };
+    measure();
+    new ResizeObserver(measure).observe(toolbar);
+  }
+
   const map = new MapLibreMap({
     container: 'map',
     style: BLANK,
@@ -857,7 +872,12 @@ async function main(): Promise<void> {
                 '#3a4149',
               ],
             ] as unknown as ExpressionSpecification,
-            'fill-opacity': 0.72,
+            'fill-opacity': [
+              'case',
+              ['boolean', ['feature-state', 'hover'], false],
+              0.93,
+              0.72,
+            ] as unknown as ExpressionSpecification,
           },
         },
         'uat-outline',
@@ -949,6 +969,10 @@ async function main(): Promise<void> {
 
     map.addSource('courts', {
       type: 'geojson',
+      // Feature state needs an id to address. Without this, hovering a court could move the
+      // cursor and fill the sidebar but could not mark the circle being described, which left
+      // a reader matching a name in the panel against 241 identical dots.
+      generateId: true,
       data: asFeatures(courtsFor(mode), ratioFor(mode, courtsFor(mode))),
     });
 
@@ -994,9 +1018,26 @@ async function main(): Promise<void> {
       paint: {
         'circle-radius': radius,
         'circle-color': colour,
-        'circle-opacity': 0.85,
-        'circle-stroke-color': '#0b0d10',
-        'circle-stroke-width': 1,
+        'circle-opacity': [
+          'case',
+          ['boolean', ['feature-state', 'hover'], false],
+          1,
+          0.85,
+        ] as unknown as ExpressionSpecification,
+        // A pale ring rather than a colour change: the fill is carrying the caseload ratio and
+        // must keep meaning the same thing under the cursor as away from it.
+        'circle-stroke-color': [
+          'case',
+          ['boolean', ['feature-state', 'hover'], false],
+          '#f2f4f7',
+          '#0b0d10',
+        ] as unknown as ExpressionSpecification,
+        'circle-stroke-width': [
+          'case',
+          ['boolean', ['feature-state', 'hover'], false],
+          2.5,
+          1,
+        ] as unknown as ExpressionSpecification,
       },
     });
 
@@ -1035,6 +1076,7 @@ async function main(): Promise<void> {
     // hears its cases, and how far that is by road. The distance is the one the assignment
     // itself used, read back out of feature state rather than recomputed.
     map.on('mousemove', 'arondare-fill', (e: MapMouseEvent & { features?: MapGeoJSONFeature[] }) => {
+      markUat(e.features?.[0]?.id);
       const feature = e.features?.[0];
       if (!feature || !couplingForMap || !arondareForMap) return;
       map.getCanvas().style.cursor = 'pointer';
@@ -1078,14 +1120,36 @@ async function main(): Promise<void> {
     });
     map.on('mouseleave', 'arondare-fill', () => {
       map.getCanvas().style.cursor = '';
+      markUat(undefined);
     });
+
+    // Which feature currently wears the hover state, so it can be taken off again. Held per
+    // source because the two hover targets are different layers over different data.
+    let hoveredCourt: string | number | undefined;
+    let hoveredUat: string | number | undefined;
+    const markCourt = (id: string | number | undefined): void => {
+      if (hoveredCourt !== undefined && map.getSource('courts')) {
+        map.setFeatureState({ source: 'courts', id: hoveredCourt }, { hover: false });
+      }
+      hoveredCourt = id;
+      if (id !== undefined) map.setFeatureState({ source: 'courts', id }, { hover: true });
+    };
+    const markUat = (id: string | number | undefined): void => {
+      if (hoveredUat !== undefined && map.getSource('uats')) {
+        map.setFeatureState({ source: 'uats', id: hoveredUat }, { hover: false });
+      }
+      hoveredUat = id;
+      if (id !== undefined) map.setFeatureState({ source: 'uats', id }, { hover: true });
+    };
 
     map.on('mousemove', 'courts', (e: MapMouseEvent & { features?: MapGeoJSONFeature[] }) => {
       map.getCanvas().style.cursor = 'pointer';
+      markCourt(e.features?.[0]?.id);
       show(e.features?.[0] ?? null);
     });
     map.on('mouseleave', 'courts', () => {
       map.getCanvas().style.cursor = '';
+      markCourt(undefined);
       // In the catchment view the polygons own this panel. Resetting here overwrote a commune
       // the reader was still pointing at with the hint for a court they had just left — and
       // with the wrong noun besides, since that hint says "instanță".
