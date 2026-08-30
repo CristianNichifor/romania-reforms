@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/network.schema.json",
+  "title": "The feeder network: routes, and the places no route reaches",
+  "description": "One shortest-path tree per hub, every leaf a route. Every UAT is either served exactly once, is a hub, or is named in `unroutable` — there is no fourth outcome, because a UAT that were none of those would be a place nobody counted, and an uncounted place flatters every figure built on top of it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "title", "publisher", "period", "provenance", "summary", "unroutable", "routes", "limitations"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "type": "string" },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "period": { "type": "string" },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["hubs", "routes", "uatsServed", "uatsUnroutable", "uatsTotal", "longRoutes", "oneWayMinMedian", "oneWayMinP90", "oneWayMinMax", "hubSirutas"],
+      "properties": {
+        "hubs": { "type": "integer", "minimum": 1 },
+        "routes": { "type": "integer", "minimum": 1 },
+        "uatsServed": { "type": "integer", "minimum": 1 },
+        "uatsUnroutable": { "type": "integer", "minimum": 0 },
+        "uatsTotal": { "type": "integer", "minimum": 1 },
+        "longRoutes": {
+          "description": "Routes over an hour one way. A route cannot be shortened by splitting it, so these are reported rather than hidden.",
+          "type": "integer", "minimum": 0
+        },
+        "oneWayMinMedian": { "type": "number", "exclusiveMinimum": 0 },
+        "oneWayMinP90": { "type": "number", "exclusiveMinimum": 0 },
+        "oneWayMinMax": { "type": "number", "exclusiveMinimum": 0 },
+        "hubSirutas": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+      }
+    },
+    "unroutable": {
+      "description": "Every UAT with no road route to its hub, by name. A count would hide that almost all of them are Danube Delta and river-island communes reachable only by water.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["siruta", "name", "county", "hub"],
+        "properties": {
+          "siruta": { "type": "string", "minLength": 1 },
+          "name": { "type": "string", "minLength": 1 },
+          "county": { "type": "string", "minLength": 1 },
+          "hub": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "routes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["hub", "leaf", "stops", "serves", "oneWayMin", "oneWayKm", "isLong"],
+        "properties": {
+          "hub": { "type": "string", "minLength": 1 },
+          "leaf": { "type": "string", "minLength": 1 },
+          "stops": {
+            "description": "Every UAT from the leaf to the hub inclusive, including any the route crosses without serving.",
+            "type": "array", "items": { "type": "string" }, "minItems": 2
+          },
+          "serves": {
+            "description": "The UATs this route is costed for. A UAT sitting on two branches belongs to exactly one.",
+            "type": "array", "items": { "type": "string" }
+          },
+          "oneWayMin": { "type": "number", "minimum": 0 },
+          "oneWayKm": { "type": ["number", "null"], "minimum": 0 },
+          "isLong": { "type": "boolean" }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+    }
+  }
+}

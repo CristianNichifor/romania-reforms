@@ -25,6 +25,57 @@ travel_time_distribution   median 16,0 min, p90 35,0 min, max 178,5 min
 implied_speed              median 50,0 km/h over 9.086 pairs; 0 above 110
 ```
 
+## L1: the network, and what it costs in vehicles
+
+Every UAT gets a **fixed, published** timetable. What population changes is how many
+departures a place receives and where they sit in the day; what it never changes is whether
+they can be relied on. Nothing here is booked in advance.
+
+| class | UATs | people | departures/day | seats |
+|---|---|---|---|---|
+| basic | 887 | 1 247 536 | 4, all on the peaks | 20 |
+| feeder | 1 587 | 4 967 997 | 9 | 40 |
+| trunk | 712 | 12 838 282 | 16, across the day | 50 |
+
+Routes come from a shortest-path tree out of each of the 249 hubs; every leaf becomes a route
+stopping at each UAT down its branch. That alone collapses **2 895 UAT-to-hub shuttles into
+1 537 routes**, because a village on the way to a further village is a stop rather than a
+service of its own.
+
+```
+routes            1.537      one-way min   median 27,6  p90 49,8  max 121,7
+UATs served       2.923      long routes (>60 min)                       50
+unroutable           14      accounted for              3.186 of 3.186
+```
+
+### What the network costs, against one bus per village
+
+```
+                       one shuttle per UAT    routed network
+peak vehicles                        3.914             2.351     -40%
+fleet incl. 15% spare                4.502             2.704     -40%
+bus-hours / weekday                 19.564            14.295     -27%
+bus-km / weekday                   983.633           718.859     -27%
+
+annualised: 3,57 M bus-hours, 179,7 M bus-km
+```
+
+Fleet falls further than driving does — 40% against 27% — because merging four villages onto
+one route removes three *concurrent* buses while covering similar ground. Keeping the peak and
+the hours apart is the whole reason `fleet.py` exists; conflating them is how a transit system
+gets under-costed.
+
+**Spares are a depot float, applied once to the network.** Applying the ratio route by route
+and rounding up buys a spare for every single-bus service — `ceil(1 × 1,15)` is 2, a 100%
+margin from 15%. Measured, that was 6 809 buses against 4 502.
+
+### The 14 places with no road
+
+`data/network.json` names them rather than counting them, and named they validate the model:
+Chilia Veche, Crișan, C.A. Rosetti, Maliuc, Pardina and Ceatalchioi in the Danube Delta,
+Frecăței and Mărașu on the Brăila river islands. Reachable only by water, found without being
+told they exist. Every cost figure here therefore describes the country **minus** those places.
+
 ## What L0 is
 
 `simulators/administrativ` measures the road **distance** between the seats of adjacent UATs.
@@ -174,6 +225,9 @@ uv run python -m pipeline.build_finance
 # Then here:
 uv run python -m scripts.measure_limits    # writes data/road-limits.json (committed)
 uv run python -m scripts.build_road_time   # writes data/road_time.parquet (not committed)
+uv run python -m scripts.export_hubs       # writes data/hubs.json (committed)
+uv run python -m scripts.build_network     # writes data/network.json (committed)
+uv run python -m scripts.cost_network      # vehicles, hours and km against the upper bound
 uv run python -m scripts.check_gate        # the harness; needs recorded times to say anything
 ```
 
