@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/fares.schema.json",
+  "title": "Ticket revenue and the remaining subsidy",
+  "description": "The only file in this simulator that produces a subsidy rather than a cost. It requires a band rather than a single figure: passenger numbers come from an assumed occupancy, and across the range nobody can currently rule out the recovery ratio runs from a third to two thirds. A lone number here would read as a measurement.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "title", "publisher", "period", "provenance", "assumptions", "central", "band", "benchmark", "limitations"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "type": "string" },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "period": { "type": "string" },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+    "assumptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["farePerPassengerKm", "loadFactor", "meanSeats", "busKmPerYear"],
+      "properties": {
+        "farePerPassengerKm": { "type": "number", "exclusiveMinimum": 0 },
+        "loadFactor": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "meanSeats": { "type": "number", "exclusiveMinimum": 0 },
+        "busKmPerYear": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "central": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["passengerKm", "revenueRon", "operatingRon", "totalRon", "subsidyRon", "recovery", "subsidyPerPersonYearRon", "passengerKmPerPersonYear"],
+      "properties": {
+        "passengerKm": { "type": "number", "exclusiveMinimum": 0 },
+        "revenueRon": { "type": "number", "exclusiveMinimum": 0 },
+        "operatingRon": { "type": "number", "exclusiveMinimum": 0 },
+        "totalRon": { "type": "number", "exclusiveMinimum": 0 },
+        "subsidyRon": { "type": "number", "minimum": 0 },
+        "recovery": { "type": "number", "minimum": 0 },
+        "subsidyPerPersonYearRon": { "type": "number", "minimum": 0 },
+        "passengerKmPerPersonYear": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "band": {
+      "description": "Required, and required to have more than one row: the sensitivity IS the result.",
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["loadFactor", "revenueRon", "subsidyRon", "recovery"],
+        "properties": {
+          "loadFactor": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+          "revenueRon": { "type": "number", "exclusiveMinimum": 0 },
+          "subsidyRon": { "type": "number", "minimum": 0 },
+          "recovery": { "type": "number", "minimum": 0 }
+        }
+      }
+    },
+    "benchmark": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["moviaRecovery", "modelRecovery", "withinBand"],
+      "properties": {
+        "moviaRecovery": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "modelRecovery": { "type": "number", "minimum": 0 },
+        "withinBand": { "type": "boolean" }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+    }
+  }
+}

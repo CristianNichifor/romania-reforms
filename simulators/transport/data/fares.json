@@ -1,0 +1,94 @@
+{
+  "$schema": "../schema/fares.schema.json",
+  "id": "fares",
+  "title": "Din bilete și din buget: cât rămâne de acoperit public",
+  "publisher": "Cristian Nichifor",
+  "period": "2026",
+  "provenance": {
+    "source": "hotarari-consilii-judetene-plus-reper-danez",
+    "locator": "tarifele pe kilometru-călător din hotărârile consiliilor județene Botoșani și Vaslui, 2025; gradul de ocupare presupus; rata de acoperire din bilete a companiei Movia, Danemarca, folosită ca verificare, nu ca intrare",
+    "confidence": "derived",
+    "note": "Tariful are sursă românească. Gradul de ocupare nu are și nu poate avea: nu există serviciu de măsurat, pentru că rețeaua nu există. El este parametrul liber al acestui nivel, iar rezultatul se raportează pe tot intervalul plauzibil tocmai ca să se vadă cât atârnă de el."
+  },
+  "assumptions": {
+    "farePerPassengerKm": 0.35,
+    "loadFactor": 0.22,
+    "meanSeats": 41,
+    "busKmPerYear": 254585950
+  },
+  "central": {
+    "passengerKm": 2296365269,
+    "revenueRon": 803727844,
+    "operatingRon": 1645940597,
+    "totalRon": 1798186193,
+    "subsidyRon": 842212753,
+    "recovery": 0.488,
+    "subsidyPerPersonYearRon": 49.98,
+    "passengerKmPerPersonYear": 136.3
+  },
+  "band": [
+    {
+      "loadFactor": 0.15,
+      "revenueRon": 547996257,
+      "subsidyRon": 1097944340,
+      "recovery": 0.333
+    },
+    {
+      "loadFactor": 0.2,
+      "revenueRon": 730661676,
+      "subsidyRon": 915278921,
+      "recovery": 0.444
+    },
+    {
+      "loadFactor": 0.25,
+      "revenueRon": 913327096,
+      "subsidyRon": 732613501,
+      "recovery": 0.555
+    },
+    {
+      "loadFactor": 0.3,
+      "revenueRon": 1095992515,
+      "subsidyRon": 549948082,
+      "recovery": 0.666
+    }
+  ],
+  "benchmark": {
+    "moviaRecovery": 0.5,
+    "modelRecovery": 0.488,
+    "withinBand": true
+  },
+  "limitations": [
+    {
+      "id": "gradul-de-ocupare-decide-tot",
+      "text": "Nu există model de cerere. Numărul de călători se obține din capacitatea oferită înmulțită cu un grad de ocupare presupus, deci venitul și subvenția sunt direct proporționale cu acea presupunere. Pe intervalul plauzibil de 15-30% acoperirea din bilete variază între 33% și 67%, adică subvenția anuală variază cu peste jumătate de miliard de lei. Orice cifră de aici se citește ca interval, nu ca valoare.",
+      "severity": "blocking",
+      "affects": [
+        "fares"
+      ]
+    },
+    {
+      "id": "cererea-nu-raspunde-la-tarif",
+      "text": "Modelul nu are elasticitate: dublarea tarifului dublează venitul, ceea ce este fals. Un tarif mai mare alungă călători, iar în mediul rural sensibilitatea la preț este mai mare decât în oraș, pentru că mașina este o alternativă reală. Deci acest nivel poate spune ce ar aduce tariful actual la o rețea dată, dar NU poate compara două politici tarifare.",
+      "severity": "blocking",
+      "affects": [
+        "fares"
+      ]
+    },
+    {
+      "id": "gratuitatile-nu-sunt-modelate",
+      "text": "Elevii, pensionarii și celelalte categorii cu gratuitate sau reducere legală nu sunt separate: toți călătorii plătesc tariful întreg în acest calcul. În transportul județean românesc naveta școlară este o parte importantă a cererii și este decontată separat din bugete publice, deci venitul din bilete de aici este supraestimat și, pe cealaltă parte, o parte din ce apare ca subvenție este de fapt decontare.",
+      "severity": "material",
+      "affects": [
+        "fares"
+      ]
+    },
+    {
+      "id": "capacitatea-nu-e-cerere",
+      "text": "Călătorii se deduc din locurile oferite, deci rețeaua nu poate fi niciodată supraaglomerată în acest model și nici nu poate arăta o cerere nesatisfăcută. O linie pe care nu încape lumea și una pe care nu urcă nimeni ies la fel dacă au același grad mediu de ocupare.",
+      "severity": "material",
+      "affects": [
+        "fares"
+      ]
+    }
+  ]
+}

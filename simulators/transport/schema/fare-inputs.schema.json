@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/fare-inputs.schema.json",
+  "title": "Fares and occupancy",
+  "description": "What a passenger pays and how full the bus is. The fare is Romanian and sourced from county council decisions; the load factor cannot be sourced, because it is the behaviour of a service that does not exist. That asymmetry is the point of keeping them in separate rows with separate confidences.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "title", "publisher", "period", "provenance", "currency", "items", "benchmarks", "limitations"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "type": "string" },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "period": { "type": "string" },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+    "currency": { "type": "string", "enum": ["RON"] },
+    "items": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["value", "unit", "confidence"],
+        "properties": {
+          "value": { "type": "number", "exclusiveMinimum": 0 },
+          "unit": { "type": "string", "minLength": 1 },
+          "confidence": { "enum": ["verbatim", "derived", "assumed"] },
+          "note": { "type": "string" }
+        }
+      }
+    },
+    "benchmarks": {
+      "description": "Used to check the output, never to produce it. Assuming a recovery ratio would make the subsidy a restatement of the cost.",
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["value", "unit", "confidence"],
+        "properties": {
+          "value": { "type": "number" },
+          "unit": { "type": "string" },
+          "confidence": { "enum": ["verbatim", "derived", "assumed"] },
+          "note": { "type": "string" }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+    }
+  }
+}
