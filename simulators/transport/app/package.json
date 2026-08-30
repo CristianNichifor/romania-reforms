@@ -9,7 +9,8 @@
     "build": "tsc --noEmit && vitest run && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "postbuild": "node scripts/check-dist.mjs"
   },
   "dependencies": {
     "maplibre-gl": "^6.6.0"

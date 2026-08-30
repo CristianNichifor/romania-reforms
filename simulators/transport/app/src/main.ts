@@ -1,5 +1,12 @@
 import * as maplibregl from 'maplibre-gl';
+// MapLibre 6 parses GeoJSON in a web worker that it loads as a SEPARATE file, resolved next to
+// the main script. Vite inlines the library into the app bundle and never emits that file, so
+// the worker 404s, dies silently, and no source ever finishes loading: a blank map, no
+// exception, no map error event. Pointing it at a worker Vite actually bundles is the fix.
+import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import 'maplibre-gl/dist/maplibre-gl.css';
+
+maplibregl.setWorkerUrl(workerUrl);
 import './style.css';
 import {
   BANDS,
@@ -86,6 +93,12 @@ async function main() {
     }),
   );
 
+  // MapLibre reports source and worker failures through this event and never throws. Without
+  // it a dead worker or an unreachable tile is completely silent — which is exactly how a blank
+  // map went unnoticed through several deploys.
+  map.on('error', (e: unknown) => {
+    console.error('map error', (e as { error?: Error }).error ?? e);
+  });
   await new Promise<void>((resolve) => map.on('load', () => resolve()));
 
   const uats = await fetch(asset('uats.geojson')).then((r) => r.json());
