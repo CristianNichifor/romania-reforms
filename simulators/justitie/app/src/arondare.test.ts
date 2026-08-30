@@ -40,8 +40,20 @@ function stubFetch(): void {
 
 describe('the browser arondare against the Python reference', () => {
   let coupled: Coupled;
+  // Typed field by field rather than as Record<string, number>: an index signature makes every
+  // lookup possibly-undefined under noUncheckedIndexedAccess, and the fixture either has these
+  // keys or is not the fixture.
   let reference: {
-    summary: Record<string, number>;
+    summary: {
+      units: number;
+      routed: number;
+      crossingCounty: number;
+      peopleCrossingCounty: number;
+      wouldSplitByCommune: number;
+      meanMetresOwnCounty: number;
+      meanMetresNearest: number;
+      metresSavedEachCrossing: number;
+    };
     units: { crossesCounty: boolean; population: number }[];
   };
 
