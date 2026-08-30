@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ro">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Transport — cât durează până la reședința de județ</title>
+    <meta name="description" content="Cât ar dura să ajungi la reședința ta de județ cu autobuzul, dacă fiecare UAT din România ar avea orar, și ce costă asta pe an." />
+  </head>
+  <body>
+    <main>
+      <div id="map" aria-label="Harta timpului de călătorie până la reședința de județ"></div>
+      <aside id="panel">
+        <h1>Până la reședința de județ</h1>
+        <p class="lede">
+          Cât ar dura, cu autobuzul, dacă fiecare din cele 3.186 de UAT-uri ar avea un orar
+          publicat. Rabatere până la centru, așteptare, apoi trunchi până la reședință.
+        </p>
+
+        <div id="toggle" role="group" aria-label="Scenariu de orar">
+          <button data-scenario="uncoordinated" class="on">Fără corespondență</button>
+          <button data-scenario="pulsed">Cu corespondență</button>
+        </div>
+        <p class="hint" id="scenario-note"></p>
+
+        <dl id="stats"></dl>
+
+        <h2>Legendă</h2>
+        <ul id="legend"></ul>
+
+        <h2>Ce costă pe an</h2>
+        <dl id="cost"></dl>
+
+        <h2>Ce nu este verificat</h2>
+        <ul id="caveats"></ul>
+
+        <p class="foot">
+          Un instrument pentru dezbatere publică, nu o propunere. Un scenariu de comasare,
+          nu comasarea în general.
+        </p>
+      </aside>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

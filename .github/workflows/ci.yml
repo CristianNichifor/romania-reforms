@@ -126,12 +126,12 @@ jobs:
       # runs is everything that does not need the artefacts: the speed table, the
       # accumulation, and the gate's own logic.
       #
-      # This job is expected to FAIL until a human records the reference drive times in
-      # sources/reference-drive-times-vl.csv. That is the point of it. The gate is the only
-      # thing standing between an assumed speed table and every number built on top of it,
-      # and a gate excluded from CI so the badge stays green is how an unfilled gate ships
-      # as though it had verified something. The failing test names itself:
-      # test_the_reference_file_is_filled_in.
+      # The speed model is derived from measured limits and kinematics rather than checked
+      # against recorded journeys, and that unvalidated state is declared in provenance
+      # instead of being shouted by a permanently red build.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
       - name: Pipeline
         working-directory: simulators/transport
         env:
@@ -141,3 +141,11 @@ jobs:
           uv run ruff check scripts tests
           uv run ruff format --check scripts tests
           uv run pytest -q
+      # The app joins journey times to polygons by position, and copy-data.mjs fails loudly
+      # when that join matches nothing — which is the check worth having in CI, because a
+      # silently empty join renders a plausible grey map.
+      - name: App
+        working-directory: simulators/transport/app
+        run: |
+          npm ci
+          npm run build
