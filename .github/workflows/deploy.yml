@@ -121,9 +121,11 @@ jobs:
           if [ ! -s dist/transport/data/scenarios.json ]; then
             echo "MISSING dist/transport/data/scenarios.json"; fail=1
           fi
-          # Rail is fetched only when the reader ticks the box, so a missing file fails
-          # silently at click time rather than at load — the box would simply never fill in.
-          for name in rail-lines.geojson rail-stations.geojson; do
+          # Rail and roads are fetched only when the reader ticks a box, so a missing file
+          # fails silently at click time rather than at load — the box would simply never fill
+          # in. The roads are copied from administrativ at build time and are not in git, which
+          # is exactly the kind of file that goes missing without anything noticing.
+          for name in rail-lines.geojson rail-stations.geojson roads.geojson roads-county.geojson; do
             if [ ! -s "dist/transport/data/$name" ]; then
               echo "MISSING dist/transport/data/$name"; fail=1
             fi

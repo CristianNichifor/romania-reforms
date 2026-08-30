@@ -11,7 +11,14 @@ import './style.css';
 import {
   BANDS,
   NO_DATA,
+  ROAD_CASING_COLOUR,
+  ROAD_COLOUR,
+  ROAD_COUNTY_COLOUR,
+  countyRoadCasingOpacity,
+  countyRoadOpacity,
+  countyRoadWidth,
   journeyPaint,
+  majorRoadWidth,
   railLinePaint,
   railLineWidth,
   stationRadius,
@@ -230,6 +237,77 @@ async function main() {
     writeHash(scenario, chosen.id);
     renderStats();
   });
+
+  // Roads. The network the travel-time model is measured over, so a reader can see why a
+  // commune two ridges from its centre takes ninety minutes. Same files and same styling as
+  // the administrative map — a bright core over a dark casing, because every hue is already
+  // spoken for by the journey bands.
+  //
+  // Inserted BENEATH the commune outline so roads read as terrain under the result rather than
+  // as another result on top of it. Fetched on first tick: 6,5 MB that most visits never want.
+  const roadsLoaded = new Set<string>();
+
+  async function showRoads(kind: 'major' | 'county', on: boolean) {
+    const ids = kind === 'major' ? ['roads-casing', 'roads-line'] : ['county-casing', 'county-line-r'];
+    if (on && !roadsLoaded.has(kind)) {
+      const file = kind === 'major' ? 'roads.geojson' : 'roads-county.geojson';
+      const toggle = el<HTMLInputElement>(kind === 'major' ? 'roads-toggle' : 'county-roads-toggle');
+      toggle.disabled = true;
+      const data = await fetch(asset(file)).then((r) => r.json());
+      map.addSource(`src-${kind}`, { type: 'geojson', data });
+      const width = kind === 'major' ? majorRoadWidth() : countyRoadWidth();
+      map.addLayer(
+        {
+          id: ids[0],
+          type: 'line',
+          source: `src-${kind}`,
+          paint: {
+            'line-color': ROAD_CASING_COLOUR,
+            'line-opacity': (kind === 'major' ? 0.75 : countyRoadCasingOpacity()) as never,
+            'line-width': ['+', width, kind === 'major' ? 2 : 1.6] as never,
+          },
+        },
+        'uat-line',
+      );
+      map.addLayer(
+        {
+          id: ids[1],
+          type: 'line',
+          source: `src-${kind}`,
+          paint: {
+            'line-color': kind === 'major' ? ROAD_COLOUR : ROAD_COUNTY_COLOUR,
+            'line-opacity': (kind === 'major' ? 0.95 : countyRoadOpacity()) as never,
+            'line-width': width as never,
+          },
+        },
+        'uat-line',
+      );
+      roadsLoaded.add(kind);
+      toggle.disabled = false;
+    }
+    for (const id of ids) {
+      if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', on ? 'visible' : 'none');
+    }
+  }
+
+  for (const [id, kind] of [['roads-toggle', 'major'], ['county-roads-toggle', 'county']] as const) {
+    const box = el<HTMLInputElement>(id);
+    box.addEventListener('change', () => {
+      void showRoads(kind, box.checked);
+      const params = hash();
+      params.set(kind === 'major' ? 'dn' : 'dj', box.checked ? '1' : '0');
+      history.replaceState(null, '', `#${params}`);
+    });
+    if (hash().get(kind === 'major' ? 'dn' : 'dj') === '1') {
+      box.checked = true;
+      void showRoads(kind, true);
+    }
+  }
+
+  el('roads-note').textContent =
+    'Aceleași drumuri peste care este măsurat modelul de timp, din OpenStreetMap. Se încarcă ' +
+    'doar când le ceri — 6,5 MB împreună. Cele județene apar estompat la nivel de țară: ' +
+    'la zoom mic sunt o pată, nu o informație.';
 
   // Rail. Its geometry is 2 MB and most readers never open it, so the layers are fetched the
   // first time the box is ticked rather than on load. `railLoaded` guards the second tick.

@@ -19,6 +19,11 @@ for (const [from, name] of [
   [join(administrativ, 'web/public/data/uats.geojson'), 'uats.geojson'],
   [join(administrativ, 'web/public/data/counties.geojson'), 'counties.geojson'],
   [join(administrativ, 'web/public/data/attributes.json'), 'attributes.json'],
+  // The road network the travel-time model is measured over. Same two files the
+  // administrative map draws, copied rather than re-derived so the two pages cannot disagree
+  // about where a road is. Fetched only when the reader asks for them: 6,5 MB together.
+  [join(administrativ, 'web/public/data/roads.geojson'), 'roads.geojson'],
+  [join(administrativ, 'web/public/data/roads-county.geojson'), 'roads-county.geojson'],
 ]) {
   copyFileSync(from, join(out, name));
 }

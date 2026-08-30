@@ -47,6 +47,42 @@ export const NO_DATA = '#3a3f4d';
  * appended the final colour as a lone trailing element, leaving an odd argument count that
  * MapLibre rejects outright.
  */
+/**
+ * Road colours, taken from the administrative map rather than reinvented — the two pages show
+ * the same country and a reader moving between them should not have to relearn what a road
+ * looks like. Its reasoning applies here unchanged: every hue is spoken for by the journey
+ * bands, so roads separate by brightness instead, a bright core over a dark casing.
+ */
+export const ROAD_COLOUR = '#ffffff';
+export const ROAD_COUNTY_COLOUR = '#9fc6ef';
+export const ROAD_CASING_COLOUR = '#0a0d11';
+
+/** National roads: width by class, so the hierarchy survives zooming out. */
+export function majorRoadWidth(): unknown {
+  return [
+    'interpolate',
+    ['linear'],
+    ['zoom'],
+    6,
+    ['match', ['get', 'highway'], 'motorway', 2.2, 'trunk', 1.7, 1.1],
+    11,
+    ['match', ['get', 'highway'], 'motorway', 4.6, 'trunk', 3.6, 2.4],
+  ];
+}
+
+/** County and communal roads: thinner, and faint until the reader zooms in. */
+export function countyRoadWidth(): unknown {
+  return ['interpolate', ['linear'], ['zoom'], 6, 0.7, 9, 1.5, 12, 2.6];
+}
+
+export function countyRoadOpacity(): unknown {
+  return ['interpolate', ['linear'], ['zoom'], 6, 0.6, 9, 0.85, 12, 0.95];
+}
+
+export function countyRoadCasingOpacity(): unknown {
+  return ['interpolate', ['linear'], ['zoom'], 6, 0.35, 9, 0.6];
+}
+
 /** A line whose speed OSM never recorded. Grey, not "slow" — absence is not a measurement. */
 export const RAIL_UNTAGGED = '#6b7280';
 
