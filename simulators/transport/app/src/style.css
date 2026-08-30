@@ -1,6 +1,9 @@
+/* The band colours are NOT here. They live in BANDS in src/main.ts, because the map paint
+   expression and the legend both read them and a MapLibre expression cannot resolve a CSS
+   variable. A duplicate set used to sit here, referenced by nothing — editing it would have
+   changed no pixel while looking exactly like the place to change the colours. */
 :root {
   --bg: #12141a; --panel: #1a1d26; --ink: #e8eaf0; --dim: #98a0b3; --line: #2a2f3d;
-  --b1: #1a9850; --b2: #a6d96a; --b3: #fee08b; --b4: #fdae61; --b5: #d73027; --none: #3a3f4d;
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink);
@@ -47,7 +50,19 @@ ul { list-style: none; padding: 0; margin: 8px 0 0; }
   font: 13px/1.45 system-ui, sans-serif; padding: 10px 12px; }
 .maplibregl-popup-tip { border-top-color: var(--panel); border-bottom-color: var(--panel); }
 @media (max-width: 900px) {
-  main { grid-template-columns: 1fr; grid-template-rows: 55vh 1fr; }
-  #map { height: 55vh; }
-  #panel { border-left: none; border-top: 1px solid var(--line); }
+  /* dvh, not vh: on mobile Safari and Chrome `100vh` is the viewport with the URL bar
+     *hidden*, so a 100vh layout is taller than the screen from the moment it loads and the
+     panel starts below the fold. dvh tracks the bar as it collapses. */
+  /* body is height:100% for the desktop full-bleed layout; on mobile the page has to be
+     allowed to grow past the viewport or the panel is unreachable below a clipped body. */
+  html, body { height: auto; }
+  main { grid-template-columns: 1fr; grid-template-rows: 52dvh auto; height: auto; min-height: 100dvh; }
+  #map { height: 52dvh; position: sticky; top: 0; }
+  #panel { border-left: none; border-top: 1px solid var(--line); overflow-y: visible;
+    padding: 16px 16px 40px; }
+  /* The map is sticky, so the page scrolls the panel under it and the reader keeps the
+     geography in view while reading the numbers that describe it. */
+  h2 { margin-top: 20px; }
+  select, #toggle button, .up { min-height: 40px; }
+  #toggle button { padding: 10px 8px; }
 }

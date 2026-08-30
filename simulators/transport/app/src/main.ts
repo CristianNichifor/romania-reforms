@@ -30,12 +30,18 @@ interface Consolidation {
   journey: Array<[number, number] | null>;
 }
 
+// RdYlBu, not RdYlGn. The previous ramp ran green→red, which ColorBrewer marks as *not*
+// colour-blind safe: to the ~8% of men with deuteranopia or protanopia the two ends of it are
+// the same colour, and on this map the ends carry the entire meaning — "your county seat is
+// twenty minutes away" against "two hours". Swapping green for blue keeps the ramp diverging
+// and legible under every common form of colour vision deficiency, and it stays ordered in
+// greyscale. The popup also states the number, which is the real backstop.
 const BANDS: Array<{ upTo: number; colour: string; label: string }> = [
-  { upTo: 45, colour: '#1a9850', label: 'sub 45 min' },
-  { upTo: 60, colour: '#a6d96a', label: '45–60 min' },
-  { upTo: 90, colour: '#fee08b', label: '60–90 min' },
+  { upTo: 45, colour: '#2c7bb6', label: 'sub 45 min' },
+  { upTo: 60, colour: '#abd9e9', label: '45–60 min' },
+  { upTo: 90, colour: '#ffffbf', label: '60–90 min' },
   { upTo: 120, colour: '#fdae61', label: '90–120 min' },
-  { upTo: Infinity, colour: '#d73027', label: 'peste 120 min' },
+  { upTo: Infinity, colour: '#d7191c', label: 'peste 120 min' },
 ];
 const NO_DATA = '#3a3f4d';
 
@@ -250,7 +256,7 @@ async function main() {
           'line-color': [
             'case',
             ['<', ['get', 'maxspeed'], 0], '#6b7280',
-            ['step', ['get', 'maxspeed'], '#d73027', 51, '#fdae61', 91, '#a6d96a', 121, '#1a9850'],
+            ['step', ['get', 'maxspeed'], '#d7191c', 51, '#fdae61', 91, '#abd9e9', 121, '#2c7bb6'],
           ],
           'line-width': ['interpolate', ['linear'], ['zoom'], 6, 1.1, 10, 2.6],
         },
@@ -347,6 +353,10 @@ async function main() {
 
   writeHash(scenario, chosen.id);
   renderStats();
+  // The geometry is several MB and the map is blank until it lands. `role="status"` means a
+  // screen reader announces it without stealing focus; removing the node is what tells a
+  // sighted reader the blank map is finished rather than broken.
+  el('loading').remove();
 }
 
 main().catch((error) => {
