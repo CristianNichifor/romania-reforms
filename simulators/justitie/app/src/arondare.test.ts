@@ -19,7 +19,7 @@ import { resolve } from 'node:path';
 import { beforeAll, describe, expect, it } from 'vitest';
 
 import { DEFAULT_PARAMS } from '../../../administrativ/web/src/model/types';
-import { assign, loadCoupling, type Coupled } from './arondare';
+import { assign, changedParams, loadCoupling, readScenario, type Coupled } from './arondare';
 
 const DATA = resolve(__dirname, '../public/data');
 const REFERENCE = resolve(__dirname, '../../data/arondare-noua.json');
@@ -116,6 +116,36 @@ describe('the browser arondare against the Python reference', () => {
     const small = assign(coupled, { ...coupled.defaults, pTarget: 25_000 }).summary;
     const large = assign(coupled, { ...coupled.defaults, pTarget: 100_000 }).summary;
     expect(small.units).toBeGreaterThan(large.units);
+  });
+
+  it('follows a scenario carried in the URL, parameters and pins alike', () => {
+    // The administrative app's own hash format: pt is the population target, pin is a
+    // "uat.seat" override. If this page ignored either, a reader who built a map next door
+    // would be shown a different country without being told.
+    const link = readScenario('#pt=100000&n=3');
+    expect(link.params.pTarget).toBe(100_000);
+    expect(link.params.nMin).toBe(3);
+    expect(changedParams(link.params).sort()).toEqual(['nMin', 'pTarget']);
+
+    const fromLink = assign(coupled, link.params, link.pins).summary;
+    const atDefaults = assign(coupled, coupled.defaults).summary;
+    expect(fromLink.units).not.toBe(atDefaults.units);
+  });
+
+  it('carries manual seat pins into the judicial map', () => {
+    const pinned = readScenario('#pin=5.7');
+    expect(pinned.pins).toEqual([{ uat: 5, seat: 7 }]);
+    // A pin forces one commune to a seat it would not otherwise take, so the court that
+    // commune answers to can change. What must not happen is the pin being silently dropped.
+    const withPin = assign(coupled, pinned.params, pinned.pins);
+    expect(withPin.courtOf.length).toBe(coupled.data.uatCount);
+  });
+
+  it('treats an empty or malformed hash as the defaults', () => {
+    for (const hash of ['', '#', '#pt=nonsense']) {
+      expect(readScenario(hash).params.pTarget).toBe(coupled.defaults.pTarget);
+      expect(changedParams(readScenario(hash).params)).toEqual([]);
+    }
   });
 
   it('is deterministic', () => {
