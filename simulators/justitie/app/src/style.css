@@ -409,3 +409,64 @@ dd {
   margin-top: 0.9rem;
   padding-top: 0.85rem;
 }
+
+/* The paper's chapters, as the page's spine.
+ *
+ * Sections used to be named after whatever happened to be computable — "Sporurile",
+ * "Parchetele" — so a reader could not map the page back to the document, and a chapter nobody
+ * had modelled simply did not appear. The ledger states coverage instead of implying it. */
+.ledger {
+  list-style: none;
+  margin: 0.6rem 0;
+  padding: 0;
+  font-size: 0.82rem;
+}
+.ledger li {
+  display: grid;
+  grid-template-columns: 1rem 1.35rem 1fr auto;
+  gap: 0.3rem;
+  align-items: baseline;
+  padding: 0.12rem 0;
+  color: var(--muted);
+}
+.ch-mark { text-align: center; }
+.ch-n { text-align: right; opacity: 0.7; }
+.ch-p { font-variant-numeric: tabular-nums; opacity: 0.55; font-size: 0.76rem; }
+/* Computed chapters carry the page's own emphasis; quoted ones sit back; uncovered ones are
+ * dimmed but never hidden — the whole point is that they stay countable. */
+.ch-simulat { color: var(--fg); }
+.ch-simulat .ch-mark { color: var(--accent, #7fb3ff); }
+.ch-citat .ch-mark { opacity: 0.5; }
+.ch-negacoperit { opacity: 0.62; }
+.ch-negacoperit .ch-mark { color: #e5484d; opacity: 0.8; }
+
+/* Which chapter a section answers to, and whether it is the paper speaking or the model. */
+.ch-badge {
+  margin-left: 0.45rem;
+  margin-right: auto;
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+  text-transform: lowercase;
+  color: var(--muted);
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 0.02rem 0.4rem;
+  opacity: 0.65;
+  white-space: nowrap;
+}
+
+/* Uncovered chapters. The two kinds are styled apart on purpose: one is work not done, the
+ * other is material that was never a quantity, and a reader should not have to read the
+ * sentence to tell which. */
+.gap {
+  margin: 0.45rem 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+  padding-left: 0.6rem;
+  border-left: 2px solid currentColor;
+  opacity: 0.75;
+}
+.gap-buildable {
+  color: #e5a23d;
+  opacity: 1;
+}

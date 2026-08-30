@@ -49,6 +49,8 @@ const sources = [
   [resolve(here, '../../data/eficienta-csm.json'), 'eficienta.json'],
   // The prosecution service, reorganised in parallel by 7.3.
   [resolve(here, '../../data/parchete-2025.json'), 'parchete.json'],
+  // The ledger: which chapters this page checks, quotes, or leaves alone.
+  [resolve(here, '../../data/acoperire.json'), 'acoperire.json'],
   [resolve(here, '../../data/court-distance.bin'), 'court-distance.bin'],
   // The administrative model's own payload, so the merge can be re-run here as the reader
   // moves the sliders. Copied rather than fetched across from the administrative site: 1,6 MB

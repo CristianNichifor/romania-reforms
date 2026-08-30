@@ -89,6 +89,28 @@ interface Servicii {
   limitations: Limitation[];
 }
 
+interface Acoperire {
+  counts: {
+    simulat: number;
+    citat: number;
+    negacoperit: number;
+    buildable: number;
+    notAQuantity: number;
+    total: number;
+  };
+  chapters: {
+    number: number;
+    title: string;
+    page: number;
+    simulated: string[];
+    quoted: boolean;
+    gap: 'buildable' | 'not-a-quantity' | null;
+    why: string | null;
+    status: 'simulat' | 'citat' | 'negacoperit';
+  }[];
+  limitations: Limitation[];
+}
+
 interface Parchete {
   levels: {
     level: string;
@@ -357,6 +379,7 @@ async function main(): Promise<void> {
     politie,
     eficienta,
     parchete,
+    acoperire,
   ] = await Promise.all([
     fetch(`${base}data/instante.json`).then((r) => r.json() as Promise<Document>),
     fetch(`${base}data/counties.geojson`).then((r) => r.json()),
@@ -375,6 +398,7 @@ async function main(): Promise<void> {
     fetch(`${base}data/politie.json`).then((r) => r.json() as Promise<Politie>),
     fetch(`${base}data/eficienta.json`).then((r) => r.json() as Promise<Eficienta>),
     fetch(`${base}data/parchete.json`).then((r) => r.json() as Promise<Parchete>),
+    fetch(`${base}data/acoperire.json`).then((r) => r.json() as Promise<Acoperire>),
   ]);
   const countyName = (code: string): string => manifest.countyNames?.[code] ?? code;
 
@@ -909,6 +933,42 @@ async function main(): Promise<void> {
   // The tightest staffing target, where the grade choice costs the most. Sorted rather than
   // indexed, and the fold is skipped entirely if the document ships no targets at all.
   const [lowest] = [...proiect.gradeChoiceSwing].sort((a, b) => a.target - b.target);
+  const MARK = { simulat: '●', citat: '○', negacoperit: '✕' } as const;
+  el('#acoperire-chev').textContent =
+    `${acoperire.counts.simulat} din ${acoperire.counts.total} capitole`;
+  el('#acoperire-body').innerHTML =
+    `<p class="note">Lucrarea are ${acoperire.counts.total} de capitole. Pagina calculează
+       ${acoperire.counts.simulat}, citează ${acoperire.counts.citat} ca text al autorului
+       fiindcă sunt arhitectură instituțională, nu mărimi, și nu atinge deloc
+       ${acoperire.counts.negacoperit}.</p>
+     <ol class="ledger">
+       ${acoperire.chapters
+         .map(
+           (c) =>
+             `<li class="ch-${c.status}"><span class="ch-mark">${MARK[c.status]}</span>
+                <span class="ch-n">${c.number}.</span>
+                <span class="ch-t">${c.title}</span>
+                <span class="ch-p">p.${c.page}</span></li>`,
+         )
+         .join('')}
+     </ol>
+     <p class="note">● calculat  ○ citat, nu măsurat  ✕ neatins. „Calculat” nu înseamnă
+       „confirmat”: premisa capitolului 12 e verificată și nu se susține.</p>`;
+
+  // Each section says which chapter it belongs to, so the page can be read against the paper.
+  const badge = (id: string, chapter: number, kind: 'politică' | 'simulare' | 'ambele'): void => {
+    const chapterInfo = acoperire.chapters.find((c) => c.number === chapter);
+    const host = document.querySelector(`#${id} > summary`);
+    if (!host || !chapterInfo) return;
+    const tag = document.createElement('span');
+    tag.className = 'ch-badge';
+    // Just the number. Spelling out "simulare"/"ambele" pushed every title onto three lines
+    // in a 314-pixel panel; the ledger already carries the kind, and the tooltip has the rest.
+    tag.textContent = `cap. ${chapter}`;
+    tag.title = `${chapterInfo.title} (p. ${chapterInfo.page}) — ${kind}`;
+    host.insertBefore(tag, host.querySelector('.chev'));
+  };
+
   const PARCHET_LABEL: Record<string, string> = {
     piccj: 'PÎCCJ + DNA, DIICOT',
     'curte-de-apel': 'pe lângă curți de apel',
@@ -1311,6 +1371,34 @@ async function main(): Promise<void> {
 
   // The limitations are part of the map, not a footnote to it. The blocking one is the reason
   // this shows where courts are and refuses to show what closing one would cost.
+  // The chapters nobody covered, listed rather than left invisible. Split by kind: a chapter
+  // that could be built is an admission of work not done, and one that is not a quantity is a
+  // statement about the material. Merging them would excuse the first or invent the second.
+  const uncovered = acoperire.chapters.filter((c) => c.status === 'negacoperit');
+  const buildable = uncovered.filter((c) => c.gap === 'buildable');
+  el('#gaps-count').textContent = `${buildable.length} din ${uncovered.length} se pot construi`;
+  el('#gaps').innerHTML = uncovered
+    .map(
+      (c) =>
+        `<p class="gap ${c.gap === 'buildable' ? 'gap-buildable' : ''}">
+           <strong>${c.number}. ${c.title}</strong> — ${
+             c.gap === 'buildable' ? 'se poate calcula, nu am făcut-o' : 'nu e o mărime'
+           }. ${c.why ?? ''}</p>`,
+    )
+    .join('');
+
+  [
+    ['eficienta-fold', 12, 'simulare'],
+    ['parchete-fold', 7, 'ambele'],
+    ['sporuri-fold', 10, 'simulare'],
+    ['arondare-fold', 12, 'simulare'],
+    ['spitale-fold', 7, 'simulare'],
+    ['proiect-fold', 10, 'simulare'],
+    ['pensii-fold', 11, 'ambele'],
+  ].forEach(([id, chapter, kind]) =>
+    badge(id as string, chapter as number, kind as 'politică' | 'simulare' | 'ambele'),
+  );
+
   // Blocking caveats stay in the open; the rest fold. Thirteen paragraphs under a map is a
   // wall a reader scrolls past, and the ones that change how a number should be read are not
   // the ones to lose that way.
@@ -1327,6 +1415,7 @@ async function main(): Promise<void> {
     ...politie.limitations,
     ...eficienta.limitations,
     ...parchete.limitations,
+    ...acoperire.limitations,
   ];
   const blocking = allLimits.filter((l) => l.severity === 'blocking');
   const rest = allLimits.filter((l) => l.severity !== 'blocking');
