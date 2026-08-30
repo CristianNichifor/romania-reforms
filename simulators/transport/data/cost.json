@@ -57,8 +57,8 @@
     },
     {
       "id": "preturile-nu-sunt-citate",
-      "text": "Niciun preț unitar din data/cost-inputs.json nu provine dintr-o sursă publică citată. Sunt estimări de lucru și costul total le moștenește incertitudinea în întregime.",
-      "severity": "blocking",
+      "text": "O parte dintre prețurile unitare din data/cost-inputs.json au sursă publică — salariul șoferului, motorina fără TVA, rovinieta, prețurile de referință ale vehiculelor, durata anvelopelor — iar întreținerea este derivată dintr-un reper european ajustat salarial. Fără sursă rămân anvelopele pe kilometru, asigurarea, gararea și cota de administrație. Fiecare poziție își poartă propria proveniență în fișier: o versiune anterioară a acestei limitări spunea că niciun preț nu are sursă, ceea ce nu mai este adevărat de la sursarea salariului și a motorinei.",
+      "severity": "material",
       "affects": [
         "cost"
       ]
@@ -81,7 +81,7 @@
     },
     {
       "id": "cost-pe-km-sub-referinta-ajustata",
-      "text": "Costul de funcționare iese 5,7 lei pe kilometru, față de circa 8,8 lei cât ar fi o operare rurală vest-europeană cu partea de salarii ajustată la nivelul românesc. Ponderea șoferilor, ajustată la fel, se potrivește — 27% față de 22% așteptat — deci diferența stă în costurile care nu depind de salarii. Este întrebarea deschisă a acestui nivel.",
+      "text": "Costul de funcționare iese 6,47 lei pe kilometru. Față de tariful aprobat la Buzău în 2025, convertit prin numărul mediu de locuri cum cere metodologia ANRSC, modelul este la 0,92 din reper la 20 de locuri — capacitatea pe care o cer de obicei programele județene — și la 0,45 la media parcului modelat. Reperul NU se poate compara direct: costul pe kilometru nu crește proporțional cu locurile, deci lei/km/loc nu normalizează între parcuri diferite, iar compoziția parcului din Buzău nu a fost găsită. Ponderea șoferilor este 25% față de 22-24% așteptat după ajustarea salarială a reperului vest-european. O versiune anterioară a acestei limitări afirma că modelul este de 2,3 ori sub reper; afirmația venea din compararea la media parcului nostru și era greșită.",
       "severity": "material",
       "affects": [
         "cost"

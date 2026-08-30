@@ -1,215 +1,131 @@
 # transport — Romanian public transport simulator
 
-What it costs per year to connect every one of Romania's 3 186 UATs to public transport at a
-declared standard, and who can actually get where.
+What it would cost per year to connect every one of Romania's 3 186 UATs to a **fixed, published**
+public transport service, who could actually get where, and what a minute of journey time costs
+to buy — by bus or by rail.
 
 Design: [`docs/superpowers/specs/2026-08-29-transport-design.md`](../../docs/superpowers/specs/2026-08-29-transport-design.md).
-Plan for this layer: [`docs/superpowers/plans/2026-08-29-transport-l0-travel-time.md`](../../docs/superpowers/plans/2026-08-29-transport-l0-travel-time.md).
 
 ## Status
 
-**`L0` built and run at national scale. Derived throughout, and validated against nothing.**
+**Built end to end and published.** Measured road limits → derived speeds → hubs → routes →
+fleet → cost in lei → journey times → consolidation scenarios → rail track, rail cost, and the
+comparison between them, on a map.
 
-The travel-time substrate exists, its inputs are measured, and its machinery is checked. What
-does not exist anywhere in this repository is an observation of a real Romanian journey — so
-the model is defensible part by part and unverified as a whole. That is a declared limitation
-carried in provenance, not a footnote; every number built on `L0` inherits it.
+**Nothing here is validated against a recorded Romanian journey.** No such observation exists in
+this repository. The model is defensible part by part and unverified as a whole; that is a
+declared limitation carried in provenance, and every number inherits it. Rail is the exception in
+one direction only — its speed model is anchored at both ends, to a measurement and to a
+published national average.
 
-First full run over the OSM Romania extract:
-
-```
-road_graph                 511.650 road features -> 5.710.662 junctions
-seat_snapping              median 19 m, max 749 m; 0 beyond 5.000 m
-routed_pairs               9.235 of 9.281 adjacent pairs; 46 unreachable
-travel_time_distribution   median 16,0 min, p90 35,0 min, max 178,5 min
-implied_speed              median 50,0 km/h over 9.086 pairs; 0 above 110
-```
-
-## L1: the network, and what it costs in vehicles
-
-**Two tiers built: T3 feeders and T2 trunk. T1, county seat to county seat, is not built.**
-
-Every UAT gets a **fixed, published** timetable. What population changes is how many
-departures a place receives and where they sit in the day; what it never changes is whether
-they can be relied on. Nothing here is booked in advance.
-
-| class | UATs | people | departures/day | seats |
-|---|---|---|---|---|
-| basic | 887 | 1 247 536 | 4, all on the peaks | 20 |
-| feeder | 1 587 | 4 967 997 | 9 | 40 |
-| trunk | 712 | 12 838 282 | 16, across the day | 50 |
-
-Routes come from a shortest-path tree out of each of the 249 hubs; every leaf becomes a route
-stopping at each UAT down its branch. That alone collapses **2 895 UAT-to-hub shuttles into
-1 537 routes**, because a village on the way to a further village is a stop rather than a
-service of its own.
-
-The network has two tiers, both from the same tree. **T3 feeders** take every UAT to its
-centre; **T2 trunk** routes take every centre to its county seat. `members` decides what a
-route serves and `zone` what it may cross, so a trunk route drives through the villages
-between two centres without being responsible for them — their own feeder is.
+## The headline
 
 ```
-             routes   one-way min: median   p90    max   over an hour
-T3 feeder     1.537                  27,6  49,8  121,7             50
-T2 trunk        171                  60,6 105,4  146,3             87
-
-UATs served   2.923    unroutable 14    centres with no trunk route 1
-accounted for 3.186 of 3.186
+network      249 centres   1.708 routes   4.057 buses   1,80 mld lei/an
+journey      median 98 min uncoordinated, 73 min pulsed (population-weighted)
+rail         12.516 km of passenger line, 1.993 stations
+             45,0 km/h as the track stands, 74,3 km/h rehabilitated
+a minute     356 lei per passenger-hour by rehabilitating track
+             0 lei per passenger-hour by coordinating the buses that already run
 ```
 
-**The trunk leg is the longer half.** A feeder reaches a centre in a median 27,6 minutes; from
-there to the county seat is a median 60,6. A full journey is therefore around 88 minutes one
-way *before* any wait at the transfer, which is not yet modelled. Costing feeders alone would
-have described a network that connects nobody to their county town.
+## What the model found
 
-### What the network costs
+Three findings, each of which contradicted something in the design document or in my own
+reasoning, and each of which is reproducible from the committed data.
 
-```
-                        T3 feeder    T2 trunk     network
-peak vehicles               2.351         477       2.828
-bus-hours / weekday        14.295       5.805      20.100
-bus-km / weekday          718.859     299.485   1.018.344
-fleet incl. 15% spare                                3.253
+### 1. Consolidating harder makes journeys *shorter*
 
-annualised: 5,03 M bus-hours, 254,6 M bus-km
-```
+The project was designed around a trade: fewer centres save administrative money and cost
+travel time. The sweep says the trade runs the other way.
 
-Two things that only show up once the tiers are separated.
+| scenario | centres | fleet | cost/yr | median journey | admin saving |
+|---|---|---|---|---|---|
+| default | 249 | 4 058 | 1,80 md | 73 min | 8,73 md |
 
-**Merging works on the feeders.** Against the one-bus-per-village upper bound of 3 914 peak
-vehicles, the routed feeders need 2 351 — down 40% — while driving falls only 27%, because
-merging four villages onto one route removes three *concurrent* buses over similar ground.
-Keeping the peak and the hours apart is the whole reason `fleet.py` exists.
+| higher absorber bar | 233 | 4 009 | 1,79 md | 70 min | 8,81 md |
+| smaller radii | 255 | 4 017 | 1,78 md | 75 min | 8,69 md |
+| no population target | 347 | 4 028 | 1,79 md | 73 min | 8,20 md |
+| **one centre per county** | **41** | **4 799** | **2,38 md** | **52 min** | — |
 
-**The trunk tier is cheap in fleet and expensive in hours.** It adds 20% more vehicles but
-41% more bus-hours, from a tenth of the routes — long journeys run frequently, where feeders
-are short journeys run rarely. That is the opposite shape to the feeders, and it is where the
-operating cost will land when `L2` prices it.
+At one centre per county the journey is **28% shorter** and transport **33% dearer**. Removing
+the hub removes the transfer, and the transfer was the expensive part. Between 233 and 347
+centres almost nothing moves at all — under 1% on cost, under 5% on journey time — so the
+parameter the reform argues about is not the parameter that matters.
 
-**Spares are a depot float, applied once to the network.** Applying the ratio route by route
-and rounding up buys a spare for every single-bus service — `ceil(1 × 1,15)` is 2, a 100%
-margin from 15%. Measured, that was 6 809 buses against 4 502.
+The default row reads 4 058 against `data/cost.json`'s 4 057, because the sweep recomputes hub
+assignment in memory while `build_cost` reads the committed `network.json`, and one tie breaks
+differently. It is 0,003% of cost and one bus in four thousand — left alone, but held by
+`test_the_sweep_default_agrees_with_the_costed_network` so that it cannot widen unnoticed.
 
-### The 14 places with no road
+### 2. Coordination beats capital, twice
 
-`data/network.json` names them rather than counting them, and named they validate the model:
-Chilia Veche, Crișan, C.A. Rosetti, Maliuc, Pardina and Ceatalchioi in the Danube Delta,
-Frecăței and Mărașu on the Brăila river islands. Reachable only by water, found without being
-told they exist. Every cost figure here therefore describes the country **minus** those places.
+Pulsing the timetable — same buses, same kilometres, same drivers, only the departure times
+move — takes the median journey from 98 to 73 minutes. Population within 90 minutes goes from
+46,9% to 57,5%. It costs nothing: `ceil(cycle / headway)` is unchanged by padding, so the
+rounding does not buy a single extra vehicle.
 
-## L2: what it costs a year
+Rail says the same thing from the other side. Rehabilitating track buys an hour of passenger
+time for 356 lei. Buying the 7,0 m passenger-hours that pulsing gives away free would cost
+**2,50 md lei a year — more than the entire bus network costs to run.**
 
-```
-operating   1,45 mld RON      capital  0,27 mld      total  1,72 mld
-against an administrative saving of 8,73 mld claimed by the same map
-```
+These are unit prices, not two ways of serving the same people; rail passengers and bus
+passengers are different people on different routes. What survives is the ordering: the
+organisational fix goes first because it is nearly free, not because renewal is pointless.
 
-Every unit price sits in `data/cost-inputs.json` with its own confidence and note, so a reader
-disputing the driver wage argues with one row rather than with the model. **None of them is
-cited from a public source**, and the file says so in a blocking limitation. The engine is pure
-arithmetic over that file: replacing a guess with a sourced figure needs no code change.
+### 3. Romania loses 39% of the speed its own alignment already permits
 
-### The checks, and the one that still fails
+| | |
+|---|---|
+| measured line speed | **88,0 km/h** — OSM `maxspeed`, 8 485 main/branch segments |
+| physics ceiling | **74,3 km/h** — kinematics at 10 km stop spacing |
+| observed commercial | **45,0 km/h** — published national average |
+| condition residual | **0,606** — *derived, not assumed* |
 
-Benchmarks have to be wage-adjusted or they answer a question about a different country. A
-western rural operation runs near 2,5 EUR/km at ~45% driver — but its drivers cost about
-32 EUR/h against ours at 11,3.
+The gap is not geometry: the curves are where they are in both numbers. It is slow orders over
+worn rail, single-track crossing waits, and the 65% of track and 85% of catenary CFR's own
+renewal figures describe as life-expired. So the model does not assume a condition penalty; it
+measures one as the residual between what the alignment permits and what the network delivers.
 
-```
-driver share of operating     27%    expect ~22%        ok
-commercial speed             36,8    expect 25-40 km/h  ok
-operating cost per bus-km    5,71    expect ~8,8 RON    LOW — the open question
-```
+A perverse property falls out of CFR's tariff: it bands lines by permitted speed **including
+permanent restrictions**, and charges 3,45 lei/train-km on the best band against 1,48 on the
+worst. A worn line is cheaper to run on and slower. Renewal is partly self-taxing, and the model
+charges it for that.
 
-Two of these only pass because earlier versions were wrong, and the corrections are worth
-recording. **Commercial speed** was 48,6 km/h, because free-flow road time is not service time;
-it is now divided by an explicit, disputable factor of 0,75 calibrated against the observed
-25-40 range. Stops are not in that factor — dwell is charged separately, and braking away from
-a stop was measured against the kinematics in `speeds.py` at 14,5 s, which over a median three
-stops is 3% and nowhere near the gap.
-
-**Driver share** was reported as failing against a 35-55% band. That band was Western European
-and the model was right: wage-adjusted, Romania should sit near 22%.
-
-What genuinely remains open is cost per kilometre. The driver half now matches, so the shortfall
-is in the costs that do not depend on wages — maintenance, tyres, insurance, depot, vehicle
-prices — and none of those is sourced.
-
-### The validation that would settle it
-
-Consiliul Județean Buzău approved an average tariff of **0,35 lei/km/loc** for route group 06 in
-2025, up from 0,30. It is not a guess: it comes from a *fișă cu structura pe elemente de
-cheltuieli*, built on the three operators' balance sheets at 31 December 2024 and their January
-2025 payroll. That is a real Romanian operating cost, published, and one of forty-one counties
-that publish the same thing.
-
-It is **not used here**, because converting lei/km/loc into lei per vehicle-km needs the
-occupancy convention in Ordinul ANRSC 272/2007 (as amended by 134/2019), which has not been
-established. Read as per-seat it implies about 16 lei/km; read as per average passenger, about 7.
-The model sits at 6,10 — so the conversion decides whether the model is roughly right or low by
-more than half, and guessing it would be worse than leaving the gap open.
-
-Establishing that one convention would validate the **total**, not a single line, and it is the
-highest-value piece of work outstanding on this simulator.
-
-## What L0 is
-
-`simulators/administrativ` measures the road **distance** between the seats of adjacent UATs.
-This measures the **time**, over the same OSM network, the same junction graph and the same
-seat snapping — the only difference is that each segment is divided by a speed before the
-search.
-
-It is not only for this simulator. `justitie` already maps what court consolidation costs in
-travel and carries an explicit caveat against its own figures: *kilometres are not hours;
-forty in the mountains can cost more than eighty on the plain.* That caveat is a limitation of
-the unit, and this is what retires it.
+## The layers
 
 | file | what it holds |
 |---|---|
-| `scripts/measure_limits.py` | Measures signed limits per road class from OSM → `data/road-limits.json`. |
-| `scripts/speeds.py` | Derives effective speed from those limits plus kinematics. |
+| `scripts/measure_limits.py` | Signed limits per road class from OSM → `data/road-limits.json`. |
+| `scripts/speeds.py` | Effective road speed: measured limits + kinematics + one assumed efficiency. |
 | `scripts/build_road_time.py` | Drives administrativ's graph with a time weight → `data/road_time.parquet`. |
-| `scripts/county_times.py` | Accumulates one-hop times into journeys, within one county. |
-| `scripts/check_gate.py` | Comparison harness for recorded drive times. Currently uncalibrated. |
+| `scripts/county_times.py` | Dijkstra over UAT adjacency, within a routing zone. |
+| `scripts/network.py` `tiers.py` | Routes from shortest-path trees; three fixed service classes. |
+| `scripts/fleet.py` `costs.py` | Peak vehicles vs bus-hours; unit prices into lei. |
+| `scripts/build_access.py` | Feeder + wait + trunk → `data/access.json`. |
+| `scripts/sweep_scenarios.py` | Five consolidation scenarios → `data/scenarios.json`. |
+| `scripts/rail_speeds.py` | Commercial speed by track condition class, calibrated at both ends. |
+| `scripts/build_railnet.py` | Rail graph, station↔UAT join, county-seat times, map geometry. |
+| `scripts/rail_costs.py` `build_rail_cost.py` | TUI, energy, crew, rolling stock, rehabilitation. |
+| `app/` | MapLibre map. No basemap, no runtime calls, everything client-side. |
 
-## Where the speeds come from
+## Where the road speeds come from
 
-An earlier version of `speeds.py` was a column of judgement calls — `trunk: 75.0` and a
-paragraph arguing that Romanian national roads do not deliver their legal 90. The argument was
-right and the number was not, and nothing in the file could tell you which. It is now three
-separable parts, so a critic can attack one without having to accept the others.
+Three separable parts, so a critic can attack one without accepting the others.
 
-**1. Measured limits** (`derived`). From 505 456 OSM features, length-weighted. The finding
-that shapes everything: below motorway, the *open-road* limit is essentially the national 90 on
-every class. Trunk, primary, secondary and tertiary are not signed differently out in the
-country. What separates them is how much of their length runs **inside a locality** at 50:
+**1. Measured limits** (`derived`). Length-weighted over 505 456 OSM features. The finding that
+shapes everything: below motorway the *open-road* limit is essentially the national 90 on every
+class. What separates a national road from a communal one is how much of its length runs
+**inside a locality** at 50 — 32% for trunk, 59% for secondary, 79% for tertiary. A DN is not
+slow because it is a worse road; it is slow because a third of it threads through villages.
 
-| class | inside a locality | open-road limit | coverage |
-|---|---|---|---|
-| motorway | 0% | 126,7 | 96% |
-| trunk | 32% | 94,1 | 84% |
-| primary | 51% | 88,0 | 88% |
-| secondary | 59% | 89,2 | 74% |
-| tertiary | 79% | 89,4 | 56% |
-| unclassified | 95% | 88,6 | 41% |
-| residential | 100% | 85,5 | 38% |
+**2. Kinematics** (computed). Braking into a locality and accelerating out, from the speed
+change and the vehicle's rates. About five seconds per village for a bus — smaller than
+intuition suggests, which is itself the point: the crawl through the village is the cost, not
+the braking at its edge.
 
-A DN is not slow because it is a worse road. It is slow because a third of it threads through
-the villages it connects — a fact about settlement geography, not asphalt. Below 30% coverage a
-class is marked unusable and takes the pessimistic fallback rather than pretending.
-
-**2. Kinematics** (computed). Leaving a 90 zone for a 50 zone costs braking and re-acceleration
-against cruising, from the speed change and the vehicle's rates. It is smaller than intuition
-suggests — about five seconds per village for a bus — which is itself the point: a village
-costs a minute of crawling and a few seconds of braking, so the crawl is what matters.
-
-**3. Efficiency per class** (`assumed`). Curves, junctions, surface, traffic, and nobody driving
-at the limit continuously. The one genuinely assumed term, per class because a motorway has no
-junctions and a village lane is all junction. **This is where a dispute about these numbers
-should land.**
-
-Resulting effective speeds, km/h:
+**3. Efficiency per class** (`assumed`). Curves, junctions, surface, traffic. The one genuinely
+assumed term, and **where a dispute about these numbers should land.**
 
 | class | car | bus |
 |---|---|---|
@@ -220,93 +136,123 @@ Resulting effective speeds, km/h:
 | tertiary | 44,3 | 43,5 |
 | residential | 37,1 | 36,8 |
 
-**A bus and a car converge below trunk.** Those roads are bound by their own geometry, not by
-the vehicle, so on the rural network that carries most UAT-to-UAT travel, vehicle choice is not
-a lever on journey time. The bus penalty is real only on motorway and trunk — which is where
-the inter-county and trunk layers run, and nowhere else.
+**A bus and a car converge below trunk.** Those roads are bound by their geometry, not by the
+vehicle, so on the rural network vehicle choice is not a lever on journey time.
 
-L0 uses the **car** profile: it is a road travel-time substrate, and `justitie` reads the same
-graph to ask how far a citizen is from a courthouse. The bus profile belongs in the timetable
-layer above, together with dwell time, which is not a property of a road.
+## Where the money comes from
 
-## The change to administrativ is verified beyond what CI can show
+```
+driver     0,42 md      running   1,00 md      standing  0,05 md
+admin      0,18 md      capital   0,15 md      total     1,80 md
+```
 
-`L0` gave `pipeline.build_graph` an optional speed argument, so administrativ's every region
-boundary now flows through a function this simulator edited. CI cannot prove that safe: it
-skips administrativ's reference-model and parity tests for want of the built artefacts.
+Operating cost scales with what the buses do; capital with how many must exist. Fold them
+together and the trade between a peaky timetable and a large fleet disappears — which is how a
+transit system gets costed wrong in a way nobody can see.
 
-With the artefacts present locally the full suite is **114 passed, 0 skipped** — where it is 64
-passed and 50 skipped in CI. Those 50 include the parity fixtures, which compare the Python
-reference model against the TypeScript port by hash across all 3 186 UATs. Every region
-assignment is unchanged.
+**The rail side is better sourced than the road side**, which was not expected. CFR publishes its
+access tariff in the network statement and the procurements are public, so TUI, rolling stock
+and rehabilitation are all `verbatim` — including a maintenance figure contracted separately,
+the exact split no Romanian bus source would yield.
 
-## What the run settled
+### Sanity checks
 
-**153 pairs administrativ cannot reach do have road routes** — 149 under the current model.
-Administrativ bounds its search at 60 km of distance and records 195 adjacent pairs as
-unreachable. Bounding by *time* reaches further along fast roads and routes most of them, 55 to
-159 minutes. No pair goes the other way.
+```
+driver share of operating     25%    expect ~24%        ok
+commercial speed             36,8    expect 25-40 km/h  ok
+operating cost per bus-km    6,47    0,92x Buzau at 20 seats
+```
 
-This matters outside this simulator: `reference_model._county_road_distances` substitutes a
-straight-line estimate for an edge it has no measured distance for, so those pairs currently
-carry a Euclidean guess in `justitie`'s published access map where the real drive is over an
-hour.
+Two of these pass only because earlier versions were wrong, and the corrections are the useful
+part.
 
-**The search bound is not tight in practice.** `SEARCH_LIMIT_S` is derived from the table's
-slowest road so that nothing administrativ can reach is truncated, which on paper clears the
-worst case by two seconds. The longest hop actually routed is 99 minutes against a 180-minute
-limit — the theoretical worst case, 60 km entirely at 20 km/h, does not occur.
+**The Buzău benchmark does not normalise across fleets.** ANRSC divides cost per vehicle-km by
+average **seats**, and cost per km does not scale with seats — a 40-seat bus does not cost what
+two 20-seat buses cost. An earlier version of this file claimed the model was 2,3× too low
+against that benchmark. It was comparing at *our* mean of 41 seats; county programmes specify
+capacities in the 20s, where the model sits at 0,92×. That bad comparison sent me chasing
+maintenance and utilisation for a gap that was an artefact of the comparison itself.
 
-## The gate, and what it is not
+**Driver share was reported as failing** against a 35–55% band. That band was Western European.
+Wage-adjusted, Romania should sit near 22–24%, and the model does.
 
-`scripts/check_gate.py` compares modelled times against drive times recorded by a human, in one
-county — Vâlcea, because it has both the Olt gorge and real mountain roads, so the assumption
-that a road class implies a speed is exercised rather than flattered.
+**Maintenance is derived, not guessed.** A European benchmark of 0,45 EUR/km, split into labour
+and parts, with the Romanian wage ratio applied **only to the labour half** — a bearing costs
+what a bearing costs. Discounting the whole figure is precisely the driver-share error again.
+1,20 → 1,49 lei/km, and the model moved *toward* its benchmark and *upward* in cost.
 
-Its reference set is split, because `L0` has two errors pointing opposite ways. The speed model
-may be optimistic; `county_times` is deliberately pessimistic, since it routes through every
-intermediate seat village rather than past it. Compared only as whole journeys the two partly
-cancel and the gate would pass with both components wrong. So `adjacent` drives are checked
-against the raw one-hop edge, where the accumulation cannot reach them, and bias is reported per
-kind:
+## Errors worth keeping
 
-| adjacent | journey | what it means |
-|---|---|---|
-| biased | biased | the speed model is wrong |
-| clean | biased | speeds are fine; the detour through intermediate seats is the cost |
-| biased | clean | the two errors are cancelling — the dangerous case, now visible |
+Recorded because each was silent, and because the mechanism that caught each one is the
+reusable part.
 
-**It has not been run, and no drive times exist for it.** `sources/reference-drive-times-vl.csv`
-holds twelve pairs chosen from the graph — six genuinely adjacent, six six-hops apart, spread
-across gorge, hill and plain — with the times left as placeholders. The pairs are the part that
-could be derived; the times are the part that could not.
+**The fleet was 51% wrong and 34 unit tests passed.** The spare ratio was applied per route, so
+`ceil(1 × 1,15) = 2` bought a spare for every single-bus service: 6 809 buses against 4 502.
+`Resources` now has no `fleet` field at all, and a test asserts its absence.
 
-So this is a **calibration harness that has not been calibrated**, and the layer's honest status
-is *unvalidated* rather than *verified*. That state lives in `speeds.SPEED_PROVENANCE` and in the
-limitations of `data/road-limits.json`, both checked by the repository's data gate, rather than
-in a build that is red forever and learned to be ignored.
+**A join matched 0 of 3 186 rows and rendered a plausible map.** `uats.geojson` carries no
+properties — administrativ keys it by polygon position. The fatal guard in `copy-data.mjs`
+exists because a silently empty join produces a uniform grey map that still renders, which is
+worse than one that does not.
+
+**The rail layer was blocked on a rule, not on data.** The spec said rail times must come from
+the published *Mersul Trenurilor*. But this simulator models a counterfactual, and that
+timetable describes the system being reformed — it would hard-code today's restrictions into an
+answer about tomorrow. It was the wrong input, not the missing one. Once inverted, the layer
+took one sitting.
+
+**A 1,64× rail detour looked like a bug, so it was tested rather than published.** Sweeping the
+junction-snap constant over a tenfold range moves the detour by 7% while halving the node count,
+and connectivity stays complete at every setting. It is the Carpathians, not the graph.
+
+**Two limitations went stale as the work landed.** `cost.json` was publishing "no unit price has
+a public source" after several had been sourced, and `railnet.json` still declared rail cost
+unmodelled after it was built. An artefact that lies about its own limits is worse than one with
+no limits section, because it has been believed once already.
+
+## What this cannot support
+
+Seven `blocking` and `material` limitations travel with the data and reach the page. The ones
+that would change a conclusion:
+
+- **This is cost, not subsidy.** There is no demand model and no fare revenue anywhere here.
+- **Train loading is assumed.** At 96 passengers a passenger-hour costs 356 lei; at half that,
+  double. It is the single number that can overturn the rail comparison's order of magnitude.
+- **The line class is deduced, not read.** CFR's official section-to-class list was not taken;
+  class comes from measured OSM speed using CFR's own thresholds.
+- **The station is not the village.** 5 of 42 county seats have their station beyond 2 km and
+  need a bus to reach their own railway. Reported, not yet added to journey time.
+- **14 UATs have no road route** — the Danube Delta and the Brăila river islands. Every figure
+  here describes the country *minus* those places. They are named in `data/network.json` rather
+  than counted, and they were found without being told they exist.
 
 ## Running it
 
 ```sh
-# In simulators/administrativ, once. The OSM extract is 312 MB; end to end about twenty minutes.
+# In simulators/administrativ, once. The OSM extract is 312 MB; about twenty minutes end to end.
 uv run python -m pipeline.fetch --with-roads
 uv run python -m pipeline.build_geometry
 uv run python -m pipeline.build_seats
 uv run python -m pipeline.build_adjacency
 uv run python -m pipeline.build_road_distance
-# check_gate reads administrativ's full model, not only its road graph:
 uv run python -m pipeline.build_candidacy
 uv run python -m pipeline.build_finance
 
 # Then here:
-uv run python -m scripts.measure_limits    # writes data/road-limits.json (committed)
-uv run python -m scripts.build_road_time   # writes data/road_time.parquet (not committed)
-uv run python -m scripts.export_hubs       # writes data/hubs.json (committed)
-uv run python -m scripts.build_network     # writes data/network.json (committed)
-uv run python -m scripts.cost_network      # vehicles, hours and km against the upper bound
-uv run python -m scripts.check_gate        # the harness; needs recorded times to say anything
+uv run python -m scripts.measure_limits    # data/road-limits.json      (committed)
+uv run python -m scripts.build_road_time   # data/road_time.parquet     (not committed)
+uv run python -m scripts.export_hubs       # data/hubs.json             (committed)
+uv run python -m scripts.build_network     # data/network.json          (committed)
+uv run python -m scripts.build_cost        # data/cost.json             (committed)
+uv run python -m scripts.build_access      # data/access.json           (committed)
+uv run python -m scripts.sweep_scenarios   # data/scenarios.json        (committed)
+uv run python -m scripts.build_railnet     # data/railnet.json + geojson (committed)
+uv run python -m scripts.build_rail_cost   # data/rail-cost.json        (committed)
+
+cd app && npm ci && npm run build
 ```
 
-`data/road-limits.json` is committed — it is small, and it is the measurement the speed model
-rests on. `data/road_time.parquet` is not: it is reproducible from the commands above.
+`data/*.json` and `data/*.geojson` are committed: the first because `scripts/validate_data.py`
+globs them into the repository's one data gate, the second because the app build runs in CI and
+the pipeline that produces them cannot — it needs the OSM extract. `data/*.parquet` is not
+committed; it is reproducible from the commands above.

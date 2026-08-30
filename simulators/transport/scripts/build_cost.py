@@ -122,6 +122,22 @@ def main(argv: list[str] | None = None) -> int:
     saving_admin = hubs["savingsRon"]["administrative"]
     saving_operating = hubs["savingsRon"]["operating"]
 
+    # Computed here rather than in the sanity-check section below, because the limitations
+    # quote them. A limitation carrying a frozen number goes stale the first time an input
+    # moves, and this file has already published two that did.
+    inputs = json.loads((ROOT / "data" / "cost-inputs.json").read_text(encoding="utf-8"))
+    seats = {name: spec["seats"] for name, spec in inputs["vehicles"].items()}
+    mean_seats = sum(seats[c] * n for c, n in fleet_by_class.items()) / sum(fleet_by_class.values())
+    buzau = inputs["benchmarks"]["buzauTariffLeiKmLoc"]["value"]
+    ron_per_bus_km = cost.operating_ron / (sum(km_by_class.values()) * WEEKDAYS_PER_YEAR)
+    driver_share = cost.driver_ron / cost.operating_ron
+    model_vs_benchmark = ron_per_bus_km / (buzau * 20)
+    model_vs_benchmark_ours = ron_per_bus_km / (buzau * mean_seats)
+
+    def ro(value: float, places: int = 2) -> str:
+        """Romanian decimal comma. The limitations are Romanian prose; 6.47 reads as a typo."""
+        return f"{value:.{places}f}".replace(".", ",")
+
     document = {
         "$schema": "../schema/cost.schema.json",
         "id": "cost",
@@ -183,11 +199,16 @@ def main(argv: list[str] | None = None) -> int:
             {
                 "id": "preturile-nu-sunt-citate",
                 "text": (
-                    "Niciun preț unitar din data/cost-inputs.json nu provine dintr-o sursă "
-                    "publică citată. Sunt estimări de lucru și costul total le moștenește "
-                    "incertitudinea în întregime."
+                    "O parte dintre prețurile unitare din data/cost-inputs.json au sursă "
+                    "publică — salariul șoferului, motorina fără TVA, rovinieta, prețurile de "
+                    "referință ale vehiculelor, durata anvelopelor — iar întreținerea este "
+                    "derivată dintr-un reper european ajustat salarial. Fără sursă rămân "
+                    "anvelopele pe kilometru, asigurarea, gararea și cota de administrație. "
+                    "Fiecare poziție își poartă propria proveniență în fișier: o versiune "
+                    "anterioară a acestei limitări spunea că niciun preț nu are sursă, ceea ce "
+                    "nu mai este adevărat de la sursarea salariului și a motorinei."
                 ),
-                "severity": "blocking",
+                "severity": "material",
                 "affects": ["cost"],
             },
             {
@@ -217,11 +238,18 @@ def main(argv: list[str] | None = None) -> int:
             {
                 "id": "cost-pe-km-sub-referinta-ajustata",
                 "text": (
-                    "Costul de funcționare iese 5,7 lei pe kilometru, față de circa 8,8 lei "
-                    "cât ar fi o operare rurală vest-europeană cu partea de salarii ajustată "
-                    "la nivelul românesc. Ponderea șoferilor, ajustată la fel, se potrivește "
-                    "— 27% față de 22% așteptat — deci diferența stă în costurile care nu "
-                    "depind de salarii. Este întrebarea deschisă a acestui nivel."
+                    f"Costul de funcționare iese {ro(ron_per_bus_km)} lei pe kilometru. Față de "
+                    f"tariful aprobat la Buzău în 2025, convertit prin numărul mediu de locuri "
+                    f"cum cere metodologia ANRSC, modelul este la {ro(model_vs_benchmark)} din "
+                    "reper la 20 de locuri — capacitatea pe care o cer de obicei programele "
+                    f"județene — și la {ro(model_vs_benchmark_ours)} la media parcului modelat. "
+                    "Reperul NU se poate compara direct: costul pe kilometru nu crește "
+                    "proporțional cu locurile, deci lei/km/loc nu normalizează între parcuri "
+                    "diferite, iar compoziția parcului din Buzău nu a fost găsită. Ponderea "
+                    f"șoferilor este {driver_share:.0%} față de 22-24% așteptat după ajustarea "
+                    "salarială a reperului vest-european. O versiune anterioară a acestei "
+                    "limitări afirma că modelul este de 2,3 ori sub reper; afirmația venea din "
+                    "compararea la media parcului nostru și era greșită."
                 ),
                 "severity": "material",
                 "affects": ["cost"],
@@ -309,8 +337,9 @@ def main(argv: list[str] | None = None) -> int:
     # An earlier version of this check did exactly that and reported the model 2,3x low. The
     # band is printed instead, because the honest answer is a range and the width of it is
     # the missing fact.
-    seats = {"basic": 20, "feeder": 40, "trunk": 50}
-    mean_seats = sum(seats[c] * n for c, n in fleet_by_class.items()) / sum(fleet_by_class.values())
+    # seats and mean_seats are computed once, above, from data/cost-inputs.json — they used to
+    # be a second hardcoded copy here, which is how a seat count changes in the data file and
+    # the benchmark comparison keeps quietly using the old one.
     benchmark = json.loads((ROOT / "data" / "cost-inputs.json").read_text(encoding="utf-8"))[
         "benchmarks"
     ]["buzauTariffLeiKmLoc"]["value"]

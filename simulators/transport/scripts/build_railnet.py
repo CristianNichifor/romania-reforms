@@ -383,15 +383,16 @@ def main(argv: list[str] | None = None) -> int:
                 "affects": ["railnet"],
             },
             {
-                "id": "fara-cost-feroviar",
+                "id": "timpul-aici-costul-dincolo",
                 "text": (
-                    "Se calculează timpul, nu costul. Tariful de utilizare a infrastructurii, "
-                    "energia, personalul de tren și materialul rulant nu sunt încă modelate, deci "
-                    "comparația dintre reabilitarea liniei și autobuze suplimentare nu se poate "
-                    "încă face în lei."
+                    "Acest fișier conține numai timpi. Tariful de utilizare a infrastructurii, "
+                    "energia, personalul de tren, materialul rulant și costul reabilitării sunt "
+                    "în data/rail-cost.json, împreună cu limitările lor — dintre care una "
+                    "blocantă: nu există model de cerere, deci încărcarea trenului este "
+                    "presupusă și ea decide ordinul de mărime al oricărei cifre pe călător."
                 ),
-                "severity": "blocking",
-                "affects": ["railnet", "cost"],
+                "severity": "note",
+                "affects": ["railnet"],
             },
         ],
     }
