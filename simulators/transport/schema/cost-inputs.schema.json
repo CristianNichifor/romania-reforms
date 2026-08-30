@@ -5,7 +5,7 @@
   "description": "Every line item carries its own confidence and note, so a reader who disputes the driver wage argues with one row rather than with the model. The engine that consumes this is pure arithmetic; replacing a figure with a sourced one requires no code change. As shipped, none of these is cited from a public source — the structure is checkable and the numbers are not, which the limitations say in as many words.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "title", "publisher", "period", "provenance", "currency", "items", "vehicles", "limitations"],
+  "required": ["id", "title", "publisher", "period", "provenance", "currency", "items", "vehicles", "benchmarks", "limitations"],
   "properties": {
     "$schema": { "type": "string" },
     "id": { "type": "string" },
@@ -42,6 +42,22 @@
           "seats": { "type": "integer", "exclusiveMinimum": 0 },
           "priceRon": { "type": "number", "exclusiveMinimum": 0 },
           "dieselPer100Km": { "type": "number", "exclusiveMinimum": 0 },
+          "confidence": { "enum": ["verbatim", "derived", "assumed"] },
+          "note": { "type": "string" }
+        }
+      }
+    },
+    "benchmarks": {
+      "description": "Real published figures the model is checked against, with what makes them comparable. Not inputs: nothing here is consumed by the engine.",
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["value", "unit", "confidence"],
+        "properties": {
+          "value": { "type": "number" },
+          "unit": { "type": "string", "minLength": 1 },
           "confidence": { "enum": ["verbatim", "derived", "assumed"] },
           "note": { "type": "string" }
         }

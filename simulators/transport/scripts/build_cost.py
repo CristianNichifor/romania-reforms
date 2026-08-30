@@ -299,6 +299,21 @@ def main(argv: list[str] | None = None) -> int:
         f"  operating cost per bus-km  {ron_per_km:>6.2f}   expect ~{expect_per_km:.1f} RON  "
         f"{'ok' if ron_per_km >= expect_per_km * 0.75 else 'LOW — the open question'}"
     )
+    # The one benchmark that judges the total rather than a line. ANRSC methodology divides
+    # cost per vehicle-km by the operator's average SEATS per vehicle — capacity, not
+    # passengers carried — so a published lei/km/loc converts straight back.
+    seats = {"basic": 20, "feeder": 40, "trunk": 50}
+    mean_seats = sum(seats[c] * n for c, n in fleet_by_class.items()) / sum(fleet_by_class.values())
+    implied = ron_per_km / mean_seats
+    benchmark = json.loads((ROOT / "data" / "cost-inputs.json").read_text(encoding="utf-8"))[
+        "benchmarks"
+    ]["buzauTariffLeiKmLoc"]["value"]
+    verdict = "ok" if implied >= benchmark * 0.75 else f"LOW by {benchmark / implied:.1f}x"
+    print(
+        f"\n  implied tariff             {implied:>6.3f} lei/km/loc at {mean_seats:.0f} seats"
+        f"   Buzau 2025: {benchmark:.2f}   {verdict}"
+    )
+
     print(
         f"  commercial speed           {speed:>6.1f}   expect 25-40 km/h  "
         f"{'ok' if 25 <= speed <= 40 else 'OUTSIDE'}"
