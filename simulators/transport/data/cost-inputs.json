@@ -124,6 +124,18 @@
       "unit": "km",
       "confidence": "verbatim",
       "note": "Durata de viață a unui set de anvelope, circa 100.000 km. Anexa 6 la documentația de negociere a Consiliului Județean Constanța, Grupa 03, 2025, estimare pe elementele de cheltuieli din Anexa 2 la Ordinul ANRSC 272/2007."
+    },
+    "depotCapexPerBusRon": {
+      "value": 745500,
+      "unit": "RON/vehicle space",
+      "confidence": "assumed",
+      "note": "Investiția în autobază, pe loc de vehicul: parcare, hală de întreținere cu canal, spălătorie, spații administrative. 150.000 de euro pe loc, la cursul de lucru. DEDUS, nu citat, din contracte românești care nu se pot folosi direct: Câmpina, 34.454.991,51 lei pentru o autobază de NOUĂ locuri cu atelier, canal, spălătorie și administrativ, adică circa 770.000 de euro pe loc; Iași, peste 60 de milioane de euro pentru un depou de tramvaie ȘI autobuze, circa 119 vehicule, adică 510.000 pe vehicul. Ambele sunt pentru vehicule ELECTRICE și includ stații de încărcare și racorduri pe care un parc diesel nu le are, iar Câmpina împarte atelierul și spălătoria la doar nouă locuri. Cifra de aici este sub amândouă pentru că presupune o autobază mare, diesel: aproximativ patru locuri de parcare auto ca suprafață, plus hala și spălătoria diluate la scară. Este cea mai slab fundamentată intrare din model și totodată una dintre cele mai mari — vezi limitarea autobazele-domina-capexul."
+    },
+    "depotLifeYears": {
+      "value": 40,
+      "unit": "years",
+      "confidence": "assumed",
+      "note": "Durata de viață a unei autobaze. Mult peste cei 12 ani ai unui autobuz, ceea ce contează: clădirea se plătește o dată la trei generații de vehicule, deci anualizarea ei nu se face pe același orizont ca parcul."
     }
   },
   "vehicles": {
@@ -185,6 +197,14 @@
     {
       "id": "linii-de-cost-lipsa",
       "text": "Documentația Constanța enumeră poziții pe care modelul nu le are deloc: inspecția tehnică la șase luni, licența comunitară, asigurarea de bagaje și persoane, impozitul pe terenul de parcare, și alte cheltuieli materiale neprevăzute. Rovinieta a fost adăugată; restul lipsesc și trag costul în jos.",
+      "severity": "material",
+      "affects": [
+        "cost"
+      ]
+    },
+    {
+      "id": "autobazele-domina-capexul",
+      "text": "Investiția în autobaze nu are sursă românească directă pentru un parc diesel de dimensiunea modelată și este dedusă din două contracte pentru autobaze electrice, mult mai scumpe pe loc. Contează mult: la 150.000 de euro pe loc, autobazele costă mai mult decât autobuzele care stau în ele. Dacă cifra reală este jumătate sau dublă, costul total pe douăzeci de ani se mișcă cu miliarde. Se vede separat în model tocmai ca să poată fi contestată singură.",
       "severity": "material",
       "affects": [
         "cost"

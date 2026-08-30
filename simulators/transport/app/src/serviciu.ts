@@ -218,6 +218,10 @@ export interface Prices {
   vehicleLifeYears: number;
   spareRatio: number;
   /** Paid hours a full-time driver works in a month. */
+  /** Capital to build one vehicle space: parking, workshop, wash, admin. */
+  depotCapexPerBus: number;
+  /** A depot outlives three generations of bus, so it is annualised on its own horizon. */
+  depotLifeYears: number;
   driverPaidHoursMonth: number;
   /** Paid hours per hour the bus is moving: sign-on, breaks, deadhead. */
   platformToPaidRatio: number;
@@ -308,6 +312,8 @@ export function loadPrices(document: {
     vehiclePrice: price,
     vehicleLifeYears: item('vehicleLifeYears'),
     spareRatio: 0.15,
+    depotCapexPerBus: item('depotCapexPerBusRon'),
+    depotLifeYears: item('depotLifeYears'),
     driverPaidHoursMonth: item('driverPaidHoursMonth'),
     platformToPaidRatio: item('platformToPaidRatio'),
     serviceSpeedFactor: item('serviceSpeedFactor'),
@@ -377,15 +383,36 @@ export interface NetworkCost {
  * financial one — it decides how much a journey in 2038 is worth against one now — and
  * picking one silently inside a model would bury that choice in arithmetic.
  */
-export function lifetimeCost(cost: Cost, vehicleLifeYears: number, years: number): {
+export function lifetimeCost(
+  cost: Cost,
+  vehicleLifeYears: number,
+  years: number,
+  fleet = 0,
+  depotCapexPerBus = 0,
+): {
+  fleetCapexRon: number;
+  depotCapexRon: number;
   capexRon: number;
   opexRon: number;
   totalRon: number;
   years: number;
 } {
-  const capex = cost.capitalRon * vehicleLifeYears;
+  const fleetCapex = cost.capitalRon * vehicleLifeYears;
+  // The depot is charged once at full price over this horizon, not annualised: a network being
+  // built needs the buildings before it runs, and a policy question wants the bill. Its longer
+  // life shows up as the reason the same buildings serve the NEXT fleet too — which is why the
+  // twelve-year figure overstates the true whole-life cost of the buildings and the code says
+  // so rather than quietly spreading it.
+  const depotCapex = fleet * depotCapexPerBus;
   const opex = cost.operatingRon * years;
-  return { capexRon: capex, opexRon: opex, totalRon: capex + opex, years };
+  return {
+    fleetCapexRon: fleetCapex,
+    depotCapexRon: depotCapex,
+    capexRon: fleetCapex + depotCapex,
+    opexRon: opex,
+    totalRon: fleetCapex + depotCapex + opex,
+    years,
+  };
 }
 
 /** Full-time drivers for a year of bus-hours. */

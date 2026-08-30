@@ -99,7 +99,14 @@ async function main() {
   // their life. Undiscounted and in today's lei — a discount rate decides how much a journey
   // in 2038 is worth against one now, and that is a political choice, not a modelling detail.
   const HORIZON_YEARS = prices.vehicleLifeYears;
-  const life = () => lifetimeCost(resourcesFor().cost, prices.vehicleLifeYears, HORIZON_YEARS);
+  const life = () =>
+    lifetimeCost(
+      resourcesFor().cost,
+      prices.vehicleLifeYears,
+      HORIZON_YEARS,
+      resourcesFor().fleetTotal,
+      prices.depotCapexPerBus,
+    );
 
   let scenario: Timetable = hash().get('s') === 'pulsed' ? 'pulsed' : 'uncoordinated';
 
@@ -298,8 +305,20 @@ async function main() {
         Math.round(resourcesFor().busHoursPerWeekday),
       )}</dd>
       <dt>OPEX pe an</dt><dd>${bn(resourcesFor().cost.operatingRon)}</dd>
-      <dt>CAPEX, parcul întreg</dt><dd>${bn(life().capexRon)}</dd>
+      <dt>CAPEX vehicule</dt><dd>${bn(life().fleetCapexRon)}</dd>
+      <dt>CAPEX autobaze</dt><dd>${bn(life().depotCapexRon)}</dd>
       <dt>Cost total pe ${life().years} ani</dt><dd class="big">${bn(life().totalRon)}</dd>`;
+
+    // The line nobody expects, and the least defensible input in the model. Both facts belong
+    // next to it rather than in a limitations list further down the page.
+    const ratio = life().depotCapexRon / life().fleetCapexRon;
+    el('cost-note').textContent =
+      `Autobazele costă mai mult decât autobuzele din ele — de ` +
+      `${ratio.toFixed(1).replace('.', ',')} ori. Halele, canalele și spălătoriile se ` +
+      `construiesc o dată la trei generații de vehicule și aproape nimeni nu le pune în ` +
+      `factură. Este și cifra cea mai slab fundamentată de aici: dedusă din contracte pentru ` +
+      `autobaze electrice, mai scumpe pe loc decât una diesel. Dacă e dublă sau pe jumătate, ` +
+      `totalul se mișcă cu miliarde — de aceea stă pe rând separat.`;
 
     // What scenario the reader is actually on, and how to change it. The page used to offer
     // five presets; consolidation belongs to the administrative simulator, and this now says
@@ -533,7 +552,13 @@ async function main() {
   function renderLevels() {
     const rows = SERVICE_LEVELS.map((l) => {
       const r = priced.get(l.id)!;
-      const lc = lifetimeCost(r.cost, prices.vehicleLifeYears, HORIZON_YEARS);
+      const lc = lifetimeCost(
+        r.cost,
+        prices.vehicleLifeYears,
+        HORIZON_YEARS,
+        r.fleetTotal,
+        prices.depotCapexPerBus,
+      );
       return `<tr class="${l.id === level.id ? 'on' : ''}">
         <td>${l.label.split(' — ')[0]}</td>
         <td>${fmt.format(Math.round(r.seatKmPerYear / 1e6))}</td>

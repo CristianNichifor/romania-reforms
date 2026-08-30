@@ -99,6 +99,8 @@ describe('cost arithmetic', () => {
     vehiclePrice: { basic: 100_000, trunk: 300_000 },
     vehicleLifeYears: 10,
     spareRatio: 0.15,
+    depotCapexPerBus: 745_500,
+    depotLifeYears: 40,
     driverPaidHoursMonth: 165,
     platformToPaidRatio: 1.3,
     serviceSpeedFactor: 0.75,
@@ -275,9 +277,21 @@ describe('capacity and whole-life cost', () => {
     // capitalRon is the annualised slice; a policy question wants the bill, so the vehicles
     // are bought at full price and the service is run for its life.
     const lc = lifetimeCost(cost, 12, 12);
-    expect(lc.capexRon).toBe(50 * 12);
+    expect(lc.fleetCapexRon).toBe(50 * 12);
     expect(lc.opexRon).toBe(400 * 12);
     expect(lc.totalRon).toBe(lc.capexRon + lc.opexRon);
+  });
+
+  it('charges the depot separately, and it is not small', () => {
+    // Buildings the network cannot run without, and the least defensible input in the model.
+    // Kept as its own line so it can be argued with on its own.
+    const withDepot = lifetimeCost(cost, 12, 12, 100, 745_500);
+    expect(withDepot.depotCapexRon).toBe(100 * 745_500);
+    expect(withDepot.totalRon).toBeGreaterThan(lifetimeCost(cost, 12, 12).totalRon);
+  });
+
+  it('charges no depot when none is asked for', () => {
+    expect(lifetimeCost(cost, 12, 12).depotCapexRon).toBe(0);
   });
 
   it('does not discount, and says which years it covers', () => {
