@@ -1,0 +1,181 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/arondare-noua.schema.json",
+  "title": "Consolidated UATs assigned to courts by road distance",
+  "description": "The administrative reform's consolidated units, each assigned whole to the nearest of the 42 court seats regardless of county line. Two things only visible at unit level: how many units commune-by-commune routing would split across two courts, and how many are nearer a neighbouring county's court than their own.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "period",
+    "provenance",
+    "courtSeats",
+    "summary",
+    "units",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "const": "arondare-noua"
+    },
+    "title": {
+      "type": "string"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "period": {
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json#/$defs/provenance"
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "units",
+        "routed",
+        "crossingCounty",
+        "peopleCrossingCounty",
+        "wouldSplitByCommune",
+        "meanMetresOwnCounty",
+        "meanMetresNearest",
+        "metresSavedEachCrossing"
+      ],
+      "properties": {
+        "units": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "routed": {
+          "description": "Units the road graph reaches. Anything unreachable is kept in the file and out of every average.",
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "crossingCounty": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "peopleCrossingCounty": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "wouldSplitByCommune": {
+          "description": "Units whose member communes do not all choose the same nearest court. The argument for assigning the unit whole.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "meanMetresOwnCounty": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "meanMetresNearest": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "metresSavedEachCrossing": {
+          "description": "Mean shortening for a person in a unit that crosses the county line.",
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "units": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "siruta",
+          "name",
+          "county",
+          "members",
+          "population",
+          "courtSiruta",
+          "courtName",
+          "courtCounty",
+          "metres",
+          "ownCountyMetres",
+          "crossesCounty",
+          "wouldSplitByCommune"
+        ],
+        "properties": {
+          "siruta": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "county": {
+            "type": "string"
+          },
+          "members": {
+            "type": "integer",
+            "exclusiveMinimum": 0
+          },
+          "population": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "courtSiruta": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "courtName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "courtCounty": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "metres": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "ownCountyMetres": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "crossesCounty": {
+            "type": "boolean"
+          },
+          "wouldSplitByCommune": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "provenance.schema.json#/$defs/limitation"
+      }
+    },
+    "courtSeats": {
+      "description": "One per county plus Bucharest — the coverage rule, not a distance choice.",
+      "type": "integer",
+      "exclusiveMinimum": 0
+    }
+  }
+}

@@ -36,6 +36,8 @@ const sources = [
   [resolve(here, '../../data/sporuri-2025.json'), 'sporuri.json'],
   // The same judges priced under the July 2026 pay draft.
   [resolve(here, '../../data/costuri-proiect-2026.json'), 'proiect.json'],
+  // Consolidated UATs assigned to courts by distance, county lines ignored.
+  [resolve(here, '../../data/arondare-noua.json'), 'arondare-noua.json'],
   // County codes to full names, so a merged court is "Tribunalul Covasna" and not "CV".
   [resolve(here, '../../../administrativ/web/public/data/manifest.json'), 'manifest.json'],
 ];

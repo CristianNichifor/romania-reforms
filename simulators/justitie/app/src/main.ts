@@ -57,6 +57,30 @@ interface Limitation {
   affects: string[];
 }
 
+interface ArondareNoua {
+  courtSeats: number;
+  summary: {
+    units: number;
+    routed: number;
+    crossingCounty: number;
+    peopleCrossingCounty: number;
+    wouldSplitByCommune: number;
+    meanMetresOwnCounty: number;
+    meanMetresNearest: number;
+    metresSavedEachCrossing: number;
+  };
+  units: {
+    name: string;
+    county: string;
+    courtName: string | null;
+    courtCounty: string | null;
+    metres: number | null;
+    ownCountyMetres: number | null;
+    crossesCounty: boolean;
+  }[];
+  limitations: Limitation[];
+}
+
 interface Proiect {
   referenceLei: number;
   byTier: {
@@ -202,7 +226,7 @@ const BLANK = {
 };
 
 async function main(): Promise<void> {
-  const [doc, counties, proposal, manifest, design, costuri, pensii, sporuri, proiect] =
+  const [doc, counties, proposal, manifest, design, costuri, pensii, sporuri, proiect, arondare] =
     await Promise.all([
     fetch(`${base}data/instante.json`).then((r) => r.json() as Promise<Document>),
     fetch(`${base}data/counties.geojson`).then((r) => r.json()),
@@ -215,6 +239,7 @@ async function main(): Promise<void> {
     fetch(`${base}data/pensii.json`).then((r) => r.json() as Promise<Pensii>),
     fetch(`${base}data/sporuri.json`).then((r) => r.json() as Promise<Sporuri>),
     fetch(`${base}data/proiect.json`).then((r) => r.json() as Promise<Proiect>),
+    fetch(`${base}data/arondare-noua.json`).then((r) => r.json() as Promise<ArondareNoua>),
   ]);
   const countyName = (code: string): string => manifest.countyNames?.[code] ?? code;
 
@@ -736,6 +761,45 @@ async function main(): Promise<void> {
   // The tightest staffing target, where the grade choice costs the most. Sorted rather than
   // indexed, and the fold is skipped entirely if the document ships no targets at all.
   const [lowest] = [...proiect.gradeChoiceSwing].sort((a, b) => a.target - b.target);
+  // Assignment by distance rather than by county line, on the consolidated units rather than
+  // on today's communes. The split count leads because it is the part that only appears once
+  // the unit, not the commune, is the thing being assigned.
+  const arKm = (metres: number): string => `${Math.round(metres / 1000)} km`;
+  const arSum = arondare.summary;
+  const arWorst = arondare.units
+    .filter((u) => u.crossesCounty && u.metres !== null && u.ownCountyMetres !== null)
+    .sort((x, y) => y.ownCountyMetres! - y.metres! - (x.ownCountyMetres! - x.metres!))
+    .slice(0, 6);
+  el('#arondare-chev').textContent = `${arSum.crossingCounty} peste județ`;
+  el('#arondare-body').innerHTML =
+    `<p class="note">Cele ${ro.format(arSum.units)} de unități consolidate din reforma
+       administrativă, arondate fiecare la cea mai apropiată dintre cele
+       ${arondare.courtSeats} de instanțe, pe drum, fără să conteze granița de județ.</p>
+     <div class="pens-row">
+       <span class="pens-head">unitate</span>
+       <span class="pens-head">jud.</span>
+       <span class="pens-head">instanța</span>
+       <span class="pens-head">în jud.</span>
+       ${arWorst
+         .map(
+           (u) =>
+             `<span>${u.name.replace(/^(ORAȘ|MUNICIPIUL) /, '')}</span>
+              <span>${u.county}</span>
+              <span class="pens-low">${arKm(u.metres!)} (${u.courtCounty})</span>
+              <span>${arKm(u.ownCountyMetres!)}</span>`,
+         )
+         .join('')}
+     </div>
+     <p class="disagree">Reședințele de județ nu sunt așezate uniform, așa că
+       ${arSum.crossingCounty} de unități — ${ro.format(arSum.peopleCrossingCounty)} de
+       locuitori — au o instanță mai apropiată în alt județ decât în al lor. Pentru ei drumul e
+       mai scurt cu ${arKm(arSum.metresSavedEachCrossing)} în medie, iar pe țară media scade de
+       la ${arKm(arSum.meanMetresOwnCounty)} la ${arKm(arSum.meanMetresNearest)}.</p>
+     <p class="disagree">Unitatea se arondează întreagă, nu comună cu comună. Dacă fiecare
+       comună și-ar alege singură instanța cea mai apropiată,
+       ${arSum.wouldSplitByCommune} din ${ro.format(arSum.units)} de unități noi s-ar rupe
+       între două instanțe — o arondare pe care nicio administrație nu ar putea-o ține.</p>`;
+
   el('#proiect-chev').textContent = proiect.spread.compresses
     ? 'comprimă grila'
     : 'lărgește grila';
@@ -872,6 +936,7 @@ async function main(): Promise<void> {
     ...pensii.limitations,
     ...sporuri.limitations,
     ...proiect.limitations,
+    ...arondare.limitations,
   ];
   const blocking = allLimits.filter((l) => l.severity === 'blocking');
   const rest = allLimits.filter((l) => l.severity !== 'blocking');
