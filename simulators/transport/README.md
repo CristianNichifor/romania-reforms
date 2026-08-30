@@ -133,7 +133,25 @@ stops is 3% and nowhere near the gap.
 and the model was right: wage-adjusted, Romania should sit near 22%.
 
 What genuinely remains open is cost per kilometre. The driver half now matches, so the shortfall
-is in the costs that do not depend on wages, and none of those prices is sourced.
+is in the costs that do not depend on wages — maintenance, tyres, insurance, depot, vehicle
+prices — and none of those is sourced.
+
+### The validation that would settle it
+
+Consiliul Județean Buzău approved an average tariff of **0,35 lei/km/loc** for route group 06 in
+2025, up from 0,30. It is not a guess: it comes from a *fișă cu structura pe elemente de
+cheltuieli*, built on the three operators' balance sheets at 31 December 2024 and their January
+2025 payroll. That is a real Romanian operating cost, published, and one of forty-one counties
+that publish the same thing.
+
+It is **not used here**, because converting lei/km/loc into lei per vehicle-km needs the
+occupancy convention in Ordinul ANRSC 272/2007 (as amended by 134/2019), which has not been
+established. Read as per-seat it implies about 16 lei/km; read as per average passenger, about 7.
+The model sits at 6,10 — so the conversion decides whether the model is roughly right or low by
+more than half, and guessing it would be worse than leaving the gap open.
+
+Establishing that one convention would validate the **total**, not a single line, and it is the
+highest-value piece of work outstanding on this simulator.
 
 ## What L0 is
 

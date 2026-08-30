@@ -46,7 +46,7 @@
       "value": 1.2,
       "unit": "RON/km",
       "confidence": "assumed",
-      "note": "Întreținere și reparații, fără anvelope. Drumurile comunale uzează mai repede decât cele naționale, iar aici nu se face distincție."
+      "note": "Întreținere și reparații, fără anvelope. Nefundamentat pe o sursă publică și, împreună cu celelalte costuri care nu depind de salarii, explicația cea mai probabilă pentru costul pe kilometru rămas sub referința ajustată."
     },
     "tyresPerKm": {
       "value": 0.15,
@@ -138,6 +138,14 @@
     {
       "id": "diesel-si-atat",
       "text": "Doar motorină. Autobuzele electrice schimbă complet raportul dintre investiție și funcționare, iar finanțarea PNRR pentru ele nu apare aici.",
+      "severity": "material",
+      "affects": [
+        "cost"
+      ]
+    },
+    {
+      "id": "reper-de-validare-neconvertit",
+      "text": "Există un reper real, neconvertit încă: Consiliul Județean Buzău a aprobat în 2025 un tarif mediu de 0,35 lei/km/loc pentru grupa de trasee 06, în creștere de la 0,30, calculat dintr-o fișă cu structura pe elemente de cheltuieli, pe balanțele operatorilor la 31 decembrie 2024 și pe statele de plată din ianuarie 2025. Este un cost real de operare din România. Nu poate fi transformat în lei pe kilometru-vehicul fără convenția de ocupare din Ordinul ANRSC 272/2007, modificat prin 134/2019, care nu a fost stabilită aici — între „pe loc” și „pe călător mediu” diferența este de la 7 la 16 lei/km, prea largă ca să folosească la ceva. Odată lămurită, acest reper validează totalul, nu o singură poziție.",
       "severity": "material",
       "affects": [
         "cost"
