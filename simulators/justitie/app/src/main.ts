@@ -57,6 +57,21 @@ interface Limitation {
   affects: string[];
 }
 
+interface Proiect {
+  referenceLei: number;
+  byTier: {
+    tier: Court['tier'];
+    coefficient: number;
+    monthlyLei: number;
+    todayMonthlyLei: number;
+    ratioToToday: number;
+  }[];
+  spread: { todayRatio: number; draftRatio: number; compresses: boolean };
+  gradeGap: { todayMonthlyLei: number; draftMonthlyLei: number; narrows: boolean };
+  gradeChoiceSwing: { target: number; todayLei: number; draftLei: number }[];
+  limitations: Limitation[];
+}
+
 interface Sporuri {
   scope: { filledPosts: number; baseMonthlyLeiPerPost: number };
   sporuri: { narrow: number; wide: number };
@@ -187,7 +202,7 @@ const BLANK = {
 };
 
 async function main(): Promise<void> {
-  const [doc, counties, proposal, manifest, design, costuri, pensii, sporuri] =
+  const [doc, counties, proposal, manifest, design, costuri, pensii, sporuri, proiect] =
     await Promise.all([
     fetch(`${base}data/instante.json`).then((r) => r.json() as Promise<Document>),
     fetch(`${base}data/counties.geojson`).then((r) => r.json()),
@@ -199,6 +214,7 @@ async function main(): Promise<void> {
     fetch(`${base}data/costuri.json`).then((r) => r.json() as Promise<Costuri>),
     fetch(`${base}data/pensii.json`).then((r) => r.json() as Promise<Pensii>),
     fetch(`${base}data/sporuri.json`).then((r) => r.json() as Promise<Sporuri>),
+    fetch(`${base}data/proiect.json`).then((r) => r.json() as Promise<Proiect>),
   ]);
   const countyName = (code: string): string => manifest.countyNames?.[code] ?? code;
 
@@ -712,6 +728,46 @@ async function main(): Promise<void> {
       `printr-un proces public. Baza de comparație — activitatea instanțelor — este raportul ` +
       `Consiliului Superior al Magistraturii.`;
 
+  // Coefficients carry up to sixteen decimals in the grid and the spreads are bare ratios, so
+  // both are printed at a fixed two places — otherwise a column reads 5,5 beside 5,363 and the
+  // difference looks like precision rather than formatting.
+  const dec2 = (x: number): string =>
+    x.toLocaleString('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  // The tightest staffing target, where the grade choice costs the most. Sorted rather than
+  // indexed, and the fold is skipped entirely if the document ships no targets at all.
+  const [lowest] = [...proiect.gradeChoiceSwing].sort((a, b) => a.target - b.target);
+  el('#proiect-chev').textContent = proiect.spread.compresses
+    ? 'comprimă grila'
+    : 'lărgește grila';
+  el('#proiect-body').innerHTML =
+    `<p class="note">Proiectul din iulie 2026 plătește după coeficient × o valoare de referință
+       de ${ro.format(proiect.referenceLei)} lei. Sumele de azi sunt în lei 2022 și cele din
+       proiect în lei 2026, deci nivelurile nu se compară — rapoartele, da.</p>
+     <div class="pens-row">
+       <span class="pens-head">grad</span>
+       <span class="pens-head">coef.</span>
+       <span class="pens-head">proiect</span>
+       <span class="pens-head">azi</span>
+       ${proiect.byTier
+         .map(
+           (t) =>
+             `<span>${TIER_LABEL[t.tier]}</span>
+              <span>${dec2(t.coefficient)}</span>
+              <span class="${t.ratioToToday < 1 ? 'pens-low' : ''}">${ro.format(t.monthlyLei)}</span>
+              <span>${ro.format(t.todayMonthlyLei)}</span>`,
+         )
+         .join('')}
+     </div>
+     <p class="disagree">Evantaiul de la vârf la bază se strânge de la
+       ${dec2(proiect.spread.todayRatio)} la ${dec2(proiect.spread.draftRatio)}: gradele
+       de sus sunt tăiate, judecătoria e urcată. Nu e o creștere generală, e o comprimare.</p>
+     <p class="disagree">Pentru simulatorul ăsta contează direct. Lucrarea nu spune ce grad au
+       judecătorii instanței de nivel 1, iar diferența dintre grade scade de la
+       ${ro.format(proiect.gradeGap.todayMonthlyLei)} la
+       ${ro.format(proiect.gradeGap.draftMonthlyLei)} lei pe lună. Tăcerea aceea costă azi
+       ${ro.format(Math.round((lowest?.todayLei ?? 0) / 1e6))} milioane de lei pe an și ar costa
+       ${ro.format(Math.round((lowest?.draftLei ?? 0) / 1e6))} de milioane după proiect.</p>`;
+
   // The one number three other sections used to say could not be found. Shown against the two
   // things it decides — the draft law's ceiling and the pension bill's headline — because a
   // percentage of a wage bill means nothing to a reader on its own.
@@ -813,6 +869,7 @@ async function main(): Promise<void> {
     ...costuri.limitations,
     ...pensii.limitations,
     ...sporuri.limitations,
+    ...proiect.limitations,
   ];
   const blocking = allLimits.filter((l) => l.severity === 'blocking');
   const rest = allLimits.filter((l) => l.severity !== 'blocking');

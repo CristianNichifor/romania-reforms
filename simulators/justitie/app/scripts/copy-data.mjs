@@ -34,6 +34,8 @@ const sources = [
   [resolve(here, '../../data/pensii-comparatie.json'), 'pensii.json'],
   // What the courts pay above base salary, and what it does to the bill's headline.
   [resolve(here, '../../data/sporuri-2025.json'), 'sporuri.json'],
+  // The same judges priced under the July 2026 pay draft.
+  [resolve(here, '../../data/costuri-proiect-2026.json'), 'proiect.json'],
   // County codes to full names, so a merged court is "Tribunalul Covasna" and not "CV".
   [resolve(here, '../../../administrativ/web/public/data/manifest.json'), 'manifest.json'],
 ];
