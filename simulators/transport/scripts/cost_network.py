@@ -45,15 +45,26 @@ UPPER_BOUND: Final[dict[str, float]] = {
 
 
 def cost(routes: list[dict], population: dict[str, int]) -> tuple[Resources, int]:
-    """Sum the network. Returns the totals and how many routes had no measured length."""
+    """Sum a set of routes. Returns the totals and how many had no measured length.
+
+    A **T3 feeder** takes the class of the largest UAT on its branch: one bus serves the whole
+    branch, and taking the smallest would run a 20-seat minibus past a town of 8 000.
+
+    A **T2 trunk** is trunk class by definition. It connects centres, and a centre is trunk
+    whatever its population — 42 of the 249 are communes, the smallest 1 882 people, but they
+    carry the transfers of everything feeding into them.
+    """
     total = Resources(0, 0.0, 0.0, 0.0)
     unmeasured = 0
     for route in routes:
         if route["oneWayKm"] is None:
             unmeasured += 1
             continue
-        largest = max((int(population[s]) for s in route["serves"]), default=0)
-        service = service_for(classify(largest, is_hub=False))
+        if route["tier"] == "T2":
+            service = service_for("trunk")
+        else:
+            largest = max((int(population[s]) for s in route["serves"]), default=0)
+            service = service_for(classify(largest, is_hub=False))
         total = total + resources_for_route(
             round_trip_min=2 * route["oneWayMin"],
             layover_min=LAYOVER_MIN,
@@ -77,14 +88,30 @@ def main(argv: list[str] | None = None) -> int:
     uats = gpd.read_file(ADMINISTRATIV / "data/processed/uat_geometry.gpkg", layer="uat")
     population = dict(zip(uats.siruta, uats.population, strict=True))
 
-    total, unmeasured = cost(network["routes"], population)
+    feeders = [r for r in network["routes"] if r["tier"] == "T3"]
+    trunks = [r for r in network["routes"] if r["tier"] == "T2"]
+    feeder_total, feeder_missing = cost(feeders, population)
+    trunk_total, trunk_missing = cost(trunks, population)
+    total = feeder_total + trunk_total
+    unmeasured = feeder_missing + trunk_missing
     fleet = fleet_required(total.peak_vehicles, SPARE_RATIO)
 
     print(
         f"Costed {len(network['routes']) - unmeasured:,} routes"
         f"{f' ({unmeasured} without a measured length)' if unmeasured else ''}\n"
     )
-    print(f"{'':24}{'one shuttle per UAT':>20}{'routed network':>17}{'':>8}")
+    print(f"{'':24}{'T3 feeder':>12}{'T2 trunk':>12}{'network':>12}")
+    for label, f, t in (
+        ("peak vehicles", feeder_total.peak_vehicles, trunk_total.peak_vehicles),
+        ("bus-hours / weekday", feeder_total.bus_hours, trunk_total.bus_hours),
+        ("bus-km / weekday", feeder_total.bus_km, trunk_total.bus_km),
+    ):
+        print(f"{label:24}{f:>12,.0f}{t:>12,.0f}{f + t:>12,.0f}")
+    print(
+        f"{'fleet incl. ' + format(SPARE_RATIO, '.0%') + ' spare':24}{'':>12}{'':>12}{fleet:>12,}"
+    )
+
+    print(f"\n{'':24}{'one shuttle per UAT':>20}{'this network':>15}")
     for label, key, got in (
         ("peak vehicles", "peak_vehicles", total.peak_vehicles),
         (f"fleet incl. {SPARE_RATIO:.0%} spare", "fleet", fleet),
@@ -92,7 +119,8 @@ def main(argv: list[str] | None = None) -> int:
         ("bus-km / weekday", "bus_km", total.bus_km),
     ):
         bound = UPPER_BOUND[key]
-        print(f"{label:24}{bound:>20,.0f}{got:>17,.0f}{(got / bound - 1) * 100:>7.0f}%")
+        print(f"{label:24}{bound:>20,.0f}{got:>15,.0f}{(got / bound - 1) * 100:>7.0f}%")
+    print("  (the bound covers feeders only, so the trunk tier is added cost, not merged cost)")
 
     print(
         f"\nannualised over 250 weekdays: {total.bus_hours * 250:,.0f} bus-hours, "
@@ -100,9 +128,12 @@ def main(argv: list[str] | None = None) -> int:
     )
     print(f"fleet per daily bus-hour: {fleet / total.bus_hours:.2f}")
 
-    if total.peak_vehicles >= UPPER_BOUND["peak_vehicles"]:
+    # Like for like: the bound was measured on feeders alone, before any trunk tier existed,
+    # so the feeder total is what it can judge. Comparing the whole network against it would
+    # trip the moment a tier was added, which is a change rather than a regression.
+    if feeder_total.peak_vehicles >= UPPER_BOUND["peak_vehicles"]:
         print(
-            "\nFATAL: the routed network is no cheaper than one bus per UAT — "
+            "\nFATAL: the routed feeders are no cheaper than one bus per UAT — "
             "the route rule is not merging",
             file=sys.stderr,
         )

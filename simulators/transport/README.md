@@ -27,6 +27,8 @@ implied_speed              median 50,0 km/h over 9.086 pairs; 0 above 110
 
 ## L1: the network, and what it costs in vehicles
 
+**Two tiers built: T3 feeders and T2 trunk. T1, county seat to county seat, is not built.**
+
 Every UAT gets a **fixed, published** timetable. What population changes is how many
 departures a place receives and where they sit in the day; what it never changes is whether
 they can be relied on. Nothing here is booked in advance.
@@ -42,28 +44,48 @@ stopping at each UAT down its branch. That alone collapses **2 895 UAT-to-hub sh
 1 537 routes**, because a village on the way to a further village is a stop rather than a
 service of its own.
 
-```
-routes            1.537      one-way min   median 27,6  p90 49,8  max 121,7
-UATs served       2.923      long routes (>60 min)                       50
-unroutable           14      accounted for              3.186 of 3.186
-```
-
-### What the network costs, against one bus per village
+The network has two tiers, both from the same tree. **T3 feeders** take every UAT to its
+centre; **T2 trunk** routes take every centre to its county seat. `members` decides what a
+route serves and `zone` what it may cross, so a trunk route drives through the villages
+between two centres without being responsible for them — their own feeder is.
 
 ```
-                       one shuttle per UAT    routed network
-peak vehicles                        3.914             2.351     -40%
-fleet incl. 15% spare                4.502             2.704     -40%
-bus-hours / weekday                 19.564            14.295     -27%
-bus-km / weekday                   983.633           718.859     -27%
+             routes   one-way min: median   p90    max   over an hour
+T3 feeder     1.537                  27,6  49,8  121,7             50
+T2 trunk        171                  60,6 105,4  146,3             87
 
-annualised: 3,57 M bus-hours, 179,7 M bus-km
+UATs served   2.923    unroutable 14    centres with no trunk route 1
+accounted for 3.186 of 3.186
 ```
 
-Fleet falls further than driving does — 40% against 27% — because merging four villages onto
-one route removes three *concurrent* buses while covering similar ground. Keeping the peak and
-the hours apart is the whole reason `fleet.py` exists; conflating them is how a transit system
-gets under-costed.
+**The trunk leg is the longer half.** A feeder reaches a centre in a median 27,6 minutes; from
+there to the county seat is a median 60,6. A full journey is therefore around 88 minutes one
+way *before* any wait at the transfer, which is not yet modelled. Costing feeders alone would
+have described a network that connects nobody to their county town.
+
+### What the network costs
+
+```
+                        T3 feeder    T2 trunk     network
+peak vehicles               2.351         477       2.828
+bus-hours / weekday        14.295       5.805      20.100
+bus-km / weekday          718.859     299.485   1.018.344
+fleet incl. 15% spare                                3.253
+
+annualised: 5,03 M bus-hours, 254,6 M bus-km
+```
+
+Two things that only show up once the tiers are separated.
+
+**Merging works on the feeders.** Against the one-bus-per-village upper bound of 3 914 peak
+vehicles, the routed feeders need 2 351 — down 40% — while driving falls only 27%, because
+merging four villages onto one route removes three *concurrent* buses over similar ground.
+Keeping the peak and the hours apart is the whole reason `fleet.py` exists.
+
+**The trunk tier is cheap in fleet and expensive in hours.** It adds 20% more vehicles but
+41% more bus-hours, from a tenth of the routes — long journeys run frequently, where feeders
+are short journeys run rarely. That is the opposite shape to the feeders, and it is where the
+operating cost will land when `L2` prices it.
 
 **Spares are a depot float, applied once to the network.** Applying the ratio route by route
 and rounding up buys a spare for every single-bus service — `ceil(1 × 1,15)` is 2, a 100%

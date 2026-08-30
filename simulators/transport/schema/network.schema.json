@@ -1,11 +1,11 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cristiannichifor.github.io/romania-reforms/schema/network.schema.json",
-  "title": "The feeder network: routes, and the places no route reaches",
-  "description": "One shortest-path tree per hub, every leaf a route. Every UAT is either served exactly once, is a hub, or is named in `unroutable` — there is no fourth outcome, because a UAT that were none of those would be a place nobody counted, and an uncounted place flatters every figure built on top of it.",
+  "title": "The bus network: feeders, trunk, and the places no route reaches",
+  "description": "Two tiers. T3 feeders take every UAT to the centre that serves it; T2 trunk routes take every centre to its county seat. Both come from the same shortest-path tree, with `members` deciding what a route serves and `zone` what it may cross. Every UAT is served exactly once, is a hub, or is named in `unroutable` — there is no fourth outcome, because a UAT that were none of those is a place nobody counted, and an uncounted place flatters every figure built on top of it.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "title", "publisher", "period", "provenance", "summary", "unroutable", "routes", "limitations"],
+  "required": ["id", "title", "publisher", "period", "provenance", "summary", "unroutable", "hubsWithoutTrunk", "routes", "limitations"],
   "properties": {
     "$schema": { "type": "string" },
     "id": { "type": "string" },
@@ -16,20 +16,20 @@
     "summary": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["hubs", "routes", "uatsServed", "uatsUnroutable", "uatsTotal", "longRoutes", "oneWayMinMedian", "oneWayMinP90", "oneWayMinMax", "hubSirutas"],
+      "required": ["hubs", "routes", "uatsServed", "uatsUnroutable", "uatsTotal", "countySeats", "hubsWithoutTrunk", "feeder", "trunk", "hubSirutas"],
       "properties": {
         "hubs": { "type": "integer", "minimum": 1 },
         "routes": { "type": "integer", "minimum": 1 },
         "uatsServed": { "type": "integer", "minimum": 1 },
         "uatsUnroutable": { "type": "integer", "minimum": 0 },
         "uatsTotal": { "type": "integer", "minimum": 1 },
-        "longRoutes": {
-          "description": "Routes over an hour one way. A route cannot be shortened by splitting it, so these are reported rather than hidden.",
+        "countySeats": { "type": "integer", "minimum": 1 },
+        "hubsWithoutTrunk": {
+          "description": "Centres with no road route to their county seat. A feeder that reaches such a centre still leaves its passengers short of the county town.",
           "type": "integer", "minimum": 0
         },
-        "oneWayMinMedian": { "type": "number", "exclusiveMinimum": 0 },
-        "oneWayMinP90": { "type": "number", "exclusiveMinimum": 0 },
-        "oneWayMinMax": { "type": "number", "exclusiveMinimum": 0 },
+        "feeder": { "$ref": "#/$defs/tierSummary" },
+        "trunk": { "$ref": "#/$defs/tierSummary" },
         "hubSirutas": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
       }
     },
@@ -48,14 +48,32 @@
         }
       }
     },
+    "hubsWithoutTrunk": {
+      "description": "Centres the trunk tier cannot connect to their county seat, named for the same reason the unroutable are.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["siruta", "name", "county"],
+        "properties": {
+          "siruta": { "type": "string", "minLength": 1 },
+          "name": { "type": "string", "minLength": 1 },
+          "county": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
     "routes": {
       "type": "array",
       "minItems": 1,
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["hub", "leaf", "stops", "serves", "oneWayMin", "oneWayKm", "isLong"],
+        "required": ["tier", "hub", "leaf", "stops", "serves", "oneWayMin", "oneWayKm", "isLong"],
         "properties": {
+          "tier": {
+            "description": "T3 is a feeder from a UAT to its centre; T2 is trunk from a centre to its county seat.",
+            "enum": ["T2", "T3"]
+          },
           "hub": { "type": "string", "minLength": 1 },
           "leaf": { "type": "string", "minLength": 1 },
           "stops": {
@@ -63,7 +81,7 @@
             "type": "array", "items": { "type": "string" }, "minItems": 2
           },
           "serves": {
-            "description": "The UATs this route is costed for. A UAT sitting on two branches belongs to exactly one.",
+            "description": "What this route is costed for. A T3 route serves UATs; a T2 route serves centres, and drives through the villages between them without being responsible for them — their own feeder is.",
             "type": "array", "items": { "type": "string" }
           },
           "oneWayMin": { "type": "number", "minimum": 0 },
@@ -76,6 +94,20 @@
       "type": "array",
       "minItems": 1,
       "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+    }
+  },
+  "$defs": {
+    "tierSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["routes", "oneWayMinMedian", "oneWayMinP90", "oneWayMinMax", "longRoutes"],
+      "properties": {
+        "routes": { "type": "integer", "minimum": 0 },
+        "oneWayMinMedian": { "type": "number", "minimum": 0 },
+        "oneWayMinP90": { "type": "number", "minimum": 0 },
+        "oneWayMinMax": { "type": "number", "minimum": 0 },
+        "longRoutes": { "type": "integer", "minimum": 0 }
+      }
     }
   }
 }

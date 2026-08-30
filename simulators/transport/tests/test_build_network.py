@@ -26,7 +26,12 @@ def network() -> dict:
 
 
 def served_uats(network: dict) -> list[str]:
-    return [uat for route in network["routes"] for uat in route["serves"]]
+    """Only the feeders. A trunk route serves centres, which their own feeder already covers."""
+    return [u for route in network["routes"] if route["tier"] == "T3" for u in route["serves"]]
+
+
+def summary_of(network: dict) -> dict:
+    return network["summary"]
 
 
 def test_every_uat_is_served_or_a_hub_or_named_unroutable(network):
@@ -67,12 +72,40 @@ def test_the_unroutable_are_where_the_roads_genuinely_are_not(network):
     assert water >= len(counties) / 2, counties
 
 
-def test_the_tree_actually_merges(network):
-    """Around 1 537 routes for 2 923 served UATs. If routes approach UATs, the tree is not
-    collapsing branches and every village has its own bus — which is the upper bound this
-    layer exists to beat."""
+def test_the_feeder_tree_actually_merges(network):
+    """Around 1 537 feeder routes for 2 923 served UATs. If routes approach UATs, the tree is
+    not collapsing branches and every village has its own bus — the upper bound this layer
+    exists to beat."""
     summary = network["summary"]
-    assert summary["routes"] < summary["uatsServed"] * 0.75
+    assert summary["feeder"]["routes"] < summary["uatsServed"] * 0.75
+
+
+def test_the_trunk_reaches_every_centre_it_can(network):
+    """Only Sulina has no road to its county seat, and it is in the Delta. If this grows, a
+    county's centres have been cut off from their seat and nobody would see it in a cost."""
+    assert summary_of(network)["hubsWithoutTrunk"] <= 1
+    for row in network["hubsWithoutTrunk"]:
+        assert row["siruta"] and row["name"] and row["county"]
+
+
+def test_the_trunk_leg_is_the_longer_half(network):
+    """The finding that made this tier necessary: a feeder reaches a centre in a median 27,6
+    minutes, and the trunk from that centre to the county seat is a median 60,6. Costing
+    feeders alone described a network connecting nobody to their county town."""
+    summary = network["summary"]
+    assert summary["trunk"]["oneWayMinMedian"] > summary["feeder"]["oneWayMinMedian"]
+
+
+def test_a_trunk_route_serves_centres_not_villages(network):
+    """A trunk route drives through the villages between two centres without being
+    responsible for them — their own feeder is, and counting them twice would inflate the
+    network."""
+    hubs = set(network["summary"]["hubSirutas"])
+    seats = {r["hub"] for r in network["routes"] if r["tier"] == "T2"}
+    for route in network["routes"]:
+        if route["tier"] != "T2":
+            continue
+        assert set(route["serves"]) <= hubs | seats, route["leaf"]
 
 
 def test_every_route_ends_at_its_hub(network):
@@ -95,8 +128,9 @@ def test_route_lengths_are_measured_not_assumed(network):
 
 
 def test_long_routes_are_flagged_consistently(network):
-    flagged = sum(1 for route in network["routes"] if route["isLong"])
-    assert flagged == network["summary"]["longRoutes"]
+    for tier, key in (("T3", "feeder"), ("T2", "trunk")):
+        flagged = sum(1 for r in network["routes"] if r["tier"] == tier and r["isLong"])
+        assert flagged == network["summary"][key]["longRoutes"], tier
     for route in network["routes"]:
         assert route["isLong"] == (route["oneWayMin"] > 60.0)
 
@@ -104,6 +138,8 @@ def test_long_routes_are_flagged_consistently(network):
 def test_the_summary_matches_its_own_routes(network):
     summary = network["summary"]
     assert summary["routes"] == len(network["routes"])
+    for tier, key in (("T3", "feeder"), ("T2", "trunk")):
+        assert summary[key]["routes"] == sum(1 for r in network["routes"] if r["tier"] == tier)
     assert summary["uatsServed"] == len(set(served_uats(network)))
     assert summary["uatsUnroutable"] == len(network["unroutable"])
 

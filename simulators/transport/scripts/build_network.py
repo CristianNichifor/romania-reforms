@@ -36,6 +36,10 @@ ROOT = Path(__file__).resolve().parents[1]
 ADMINISTRATIV = ROOT.parent / "administrativ"
 OUT = ROOT / "data" / "network.json"
 
+sys.path.insert(0, str(ADMINISTRATIV))
+
+from pipeline.county_capitals import COUNTY_CAPITAL_SIRUTA  # noqa: E402
+
 from scripts.network import routes_for_hub  # noqa: E402
 from scripts.zones import zone_of, zones_from_counties  # noqa: E402
 
@@ -104,8 +108,23 @@ def main(argv: list[str] | None = None) -> int:
     members: dict[str, set[str]] = collections.defaultdict(set)
     for uat, centre in hub_of.items():
         members[centre].add(uat)
+    hub_ids = set(members)
 
-    print(f"Routing {len(members)} hubs...")
+    def emit(route, tier: str) -> dict:
+        km = path_metres(route.stops, edge_m) / 1000
+        return {
+            "tier": tier,
+            "hub": route.hub,
+            "leaf": route.leaf,
+            "stops": route.stops,
+            "serves": route.serves,
+            "oneWayMin": round(route.one_way_min, 1),
+            "oneWayKm": None if np.isnan(km) else round(km, 1),
+            "isLong": route.is_long,
+        }
+
+    # T3, the feeders: every UAT to the centre that serves it.
+    print(f"Routing {len(members)} hubs (T3 feeders)...")
     rows: list[dict] = []
     served: set[str] = set()
     for centre in sorted(members):
@@ -118,22 +137,57 @@ def main(argv: list[str] | None = None) -> int:
             population=population,
         ):
             served.update(route.serves)
-            km = path_metres(route.stops, edge_m) / 1000
-            rows.append(
-                {
-                    "hub": route.hub,
-                    "leaf": route.leaf,
-                    "stops": route.stops,
-                    "serves": route.serves,
-                    "oneWayMin": round(route.one_way_min, 1),
-                    "oneWayKm": None if np.isnan(km) else round(km, 1),
-                    "isLong": route.is_long,
-                }
-            )
+            rows.append(emit(route, "T3"))
 
-    hub_ids = set(members)
+    # T2, the trunk: every centre to its county seat. The same tree machinery, with the hubs
+    # as members instead of the UATs — `members` is what a route serves and `zone` is what it
+    # may cross, so a trunk route drives through the villages between two centres without
+    # being responsible for them. Their feeder already is.
+    #
+    # This layer matters more than its route count suggests. A feeder reaches a centre in a
+    # median 27,6 minutes; the trunk leg from that centre to the county seat is a median 55,4.
+    # Costing the feeders alone would have described a network that connects nobody to their
+    # county town.
+    in_county: dict[str, set[str]] = collections.defaultdict(set)
+    for uat, code in county.items():
+        in_county[code].add(uat)
+
+    print(f"Routing {len(COUNTY_CAPITAL_SIRUTA)} county seats (T2 trunk)...")
+    trunk_served: set[str] = set()
+    for capital, code in sorted(COUNTY_CAPITAL_SIRUTA.items(), key=lambda kv: kv[1]):
+        centres = {h for h in hub_ids if county[h] == code} | {capital}
+        if len(centres) < 2:
+            continue
+        for route in routes_for_hub(
+            hub=capital,
+            members=centres,
+            zone=in_county[code],
+            neighbours=neighbours,
+            edge_s=edge_s,
+            population=population,
+        ):
+            trunk_served.update(route.serves)
+            rows.append(emit(route, "T2"))
+
+    trunk_orphans = sorted(
+        h
+        for h in hub_ids
+        if county[h] != "B" and h not in COUNTY_CAPITAL_SIRUTA and h not in trunk_served
+    )
+
     unroutable = sorted(set(hub_of) - served - hub_ids)
-    minutes = np.array([r["oneWayMin"] for r in rows])
+    feeders = [r for r in rows if r["tier"] == "T3"]
+    trunks = [r for r in rows if r["tier"] == "T2"]
+
+    def quantiles(subset: list[dict]) -> dict:
+        minutes = np.array([r["oneWayMin"] for r in subset])
+        return {
+            "routes": len(subset),
+            "oneWayMinMedian": round(float(np.median(minutes)), 1),
+            "oneWayMinP90": round(float(np.quantile(minutes, 0.9)), 1),
+            "oneWayMinMax": round(float(minutes.max()), 1),
+            "longRoutes": sum(1 for r in subset if r["isLong"]),
+        }
 
     document = {
         "$schema": "../schema/network.schema.json",
@@ -160,12 +214,15 @@ def main(argv: list[str] | None = None) -> int:
             "uatsServed": len(served),
             "uatsUnroutable": len(unroutable),
             "uatsTotal": len(hub_of),
-            "longRoutes": sum(1 for r in rows if r["isLong"]),
-            "oneWayMinMedian": round(float(np.median(minutes)), 1),
-            "oneWayMinP90": round(float(np.quantile(minutes, 0.9)), 1),
-            "oneWayMinMax": round(float(minutes.max()), 1),
+            "countySeats": len(COUNTY_CAPITAL_SIRUTA),
+            "hubsWithoutTrunk": len(trunk_orphans),
+            "feeder": quantiles(feeders),
+            "trunk": quantiles(trunks),
             "hubSirutas": sorted(hub_ids),
         },
+        "hubsWithoutTrunk": [
+            {"siruta": s, "name": name[s], "county": county[s]} for s in trunk_orphans
+        ],
         "unroutable": [
             {"siruta": s, "name": name[s], "county": county[s], "hub": hub_of[s]}
             for s in unroutable
@@ -182,6 +239,28 @@ def main(argv: list[str] | None = None) -> int:
                 ),
                 "severity": "material",
                 "affects": ["network", "cost", "access"],
+            },
+            {
+                "id": "centre-fara-legatura-la-resedinta",
+                "text": (
+                    "Un centru nu are traseu rutier până la reședința de județ: Sulina, în "
+                    "Deltă, accesibilă doar pe apă. Locuitorii arondați lui ajung la centru, "
+                    "dar nu mai departe, iar drumul până la reședința de județ nu apare în "
+                    "niciun cost de aici."
+                ),
+                "severity": "material",
+                "affects": ["network", "cost", "access"],
+            },
+            {
+                "id": "legatura-trunchi-dubleaza-drumul",
+                "text": (
+                    "Traseul de rabatere ajunge la centru într-o mediană de 27,6 minute, dar "
+                    "de acolo până la reședința de județ mediana este 60,6. O călătorie "
+                    "completă este deci de ordinul a 88 de minute dus, fără timpul de "
+                    "așteptare la corespondență, care nu este încă modelat."
+                ),
+                "severity": "material",
+                "affects": ["access"],
             },
             {
                 "id": "trasee-lungi-neîmpărțite",
@@ -201,11 +280,16 @@ def main(argv: list[str] | None = None) -> int:
     OUT.write_text(json.dumps(document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     s = document["summary"]
-    print(f"  routes {s['routes']:,}   serving {s['uatsServed']:,} UATs   hubs {s['hubs']}")
-    print(f"  unroutable {s['uatsUnroutable']} (named)   long routes {s['longRoutes']}")
+    for tier, label in (("feeder", "T3 feeder"), ("trunk", "T2 trunk ")):
+        q = s[tier]
+        print(
+            f"  {label}: {q['routes']:>5,} routes   one-way median "
+            f"{q['oneWayMinMedian']:>5.1f}  p90 {q['oneWayMinP90']:>5.1f}  "
+            f"max {q['oneWayMinMax']:>5.1f}   over an hour {q['longRoutes']}"
+        )
     print(
-        f"  one-way: median {s['oneWayMinMedian']} min, p90 {s['oneWayMinP90']}, "
-        f"max {s['oneWayMinMax']}"
+        f"  UATs served {s['uatsServed']:,}   unroutable {s['uatsUnroutable']} (named)   "
+        f"hubs without a trunk route {s['hubsWithoutTrunk']}"
     )
     covered = len(served) + len(unroutable) + len(hub_ids)
     print(f"  accounted for: {covered:,} of {s['uatsTotal']:,}")
