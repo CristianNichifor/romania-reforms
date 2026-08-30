@@ -1,0 +1,154 @@
+{
+  "$schema": "../schema/resurse.schema.json",
+  "id": "resurse-necesare",
+  "title": "Resursele cerute de capitolul 16, față de sistemul pe care îl reechipează",
+  "publisher": "Cristian Nichifor",
+  "period": "2025",
+  "provenance": {
+    "source": "reforma-sistem-judiciar-romania",
+    "locator": "Capitolul 16, p. 63",
+    "confidence": "verbatim",
+    "note": "Cifrele capitolului sunt citate. Conversia în lei, împărțirea pe locații și pe ani, și comparațiile cu posturile vacante și cu grila de salarizare sunt calculate aici."
+  },
+  "exchangeRate": {
+    "leiPerEur": 5.0968,
+    "date": "2025-12-31",
+    "yearAverage": 5.0424,
+    "provenance": {
+      "source": "ecb-eurofx-ron-2025",
+      "locator": "ECB Data Portal, seria EXR.D.RON.EUR.SP00.A",
+      "confidence": "verbatim"
+    }
+  },
+  "chapter": {
+    "page": 63,
+    "digitalisationMillionEur": [
+      200.0,
+      300.0
+    ],
+    "buildingsMillionEur": [
+      500.0,
+      700.0
+    ],
+    "buildingsYears": 10,
+    "auxiliaryAnnualMillionEur": 150.0,
+    "auxiliaryRecruits": [
+      4000,
+      6000
+    ],
+    "magistrateRecruits": 1000,
+    "magistrateYears": 10,
+    "institutional": [
+      "audit extern",
+      "ANIR",
+      "platforma digitala",
+      "audit extern"
+    ]
+  },
+  "auxiliaryCheck": {
+    "annualMoneyLei": 764520000,
+    "recruitsLow": 4000,
+    "recruitsHigh": 6000,
+    "band": {
+      "baseLowMonthlyLei": 3950.0,
+      "baseHighMonthlyLei": 5417.0,
+      "withSporuriLowMonthlyLei": 4935.13,
+      "withSporuriHighMonthlyLei": 7131.48,
+      "sporuriNarrow": 0.2494,
+      "sporuriWide": 0.3165
+    },
+    "costOfRecruitsDearestLei": 513466560,
+    "costOfRecruitsCheapestLei": 236886240,
+    "moneyOverDearest": 1.49,
+    "moneyOverCheapest": 3.23,
+    "impliedMonthlyLeiAtHigh": 10618,
+    "impliedMonthlyLeiAtLow": 15928,
+    "unexplainedAnnualLei": 251053440
+  },
+  "magistrateCheck": {
+    "recruits": 1000,
+    "years": 10,
+    "perYear": 100.0,
+    "judgesVacant": 751,
+    "prosecutorsVacant": 765,
+    "bothVacant": 1516,
+    "coversJudgeVacancies": true,
+    "coversBothVacancies": false,
+    "shortfallIfBoth": 516
+  },
+  "buildingsCheck": {
+    "millionEurLow": 500.0,
+    "millionEurHigh": 700.0,
+    "years": 10,
+    "sitesToday": 176,
+    "sitesProposed": 42,
+    "sitesClosed": 134,
+    "perSiteTodayLowEur": 2840909,
+    "perSiteTodayHighEur": 3977273,
+    "perSiteProposedLowEur": 11904762,
+    "perSiteProposedHighEur": 16666667
+  },
+  "total": {
+    "annualLowMillionEur": 220.0,
+    "annualHighMillionEur": 250.0,
+    "annualLowLei": 1121296000,
+    "annualHighLei": 1274200000,
+    "oneOffLowMillionEur": 700.0,
+    "oneOffHighMillionEur": 1000.0,
+    "basePayrollLei": 2457065665,
+    "shareOfBasePayrollLow": 0.456,
+    "shareOfBasePayrollHigh": 0.519,
+    "horizonYears": 10
+  },
+  "limitations": [
+    {
+      "id": "salariile-nu-sunt-buget",
+      "text": "Numitorul este masa salarială de bază a instanțelor — 2,46 miliarde lei — nu bugetul justiției, care cuprinde și parchetele, penitenciarele, cheltuielile materiale și investițiile. „+50% peste salariile de bază” nu înseamnă „+50% la bugetul justiției”, iar procentul din buget ar fi mai mic. Comparația e făcută cu singurul numitor pe care depozitul îl poate calcula din surse citabile.",
+      "severity": "blocking",
+      "affects": [
+        "total"
+      ]
+    },
+    {
+      "id": "euro-nedatati",
+      "text": "Lucrarea nu spune în ce euro sunt cifrele. Sunt convertiți la cursul de referință BCE din 31 decembrie 2025, data la care sunt luate toate posturile de aici. Media anului diferă cu circa 1%, deci alegerea datei nu schimbă nicio concluzie; inflația de construcții pe zece ani, în schimb, ar schimba, și nu e modelată.",
+      "severity": "material",
+      "affects": [
+        "total",
+        "buildingsCheck"
+      ]
+    },
+    {
+      "id": "esalonarea-e-presupusa",
+      "text": "Doar sediile primesc un orizont în lucrare — zece ani. Digitalizarea e o sumă fără termen, întinsă aici tot pe zece ani pentru a putea sta lângă o cifră anuală, iar planul din capitolul 15 se încheie tot în zece. Alt eșalonaj dă alt cost anual, iar suma totală rămâne aceeași.",
+      "severity": "material",
+      "affects": [
+        "total"
+      ]
+    },
+    {
+      "id": "recrutarea-nu-tine-cont-de-plecari",
+      "text": "Comparația dintre 1.000 de magistrați și posturile vacante e statică: ignoră pensionările, demisiile și pensia de serviciu pe care capitolul 11 o schimbă tocmai în acest interval. Recrutarea netă necesară e mai mare decât golul de azi, deci concluzia — că zece ani de recrutare nu ajung pentru ambele corpuri — este dacă ceva prea blândă.",
+      "severity": "material",
+      "affects": [
+        "magistrateCheck"
+      ]
+    },
+    {
+      "id": "costul-unui-post-e-doar-salariul",
+      "text": "Un post auxiliar e socotit la salariul de bază din grilă plus cota de sporuri din execuția bugetară. Nu include contribuția asiguratorie a angajatorului, formarea, spațiul sau echipamentul. Diferența nemotivată dintre bani și oameni e deci un maxim, nu o măsură a risipei: o parte din ea acoperă costuri reale pe care capitolul nu le enumeră.",
+      "severity": "material",
+      "affects": [
+        "auxiliaryCheck"
+      ]
+    },
+    {
+      "id": "locatiile-sunt-deduse-din-coordonate",
+      "text": "„Locație” înseamnă aici o coordonată distinctă, nu o clădire: două instanțe din același oraș pot ocupa sedii diferite, iar una poate ocupa mai multe. Cele 176 de locații de azi și cele 42 propuse sunt un ordin de mărime al parcului imobiliar, nu un inventar al lui — inventarul nu e public într-o formă care să poată fi citită.",
+      "severity": "material",
+      "affects": [
+        "buildingsCheck"
+      ]
+    }
+  ]
+}

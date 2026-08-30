@@ -49,6 +49,8 @@ const sources = [
   [resolve(here, '../../data/eficienta-csm.json'), 'eficienta.json'],
   // The prosecution service, reorganised in parallel by 7.3.
   [resolve(here, '../../data/parchete-2025.json'), 'parchete.json'],
+  // Chapter 16's resource figures, against the pay grid and estate they have to agree with.
+  [resolve(here, '../../data/resurse-necesare.json'), 'resurse.json'],
   // The ledger: which chapters this page checks, quotes, or leaves alone.
   [resolve(here, '../../data/acoperire.json'), 'acoperire.json'],
   // A variant, not the paper: eight appellate courts instead of the fifteen it proposes.

@@ -1,0 +1,231 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/resurse.schema.json",
+  "title": "The resources chapter 16 asks for, against the system it re-equips",
+  "description": "Chapter 16 states six figures in a bullet list and reconciles none of them: 200-300 mil euro for digitalisation, 500-700 mil euro for buildings over ten years, 150 mil euro a year for auxiliary staff, 4.000-6.000 auxiliary recruits and 1.000 magistrates in ten years. This document holds the chapter's own numbers beside the ones they have to agree with — the pay grid, the vacant posts, the court estate and the wage bill — so each claim can be checked against the rest of the repository rather than taken on assertion.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "period",
+    "provenance",
+    "exchangeRate",
+    "chapter",
+    "auxiliaryCheck",
+    "magistrateCheck",
+    "buildingsCheck",
+    "total",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "const": "resurse-necesare" },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "period": { "type": "string" },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+
+    "exchangeRate": {
+      "description": "Euros in the paper are undated; this is the rate they are read at, with the year's average beside it so the reader can see the choice does not carry any conclusion.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["leiPerEur", "date", "yearAverage", "provenance"],
+      "properties": {
+        "leiPerEur": { "type": "number", "exclusiveMinimum": 0 },
+        "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "yearAverage": { "type": "number", "exclusiveMinimum": 0 },
+        "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" }
+      }
+    },
+
+    "chapter": {
+      "description": "The chapter's figures as printed, quoted rather than paraphrased.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "page",
+        "digitalisationMillionEur",
+        "buildingsMillionEur",
+        "buildingsYears",
+        "auxiliaryAnnualMillionEur",
+        "auxiliaryRecruits",
+        "magistrateRecruits",
+        "magistrateYears",
+        "institutional"
+      ],
+      "properties": {
+        "page": { "type": "integer", "minimum": 1 },
+        "digitalisationMillionEur": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "type": "number", "exclusiveMinimum": 0 }
+        },
+        "buildingsMillionEur": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "type": "number", "exclusiveMinimum": 0 }
+        },
+        "buildingsYears": { "type": ["integer", "null"], "minimum": 1 },
+        "auxiliaryAnnualMillionEur": { "type": "number", "exclusiveMinimum": 0 },
+        "auxiliaryRecruits": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "type": "integer", "exclusiveMinimum": 0 }
+        },
+        "magistrateRecruits": { "type": "integer", "exclusiveMinimum": 0 },
+        "magistrateYears": { "type": "integer", "exclusiveMinimum": 0 },
+        "institutional": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+
+    "auxiliaryCheck": {
+      "description": "The annual money line against the headcount line it is said to pay for, at the pay grid uplifted by the sporuri share the budget execution shows.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "annualMoneyLei",
+        "recruitsLow",
+        "recruitsHigh",
+        "band",
+        "costOfRecruitsDearestLei",
+        "costOfRecruitsCheapestLei",
+        "moneyOverDearest",
+        "moneyOverCheapest",
+        "impliedMonthlyLeiAtHigh",
+        "impliedMonthlyLeiAtLow",
+        "unexplainedAnnualLei"
+      ],
+      "properties": {
+        "annualMoneyLei": { "type": "number", "minimum": 0 },
+        "recruitsLow": { "type": "integer", "minimum": 0 },
+        "recruitsHigh": { "type": "integer", "minimum": 0 },
+        "band": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "baseLowMonthlyLei",
+            "baseHighMonthlyLei",
+            "withSporuriLowMonthlyLei",
+            "withSporuriHighMonthlyLei",
+            "sporuriNarrow",
+            "sporuriWide"
+          ],
+          "properties": {
+            "baseLowMonthlyLei": { "type": "number", "minimum": 0 },
+            "baseHighMonthlyLei": { "type": "number", "minimum": 0 },
+            "withSporuriLowMonthlyLei": { "type": "number", "minimum": 0 },
+            "withSporuriHighMonthlyLei": { "type": "number", "minimum": 0 },
+            "sporuriNarrow": { "type": "number", "minimum": 0 },
+            "sporuriWide": { "type": "number", "minimum": 0 }
+          }
+        },
+        "costOfRecruitsDearestLei": { "type": "number", "minimum": 0 },
+        "costOfRecruitsCheapestLei": { "type": "number", "minimum": 0 },
+        "moneyOverDearest": { "type": "number", "minimum": 0 },
+        "moneyOverCheapest": { "type": "number", "minimum": 0 },
+        "impliedMonthlyLeiAtHigh": { "type": "number", "minimum": 0 },
+        "impliedMonthlyLeiAtLow": { "type": "number", "minimum": 0 },
+        "unexplainedAnnualLei": { "type": "number" }
+      }
+    },
+
+    "magistrateCheck": {
+      "description": "A thousand magistrates over ten years against the posts standing vacant on 31 December 2025, read both as judges alone and as judges and prosecutors together, because the paper does not say which it means.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "recruits",
+        "years",
+        "perYear",
+        "judgesVacant",
+        "prosecutorsVacant",
+        "bothVacant",
+        "coversJudgeVacancies",
+        "coversBothVacancies",
+        "shortfallIfBoth"
+      ],
+      "properties": {
+        "recruits": { "type": "integer", "minimum": 0 },
+        "years": { "type": "integer", "exclusiveMinimum": 0 },
+        "perYear": { "type": "number", "minimum": 0 },
+        "judgesVacant": { "type": "integer", "minimum": 0 },
+        "prosecutorsVacant": { "type": "integer", "minimum": 0 },
+        "bothVacant": { "type": "integer", "minimum": 0 },
+        "coversJudgeVacancies": { "type": "boolean" },
+        "coversBothVacancies": { "type": "boolean" },
+        "shortfallIfBoth": { "type": "integer", "minimum": 0 }
+      }
+    },
+
+    "buildingsCheck": {
+      "description": "The rehabilitation budget spread over the estate that exists and over the one the paper's own map would leave. A site is a distinct court coordinate, not a surveyed building.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "millionEurLow",
+        "millionEurHigh",
+        "years",
+        "sitesToday",
+        "sitesProposed",
+        "sitesClosed",
+        "perSiteTodayLowEur",
+        "perSiteTodayHighEur",
+        "perSiteProposedLowEur",
+        "perSiteProposedHighEur"
+      ],
+      "properties": {
+        "millionEurLow": { "type": "number", "exclusiveMinimum": 0 },
+        "millionEurHigh": { "type": "number", "exclusiveMinimum": 0 },
+        "years": { "type": ["integer", "null"], "minimum": 1 },
+        "sitesToday": { "type": "integer", "exclusiveMinimum": 0 },
+        "sitesProposed": { "type": "integer", "exclusiveMinimum": 0 },
+        "sitesClosed": { "type": "integer", "minimum": 0 },
+        "perSiteTodayLowEur": { "type": "number", "minimum": 0 },
+        "perSiteTodayHighEur": { "type": "number", "minimum": 0 },
+        "perSiteProposedLowEur": { "type": "number", "minimum": 0 },
+        "perSiteProposedHighEur": { "type": "number", "minimum": 0 }
+      }
+    },
+
+    "total": {
+      "description": "What the chapter adds up to per year over its own horizon, against the courts' base wage bill. A wage bill is not a budget, and the limitation says so.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "annualLowMillionEur",
+        "annualHighMillionEur",
+        "annualLowLei",
+        "annualHighLei",
+        "oneOffLowMillionEur",
+        "oneOffHighMillionEur",
+        "basePayrollLei",
+        "shareOfBasePayrollLow",
+        "shareOfBasePayrollHigh",
+        "horizonYears"
+      ],
+      "properties": {
+        "annualLowMillionEur": { "type": "number", "minimum": 0 },
+        "annualHighMillionEur": { "type": "number", "minimum": 0 },
+        "annualLowLei": { "type": "number", "minimum": 0 },
+        "annualHighLei": { "type": "number", "minimum": 0 },
+        "oneOffLowMillionEur": { "type": "number", "minimum": 0 },
+        "oneOffHighMillionEur": { "type": "number", "minimum": 0 },
+        "basePayrollLei": { "type": "number", "exclusiveMinimum": 0 },
+        "shareOfBasePayrollLow": { "type": "number", "minimum": 0 },
+        "shareOfBasePayrollHigh": { "type": "number", "minimum": 0 },
+        "horizonYears": { "type": "integer", "exclusiveMinimum": 0 }
+      }
+    },
+
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+    }
+  }
+}
