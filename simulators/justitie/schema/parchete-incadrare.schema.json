@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/parchete-incadrare.schema.json",
+  "title": "How far the prosecution establishment sits from its own caseload",
+  "description": "parchete-regiuni found that the load runs backwards — the appellate office with the most cases carries the lightest load per prosecutor — and that merging offices cannot fix it, because merging moves boundaries rather than people. This measures the gap instead: for each proposed office, the headcount that would give every prosecutor in its tier the same number of cases, against the headcount there now. It is a measure of misalignment and explicitly not a personnel plan; that limitation is blocking and must stay so.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "period",
+    "variantOfPaper",
+    "provenance",
+    "summary",
+    "levels",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "const": "parchete-incadrare" },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "period": { "type": "string" },
+    "variantOfPaper": {
+      "description": "Always true. The paper proposes no re-staffing; this is arithmetic on top of a structure it does not propose either.",
+      "const": true
+    },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "arrivals",
+        "departures",
+        "vacantPosts",
+        "vacanciesCoverArrivals",
+        "arrivalsAsShareOfVacancies",
+        "totalProsecutors",
+        "shareOfCorpsMoving",
+        "inversionSurvivesInvestigationMeasure",
+        "investigationLoadBiggest",
+        "investigationLoadHeaviest"
+      ],
+      "properties": {
+        "arrivals": {
+          "description": "Prosecutors who would have to arrive somewhere for both tiers to carry equal caseloads.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "departures": { "type": "integer", "minimum": 0 },
+        "vacantPosts": { "type": "integer", "minimum": 0 },
+        "vacanciesCoverArrivals": {
+          "description": "Whether the existing vacancies are numerous enough to absorb the whole rebalancing by recruitment rather than transfer.",
+          "type": "boolean"
+        },
+        "arrivalsAsShareOfVacancies": { "type": "number", "minimum": 0 },
+        "totalProsecutors": { "type": "integer", "exclusiveMinimum": 0 },
+        "shareOfCorpsMoving": { "type": "number", "minimum": 0, "maximum": 1 },
+        "inversionSurvivesInvestigationMeasure": {
+          "description": "Whether the load inversion holds when only prosecutors who actually worked investigations are counted — the obvious way it could have been an artefact.",
+          "type": "boolean"
+        },
+        "investigationLoadBiggest": { "type": "number", "minimum": 0 },
+        "investigationLoadHeaviest": { "type": "number", "minimum": 0 }
+      }
+    },
+
+    "levels": {
+      "description": "One entry per tier. Tiers are equalised separately because a county office and a regional office do different work at different grades.",
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "level",
+          "offices",
+          "totalVolume",
+          "totalProsecutors",
+          "targetPerProsecutor",
+          "officesShort",
+          "officesLong",
+          "arrivals",
+          "departures",
+          "netRoundingDrift",
+          "shareOfCorpsMoving",
+          "spreadToday",
+          "medianTodayPerProsecutor",
+          "mostShort",
+          "mostShortBy",
+          "mostLong",
+          "mostLongBy",
+          "rows"
+        ],
+        "properties": {
+          "level": { "type": "string" },
+          "offices": { "type": "integer", "exclusiveMinimum": 0 },
+          "totalVolume": { "type": "integer", "exclusiveMinimum": 0 },
+          "totalProsecutors": { "type": "integer", "exclusiveMinimum": 0 },
+          "targetPerProsecutor": { "type": "number", "exclusiveMinimum": 0 },
+          "officesShort": { "type": "integer", "minimum": 0 },
+          "officesLong": { "type": "integer", "minimum": 0 },
+          "arrivals": { "type": "integer", "minimum": 0 },
+          "departures": { "type": "integer", "minimum": 0 },
+          "netRoundingDrift": {
+            "description": "Arrivals minus departures. Non-zero only because headcount is rounded to whole people.",
+            "type": "integer"
+          },
+          "shareOfCorpsMoving": { "type": "number", "minimum": 0, "maximum": 1 },
+          "spreadToday": { "type": "number", "exclusiveMinimum": 0 },
+          "medianTodayPerProsecutor": { "type": "number", "exclusiveMinimum": 0 },
+          "mostShort": { "type": "string" },
+          "mostShortBy": { "type": "integer" },
+          "mostLong": { "type": "string" },
+          "mostLongBy": { "type": "integer" },
+          "rows": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["name", "volume", "prosecutors", "equalised", "delta", "perProsecutor"],
+              "properties": {
+                "name": { "type": "string" },
+                "volume": { "type": "integer", "minimum": 0 },
+                "prosecutors": { "type": "integer", "exclusiveMinimum": 0 },
+                "equalised": { "type": "integer", "exclusiveMinimum": 0 },
+                "delta": { "type": "integer" },
+                "perProsecutor": { "type": "number", "minimum": 0 }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+    }
+  }
+}

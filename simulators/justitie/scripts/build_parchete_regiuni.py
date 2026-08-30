@@ -112,7 +112,7 @@ def appellate_offices() -> list[dict]:
         rf"(\d{{1,2}})\.\s+({NAME})\s+(\d+)\s+([\d.,]+)\s+([\d.,]+)\s+([\d.,]+)(?=\s|$)", table
     )
     offices = []
-    for _, name, volume, per_prosecutor, per_schema, _up in rows:
+    for _, name, volume, per_prosecutor, per_schema, investigation in rows:
         per = number(per_prosecutor)
         if per <= 0:
             raise SystemExit(f"{name}: caseload per prosecutor is {per}")
@@ -122,6 +122,12 @@ def appellate_offices() -> list[dict]:
                 "volume": int(volume),
                 "perProsecutor": per,
                 "perSchema": number(per_schema),
+                # The report's second load column: the same cases over only those prosecutors
+                # who actually worked criminal investigations, rather than everyone on the
+                # establishment. It is the obvious way the inversion below could be an artefact
+                # — a large office whose prosecutors do much besides case work would show a low
+                # load without being under-worked — so it is carried and the check is run.
+                "perProsecutorInvestigation": number(investigation),
                 # The annex prints no headcount; volume over load is its definition.
                 "prosecutors": int(round(int(volume) / per)),
             }
@@ -224,6 +230,13 @@ def main() -> int:
         "biggestTodayVolume": biggest_today["volume"],
         "biggestTodayPerProsecutor": biggest_today["perProsecutor"],
         "loadRunsBackwards": biggest_today["perProsecutor"] < heaviest_today["perProsecutor"],
+        # Does it survive being measured on prosecutors who actually investigate?
+        "biggestTodayInvestigationLoad": biggest_today["perProsecutorInvestigation"],
+        "heaviestTodayInvestigationLoad": heaviest_today["perProsecutorInvestigation"],
+        "inversionSurvivesInvestigationMeasure": (
+            biggest_today["perProsecutorInvestigation"]
+            < heaviest_today["perProsecutorInvestigation"]
+        ),
         "structure": structure,
     }
 

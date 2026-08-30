@@ -18,17 +18,28 @@
     "limitations"
   ],
   "properties": {
-    "$schema": { "type": "string" },
-    "id": { "const": "parchete-regiuni" },
-    "title": { "type": "string" },
-    "publisher": { "type": "string" },
-    "period": { "type": "string" },
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "const": "parchete-regiuni"
+    },
+    "title": {
+      "type": "string"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "period": {
+      "type": "string"
+    },
     "variantOfPaper": {
       "description": "Always true. The paper keeps fifteen appellate prosecution offices and proposes no regions for them; nothing here may be read as its proposal.",
       "const": true
     },
-    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
-
+    "provenance": {
+      "$ref": "provenance.schema.json#/$defs/provenance"
+    },
     "summary": {
       "type": "object",
       "additionalProperties": false,
@@ -49,24 +60,65 @@
         "biggestTodayVolume",
         "biggestTodayPerProsecutor",
         "loadRunsBackwards",
-        "structure"
+        "structure",
+        "biggestTodayInvestigationLoad",
+        "heaviestTodayInvestigationLoad",
+        "inversionSurvivesInvestigationMeasure"
       ],
       "properties": {
-        "officesBefore": { "const": 15 },
-        "officesAfter": { "const": 8 },
-        "absorbed": { "type": "integer", "minimum": 0 },
-        "totalVolume": { "type": "integer", "exclusiveMinimum": 0 },
-        "totalProsecutors": { "type": "integer", "exclusiveMinimum": 0 },
-        "nationalPerProsecutor": { "type": "number", "exclusiveMinimum": 0 },
-        "spreadBefore": { "$ref": "#/$defs/spread" },
-        "spreadAfter": { "$ref": "#/$defs/spread" },
-        "heaviestToday": { "type": "string" },
-        "heaviestTodayPerProsecutor": { "type": "number", "exclusiveMinimum": 0 },
-        "lightestToday": { "type": "string" },
-        "lightestTodayPerProsecutor": { "type": "number", "exclusiveMinimum": 0 },
-        "biggestToday": { "type": "string" },
-        "biggestTodayVolume": { "type": "integer", "exclusiveMinimum": 0 },
-        "biggestTodayPerProsecutor": { "type": "number", "exclusiveMinimum": 0 },
+        "officesBefore": {
+          "const": 15
+        },
+        "officesAfter": {
+          "const": 8
+        },
+        "absorbed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "totalVolume": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "totalProsecutors": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "nationalPerProsecutor": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "spreadBefore": {
+          "$ref": "#/$defs/spread"
+        },
+        "spreadAfter": {
+          "$ref": "#/$defs/spread"
+        },
+        "heaviestToday": {
+          "type": "string"
+        },
+        "heaviestTodayPerProsecutor": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "lightestToday": {
+          "type": "string"
+        },
+        "lightestTodayPerProsecutor": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "biggestToday": {
+          "type": "string"
+        },
+        "biggestTodayVolume": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "biggestTodayPerProsecutor": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
         "loadRunsBackwards": {
           "description": "True when the office with the largest volume also carries the lightest load per prosecutor — the inversion this tier is characterised by.",
           "type": "boolean"
@@ -84,17 +136,44 @@
             "proposedTotal"
           ],
           "properties": {
-            "todayLower": { "type": "integer", "exclusiveMinimum": 0 },
-            "todayAppellate": { "type": "integer", "exclusiveMinimum": 0 },
-            "proposedCounty": { "const": 42 },
-            "proposedRegional": { "const": 8 },
-            "todayTotal": { "type": "integer", "exclusiveMinimum": 0 },
-            "proposedTotal": { "type": "integer", "exclusiveMinimum": 0 }
+            "todayLower": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "todayAppellate": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "proposedCounty": {
+              "const": 42
+            },
+            "proposedRegional": {
+              "const": 8
+            },
+            "todayTotal": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            },
+            "proposedTotal": {
+              "type": "integer",
+              "exclusiveMinimum": 0
+            }
           }
+        },
+        "biggestTodayInvestigationLoad": {
+          "type": "number",
+          "minimum": 0
+        },
+        "heaviestTodayInvestigationLoad": {
+          "type": "number",
+          "minimum": 0
+        },
+        "inversionSurvivesInvestigationMeasure": {
+          "type": "boolean",
+          "description": "Whether the office with the most cases still shows the lighter load when only investigating prosecutors are counted."
         }
       }
     },
-
     "regions": {
       "type": "array",
       "minItems": 8,
@@ -114,19 +193,49 @@
           "perProsecutor"
         ],
         "properties": {
-          "region": { "type": "string" },
-          "seat": { "type": "string" },
-          "seatCounty": { "type": "string", "minLength": 1, "maxLength": 2 },
-          "counties": { "type": "array", "minItems": 1, "items": { "type": "string" } },
-          "officesBefore": { "type": "integer", "exclusiveMinimum": 0 },
-          "absorbs": { "type": "array", "items": { "type": "string" } },
-          "volume": { "type": "integer", "exclusiveMinimum": 0 },
-          "prosecutors": { "type": "integer", "exclusiveMinimum": 0 },
-          "perProsecutor": { "type": "number", "exclusiveMinimum": 0 }
+          "region": {
+            "type": "string"
+          },
+          "seat": {
+            "type": "string"
+          },
+          "seatCounty": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2
+          },
+          "counties": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "officesBefore": {
+            "type": "integer",
+            "exclusiveMinimum": 0
+          },
+          "absorbs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "volume": {
+            "type": "integer",
+            "exclusiveMinimum": 0
+          },
+          "prosecutors": {
+            "type": "integer",
+            "exclusiveMinimum": 0
+          },
+          "perProsecutor": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          }
         }
       }
     },
-
     "offices": {
       "description": "The fifteen offices as the report has them, kept so the merge can be checked against its inputs.",
       "type": "array",
@@ -135,36 +244,89 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["office", "volume", "perProsecutor", "perSchema", "prosecutors", "region"],
+        "required": [
+          "office",
+          "volume",
+          "perProsecutor",
+          "perSchema",
+          "perProsecutorInvestigation",
+          "prosecutors",
+          "region"
+        ],
         "properties": {
-          "office": { "type": "string" },
-          "volume": { "type": "integer", "exclusiveMinimum": 0 },
-          "perProsecutor": { "type": "number", "exclusiveMinimum": 0 },
-          "perSchema": { "type": "number", "minimum": 0 },
-          "prosecutors": { "type": "integer", "exclusiveMinimum": 0 },
-          "region": { "type": "string" }
+          "office": {
+            "type": "string"
+          },
+          "volume": {
+            "type": "integer",
+            "exclusiveMinimum": 0
+          },
+          "perProsecutor": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "perSchema": {
+            "type": "number",
+            "minimum": 0
+          },
+          "prosecutors": {
+            "type": "integer",
+            "exclusiveMinimum": 0
+          },
+          "region": {
+            "type": "string"
+          },
+          "perProsecutorInvestigation": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Cases over prosecutors who actually worked investigations, the report's second load column."
+          }
         }
       }
     },
-
     "limitations": {
       "type": "array",
       "minItems": 1,
-      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+      "items": {
+        "$ref": "provenance.schema.json#/$defs/limitation"
+      }
     }
   },
-
   "$defs": {
     "spread": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["min", "max", "median", "maxOverMin", "p90OverP10"],
+      "required": [
+        "min",
+        "max",
+        "median",
+        "maxOverMin",
+        "p90OverP10"
+      ],
       "properties": {
-        "min": { "type": "number", "exclusiveMinimum": 0 },
-        "max": { "type": "number", "exclusiveMinimum": 0 },
-        "median": { "type": "number", "exclusiveMinimum": 0 },
-        "maxOverMin": { "type": "number", "exclusiveMinimum": 0 },
-        "p90OverP10": { "type": ["number", "null"], "exclusiveMinimum": 0 }
+        "min": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "max": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "median": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "maxOverMin": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "p90OverP10": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0
+        }
       }
     }
   }

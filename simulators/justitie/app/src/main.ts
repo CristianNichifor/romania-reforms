@@ -179,6 +179,35 @@ interface Eficienta {
   limitations: Limitation[];
 }
 
+interface ParcheteIncadrare {
+  summary: {
+    arrivals: number;
+    departures: number;
+    vacantPosts: number;
+    vacanciesCoverArrivals: boolean;
+    arrivalsAsShareOfVacancies: number;
+    totalProsecutors: number;
+    shareOfCorpsMoving: number;
+    inversionSurvivesInvestigationMeasure: boolean;
+    investigationLoadBiggest: number;
+    investigationLoadHeaviest: number;
+  };
+  levels: {
+    level: string;
+    offices: number;
+    targetPerProsecutor: number;
+    officesShort: number;
+    officesLong: number;
+    arrivals: number;
+    departures: number;
+    mostShort: string;
+    mostShortBy: number;
+    mostLong: string;
+    mostLongBy: number;
+  }[];
+  limitations: Limitation[];
+}
+
 interface ParcheteRegiuni {
   summary: {
     officesBefore: number;
@@ -580,6 +609,7 @@ async function main(): Promise<void> {
     comasare,
     incarcatura,
     parcheteRegiuni,
+    incadrare,
   ] = await Promise.all([
     fetch(`${base}data/instante.json`).then((r) => r.json() as Promise<Document>),
     fetch(`${base}data/counties.geojson`).then((r) => r.json()),
@@ -605,6 +635,7 @@ async function main(): Promise<void> {
     fetch(`${base}data/parchete-comasare.json`).then((r) => r.json() as Promise<ParcheteComasare>),
     fetch(`${base}data/incarcatura.json`).then((r) => r.json() as Promise<Incarcatura>),
     fetch(`${base}data/parchete-regiuni.json`).then((r) => r.json() as Promise<ParcheteRegiuni>),
+    fetch(`${base}data/parchete-incadrare.json`).then((r) => r.json() as Promise<ParcheteIncadrare>),
   ]);
   const countyName = (code: string): string => manifest.countyNames?.[code] ?? code;
 
@@ -1767,6 +1798,7 @@ async function main(): Promise<void> {
   // would be the same fault the page spends the rest of its length pointing at.
   const cm = comasare.summary;
   const pr = parcheteRegiuni;
+  const inc = incadrare;
   el('#comasare-chev').textContent =
     `${dec(cm.spreadBefore.maxOverMin, 1)}× → ${dec(cm.spreadAfter.maxOverMin, 1)}×`;
   el('#comasare-body').innerHTML =
@@ -1849,7 +1881,46 @@ async function main(): Promise<void> {
        încărcătură — ${ro.format(Math.round(pr.summary.biggestTodayPerProsecutor))} de dosare pe
        procuror — fiindcă are de departe cei mai mulți procurori. ${town(pr.summary.heaviestToday)} are
        ${ro.format(Math.round(pr.summary.heaviestTodayPerProsecutor))}. Comasarea mută granițele,
-       nu oamenii: inversiunea rămâne și după. Ce ar fi de reparat nu e harta, ci schema.</p>`;
+       nu oamenii: inversiunea rămâne și după. Ce ar fi de reparat nu e harta, ci schema.</p>
+     <p class="disagree">Obiecția evidentă e că un parchet mare pare ușor încărcat fiindcă
+       mulți dintre procurorii lui fac altceva decât urmărire penală. Raportul dă și a doua
+       coloană, doar pe procurorii care au lucrat efectiv la dosare penale: acolo
+       ${town(pr.summary.biggestToday)} are ${dec(inc.summary.investigationLoadBiggest, 0)} de
+       dosare, iar ${town(pr.summary.heaviestToday)} ${dec(inc.summary.investigationLoadHeaviest, 0)}.
+       Diferența se lărgește, nu dispare.</p>
+     <h4 class="sub-head">Cât de departe e schema de muncă</h4>
+     <p class="note">Dacă fiecare procuror dintr-un nivel ar avea același număr de dosare, câți
+       oameni ar fi în alt loc decât sunt azi? Nivelurile se egalizează separat — un parchet
+       județean și unul regional fac altă muncă, la alt grad.</p>
+     <div class="pens-row">
+       <span class="pens-head">nivel</span>
+       <span class="pens-head">țintă</span>
+       <span class="pens-head">sub</span>
+       <span class="pens-head">peste</span>
+       ${inc.levels
+         .map(
+           (l) =>
+             `<span>${l.offices} ${l.level}</span>
+              <span>${ro.format(Math.round(l.targetPerProsecutor))}</span>
+              <span>${l.officesShort} (+${l.arrivals})</span>
+              <span>${l.officesLong} (−${l.departures})</span>`,
+         )
+         .join('')}
+     </div>
+     <p class="disagree"><strong>Se poate face aproape fără să mute pe nimeni.</strong> Ca
+       fiecare nivel să fie egal încărcat, ar trebui să ajungă
+       ${ro.format(inc.summary.arrivals)} de procurori acolo unde sunt dosarele —
+       ${dec(inc.summary.shareOfCorpsMoving * 100, 0)}% din corp. Dar parchetele au deja
+       ${ro.format(inc.summary.vacantPosts)} de posturi vacante, iar cei
+       ${ro.format(inc.summary.arrivals)} sunt
+       ${dec(inc.summary.arrivalsAsShareOfVacancies * 100, 0)}% din ele: reechilibrarea se poate
+       face recrutând unde lipsesc oameni, nu transferând de unde sunt prea mulți. Cele două
+       politici nu seamănă deloc pentru oamenii din ele.</p>
+     <p class="disagree"><strong>Nu e un plan de personal.</strong> Un procuror nu e o unitate
+       de capacitate care se pune unde cere aritmetica — un transfer e o casă, o școală și o
+       familie. Cifra spune cât de departe e schema de muncă. Nu spune că cineva ar trebui
+       mutat, și nu ține cont nici de mărimea minimă sub care un parchet nu funcționează, nici
+       de faptul că un dosar de apel nu e cât unul de judecătorie.</p>`;
 
   // Chapters 4-5. The paper's judicial map rests on one sentence in 5.1, and the sentence can
   // be checked against the paper's own Danish counts — which is a narrower test than it looks,
@@ -2370,6 +2441,7 @@ async function main(): Promise<void> {
     ...comasare.limitations,
     ...incarcatura.limitations,
     ...parcheteRegiuni.limitations,
+    ...incadrare.limitations,
   ];
   const blocking = allLimits.filter((l) => l.severity === 'blocking');
   const rest = allLimits.filter((l) => l.severity !== 'blocking');
