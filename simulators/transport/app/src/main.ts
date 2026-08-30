@@ -13,6 +13,7 @@ import {
   DAY_PROFILE,
   SERVICE_LEVELS,
   costNetwork,
+  demandFrom,
   farebox,
   levelById,
   lifetimeCost,
@@ -479,15 +480,21 @@ async function main() {
     if (!f) return;
     // Recomputed against this network's own operating cost, so the recovery ratio describes
     // the service on screen rather than the one the pipeline happened to publish.
-    const people = coupled.data.population.reduce((a: number, b: number) => a + b, 0);
+    // The people the network actually reaches, not the whole country. Summing every UAT counts
+    // Bucharest's two million, whom this network does not serve internally, and inflated ticket
+    // revenue by an eighth.
+    let people = 0;
+    journeys.forEach((row, i) => {
+      if (row) people += coupled.data.population[i];
+    });
+    // Demand from population, so the load factor is a result rather than the assumption that
+    // used to govern every subsidy figure on this page.
+    const need = demandFrom(people, resourcesFor().seatKmPerYear, prices.passengerKmPerPersonYear);
     const live = farebox(
-      resourcesFor().busKmPerWeekday,
-      resourcesFor().fleetByClass,
+      need.passengerKm,
       resourcesFor().cost.operatingRon,
       people,
       f.central.revenueRon / f.central.passengerKm,
-      summary.fares.assumedLoadFactor,
-      prices.weekdaysPerYear,
     );
     el('fares').innerHTML = `
       <dt>Venit din bilete</dt><dd>${bn(live.revenueRon)}</dd>
@@ -495,7 +502,10 @@ async function main() {
       <dt>Pe om, pe an</dt><dd>${fmt.format(
         Math.round(live.subsidyPerPersonYearRon),
       )} lei</dd>
-      <dt>Acoperire din bilete</dt><dd>${(live.recovery * 100).toFixed(0)}%</dd>`;
+      <dt>Acoperire din bilete</dt><dd>${(live.recovery * 100).toFixed(0)}%</dd>
+      <dt>Grad de ocupare</dt><dd>${(need.loadFactor * 100).toFixed(0)}%${
+        need.overCapacity ? ' — peste capacitate' : ''
+      }</dd>`;
 
     // The band, not just the central case. Occupancy is assumed and it is the only number that
     // moves this result, so quoting one recovery ratio alone would read as a measurement.

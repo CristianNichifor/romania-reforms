@@ -24,6 +24,7 @@ import {
   classify,
   costNetwork,
   cycleSlack,
+  demandFrom,
   farebox,
   fleetRequired,
   lifetimeCost,
@@ -108,6 +109,7 @@ describe('cost arithmetic', () => {
       hybrid: { basic: 1.8, trunk: 3 },
       diesel: { basic: 2, trunk: 4 },
     },
+    passengerKmPerPersonYear: 300,
     depotCapexPerBus: 745_500,
     depotElectricPremiumPerBus: 497_000,
     depotLifeYears: 40,
@@ -190,38 +192,43 @@ describe.skipIf(!ready)('against the Python pipeline at default parameters', () 
 });
 
 describe('the farebox', () => {
-  const fleet = { basic: 100, feeder: 100, trunk: 100 };
-
   it('reports recovery as an output, not an assumption', () => {
     // Revenue is built from a fare and a quantity. Assuming the ratio would make the subsidy a
     // restatement of the cost, and the benchmark could never disagree with it.
-    const f = farebox(1000, fleet, 1_000_000, 100, 0.35, 0.22, 250);
+    const f = farebox(2_000_000, 1_000_000, 100, 0.35);
     expect(f.recovery).toBeCloseTo(f.revenueRon / 1_000_000);
   });
 
-  it('scales revenue with the load factor and nothing else does the work', () => {
-    const low = farebox(1000, fleet, 1, 100, 0.35, 0.1, 250);
-    const high = farebox(1000, fleet, 1, 100, 0.35, 0.2, 250);
-    expect(high.revenueRon).toBeCloseTo(2 * low.revenueRon);
-  });
-
   it('does not report a surplus as a negative subsidy', () => {
-    const f = farebox(1_000_000, fleet, 1, 100, 0.35, 0.22, 250);
+    const f = farebox(100_000_000, 1, 100, 0.35);
     expect(f.revenueRon).toBeGreaterThan(1);
     expect(f.subsidyRon).toBe(0);
   });
 
-  it('uses the fleet it was given to find the average seat count', () => {
-    // A network of minibuses earns less per kilometre than one of coaches at the same load.
-    const small = farebox(1000, { basic: 300 }, 1, 100, 0.35, 0.22, 250);
-    const large = farebox(1000, { trunk: 300 }, 1, 100, 0.35, 0.22, 250);
-    expect(large.revenueRon).toBeGreaterThan(small.revenueRon);
-  });
-
-  it('survives an empty fleet without dividing by zero', () => {
-    const f = farebox(0, {}, 0, 0, 0.35, 0.22, 250);
+  it('survives an empty network without dividing by zero', () => {
+    const f = farebox(0, 0, 0, 0.35);
     expect(f.passengerKm).toBe(0);
     expect(Number.isFinite(f.subsidyPerPersonYearRon)).toBe(true);
+  });
+});
+
+describe('demand from population', () => {
+  it('makes the load factor a result rather than an input', () => {
+    const d = demandFrom(1_000_000, 1_000_000_000, 300);
+    expect(d.passengerKm).toBe(300_000_000);
+    expect(d.loadFactor).toBeCloseTo(0.3);
+  });
+
+  it('says so when the timetable cannot carry the people', () => {
+    // The point of comparing the two: a model that assumed occupancy could never report this.
+    expect(demandFrom(1_000_000, 100_000_000, 300).overCapacity).toBe(true);
+    expect(demandFrom(1_000_000, 1_000_000_000, 300).overCapacity).toBe(false);
+  });
+
+  it('falls as service rises, for the same population', () => {
+    const thin = demandFrom(1_000_000, 500_000_000, 300).loadFactor;
+    const dense = demandFrom(1_000_000, 1_500_000_000, 300).loadFactor;
+    expect(dense).toBeLessThan(thin);
   });
 });
 

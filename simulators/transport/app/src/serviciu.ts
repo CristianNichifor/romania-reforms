@@ -251,6 +251,8 @@ export interface Prices {
   vehiclePrice: Record<string, number>;
   vehicleLifeYears: number;
   spareRatio: number;
+  /** Passenger-kilometres one inhabitant makes on this network in a year. */
+  passengerKmPerPersonYear: number;
   /** Paid hours a full-time driver works in a month. */
   /** Capital to build one vehicle space: parking, workshop, wash, admin. */
   depotCapexPerBus: number;
@@ -375,6 +377,7 @@ export function loadPrices(document: {
     depotCapexPerBus: item('depotCapexPerBusRon'),
     depotElectricPremiumPerBus: item('depotElectricPremiumPerBusRon'),
     depotLifeYears: item('depotLifeYears'),
+    passengerKmPerPersonYear: item('passengerKmPerPersonYear'),
     driverPaidHoursMonth: item('driverPaidHoursMonth'),
     platformToPaidRatio: item('platformToPaidRatio'),
     serviceSpeedFactor: item('serviceSpeedFactor'),
@@ -652,6 +655,43 @@ export function costNetwork(
 }
 
 
+export interface Demand {
+  /** Passenger-kilometres a year, from population alone. */
+  passengerKm: number;
+  /** Seats offered over the same year. */
+  seatKm: number;
+  /**
+   * Share of offered seats actually occupied — an OUTPUT now, not an assumption.
+   *
+   * This is the whole point of extrapolating demand from population: the load factor was the
+   * single number governing every subsidy figure in the model, and it was picked. Now it falls
+   * out of how many people live in the country and how much service is run for them, and it
+   * can exceed 1 — which is a finding, not an error.
+   */
+  loadFactor: number;
+  /** True where the timetable cannot carry the population it serves. */
+  overCapacity: boolean;
+}
+
+/**
+ * Demand extrapolated from population, and the capacity it meets.
+ *
+ * Deliberately crude and deliberately not hidden: every inhabitant generates the same
+ * passenger-kilometres regardless of age, income, car ownership or how far they are from their
+ * county seat. What it buys is that the service level and the demand can finally be compared —
+ * the model can say "this timetable cannot carry these people" instead of assuming an occupancy
+ * that makes the sum work.
+ */
+export function demandFrom(
+  people: number,
+  seatKmPerYear: number,
+  passengerKmPerPersonYear: number,
+): Demand {
+  const passengerKm = people * passengerKmPerPersonYear;
+  const loadFactor = seatKmPerYear ? passengerKm / seatKmPerYear : 0;
+  return { passengerKm, seatKm: seatKmPerYear, loadFactor, overCapacity: loadFactor > 1 };
+}
+
 export interface Farebox {
   passengerKm: number;
   revenueRon: number;
@@ -673,20 +713,11 @@ export interface Farebox {
  * proportional to that assumption.
  */
 export function farebox(
-  busKmPerWeekday: number,
-  fleetByClass: Record<string, number>,
+  passengerKm: number,
   operatingRon: number,
   people: number,
   fare: number,
-  loadFactor: number,
-  weekdaysPerYear: number,
 ): Farebox {
-  const fleet = Object.values(fleetByClass).reduce((a, b) => a + b, 0);
-  const seats = fleet
-    ? Object.entries(fleetByClass).reduce((sum, [name, n]) => sum + (SERVICES[name]?.seats ?? 0) * n, 0) / fleet
-    : 0;
-
-  const passengerKm = busKmPerWeekday * weekdaysPerYear * seats * loadFactor;
   const revenue = passengerKm * fare;
   // Clamped at zero: a service earning more than it costs needs no subsidy, and a negative
   // subsidy is a surplus — a different claim that must not arrive disguised as this one.

@@ -190,6 +190,12 @@
       "unit": "RON/electric vehicle space",
       "confidence": "assumed",
       "note": "În plus față de un loc obișnuit, pentru un loc cu încărcare: stație, racord și putere disponibilă. 100.000 de euro. Dedus din distanța dintre o autobază convențională și una electrică — Berlin este la 545.000 de euro pe loc față de circa 150.000 pentru una convențională, dar în costuri de construcție germane; premiul folosit aici este mult sub acea diferență. Se aplică DOAR locurilor electrice, deci crește exact atât cât cere mixul de tracțiune pe care îl aleg traseele — nu o cotă."
+    },
+    "passengerKmPerPersonYear": {
+      "value": 175,
+      "unit": "passenger-km/person/year",
+      "confidence": "assumed",
+      "note": "Câți kilometri-călător face un locuitor pe an PE ACEASTĂ REȚEA. Cererea se extrapolează din populație: fiecare comună generează populația ei înmulțită cu acest număr, iar gradul de ocupare devine un REZULTAT, nu o presupunere. Reperul publicat este media UE de circa 2.100 km-călător pe locuitor pe an cu transportul public, iar țările din frunte trec de 3.000 — dar acelea includ transportul urban, unde se fac majoritatea călătoriilor, și trenul de lungă distanță. Rețeaua de aici leagă doar comuna de centru și centrul de reședință. CALIBRAT PRIN VERIFICARE, ca la viteza feroviară: 175 dă un grad de ocupare de circa 25%, adică exact intervalul de 20-30% observat la servicii regionale. La 300 modelul scotea 49% ocupare și 120% acoperire din bilete — adică o rețea rurală care se autofinanțează, ceea ce nu există nicăieri. Acela este capătul de sus al plauzibilului, nu o valoare de lucru."
     }
   },
   "vehicles": {
@@ -277,6 +283,15 @@
       "text": "Prețurile vehiculelor sunt acum prețuri de vânzare de pe piața europeană, 2025-2026, nu prețuri de referință din documentații de tarifare. Sunt aproape duble față de ce folosea modelul înainte, iar investiția în parc crește pe măsură. Ce rămâne neacoperit: o achiziție publică de câteva mii de vehicule nu se face la preț de listă — se negociază în jos pe volum și în sus pe cerințe de dotare, iar cele două nu se anulează previzibil.",
       "severity": "material",
       "affects": [
+        "cost"
+      ]
+    },
+    {
+      "id": "cererea-vine-din-populatie-nu-din-comportament",
+      "text": "Cererea se obține înmulțind populația cu un număr de kilometri-călător pe an, egal pentru toată lumea. Nu depinde de vârstă, de venit, de faptul că cineva are mașină sau de cât durează călătoria — o comună la două ore de reședință generează la fel de mult ca una la douăzeci de minute, ceea ce este sigur fals. Ce oferă totuși: gradul de ocupare încetează să fie o presupunere și devine un rezultat verificabil față de capacitate, iar dacă cererea depășește locurile oferite modelul o spune în loc să treacă mai departe.",
+      "severity": "material",
+      "affects": [
+        "fares",
         "cost"
       ]
     }
