@@ -241,13 +241,15 @@ def main() -> int:
                 "affects": ["cost"],
             },
             {
-                "id": "volumul-parchetelor-nu-e-modelat",
+                "id": "volumul-parchetelor-e-in-alta-parte",
                 "text": (
-                    "Raportul dă și volumul de activitate și încărcătura pe procuror, pe "
-                    "capitole întregi. Aici sunt luate doar posturile și costul lor; "
-                    "redistribuirea muncii între cele 42 de parchete propuse nu e calculată."
+                    "Fișierul de față ia doar posturile și costul lor. Volumul de activitate și "
+                    "încărcătura pe procuror — pe care raportul le dă pe anexe întregi — sunt "
+                    "citite și redistribuite pe cele 42 de parchete propuse în "
+                    "„parchete-comasare”, nu aici. Cele două nu trebuie citite ca un întreg: "
+                    "aici sunt posturi din schemă, acolo procurori care ocupă efectiv un post."
                 ),
-                "severity": "blocking",
+                "severity": "note",
                 "affects": ["parchete"],
             },
         ],

@@ -1,0 +1,617 @@
+{
+  "$schema": "../schema/incarcatura.schema.json",
+  "id": "incarcatura-noua",
+  "title": "Cât ar avea de judecat fiecare dintre cele 42 de instanțe propuse",
+  "publisher": "Cristian Nichifor",
+  "period": "2025",
+  "provenance": {
+    "source": "csm-starea-justitiei-2025",
+    "locator": "Anexa 1 (volumul pe instanță), rutat prin HG 1217/2023 și arondare-noua",
+    "confidence": "derived",
+    "note": "Volumul fiecărei judecătorii este citat din raportul CSM. Împărțirea lui pe comune după populație, mutarea comunelor în unitățile consolidate și însumarea pe cele 42 de sedii sunt calculate aici."
+  },
+  "summary": {
+    "courtsBefore": 175,
+    "courtsAfter": 42,
+    "routedVolume": 2738025,
+    "nationalLevelOneVolume": 2738025,
+    "invariantVolume": 2044680,
+    "invariantShare": 0.747,
+    "splitVolume": 693345,
+    "tribunalVolume": 725099,
+    "totalVolume": 3461788,
+    "loadPerJudge": 1478.9,
+    "judgesNeeded": 2340.9,
+    "spreadToday": {
+      "min": 1644,
+      "max": 88345,
+      "median": 8486,
+      "maxOverMin": 53.74,
+      "p90OverP10": 9.65
+    },
+    "spreadAfter": {
+      "min": 22619,
+      "max": 676660,
+      "median": 62611.5,
+      "maxOverMin": 29.92,
+      "p90OverP10": 3.77
+    },
+    "spreadPerCapita": {
+      "min": 86.1,
+      "max": 289.6,
+      "median": 163.7,
+      "maxOverMin": 3.36,
+      "p90OverP10": 1.74
+    },
+    "busiest": "SECTORUL 1",
+    "busiestVolume": 676660,
+    "busiestShareOfTotal": 0.195,
+    "busiestJudges": 457.5,
+    "quietest": "MUNICIPIUL MIERCUREA CIUC",
+    "quietestVolume": 22619,
+    "unreachableVolume": 1335,
+    "unreachableCommunes": 5,
+    "dormantCourts": [
+      "Judecătoria Însurăţei"
+    ],
+    "localitiesNotInModel": 0
+  },
+  "courts": [
+    {
+      "siruta": "179141",
+      "name": "SECTORUL 1",
+      "county": "B",
+      "units": 5,
+      "population": 2336706,
+      "lowerVolume": 503760,
+      "upperVolume": 172900,
+      "volume": 676660,
+      "judgesAtNationalLoad": 457.5,
+      "casesPerThousandPeople": 289.6
+    },
+    {
+      "siruta": "69900",
+      "name": "MUNICIPIUL CRAIOVA",
+      "county": "DJ",
+      "units": 9,
+      "population": 676111,
+      "lowerVolume": 102837,
+      "upperVolume": 24902,
+      "volume": 127739,
+      "judgesAtNationalLoad": 86.4,
+      "casesPerThousandPeople": 188.9
+    },
+    {
+      "siruta": "54975",
+      "name": "MUNICIPIUL CLUJ-NAPOCA",
+      "county": "CJ",
+      "units": 6,
+      "population": 623860,
+      "lowerVolume": 96111,
+      "upperVolume": 25128,
+      "volume": 121239,
+      "judgesAtNationalLoad": 82.0,
+      "casesPerThousandPeople": 194.3
+    },
+    {
+      "siruta": "60419",
+      "name": "MUNICIPIUL CONSTANȚA",
+      "county": "CT",
+      "units": 6,
+      "population": 631075,
+      "lowerVolume": 95738,
+      "upperVolume": 27089,
+      "volume": 122827,
+      "judgesAtNationalLoad": 83.1,
+      "casesPerThousandPeople": 194.6
+    },
+    {
+      "siruta": "95060",
+      "name": "MUNICIPIUL IAȘI",
+      "county": "IS",
+      "units": 7,
+      "population": 641145,
+      "lowerVolume": 90244,
+      "upperVolume": 25750,
+      "volume": 115994,
+      "judgesAtNationalLoad": 78.4,
+      "casesPerThousandPeople": 180.9
+    },
+    {
+      "siruta": "20297",
+      "name": "MUNICIPIUL BACĂU",
+      "county": "BC",
+      "units": 10,
+      "population": 695956,
+      "lowerVolume": 85396,
+      "upperVolume": 15293,
+      "volume": 100689,
+      "judgesAtNationalLoad": 68.1,
+      "casesPerThousandPeople": 144.7
+    },
+    {
+      "siruta": "44818",
+      "name": "MUNICIPIUL BUZĂU",
+      "county": "BZ",
+      "units": 8,
+      "population": 567778,
+      "lowerVolume": 81331,
+      "upperVolume": 11484,
+      "volume": 92815,
+      "judgesAtNationalLoad": 62.8,
+      "casesPerThousandPeople": 163.5
+    },
+    {
+      "siruta": "155243",
+      "name": "MUNICIPIUL TIMIȘOARA",
+      "county": "TM",
+      "units": 4,
+      "population": 516197,
+      "lowerVolume": 80598,
+      "upperVolume": 24890,
+      "volume": 105488,
+      "judgesAtNationalLoad": 71.3,
+      "casesPerThousandPeople": 204.4
+    },
+    {
+      "siruta": "77812",
+      "name": "MUNICIPIUL TÂRGU JIU",
+      "county": "GJ",
+      "units": 8,
+      "population": 430335,
+      "lowerVolume": 76224,
+      "upperVolume": 16073,
+      "volume": 92297,
+      "judgesAtNationalLoad": 62.4,
+      "casesPerThousandPeople": 214.5
+    },
+    {
+      "siruta": "13169",
+      "name": "MUNICIPIUL PITEȘTI",
+      "county": "AG",
+      "units": 6,
+      "population": 492445,
+      "lowerVolume": 73918,
+      "upperVolume": 22209,
+      "volume": 96127,
+      "judgesAtNationalLoad": 65.0,
+      "casesPerThousandPeople": 195.2
+    },
+    {
+      "siruta": "130534",
+      "name": "MUNICIPIUL PLOIEȘTI",
+      "county": "PH",
+      "units": 6,
+      "population": 626329,
+      "lowerVolume": 73229,
+      "upperVolume": 22172,
+      "volume": 95401,
+      "judgesAtNationalLoad": 64.5,
+      "casesPerThousandPeople": 152.3
+    },
+    {
+      "siruta": "40198",
+      "name": "MUNICIPIUL BRAȘOV",
+      "county": "BV",
+      "units": 5,
+      "population": 518106,
+      "lowerVolume": 69827,
+      "upperVolume": 20229,
+      "volume": 90056,
+      "judgesAtNationalLoad": 60.9,
+      "casesPerThousandPeople": 173.8
+    },
+    {
+      "siruta": "174744",
+      "name": "MUNICIPIUL FOCȘANI",
+      "county": "VN",
+      "units": 8,
+      "population": 483277,
+      "lowerVolume": 66761,
+      "upperVolume": 7773,
+      "volume": 74534,
+      "judgesAtNationalLoad": 50.4,
+      "casesPerThousandPeople": 154.2
+    },
+    {
+      "siruta": "26564",
+      "name": "MUNICIPIUL ORADEA",
+      "county": "BH",
+      "units": 5,
+      "population": 551297,
+      "lowerVolume": 64155,
+      "upperVolume": 19155,
+      "volume": 83310,
+      "judgesAtNationalLoad": 56.3,
+      "casesPerThousandPeople": 151.1
+    },
+    {
+      "siruta": "146263",
+      "name": "MUNICIPIUL SUCEAVA",
+      "county": "SV",
+      "units": 9,
+      "population": 654413,
+      "lowerVolume": 64122,
+      "upperVolume": 20888,
+      "volume": 85010,
+      "judgesAtNationalLoad": 57.5,
+      "casesPerThousandPeople": 129.9
+    },
+    {
+      "siruta": "114319",
+      "name": "MUNICIPIUL TÂRGU MUREȘ",
+      "county": "MS",
+      "units": 8,
+      "population": 548921,
+      "lowerVolume": 57348,
+      "upperVolume": 17892,
+      "volume": 75240,
+      "judgesAtNationalLoad": 50.9,
+      "casesPerThousandPeople": 137.1
+    },
+    {
+      "siruta": "32394",
+      "name": "MUNICIPIUL BISTRIȚA",
+      "county": "BN",
+      "units": 10,
+      "population": 519152,
+      "lowerVolume": 54418,
+      "upperVolume": 8167,
+      "volume": 62585,
+      "judgesAtNationalLoad": 42.3,
+      "casesPerThousandPeople": 120.6
+    },
+    {
+      "siruta": "151790",
+      "name": "MUNICIPIUL ALEXANDRIA",
+      "county": "TR",
+      "units": 6,
+      "population": 382504,
+      "lowerVolume": 54030,
+      "upperVolume": 6722,
+      "volume": 60752,
+      "judgesAtNationalLoad": 41.1,
+      "casesPerThousandPeople": 158.8
+    },
+    {
+      "siruta": "35731",
+      "name": "MUNICIPIUL BOTOȘANI",
+      "county": "BT",
+      "units": 7,
+      "population": 392160,
+      "lowerVolume": 53253,
+      "upperVolume": 9043,
+      "volume": 62296,
+      "judgesAtNationalLoad": 42.1,
+      "casesPerThousandPeople": 158.9
+    },
+    {
+      "siruta": "143450",
+      "name": "MUNICIPIUL SIBIU",
+      "county": "SB",
+      "units": 4,
+      "population": 371670,
+      "lowerVolume": 53038,
+      "upperVolume": 10583,
+      "volume": 63621,
+      "judgesAtNationalLoad": 43.0,
+      "casesPerThousandPeople": 171.2
+    },
+    {
+      "siruta": "9262",
+      "name": "MUNICIPIUL ARAD",
+      "county": "AR",
+      "units": 6,
+      "population": 432429,
+      "lowerVolume": 52195,
+      "upperVolume": 10443,
+      "volume": 62638,
+      "judgesAtNationalLoad": 42.4,
+      "casesPerThousandPeople": 144.9
+    },
+    {
+      "siruta": "161945",
+      "name": "MUNICIPIUL VASLUI",
+      "county": "VS",
+      "units": 7,
+      "population": 374700,
+      "lowerVolume": 50894,
+      "upperVolume": 8156,
+      "volume": 59050,
+      "judgesAtNationalLoad": 39.9,
+      "casesPerThousandPeople": 157.6
+    },
+    {
+      "siruta": "120726",
+      "name": "MUNICIPIUL PIATRA-NEAMȚ",
+      "county": "NT",
+      "units": 7,
+      "population": 426889,
+      "lowerVolume": 50756,
+      "upperVolume": 10946,
+      "volume": 61702,
+      "judgesAtNationalLoad": 41.7,
+      "casesPerThousandPeople": 144.5
+    },
+    {
+      "siruta": "100576",
+      "name": "ORAȘ BUFTEA",
+      "county": "IF",
+      "units": 9,
+      "population": 299185,
+      "lowerVolume": 50220,
+      "upperVolume": 24762,
+      "volume": 74982,
+      "judgesAtNationalLoad": 50.7,
+      "casesPerThousandPeople": 250.6
+    },
+    {
+      "siruta": "106318",
+      "name": "MUNICIPIUL BAIA MARE",
+      "county": "MM",
+      "units": 8,
+      "population": 431621,
+      "lowerVolume": 47636,
+      "upperVolume": 13405,
+      "volume": 61041,
+      "judgesAtNationalLoad": 41.3,
+      "casesPerThousandPeople": 141.4
+    },
+    {
+      "siruta": "75098",
+      "name": "MUNICIPIUL GALAȚI",
+      "county": "GL",
+      "units": 3,
+      "population": 348927,
+      "lowerVolume": 47024,
+      "upperVolume": 18081,
+      "volume": 65105,
+      "judgesAtNationalLoad": 44.0,
+      "casesPerThousandPeople": 186.6
+    },
+    {
+      "siruta": "109773",
+      "name": "MUNICIPIUL DROBETA-TURNU SEVERIN",
+      "county": "MH",
+      "units": 5,
+      "population": 247019,
+      "lowerVolume": 45383,
+      "upperVolume": 10543,
+      "volume": 55926,
+      "judgesAtNationalLoad": 37.8,
+      "casesPerThousandPeople": 226.4
+    },
+    {
+      "siruta": "86687",
+      "name": "MUNICIPIUL DEVA",
+      "county": "HD",
+      "units": 6,
+      "population": 308398,
+      "lowerVolume": 44999,
+      "upperVolume": 19388,
+      "volume": 64387,
+      "judgesAtNationalLoad": 43.5,
+      "casesPerThousandPeople": 208.8
+    },
+    {
+      "siruta": "1017",
+      "name": "MUNICIPIUL ALBA IULIA",
+      "county": "AB",
+      "units": 5,
+      "population": 325941,
+      "lowerVolume": 43091,
+      "upperVolume": 11811,
+      "volume": 54902,
+      "judgesAtNationalLoad": 37.1,
+      "casesPerThousandPeople": 168.4
+    },
+    {
+      "siruta": "125347",
+      "name": "MUNICIPIUL SLATINA",
+      "county": "OT",
+      "units": 6,
+      "population": 337916,
+      "lowerVolume": 40789,
+      "upperVolume": 9129,
+      "volume": 49918,
+      "judgesAtNationalLoad": 33.8,
+      "casesPerThousandPeople": 147.7
+    },
+    {
+      "siruta": "167473",
+      "name": "MUNICIPIUL RÂMNICU VÂLCEA",
+      "county": "VL",
+      "units": 5,
+      "population": 334719,
+      "lowerVolume": 39916,
+      "upperVolume": 9063,
+      "volume": 48979,
+      "judgesAtNationalLoad": 33.1,
+      "casesPerThousandPeople": 146.3
+    },
+    {
+      "siruta": "42682",
+      "name": "MUNICIPIUL BRĂILA",
+      "county": "BR",
+      "units": 4,
+      "population": 251263,
+      "lowerVolume": 39327,
+      "upperVolume": 7494,
+      "volume": 46821,
+      "judgesAtNationalLoad": 31.7,
+      "casesPerThousandPeople": 186.3
+    },
+    {
+      "siruta": "50790",
+      "name": "MUNICIPIUL REȘIȚA",
+      "county": "CS",
+      "units": 6,
+      "population": 277930,
+      "lowerVolume": 38270,
+      "upperVolume": 7244,
+      "volume": 45514,
+      "judgesAtNationalLoad": 30.8,
+      "casesPerThousandPeople": 163.8
+    },
+    {
+      "siruta": "65342",
+      "name": "MUNICIPIUL TÂRGOVIȘTE",
+      "county": "DB",
+      "units": 4,
+      "population": 340682,
+      "lowerVolume": 37669,
+      "upperVolume": 12006,
+      "volume": 49675,
+      "judgesAtNationalLoad": 33.6,
+      "casesPerThousandPeople": 145.8
+    },
+    {
+      "siruta": "92658",
+      "name": "MUNICIPIUL SLOBOZIA",
+      "county": "IL",
+      "units": 5,
+      "population": 235216,
+      "lowerVolume": 37238,
+      "upperVolume": 4725,
+      "volume": 41963,
+      "judgesAtNationalLoad": 28.4,
+      "casesPerThousandPeople": 178.4
+    },
+    {
+      "siruta": "100521",
+      "name": "MUNICIPIUL GIURGIU",
+      "county": "GR",
+      "units": 2,
+      "population": 130317,
+      "lowerVolume": 30050,
+      "upperVolume": 7514,
+      "volume": 37564,
+      "judgesAtNationalLoad": 25.4,
+      "casesPerThousandPeople": 288.3
+    },
+    {
+      "siruta": "136483",
+      "name": "MUNICIPIUL SATU MARE",
+      "county": "SM",
+      "units": 3,
+      "population": 248041,
+      "lowerVolume": 29729,
+      "upperVolume": 7529,
+      "volume": 37258,
+      "judgesAtNationalLoad": 25.2,
+      "casesPerThousandPeople": 150.2
+    },
+    {
+      "siruta": "92569",
+      "name": "MUNICIPIUL CĂLĂRAȘI",
+      "county": "CL",
+      "units": 3,
+      "population": 185005,
+      "lowerVolume": 28418,
+      "upperVolume": 6186,
+      "volume": 34604,
+      "judgesAtNationalLoad": 23.4,
+      "casesPerThousandPeople": 187.0
+    },
+    {
+      "siruta": "159614",
+      "name": "MUNICIPIUL TULCEA",
+      "county": "TL",
+      "units": 3,
+      "population": 155544,
+      "lowerVolume": 24852,
+      "upperVolume": 5662,
+      "volume": 30514,
+      "judgesAtNationalLoad": 20.6,
+      "casesPerThousandPeople": 196.2
+    },
+    {
+      "siruta": "63394",
+      "name": "MUNICIPIUL SFÂNTU GHEORGHE",
+      "county": "CV",
+      "units": 6,
+      "population": 228551,
+      "lowerVolume": 22258,
+      "upperVolume": 3579,
+      "volume": 25837,
+      "judgesAtNationalLoad": 17.5,
+      "casesPerThousandPeople": 113.0
+    },
+    {
+      "siruta": "139704",
+      "name": "MUNICIPIUL ZALĂU",
+      "county": "SJ",
+      "units": 4,
+      "population": 204242,
+      "lowerVolume": 21651,
+      "upperVolume": 4458,
+      "volume": 26109,
+      "judgesAtNationalLoad": 17.7,
+      "casesPerThousandPeople": 127.8
+    },
+    {
+      "siruta": "83320",
+      "name": "MUNICIPIUL MIERCUREA CIUC",
+      "county": "HR",
+      "units": 4,
+      "population": 262630,
+      "lowerVolume": 17986,
+      "upperVolume": 4633,
+      "volume": 22619,
+      "judgesAtNationalLoad": 15.3,
+      "casesPerThousandPeople": 86.1
+    }
+  ],
+  "limitations": [
+    {
+      "id": "dosarele-se-impart-dupa-populatie",
+      "text": "Dosarele unei judecătorii sunt împărțite pe comunele ei proporțional cu populația, fiindcă nu se publică câte dosare vine din fiecare comună. O comună urbană produce mai multe procese pe cap de locuitor decât una rurală, deci împărțirea e aproximativă. Cât de mult contează se poate citi: „invariantShare” spune ce parte din volum merge întreagă la o singură instanță și deci nu depinde deloc de această împărțire.",
+      "severity": "material",
+      "affects": [
+        "courts",
+        "summary"
+      ]
+    },
+    {
+      "id": "delta-nu-are-drum",
+      "text": "Unitatea consolidată a Sulinei — cinci comune, circa 7.200 de locuitori — nu are drum până la niciun sediu de instanță, fiindcă în Deltă se ajunge pe apă. Partea ei de volum e numărată separat, nu împărțită altor instanțe: o instanță la care nu se poate ajunge cu mașina nu e o arondare.",
+      "severity": "note",
+      "affects": [
+        "courts",
+        "summary"
+      ]
+    },
+    {
+      "id": "arondarea-legala-e-din-2023",
+      "text": "Ce comune ține fiecare judecătorie vine din HG 1217/2023, iar volumul din raportul pe 2025. Între cele două date arondarea nu s-a schimbat, dar sunt ani diferiți, iar comunele înființate după hotărâre nu au judecătorie în ea.",
+      "severity": "material",
+      "affects": [
+        "courts"
+      ]
+    },
+    {
+      "id": "doua-niveluri-adunate-si-aici",
+      "text": "Ca la parchete, volumul judecătoriilor și cel al tribunalelor sunt adunate, deși un dosar de tribunal nu e cât unul de judecătorie. Comasarea propusă asta presupune; cele două componente sunt păstrate separat în fișier ca să poată fi citite și pe rând.",
+      "severity": "material",
+      "affects": [
+        "courts"
+      ]
+    },
+    {
+      "id": "judecatorii-la-media-nationala",
+      "text": "Numărul de judecători de care ar avea nevoie fiecare instanță e volumul împărțit la încărcătura medie națională. E o măsură a mărimii, nu un stat de funcții: o instanță mare se specializează pe complete și nu scalează liniar, iar o instanță mică are un minim sub care nu poate funcționa.",
+      "severity": "material",
+      "affects": [
+        "courts"
+      ]
+    },
+    {
+      "id": "depinde-de-parametrii-reformei-administrative",
+      "text": "Unitățile consolidate sunt cele produse de simulatorul administrativ la parametrii impliciți, iar arondarea lor e cea din „arondare-noua”. Cu alte praguri ies alte unități, altă arondare și altă încărcătură.",
+      "severity": "material",
+      "affects": [
+        "courts"
+      ]
+    }
+  ]
+}

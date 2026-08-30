@@ -87,9 +87,17 @@ def test_the_merger_covers_only_the_two_bottom_levels(parchete):
     assert merger["proposedOffices"] == 42
 
 
-def test_the_unmodelled_workload_is_declared_blocking(parchete):
-    """Posts and cost only. The report's volume and caseload-per-prosecutor chapters are not
-    read here, so nothing says how work would redistribute across 42 offices."""
-    blocking = {x["id"] for x in parchete["limitations"] if x["severity"] == "blocking"}
-    assert "volumul-parchetelor-nu-e-modelat" in blocking
-    assert "piccj-cuprinde-dna-si-diicot" in {x["id"] for x in parchete["limitations"]}
+def test_the_workload_points_at_where_it_is_now_modelled(parchete):
+    """This file is still posts and cost only, but the redistribution it used to declare
+    missing has been built in `parchete-comasare`.
+
+    The caveat was blocking and is now a pointer, which is the change that matters: a blocking
+    limitation left standing after the work is done is its own kind of wrong answer, telling a
+    reader nothing can be said about something the page goes on to say.
+    """
+    ids = {x["id"] for x in parchete["limitations"]}
+    assert "volumul-parchetelor-nu-e-modelat" not in ids
+    pointer = next(x for x in parchete["limitations"] if x["id"] == "volumul-parchetelor-e-in-alta-parte")
+    assert pointer["severity"] != "blocking"
+    assert "parchete-comasare" in pointer["text"]
+    assert "piccj-cuprinde-dna-si-diicot" in ids
