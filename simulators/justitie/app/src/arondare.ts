@@ -25,8 +25,9 @@
 
 import { decode } from '../../../administrativ/web/src/model/load';
 import { runModel } from '../../../administrativ/web/src/model/model';
+import { decode as decodeScenario } from '../../../administrativ/web/src/app/scenario';
 import { DEFAULT_PARAMS } from '../../../administrativ/web/src/model/types';
-import type { ModelData, Params } from '../../../administrativ/web/src/model/types';
+import type { ModelData, Params, Pin } from '../../../administrativ/web/src/model/types';
 
 export interface CourtSeat {
   county: string;
@@ -145,10 +146,33 @@ function nearestRow(
   return bestRow < 0 ? null : { row: bestRow, metres: best * meta.scaleMetres };
 }
 
+/**
+ * The administrative scenario carried in the URL, decoded by the administrative app's own
+ * reader rather than a second parser here.
+ *
+ * That app puts every parameter and every manual pin in the hash on purpose — "a scenario
+ * nobody can link to is a scenario nobody can dispute". This page was the one place that
+ * guarantee broke: it ran the model, but always at the defaults, so a reader who had built a
+ * particular map next door arrived here and was shown a different country without being told.
+ */
+export function readScenario(hash: string): { params: Params; pins: Pin[] } {
+  const scenario = decodeScenario(hash, 'ro');
+  return { params: scenario.params, pins: scenario.pins };
+}
+
+/** Which parameters the link actually moved. Empty means the reader is on the defaults. */
+export function changedParams(params: Params): (keyof Params)[] {
+  return (Object.keys(DEFAULT_PARAMS) as (keyof Params)[]).filter(
+    (key) => params[key] !== DEFAULT_PARAMS[key],
+  );
+}
+
 /** Run the merge at these parameters, then assign every consolidated unit to a court. */
-export function assign(coupled: Coupled, params: Params): Arondare {
+export function assign(coupled: Coupled, params: Params, pins: Pin[] = []): Arondare {
   const { data, meta, distance, rowOfCounty } = coupled;
-  const result = runModel(data, params);
+  // Pins are seat overrides a reader placed by hand. Dropping them would silently undo the
+  // most deliberate thing they did to the map.
+  const result = runModel(data, params, pins);
   const { regionOf } = result;
 
   const members = new Map<number, number[]>();

@@ -22,7 +22,14 @@ import {
   type MapMouseEvent,
 } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { assign, loadCoupling, type Arondare, type Coupled } from './arondare';
+import {
+  assign,
+  changedParams,
+  loadCoupling,
+  readScenario,
+  type Arondare,
+  type Coupled,
+} from './arondare';
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 
 // MapLibre 6 ships its worker as a separate file rather than inlining it, and a bundled app
@@ -1131,6 +1138,12 @@ async function main(): Promise<void> {
       .sort((x, y) => y.ownCountyMetres! - y.metres! - (x.ownCountyMetres! - x.metres!))
       .slice(0, 6);
 
+  // The scenario the reader arrived with. The administrative app writes every parameter and
+  // every pin into the hash so a map can be linked to and argued with; this page reads the
+  // same hash rather than starting from the defaults and quietly showing a different country.
+  const scenario = readScenario(location.hash);
+  const movedNow = (): (keyof typeof scenario.params)[] => changedParams(scenario.params);
+
   const renderArondare = (
     sum: ArondareNoua['summary'],
     rows: ArondareRow[],
@@ -1194,7 +1207,22 @@ async function main(): Promise<void> {
                 <output id="p-target-out"></output></label>`
            : `<p class="note"><button id="arondare-couple" type="button">Recalculează cu
                 propriile praguri</button> — rulează modelul administrativ aici (1,9 MB) și
-                reface arondarea la fiecare mișcare.</p>`
+                reface arondarea la fiecare mișcare.</p>
+              <p class="note">${
+                movedNow().length || scenario.pins.length
+                  ? `Linkul cu care ai venit schimbă ${movedNow().length} ${
+                      movedNow().length === 1 ? 'prag' : 'praguri'
+                    }${
+                      scenario.pins.length
+                        ? ` și fixează ${scenario.pins.length} ${
+                            scenario.pins.length === 1 ? 'sediu' : 'sedii'
+                          }`
+                        : ''
+                    } — harta de mai jos e a ta, nu cea implicită.`
+                  : `Ești pe setările implicite. <a href="../administrativ/">Construiește o
+                     hartă administrativă</a>, apoi adu linkul înapoi aici: pagina îl citește
+                     din adresă și reface arondarea după el.`
+              }</p>`
        }</div>`;
   };
 
@@ -1220,16 +1248,41 @@ async function main(): Promise<void> {
     input.addEventListener('input', () => {
       const next = Number(input.value);
       el('#p-target-out').textContent = `${ro.format(next)} loc.`;
-      if (coupled) showLive(assign(coupled, { ...coupled.defaults, pTarget: next }), next);
+      if (coupled) {
+        // Keep the rest of the scenario; only the slider's own parameter moves. Written back
+        // to the hash so a link shared from here still describes what the reader saw.
+        scenario.params = { ...scenario.params, pTarget: next };
+        const query = new URLSearchParams(location.hash.replace(/^#/, ''));
+        query.set('pt', String(next));
+        ownHashWrite = true;
+        history.replaceState(null, '', `#${query.toString()}`);
+        showLive(assign(coupled, scenario.params, scenario.pins), next);
+      }
     });
   };
+  // Changing only the hash is a same-document navigation: the page does not reload, so a
+  // reader pasting a scenario link into an already-open tab would otherwise see nothing move.
+  // Re-read and recompute, unless the change came from our own slider writing itself back.
+  let ownHashWrite = false;
+  window.addEventListener('hashchange', () => {
+    if (ownHashWrite) {
+      ownHashWrite = false;
+      return;
+    }
+    const next = readScenario(location.hash);
+    scenario.params = next.params;
+    scenario.pins = next.pins;
+    if (coupled) showLive(assign(coupled, scenario.params, scenario.pins), scenario.params.pTarget);
+    else renderArondare(arondare.summary, arondare.units, false);
+  });
+
   el('#arondare-body').addEventListener('click', (event) => {
     if (!(event.target as HTMLElement).closest('#arondare-couple')) return;
     el('#arondare-live').innerHTML = '<p class="note">Se încarcă modelul administrativ…</p>';
     void loadCoupling(base)
       .then((ready) => {
         coupled = ready;
-        showLive(assign(ready, ready.defaults), ready.defaults.pTarget);
+        showLive(assign(ready, scenario.params, scenario.pins), scenario.params.pTarget);
       })
       .catch((error: unknown) => {
         el('#arondare-live').innerHTML =
