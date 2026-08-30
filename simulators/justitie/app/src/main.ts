@@ -57,6 +57,19 @@ interface Limitation {
   affects: string[];
 }
 
+interface Sporuri {
+  scope: { filledPosts: number; baseMonthlyLeiPerPost: number };
+  sporuri: { narrow: number; wide: number };
+  draftCap: { percent: number; overCap: boolean; gapPercentagePoints: number };
+  pension: {
+    currentPercent: number;
+    proposedPercent: number;
+    reductionWithoutSporuriPercent: number;
+    readings: { measure: string; reductionPercent: number }[];
+  };
+  limitations: Limitation[];
+}
+
 interface Pensii {
   averageGrossWageLei: number;
   paper: { formula: string; retirementAgeFrom: number; retirementAgeTo: number };
@@ -171,7 +184,8 @@ const BLANK = {
 };
 
 async function main(): Promise<void> {
-  const [doc, counties, proposal, manifest, design, costuri, pensii] = await Promise.all([
+  const [doc, counties, proposal, manifest, design, costuri, pensii, sporuri] =
+    await Promise.all([
     fetch(`${base}data/instante.json`).then((r) => r.json() as Promise<Document>),
     fetch(`${base}data/counties.geojson`).then((r) => r.json()),
     fetch(`${base}data/propunere.json`).then((r) => r.json() as Promise<Proposal>),
@@ -181,6 +195,7 @@ async function main(): Promise<void> {
     fetch(`${base}data/design.json`).then((r) => r.json() as Promise<Design>),
     fetch(`${base}data/costuri.json`).then((r) => r.json() as Promise<Costuri>),
     fetch(`${base}data/pensii.json`).then((r) => r.json() as Promise<Pensii>),
+    fetch(`${base}data/sporuri.json`).then((r) => r.json() as Promise<Sporuri>),
   ]);
   const countyName = (code: string): string => manifest.countyNames?.[code] ?? code;
 
@@ -694,6 +709,45 @@ async function main(): Promise<void> {
       `printr-un proces public. Baza de comparație — activitatea instanțelor — este raportul ` +
       `Consiliului Superior al Magistraturii.`;
 
+  // The one number three other sections used to say could not be found. Shown against the two
+  // things it decides — the draft law's ceiling and the pension bill's headline — because a
+  // percentage of a wage bill means nothing to a reader on its own.
+  const pct = (x: number): string => `${ro.format(Math.round(x * 1000) / 10)}%`;
+  const narrow = sporuri.pension.readings.find((r) => r.measure === 'narrow');
+  const wide = sporuri.pension.readings.find((r) => r.measure === 'wide');
+  el('#sporuri-chev').textContent = pct(sporuri.sporuri.narrow);
+  el('#sporuri-body').innerHTML =
+    `<p class="note">Execuția bugetară pe 2025, pentru ordonatorul principal sub care
+       raportează instanțele: ${ro.format(sporuri.scope.filledPosts)} de posturi ocupate.</p>
+     <div class="pens-row">
+       <span class="pens-head">măsură</span>
+       <span class="pens-head">cotă</span>
+       <span class="pens-head">plafon</span>
+       <span class="pens-head">diferență</span>
+       <span>sporuri</span>
+       <span class="${sporuri.draftCap.overCap ? 'pens-low' : ''}">${pct(sporuri.sporuri.narrow)}</span>
+       <span>${sporuri.draftCap.percent}%</span>
+       <span class="${sporuri.draftCap.overCap ? 'pens-low' : ''}">${
+         sporuri.draftCap.gapPercentagePoints > 0 ? '+' : ''
+       }${ro.format(sporuri.draftCap.gapPercentagePoints)} p.p.</span>
+       <span>peste bază</span>
+       <span>${pct(sporuri.sporuri.wide)}</span>
+       <span>—</span>
+       <span>—</span>
+     </div>
+     <p class="note">„Sporuri” sunt paragrafele 10.01.05 și 10.01.06 din execuție; „peste bază”
+       este tot ce se plătește în afara salariului de bază, indiferent cum se numește.</p>
+     <p class="disagree">Proiectul de salarizare din iulie 2026 plafonează sporurile la
+       ${sporuri.draftCap.percent}% din salariile de bază, pe ordonator principal. Instanțele
+       sunt ${sporuri.draftCap.overCap ? 'peste' : 'sub'} acest plafon.</p>
+     <p class="disagree">Proiectul de pensii taie procentul de la
+       ${sporuri.pension.currentPercent}% la ${sporuri.pension.proposedPercent}%, dar în același
+       timp lărgește baza de calcul cu exact aceste sporuri. Fără ele în bază, scăderea pare de
+       ${ro.format(sporuri.pension.reductionWithoutSporuriPercent)}%; cu ele, este de
+       ${ro.format(narrow?.reductionPercent ?? 0)}%${
+         wide ? ` — sau ${ro.format(wide.reductionPercent)}% la definiția largă` : ''
+       }.</p>`;
+
   // The two pension reforms, against the same judge. The paper's cap is a flat sum and the
   // bill's floor is a share of each grade's own indemnity, so the two cross: for every grade
   // but the trainee the paper pays less than the bill's minimum. Marked where that happens
@@ -747,6 +801,7 @@ async function main(): Promise<void> {
     ...proposal.limitations,
     ...costuri.limitations,
     ...pensii.limitations,
+    ...sporuri.limitations,
   ];
   const blocking = allLimits.filter((l) => l.severity === 'blocking');
   const rest = allLimits.filter((l) => l.severity !== 'blocking');

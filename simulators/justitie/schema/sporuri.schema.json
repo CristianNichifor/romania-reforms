@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/sporuri.schema.json",
+  "title": "What the courts pay above base salary, and what it does to the pension bill",
+  "description": "Budget execution for the courts' ordonator principal de credite, as the share of base salary paid in supplements. Retires the caveat that this could not be found in public data, and rewrites the pension bill's headline: the rate falls from 80% to 55% while the base widens to include these supplements, so the cut is far smaller than the rate change alone suggests.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "period",
+    "provenance",
+    "scope",
+    "sporuri",
+    "draftCap",
+    "pension",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "const": "sporuri-2025" },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "period": { "type": "string" },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+    "scope": {
+      "description": "Whose supplements these are. Stated because the ratio is only as good as the perimeter it was measured over.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entity", "filledPosts", "baseAnnualLei", "baseMonthlyLeiPerPost"],
+      "properties": {
+        "entity": { "type": "string" },
+        "filledPosts": { "type": "integer", "exclusiveMinimum": 0 },
+        "baseAnnualLei": { "type": "number", "exclusiveMinimum": 0 },
+        "baseMonthlyLeiPerPost": {
+          "description": "The cross-check that told us this line is every court, not the supreme court alone.",
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "sporuri": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["narrow", "wide", "narrowDescription", "wideDescription"],
+      "properties": {
+        "narrow": {
+          "description": "10.01.05 + 10.01.06 over 10.01.01. The closest proxy for what a ceiling would measure.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 3
+        },
+        "wide": {
+          "description": "Everything above base pay. Never below narrow, since it contains it.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 3
+        },
+        "narrowDescription": { "type": "string" },
+        "wideDescription": { "type": "string" }
+      }
+    },
+    "prosecutionNarrow": {
+      "description": "The prosecution service's own ratio, carried for context only.",
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 3
+    },
+    "draftCap": {
+      "description": "The 20% ceiling in the July 2026 draft salary law, read from the pay simulator's frame.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["percent", "overCap", "gapPercentagePoints", "provenance"],
+      "properties": {
+        "percent": { "type": "number", "exclusiveMinimum": 0 },
+        "overCap": { "type": "boolean" },
+        "gapPercentagePoints": { "type": "number" },
+        "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" }
+      }
+    },
+    "pension": {
+      "description": "The bill cuts the rate and widens the base at once. Both effects, at both readings of what a supplement is.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "currentPercent",
+        "proposedPercent",
+        "reductionWithoutSporuriPercent",
+        "readings"
+      ],
+      "properties": {
+        "currentPercent": { "type": "number", "exclusiveMinimum": 0 },
+        "proposedPercent": { "type": "number", "exclusiveMinimum": 0 },
+        "reductionWithoutSporuriPercent": {
+          "description": "The figure published before this document existed: rate change alone, no widening.",
+          "type": "number"
+        },
+        "readings": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "measure",
+              "sporuriShare",
+              "effectivePercentOfIndemnity",
+              "reductionPercent"
+            ],
+            "properties": {
+              "measure": { "enum": ["narrow", "wide"] },
+              "sporuriShare": { "type": "number", "minimum": 0, "maximum": 3 },
+              "effectivePercentOfIndemnity": { "type": "number", "exclusiveMinimum": 0 },
+              "reductionPercent": { "type": "number" }
+            }
+          }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+    }
+  }
+}

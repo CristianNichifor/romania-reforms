@@ -156,11 +156,11 @@ def main() -> int:
                 "text": (
                     "Este indemnizația de bază, fără sporuri, indemnizații de hrană, "
                     "compensații sau alte drepturi — exact ce reproșează capitolul 10 "
-                    "sistemului actual. Cât se plătește peste bază nu se poate afla din "
-                    "datele publice de aici: execuția bugetară din simulatorul de salarizare "
-                    "nu are nicio linie separată pentru justiție."
+                    "sistemului actual. Cât se plătește peste bază se știe acum, dar la nivel "
+                    "de sistem, nu de grad: instanțele plătesc în sporuri 24,9% din salariile "
+                    "de bază (vezi sporuri-2025). Cifrele de aici rămân indemnizația goală."
                 ),
-                "severity": "blocking",
+                "severity": "material",
                 "affects": ["cost", "salarizare"],
             },
             {

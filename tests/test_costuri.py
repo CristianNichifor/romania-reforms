@@ -90,9 +90,18 @@ def test_a_higher_caseload_target_needs_fewer_judges(costuri):
         assert needed == sorted(needed, reverse=True), (grade, needed)
 
 
-def test_the_two_blocking_gaps_are_declared(costuri):
+def test_the_gaps_are_declared_at_the_right_weight(costuri):
+    """One gap is still blocking; the other stopped being one when the sporuri were found.
+
+    The grade of a merged court's judges is a hole nothing in the repository fills, and it
+    swings the answer between a saving and a half-billion-lei increase — that stays blocking.
+    Sporuri were blocking for the same reason until the pay simulator's execution data turned
+    out to carry the courts' own principal; now their size is known at system level, so the
+    caveat is about scope, not absence. Asserted in both directions so neither can drift back.
+    """
     ids = {x["id"] for x in costuri["limitations"]}
     assert "gradul-instantei-comasate-nu-e-stabilit" in ids
     assert "doar-indemnizatia-de-baza" in ids
-    blocking = {x["id"] for x in costuri["limitations"] if x["severity"] == "blocking"}
-    assert len(blocking) >= 2, blocking
+    weight = {x["id"]: x["severity"] for x in costuri["limitations"]}
+    assert weight["gradul-instantei-comasate-nu-e-stabilit"] == "blocking"
+    assert weight["doar-indemnizatia-de-baza"] == "material"

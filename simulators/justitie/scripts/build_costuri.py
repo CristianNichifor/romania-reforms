@@ -157,11 +157,12 @@ def main() -> int:
                 "id": "doar-indemnizatia-de-baza",
                 "text": (
                     "Sunt doar indemnizațiile de bază, la vârful grilei. Sporurile — exact "
-                    "subiectul capitolului 10 — nu sunt incluse și nu pot fi aflate din "
-                    "datele publice disponibile aici. Cifrele sunt deci o limită de sus "
-                    "pentru bază și o limită de jos pentru ce se plătește în realitate."
+                    "subiectul capitolului 10 — nu sunt incluse în calculul pe instanță. "
+                    "Ordinul lor de mărime se cunoaște însă: instanțele plătesc în sporuri "
+                    "24,9% peste salariile de bază, deci masa salarială reală este cu circa "
+                    "un sfert peste cifrele de aici (vezi sporuri-2025)."
                 ),
-                "severity": "blocking",
+                "severity": "material",
                 "affects": ["cost", "salarizare"],
             },
             {

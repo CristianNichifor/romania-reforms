@@ -54,11 +54,19 @@ def test_all_four_changes_are_recorded(pensii):
 
 def test_the_reduction_is_labelled_a_ceiling_not_an_estimate(pensii):
     """Computed on indemnity alone while the new base also counts sporuri, so the real cut is
-    smaller by an unknown amount. If that caveat ever leaves, the number starts lying."""
+    smaller. The caveat must survive — the number lies without it — but it is no longer
+    blocking: sporuri-2025 measures the widening at 24,9% and puts the cut near 14%.
+
+    What keeps it a ceiling rather than an estimate is the 60-month averaging, which is still
+    not modelled and pushes the other way.
+    """
     ids = {x["id"] for x in pensii["limitations"]}
     assert "sporurile-nu-sunt-publice" in ids
-    blocking = {x["id"] for x in pensii["limitations"] if x["severity"] == "blocking"}
-    assert "sporurile-nu-sunt-publice" in blocking
+    weight = {x["id"]: x["severity"] for x in pensii["limitations"]}
+    assert weight["sporurile-nu-sunt-publice"] == "material"
+    assert "nu-stim-cati-pensionari" in {
+        x["id"] for x in pensii["limitations"] if x["severity"] == "blocking"
+    }
 
 
 def test_the_reduction_matches_the_two_rates(pensii):

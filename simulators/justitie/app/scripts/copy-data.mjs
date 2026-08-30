@@ -32,6 +32,8 @@ const sources = [
   [resolve(here, '../../data/costuri-2025.json'), 'costuri.json'],
   // The two pension reforms, so the page can show them against each other.
   [resolve(here, '../../data/pensii-comparatie.json'), 'pensii.json'],
+  // What the courts pay above base salary, and what it does to the bill's headline.
+  [resolve(here, '../../data/sporuri-2025.json'), 'sporuri.json'],
   // County codes to full names, so a merged court is "Tribunalul Covasna" and not "CV".
   [resolve(here, '../../../administrativ/web/public/data/manifest.json'), 'manifest.json'],
 ];
