@@ -9,7 +9,14 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 maplibregl.setWorkerUrl(workerUrl);
 import './style.css';
 import { buildNetwork, changedParams, loadCoupling, readScenario } from './consolidare';
-import { DAY_PROFILE, costNetwork, farebox, loadPrices } from './serviciu';
+import {
+  DAY_PROFILE,
+  SERVICE_LEVELS,
+  costNetwork,
+  farebox,
+  levelById,
+  loadPrices,
+} from './serviciu';
 import { compareWithBus, loadRailAccess, trainHeadwayMin } from './feroviar';
 import {
   BANDS,
@@ -77,7 +84,15 @@ async function main() {
   const net = buildNetwork(coupled, params, pins);
   // Buses, hours and lei for THIS network, not for the one the pipeline happened to publish.
   const prices = loadPrices(costInputs);
-  const resources = costNetwork(coupled, net, prices);
+
+  // Cost is not a number, it is a function of what you decide to run. Every level is priced,
+  // not only the one on screen, because the comparison IS the answer: what the next departure
+  // a day costs, and who gets it.
+  let level = levelById(hash().get('n') ?? 'implicit');
+  const priced = new Map(
+    SERVICE_LEVELS.map((l) => [l.id, costNetwork(coupled, net, prices, l)] as const),
+  );
+  const resourcesFor = () => priced.get(level.id)!;
 
   let scenario: Timetable = hash().get('s') === 'pulsed' ? 'pulsed' : 'uncoordinated';
 
@@ -253,7 +268,7 @@ async function main() {
         scenario === 'pulsed' ? a.waitPulsedMin : a.waitUncoordinatedMin,
       )}</dd>
       <dt>Centre</dt><dd>${fmt.format(net.centres.length)}</dd>
-      <dt>Autobuze</dt><dd>${fmt.format(resources.fleetTotal)}</dd>`;
+      <dt>Autobuze</dt><dd>${fmt.format(resourcesFor().fleetTotal)}</dd>`;
     // The map is per commune and the median is per person. Most communes are small and far,
     // so the typical polygon is redder than the median — saying so stops the map and the
     // number looking like they disagree.
@@ -265,12 +280,14 @@ async function main() {
     // Recomputed for the reader's network: routes generated from their centres, vehicles from
     // the service standard, lei from the same price file the pipeline argues from.
     el('cost').innerHTML = `
-      <dt>Trasee</dt><dd>${fmt.format(resources.routes)}</dd>
+      <dt>Trasee</dt><dd>${fmt.format(resourcesFor().routes)}</dd>
+      <dt>Șoferi</dt><dd>${fmt.format(resourcesFor().drivers)}</dd>
       <dt>Ore de autobuz pe zi</dt><dd>${fmt.format(
-        Math.round(resources.busHoursPerWeekday),
+        Math.round(resourcesFor().busHoursPerWeekday),
       )}</dd>
-      <dt>Funcționare</dt><dd>${bn(resources.cost.operatingRon)}</dd>
-      <dt>Total pe an</dt><dd class="big">${bn(resources.cost.totalRon)}</dd>`;
+      <dt>Funcționare</dt><dd>${bn(resourcesFor().cost.operatingRon)}</dd>
+      <dt>Investiție anualizată</dt><dd>${bn(resourcesFor().cost.capitalRon)}</dd>
+      <dt>Total pe an</dt><dd class="big">${bn(resourcesFor().cost.totalRon)}</dd>`;
 
     // What scenario the reader is actually on, and how to change it. The page used to offer
     // five presets; consolidation belongs to the administrative simulator, and this now says
@@ -410,9 +427,9 @@ async function main() {
     // the service on screen rather than the one the pipeline happened to publish.
     const people = coupled.data.population.reduce((a: number, b: number) => a + b, 0);
     const live = farebox(
-      resources.busKmPerWeekday,
-      resources.fleetByClass,
-      resources.cost.operatingRon,
+      resourcesFor().busKmPerWeekday,
+      resourcesFor().fleetByClass,
+      resourcesFor().cost.operatingRon,
       people,
       f.central.revenueRon / f.central.passengerKm,
       summary.fares.assumedLoadFactor,
@@ -499,6 +516,56 @@ async function main() {
   }
   renderRail();
   renderFares();
+  renderLevels();
+
+  function renderLevels() {
+    const rows = SERVICE_LEVELS.map((l) => {
+      const r = priced.get(l.id)!;
+      return `<tr class="${l.id === level.id ? 'on' : ''}">
+        <td>${l.label.split(' — ')[0]}</td>
+        <td>${fmt.format(r.fleetTotal)}</td>
+        <td>${fmt.format(r.drivers)}</td>
+        <td>${bn(r.cost.operatingRon)}</td>
+        <td>${bn(r.cost.totalRon)}</td>
+      </tr>`;
+    }).join('');
+    el('levels').innerHTML =
+      `<thead><tr><th>Nivel</th><th>Autobuze</th><th>Șoferi</th><th>Funcț.</th><th>Total</th></tr></thead>` +
+      `<tbody>${rows}</tbody>`;
+
+    // The marginal figure, which is the one worth arguing about. A total says what a network
+    // costs; the step between two levels says what the next departure a day is worth.
+    const floor = priced.get('minim')!;
+    const proposed = priced.get('implicit')!;
+    const wide = priced.get('extins')!;
+    const step = (a: typeof floor, b: typeof floor) =>
+      bn(b.cost.totalRon - a.cost.totalRon);
+    el('levels-note').textContent =
+      `Toate trei sunt calculate pe aceeași rețea și aceleași prețuri — diferă doar câte curse ` +
+      `se pun în orar. De la minim la standardul propus sunt ${step(floor, proposed)} în plus ` +
+      `pe an și ${fmt.format(proposed.drivers - floor.drivers)} de șoferi în plus; de acolo la ` +
+      `extins încă ${step(proposed, wide)}. Costul nu este un număr, este o funcție de ce alegi ` +
+      `să circule.`;
+  }
+
+  const levelSelect = el<HTMLSelectElement>('level');
+  levelSelect.innerHTML = SERVICE_LEVELS.map(
+    (l) => `<option value="${l.id}">${l.label}</option>`,
+  ).join('');
+  levelSelect.value = level.id;
+  levelSelect.addEventListener('change', () => {
+    level = levelById(levelSelect.value);
+    const params = hash();
+    params.set('n', level.id);
+    history.replaceState(null, '', `#${params}`);
+    renderStats();
+    renderFares();
+    renderLevels();
+  });
+
+  el('level-note').textContent =
+    'Cât se circulă, nu unde. Traseele și centrele rămân aceleași; se schimbă numărul de ' +
+    'curse pe zi, deci autobuzele, șoferii și banii.';
 
   el('caveats').innerHTML = summary.limitations
     .filter((l: { severity: string }) => l.severity === 'blocking' || l.severity === 'material')

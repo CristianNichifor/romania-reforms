@@ -56,6 +56,67 @@ export const SERVICES: Record<string, Service> = {
   },
 };
 
+/**
+ * Service levels: what the network promises, as departures per period per class.
+ *
+ * These are the lever the whole simulator exists to price. Cost is not a single number — it is
+ * a function of what you decide to run — and the interesting question is not "what does this
+ * cost" but "what does each extra departure a day cost, and who gets it".
+ *
+ * Written out per level rather than as a multiplier on the default. A multiplier reads as
+ * arithmetic; these are policies, and each one has to be defensible on its own terms:
+ *
+ * - **minim** — peaks only, everywhere. A commuter and a pupil can travel; nobody else can.
+ *   This is roughly what much of rural Romania has today, and it is the floor a reader should
+ *   be able to compare against rather than an option anyone should choose.
+ * - **implicit** — the standard the design document argues for: four a day to the smallest
+ *   commune, all on the peaks, and an hourly trunk to hold the pulse together.
+ * - **extins** — midday and evening on the feeders too, so the network serves a hospital
+ *   appointment and an evening shift rather than only the journey to work.
+ *
+ * The trunk tier matters most: it carries every transfer, so thinning it degrades journeys for
+ * communes that never see a trunk bus.
+ */
+export interface ServiceLevel {
+  id: string;
+  label: string;
+  departures: Record<string, Record<string, number>>;
+}
+
+export const SERVICE_LEVELS: ServiceLevel[] = [
+  {
+    id: 'minim',
+    label: 'Minim — doar vârfurile',
+    departures: {
+      basic: { am_peak: 1, midday: 0, pm_peak: 1, evening: 0 },
+      feeder: { am_peak: 2, midday: 0, pm_peak: 2, evening: 0 },
+      trunk: { am_peak: 2, midday: 2, pm_peak: 2, evening: 1 },
+    },
+  },
+  {
+    id: 'implicit',
+    label: 'Implicit — standardul propus',
+    departures: {
+      basic: { am_peak: 2, midday: 0, pm_peak: 2, evening: 0 },
+      feeder: { am_peak: 3, midday: 2, pm_peak: 3, evening: 1 },
+      trunk: { am_peak: 3, midday: 5, pm_peak: 4, evening: 4 },
+    },
+  },
+  {
+    id: 'extins',
+    label: 'Extins — și după-amiaza, și seara',
+    departures: {
+      basic: { am_peak: 2, midday: 1, pm_peak: 2, evening: 1 },
+      feeder: { am_peak: 4, midday: 4, pm_peak: 4, evening: 2 },
+      trunk: { am_peak: 4, midday: 7, pm_peak: 5, evening: 6 },
+    },
+  },
+];
+
+export function levelById(id: string): ServiceLevel {
+  return SERVICE_LEVELS.find((l) => l.id === id) ?? SERVICE_LEVELS[1];
+}
+
 const BASIC_MAX_POPULATION = 2_000;
 const FEEDER_MAX_POPULATION = 5_000;
 
@@ -156,6 +217,10 @@ export interface Prices {
   vehiclePrice: Record<string, number>;
   vehicleLifeYears: number;
   spareRatio: number;
+  /** Paid hours a full-time driver works in a month. */
+  driverPaidHoursMonth: number;
+  /** Paid hours per hour the bus is moving: sign-on, breaks, deadhead. */
+  platformToPaidRatio: number;
   serviceSpeedFactor: number;
   dwellMinPerStop: number;
   weekdaysPerYear: number;
@@ -243,6 +308,8 @@ export function loadPrices(document: {
     vehiclePrice: price,
     vehicleLifeYears: item('vehicleLifeYears'),
     spareRatio: 0.15,
+    driverPaidHoursMonth: item('driverPaidHoursMonth'),
+    platformToPaidRatio: item('platformToPaidRatio'),
     serviceSpeedFactor: item('serviceSpeedFactor'),
     dwellMinPerStop: item('dwellMinPerStop'),
     weekdaysPerYear: 250,
@@ -270,7 +337,27 @@ export interface NetworkCost {
   busKmPerWeekday: number;
   fleetByClass: Record<string, number>;
   fleetTotal: number;
+  /**
+   * Drivers to employ, full-time equivalent.
+   *
+   * Not the same as buses, and larger: a driver is paid for sign-on, breaks and deadhead as
+   * well as for driving, and one bus running sixteen hours a day needs more than one driver.
+   * Costing at bus-hours alone would understate the largest single line by roughly a third —
+   * which is why `perBusHour` already carries the ratio, and why this headcount has to carry
+   * it too rather than dividing bus-hours by a working year.
+   */
+  drivers: number;
   cost: Cost;
+}
+
+/** Full-time drivers for a year of bus-hours. */
+export function driversRequired(
+  busHoursPerYear: number,
+  paidHoursMonth: number,
+  platformToPaid: number,
+): number {
+  if (paidHoursMonth <= 0) return 0;
+  return Math.ceil((busHoursPerYear * platformToPaid) / (paidHoursMonth * 12));
 }
 
 /**
@@ -284,7 +371,12 @@ export interface NetworkCost {
  * - the **spare ratio is applied once, to the network total**, never per route. Per route it
  *   buys a spare for every single-bus service and inflates the fleet by half again.
  */
-export function costNetwork(coupled: Coupled, net: Network, prices: Prices): NetworkCost {
+export function costNetwork(
+  coupled: Coupled,
+  net: Network,
+  prices: Prices,
+  level: ServiceLevel = levelById('implicit'),
+): NetworkCost {
   const { data, road } = coupled;
   const zoneOf = zonesOf(data);
 
@@ -303,8 +395,7 @@ export function costNetwork(coupled: Coupled, net: Network, prices: Prices): Net
   let busKm = 0;
 
   const add = (name: string, roundTripMin: number, kmRoundTrip: number) => {
-    const service = SERVICES[name];
-    const r = resourcesForRoute(roundTripMin, service.departures, kmRoundTrip);
+    const r = resourcesForRoute(roundTripMin, level.departures[name], kmRoundTrip);
     peakByClass[name] += r.peakVehicles;
     kmByClass[name] += r.busKm;
     hours += r.busHours;
@@ -353,6 +444,11 @@ export function costNetwork(coupled: Coupled, net: Network, prices: Prices): Net
   return {
     routes: routeCount,
     routesWithoutLength: withoutLength,
+    drivers: driversRequired(
+      hours * prices.weekdaysPerYear,
+      prices.driverPaidHoursMonth,
+      prices.platformToPaidRatio,
+    ),
     peakVehicles: peakTotal,
     busHoursPerWeekday: hours,
     busKmPerWeekday: busKm,

@@ -33,6 +33,13 @@ select { width:100%; padding:9px 10px; background:#232838; color:var(--ink); fon
 .check { display: flex; align-items: center; gap: 9px; font-size: 13px; color: var(--dim);
   margin-top: 10px; cursor: pointer; }
 .check input { accent-color: #7aa2f7; width: 15px; height: 15px; }
+table { width: 100%; border-collapse: collapse; margin-top: 10px;
+  font-variant-numeric: tabular-nums; font-size: 12.5px; }
+th, td { text-align: right; padding: 5px 4px; border-bottom: 1px solid var(--line); }
+th:first-child, td:first-child { text-align: left; color: var(--dim); }
+thead th { color: var(--dim); font-weight: 600; font-size: 11px; text-transform: uppercase;
+  letter-spacing: .04em; }
+tr.on td { color: var(--ink); font-weight: 600; }
 dl { display: grid; grid-template-columns: 1fr auto; gap: 5px 12px; margin: 12px 0 0;
   font-variant-numeric: tabular-nums; }
 dt { color: var(--dim); font-size: 13px; }

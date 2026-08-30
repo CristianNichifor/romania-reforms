@@ -16,6 +16,9 @@ import { assemble, buildNetwork } from './consolidare';
 import {
   DAY_PROFILE,
   SERVICES,
+  SERVICE_LEVELS,
+  driversRequired,
+  levelById,
   annualCost,
   classify,
   costNetwork,
@@ -95,6 +98,8 @@ describe('cost arithmetic', () => {
     vehiclePrice: { basic: 100_000, trunk: 300_000 },
     vehicleLifeYears: 10,
     spareRatio: 0.15,
+    driverPaidHoursMonth: 165,
+    platformToPaidRatio: 1.3,
     serviceSpeedFactor: 0.75,
     dwellMinPerStop: 0.75,
     weekdaysPerYear: 10,
@@ -204,5 +209,52 @@ describe('the farebox', () => {
     const f = farebox(0, {}, 0, 0, 0.35, 0.22, 250);
     expect(f.passengerKm).toBe(0);
     expect(Number.isFinite(f.subsidyPerPersonYearRon)).toBe(true);
+  });
+});
+
+describe('service levels', () => {
+  it('offers a floor, a proposal and an extension', () => {
+    expect(SERVICE_LEVELS.map((l) => l.id)).toEqual(['minim', 'implicit', 'extins']);
+  });
+
+  it('orders them by what they actually run', () => {
+    const total = (id: string) =>
+      Object.values(levelById(id).departures).reduce(
+        (sum, tier) => sum + Object.values(tier).reduce((a, b) => a + b, 0),
+        0,
+      );
+    expect(total('minim')).toBeLessThan(total('implicit'));
+    expect(total('implicit')).toBeLessThan(total('extins'));
+  });
+
+  it('never leaves the smallest commune with nothing', () => {
+    // The floor is a floor, not an abolition: every level runs on both peaks.
+    for (const l of SERVICE_LEVELS) {
+      expect(l.departures.basic.am_peak).toBeGreaterThan(0);
+      expect(l.departures.basic.pm_peak).toBeGreaterThan(0);
+    }
+  });
+
+  it('falls back to the proposed standard on an unknown id', () => {
+    expect(levelById('nonesuch').id).toBe('implicit');
+  });
+});
+
+describe('drivers', () => {
+  it('needs more drivers than buses, because a driver is paid for more than driving', () => {
+    // One bus on the road for a full service day cannot be one driver.
+    const hours = 6_917_575;
+    expect(driversRequired(hours, 165, 1.3)).toBeGreaterThan(4000);
+  });
+
+  it('scales with the platform-to-paid ratio', () => {
+    expect(driversRequired(100_000, 165, 1.3)).toBeGreaterThan(
+      driversRequired(100_000, 165, 1.0),
+    );
+  });
+
+  it('returns none for a service that does not run', () => {
+    expect(driversRequired(0, 165, 1.3)).toBe(0);
+    expect(driversRequired(100, 0, 1.3)).toBe(0);
   });
 });
