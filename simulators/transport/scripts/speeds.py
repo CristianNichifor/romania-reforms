@@ -1,35 +1,54 @@
-"""Assumed effective speed by OSM road class.
+"""Effective travel speed by road class, derived rather than asserted.
 
-This is the weakest thing in L0 and it is deliberately alone in one file, so that the whole
-assumption set can be read in one screen and disputed as a unit.
+An earlier version of this file was a column of numbers with a paragraph of justification —
+`trunk: 75.0` and a claim that Romanian national roads do not deliver their legal 90. The
+claim was right and the number was not, and nothing in the file could tell you which.
 
-These are **effective** speeds, not legal limits. The legal limits (OUG 195/2002) are 130
-km/h on motorways, 100 on expressways and European national roads, 90 on other roads outside
-localities and 50 inside them. Nobody averages those over a real journey: junctions, villages
-strung along national roads, agricultural traffic and the state of the surface all take their
-cut, and a Romanian DN through a string of communes does not deliver 90 km/h over any distance
-that matters.
+This derives the same table from three separable parts, so a critic can attack one without
+having to accept the others:
 
-So each figure below is the legal limit discounted toward what a journey actually averages.
-That discount is a judgement, and it is the single assumption most likely to be wrong.
+1. **Measured limits.** `data/road-limits.json`, from `scripts/measure_limits.py`, holds the
+   length-weighted signed limits per class. The finding that shapes everything: below
+   motorway, the *open-road* limit is essentially the national 90 on every class. What
+   separates a national road from a communal one is how much of its length runs **inside a
+   locality** at 50 — 32% for trunk, 59% for secondary, 80% for tertiary. A DN is not slow
+   because it is a worse road; it is slow because a third of it threads through villages.
+   `derived`, from OSM, at 84–96% coverage on the classes that carry most traffic.
 
-**What makes it defensible is not this file.** It is the one-county gate in
-`scripts/check_gate.py`, which compares these speeds' output against real recorded drive
-times and fails the build when they disagree. Changing a number here without re-running that
-gate is how the whole substrate becomes plausible and quietly wrong.
+2. **Physics.** A vehicle leaving a 90 zone for a 50 zone must brake and then accelerate
+   again, and both cost time against cruising. That loss is computed from the speed change
+   and the vehicle's acceleration, not guessed. It is smaller than intuition suggests —
+   about five seconds per village for a bus — which is itself worth knowing: the cost of a
+   village is overwhelmingly the slower crawl through it, not the braking at its edge.
 
-The classes are administrativ's `ROUTING_CLASSES`, repeated here rather than imported: this
-module has no dependency on the geo stack and is the poorer for gaining one, and the test
-`test_every_routable_class_has_a_speed` fails loudly if the two lists ever drift apart.
+3. **Efficiency.** What remains: curves, junctions, surface, traffic, and the fact that
+   nobody drives at the limit continuously. This is the one genuinely assumed term, it is
+   per class because a motorway has no junctions and a village lane is all junction, and it
+   is where a dispute about these numbers should land.
+
+**Vehicles differ less than expected.** Below trunk, a bus and a car model within a km/h of
+each other, because those roads are limited by their geometry rather than by the vehicle.
+The bus penalty is real only on motorway and trunk. That is a result, not an oversight.
+
+**Nothing here is verified against a recorded journey.** No observations of real Romanian
+travel time exist in this repository. The model is defensible in its parts and unvalidated as
+a whole; see `check_gate.py` and the limitation it declares.
 """
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
 from typing import Final
 
 import numpy as np
 
-# Kept in step with administrativ's pipeline.build_road_distance.ROUTING_CLASSES.
+ROOT = Path(__file__).resolve().parents[1]
+LIMITS_FILE = ROOT / "data" / "road-limits.json"
+
+# Kept in step with administrativ's pipeline.build_road_distance.ROUTING_CLASSES. Repeated
+# rather than imported so this module keeps no dependency on the geo stack; the test
+# `test_every_routable_class_has_a_speed` fails loudly if the two ever drift.
 ROUTING_CLASSES: Final[tuple[str, ...]] = (
     "motorway",
     "trunk",
@@ -47,45 +66,147 @@ ROUTING_CLASSES: Final[tuple[str, ...]] = (
     "tertiary_link",
 )
 
-EFFECTIVE_KMH: Final[dict[str, float]] = {
-    # Free-flowing and grade-separated; the one class that comes close to its limit.
-    "motorway": 110.0,
-    # DN-grade. The legal 90 is rarely achieved: these run through the villages they connect.
-    "trunk": 75.0,
-    "primary": 65.0,
-    # DJ-grade county roads, the backbone of everything this simulator models.
-    "secondary": 55.0,
-    # DC-grade communal roads, frequently unsurfaced in part.
-    "tertiary": 45.0,
-    # Inside a locality, where the limit is 50 and the achieved speed is lower.
-    "unclassified": 35.0,
-    "residential": 30.0,
-    "living_street": 20.0,
-    # OSM's "we know it is a road and no more than that".
-    "road": 30.0,
-    # Slip roads: short, and taken at the speed of the slower end.
-    "motorway_link": 60.0,
-    "trunk_link": 50.0,
-    "primary_link": 45.0,
-    "secondary_link": 40.0,
-    "tertiary_link": 35.0,
+# How much of a class's signed limit is actually achieved, once curves, junctions, surface
+# and ordinary traffic are allowed for. The assumed term, and deliberately per class: a
+# motorway is grade-separated and nearly frictionless, a residential street is continuous
+# junction. These are engineering judgement and the first thing to argue with.
+EFFICIENCY: Final[dict[str, float]] = {
+    "motorway": 0.95,
+    "trunk": 0.88,
+    "primary": 0.88,
+    "secondary": 0.85,
+    "tertiary": 0.85,
+    "unclassified": 0.80,
+    "residential": 0.80,
+    "living_street": 0.75,
+    "road": 0.80,
 }
 
-# An OSM value the table does not know. Pessimistic on purpose: an unrecognised class must
-# never become a shortcut, because a shortcut is invisible in the output while a slow road
-# shows up as an implausible time the gate can catch.
+# Mean length of a Romanian locality along a through road, in km. Sets how many braking and
+# re-acceleration cycles a kilometre of road contains: a class that is 32% locality at 1,5 km
+# per village meets one village every 4,7 km. Assumed; the model is barely sensitive to it,
+# because the transition loss is small next to the crawl through the village itself.
+LOCALITY_LENGTH_KM: Final[float] = 1.5
+
+
+class Vehicle:
+    """Acceleration and legal ceiling for one kind of road user.
+
+    Braking and acceleration rates are ordinary engineering figures for comfortable service —
+    a bus cannot use a car's rates with passengers standing. The bus legal ceilings are
+    marked assumed rather than cited: OUG 195/2002 art. 49 sets lower maxima for vehicles
+    carrying more than nine people, and the exact figures should be checked against the
+    article before any published number leans on them.
+    """
+
+    def __init__(self, name: str, accel: float, decel: float, cap_motorway: float, cap_open: float):
+        self.name = name
+        self.accel = accel
+        self.decel = decel
+        self.cap_motorway = cap_motorway
+        self.cap_open = cap_open
+
+    def cap(self, road_class: str) -> float:
+        return self.cap_motorway if road_class.startswith("motorway") else self.cap_open
+
+
+VEHICLES: Final[dict[str, Vehicle]] = {
+    # Legal maxima for a car: 130 motorway, 90 outside localities.
+    "car": Vehicle("car", accel=1.5, decel=2.5, cap_motorway=130.0, cap_open=90.0),
+    # A coach: gentler rates for standing passengers, and lower legal ceilings.
+    "bus": Vehicle("bus", accel=0.8, decel=1.2, cap_motorway=100.0, cap_open=80.0),
+}
+
+# L0 is a road travel-time substrate, not a bus timetable — justitie reads the same graph to
+# ask how far a citizen is from a courthouse, which is a car journey. The bus profile applies
+# in the timetable layer above, together with dwell time, which is not a road property.
+DEFAULT_VEHICLE: Final[str] = "car"
+
+# For a class the measurement cannot speak to: below 30% tagged coverage, or an OSM value
+# this table has never seen. Pessimistic on purpose — an unrecognised class must never become
+# a shortcut, because a shortcut is invisible in the output while a slow road shows up as an
+# implausible time a plausibility check can catch.
 FALLBACK_KMH: Final[float] = 20.0
 
+
+def _transition_loss_s(open_ms: float, locality_ms: float, vehicle: Vehicle) -> float:
+    """Seconds lost braking into a locality and accelerating back out, against cruising.
+
+    Decelerating from v1 to v2 covers (v1+v2)/2 × Δv/a in the time Δv/a; cruising that same
+    ground at v1 would have taken less. The difference, both ways, is Δv²/(2·v1)·(1/a_d+1/a_a).
+    """
+    change = open_ms - locality_ms
+    if change <= 0:
+        return 0.0
+    return (change * change / (2 * open_ms)) * (1 / vehicle.decel + 1 / vehicle.accel)
+
+
+def _class_speed(measured: dict, road_class: str, vehicle: Vehicle) -> float | None:
+    """Effective km/h for one class, or None if the measurement cannot support it."""
+    if not measured.get("usable"):
+        return None
+    share = measured["locality_share"]
+    efficiency = EFFICIENCY.get(road_class, 0.80)
+    ceiling = vehicle.cap(road_class)
+
+    open_ms = min(measured["open_road_kmh"], ceiling) * efficiency / 3.6
+    locality_ms = min(measured["locality_kmh"], ceiling) * efficiency / 3.6
+    if open_ms <= 0 or locality_ms <= 0:
+        return None
+
+    seconds_per_km = (
+        share * 1000 / locality_ms
+        + (1 - share) * 1000 / open_ms
+        + (share / LOCALITY_LENGTH_KM) * _transition_loss_s(open_ms, locality_ms, vehicle)
+    )
+    return 3600 / seconds_per_km
+
+
+def load_limits(path: Path = LIMITS_FILE) -> dict:
+    """The measured limits. Committed, so this needs no OSM extract to import."""
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def effective_kmh(vehicle: str = DEFAULT_VEHICLE, path: Path = LIMITS_FILE) -> dict[str, float]:
+    """Derive the whole table for one vehicle.
+
+    A `*_link` slip road inherits its parent's speed capped at the locality limit: links are
+    short, taken at the speed of the slower end, and too sparsely tagged to measure.
+    """
+    if vehicle not in VEHICLES:
+        raise ValueError(f"unknown vehicle {vehicle!r}; have {sorted(VEHICLES)}")
+    profile = VEHICLES[vehicle]
+    measured = load_limits(path)["classes"]
+
+    table: dict[str, float] = {}
+    for road_class in ROUTING_CLASSES:
+        if road_class.endswith("_link"):
+            continue
+        speed = _class_speed(measured.get(road_class, {}), road_class, profile)
+        table[road_class] = round(speed, 1) if speed else FALLBACK_KMH
+
+    for road_class in ROUTING_CLASSES:
+        if not road_class.endswith("_link"):
+            continue
+        parent = road_class.removesuffix("_link")
+        table[road_class] = round(min(table.get(parent, FALLBACK_KMH), 60.0), 1)
+
+    return table
+
+
+EFFECTIVE_KMH: Final[dict[str, float]] = effective_kmh()
+
 SPEED_PROVENANCE: Final[dict[str, str]] = {
-    "source": "oug-195-2002-plus-judecata",
+    "source": "osm-maxspeed-plus-cinematica",
     "locator": (
-        "Limitele legale din OUG 195/2002 art. 49, reduse la viteze efective de parcurs; "
-        "calibrate prin verificarea pe județul de control"
+        "Limitele semnalizate măsurate în data/road-limits.json, combinate cu pierderile de "
+        "frânare și accelerare la intrarea în localitate; limitele legale din OUG 195/2002 art. 49"
     ),
-    "confidence": "assumed",
+    "confidence": "derived",
     "note": (
-        "Vitezele sunt estimate pe clasa drumului din OSM, nu măsurate. Nu există date "
-        "publice de viteză reală pe rețeaua rutieră din România la nivel de segment."
+        "Limitele sunt măsurate, cinematica este calculată, iar randamentul pe clasă de drum "
+        "este presupus. Niciun element nu este verificat față de un timp de parcurs "
+        "înregistrat — nu există astfel de date în acest depozit."
     ),
 }
 

@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/road-limits.schema.json",
+  "title": "Signed speed limits per road class, measured from OSM",
+  "description": "What the speed table stands on. On every class below motorway the open-road limit is essentially the national 90 km/h; what separates a national road from a communal one is how much of its length runs inside a locality at 50. That share is measured here, length-weighted, so the travel-time model assumes physics rather than speeds.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "title", "publisher", "period", "provenance", "localityThresholdKmh", "classes", "limitations"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "type": "string" },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "period": { "type": "string" },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+    "localityThresholdKmh": {
+      "description": "At or below this signed limit a segment is taken to be inside a locality. Romanian law sets 50 in built-up areas (OUG 195/2002 art. 49).",
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "classes": {
+      "description": "One entry per OSM highway class.",
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["km", "coverage", "usable"],
+        "properties": {
+          "km": { "type": "number", "minimum": 0 },
+          "km_tagged": { "type": "number", "minimum": 0 },
+          "coverage": {
+            "description": "Share of this class's length carrying a numeric maxspeed tag.",
+            "type": "number", "minimum": 0, "maximum": 1
+          },
+          "usable": {
+            "description": "False when coverage is too thin for the class to be read on its own.",
+            "type": "boolean"
+          },
+          "locality_share": {
+            "description": "Share of tagged length signed at or below the locality threshold.",
+            "type": "number", "minimum": 0, "maximum": 1
+          },
+          "open_road_kmh": { "type": ["number", "null"], "exclusiveMinimum": 0 },
+          "locality_kmh": { "type": ["number", "null"], "exclusiveMinimum": 0 },
+          "mean_kmh": { "type": "number", "exclusiveMinimum": 0 }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+    }
+  }
+}

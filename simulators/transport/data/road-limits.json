@@ -1,0 +1,125 @@
+{
+  "$schema": "../schema/road-limits.schema.json",
+  "id": "road-limits",
+  "title": "Limitele de viteză semnalizate, pe clasă de drum",
+  "publisher": "OpenStreetMap contributors",
+  "period": "2026",
+  "provenance": {
+    "source": "osm-geofabrik-romania",
+    "locator": "eticheta maxspeed din extrasul Geofabrik romania-latest.osm.pbf, ponderată cu lungimea segmentelor",
+    "confidence": "derived",
+    "note": "Măsurat, nu presupus. Valorile netextuale (RO:urban, walk, none) sunt tratate ca nemarcate. Un drum sub 30% acoperire nu este folosit singur."
+  },
+  "localityThresholdKmh": 50.0,
+  "classes": {
+    "motorway": {
+      "km": 2672.0,
+      "km_tagged": 2568.4,
+      "coverage": 0.961,
+      "usable": true,
+      "locality_share": 0.0019,
+      "open_road_kmh": 126.7,
+      "locality_kmh": 44.7,
+      "mean_kmh": 126.6
+    },
+    "trunk": {
+      "km": 5411.9,
+      "km_tagged": 4560.4,
+      "coverage": 0.843,
+      "usable": true,
+      "locality_share": 0.3243,
+      "open_road_kmh": 94.1,
+      "locality_kmh": 47.7,
+      "mean_kmh": 79.1
+    },
+    "primary": {
+      "km": 13349.6,
+      "km_tagged": 11680.9,
+      "coverage": 0.875,
+      "usable": true,
+      "locality_share": 0.5053,
+      "open_road_kmh": 88.0,
+      "locality_kmh": 48.7,
+      "mean_kmh": 68.1
+    },
+    "secondary": {
+      "km": 30546.4,
+      "km_tagged": 22527.8,
+      "coverage": 0.737,
+      "usable": true,
+      "locality_share": 0.5929,
+      "open_road_kmh": 89.2,
+      "locality_kmh": 49.0,
+      "mean_kmh": 65.4
+    },
+    "tertiary": {
+      "km": 24672.9,
+      "km_tagged": 13689.4,
+      "coverage": 0.555,
+      "usable": true,
+      "locality_share": 0.7948,
+      "open_road_kmh": 89.4,
+      "locality_kmh": 47.9,
+      "mean_kmh": 56.4
+    },
+    "unclassified": {
+      "km": 19449.9,
+      "km_tagged": 7971.1,
+      "coverage": 0.41,
+      "usable": true,
+      "locality_share": 0.9454,
+      "open_road_kmh": 88.6,
+      "locality_kmh": 39.4,
+      "mean_kmh": 42.0
+    },
+    "residential": {
+      "km": 92249.8,
+      "km_tagged": 34921.8,
+      "coverage": 0.379,
+      "usable": true,
+      "locality_share": 0.9984,
+      "open_road_kmh": 85.5,
+      "locality_kmh": 47.0,
+      "mean_kmh": 47.0
+    },
+    "living_street": {
+      "km": 5187.2,
+      "km_tagged": 1286.3,
+      "coverage": 0.248,
+      "usable": false,
+      "locality_share": 0.9996,
+      "open_road_kmh": 90.0,
+      "locality_kmh": 34.3,
+      "mean_kmh": 34.3
+    },
+    "road": {
+      "km": 2.2,
+      "km_tagged": 0.2,
+      "coverage": 0.081,
+      "usable": false,
+      "locality_share": 1.0,
+      "open_road_kmh": null,
+      "locality_kmh": 30.0,
+      "mean_kmh": 30.0
+    }
+  },
+  "limitations": [
+    {
+      "id": "acoperire-inegala",
+      "text": "Acoperirea etichetei maxspeed diferă mult între clase: peste 84% pe autostradă și drumuri naționale, sub 40% pe drumurile comunale și rezidențiale. Media pe o clasă slab acoperită descrie segmentele etichetate, nu neapărat clasa.",
+      "severity": "material",
+      "affects": [
+        "speeds",
+        "travel_time"
+      ]
+    },
+    {
+      "id": "limita-nu-e-viteza",
+      "text": "O limită semnalizată este un maxim legal, nu viteza realizată. Curbele, intersecțiile, starea carosabilului și traficul o reduc; conversia se face în scripts/speeds.py și este o presupunere separată.",
+      "severity": "material",
+      "affects": [
+        "travel_time"
+      ]
+    }
+  ]
+}
