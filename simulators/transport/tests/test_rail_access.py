@@ -124,3 +124,56 @@ def test_a_nan_from_parquet_is_not_a_journey():
     assert rail_journey_min({**NEAR, "rail_km": nan}, 60.0, 10.0) is None
     assert rail_journey_min({**NEAR, "station_km": nan}, 60.0, 10.0) is None
     assert rail_journey_min({**NEAR, "seat_station_km": nan}, 60.0, 10.0) is None
+
+
+def _route(serves, km=10.0):
+    return {"serves": list(serves), "oneWayKm": km, "tier": "T3"}
+
+
+def test_a_route_is_only_releasable_if_every_commune_prefers_the_train():
+    """The structural point. A feeder serves its whole branch, so one village with a station
+    on a branch of eight releases nothing — the bus still runs for the other seven."""
+    from scripts.build_access import rail_displacement
+
+    mode = {"a": "rail", "b": "bus", "c": "rail", "d": "rail"}
+    out = rail_displacement([_route("ab"), _route("cd")], mode)
+    assert out["routesFullyRailServed"] == 1
+    assert out["routesPartlyRailServed"] == 1
+    assert out["displaceableKmShare"] == pytest.approx(0.5)
+
+
+def test_a_route_nobody_prefers_the_train_on_is_untouched():
+    from scripts.build_access import rail_displacement
+
+    out = rail_displacement([_route("ab")], {"a": "bus", "b": "bus"})
+    assert out["routesUntouched"] == 1
+    assert out["displaceableKmShare"] == 0.0
+
+
+def test_a_route_with_no_known_communes_is_skipped_not_counted_as_releasable():
+    """An empty `serves` intersection must not read as 'all of them prefer the train', which
+    is what `all([])` would give — vacuous truth quietly releasing a route that serves people
+    the access model never scored."""
+    from scripts.build_access import rail_displacement
+
+    out = rail_displacement([_route("xy")], {"a": "rail"})
+    assert out["routesFullyRailServed"] == 0
+    assert out["displaceableKmShare"] == 0.0
+
+
+def test_a_route_without_a_length_does_not_crash_the_bound():
+    """One route in the network has no length; it must not take the arithmetic with it."""
+    from scripts.build_access import rail_displacement
+
+    out = rail_displacement([{"serves": ["a"], "oneWayKm": None}], {"a": "rail"})
+    assert out["routesFullyRailServed"] == 1
+
+
+def test_the_published_bound_is_small_and_stated():
+    """If rail ever appeared to release most of the network, something structural broke."""
+    path = ROOT / "data" / "access.json"
+    if not path.exists():
+        pytest.skip("access not built")
+    rail = json.loads(path.read_text(encoding="utf-8"))["summary"]["rail"]
+    assert 0 < rail["displaceableKmShare"] < 0.25
+    assert rail["routesUntouched"] > rail["routesFullyRailServed"]

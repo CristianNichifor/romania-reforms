@@ -41,6 +41,10 @@
       "peopleFasterByRail": 1278687,
       "medianBestUncoordinatedMin": 92.9,
       "medianBestPulsedMin": 69.4,
+      "routesFullyRailServed": 65,
+      "routesPartlyRailServed": 118,
+      "routesUntouched": 1507,
+      "displaceableKmShare": 0.0407,
       "withinBest": {
         "60": {
           "uncoordinatedPct": 38.3,
@@ -47110,8 +47114,8 @@
     },
     {
       "id": "trenul-nu-schimba-costul",
-      "text": "Timpii de călătorie folosesc trenul acolo unde este mai rapid, dar costul rețelei din data/cost.json rămâne calculat pe toate traseele de autobuz. Nimic nu a fost scos din rețeaua rutieră pentru cele 247 de UAT-uri care merg mai repede cu trenul, deci acesta este un câștig de timp fără economia care l-ar putea însoți — sau, invers, fără costul serviciului feroviar suplimentar care l-ar produce.",
-      "severity": "blocking",
+      "text": "Costul din data/cost.json rămâne calculat pe toate traseele de autobuz, iar serviciul feroviar suplimentar nu este adăugat nicăieri. Cât de mult ar putea schimba asta este însă mărginit și măsurat, nu necunoscut: un traseu de rabatere servește toate comunele de pe ramura lui, deci poate fi retras doar dacă TOATE merg mai repede cu trenul. Numai 65 din 1708 de trasee îndeplinesc condiția, adică 4.1% din kilometri. Restul rețelei rutiere rămâne necesară oricum. Și acele trasee sunt doar candidate: retragerea lor ar lăsa comunele respective cu un tren la 48 de minute și nimic altceva, ceea ce nu este rețeaua previzibilă pe care o modelează acest simulator.",
+      "severity": "material",
       "affects": [
         "access",
         "cost"

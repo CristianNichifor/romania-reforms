@@ -67,6 +67,46 @@ WALK_DETOUR: Final[float] = 1.3
 STATION_WALK_KM: Final[float] = 2.0
 
 
+def rail_displacement(routes: list[dict], mode: dict[str, str]) -> dict:
+    """How much bus service rail could actually release — which is far less than it looks.
+
+    The tempting arithmetic is "247 communes are faster by train, so withdraw their buses".
+    That is wrong, and wrong structurally rather than by a margin. A feeder serves every UAT
+    down its branch, so a route can only be withdrawn if **every** commune on it is better off
+    by train. One village with a station on a branch of eight releases nothing at all.
+
+    Counted here rather than asserted, because the bound it produces is the useful number: it
+    turns "we do not know what rail does to cost" into "rail can displace at most this much",
+    and that is a claim a reader can argue with.
+
+    A route counted here is still only a *candidate*. Withdrawing it would leave those communes
+    with a train and nothing else, and a service running once every forty-eight minutes with no
+    fallback is not the predictable network this model is built around.
+    """
+    fully = partly = untouched = 0
+    fully_km = total_km = 0.0
+    for route in routes:
+        known = [s for s in route["serves"] if s in mode]
+        if not known:
+            continue
+        by_rail = sum(1 for s in known if mode[s] == "rail")
+        km = route.get("oneWayKm") or 0.0
+        total_km += km
+        if by_rail == len(known):
+            fully += 1
+            fully_km += km
+        elif by_rail:
+            partly += 1
+        else:
+            untouched += 1
+    return {
+        "routesFullyRailServed": fully,
+        "routesPartlyRailServed": partly,
+        "routesUntouched": untouched,
+        "displaceableKmShare": round(fully_km / total_km, 4) if total_km else 0.0,
+    }
+
+
 def load_rail_access(path: Path | None = None) -> dict[str, dict]:
     """Per-UAT rail access from the rail build, or empty if it has not been run.
 
@@ -261,6 +301,10 @@ def main(argv: list[str] | None = None) -> int:
             )
 
     people = sum(r["population"] for r in rows)
+    # Computed before the summary because the limitation quotes it. A limitation carrying a
+    # number that is not the number the model produced is how this file published two false
+    # statements about itself earlier in its life.
+    displacement = rail_displacement(network["routes"], {r["siruta"]: r["mode"] for r in rows})
 
     def share_within(field: str, minutes: int) -> float:
         return round(sum(r["population"] for r in rows if r[field] <= minutes) / people * 100, 1)
@@ -302,6 +346,7 @@ def main(argv: list[str] | None = None) -> int:
             "peopleFasterByRail": sum(r["population"] for r in rows if r["mode"] == "rail"),
             "medianBestUncoordinatedMin": weighted_median("bestUncoordinatedMin"),
             "medianBestPulsedMin": weighted_median("bestPulsedMin"),
+            **displacement,
             "withinBest": {
                 str(m): {
                     "uncoordinatedPct": share_within("bestUncoordinatedMin", m),
@@ -353,14 +398,20 @@ def main(argv: list[str] | None = None) -> int:
             {
                 "id": "trenul-nu-schimba-costul",
                 "text": (
-                    "Timpii de călătorie folosesc trenul acolo unde este mai rapid, dar costul "
-                    "rețelei din data/cost.json rămâne calculat pe toate traseele de autobuz. "
-                    "Nimic nu a fost scos din rețeaua rutieră pentru cele 247 de UAT-uri care "
-                    "merg mai repede cu trenul, deci acesta este un câștig de timp fără economia "
-                    "care l-ar putea însoți — sau, invers, fără costul serviciului feroviar "
-                    "suplimentar care l-ar produce."
+                    "Costul din data/cost.json rămâne calculat pe toate traseele de autobuz, iar "
+                    "serviciul feroviar suplimentar nu este adăugat nicăieri. Cât de mult ar "
+                    "putea schimba asta este însă mărginit și măsurat, nu necunoscut: un traseu "
+                    "de rabatere servește toate comunele de pe ramura lui, deci poate fi retras "
+                    "doar dacă TOATE merg mai repede cu trenul. Numai "
+                    f"{displacement['routesFullyRailServed']} din "
+                    f"{len(network['routes'])} de trasee îndeplinesc condiția, adică "
+                    f"{displacement['displaceableKmShare']:.1%} din kilometri. Restul rețelei "
+                    "rutiere rămâne necesară oricum. Și acele trasee sunt doar candidate: "
+                    "retragerea lor ar lăsa comunele respective cu un tren la 48 de minute și "
+                    "nimic altceva, ceea ce nu este rețeaua previzibilă pe care o modelează "
+                    "acest simulator."
                 ),
-                "severity": "blocking",
+                "severity": "material",
                 "affects": ["access", "cost"],
             },
             {
@@ -405,6 +456,11 @@ def main(argv: list[str] | None = None) -> int:
         f"({r['peopleFasterByRail']:,} people)\n"
         f"  median with rail  {r['medianBestPulsedMin']:>6.1f} min pulsed "
         f"(bus only {s['medianPulsedMin']:.1f})"
+    )
+    print(
+        f"  bus the train could release: {r['routesFullyRailServed']} routes of "
+        f"{r['routesFullyRailServed'] + r['routesPartlyRailServed'] + r['routesUntouched']}, "
+        f"{r['displaceableKmShare']:.1%} of km — the rest of the road network is needed anyway"
     )
     print("\nshare of population within:")
     for m, v in s["within"].items():

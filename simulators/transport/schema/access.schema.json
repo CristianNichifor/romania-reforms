@@ -41,7 +41,7 @@
           "description": "Kept out of the bus figures rather than blended into them. Rail reaches few places and transforms the ones it reaches; one merged median would report a four-minute improvement and describe neither half of that.",
           "type": "object",
           "additionalProperties": false,
-          "required": ["headwayMin", "waitUncoordinatedMin", "commercialKmh", "uatsWithOption", "uatsFasterByRail", "peopleFasterByRail", "medianBestUncoordinatedMin", "medianBestPulsedMin", "withinBest"],
+          "required": ["headwayMin", "waitUncoordinatedMin", "commercialKmh", "uatsWithOption", "uatsFasterByRail", "peopleFasterByRail", "medianBestUncoordinatedMin", "medianBestPulsedMin", "withinBest", "routesFullyRailServed", "routesPartlyRailServed", "routesUntouched", "displaceableKmShare"],
           "properties": {
             "headwayMin": { "type": "number", "exclusiveMinimum": 0 },
             "waitUncoordinatedMin": { "type": "number", "minimum": 0 },
@@ -54,6 +54,16 @@
             "peopleFasterByRail": { "type": "integer", "minimum": 0 },
             "medianBestUncoordinatedMin": { "type": "number", "minimum": 0 },
             "medianBestPulsedMin": { "type": "number", "minimum": 0 },
+            "routesFullyRailServed": {
+              "description": "Routes on which EVERY commune is faster by train — the only ones a bus could be withdrawn from, because a feeder serves its whole branch. One village with a station on a branch of eight releases nothing.",
+              "type": "integer", "minimum": 0
+            },
+            "routesPartlyRailServed": { "type": "integer", "minimum": 0 },
+            "routesUntouched": { "type": "integer", "minimum": 0 },
+            "displaceableKmShare": {
+              "description": "Upper bound on the bus service rail could release. Bounds the cost interaction rather than leaving it unknown — and these routes are candidates only, since withdrawing them leaves a commune with a train and no fallback.",
+              "type": "number", "minimum": 0, "maximum": 1
+            },
             "withinBest": {
               "type": "object",
               "additionalProperties": {
