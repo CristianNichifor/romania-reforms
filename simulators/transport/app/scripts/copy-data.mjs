@@ -27,6 +27,14 @@ const access = JSON.parse(readFileSync(join(sim, 'data/access.json'), 'utf8'));
 const sweep = JSON.parse(readFileSync(join(sim, 'data/scenarios.json'), 'utf8'));
 const cost = JSON.parse(readFileSync(join(sim, 'data/cost.json'), 'utf8'));
 const hubs = JSON.parse(readFileSync(join(sim, 'data/hubs.json'), 'utf8'));
+const railnet = JSON.parse(readFileSync(join(sim, 'data/railnet.json'), 'utf8'));
+const railCost = JSON.parse(readFileSync(join(sim, 'data/rail-cost.json'), 'utf8'));
+
+// The track and its stations. Copied rather than joined to anything: rail is its own layer,
+// and the whole point of the station geometry is that it does NOT line up with the settlements.
+for (const name of ['rail-lines.geojson', 'rail-stations.geojson']) {
+  copyFileSync(join(sim, 'data', name), join(out, name));
+}
 
 // Summary only — the panel needs the headline numbers, not every route.
 writeFileSync(
@@ -37,7 +45,16 @@ writeFileSync(
     ledger: cost.ledgerRon,
     scenario: hubs.scenario,
     hubs: hubs.summary,
-    limitations: [...access.limitations, ...cost.limitations],
+    rail: {
+      network: railnet.network,
+      seats: railnet.seats,
+      pairs: railnet.pairs,
+      conditions: railnet.conditions,
+      rehabilitation: railCost.rehabilitation,
+      againstPulsing: railCost.againstPulsing,
+      reference: railCost.reference,
+    },
+    limitations: [...access.limitations, ...cost.limitations, ...railCost.limitations],
   }),
 );
 

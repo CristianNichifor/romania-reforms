@@ -226,9 +226,109 @@ async function main() {
     renderStats();
   });
 
+  // Rail. Its geometry is 2 MB and most readers never open it, so the layers are fetched the
+  // first time the box is ticked rather than on load. `railLoaded` guards the second tick.
+  let railLoaded = false;
+  const railToggle = el<HTMLInputElement>('rail-toggle');
+
+  async function showRail(on: boolean) {
+    if (on && !railLoaded) {
+      railToggle.disabled = true;
+      const [lines, stations] = await Promise.all([
+        fetch(asset('rail-lines.geojson')).then((r) => r.json()),
+        fetch(asset('rail-stations.geojson')).then((r) => r.json()),
+      ]);
+      map.addSource('rail', { type: 'geojson', data: lines });
+      map.addSource('stations', { type: 'geojson', data: stations });
+      // Coloured by signed line speed, using CFR's own tariff bands. The slow network is the
+      // story, so it is the one that shows: class D track is drawn in the alarm colour.
+      map.addLayer({
+        id: 'rail-line',
+        type: 'line',
+        source: 'rail',
+        paint: {
+          'line-color': [
+            'case',
+            ['<', ['get', 'maxspeed'], 0], '#6b7280',
+            ['step', ['get', 'maxspeed'], '#d73027', 51, '#fdae61', 91, '#a6d96a', 121, '#1a9850'],
+          ],
+          'line-width': ['interpolate', ['linear'], ['zoom'], 6, 1.1, 10, 2.6],
+        },
+      });
+      map.addLayer({
+        id: 'station-dot',
+        type: 'circle',
+        source: 'stations',
+        paint: {
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 6, 1.6, 11, 4],
+          'circle-color': '#e8eaf0',
+          'circle-stroke-color': '#12141a',
+          'circle-stroke-width': 0.6,
+        },
+      });
+      railLoaded = true;
+      railToggle.disabled = false;
+    }
+    for (const id of ['rail-line', 'station-dot']) {
+      if (map.getLayer(id)) {
+        map.setLayoutProperty(id, 'visibility', on ? 'visible' : 'none');
+      }
+    }
+  }
+
+  function renderRail() {
+    const r = summary.rail;
+    if (!r) return;
+    const hours = (v: number) => `${fmt.format(Math.round(v / 1000))} mii ore`;
+    el('rail').innerHTML = `
+      <dt>Linie de călători</dt><dd>${fmt.format(Math.round(r.network.passengerLineKm))} km</dd>
+      <dt>Gări și halte</dt><dd>${fmt.format(r.network.stationCount)}</dd>
+      <dt>Viteză comercială azi</dt><dd>${fmt.format(r.conditions.as_is.commercialKmh)} km/h</dd>
+      <dt>După reabilitare</dt><dd class="big">${fmt.format(
+        r.conditions.rehabilitated.commercialKmh,
+      )} km/h</dd>
+      <dt>O oră de călător costă</dt><dd>${fmt.format(
+        Math.round(r.rehabilitation.ronPerPassengerHour),
+      )} lei</dd>`;
+
+    const seatsOff = r.seats.considered - r.seats.withinWalkOfStation;
+    el('rail-note').textContent =
+      `Linia este colorată după viteza semnalizată: roșu sub 51 km/h, verde peste 121 — ` +
+      `pragurile după care CFR își tarifează propria rețea. ${seatsOff} din ` +
+      `${r.seats.considered} de reședințe au gara la peste ${r.seats.walkKm} km, deci au nevoie ` +
+      `de autobuz ca să ajungă la propria cale ferată.`;
+
+    // The comparison the rail layer exists to make. Kept next to the number rather than in a
+    // footnote, and stated as a unit price so nobody reads it as one mode replacing the other.
+    el('rail-compare').innerHTML =
+      `<strong>Ce cumperi cu un minut.</strong> Reabilitarea plătește ` +
+      `${fmt.format(Math.round(r.rehabilitation.ronPerPassengerHour))} lei pentru o oră de ` +
+      `călător. Corespondența dintre rabatere și trunchi scutește ` +
+      `${fmt.format(r.againstPulsing.pulseSavingMin)} de minute de fiecare călătorie fără niciun ` +
+      `leu de investiție — aceleași autobuze, aceiași kilometri. Aceleași ` +
+      `${hours(r.againstPulsing.passengerHoursPerYear)} cumpărate prin reabilitare ar costa ` +
+      `${bn(r.againstPulsing.equivalentRailSpendRon)} pe an, mai mult decât costă toată rețeaua ` +
+      `de autobuze. Sunt prețuri unitare, nu doi moduri de a servi aceiași oameni: comparația ` +
+      `spune în ce ordine se cheltuie, nu că reabilitarea ar fi inutilă.`;
+  }
+
+  railToggle.addEventListener('change', () => {
+    void showRail(railToggle.checked);
+    const params = hash();
+    params.set('r', railToggle.checked ? '1' : '0');
+    history.replaceState(null, '', `#${params}`);
+  });
+  if (hash().get('r') === '1') {
+    railToggle.checked = true;
+    void showRail(true);
+  }
+  renderRail();
+
   el('caveats').innerHTML = summary.limitations
     .filter((l: { severity: string }) => l.severity === 'blocking' || l.severity === 'material')
-    .slice(0, 5)
+    // Raised from five when rail landed: the page now carries three models' caveats, and a
+    // short list would have silently dropped the bus ones to make room for the new arrivals.
+    .slice(0, 8)
     .map((l: { text: string }) => `<li>${l.text}</li>`)
     .join('');
 

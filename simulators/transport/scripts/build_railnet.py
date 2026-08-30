@@ -175,6 +175,35 @@ def pick_county_seats(seats, population: dict[int, int]):
     return chosen.sort_values("county_code", ignore_index=True)
 
 
+# Simplification tolerance for the published geometry, in metres. The map draws the country
+# at six zoom levels out, where 100 m is well under a pixel; the graph is built from the full
+# geometry regardless, so this affects what is drawn and never what is measured.
+DRAW_TOLERANCE_M = 100.0
+
+
+def write_geometry(lines, stations) -> None:
+    """Publish simplified track and stations for the map.
+
+    Only what the map can use: the line's signed speed, so a reader can see the slow network
+    directly, and the stations, so the gap between a halt and the town it names is visible
+    rather than only stated in a limitation.
+    """
+    draw = lines[["maxspeed", "electrified", "geometry"]].copy()
+    draw["geometry"] = draw.geometry.simplify(DRAW_TOLERANCE_M)
+    draw = draw.to_crs("EPSG:4326")
+    draw["maxspeed"] = draw["maxspeed"].astype("float64").where(draw["maxspeed"].notna(), -1)
+    # Five decimals is about a metre. The geometry has already been simplified to 100 m, so
+    # every digit past that is bytes shipped to a browser to describe noise.
+    draw.to_file(OUT_DIR / "rail-lines.geojson", driver="GeoJSON", COORDINATE_PRECISION=5)
+
+    points = stations[["railway", "name", "geometry"]].to_crs("EPSG:4326")
+    points.to_file(OUT_DIR / "rail-stations.geojson", driver="GeoJSON", COORDINATE_PRECISION=5)
+
+    for name in ("rail-lines.geojson", "rail-stations.geojson"):
+        size = (OUT_DIR / name).stat().st_size / 1e6
+        print(f"  wrote {name}  {size:.1f} MB")
+
+
 def build_graph(lines):
     """Weld line endpoints into a graph whose edge weight is metres.
 
@@ -301,6 +330,7 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
+    write_geometry(lines, stations)
     document = {
         "$schema": "../schema/railnet.schema.json",
         "id": "railnet",

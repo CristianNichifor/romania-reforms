@@ -6,3 +6,9 @@ data/reports/
 # Small, validated documents under data/*.json stay tracked on purpose: scripts/validate_data.py
 # globs simulators/*/data/*.json and checks each against its schema, so ignoring the whole
 # directory would quietly remove this simulator from the repository's one data gate.
+
+# data/*.geojson IS tracked, deliberately. The rail geometry is derived — but the pipeline
+# that makes it needs a 1 GB OSM extract and therefore does not run in CI, while the app build
+# does, and copies these into its bundle. Ignoring them would turn the rail toggle into a
+# button that fetches a 404 on the published site, which fails at click time rather than at
+# build time. 2,1 MB against 26 MB of headroom in scripts/check_repo_size.py.
