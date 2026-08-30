@@ -299,20 +299,30 @@ def main(argv: list[str] | None = None) -> int:
         f"  operating cost per bus-km  {ron_per_km:>6.2f}   expect ~{expect_per_km:.1f} RON  "
         f"{'ok' if ron_per_km >= expect_per_km * 0.75 else 'LOW — the open question'}"
     )
-    # The one benchmark that judges the total rather than a line. ANRSC methodology divides
-    # cost per vehicle-km by the operator's average SEATS per vehicle — capacity, not
-    # passengers carried — so a published lei/km/loc converts straight back.
+    # The benchmark that judges the total rather than a line — but it converts only with a
+    # fleet composition, and that is the trap. ANRSC divides cost per vehicle-km by the
+    # operator's average SEATS, and cost per vehicle-km does *not* scale with seats: a
+    # 40-seater does not cost twice a 20-seater. So lei/km/loc does not normalise across
+    # fleets, and comparing ours (41 seats) against Buzau's (unknown, but county programmes
+    # specify capacities in the 20s) reads as a factor-of-two error when there may be none.
+    #
+    # An earlier version of this check did exactly that and reported the model 2,3x low. The
+    # band is printed instead, because the honest answer is a range and the width of it is
+    # the missing fact.
     seats = {"basic": 20, "feeder": 40, "trunk": 50}
     mean_seats = sum(seats[c] * n for c, n in fleet_by_class.items()) / sum(fleet_by_class.values())
-    implied = ron_per_km / mean_seats
     benchmark = json.loads((ROOT / "data" / "cost-inputs.json").read_text(encoding="utf-8"))[
         "benchmarks"
     ]["buzauTariffLeiKmLoc"]["value"]
-    verdict = "ok" if implied >= benchmark * 0.75 else f"LOW by {benchmark / implied:.1f}x"
-    print(
-        f"\n  implied tariff             {implied:>6.3f} lei/km/loc at {mean_seats:.0f} seats"
-        f"   Buzau 2025: {benchmark:.2f}   {verdict}"
-    )
+    print(f"\n  against Buzau 2025 ({benchmark:.2f} lei/km/loc), by their fleet's mean seats:")
+    for their_seats in (20, 23, 30, mean_seats):
+        implied = benchmark * their_seats
+        label = "= ours" if abs(their_seats - mean_seats) < 0.5 else ""
+        print(
+            f"    {their_seats:>5.0f} seats {label:<7} -> {implied:>6.2f} lei/km   "
+            f"we are {ron_per_km / implied:.2f}x"
+        )
+    print("    county programmes specify capacities in the 20s, so nearer the top of that")
 
     print(
         f"  commercial speed           {speed:>6.1f}   expect 25-40 km/h  "

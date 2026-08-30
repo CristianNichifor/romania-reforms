@@ -139,9 +139,9 @@
   },
   "limitations": [
     {
-      "id": "modelul-este-sub-reperul-real",
-      "text": "Convertit corect, modelul iese de circa 2,3 ori sub un cost real românesc. Metodologia împarte costul pe kilometru la numărul mediu de LOCURI, nu de călători, deci reperul Buzău de 0,35 lei/km/loc se compară direct: la o medie de circa 41 de locuri pe vehicul, modelul de aici implică 0,15 lei/km/loc. Diferența este în costurile care nu depind de salarii — întreținere, anvelope, asigurare, garare, prețul vehiculelor — singurele rămase fără sursă. Cifra totală trebuie citită ca o limită inferioară, nu ca o estimare.",
-      "severity": "blocking",
+      "id": "reperul-nu-se-converteste-fara-parc",
+      "text": "Reperul Buzău de 0,35 lei/km/loc nu se poate compara cu modelul fără compoziția parcului lor. Metodologia ANRSC împarte costul pe kilometru-vehicul la numărul mediu de LOCURI, iar costul pe kilometru nu crește proporțional cu locurile: un autobuz de 40 de locuri nu costă cât două de 20. Deci lei/km/loc nu normalizează între parcuri diferite. La 20-23 de locuri, cât cer de obicei programele județene, modelul iese între 0,9 și 1,3 din reper, adică aproximativ corect; doar dacă parcul lor ar avea media noastră de 41 de locuri ar ieși de 2,3 ori mai mic. O versiune anterioară a acestei limitări afirma exact asta și era greșită.",
+      "severity": "material",
       "affects": [
         "cost"
       ]
