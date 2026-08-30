@@ -89,6 +89,30 @@ interface Servicii {
   limitations: Limitation[];
 }
 
+interface Eficienta {
+  years: {
+    year: number;
+    judecatorii: {
+      veryEfficient: number;
+      efficient: number;
+      satisfactory: number;
+      inefficient: number | null;
+      classified: number;
+      efficientOrBetter: number;
+    };
+  }[];
+  paperClaim: { text: string; efficientCourts: number; totalCourts: number };
+  comparison: {
+    citedYear: number;
+    paperSaysEfficient: number;
+    reportSaysEfficientOrBetter: number;
+    reportSaysVeryEfficient: number;
+    latestEfficientOrBetter: number;
+    latestClassified: number;
+  };
+  limitations: Limitation[];
+}
+
 interface Politie {
   summary: {
     stations: number;
@@ -316,6 +340,7 @@ async function main(): Promise<void> {
     spitale,
     servicii,
     politie,
+    eficienta,
   ] = await Promise.all([
     fetch(`${base}data/instante.json`).then((r) => r.json() as Promise<Document>),
     fetch(`${base}data/counties.geojson`).then((r) => r.json()),
@@ -332,6 +357,7 @@ async function main(): Promise<void> {
     fetch(`${base}data/spitale.json`).then((r) => r.json() as Promise<Spitale>),
     fetch(`${base}data/servicii.json`).then((r) => r.json() as Promise<Servicii>),
     fetch(`${base}data/politie.json`).then((r) => r.json() as Promise<Politie>),
+    fetch(`${base}data/eficienta.json`).then((r) => r.json() as Promise<Eficienta>),
   ]);
   const countyName = (code: string): string => manifest.countyNames?.[code] ?? code;
 
@@ -866,6 +892,50 @@ async function main(): Promise<void> {
   // The tightest staffing target, where the grade choice costs the most. Sorted rather than
   // indexed, and the fold is skipped entirely if the document ships no targets at all.
   const [lowest] = [...proiect.gradeChoiceSwing].sort((a, b) => a.target - b.target);
+  const ef = eficienta.comparison;
+  const cited = eficienta.years.find((y) => y.year === ef.citedYear)!;
+  el('#eficienta-chev').textContent = `${ef.reportSaysEfficientOrBetter} din ${cited.judecatorii.classified}`;
+  el('#eficienta-body').innerHTML =
+    `<p class="note">Lucrarea își începe capitolul despre noua hartă judiciară cu
+       „${eficienta.paperClaim.text}”, citând raportul CSM. Raportul clasifică fiecare instanță
+       pe cinci indicatori, în patru grade, și scrie totalurile în cuvinte.</p>
+     <div class="pens-row">
+       <span class="pens-head">grad (${ef.citedYear})</span>
+       <span class="pens-head">judecătorii</span>
+       <span class="pens-head">${eficienta.years[eficienta.years.length - 1]!.year}</span>
+       <span class="pens-head"></span>
+       ${eficienta.years
+         .slice(0, 1)
+         .flatMap(() => [
+           ['foarte eficient', cited.judecatorii.veryEfficient],
+           ['eficient', cited.judecatorii.efficient],
+           ['satisfăcător', cited.judecatorii.satisfactory],
+           ['ineficient', cited.judecatorii.inefficient ?? 0],
+         ])
+         .map(([label, n], i) => {
+           const last = eficienta.years[eficienta.years.length - 1]!.judecatorii;
+           const other = [
+             last.veryEfficient,
+             last.efficient,
+             last.satisfactory,
+             last.inefficient ?? 0,
+           ][i];
+           return `<span>${label}</span><span>${n}</span><span>${other}</span><span></span>`;
+         })
+         .join('')}
+     </div>
+     <p class="disagree">În ediția pe care lucrarea o citează, ${ef.reportSaysEfficientOrBetter}
+       din ${cited.judecatorii.classified} de judecătorii sunt „eficiente” sau mai bune, iar
+       niciuna nu e „ineficientă”. „Doar ${ef.paperSaysEfficient}” e aproape de cele
+       ${ef.reportSaysVeryEfficient} din gradul de sus, ceea ce sugerează că al doilea grad —
+       cele ${cited.judecatorii.efficient} pe care CSM le numește pur și simplu „eficient” — nu
+       a fost socotit. Sursa nu susține propoziția.</p>
+     <p class="disagree">Asta nu decide dacă comasarea e bună. Indicatorii CSM măsoară cât de
+       repede se golește rolul, nu dacă o instanță cu șase judecători poate să se specializeze
+       sau să supraviețuiască unei pensionări — argumentul real al lucrării, la 7.4. Se schimbă
+       doar temeiul: argumentul trebuie făcut pe acele motive, nu pe o cifră de eficiență care
+       spune contrariul.</p>`;
+
   const sp = spitale.summary;
   el('#spitale-chev').textContent = `${sp.courtSeatsWithHospital} din ${sp.courtSeatsCheckable}`;
   el('#spitale-body').innerHTML =
@@ -1192,6 +1262,7 @@ async function main(): Promise<void> {
     ...spitale.limitations,
     ...servicii.limitations,
     ...politie.limitations,
+    ...eficienta.limitations,
   ];
   const blocking = allLimits.filter((l) => l.severity === 'blocking');
   const rest = allLimits.filter((l) => l.severity !== 'blocking');

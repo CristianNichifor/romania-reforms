@@ -45,6 +45,8 @@ const sources = [
   [resolve(here, '../../data/spitale-2026.json'), 'spitale.json'],
   [resolve(here, '../../data/acces-servicii.json'), 'servicii.json'],
   [resolve(here, '../../data/politie-osm.json'), 'politie.json'],
+  // The paper's efficiency premise, against the report it cites for it.
+  [resolve(here, '../../data/eficienta-csm.json'), 'eficienta.json'],
   [resolve(here, '../../data/court-distance.bin'), 'court-distance.bin'],
   // The administrative model's own payload, so the merge can be re-run here as the reader
   // moves the sliders. Copied rather than fetched across from the administrative site: 1,6 MB

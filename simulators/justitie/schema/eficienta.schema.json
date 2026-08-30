@@ -1,0 +1,240 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/eficienta.schema.json",
+  "title": "Court efficiency under the CSM indicators, against the paper's claim",
+  "description": "The paper opens its case for a new judicial map with '176 judecatorii, doar 20 functioneaza eficient', citing the CSM report. That report classifies courts on five indicators into four grades and prints the totals: for 2023, 18 very efficient, 147 efficient, 10 satisfactory, none inefficient. This document holds both sides so the sentence can be checked against its source.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "period",
+    "provenance",
+    "indicators",
+    "years",
+    "paperClaim",
+    "comparison",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "const": "eficienta-csm"
+    },
+    "title": {
+      "type": "string"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "period": {
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json#/$defs/provenance"
+    },
+    "indicators": {
+      "type": "array",
+      "minItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "name"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "indicatorsProvenance": {
+      "$ref": "provenance.schema.json#/$defs/provenance"
+    },
+    "years": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "year",
+          "judecatorii",
+          "provenance"
+        ],
+        "properties": {
+          "year": {
+            "type": "integer"
+          },
+          "judecatorii": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "veryEfficient",
+              "efficient",
+              "satisfactory",
+              "inefficient",
+              "classified",
+              "efficientOrBetter"
+            ],
+            "properties": {
+              "veryEfficient": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "efficient": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "satisfactory": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "inefficient": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "classified": {
+                "type": "integer",
+                "exclusiveMinimum": 0
+              },
+              "efficientOrBetter": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          },
+          "tribunale": {
+            "anyOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "veryEfficient",
+                  "efficient",
+                  "satisfactory",
+                  "inefficient",
+                  "classified",
+                  "efficientOrBetter"
+                ],
+                "properties": {
+                  "veryEfficient": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "efficient": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "satisfactory": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "inefficient": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ],
+                    "minimum": 0
+                  },
+                  "classified": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0
+                  },
+                  "efficientOrBetter": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "provenance": {
+            "$ref": "provenance.schema.json#/$defs/provenance"
+          }
+        }
+      }
+    },
+    "paperClaim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "text",
+        "efficientCourts",
+        "totalCourts",
+        "provenance"
+      ],
+      "properties": {
+        "text": {
+          "type": "string"
+        },
+        "efficientCourts": {
+          "type": "integer"
+        },
+        "totalCourts": {
+          "type": "integer"
+        },
+        "provenance": {
+          "$ref": "provenance.schema.json#/$defs/provenance"
+        }
+      }
+    },
+    "comparison": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "citedYear",
+        "paperSaysEfficient",
+        "reportSaysEfficientOrBetter",
+        "reportSaysVeryEfficient",
+        "reportSaysInefficient",
+        "latestEfficientOrBetter",
+        "latestClassified"
+      ],
+      "properties": {
+        "citedYear": {
+          "type": "integer"
+        },
+        "paperSaysEfficient": {
+          "type": "integer"
+        },
+        "reportSaysEfficientOrBetter": {
+          "type": "integer"
+        },
+        "reportSaysVeryEfficient": {
+          "type": "integer"
+        },
+        "reportSaysInefficient": {
+          "type": "integer"
+        },
+        "latestEfficientOrBetter": {
+          "type": "integer"
+        },
+        "latestClassified": {
+          "type": "integer"
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "provenance.schema.json#/$defs/limitation"
+      }
+    }
+  }
+}
