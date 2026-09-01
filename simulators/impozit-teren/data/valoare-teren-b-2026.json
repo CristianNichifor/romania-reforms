@@ -1,0 +1,128 @@
+{
+  "$schema": "../schema/valoare-teren.schema.json",
+  "id": "valoare-teren-b-2026",
+  "title": "Valoarea terenului, județul B, grila 2026 pe fondul funciar 2014",
+  "publisher": "romania-reforms",
+  "counties": [
+    "B"
+  ],
+  "period": "2026",
+  "currency": "EUR",
+  "provenance": {
+    "source": "unnpr-terenuri-bucuresti-2026",
+    "locator": "grila notarială 2026 × fondul funciar INS AGR101B 2014, pe unitate administrativ-teritorială",
+    "confidence": "derived",
+    "note": "valoare = suprafață_curți_construcții × preț_intravilan_CC + Σ suprafață_categorie × preț_extravilan_categorie. Prețul intravilan al unei comune nu este unul singur: grila publică un preț pe sat, respectiv pe zonă, fără suprafețe cu care să fie ponderate, așa că low/central/high sunt minimul, media neponderată și maximul prețurilor publicate."
+  },
+  "assumptions": {
+    "sourceCurrency": "EUR",
+    "ronPerEur": 5.2567,
+    "exchangeRateDate": "2026-09-01",
+    "intravilanCategory": "CC",
+    "areaYear": 2014,
+    "gridYear": 2026,
+    "weighting": "unweighted: villages and zones have no published areas"
+  },
+  "summary": {
+    "localities": 1,
+    "localitiesInRegister": 1,
+    "unmatched": [],
+    "coverage": {
+      "localitiesExpected": 1,
+      "localitiesValued": 1,
+      "share": 1.0
+    },
+    "coveredHa": 23787.0,
+    "pricedHa": 15817.0,
+    "priceableHa": 23787.0,
+    "builtHa": 15817.0,
+    "landValueEur": {
+      "low": 5377780000,
+      "central": 50361442202,
+      "high": 208784400000
+    },
+    "highToLowRatio": 38.82
+  },
+  "localities": [
+    {
+      "siruta": "179132",
+      "name": "BUCURESTI",
+      "rank": "municipii",
+      "pricedBy": "zone",
+      "parts": 277,
+      "totalHa": 23787.0,
+      "builtHa": 15817.0,
+      "forestHa": 611.0,
+      "forestValueEur": 0,
+      "pricedExtravilanHa": 0.0,
+      "intravilanEurPerM2": {
+        "low": 34.0,
+        "central": 318.400722,
+        "high": 1320.0
+      },
+      "areaHa": {
+        "A": 2566.0,
+        "P+F": 355.0,
+        "V+L": 131.0,
+        "AP": 908.0,
+        "CC": 15817.0,
+        "DR": 3306.0,
+        "NP": 93.0
+      },
+      "extravilanEurPerM2": {},
+      "extravilanValueEur": 0,
+      "extravilanValueByCodeEur": {},
+      "landValueEur": {
+        "low": 5377780000,
+        "central": 50361442202,
+        "high": 208784400000
+      }
+    }
+  ],
+  "limitations": [
+    {
+      "id": "o-parte-din-suprafata-nu-are-pret",
+      "text": "Doar 66% din hectarele neîmpădurite ale localităților evaluate au primit un preț; restul aparțin unor categorii pentru care studiul județului nu publică nicio valoare. Hectarele fără preț intră cu zero, deci valoarea totală a terenului este subevaluată, iar orice cotă calculată ca impozit împărțit la valoare este supraevaluată în aceeași măsură.",
+      "severity": "material",
+      "affects": [
+        "valoare-teren",
+        "renta",
+        "captura"
+      ]
+    },
+    {
+      "id": "impartirea-intravilan-extravilan-e-presupusa",
+      "text": "Fondul funciar nu spune ce este intravilan. Aici se presupune că intravilanul este exact categoria curți-construcții, iar restul este extravilan. Grădinile din sate sunt teren arabil în intravilan, deci suprafața intravilană este subestimată, iar valoarea totală odată cu ea. Este cel mai important parametru al acestui fișier.",
+      "severity": "blocking",
+      "affects": [
+        "valoare-teren",
+        "impozit"
+      ]
+    },
+    {
+      "id": "nu-exista-ponderi-pentru-sate-si-zone",
+      "text": "Grila dă un preț pe sat și pe zonă, dar nici satele, nici zonele nu au suprafețe publicate, deci nu există cu ce fi ponderate. De aceea fiecare comună este evaluată de trei ori — la satul cel mai ieftin, la cel mai scump și la media neponderată. Banda este rezultatul; punctul din mijloc există doar ca să poată fi desenat. La orașe media este cea mai puțin de încredere dintre cele trei: zona A este întotdeauna cea mai mică și cea mai scumpă.",
+      "severity": "blocking",
+      "affects": [
+        "valoare-teren",
+        "impozit"
+      ]
+    },
+    {
+      "id": "anii-nu-coincid",
+      "text": "Suprafețele sunt din 2014, prețurile din 2026. Seria INS pe localități s-a oprit în 2014 și nimic nu a înlocuit-o.",
+      "severity": "material",
+      "affects": [
+        "valoare-teren"
+      ]
+    },
+    {
+      "id": "padurea-nu-e-evaluata",
+      "text": "Pădurea este exclusă din valoare: studiile o evaluează pe hectar, într-un tabel separat de grila pe metru pătrat. Suprafața ei este raportată pe fiecare rând, ca să se vadă cât lipsește.",
+      "severity": "material",
+      "affects": [
+        "valoare-teren"
+      ]
+    }
+  ]
+}

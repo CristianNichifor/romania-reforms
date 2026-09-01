@@ -40,7 +40,7 @@ argument. This repository is an index, not a monolith.
 | **justitie** | The judicial reform | migrated to the 2025 report |
 | **salarizare** | Public-sector pay | migrated |
 | **administrativ** | Consolidation of the 3 186 UATs | migrated |
-| **impozit-teren** | Taxing land on its value | 22 counties read, 18 estimated, 2 named as missing; 14 readers |
+| **impozit-teren** | Taxing land on its value | 23 counties read incl. București, 18 estimated, 1 named as missing; 15 readers |
 
 Both live simulators now live here, with their history, on project paths under one Pages
 site: `/romania-reforms/salarizare/` and `/romania-reforms/administrativ/`. Their old
@@ -434,6 +434,67 @@ shaving Bacău and Neamț by about 1% as well.
 
 Sixteen counties now: **1 248 localities, 9,47 M ha, 39,7% of Romania, 110 mld EUR.**
 
+**The București chamber does publish, and this repository said it did not.** That was a
+statement about unnpr.ro's index, not about the chamber. `srv.cnpb.ro` — the chamber's own file
+server, with an open directory listing — carries 2026 studies for **all six** of its counties:
+București, Ilfov, and one volume for Călărași, Giurgiu, Ialomița and Teleorman. The index has
+thirteen chambers because the fourteenth is not in it.
+
+**Getting it needed the certificate fixed, not skipped.** That server sends a valid certificate
+— `O=CAMERA NOTARILOR PUBLICI BUCUREȘTI`, issued by DigiCert — and omits the intermediate that
+signs it, so no client can build a path. The tempting answer is to turn verification off, and
+it is the wrong one: these documents become published numbers, and an unauthenticated fetch
+means a proxy could rewrite the price of every square metre in Bucharest with nothing to notice
+it. `tls_chain.py` does what a browser does instead — reads the certificate's own **Authority
+Information Access** pointer, fetches the intermediate it names, and reconnects **with
+verification on**. It hardcodes no CA, so it keeps working when DigiCert rotates that
+intermediate, and it does nothing at all for the thirteen chambers whose servers are configured
+properly.
+
+**The capital is one locality with 277 subzones**, not a county with 277 localities: SIRUTA
+179132, 23 787 hectares, a single row in the land register, priced across 59 cadastral zones
+from **34 EUR/m² to 1 320**. There are no ruling lines, so the reader works from word
+coordinates — the second one here to do so after Timiș.
+
+Three things in that document are worth knowing:
+
+- **A price row binds to its nearest label, not the one on its own line.** Digits and letters
+  sit on different baselines, so `ZONA 25-A2`'s prices print *above* it, while two labels wrap
+  onto a second line and push their prices *below*. Both directions, in the same table.
+- **Two zones are cut by the Băneasa railway and priced twice** — `ZONA 25-A3 la NORD de` at
+  454 EUR/m² and `la SUD de` at **945**. Assume one row per label and half of two zones is
+  priced at the other half's figure, with nothing to show for it.
+- **The grid is one number and four coefficients.** Every row satisfies `ocupat = 0,70 × liber`,
+  `alei = 0,49`, `comercial = 1,10`, `industrial = 0,90`, on all 277. So the chamber does not
+  price commercial land by observing commercial land — worth knowing before reading that column
+  as a market signal, and useful here because it makes every row self-checking. The reader
+  drops any row that fails it; none did.
+
+The column taken is **TEREN OCUPAT DE CONSTRUCTII**, because the hectares being priced are the
+register's *Ocupată cu construcții*. TEREN LIBER is 1/0,70 higher and is the right column for a
+redevelopment reading.
+
+**București is 50,3 mld EUR — the most valuable county in the set, twice Timiș.** And its band
+is 39×, by far the widest here, because 277 subzones span 34 to 1 320 EUR/m² and nothing
+publishes the hectares in each. The central figure is the estimate; the ends are bounds, not a
+confidence interval. The study carries a street index — ninety pages mapping every street in
+the city to its subzone — which is the route to narrowing it, and is not used yet.
+
+**Excluding the capital from the national estimate was right, and now it is checked rather than
+argued.** The model, extrapolated to 2,14 M people, says **37,4 mld**; the grid says **50,3**.
+It would have understated Romania's most valuable county by a third, outside its own 1,65×
+error. Reading it also *improved* the model — leave-one-out from 1,65× to 1,61× and R² from
+0,58 to 0,75 — so București now earns a place in the fit it was previously kept out of, and
+Ilfov is the only county still excluded.
+
+**Romania without Ilfov: 339 mld EUR, 65% of it read rather than modelled.**
+
+Three assumptions broke on a county with one letter and no villages, all silent, all found by
+gates rather than by errors: schema minimums that required every county to have communes and
+villages, id patterns of `[a-z]{2}` that rejected `impozit-b-2026`, and — after every upstream
+gate had passed — a regex in the app's copy step that matched two-letter county codes and
+quietly left the country's most valuable county out of the page.
+
 **The yield was wrong, and this repository already knew.** Land rent is value times yield, so
 the yield is the denominator under every capture figure here. Building land — 64% of the value
 — was capitalised at an assumed **3–7%**, anchored on the observed residential yield. But
@@ -522,7 +583,7 @@ chamber was opened and measured rather than guessed at:
 | Galați | GL, BR | GL has 5 land tables in 142 pages; Brăila is a scan |
 | Craiova | DJ, GJ, OT, MH | 23 localities priced out of 359 |
 | Timișoara | AR, CS | annexes contain no land at all |
-| București | B, IF, CL, GR, IL, TR | publishes nothing |
+| ~~București~~ | B, IF, CL, GR, IL, TR | **wrong — publishes on `srv.cnpb.ro`; B is read, five remain** |
 
 Those are hard ceilings on what the documents contain, not on what the readers manage. Nothing
 above 37% and most far below, against a 90% bar. **The estimate is not a shortcut around the
@@ -574,7 +635,7 @@ single county-wide average per category for everything else. Timișoara's chambe
 and Caraș-Severin too, and their annexes contain no land at all. Both were checked against the
 source rather than inferred from a low score.
 
-Twenty-two counties read: **1 696 localities, 13,0 M ha, 54,4% of Romania, 171 mld EUR.**
+Twenty-three counties read: **1 697 localities, 13,0 M ha, 54,5% of Romania, 222 mld EUR.**
 
 **One chamber, four counties, and the same reader for all of them — after four bugs.** CNP Cluj
 publishes Bistrița-Năsăud, Maramureș and Sălaj in Cluj's own layout, and the section-header fix

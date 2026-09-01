@@ -78,6 +78,7 @@ RANK_I_MUNICIPALITIES = {
 BUCHAREST = "bucuresti"
 
 COUNTY_TO_CHAMBER = {
+    "B": "bucuresti",
     "VS": "vaslui",
     "BC": "bacau",
     "NT": "neamt",

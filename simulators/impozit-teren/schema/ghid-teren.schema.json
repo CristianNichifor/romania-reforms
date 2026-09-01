@@ -46,7 +46,7 @@
     },
     "id": {
       "type": "string",
-      "pattern": "^unnpr-terenuri-[a-z-]+-[0-9]{4}$"
+      "pattern": "^(unnpr|cnpb)-terenuri-[a-z-]+-[0-9]{4}$"
     },
     "title": {
       "type": "string"
@@ -110,11 +110,13 @@
         },
         "communes": {
           "type": "integer",
-          "minimum": 1
+          "minimum": 0,
+          "description": "Zero este legitim: Bucureștiul este un singur municipiu, fără comune și fără sate, iar minimul de 1 presupunea tăcut că orice județ are mediu rural."
         },
         "villages": {
           "type": "integer",
-          "minimum": 1
+          "minimum": 0,
+          "description": "Zero este legitim: Bucureștiul este un singur municipiu, fără comune și fără sate, iar minimul de 1 presupunea tăcut că orice județ are mediu rural."
         },
         "communesWithExtravilan": {
           "type": "integer",
@@ -130,7 +132,8 @@
         },
         "rosterComune": {
           "type": "integer",
-          "minimum": 1
+          "minimum": 0,
+          "description": "Zero este legitim: Bucureștiul este un singur municipiu, fără comune și fără sate, iar minimul de 1 presupunea tăcut că orice județ are mediu rural."
         },
         "rosterMissingFromTable": {
           "description": "Localities the register names that the study does not price. Recorded rather than forbidden: a gap in the source is not a reason to publish nothing about the rest of the county. Judge the file by summary.coverage.",
@@ -254,7 +257,7 @@
         },
         "comune": {
           "type": "array",
-          "minItems": 1,
+          "minItems": 0,
           "items": {
             "type": "string"
           }
@@ -292,7 +295,8 @@
             "minItems": 1,
             "items": {
               "type": "string",
-              "pattern": "^[A-F]$"
+              "pattern": "^([A-F]|\\d{1,3}-[AB][0-9](\\s[NS])?)$",
+              "description": "Eticheta zonei aşa cum o scrie camera. Treisprezece camere folosesc litere A–F; Bucureştiul numerotează 59 de zone cadastrale împărţite în subzone (\"25-A3\"), două dintre ele tăiate de calea ferată şi preţuite separat la nord şi la sud (\"25-A3 N\"). Tiparul rămâne strict: a fost pus aici ca să prindă exact greşeala de a scrie un nume de localitate într-un câmp de zonă, şi o listă deschisă de şiruri ar renunţa la asta."
             }
           },
           "intravilan": {
@@ -318,7 +322,7 @@
     },
     "communes": {
       "type": "array",
-      "minItems": 1,
+      "minItems": 0,
       "items": {
         "type": "object",
         "additionalProperties": false,
@@ -380,7 +384,8 @@
             ]
           }
         }
-      }
+      },
+      "description": "Comunele judeţului, cu satele lor. Poate fi goală: Bucureştiul este un singur municipiu şi are zone, nu comune. Minimul de 1 codifica presupunerea tăcută că orice unitate din setul acesta are mediu rural, ceea ce capitala nu are."
     },
     "limitations": {
       "type": "array",

@@ -36,14 +36,17 @@ divided and multiplied by the leave-one-out error of the model that produced it.
 statement with a definition behind it: predict a county the fit has never seen, and this is how
 far off it lands. It is wide — a factor of 1,67 on the largest component — and it should be.
 
-**București and Ilfov are excluded and named.** The fit's largest town is Iași at 390 000
-people; Bucharest has 2,14 million, and applying a log-linear fit five and a half times beyond
-the range it was fitted on is not extrapolation, it is invention. Ilfov is arithmetically
-inside the range — its largest town, Voluntari, has 47 000 people — and substantively outside
-it, because Ilfov is Bucharest's suburbs and its land is priced by a city that is not in it.
-The national total here is therefore **Romania minus its capital region**, stated as such, and
-the capital region is left as a named hole rather than filled with a number nobody could
-defend.
+**București is measured now, and the refusal to extrapolate to it was right.** For most of this
+file's life the capital was excluded as un-predictable: the fit's largest town is Iași at
+390 000 people and Bucharest has 2,14 million, so reaching it meant stretching a log-linear
+fit five and a half times past its range. Its chamber's own study has since been read, and the
+comparison is the only test this model will ever get at that end of the scale — the fit says
+**37,4 mld EUR** and the grid says **50 mld**. It would have understated the country's most
+valuable county by a third, outside its own 1,65× error.
+
+**Ilfov is still excluded and named.** Arithmetically its largest town is inside the fitted
+range; substantively Ilfov is Bucharest's suburbs and its land is priced by a city that is not
+in it. It is left as a named hole rather than filled with a number nobody could defend.
 
 Usage:
     uv run python simulators/impozit-teren/scripts/build_valoare_nationala.py
@@ -70,8 +73,11 @@ BUILT_REGISTER = "Ocupata cu constructii"
 # Predicted apart from the rest: they are the codes with enough priced counties behind them to
 # average. AP and DR are priced in three counties and two, which is not a national mean.
 TRANSFERRED = ("A", "P+F", "V+L", "NP", "PADURE")
-# Outside the fit and outside the country's ordinary land market. See the module docstring.
-CAPITAL = ("B", "IF")
+# Outside the fit and outside the country's ordinary land market. București is no longer here
+# — its chamber's own study is read now — but Ilfov still is: its largest town, Voluntari, has
+# 47 000 people, which puts it inside the fit's range arithmetically and nowhere near it
+# substantively, because Ilfov's land is priced by a city that is not in Ilfov.
+CAPITAL = ("IF",)
 
 
 # The output is deliberately NOT called `valoare-teren-nationala-*.json`.
@@ -367,12 +373,14 @@ def main() -> int:
             {
                 "id": "bucurestiul-lipseste-din-total",
                 "text": (
-                    "Totalul este România fără București și Ilfov. Cel mai mare oraș din "
-                    "eșantionul pe care s-a estimat modelul are 390 000 de locuitori; "
-                    "Bucureștiul are 2,14 milioane, iar o extrapolare log-liniară de cinci ori "
-                    "peste intervalul măsurat nu ar fi o estimare. Cum acolo se află cel mai "
-                    "scump teren din țară, totalul de aici este o subestimare a României "
-                    "întregi, cu o marjă necunoscută și probabil mare."
+                    "Bucureștiul nu mai lipsește: grila camerei notarilor din București este "
+                    "citită, iar comparația confirmă că refuzul de a-l extrapola era corect — "
+                    "modelul spunea 37,4 mld EUR, grila spune 50, deci l-ar fi subestimat cu o "
+                    "treime. Rămâne exclus Ilfovul, a cărui piață e dictată de un oraș care nu "
+                    "se află în județ. Banda Bucureștiului este însă cea mai largă din set, "
+                    "aproape 39×, pentru că orașul are 277 de subzone între 34 și 1 320 EUR/mp "
+                    "și nu există nicăieri suprafața fiecăreia: cifra centrală e estimarea, "
+                    "capetele sunt limite, nu un interval de încredere."
                 ),
                 "severity": "blocking",
                 "affects": ["valoare-nationala"],
@@ -427,7 +435,10 @@ def main() -> int:
             f"estimat, {len(predicted_rows)} județe (mld)",
             {b: (total[b] - measured_total[b]) / 1e9 for b in BANDS},
         ),
-        ("ROMÂNIA fără B+IF (mld)", {b: total[b] / 1e9 for b in BANDS}),
+        (
+            f"ROMÂNIA fără {'+'.join(r['county'] for r in excluded)} (mld)",
+            {b: total[b] / 1e9 for b in BANDS},
+        ),
     ):
         print(f"{label:<26}" + "".join(f"{series[b]:12,.1f}" for b in BANDS))
     print(f"\nexclus: {', '.join(r['county'] for r in excluded)}")
