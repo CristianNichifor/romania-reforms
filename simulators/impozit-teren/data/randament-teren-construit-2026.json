@@ -1,0 +1,168 @@
+{
+  "$schema": "../schema/randament-teren-construit.schema.json",
+  "id": "randament-teren-construit-2026",
+  "title": "Randamentul terenului de sub clădiri, dedus din randamentul proprietății",
+  "publisher": "romania-reforms",
+  "counties": [
+    "HD",
+    "IS",
+    "MS",
+    "HR"
+  ],
+  "period": "2026",
+  "currency": "RON",
+  "provenance": {
+    "source": "global-property-guide-hg-2139-2004-grile-notariale",
+    "locator": "randament brut rezidențial (Global Property Guide) − amortizare (HG 2139/2004, clasa 1.6.1) × ponderea clădirii, unde ponderea terenului este calculată din prețurile de teren și de construcție publicate pe aceeași pagină în grilele notariale ale județelor HD, MS și HR",
+    "confidence": "derived",
+    "note": "r_teren = randament_net − amortizare × (1 − pondere_teren). Nu este o măsurătoare: în România nu se publică nicăieri o chirie a terenului de sub clădiri. Toate cele trei intrări sunt parametri declarați."
+  },
+  "assumptions": {
+    "grossYieldPercent": 5.87,
+    "grossYieldSource": "Global Property Guide, randament brut rezidențial România 5,87% în T3 2026 (6,02% T1 2026, 6,33% T3 2025)",
+    "operatingCostShare": {
+      "low": 0.3,
+      "central": 0.25,
+      "high": 0.2
+    },
+    "netYieldPercent": {
+      "low": 4.109,
+      "central": 4.4025,
+      "high": 4.696
+    },
+    "buildingLifeYears": {
+      "low": 60,
+      "central": 50,
+      "high": 40
+    },
+    "depreciationPercent": {
+      "low": 1.6667,
+      "central": 2.0,
+      "high": 2.5
+    },
+    "depreciationSource": "HG nr. 2139/2004, Catalogul privind clasificarea și duratele normale de funcționare a mijloacelor fixe, clasa 1.6.1 „clădiri de locuit”: 40–60 de ani",
+    "plotToFloorRatio": {
+      "low": 3.0,
+      "central": 4.0,
+      "high": 6.0
+    }
+  },
+  "summary": {
+    "counties": 4,
+    "pairs": 343,
+    "landSharePercent": {
+      "low": 4.762,
+      "central": 6.25,
+      "high": 9.091
+    },
+    "derivedYieldPercent": {
+      "low": 1.728,
+      "central": 2.5275,
+      "high": 3.1808
+    },
+    "urbanLandSharePercent": {
+      "low": 12.991,
+      "central": 16.603,
+      "high": 22.995
+    },
+    "urbanDerivedYieldPercent": {
+      "low": 1.9338,
+      "central": 2.7346,
+      "high": 3.4126
+    },
+    "ruralLandSharePercent": {
+      "low": 4.327,
+      "central": 5.687,
+      "high": 8.295
+    },
+    "ruralDerivedYieldPercent": {
+      "low": 1.7172,
+      "central": 2.5162,
+      "high": 3.1676
+    },
+    "urbanPairs": 66,
+    "ruralPairs": 277,
+    "assumedYieldPercent": {
+      "low": 3.0,
+      "central": 5.0,
+      "high": 7.0
+    }
+  },
+  "counties_measured": [
+    {
+      "county": "HD",
+      "source": "Hunedoara_2026.pdf",
+      "pairs": 181,
+      "landSharePercent": {
+        "low": 5.028,
+        "central": 6.593,
+        "high": 9.574
+      }
+    },
+    {
+      "county": "IS",
+      "source": "studiu_de_piata_Iasi_2026.pdf",
+      "pairs": 11,
+      "landSharePercent": {
+        "low": 27.273,
+        "central": 33.333,
+        "high": 42.857
+      }
+    },
+    {
+      "county": "MS",
+      "source": "28_03_2026_STUDIU_JUDETUL_MURES_PT_2026_republicare_compressed_(4)_16_03_2026.pdf",
+      "pairs": 80,
+      "landSharePercent": {
+        "low": 4.008,
+        "central": 5.273,
+        "high": 7.707
+      }
+    },
+    {
+      "county": "HR",
+      "source": "28_03_2026_STUDIU_JUDETUL_HARGHITA_PT_2026_republicare_compressed_(1)_16_03_2026.pdf",
+      "pairs": 71,
+      "landSharePercent": {
+        "low": 5.573,
+        "central": 7.295,
+        "high": 10.557
+      }
+    }
+  ],
+  "limitations": [
+    {
+      "id": "nu-e-masuratoare-ci-deducere",
+      "text": "Nu există nicăieri în România o chirie publicată a terenului de sub clădiri: grilele notariale publică prețuri, nu chirii, iar redevențele de concesiune se negociază contract cu contract. Cifra de aici este dedusă dintr-o identitate cu trei intrări declarate, nu observată.",
+      "severity": "blocking",
+      "affects": [
+        "randament-teren-construit",
+        "renta"
+      ]
+    },
+    {
+      "id": "esantion-de-judete-sarace",
+      "text": "Ponderea terenului este calculată din trei județe — Hunedoara, Mureș, Harghita — pentru că doar acolo grila publică prețul terenului și pe cel al construcției pentru aceeași localitate. Nu există grilă pentru București, Cluj sau Timiș, unde terenul e scump și ponderea lui ar fi mult mai mare. Estimarea este deci înclinată în jos.",
+      "severity": "material",
+      "affects": [
+        "randament-teren-construit"
+      ]
+    },
+    {
+      "id": "raportul-lot-suprafata-construita",
+      "text": "Ponderea terenului depinde de cât teren se presupune sub o casă. Aici se folosește un lot de 3–6 ori suprafața construită desfășurată, cu 4 la mijloc. Este o presupunere, nu o măsurătoare, iar ponderea se mișcă direct cu ea.",
+      "severity": "material",
+      "affects": [
+        "randament-teren-construit"
+      ]
+    },
+    {
+      "id": "acelasi-randament-cerut-pe-ambele-jumatati",
+      "text": "Identitatea presupune că investitorul cere aceeași rentabilitate a capitalului și pentru teren, și pentru clădire, diferența dintre ele fiind doar amortizarea. Este simplificarea standard și rămâne o simplificare: terenul și clădirea nu au același risc.",
+      "severity": "material",
+      "affects": [
+        "randament-teren-construit"
+      ]
+    }
+  ]
+}

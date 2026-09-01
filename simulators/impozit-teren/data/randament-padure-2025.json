@@ -1,0 +1,412 @@
+{
+  "$schema": "../schema/randament-padure.schema.json",
+  "id": "randament-padure-2025",
+  "title": "Randamentul terenului forestier, din recolta de lemn și prețul pe picior",
+  "publisher": "romania-reforms",
+  "counties": [
+    "AB",
+    "BC",
+    "BH",
+    "BN",
+    "BZ",
+    "CJ",
+    "DB",
+    "HD",
+    "HR",
+    "IS",
+    "MM",
+    "MS",
+    "NT",
+    "PH",
+    "SB",
+    "SJ",
+    "SM",
+    "VN",
+    "VS"
+  ],
+  "period": "2025",
+  "currency": "RON",
+  "provenance": {
+    "source": "ins-tempo-agr306a-romsilva-grile-notariale",
+    "locator": "recolta pe hectar (INS AGR306A, prin lemn-recoltat) × prețul masei lemnoase pe picior (Romsilva) × (1 − cota de costuri), împărțit la valoarea pădurii pe hectar din grilele notariale",
+    "confidence": "derived",
+    "note": "Nu există o arendă a pădurii de măsurat. Cele două intrări măsurate sunt recolta și prețul; cota de costuri a proprietarului este un parametru declarat."
+  },
+  "assumptions": {
+    "stumpageLeiPerM3": {
+      "low": 187.89,
+      "central": 230.4,
+      "high": 230.4
+    },
+    "stumpageSource": "RNP-Romsilva, licitații și negocieri de masă lemnoasă pe picior, primele nouă luni ale anului 2025: preț mediu de adjudecare 230,40 lei/m³, preț mediu de pornire 187,89 lei/m³",
+    "ownerCostShare": {
+      "low": 0.35,
+      "central": 0.25,
+      "high": 0.15
+    },
+    "ronPerEur": 5.2584
+  },
+  "summary": {
+    "counties": 19,
+    "yieldPercent": {
+      "low": 1.3448,
+      "central": 1.9028,
+      "high": 2.1565
+    },
+    "nationalM3PerHaPerYear": 2.8824,
+    "arableYieldPercentForComparison": 1.43
+  },
+  "counties_measured": [
+    {
+      "county": "AB",
+      "m3PerHaPerYear": 2.1949,
+      "forestHa": 57315.0,
+      "forestShareOfCountyPriced": 0.2528,
+      "forestValueRonPerHa": 42886.77,
+      "rentRonPerHaPerYear": {
+        "low": 268.06,
+        "central": 379.28,
+        "high": 429.85
+      },
+      "yieldPercent": {
+        "low": 0.625,
+        "central": 0.8844,
+        "high": 1.0023
+      }
+    },
+    {
+      "county": "BC",
+      "m3PerHaPerYear": 3.7363,
+      "forestHa": 280918.0,
+      "forestShareOfCountyPriced": 1.0,
+      "forestValueRonPerHa": 28921.2,
+      "rentRonPerHaPerYear": {
+        "low": 456.31,
+        "central": 645.63,
+        "high": 731.72
+      },
+      "yieldPercent": {
+        "low": 1.5778,
+        "central": 2.2324,
+        "high": 2.53
+      }
+    },
+    {
+      "county": "BH",
+      "m3PerHaPerYear": 2.5376,
+      "forestHa": 178532.0,
+      "forestShareOfCountyPriced": 0.9746,
+      "forestValueRonPerHa": 27759.84,
+      "rentRonPerHaPerYear": {
+        "low": 309.91,
+        "central": 438.5,
+        "high": 496.96
+      },
+      "yieldPercent": {
+        "low": 1.1164,
+        "central": 1.5796,
+        "high": 1.7902
+      }
+    },
+    {
+      "county": "BN",
+      "m3PerHaPerYear": 2.864,
+      "forestHa": 194096.0,
+      "forestShareOfCountyPriced": 1.0,
+      "forestValueRonPerHa": 30043.17,
+      "rentRonPerHaPerYear": {
+        "low": 349.78,
+        "central": 494.9,
+        "high": 560.89
+      },
+      "yieldPercent": {
+        "low": 1.1642,
+        "central": 1.6473,
+        "high": 1.8669
+      }
+    },
+    {
+      "county": "BZ",
+      "m3PerHaPerYear": 2.8483,
+      "forestHa": 154446.0,
+      "forestShareOfCountyPriced": 1.0,
+      "forestValueRonPerHa": 22085.28,
+      "rentRonPerHaPerYear": {
+        "low": 347.86,
+        "central": 492.19,
+        "high": 557.81
+      },
+      "yieldPercent": {
+        "low": 1.5751,
+        "central": 2.2286,
+        "high": 2.5257
+      }
+    },
+    {
+      "county": "CJ",
+      "m3PerHaPerYear": 1.8826,
+      "forestHa": 156649.0,
+      "forestShareOfCountyPriced": 1.0,
+      "forestValueRonPerHa": 46183.85,
+      "rentRonPerHaPerYear": {
+        "low": 229.92,
+        "central": 325.31,
+        "high": 368.69
+      },
+      "yieldPercent": {
+        "low": 0.4978,
+        "central": 0.7044,
+        "high": 0.7983
+      }
+    },
+    {
+      "county": "DB",
+      "m3PerHaPerYear": 3.0657,
+      "forestHa": 116755.0,
+      "forestShareOfCountyPriced": 1.0,
+      "forestValueRonPerHa": 18691.86,
+      "rentRonPerHaPerYear": {
+        "low": 374.41,
+        "central": 529.75,
+        "high": 600.39
+      },
+      "yieldPercent": {
+        "low": 2.0031,
+        "central": 2.8341,
+        "high": 3.212
+      }
+    },
+    {
+      "county": "HD",
+      "m3PerHaPerYear": 2.197,
+      "forestHa": 357081.0,
+      "forestShareOfCountyPriced": 1.0,
+      "forestValueRonPerHa": 15223.79,
+      "rentRonPerHaPerYear": {
+        "low": 268.32,
+        "central": 379.64,
+        "high": 430.26
+      },
+      "yieldPercent": {
+        "low": 1.7625,
+        "central": 2.4937,
+        "high": 2.8262
+      }
+    },
+    {
+      "county": "HR",
+      "m3PerHaPerYear": 6.2107,
+      "forestHa": 233315.0,
+      "forestShareOfCountyPriced": 1.0,
+      "forestValueRonPerHa": 32148.87,
+      "rentRonPerHaPerYear": {
+        "low": 758.5,
+        "central": 1073.21,
+        "high": 1216.3
+      },
+      "yieldPercent": {
+        "low": 2.3593,
+        "central": 3.3382,
+        "high": 3.7833
+      }
+    },
+    {
+      "county": "IS",
+      "m3PerHaPerYear": 3.0984,
+      "forestHa": 89027.0,
+      "forestShareOfCountyPriced": 0.9822,
+      "forestValueRonPerHa": 63736.02,
+      "rentRonPerHaPerYear": {
+        "low": 378.4,
+        "central": 535.4,
+        "high": 606.79
+      },
+      "yieldPercent": {
+        "low": 0.5937,
+        "central": 0.84,
+        "high": 0.952
+      }
+    },
+    {
+      "county": "MM",
+      "m3PerHaPerYear": 1.8815,
+      "forestHa": 276846.0,
+      "forestShareOfCountyPriced": 0.9734,
+      "forestValueRonPerHa": 22982.79,
+      "rentRonPerHaPerYear": {
+        "low": 229.78,
+        "central": 325.12,
+        "high": 368.47
+      },
+      "yieldPercent": {
+        "low": 0.9998,
+        "central": 1.4146,
+        "high": 1.6033
+      }
+    },
+    {
+      "county": "MS",
+      "m3PerHaPerYear": 3.1783,
+      "forestHa": 209451.0,
+      "forestShareOfCountyPriced": 1.0,
+      "forestValueRonPerHa": 27257.71,
+      "rentRonPerHaPerYear": {
+        "low": 388.16,
+        "central": 549.21,
+        "high": 622.44
+      },
+      "yieldPercent": {
+        "low": 1.424,
+        "central": 2.0149,
+        "high": 2.2835
+      }
+    },
+    {
+      "county": "NT",
+      "m3PerHaPerYear": 5.8904,
+      "forestHa": 260950.0,
+      "forestShareOfCountyPriced": 1.0,
+      "forestValueRonPerHa": 28921.2,
+      "rentRonPerHaPerYear": {
+        "low": 719.39,
+        "central": 1017.86,
+        "high": 1153.58
+      },
+      "yieldPercent": {
+        "low": 2.4874,
+        "central": 3.5194,
+        "high": 3.9887
+      }
+    },
+    {
+      "county": "PH",
+      "m3PerHaPerYear": 2.9184,
+      "forestHa": 146046.0,
+      "forestShareOfCountyPriced": 1.0,
+      "forestValueRonPerHa": 18691.86,
+      "rentRonPerHaPerYear": {
+        "low": 356.42,
+        "central": 504.3,
+        "high": 571.54
+      },
+      "yieldPercent": {
+        "low": 1.9068,
+        "central": 2.698,
+        "high": 3.0577
+      }
+    },
+    {
+      "county": "SB",
+      "m3PerHaPerYear": 2.4623,
+      "forestHa": 149199.0,
+      "forestShareOfCountyPriced": 0.756,
+      "forestValueRonPerHa": 44921.34,
+      "rentRonPerHaPerYear": {
+        "low": 300.72,
+        "central": 425.49,
+        "high": 482.22
+      },
+      "yieldPercent": {
+        "low": 0.6694,
+        "central": 0.9472,
+        "high": 1.0735
+      }
+    },
+    {
+      "county": "SJ",
+      "m3PerHaPerYear": 2.0106,
+      "forestHa": 105542.0,
+      "forestShareOfCountyPriced": 1.0,
+      "forestValueRonPerHa": 18259.39,
+      "rentRonPerHaPerYear": {
+        "low": 245.55,
+        "central": 347.43,
+        "high": 393.76
+      },
+      "yieldPercent": {
+        "low": 1.3448,
+        "central": 1.9028,
+        "high": 2.1565
+      }
+    },
+    {
+      "county": "SM",
+      "m3PerHaPerYear": 2.3923,
+      "forestHa": 52388.0,
+      "forestShareOfCountyPriced": 0.7329,
+      "forestValueRonPerHa": 40479.38,
+      "rentRonPerHaPerYear": {
+        "low": 292.17,
+        "central": 413.39,
+        "high": 468.51
+      },
+      "yieldPercent": {
+        "low": 0.7218,
+        "central": 1.0212,
+        "high": 1.1574
+      }
+    },
+    {
+      "county": "VN",
+      "m3PerHaPerYear": 3.1237,
+      "forestHa": 170094.0,
+      "forestShareOfCountyPriced": 0.8798,
+      "forestValueRonPerHa": 10349.34,
+      "rentRonPerHaPerYear": {
+        "low": 381.49,
+        "central": 539.78,
+        "high": 611.75
+      },
+      "yieldPercent": {
+        "low": 3.6862,
+        "central": 5.2156,
+        "high": 5.911
+      }
+    },
+    {
+      "county": "VS",
+      "m3PerHaPerYear": 2.7135,
+      "forestHa": 78736.0,
+      "forestShareOfCountyPriced": 1.0,
+      "forestValueRonPerHa": 50000.0,
+      "rentRonPerHaPerYear": {
+        "low": 331.4,
+        "central": 468.89,
+        "high": 531.41
+      },
+      "yieldPercent": {
+        "low": 0.6628,
+        "central": 0.9378,
+        "high": 1.0628
+      }
+    }
+  ],
+  "limitations": [
+    {
+      "id": "pretul-e-national-nu-judetean",
+      "text": "Prețul masei lemnoase pe picior este media Romsilva pe țară, aplicată tuturor județelor. Rășinoasele din Suceava și foioasele din Dolj nu se vând la același preț, iar diferența dintre județe se pierde aici — singurul lucru care variază pe județ este recolta pe hectar.",
+      "severity": "material",
+      "affects": [
+        "randament-padure",
+        "renta"
+      ]
+    },
+    {
+      "id": "costurile-proprietarului-sunt-parametru",
+      "text": "Cota de 15–35% pentru pază, administrare, regenerare și drumuri forestiere nu este publicată nicăieri ca o singură cifră. Este un parametru declarat, iar lățimea benzii randamentului vine în cea mai mare parte din el.",
+      "severity": "blocking",
+      "affects": [
+        "randament-padure",
+        "renta"
+      ]
+    },
+    {
+      "id": "romsilva-e-padurea-statului",
+      "text": "Prețul provine din licitațiile Romsilva, adică din pădurea statului. Aproape jumătate din pădurea României este privată sau a unităților administrativ-teritoriale și se vinde în alte condiții.",
+      "severity": "material",
+      "affects": [
+        "randament-padure"
+      ]
+    }
+  ]
+}

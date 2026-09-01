@@ -1,0 +1,47 @@
+{
+  "$schema": "../schema/populatie.schema.json",
+  "id": "populatie-b-2024",
+  "title": "Populația după domiciliu pe localități, județul B, 2024",
+  "publisher": "Institutul Național de Statistică",
+  "counties": [
+    "B"
+  ],
+  "period": "2024",
+  "unit": "persoane",
+  "provenance": {
+    "source": "ins-tempo-pop107d",
+    "locator": "http://statistici.insse.ro:8077/tempo-ins/matrix/POP107D, anul 2024, toate vârstele, ambele sexe",
+    "confidence": "verbatim",
+    "note": "Populație după domiciliu, nu populație rezidentă: numără unde sunt înregistrate persoanele, nu unde locuiesc. Supraestimează localitățile de unde s-a plecat. Este singura serie publicată pe localități pentru fiecare an."
+  },
+  "summary": {
+    "localities": 1,
+    "people": 2143578,
+    "towns": 1,
+    "urbanPeople": 2143578,
+    "urbanSharePercent": 100.0,
+    "largestName": "Bucuresti",
+    "largestPeople": 2143578,
+    "largestSharePercent": 100.0
+  },
+  "localities": [
+    {
+      "siruta": "179132",
+      "name": "Bucuresti",
+      "county": "B",
+      "rank": "municipii",
+      "people": 2143578
+    }
+  ],
+  "limitations": [
+    {
+      "id": "domiciliu-nu-resedinta",
+      "text": "Populația după domiciliu diferă substanțial de cea rezidentă: cine a plecat din țară sau din sat rămâne în evidență acolo unde e înregistrat. Pe județe diferența ajunge la câteva procente, pe comunele din care s-a emigrat mult este mult mai mare. Folosită aici ca predictor al pieței funciare, nu ca măsură a populației.",
+      "severity": "material",
+      "affects": [
+        "populatie",
+        "valoare-nationala"
+      ]
+    }
+  ]
+}

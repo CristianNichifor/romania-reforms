@@ -1,0 +1,393 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/ghid-teren.schema.json",
+  "title": "Minimum orientative land values, from a chamber of notaries' market study",
+  "description": "One county's land grid as its chamber of notaries publishes it. Two granularities that must not be flattened into one: intravilan values are printed per village, extravilan values once per commune. Towns and the occasional commune that has passed its own zoning decision are priced by zone letter instead, and a zone the locality does not have is recorded as null rather than as zero. Every value is a legal floor for notarial fees and transfer tax, not an observed transaction price.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "counties",
+    "period",
+    "currency",
+    "unit",
+    "provenance",
+    "summary",
+    "categories",
+    "extravilanCategories",
+    "roster",
+    "zoned",
+    "communes",
+    "limitations"
+  ],
+  "$defs": {
+    "value": {
+      "description": "EUR per square metre, or null where the study prints a dash because the locality has no such zone.",
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "categoryValues": {
+      "type": "object",
+      "minProperties": 0,
+      "additionalProperties": {
+        "$ref": "#/$defs/value"
+      },
+      "description": "Prices by category. May be empty: a study does not always print an extravilan grid for every locality, and an absent price is absent rather than zero."
+    }
+  },
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^unnpr-terenuri-[a-z-]+-[0-9]{4}$"
+    },
+    "title": {
+      "type": "string"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "counties": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z]{1,2}$"
+      }
+    },
+    "period": {
+      "type": "string",
+      "pattern": "^[0-9]{4}$"
+    },
+    "currency": {
+      "description": "The chamber's own unit. CNP Bacău prices in euro, CNP Alba Iulia in lei.",
+      "enum": [
+        "EUR",
+        "RON"
+      ]
+    },
+    "unit": {
+      "type": "string",
+      "pattern": "^(EUR|RON)/m²$"
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json#/$defs/provenance"
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pages",
+        "zonedLocalities",
+        "communes",
+        "villages",
+        "communesWithExtravilan",
+        "rosterMunicipii",
+        "rosterOrase",
+        "rosterComune",
+        "rosterMissingFromTable",
+        "tableMissingFromRoster",
+        "townsWithoutZoneGrid",
+        "numberingProblems",
+        "duplicateLocalities",
+        "coverage"
+      ],
+      "properties": {
+        "pages": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "zonedLocalities": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "communes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "villages": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "communesWithExtravilan": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "rosterMunicipii": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "rosterOrase": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "rosterComune": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "rosterMissingFromTable": {
+          "description": "Localities the register names that the study does not price. Recorded rather than forbidden: a gap in the source is not a reason to publish nothing about the rest of the county. Judge the file by summary.coverage.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tableMissingFromRoster": {
+          "description": "Communes the parse produced that the roster never names. Must be empty for the same reason, from the other direction.",
+          "type": "array",
+          "maxItems": 0,
+          "items": {
+            "type": "string"
+          }
+        },
+        "townsWithoutZoneGrid": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Localities the register names that the study does not price. Recorded rather than forbidden: a gap in the source is not a reason to publish nothing about the rest of the county. Judge the file by summary.coverage."
+        },
+        "numberingProblems": {
+          "description": "Gaps in the study's own Nr. Crt. sequence. Must be empty.",
+          "type": "array",
+          "maxItems": 0,
+          "items": {
+            "type": "string"
+          }
+        },
+        "duplicateLocalities": {
+          "description": "Localities the rural table yielded more than once. Must be empty: a duplicate would be counted twice by anything that sums land value.",
+          "type": "array",
+          "maxItems": 0,
+          "items": {
+            "type": "string"
+          }
+        },
+        "coverage": {
+          "description": "How much of the county is priced. Below 0.9 the importer refuses to write at all, because that is a broken parse rather than a short document.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "localitiesExpected",
+            "localitiesPriced",
+            "share"
+          ],
+          "properties": {
+            "localitiesExpected": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "localitiesPriced": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "share": {
+              "type": "number",
+              "minimum": 0.9,
+              "maximum": 1
+            }
+          }
+        },
+        "forestPriceScope": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "categories": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "code",
+          "label"
+        ],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "extravilanCategories": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "roster": {
+      "description": "The county's own list of its localities, from the study's organisation page. The authority the parse is measured against.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "municipii",
+        "orase",
+        "comune"
+      ],
+      "properties": {
+        "municipii": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "orase": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "comune": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "zoned": {
+      "description": "Localities priced by zone letter. Usually towns, but a commune that has passed its own zoning decision appears here too, which is why rank is recorded rather than assumed.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "rank",
+          "zones",
+          "intravilan",
+          "extravilan",
+          "page"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "rank": {
+            "enum": [
+              "municipii",
+              "orase",
+              "comune",
+              null
+            ]
+          },
+          "zones": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "pattern": "^[A-F]$"
+            }
+          },
+          "intravilan": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": {
+              "$ref": "#/$defs/categoryValues"
+            }
+          },
+          "extravilan": {
+            "$ref": "#/$defs/categoryValues"
+          },
+          "page": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "extravilanPage": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
+    },
+    "communes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "index",
+          "name",
+          "matchedRoster",
+          "villages",
+          "extravilan",
+          "page",
+          "rank"
+        ],
+        "properties": {
+          "index": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "name": {
+            "type": "string"
+          },
+          "matchedRoster": {
+            "description": "Whether the name the table printed resolved to one the roster names.",
+            "const": true
+          },
+          "villages": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "name",
+                "intravilan"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "intravilan": {
+                  "$ref": "#/$defs/categoryValues"
+                }
+              }
+            }
+          },
+          "extravilan": {
+            "$ref": "#/$defs/categoryValues"
+          },
+          "page": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "rank": {
+            "description": "The rank the county roster gives this name. Towns keep villages of their own, so a town legitimately appears in the rural table.",
+            "enum": [
+              "municipii",
+              "orase",
+              "comune",
+              null
+            ]
+          }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "provenance.schema.json#/$defs/limitation"
+      }
+    }
+  }
+}

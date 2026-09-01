@@ -1,0 +1,204 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "teren-agricol-ins.schema.json",
+  "title": "Prețul și arenda terenului arabil (ancheta INS / Eurostat)",
+  "description": "Preț de tranzacționare și arendă pentru teren arabil, pe regiuni NUTS2, plus randamentul măsurat ca arendă ÷ preț. Singura sursă din acest simulator care nu este nici administrativă, nici preț cerut.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "counties",
+    "period",
+    "currency",
+    "provenance",
+    "summary",
+    "regions",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^teren-agricol-ins-[0-9]{4}$"
+    },
+    "title": {
+      "type": "string"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "counties": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z]{1,2}$"
+      }
+    },
+    "period": {
+      "type": "string",
+      "pattern": "^[0-9]{4}$"
+    },
+    "currency": {
+      "const": "RON"
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json#/$defs/provenance"
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "regions",
+        "firstYear",
+        "lastYear",
+        "nationalPriceRonPerHa",
+        "nationalRentRonPerHa",
+        "nationalYieldPercent",
+        "regionalYieldMedianPercent",
+        "regionalYieldObservations",
+        "grasslandYieldMedianPercent",
+        "grasslandYieldObservations"
+      ],
+      "properties": {
+        "regions": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "firstYear": {
+          "type": "string",
+          "pattern": "^[0-9]{4}$"
+        },
+        "lastYear": {
+          "type": "string",
+          "pattern": "^[0-9]{4}$"
+        },
+        "nationalPriceRonPerHa": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "nationalRentRonPerHa": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "nationalYieldPercent": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "regionalYieldMedianPercent": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Randamentul median pe regiuni din 2019 încoace — parametrul pe care build_renta.py îl presupune."
+        },
+        "regionalYieldObservations": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "grasslandYieldMedianPercent": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "grasslandYieldObservations": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "regions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "region",
+          "name",
+          "counties",
+          "series"
+        ],
+        "properties": {
+          "region": {
+            "type": "string",
+            "pattern": "^RO[0-9]{0,2}$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "counties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Z]{1,2}$"
+            }
+          },
+          "series": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "product",
+                "year",
+                "priceRonPerHa",
+                "rentRonPerHa",
+                "yieldPercent"
+              ],
+              "properties": {
+                "year": {
+                  "type": "string",
+                  "pattern": "^[0-9]{4}$"
+                },
+                "priceRonPerHa": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "rentRonPerHa": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "yieldPercent": {
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
+                "product": {
+                  "type": "string",
+                  "enum": [
+                    "ARA",
+                    "J0000"
+                  ],
+                  "description": "ARA = teren arabil, J0000 = pășuni și fânețe. Anchetate separat, cu randamente diferite."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "provenance.schema.json#/$defs/limitation"
+      }
+    }
+  }
+}

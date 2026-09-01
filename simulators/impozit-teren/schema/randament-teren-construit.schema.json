@@ -1,0 +1,312 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "randament-teren-construit.schema.json",
+  "title": "Randamentul dedus al terenului de sub clădiri",
+  "description": "r_teren = randament_net − amortizare × (1 − pondere_teren). Nu este o măsurătoare — în România nu se publică o chirie a terenului construibil — ci o deducere din trei intrări declarate, dintre care ponderea terenului e calculată din grilele notariale care publică separat prețul terenului și pe cel al construcției.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "counties",
+    "period",
+    "currency",
+    "provenance",
+    "assumptions",
+    "summary",
+    "counties_measured",
+    "limitations"
+  ],
+  "$defs": {
+    "band": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "low",
+        "central",
+        "high"
+      ],
+      "properties": {
+        "low": {
+          "type": "number"
+        },
+        "central": {
+          "type": "number"
+        },
+        "high": {
+          "type": "number"
+        }
+      }
+    }
+  },
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^randament-teren-construit-[0-9]{4}$"
+    },
+    "title": {
+      "type": "string"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "counties": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z]{2}$"
+      }
+    },
+    "period": {
+      "type": "string",
+      "pattern": "^[0-9]{4}$"
+    },
+    "currency": {
+      "const": "RON"
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json#/$defs/provenance"
+    },
+    "assumptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "grossYieldPercent",
+        "grossYieldSource",
+        "operatingCostShare",
+        "netYieldPercent",
+        "buildingLifeYears",
+        "depreciationPercent",
+        "depreciationSource",
+        "plotToFloorRatio"
+      ],
+      "properties": {
+        "grossYieldPercent": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "grossYieldSource": {
+          "type": "string"
+        },
+        "operatingCostShare": {
+          "$ref": "#/$defs/band"
+        },
+        "netYieldPercent": {
+          "$ref": "#/$defs/band"
+        },
+        "buildingLifeYears": {
+          "$ref": "#/$defs/band"
+        },
+        "depreciationPercent": {
+          "$ref": "#/$defs/band"
+        },
+        "depreciationSource": {
+          "type": "string"
+        },
+        "plotToFloorRatio": {
+          "$ref": "#/$defs/band"
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "counties",
+        "pairs",
+        "landSharePercent",
+        "derivedYieldPercent",
+        "assumedYieldPercent",
+        "urbanLandSharePercent",
+        "urbanDerivedYieldPercent",
+        "ruralLandSharePercent",
+        "ruralDerivedYieldPercent",
+        "urbanPairs",
+        "ruralPairs"
+      ],
+      "properties": {
+        "counties": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "pairs": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Perechi preț-teren / preț-construcție pentru aceeași localitate."
+        },
+        "landSharePercent": {
+          "$ref": "#/$defs/band"
+        },
+        "derivedYieldPercent": {
+          "$ref": "#/$defs/band"
+        },
+        "assumedYieldPercent": {
+          "$ref": "#/$defs/band",
+          "description": "Banda folosită azi în build_renta.py, purtată aici ca să se vadă diferența."
+        },
+        "urbanLandSharePercent": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "low",
+                "central",
+                "high"
+              ],
+              "properties": {
+                "low": {
+                  "type": "number"
+                },
+                "central": {
+                  "type": "number"
+                },
+                "high": {
+                  "type": "number"
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Ponderea terenului în orașele eșantionului. Se raportează separat pentru că terenul de sub o casă de sat și cel din centrul Iașiului nu sunt același activ — 6% față de o treime — iar 97% din rânduri sunt sate."
+        },
+        "urbanDerivedYieldPercent": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "low",
+                "central",
+                "high"
+              ],
+              "properties": {
+                "low": {
+                  "type": "number"
+                },
+                "central": {
+                  "type": "number"
+                },
+                "high": {
+                  "type": "number"
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Ponderea terenului în orașele eșantionului. Se raportează separat pentru că terenul de sub o casă de sat și cel din centrul Iașiului nu sunt același activ — 6% față de o treime — iar 97% din rânduri sunt sate."
+        },
+        "ruralLandSharePercent": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "low",
+                "central",
+                "high"
+              ],
+              "properties": {
+                "low": {
+                  "type": "number"
+                },
+                "central": {
+                  "type": "number"
+                },
+                "high": {
+                  "type": "number"
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Ponderea terenului în orașele eșantionului. Se raportează separat pentru că terenul de sub o casă de sat și cel din centrul Iașiului nu sunt același activ — 6% față de o treime — iar 97% din rânduri sunt sate."
+        },
+        "ruralDerivedYieldPercent": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "low",
+                "central",
+                "high"
+              ],
+              "properties": {
+                "low": {
+                  "type": "number"
+                },
+                "central": {
+                  "type": "number"
+                },
+                "high": {
+                  "type": "number"
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Ponderea terenului în orașele eșantionului. Se raportează separat pentru că terenul de sub o casă de sat și cel din centrul Iașiului nu sunt același activ — 6% față de o treime — iar 97% din rânduri sunt sate."
+        },
+        "urbanPairs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "ruralPairs": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "counties_measured": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "county",
+          "source",
+          "pairs",
+          "landSharePercent"
+        ],
+        "properties": {
+          "county": {
+            "type": "string",
+            "pattern": "^[A-Z]{2}$"
+          },
+          "source": {
+            "type": "string"
+          },
+          "pairs": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "landSharePercent": {
+            "$ref": "#/$defs/band"
+          }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "provenance.schema.json#/$defs/limitation"
+      }
+    }
+  }
+}

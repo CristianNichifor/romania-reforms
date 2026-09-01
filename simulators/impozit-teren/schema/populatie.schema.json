@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "populatie.schema.json",
+  "title": "Populația după domiciliu pe localități",
+  "description": "Importată nu ca statistică de populație ci ca predictor: este singura variabilă găsită care prezice prețul terenului construit într-un județ nemăsurat mai bine decât media națională. Cota construită a județului dă R² 0,04 și regiunea NUTS2 e mai slabă decât nicio variabilă. Populația celui mai mare oraș reduce eroarea de la 2,12× la 1,67×.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "counties",
+    "period",
+    "unit",
+    "provenance",
+    "summary",
+    "localities",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^populatie-[a-z]{1,2}-[0-9]{4}$"
+    },
+    "title": {
+      "type": "string"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "counties": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z]{1,2}$"
+      }
+    },
+    "period": {
+      "type": "string",
+      "pattern": "^[0-9]{4}$"
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json#/$defs/provenance"
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "provenance.schema.json#/$defs/limitation"
+      }
+    },
+    "unit": {
+      "const": "persoane"
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "localities",
+        "people",
+        "towns",
+        "urbanPeople",
+        "urbanSharePercent",
+        "largestName",
+        "largestPeople",
+        "largestSharePercent"
+      ],
+      "properties": {
+        "localities": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "people": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "towns": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "urbanPeople": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "urbanSharePercent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "largestName": {
+          "type": "string"
+        },
+        "largestPeople": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Predictorul propriu-zis. Nu populația județului: Iașul are o treime din județ într-un oraș, Botoșaniul nu, iar terenul se scumpește după oraș."
+        },
+        "largestSharePercent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+    "localities": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "siruta",
+          "name",
+          "county",
+          "rank",
+          "people"
+        ],
+        "properties": {
+          "siruta": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "county": {
+            "type": "string",
+            "pattern": "^[A-Z]{1,2}$"
+          },
+          "rank": {
+            "enum": [
+              "municipii",
+              "orase",
+              "comune"
+            ]
+          },
+          "people": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    }
+  }
+}

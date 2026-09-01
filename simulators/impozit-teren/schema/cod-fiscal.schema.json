@@ -1,0 +1,173 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/cod-fiscal.schema.json",
+  "title": "The Fiscal Code's land-tax tables",
+  "description": "Article 465 of Legea 227/2015 and the coefficient it borrows from article 457, read from the consolidated text on the official legislative portal. Every money cell is a range because the Code states a range and article 465 (9) leaves the choice inside it to the local council — so a single figure here would be a fiction about the law, not a simplification of it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "period",
+    "currency",
+    "provenance",
+    "zones",
+    "ranks",
+    "categoryMapping",
+    "intravilanBuiltLeiPerHa",
+    "intravilanOtherLeiPerHa",
+    "rankCoefficient",
+    "extravilanLeiPerHa",
+    "zoneRankCoefficient",
+    "unmappedCategories",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "const": "cod-fiscal-teren-2026"
+    },
+    "title": {
+      "type": "string"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "period": {
+      "type": "string",
+      "pattern": "^[0-9]{4}$"
+    },
+    "currency": {
+      "const": "RON"
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json#/$defs/provenance"
+    },
+    "zones": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+        "type": "string",
+        "pattern": "^[A-D]$"
+      }
+    },
+    "ranks": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": {
+        "type": "string"
+      }
+    },
+    "categoryMapping": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "intravilanBuiltLeiPerHa": {
+      "description": "art. 465 (2): lei/ha by zone then rank, as a range.",
+      "type": "object",
+      "minProperties": 4,
+      "additionalProperties": {
+        "type": "object",
+        "minProperties": 6,
+        "additionalProperties": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "min",
+            "max"
+          ],
+          "properties": {
+            "min": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "max": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      }
+    },
+    "intravilanOtherLeiPerHa": {
+      "description": "art. 465 (4): lei/ha by category then zone.",
+      "type": "object",
+      "minProperties": 9,
+      "additionalProperties": {
+        "type": "object",
+        "minProperties": 4,
+        "additionalProperties": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "rankCoefficient": {
+      "description": "art. 465 (5).",
+      "type": "object",
+      "minProperties": 6,
+      "additionalProperties": {
+        "type": "number",
+        "exclusiveMinimum": 0
+      }
+    },
+    "extravilanLeiPerHa": {
+      "description": "art. 465 (7): lei/ha by category, as a range.",
+      "type": "object",
+      "minProperties": 10,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "min",
+          "max"
+        ],
+        "properties": {
+          "min": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "max": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "zoneRankCoefficient": {
+      "description": "art. 457 (6), borrowed by art. 465 (7).",
+      "type": "object",
+      "minProperties": 4,
+      "additionalProperties": {
+        "type": "object",
+        "minProperties": 6,
+        "additionalProperties": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "unmappedCategories": {
+      "description": "Fiscal Code categories with no counterpart in the notaries' grid. Carried, not forced onto a neighbour.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "provenance.schema.json#/$defs/limitation"
+      }
+    }
+  }
+}
