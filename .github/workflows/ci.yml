@@ -264,7 +264,8 @@ jobs:
           uv run python simulators/impozit-teren/scripts/build_valoare_nationala.py
       - name: The map's shapes build
         run: |
-          uv run --with geopandas python simulators/impozit-teren/scripts/build_harta.py
+          uv run --with geopandas python simulators/impozit-teren/scripts/build_harta.py \
+            --allow-missing-boundaries
       - name: App
         working-directory: simulators/impozit-teren/app
         run: |

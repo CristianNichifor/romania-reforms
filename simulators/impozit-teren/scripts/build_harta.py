@@ -32,6 +32,7 @@ Usage:
 
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -85,12 +86,33 @@ def counties_with_values() -> set[str]:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--allow-missing-boundaries",
+        action="store_true",
+        help=(
+            "exit 0 instead of failing when administrativ's geometry is not present. For CI, "
+            "which never has it: that pipeline does not commit its processed output."
+        ),
+    )
+    args = parser.parse_args()
     if not BOUNDARIES.exists():
-        raise SystemExit(
+        # Loud by default, because locally this means the geometry step has not been run and
+        # the map is about to be silently stale. Skippable on request, because CI legitimately
+        # does not have it: `administrativ` gitignores its own `data/processed/`, so the
+        # boundaries this borrows are never present on a fresh checkout. What ships is the
+        # committed GeoJSON either way, and `tests/test_harta.py` is what checks that it still
+        # joins to the values — which is the claim, rather than that geopandas reproduces a
+        # vertex.
+        message = (
             f"missing {BOUNDARIES}\n"
             "Run the administrativ pipeline's geometry step first; this simulator borrows its "
             "boundaries rather than fetching a second copy."
         )
+        if args.allow_missing_boundaries:
+            print(f"skipping the map: {message}")
+            return 0
+        raise SystemExit(message)
     wanted = counties_with_values()
     if not wanted:
         raise SystemExit("no valoare-teren-*.json; run build_valoare_teren.py first")
