@@ -114,7 +114,21 @@ interface CurtiApel {
     meanMetresToRegionSeat: number;
     countiesTravellingFurther: number;
     countiesCompared: number;
+    countiesNearerAnotherRegion: number;
+    meanDetourMetres: number;
+    worstDetour: {
+      county: string;
+      region: string;
+      nearestRegion: string;
+      detourMetres: number;
+    } | null;
   };
+  limitations: Limitation[];
+}
+
+interface Lucrarea {
+  chapters: { number: number; title: string; page: number; characters: number; text: string }[];
+  claims: { fold: string; label: string; chapter: number; page: number; quote: string }[];
   limitations: Limitation[];
 }
 
@@ -642,6 +656,7 @@ async function main(): Promise<void> {
     parcheteRegiuni,
     incadrare,
     parcheteArondare,
+    lucrarea,
   ] = await Promise.all([
     fetch(`${base}data/instante.json`).then((r) => r.json() as Promise<Document>),
     fetch(`${base}data/counties.geojson`).then((r) => r.json()),
@@ -669,6 +684,7 @@ async function main(): Promise<void> {
     fetch(`${base}data/parchete-regiuni.json`).then((r) => r.json() as Promise<ParcheteRegiuni>),
     fetch(`${base}data/parchete-incadrare.json`).then((r) => r.json() as Promise<ParcheteIncadrare>),
     fetch(`${base}data/parchete-arondare.json`).then((r) => r.json() as Promise<ParcheteArondare>),
+    fetch(`${base}data/lucrarea.json`).then((r) => r.json() as Promise<Lucrarea>),
   ]);
   const countyName = (code: string): string => manifest.countyNames?.[code] ?? code;
 
@@ -1583,6 +1599,38 @@ async function main(): Promise<void> {
   // indexed, and the fold is skipped entirely if the document ships no targets at all.
   const [lowest] = [...proiect.gradeChoiceSwing].sort((a, b) => a.target - b.target);
   const MARK = { simulat: '●', citat: '○', negacoperit: '✕' } as const;
+  // --- the paper, in its own words -----------------------------------------------------------
+  //
+  // An audit of this sidebar found 9% of it was about what the reform proposes and 91% about
+  // whether its numbers hold, with the proposals themselves reduced to eight headings and their
+  // page numbers. A correction reads as an attack when the thing corrected is invisible, so the
+  // document goes first and open, and every finding below now names the sentence it argues with.
+  const statusOf = new Map(acoperire.chapters.map((c) => [c.number, c.status]));
+  const STATUS_WORD: Record<string, string> = {
+    simulat: 'verificat',
+    citat: 'citat',
+    negacoperit: 'necontrolat',
+  };
+  el('#lucrarea-chev').textContent = `${lucrarea.chapters.length} capitole`;
+  el('#lucrarea-body').innerHTML =
+    `<p class="note">Textul propunerii, capitol cu capitol, așa cum e în document. Pagina de
+       față verifică ce se poate număra din el; aici e ce spune. Cuvintele sunt ale lucrării,
+       așezarea lor în pagină e refăcută din PDF.</p>` +
+    lucrarea.chapters
+      .map((c) => {
+        const status = statusOf.get(c.number) ?? 'negacoperit';
+        return `<details class="chapter">
+          <summary><span>${c.number}. ${c.title}</span><span class="chev">p. ${c.page}</span></summary>
+          <p class="chapter-status ${status}">${STATUS_WORD[status] ?? status}</p>
+          <div class="chapter-text">${c.text
+            .split('\n')
+            .filter((line) => line.trim())
+            .map((line) => `<p>${line.replace(/[&<>]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[ch]!)}</p>`)
+            .join('')}</div>
+        </details>`;
+      })
+      .join('');
+
   el('#acoperire-chev').textContent =
     `${acoperire.counts.simulat} din ${acoperire.counts.total} capitole`;
   el('#acoperire-body').innerHTML =
@@ -1649,7 +1697,23 @@ async function main(): Promise<void> {
        fi ${apKm(ap.meanMetresToRegionSeat)} — mai mult decât dublu. ${
          ap.countiesTravellingFurther
        } din ${ap.countiesCompared} de județe ar avea de mers mai departe, niciunul mai
-       aproape. La apel drumul îl face de obicei avocatul, nu justițiabilul, dar el rămâne.</p>`;
+       aproape. La apel drumul îl face de obicei avocatul, nu justițiabilul, dar el rămâne.</p>
+     <p class="disagree"><strong>Și regiunile nu sunt cele mai apropiate sedii.</strong>
+       ${ap.countiesNearerAnotherRegion} din ${ap.countiesCompared} de județe sunt trimise pe
+       lângă un sediu regional mai apropiat decât al lor, cu un ocol mediu de
+       ${apKm(ap.meanDetourMetres)}.${
+         ap.worstDetour
+           ? ` Cel mai mult ${countyName(ap.worstDetour.county)}: ${apKm(
+               ap.worstDetour.detourMetres,
+             )} în plus, fiindcă e în ${ap.worstDetour.region} și are sediul ${
+               ap.worstDetour.nearestRegion
+             } mai aproape.`
+           : ''
+       } E fix obiecția pe care harta de nivel 1 o ridică față de granițele de județ, un nivel
+       mai sus — dar nu se rezolvă la fel. Regiunile de dezvoltare sunt definite de Legea
+       315/2004, iar a aronda un județ la sediul cel mai apropiat înseamnă a nu mai avea
+       regiuni. Cifra arată prețul; alegerea dintre o geografie legală și un drum mai scurt nu
+       se face din date.</p>`;
 
   const PARCHET_LABEL: Record<string, string> = {
     piccj: 'PÎCCJ + DNA, DIICOT',
@@ -2501,6 +2565,21 @@ async function main(): Promise<void> {
     badge(id as string, chapter as number, kind as 'politică' | 'simulare' | 'ambele'),
   );
 
+  // Each finding gets the sentence it tests, at the top, before the argument against it.
+  //
+  // Runs here, after every fold body has been written: placed earlier it was prepended and then
+  // wiped by the `innerHTML =` of the sections that render further down.
+  for (const claim of lucrarea.claims) {
+    const body = document.getElementById(claim.fold.replace('-fold', '-body'));
+    if (!body) continue;
+    const quote = document.createElement('p');
+    quote.className = 'claim';
+    quote.innerHTML =
+      `<span class="claim-label">${claim.label} · cap. ${claim.chapter}, p. ${claim.page}</span>` +
+      `„${claim.quote.replace(/[&<>]/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[ch]!)}”`;
+    body.prepend(quote);
+  }
+
   // Blocking caveats stay in the open; the rest fold. Thirteen paragraphs under a map is a
   // wall a reader scrolls past, and the ones that change how a number should be read are not
   // the ones to lose that way.
@@ -2526,6 +2605,7 @@ async function main(): Promise<void> {
     ...parcheteRegiuni.limitations,
     ...incadrare.limitations,
     ...parcheteArondare.limitations,
+    ...lucrarea.limitations,
   ];
   const blocking = allLimits.filter((l) => l.severity === 'blocking');
   const rest = allLimits.filter((l) => l.severity !== 'blocking');

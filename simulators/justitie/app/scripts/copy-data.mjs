@@ -63,6 +63,8 @@ const sources = [
   [resolve(here, '../../data/danemarca-comparatie.json'), 'danemarca.json'],
   // Chapter 16's resource figures, against the pay grid and estate they have to agree with.
   [resolve(here, '../../data/resurse-necesare.json'), 'resurse.json'],
+  // The paper itself, so a reader can learn what the reform is before what does not hold.
+  [resolve(here, '../../data/lucrarea.json'), 'lucrarea.json'],
   // The ledger: which chapters this page checks, quotes, or leaves alone.
   [resolve(here, '../../data/acoperire.json'), 'acoperire.json'],
   // A variant, not the paper: eight appellate courts instead of the fifteen it proposes.

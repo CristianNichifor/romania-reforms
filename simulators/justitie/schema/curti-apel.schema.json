@@ -109,7 +109,11 @@
           "county",
           "region",
           "metresToRegionSeat",
-          "metresToNearestToday"
+          "metresToNearestToday",
+          "nearestRegion",
+          "metresToNearestRegionSeat",
+          "detourMetres",
+          "nearerAnotherRegion"
         ],
         "properties": {
           "county": {
@@ -125,6 +129,21 @@
           "metresToNearestToday": {
             "type": "number",
             "minimum": 0
+          },
+          "nearestRegion": {
+            "type": "string",
+            "description": "Which of the eight regional seats is actually nearest by road."
+          },
+          "metresToNearestRegionSeat": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "detourMetres": {
+            "type": "integer",
+            "description": "Own region's seat minus the nearest one. Zero when they are the same seat."
+          },
+          "nearerAnotherRegion": {
+            "type": "boolean"
           }
         }
       }
@@ -139,7 +158,10 @@
         "meanMetresToNearestToday",
         "meanMetresToRegionSeat",
         "countiesTravellingFurther",
-        "countiesCompared"
+        "countiesCompared",
+        "countiesNearerAnotherRegion",
+        "meanDetourMetres",
+        "worstDetour"
       ],
       "properties": {
         "today": {
@@ -162,6 +184,42 @@
         },
         "countiesCompared": {
           "type": "integer"
+        },
+        "countiesNearerAnotherRegion": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Counties whose statutory region sends them past a nearer regional seat. The county tier's cross-border argument, one tier up."
+        },
+        "meanDetourMetres": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "worstDetour": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": false,
+          "required": [
+            "county",
+            "region",
+            "nearestRegion",
+            "detourMetres"
+          ],
+          "properties": {
+            "county": {
+              "type": "string"
+            },
+            "region": {
+              "type": "string"
+            },
+            "nearestRegion": {
+              "type": "string"
+            },
+            "detourMetres": {
+              "type": "integer"
+            }
+          }
         }
       }
     },

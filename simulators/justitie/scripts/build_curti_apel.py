@@ -210,16 +210,32 @@ def main() -> int:
         today = float(to_today[column])
         if not np.isfinite(variant) or not np.isfinite(today):
             continue
+        # The county tier routes across county lines because nothing requires a citizen to
+        # drive past a nearer courthouse. The same question one tier up: is a county's own
+        # regional seat the nearest of the eight, or is it sent past one?
+        distances = variant_rows[:, column]
+        nearest_i = int(np.argmin(distances))
+        nearest_m = float(distances[nearest_i])
+        nearest_region = regions[nearest_i]["region"]
         counties.append(
             {
                 "county": county,
                 "region": region,
                 "metresToRegionSeat": round(variant),
                 "metresToNearestToday": round(today),
+                "nearestRegion": nearest_region,
+                "metresToNearestRegionSeat": round(nearest_m),
+                # From the rounded figures, not the raw ones, so a reader who subtracts the two
+                # published distances gets the published detour rather than a metre less.
+                "detourMetres": round(variant) - round(nearest_m),
+                "nearerAnotherRegion": nearest_region != region,
             }
         )
 
     worse = [c for c in counties if c["metresToRegionSeat"] > c["metresToNearestToday"]]
+    sent_past = sorted(
+        (c for c in counties if c["nearerAnotherRegion"]), key=lambda c: -c["detourMetres"]
+    )
     mean_variant = sum(c["metresToRegionSeat"] for c in counties) / len(counties)
     mean_today = sum(c["metresToNearestToday"] for c in counties) / len(counties)
 
@@ -232,6 +248,11 @@ def main() -> int:
     print(f"drum de la reședința de județ: {mean_today/1000:.0f} km la cea mai apropiată de azi"
           f" -> {mean_variant/1000:.0f} km la sediul regional")
     print(f"județe care ar avea de mers mai mult: {len(worse)} din {len(counties)}")
+    print(f"județe trimise pe lângă un sediu regional mai apropiat: {len(sent_past)}")
+    for c in sent_past[:6]:
+        print(f"    {c['county']}  {c['region']} ({c['metresToRegionSeat']/1000:.0f} km) "
+              f"-> {c['nearestRegion']} ({c['metresToNearestRegionSeat']/1000:.0f} km), "
+              f"ocol {c['detourMetres']/1000:.0f} km")
 
     document = {
         "$schema": "../schema/curti-apel.schema.json",
@@ -259,9 +280,39 @@ def main() -> int:
             "meanMetresToNearestToday": round(mean_today),
             "meanMetresToRegionSeat": round(mean_variant),
             "countiesTravellingFurther": len(worse),
+        "countiesNearerAnotherRegion": len(sent_past),
+        "meanDetourMetres": (
+            round(sum(c["detourMetres"] for c in sent_past) / len(sent_past)) if sent_past else 0
+        ),
+        "worstDetour": (
+            {
+                "county": sent_past[0]["county"],
+                "region": sent_past[0]["region"],
+                "nearestRegion": sent_past[0]["nearestRegion"],
+                "detourMetres": sent_past[0]["detourMetres"],
+            }
+            if sent_past
+            else None
+        ),
             "countiesCompared": len(counties),
         },
         "limitations": [
+            {
+                "id": "regiunile-nu-sunt-cele-mai-apropiate-sedii",
+                "text": (
+                    "Douăsprezece județe din 41 sunt trimise pe lângă un sediu regional mai "
+                    "apropiat: Călărași ar avea 136 km până la Constanța și are 265 până la "
+                    "Pitești; Buzăul are Bucureștiul la 124 km și Constanța la 245. Ocolul mediu "
+                    "e de 79 km. E aceeași obiecție pe care partea de instanțe o ridică față de "
+                    "granițele de județ, un nivel mai sus — dar nu se rezolvă la fel. Regiunile "
+                    "de dezvoltare sunt definite de Legea 315/2004, iar a aronda un județ la "
+                    "sediul cel mai apropiat înseamnă a nu mai avea regiuni. Cifrele arată "
+                    "prețul; alegerea între o geografie legală și un drum mai scurt nu se face "
+                    "din date."
+                ),
+                "severity": "material",
+                "affects": ["counties", "summary"],
+            },
             {
                 "id": "nu-e-propunerea-lucrarii",
                 "text": (

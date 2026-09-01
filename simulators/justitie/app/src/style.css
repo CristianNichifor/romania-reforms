@@ -626,3 +626,73 @@ dd {
   font-weight: 600;
   color: var(--fg);
 }
+
+/* --- the paper, and the claims it makes --------------------------------------------------
+ *
+ * The sentence a finding argues with, sitting above the argument. Without it the page read as
+ * a list of corrections to a document the reader could not see.
+ */
+.claim {
+  margin: 0 0 0.9rem;
+  padding: 0.6rem 0.75rem;
+  border-left: 2px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
+  border-radius: 0 6px 6px 0;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--fg);
+}
+
+.claim-label {
+  display: block;
+  margin-bottom: 0.15rem;
+  color: var(--muted);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.chapter > summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding: 0.5rem 0;
+  font-size: 0.85rem;
+  border-top: 1px solid var(--line);
+}
+
+.chapter > summary::-webkit-details-marker {
+  display: none;
+}
+
+.chapter[open] > summary {
+  color: var(--accent);
+}
+
+.chapter-status {
+  margin: 0 0 0.5rem;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.chapter-status.simulat { color: #8fd3a8; }
+.chapter-status.negacoperit { color: #d8a45a; }
+
+/* The paper's own words, set apart from everything the page says about them. */
+.chapter-text {
+  max-height: 22rem;
+  overflow-y: auto;
+  padding: 0 0.1rem 0.6rem;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.chapter-text p {
+  margin: 0 0 0.45rem;
+}

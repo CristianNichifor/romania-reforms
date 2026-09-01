@@ -95,3 +95,45 @@ def test_the_caseload_attribution_is_declared_unsound(apel):
     the file says so rather than presenting the split as a measurement."""
     blocking = {x["id"] for x in apel["limitations"] if x["severity"] == "blocking"}
     assert "circumscriptiile-nu-sunt-publicate-aici" in blocking
+
+
+# --- the cross-region question ---------------------------------------------------------------
+#
+# The county tier routes across county lines because nothing requires a citizen to drive past a
+# nearer courthouse. Asked one tier up, the same question has an uncomfortable answer, and these
+# tests exist so the answer stays reported rather than quietly dropped.
+
+
+def test_the_detour_is_computed_against_the_nearest_of_the_eight(apel):
+    for county in apel["counties"]:
+        assert county["metresToNearestRegionSeat"] <= county["metresToRegionSeat"]
+        assert county["detourMetres"] == (
+            county["metresToRegionSeat"] - county["metresToNearestRegionSeat"]
+        )
+        assert county["nearerAnotherRegion"] == (county["nearestRegion"] != county["region"])
+        # A county nearest its own seat has no detour, by construction.
+        if not county["nearerAnotherRegion"]:
+            assert county["detourMetres"] == 0
+
+
+def test_counties_sent_past_a_nearer_seat_are_counted(apel):
+    sent = [c for c in apel["counties"] if c["nearerAnotherRegion"]]
+    assert apel["summary"]["countiesNearerAnotherRegion"] == len(sent)
+    assert sent, "if this ever became empty the limitation claiming a trade-off is stale"
+    worst = max(sent, key=lambda c: c["detourMetres"])
+    assert apel["summary"]["worstDetour"]["county"] == worst["county"]
+    assert apel["summary"]["worstDetour"]["detourMetres"] == worst["detourMetres"]
+
+
+def test_the_trade_between_a_legal_geography_and_a_shorter_drive_is_declared(apel):
+    """The development regions are statutory. Routing a county to its nearest seat instead means
+    not having regions, which is a decision the data can inform and cannot make."""
+    assert "regiunile-nu-sunt-cele-mai-apropiate-sedii" in {
+        x["id"] for x in apel["limitations"]
+    }
+
+
+def test_the_nearest_region_is_one_of_the_eight(apel):
+    names = {r["region"] for r in apel["regions"]}
+    for county in apel["counties"]:
+        assert county["nearestRegion"] in names
