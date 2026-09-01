@@ -224,9 +224,16 @@ jobs:
           uv run python simulators/impozit-teren/scripts/build_randament_construit.py
           uv run python simulators/impozit-teren/scripts/build_randament_padure.py
           git diff --exit-code simulators/impozit-teren/data/
-      # The Fiscal Code's tables change: two of the five were replaced with effect from
-      # 1 January 2026. Re-reading them on every run is how that gets noticed, and the
-      # importer refuses to write a table whose shape no longer matches the article.
+      # What this checks, and what it stopped being able to check.
+      #
+      # It parses the Code's five tables and refuses to write one whose shape no longer
+      # matches the article, so a change to the *parser* still fails here. It does not notice
+      # a change to the *Code*, which is what it was written for — two of the five tables were
+      # replaced with effect from 1 January 2026 — because legislatie.just.ro refuses GitHub
+      # Actions runners outright: four attempts in one run, each closed before a byte arrived,
+      # while the same request succeeds from a laptop. The source is committed instead, so
+      # this reads a fixed copy. Noticing a new edition needs `--refresh` from a network the
+      # portal answers, and until that runs the Code here is the one that was fetched.
       - name: The Fiscal Code tables are reproducible
         run: |
           uv run python simulators/impozit-teren/scripts/import_cod_fiscal.py

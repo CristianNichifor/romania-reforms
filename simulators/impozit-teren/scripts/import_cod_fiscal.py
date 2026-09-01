@@ -30,11 +30,12 @@ Usage:
 
 from __future__ import annotations
 
+import argparse
+import gzip
 import html
 import json
 import re
 import sys
-import time
 import urllib.request
 from pathlib import Path
 
@@ -43,7 +44,7 @@ ROOT = Path(__file__).resolve().parents[1]
 # consolidated form matters more than the original: article 465's tables have been replaced
 # three times since 2015, most recently with effect from 1 January 2026.
 URL = "https://legislatie.just.ro/Public/DetaliiDocument/171282"
-SOURCE = ROOT / "sources" / "cod-fiscal-consolidat.html"
+SOURCE = ROOT / "sources" / "cod-fiscal-consolidat.html.gz"
 # The portal serves an error page to anything that does not look like a browser.
 UA = "Mozilla/5.0 (X11; Linux x86_64) romania-reforms/0.1 (+https://github.com/CristianNichifor)"
 
@@ -67,36 +68,47 @@ TO_NOTARY = {
 }
 
 
-def download() -> str:
-    """The consolidated Fiscal Code, retried, because the portal hangs up.
+def download(refresh: bool = False) -> str:
+    """The consolidated Fiscal Code, from a cache this repository commits.
 
-    A CI run died on `RemoteDisconnected: Remote end closed connection without response`
-    partway through 7,6 MB from legislatie.just.ro. Nothing was wrong with the request — the
-    same one succeeds on the next attempt — so a single hang-up must not fail a build.
+    **legislatie.just.ro does not answer GitHub Actions runners.** Not slowly, not
+    intermittently: four attempts in one run were each met with `RemoteDisconnected` before a
+    byte arrived, while the identical request succeeds from a laptop. A retry was written
+    first, on the assumption that this was the same transient the two TEMPO importers hit, and
+    it was falsified by the next run.
 
-    Not cached in git, unlike the pension law that this repository does commit for the same
-    class of reason. That file is 235 KB and this one is 7,6 MB, which is a different trade:
-    cheap insurance at a quarter of a megabyte, and a third of the repository at seven and a
-    half. A partial write is deleted rather than left, because a truncated 7 MB page parses
-    into a Fiscal Code with some articles missing and no error anywhere.
+    So the source is committed, which this repository already does for a government document
+    it cannot rely on fetching — `lege-pensii-magistrati-2025.pdf`, with the note that
+    mmuncii.gov.ro "may be as unreachable from CI as sgg.gov.ro proved to be". This one is
+    7,6 MB of markup and 1,0 MB gzipped, so it is stored compressed; the whole page is kept
+    rather than the five articles that are parsed, because a trimmed source is one this
+    repository chose the shape of and the point of a verbatim source is that it did not.
+
+    **What that costs is the change alarm, and it should be said plainly.** Re-reading the Code
+    on every run is how a change to its tables gets noticed — two of the five were replaced
+    with effect from 1 January 2026 — and a run that reads a committed copy cannot notice
+    anything. `--refresh` is what goes back to the portal, and it has to be run from a network
+    the portal answers.
     """
-    for retry in range(4):
-        if SOURCE.exists():
-            break
+    if refresh:
+        SOURCE.unlink(missing_ok=True)
+    if not SOURCE.exists():
         print(f"downloading {URL} ...")
+        request = urllib.request.Request(URL, headers={"User-Agent": UA})
         try:
-            request = urllib.request.Request(URL, headers={"User-Agent": UA})
             with urllib.request.urlopen(request, timeout=300) as response:  # noqa: S310
                 body = response.read()
-            SOURCE.parent.mkdir(parents=True, exist_ok=True)
-            SOURCE.write_bytes(body)
         except OSError as error:
-            SOURCE.unlink(missing_ok=True)
-            print(f"  attempt {retry + 1} failed: {error}", file=sys.stderr)
-            time.sleep(5 * (retry + 1))
-    if not SOURCE.exists():
-        raise SystemExit(f"could not download {URL} after 4 attempts")
-    return SOURCE.read_text(encoding="utf-8", errors="ignore")
+            raise SystemExit(
+                f"could not download {URL}: {error}\n"
+                "The portal refuses some networks outright, which is why the source is "
+                "committed. If you meant to refresh it, run this from a network it answers."
+            ) from error
+        SOURCE.parent.mkdir(parents=True, exist_ok=True)
+        with gzip.open(SOURCE, "wb") as handle:
+            handle.write(body)
+    with gzip.open(SOURCE, "rt", encoding="utf-8", errors="ignore") as handle:
+        return handle.read()
 
 
 def plain(page: str) -> str:
@@ -233,7 +245,18 @@ def normalise(name: str) -> str:
 
 
 def main() -> int:
-    text = plain(download())
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--refresh",
+        action="store_true",
+        help=(
+            "go back to legislatie.just.ro instead of reading the committed source. This is "
+            "what notices a change to the Code's tables, and it has to run from a network the "
+            "portal answers — it refuses GitHub Actions runners outright."
+        ),
+    )
+    args = parser.parse_args()
+    text = plain(download(args.refresh))
     land = section(text, "Calculul impozitului/taxei pe teren", "Articolul 466")
     # Article 457, whose zone-and-rank coefficient article 465 (7) borrows. Sliced first
     # because its own table also opens "Zona în cadrul localității" and sits earlier in the

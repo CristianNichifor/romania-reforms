@@ -24,6 +24,12 @@ simulators/*/sources/*.pdf
 !simulators/justitie/sources/lege-pensii-magistrati-2025.pdf
 simulators/*/sources/*.html
 
+# Except the consolidated Fiscal Code, which legislatie.just.ro refuses to serve to GitHub
+# Actions runners — four attempts in one run, each closed before a byte arrived, while the
+# same request succeeds from a laptop. Same reason the pension law above is kept: 1,0 MB
+# gzipped is a cheap way not to find out during a build. See import_cod_fiscal.py.
+!simulators/impozit-teren/sources/cod-fiscal-consolidat.html.gz
+
 # And the machine-readable sources the importers fetch: the INS matrix definition and the
 # ECB reference rates. Both are re-fetched on every run, and the rates file changes daily,
 # so committing it would put a diff in the repository every morning.
