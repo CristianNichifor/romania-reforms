@@ -179,6 +179,35 @@ interface Eficienta {
   limitations: Limitation[];
 }
 
+interface ParcheteIncadrare {
+  summary: {
+    arrivals: number;
+    departures: number;
+    vacantPosts: number;
+    vacanciesCoverArrivals: boolean;
+    arrivalsAsShareOfVacancies: number;
+    totalProsecutors: number;
+    shareOfCorpsMoving: number;
+    inversionSurvivesInvestigationMeasure: boolean;
+    investigationLoadBiggest: number;
+    investigationLoadHeaviest: number;
+  };
+  levels: {
+    level: string;
+    offices: number;
+    targetPerProsecutor: number;
+    officesShort: number;
+    officesLong: number;
+    arrivals: number;
+    departures: number;
+    mostShort: string;
+    mostShortBy: number;
+    mostLong: string;
+    mostLongBy: number;
+  }[];
+  limitations: Limitation[];
+}
+
 interface ParcheteRegiuni {
   summary: {
     officesBefore: number;
@@ -221,6 +250,23 @@ interface Incarcatura {
     busiestJudges: number;
     quietest: string;
     quietestVolume: number;
+    staffing: {
+      judgesInherited: number;
+      tierLoadPerJudge: number;
+      courtsShort: number;
+      courtsLong: number;
+      arrivals: number;
+      departures: number;
+      shareOfBenchMoving: number | null;
+      mostShort: string;
+      mostShortBy: number;
+      mostLong: string;
+      mostLongBy: number;
+      loadPerJudgeSpread: { min: number; max: number; maxOverMin: number };
+      vacantJudgePosts: number;
+      vacanciesCoverArrivals: boolean;
+      arrivalsAsShareOfVacancies: number | null;
+    };
   };
   courts: { name: string; county: string; volume: number; judgesAtNationalLoad: number }[];
   limitations: Limitation[];
@@ -580,6 +626,7 @@ async function main(): Promise<void> {
     comasare,
     incarcatura,
     parcheteRegiuni,
+    incadrare,
   ] = await Promise.all([
     fetch(`${base}data/instante.json`).then((r) => r.json() as Promise<Document>),
     fetch(`${base}data/counties.geojson`).then((r) => r.json()),
@@ -605,6 +652,7 @@ async function main(): Promise<void> {
     fetch(`${base}data/parchete-comasare.json`).then((r) => r.json() as Promise<ParcheteComasare>),
     fetch(`${base}data/incarcatura.json`).then((r) => r.json() as Promise<Incarcatura>),
     fetch(`${base}data/parchete-regiuni.json`).then((r) => r.json() as Promise<ParcheteRegiuni>),
+    fetch(`${base}data/parchete-incadrare.json`).then((r) => r.json() as Promise<ParcheteIncadrare>),
   ]);
   const countyName = (code: string): string => manifest.countyNames?.[code] ?? code;
 
@@ -1712,6 +1760,7 @@ async function main(): Promise<void> {
   // The question a court president asks first, and the one the map never answered: not how many
   // judges the country needs, but what this court would have to judge.
   const ic = incarcatura.summary;
+  const st = ic.staffing;
   // Seat names arrive from the UAT register shouting — "MUNICIPIUL MIERCUREA CIUC" — which is
   // fine in a table and wrong in the middle of a sentence.
   const town = (name: string): string =>
@@ -1760,13 +1809,39 @@ async function main(): Promise<void> {
        se împart pe comune după populație, fiindcă nu se publică de unde vine fiecare dosar.
        Dar ${dec(ic.invariantShare * 100, 1)}% din volum merge întreg la o singură instanță
        propusă — pentru partea aceea, împărțirea nu contează deloc. Restul de
-       ${dec((1 - ic.invariantShare) * 100, 1)}% e singurul care depinde de ea.</p>`;
+       ${dec((1 - ic.invariantShare) * 100, 1)}% e singurul care depinde de ea.</p>
+     <h4 class="sub-head">Și cine e acolo să judece</h4>
+     <p class="note">Judecătorii merg pe același drum ca dosarele lor: dacă șapte zecimi din
+       munca unei judecătorii ajung la un sediu, șapte zecimi din completul ei merg cu ea. Cele
+       ${ic.courtsAfter} de instanțe moștenesc așa
+       ${ro.format(Math.round(st.judgesInherited))} de judecători, adică
+       ${ro.format(Math.round(st.tierLoadPerJudge))} de dosare de fiecare.</p>
+     <p class="disagree"><strong>Completele sunt mult mai bine potrivite decât schemele
+       parchetelor.</strong> Între cele ${ic.courtsAfter} de instanțe propuse, încărcătura pe
+       judecător merge de la ${ro.format(Math.round(st.loadPerJudgeSpread.min))} la
+       ${ro.format(Math.round(st.loadPerJudgeSpread.max))} de dosare —
+       ${dec(st.loadPerJudgeSpread.maxOverMin, 2)}×. La parchetele județene raportul e
+       ${dec(comasare.summary.spreadAfter.maxOverMin, 2)}×. Ca fiecare instanță să fie la fel de încărcată ar
+       trebui să ajungă ${ro.format(Math.round(st.arrivals))} de judecători în altă parte —
+       ${dec((st.shareOfBenchMoving ?? 0) * 100, 0)}% din complete. ${st.courtsShort} instanțe
+       sunt sub, ${st.courtsLong} peste; cea mai scurtă e
+       ${town(st.mostShort)} cu ${ro.format(Math.round(st.mostShortBy))}, cea mai lungă
+       ${town(st.mostLong)} cu ${ro.format(Math.round(st.mostLongBy))}.</p>
+     <p class="disagree"><strong>Și aici încap în posturile goale.</strong> Sunt
+       ${ro.format(st.vacantJudgePosts)} de posturi de judecător vacante, iar cei
+       ${ro.format(Math.round(st.arrivals))} sunt
+       ${dec((st.arrivalsAsShareOfVacancies ?? 0) * 100, 0)}% din ele: diferența s-ar acoperi
+       din repartiția celor care intră, nu din mutarea celor care sunt. Ceea ce contează mai
+       mult decât la procurori — un judecător e inamovibil, iar transferul lui e cu atât mai
+       puțin o chestiune de aritmetică. Cifra spune cât de departe e completul de muncă, nu că
+       cineva ar trebui mutat.</p>`;
 
   // The one finding on this page that goes the paper's way — and an argument it never makes.
   // Presented with the concentration it also causes, because reporting only the favourable half
   // would be the same fault the page spends the rest of its length pointing at.
   const cm = comasare.summary;
   const pr = parcheteRegiuni;
+  const inc = incadrare;
   el('#comasare-chev').textContent =
     `${dec(cm.spreadBefore.maxOverMin, 1)}× → ${dec(cm.spreadAfter.maxOverMin, 1)}×`;
   el('#comasare-body').innerHTML =
@@ -1849,7 +1924,46 @@ async function main(): Promise<void> {
        încărcătură — ${ro.format(Math.round(pr.summary.biggestTodayPerProsecutor))} de dosare pe
        procuror — fiindcă are de departe cei mai mulți procurori. ${town(pr.summary.heaviestToday)} are
        ${ro.format(Math.round(pr.summary.heaviestTodayPerProsecutor))}. Comasarea mută granițele,
-       nu oamenii: inversiunea rămâne și după. Ce ar fi de reparat nu e harta, ci schema.</p>`;
+       nu oamenii: inversiunea rămâne și după. Ce ar fi de reparat nu e harta, ci schema.</p>
+     <p class="disagree">Obiecția evidentă e că un parchet mare pare ușor încărcat fiindcă
+       mulți dintre procurorii lui fac altceva decât urmărire penală. Raportul dă și a doua
+       coloană, doar pe procurorii care au lucrat efectiv la dosare penale: acolo
+       ${town(pr.summary.biggestToday)} are ${dec(inc.summary.investigationLoadBiggest, 0)} de
+       dosare, iar ${town(pr.summary.heaviestToday)} ${dec(inc.summary.investigationLoadHeaviest, 0)}.
+       Diferența se lărgește, nu dispare.</p>
+     <h4 class="sub-head">Cât de departe e schema de muncă</h4>
+     <p class="note">Dacă fiecare procuror dintr-un nivel ar avea același număr de dosare, câți
+       oameni ar fi în alt loc decât sunt azi? Nivelurile se egalizează separat — un parchet
+       județean și unul regional fac altă muncă, la alt grad.</p>
+     <div class="pens-row">
+       <span class="pens-head">nivel</span>
+       <span class="pens-head">țintă</span>
+       <span class="pens-head">sub</span>
+       <span class="pens-head">peste</span>
+       ${inc.levels
+         .map(
+           (l) =>
+             `<span>${l.offices} ${l.level}</span>
+              <span>${ro.format(Math.round(l.targetPerProsecutor))}</span>
+              <span>${l.officesShort} (+${l.arrivals})</span>
+              <span>${l.officesLong} (−${l.departures})</span>`,
+         )
+         .join('')}
+     </div>
+     <p class="disagree"><strong>Se poate face aproape fără să mute pe nimeni.</strong> Ca
+       fiecare nivel să fie egal încărcat, ar trebui să ajungă
+       ${ro.format(inc.summary.arrivals)} de procurori acolo unde sunt dosarele —
+       ${dec(inc.summary.shareOfCorpsMoving * 100, 0)}% din corp. Dar parchetele au deja
+       ${ro.format(inc.summary.vacantPosts)} de posturi vacante, iar cei
+       ${ro.format(inc.summary.arrivals)} sunt
+       ${dec(inc.summary.arrivalsAsShareOfVacancies * 100, 0)}% din ele: reechilibrarea se poate
+       face recrutând unde lipsesc oameni, nu transferând de unde sunt prea mulți. Cele două
+       politici nu seamănă deloc pentru oamenii din ele.</p>
+     <p class="disagree"><strong>Nu e un plan de personal.</strong> Un procuror nu e o unitate
+       de capacitate care se pune unde cere aritmetica — un transfer e o casă, o școală și o
+       familie. Cifra spune cât de departe e schema de muncă. Nu spune că cineva ar trebui
+       mutat, și nu ține cont nici de mărimea minimă sub care un parchet nu funcționează, nici
+       de faptul că un dosar de apel nu e cât unul de judecătorie.</p>`;
 
   // Chapters 4-5. The paper's judicial map rests on one sentence in 5.1, and the sentence can
   // be checked against the paper's own Danish counts — which is a narrower test than it looks,
@@ -2370,6 +2484,7 @@ async function main(): Promise<void> {
     ...comasare.limitations,
     ...incarcatura.limitations,
     ...parcheteRegiuni.limitations,
+    ...incadrare.limitations,
   ];
   const blocking = allLimits.filter((l) => l.severity === 'blocking');
   const rest = allLimits.filter((l) => l.severity !== 'blocking');
