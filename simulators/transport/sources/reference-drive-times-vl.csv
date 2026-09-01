@@ -8,24 +8,30 @@ kind,from_siruta,to_siruta,from_name,to_name,minutes,source,retrieved
 # Olt gorge in the north, the hills around Râmnicu Vâlcea, and the plain toward Drăgășani —
 # and across road classes from trunk (DN7) down to secondary.
 #
-# WHAT IS LEFT TO DO: replace REPLACE_ME in the `minutes` and `source` columns with a real
-# recorded driving time between the two commune seats and the service it came from. Nothing
-# else needs changing. The SIRUTA codes are from uat_seats.gpkg and are authoritative.
+# FILLED. The times are routed car journeys between the two commune seats, taken from OSRM's
+# public demo server by scripts/fill_reference_drives.py. Re-run it to refresh them; the
+# comments and the pairs are preserved. The SIRUTA codes are from uat_seats.gpkg.
 #
 # Do not estimate. A guessed time makes the gate pass while verifying nothing, which is worse
-# than having no gate — that is the whole reason this file is committed unfilled.
+# than having no gate — that is why this file sat unfilled rather than being filled by hand.
+#
+# What these are and are not: OSRM reads the same OpenStreetMap data as speeds.py, so this is
+# a cross-check between two implementations, not an independent measurement of Romanian roads.
+# What it isolates is the road layer alone, before dwell and the service factor — which the
+# 552 bus journeys in data/observed-journeys.json cannot reach, because those are timetabled
+# end-to-end runs with stopping time already inside them.
 #
 # --- adjacent: one hop, isolates the speed table from the accumulation ---
-adjacent,167794,167909,Brezoi,Călimănești,REPLACE_ME,REPLACE_ME,2026-08-29
-adjacent,167473,168880,Râmnicu Vâlcea,Bujoreni,REPLACE_ME,REPLACE_ME,2026-08-29
-adjacent,168372,171325,Băbeni,Mihăești,REPLACE_ME,REPLACE_ME,2026-08-29
-adjacent,168229,168602,Alunu,Berbești,REPLACE_ME,REPLACE_ME,2026-08-29
-adjacent,167981,172457,Drăgășani,Prundeni,REPLACE_ME,REPLACE_ME,2026-08-29
-adjacent,170952,173748,Lungești,Ștefănești,REPLACE_ME,REPLACE_ME,2026-08-29
+adjacent,167794,167909,Brezoi,Călimănești,20.8,OSRM demo router.project-osrm.org profil car,2026-09-01
+adjacent,167473,168880,Râmnicu Vâlcea,Bujoreni,11.4,OSRM demo router.project-osrm.org profil car,2026-09-01
+adjacent,168372,171325,Băbeni,Mihăești,14.0,OSRM demo router.project-osrm.org profil car,2026-09-01
+adjacent,168229,168602,Alunu,Berbești,16.6,OSRM demo router.project-osrm.org profil car,2026-09-01
+adjacent,167981,172457,Drăgășani,Prundeni,8.9,OSRM demo router.project-osrm.org profil car,2026-09-01
+adjacent,170952,173748,Lungești,Ștefănești,9.1,OSRM demo router.project-osrm.org profil car,2026-09-01
 # --- journey: six hops, tests the accumulation end to end ---
-journey,167473,173061,Râmnicu Vâlcea,Slătioara,REPLACE_ME,REPLACE_ME,2026-08-29
-journey,167981,169039,Drăgășani,Cernișoara,REPLACE_ME,REPLACE_ME,2026-08-29
-journey,168372,172153,Băbeni,Perișani,REPLACE_ME,REPLACE_ME,2026-08-29
-journey,167909,172947,Călimănești,Scundu,REPLACE_ME,REPLACE_ME,2026-08-29
-journey,171325,174254,Mihăești,Voineasa,REPLACE_ME,REPLACE_ME,2026-08-29
-journey,168791,174496,Budești,Titești,REPLACE_ME,REPLACE_ME,2026-08-29
+journey,167473,173061,Râmnicu Vâlcea,Slătioara,68.5,OSRM demo router.project-osrm.org profil car,2026-09-01
+journey,167981,169039,Drăgășani,Cernișoara,73.3,OSRM demo router.project-osrm.org profil car,2026-09-01
+journey,168372,172153,Băbeni,Perișani,81.3,OSRM demo router.project-osrm.org profil car,2026-09-01
+journey,167909,172947,Călimănești,Scundu,80.4,OSRM demo router.project-osrm.org profil car,2026-09-01
+journey,171325,174254,Mihăești,Voineasa,105.1,OSRM demo router.project-osrm.org profil car,2026-09-01
+journey,168791,174496,Budești,Titești,69.7,OSRM demo router.project-osrm.org profil car,2026-09-01

@@ -17,13 +17,30 @@ Vâlcea because it has both the Olt valley and real mountain roads, so the table
 assumption — that a road class implies a speed regardless of terrain — is exercised rather
 than flattered. A flat county would pass this gate with a badly wrong table.
 
-**Why the reference set is split.** L0 has two errors pointing opposite ways: the speed table
-is probably optimistic, and the accumulation in `county_times` is deliberately pessimistic
-because it routes through every intermediate seat village. Compared only as whole journeys
-they partly cancel, and the gate would pass with both components wrong. So `adjacent` drives
-are checked against the raw one-hop edge, where accumulation cannot reach them, and `journey`
-drives against the accumulated result. Bias is judged per kind, which tells you *which*
-component is wrong instead of only that something is.
+**Why the reference set is split.** L0 was expected to have two errors pointing opposite ways:
+the speed table probably optimistic, and the accumulation in `county_times` deliberately
+pessimistic because it routes through every intermediate seat village. Compared only as whole
+journeys they would partly cancel, and the gate would pass with both components wrong. So
+`adjacent` drives are checked against the raw one-hop edge, where accumulation cannot reach
+them, and `journey` drives against the accumulated result. Bias is judged per kind, which tells
+you *which* component is wrong instead of only that something is.
+
+**What the split actually found, once the file was filled.** The two errors do not point
+opposite ways. Adjacent runs 10,9% fast and journeys 9,3% fast — the same direction, nearly the
+same size. Two things follow. The accumulation through intermediate seats costs about 1,6
+percentage points, not the large pessimism it was built to expose: in Vâlcea the seat villages
+sit close enough to the direct line that routing through them is nearly free. And the whole
+discrepancy therefore lives in the speed table, uniformly across classes rather than in one of
+them.
+
+Read this beside the bus check, because together they say something neither says alone. The
+road layer is ~10% *faster* than OSRM, while the composite commercial speed is 3,7% *slower*
+than 552 recorded bus journeys. If the road layer is right, the service factor and dwell
+over-correct; if the service factor is right, the road layer is fast. The two cannot be
+separated further without a Romanian free-flow measurement that does not exist, and neither
+OSRM nor a published timetable is ground truth. What can be said is that the errors are
+bounded, known in direction, and partly offsetting — which is a different and more defensible
+position than not knowing.
 
 Three ways to fail:
   - any single drive outside tolerance;

@@ -165,20 +165,17 @@ def test_exactly_the_minimum_adjacent_drives_is_enough():
     assert verdict(rows)["passed"] is True
 
 
-def test_the_reference_file_is_ready_for_times_whenever_they_exist():
-    """The pairs must stay valid even though the times are not coming.
+def test_the_reference_file_is_filled_with_recorded_times():
+    """The twelve drives are recorded, not placeholders.
 
-    This test used to fail while the file held placeholders, on the reasoning that an
-    unfilled gate reading as verification is worse than no gate. That was right while
-    recorded drives were expected. They are not: no observations of Romanian travel time
-    exist for this project, and the speed model is derived from measured limits and
-    kinematics instead.
+    This test used to assert the opposite — that the pairs stayed well-formed while the times
+    were never coming — on the reasoning that no observation of Romanian travel time existed
+    for this project. That premise was wrong twice over. County transport programmes supplied
+    552 bus journeys, and a public routing service supplies these twelve car drives, which is
+    exactly what the file always asked for.
 
-    A permanently red build stops being a signal and becomes noise, so the unvalidated state
-    is declared in provenance — see `speeds.SPEED_PROVENANCE` and the limitation in
-    `data/road-limits.json` — rather than shouted here every push. What this still guards is
-    that the twelve pairs remain well-formed and correctly split, so the gate can run the day
-    anyone does record times.
+    What must not come back is a placeholder. The file's own warning is the reason: a guessed
+    time makes the gate pass while verifying nothing, which is worse than having no gate.
     """
     from pathlib import Path
 
@@ -186,18 +183,37 @@ def test_the_reference_file_is_ready_for_times_whenever_they_exist():
     text = csv.read_text(encoding="utf-8")
     rows = [line for line in text.splitlines() if line and not line.startswith(("#", "kind"))]
     assert len(rows) >= 12, f"only {len(rows)} reference drives; the gate needs at least 12"
-    kinds = [line.split(",")[0] for line in rows]
+    import csv as csvmod
+
+    parsed = list(csvmod.reader(rows))
+    kinds = [row[0] for row in parsed]
     assert kinds.count("adjacent") >= 6, "at least six adjacent pairs isolate the speed table"
     assert kinds.count("journey") >= 6, "at least six journeys test the accumulation"
 
+    assert "REPLACE_ME" not in text, "a placeholder would make the gate verify nothing"
+    for row in parsed:
+        assert len(row) == 8, f"a stray comma shifted the columns: {row}"
+        minutes, source = float(row[5]), row[6]
+        assert minutes > 0, row
+        assert source and source != "REPLACE_ME", "every drive must name the service it came from"
 
-def test_the_model_is_still_declared_unvalidated():
-    """The load-bearing sentence. If the speed table ever stops saying it has not been
-    checked against a recorded journey, either someone validated it — in which case this
-    test should be replaced by the validation — or the caveat was quietly dropped."""
+
+def test_the_speed_table_declares_both_checks_and_that_neither_is_ground_truth():
+    """The load-bearing sentence, replaced rather than deleted.
+
+    It used to assert the table still said it had *not* been checked. It has been, at both
+    ends — buses at the far end, OSRM on the road layer — so the caveat that matters is no
+    longer "unchecked" but "checked against two references, neither of which is ground truth,
+    and they disagree in opposite directions". Losing that would let a reader take the pass as
+    a measurement.
+    """
     from scripts.speeds import SPEED_PROVENANCE
 
-    assert "verificat" in SPEED_PROVENANCE["note"]
+    note = SPEED_PROVENANCE["note"]
+    assert "verific" in note
+    assert "OSRM" in note, "the road-layer check must be named"
+    assert "observed-journeys" in note, "the composite check must be named"
+    assert "adevăr de teren" in note, "neither reference may be presented as ground truth"
 
 
 @pytest.mark.parametrize("minutes", [0.0, -5.0])

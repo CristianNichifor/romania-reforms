@@ -30,19 +30,30 @@ having to accept the others:
 each other, because those roads are limited by their geometry rather than by the vehicle.
 The bus penalty is real only on motorway and trunk. That is a result, not an oversight.
 
-**What is checked, and at which end.** Nothing in *this* file is verified against a recorded
-journey — there is no published dataset of Romanian free-flow road speeds by class to check it
-against. What is now checked is the other end of the chain: `data/observed-journeys.json`
-holds 552 timetabled county bus runs read out of six county councils' transport programmes,
-and the commercial speed this model eventually produces, 36,8 km/h, sits 3,7% below their
-kilometre-weighted 38,2 and inside their interquartile range.
+**What is checked, and against what.** No class in this table is verified against a recorded
+free-flow journey, because no published dataset of Romanian speeds by road class exists. Two
+checks exist instead, at opposite ends of the chain, and neither is ground truth.
 
-That is a real test and a limited one. It constrains the *composite* — these speeds, plus
-routing, plus the service factor, plus dwell — and cannot separate the terms. A model running
-the roads too fast and standing too long at stops would land in the same place. So the honest
-statement is no longer "unvalidated as a whole" but its inverse: **validated as a whole,
-unvalidated in its parts.** The per-class efficiency figures below remain the assumed term and
-the first thing to argue with.
+At the far end, `data/observed-journeys.json` holds 552 timetabled county bus runs read out of
+six county councils' transport programmes. The commercial speed this model eventually produces,
+36,8 km/h, sits 3,7% below their kilometre-weighted 38,2 and inside their interquartile range.
+
+That test constrains the *composite* — these speeds, plus routing, plus the service factor,
+plus dwell — and cannot separate the terms on its own.
+
+The road layer is now checked separately, by `check_gate.py`, against twelve routed car
+journeys in Vâlcea from OSRM's public server. **This table runs about 10% faster than OSRM
+over the same OpenStreetMap data**, uniformly rather than in one class, and the accumulation
+through intermediate seats turns out to cost only ~1,6 points on top. Both are inside the
+gate's tolerance and its bias limit.
+
+So: composite 3,7% *slow* against recorded buses, road layer ~10% *fast* against an independent
+router. Those point opposite ways, which means the service factor and dwell are absorbing more
+than a correct road layer would need — or OSRM's rural profile is conservative and this table is
+closer than it looks. Neither OSRM nor a published timetable is ground truth, and no measurement
+of Romanian free-flow speed by road class exists to settle it. The efficiency figures below
+remain the assumed term and the first thing to argue with; what has changed is that the size and
+direction of their error are now bounded rather than unknown.
 """
 
 from __future__ import annotations
@@ -216,9 +227,13 @@ SPEED_PROVENANCE: Final[dict[str, str]] = {
     "note": (
         "Limitele sunt măsurate, cinematica este calculată, iar randamentul pe clasă de drum "
         "este presupus. Nicio clasă nu este verificată separat, pentru că nu există o "
-        "măsurătoare publică a vitezelor de drum liber pe clase în România. Verificarea "
-        "există la celălalt capăt al lanțului: viteza comercială rezultată se compară cu "
-        "552 de curse reale din data/observed-journeys.json și cade în intervalul lor."
+        "măsurătoare publică a vitezelor de drum liber pe clase în România. Există însă "
+        "două verificări la capete diferite: viteza comercială rezultată se compară cu 552 "
+        "de curse reale din data/observed-journeys.json și cade în intervalul lor, iar "
+        "stratul rutier singur se compară, prin scripts/check_gate.py, cu douăsprezece "
+        "trasee auto rutate de OSRM în Vâlcea — unde tabelul iese cu circa 10% mai rapid. "
+        "Cele două abateri sunt de sensuri opuse, deci se compensează parțial; niciuna "
+        "dintre referințe nu este adevăr de teren."
     ),
 }
 

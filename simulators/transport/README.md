@@ -135,6 +135,20 @@ assumed term, and **where a dispute about these numbers should land.**
 **A bus and a car converge below trunk.** Those roads are bound by their geometry, not by the
 vehicle, so on the rural network vehicle choice is not a lever on journey time.
 
+**Both ends are now checked, and they disagree in opposite directions.** At the far end, the
+commercial speed this produces is 36,8 km/h against 38,2 measured over 552 timetabled county
+bus runs — 3,7% **slow**, inside their interquartile range. On the road layer alone,
+`scripts/check_gate.py` compares twelve routed car drives in Vâlcea from OSRM: the table runs
+10,9% **fast** on single hops and 9,3% fast on six-hop journeys.
+
+Two things follow. The accumulation through intermediate seats costs about 1,6 points, not the
+large pessimism the gate was built to expose — in Vâlcea the seat villages sit near the direct
+line. And since the two checks lean opposite ways, the service factor and dwell are absorbing
+more than a correct road layer would need, *or* OSRM's rural profile is conservative. Neither
+reference is ground truth and no measurement of Romanian free-flow speed by class exists to
+settle it. The errors are bounded and their direction is known, which is the most that can
+honestly be claimed.
+
 ## Where the money comes from
 
 ```

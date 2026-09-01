@@ -276,9 +276,17 @@ def main(argv: list[str] | None = None) -> int:
                     f"{ro(observed['kmhP75'])} km/h. Factorul de viteză de serviciu NU a fost "
                     "ajustat ca să închidă diferența — altfel singura verificare independentă "
                     "din depozit ar fi devenit o potrivire. Ce rămâne neverificat este "
-                    "descompunerea: lanțul se verifică în ansamblu, iar un model care ar merge "
-                    "prea repede pe drum și ar staționa prea mult în stație ar cădea în același "
-                    "loc. Vezi și limitările din data/observed-journeys.json privind eșantionul."
+                    "descompunerea exactă. Stratul rutier are verificarea lui separată, în "
+                    "scripts/check_gate.py, față de douăsprezece trasee auto rutate de OSRM în "
+                    "Vâlcea: acolo modelul iese cu circa 10% mai RAPID, iar acumularea prin "
+                    "reședințele intermediare costă doar 1,6 puncte, nu penalizarea mare pentru "
+                    "care fusese construită verificarea. Deci abaterea de aici, -3,7% pe "
+                    "ansamblu, și cea de +10% pe drum sunt de sensuri opuse și se compensează "
+                    "parțial — ceea ce înseamnă că factorul de serviciu și staționarea absorb "
+                    "mai mult decât ar cere un strat rutier corect, sau că profilul rural al "
+                    "OSRM este prudent. Nu se poate departaja: nici orarul publicat, nici OSRM "
+                    "nu sunt adevăr de teren. Vezi și limitările din data/observed-journeys.json "
+                    "privind eșantionul."
                 ),
                 "severity": "note",
                 "affects": ["cost"],
