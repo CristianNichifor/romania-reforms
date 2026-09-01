@@ -50,9 +50,7 @@ def seat_coordinates() -> dict[int, tuple[float, float]]:
     import geopandas as gpd
 
     seats = gpd.read_file(SEATS).to_crs(4326)
-    return {
-        int(row.siruta): (row.geometry.x, row.geometry.y) for row in seats.itertuples()
-    }
+    return {int(row.siruta): (row.geometry.x, row.geometry.y) for row in seats.itertuples()}
 
 
 def drive_minutes(origin: tuple[float, float], destination: tuple[float, float]) -> float:
