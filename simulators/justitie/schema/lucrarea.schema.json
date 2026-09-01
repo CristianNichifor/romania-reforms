@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/lucrarea.schema.json",
+  "title": "The reform paper itself, chapter by chapter",
+  "description": "An audit found that 9% of the page was about what the reform proposes and 91% about whether its numbers hold, with the proposals reduced to a list of chapter headings and page numbers. This carries all nineteen chapters as text so a reader can learn what the reform is before reading what does not survive checking, and pairs each finding on the page with the sentence in the paper it tests. Quotes are located inside the chapter text by a needle rather than retyped, so a claim cannot drift from the document while the page goes on attributing it; which finding tests which sentence is a judgement and is marked assumed.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "period",
+    "provenance",
+    "chapters",
+    "claims",
+    "claimsProvenance",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "const": "lucrarea" },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "period": { "type": "string" },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+
+    "chapters": {
+      "description": "Every chapter of the paper, in order, whole. Including the seven that contain nothing to check.",
+      "type": "array",
+      "minItems": 19,
+      "maxItems": 19,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["number", "title", "page", "characters", "text"],
+        "properties": {
+          "number": { "type": "integer", "minimum": 1, "maximum": 19 },
+          "title": { "type": "string" },
+          "page": { "type": "integer", "minimum": 1 },
+          "characters": { "type": "integer", "exclusiveMinimum": 0 },
+          "text": { "type": "string", "minLength": 40 }
+        }
+      }
+    },
+
+    "claims": {
+      "description": "The sentence each finding on the page argues with, cut from the chapter's own text.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["fold", "label", "chapter", "page", "quote"],
+        "properties": {
+          "fold": {
+            "description": "The id of the sidebar section that tests this claim.",
+            "type": "string",
+            "pattern": "^[a-z-]+-fold$"
+          },
+          "label": { "type": "string" },
+          "chapter": { "type": "integer", "minimum": 1, "maximum": 19 },
+          "page": { "type": "integer", "minimum": 1 },
+          "quote": { "type": "string", "minLength": 8 }
+        }
+      }
+    },
+
+    "claimsProvenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+    }
+  }
+}
