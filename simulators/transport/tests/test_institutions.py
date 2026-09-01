@@ -38,8 +38,18 @@ def built() -> dict:
 
 
 def spaced(value: int) -> str:
-    """1708 as the document writes it: a thin-space thousands separator."""
+    """1708 as INSTITUTIONS.md writes it: a thin-space thousands separator."""
     return f"{value:,}".replace(",", " ")
+
+
+def grouped_in(value: int, text: str) -> bool:
+    """True if the number appears with either thousands separator this repository uses.
+
+    INSTITUTIONS.md is English prose and groups with a thin space; the README's headline block
+    is a Romanian-facing summary and groups with a full stop. Both are deliberate, so the test
+    accepts either rather than forcing one document into the other's convention.
+    """
+    return any(f"{value:,}".replace(",", sep) in text for sep in (" ", "."))
 
 
 def test_the_network_figures_are_the_ones_in_the_data(text, built):
@@ -78,11 +88,22 @@ def test_it_names_the_legal_instruments_rather_than_gesturing_at_them(text):
 
 
 def test_it_still_says_what_it_cannot_support(text):
-    """The authorities are not costed anywhere in the model. If that omission is ever quietly
-    dropped from the document, the ledger against the administrative saving reads as complete
-    when it is not."""
-    assert "not costed" in text
+    """The document used to be checked for the phrase "not costed", because the authorities
+    were the largest institutional omission. They are costed now, so what must survive is the
+    successor caveat: the staff count is assumed, setting the bodies up is not priced, and
+    ticketing is counted twice."""
+    assert "not costed" not in text, "the authorities are costed; this claim is stale"
+    assert "assumed" in text and "counted twice" in text
     assert "272/2007" in text, "the ANRSC methodology mismatch is a real legislative task"
+
+
+def test_the_authority_figures_match_the_model(text, built):
+    """Prose goes stale silently. The staff count and the Movia comparison are the whole
+    argument of that section, so they have to keep coming from data/."""
+    authority = built["cost"]["authority"]
+    assert str(authority["staffEach"]) in text
+    assert f"{authority['shareOfOperatorCost'] * 100:.1f}".replace(".", ",") in text
+    assert f"{authority['moviaShare'] * 100:.1f}".replace(".", ",") in text
 
 
 def test_no_headline_number_appears_without_a_thousands_separator(text):
@@ -91,3 +112,43 @@ def test_no_headline_number_appears_without_a_thousands_separator(text):
     bare = re.findall(r"(?<![\d\s.,/])\b\d{4,}\b(?!\d)", text)
     allowed = {"1370", "2007", "2018", "2008"}  # instrument and year references
     assert [n for n in bare if n not in allowed] == []
+
+
+README = ROOT / "README.md"
+
+
+@pytest.fixture(scope="module")
+def readme() -> str:
+    return README.read_text(encoding="utf-8")
+
+
+def test_the_readme_headline_is_the_committed_run(readme, built):
+    """The headline block quoted 4 705 drivers for weeks after the duty model raised the real
+    figure to 5 552 — it had been copied from a browser session and then left. Every number in
+    it now has to come back out of data/, so the same drift fails the build instead of being
+    published.
+    """
+    cost, network, fares = built["cost"], built["network"]["summary"], built["fares"]
+    for value in (network["hubs"], network["routes"], network["uatsTotal"]):
+        assert grouped_in(value, readme), value
+    assert grouped_in(cost["fleet"]["total"], readme)
+    assert grouped_in(cost["drivers"], readme)
+    assert grouped_in(cost["perWeekday"]["duties"], readme)
+    assert str(cost["authority"]["count"]) in readme
+    assert str(cost["authority"]["staffEach"]) in readme
+    # Recovery and subsidy, with the Romanian decimal comma the document is written in.
+    assert f"{fares['central']['recovery'] * 100:.0f}% recovery" in readme
+    assert f"{round(fares['central']['subsidyPerPersonYearRon'])} lei a head" in readme
+
+
+def test_the_readme_says_the_ledger_excludes_rail(readme):
+    """Without this the headline reads as the whole transport bill, and rail's 282 md of extra
+    track sits outside it with nothing saying so."""
+    assert "rail is priced separately and NOT added" in readme
+
+
+def test_the_readme_no_longer_claims_nothing_is_validated(readme):
+    """Third place that carried the claim. It was true when written and stopped being true
+    twice over — county timetables, then the drive-time gate."""
+    assert "No such observation exists in" not in readme
+    assert "552" in readme and "Vâlcea" in readme

@@ -65,15 +65,32 @@ class Cost:
     standing_ron: float
     admin_ron: float
     capital_ron: float
+    authority_ron: float = 0.0
 
     @property
     def operating_ron(self) -> float:
-        """What the service costs to run for a year, before buying anything."""
+        """What the OPERATOR costs to run for a year, before buying anything.
+
+        Deliberately excludes the authority. Every benchmark this repository checks against —
+        driver share, cost per bus-km, the wage-adjusted western comparison — describes a bus
+        company, and folding a public authority into the denominator would quietly break all
+        of them while looking like a more complete number.
+        """
         return self.driver_ron + self.running_ron + self.standing_ron + self.admin_ron
 
     @property
+    def annual_public_ron(self) -> float:
+        """Everything the system costs in a year: the operator, plus being the buyer.
+
+        This is the figure the ledger compares against the administrative saving. Until the
+        authority existed as a line, the ledger compared a transport cost missing its own
+        institution against a saving that was complete, which understated one side.
+        """
+        return self.operating_ron + self.authority_ron
+
+    @property
     def total_ron(self) -> float:
-        return self.operating_ron + self.capital_ron
+        return self.annual_public_ron + self.capital_ron
 
     def __add__(self, other: Cost) -> Cost:
         return Cost(
@@ -82,6 +99,7 @@ class Cost:
             standing_ron=self.standing_ron + other.standing_ron,
             admin_ron=self.admin_ron + other.admin_ron,
             capital_ron=self.capital_ron + other.capital_ron,
+            authority_ron=self.authority_ron + other.authority_ron,
         )
 
 
@@ -146,6 +164,7 @@ def annual_cost(
     fleet_by_class: dict[str, int],
     prices: Prices,
     weekdays: int = WEEKDAYS_PER_YEAR,
+    authority_ron: float = 0.0,
 ) -> Cost:
     """A year of cost from a weekday's operation and the fleet that runs it.
 
@@ -177,4 +196,5 @@ def annual_cost(
         standing_ron=standing,
         admin_ron=admin,
         capital_ron=capital,
+        authority_ron=authority_ron,
     )

@@ -316,7 +316,8 @@ async function main() {
       <dt>Ore plătite șoferilor</dt><dd>${fmt.format(
         Math.round(resourcesFor().paidHoursPerWeekday),
       )}</dd>
-      <dt>OPEX pe an</dt><dd>${bn(resourcesFor().cost.operatingRon)}</dd>
+      <dt>OPEX operator pe an</dt><dd>${bn(resourcesFor().cost.operatingRon)}</dd>
+      <dt>Autorități de transport pe an</dt><dd>${bn(resourcesFor().cost.authorityRon)}</dd>
       <dt>CAPEX vehicule</dt><dd>${bn(life().fleetCapexRon)}</dd>
       <dt>CAPEX autobaze</dt><dd>${bn(life().depotCapexRon)}</dd>
       <dt>Cost total pe ${life().years} ani</dt><dd class="big">${bn(life().totalRon)}</dd>`;

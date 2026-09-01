@@ -38,6 +38,7 @@ ROOT = Path(__file__).resolve().parents[1]
 ADMINISTRATIV = ROOT.parent / "administrativ"
 OUT = ROOT / "data" / "cost.json"
 
+from scripts.authority import authority_cost, share_of_operator_cost  # noqa: E402
 from scripts.costs import WEEKDAYS_PER_YEAR, annual_cost, load_prices  # noqa: E402
 from scripts.fleet import drivers_required, paid_driver_hours, resources_for_route  # noqa: E402
 from scripts.tiers import DAY_PROFILE, classify, duty_span_hours, service_for  # noqa: E402
@@ -149,7 +150,23 @@ def main(argv: list[str] | None = None) -> int:
     fleet_by_class = {
         name: math.ceil(peak * (1 + SPARE_RATIO)) for name, peak in peak_by_class.items()
     }
-    cost = annual_cost(paid_hours, dict(km_by_class), fleet_by_class, prices)
+    # The authority is costed before the operator's total is known, because it does not depend
+    # on it: it is a staff of planners and procurement people, not a share of anything.
+    authority = authority_cost(
+        count=items["authorityCount"]["value"],
+        staff_each=items["authorityStaffEach"]["value"],
+        gross_monthly_ron=items["authorityStaffGrossMonthly"]["value"],
+        employer_rate=items["employerContributionRate"]["value"],
+        non_staff_share=items["authorityNonStaffShare"]["value"],
+    )
+    cost = annual_cost(
+        paid_hours,
+        dict(km_by_class),
+        fleet_by_class,
+        prices,
+        authority_ron=authority.total_ron,
+    )
+    authority_share = share_of_operator_cost(authority, cost.operating_ron)
 
     saving_admin = hubs["savingsRon"]["administrative"]
     saving_operating = hubs["savingsRon"]["operating"]
@@ -223,10 +240,29 @@ def main(argv: list[str] | None = None) -> int:
             "standing": round(cost.standing_ron),
             "admin": round(cost.admin_ron),
             "operating": round(cost.operating_ron),
+            "authority": round(cost.authority_ron),
+            "annualPublic": round(cost.annual_public_ron),
             "capital": round(cost.capital_ron),
             "total": round(cost.total_ron),
         },
+        # The buyer, costed. `operating` is the operator alone, because every benchmark in this
+        # file describes a bus company; `annualPublic` is what the system costs in a year.
+        "authority": {
+            "count": authority.count,
+            "staffEach": authority.staff_each,
+            "staffTotal": authority.staff_total,
+            "salariesRon": round(authority.salaries_ron),
+            "nonStaffRon": round(authority.non_staff_ron),
+            "perAuthorityRon": round(authority.per_authority_ron),
+            "shareOfOperatorCost": round(authority_share, 4),
+            "moviaShare": 0.156,
+        },
         "ledgerRon": {
+            # Buses only. Rail is NOT added: rail-cost.json prices track and train-hours to
+            # compare UNIT prices against the bus network, and its passengers are different
+            # people on different routes. Summing the two would assert you buy both to serve
+            # the same journeys, which is a claim this repository declines to make.
+            "scope": "autobuz, inclusiv autoritatea; fără cale ferată",
             "transportCost": round(cost.total_ron),
             "administrativeSaving": saving_admin,
             "operatingSaving": saving_operating,
@@ -327,6 +363,38 @@ def main(argv: list[str] | None = None) -> int:
                 "affects": ["cost"],
             },
             {
+                "id": "personalul-autoritatii-e-parametrul-liber",
+                "text": (
+                    f"Autoritatea de transport costă {ro(authority.total_ron / 1e6, 1)} milioane "
+                    f"de lei pe an, adică {ro(authority.per_authority_ron / 1e6, 2)} milioane pe "
+                    f"județ, și se construiește de jos în sus din {authority.staff_each} oameni "
+                    "de autoritate — planificare, licitații, contracte, venituri, IT, juridic. "
+                    "Numărul de oameni este PRESUPUS și este singura cifră care contează aici: "
+                    f"iese {ro(authority_share * 100, 1)}% din plățile către operator, față de "
+                    "15,6% cât costă Movia să fie Movia pe partea de autobuz. Sub reperul danez, "
+                    "cum era de așteptat pentru o autoritate pornită de la zero față de una care "
+                    "rulează Rejsekort și centre de clienți — dar dacă adevărul este mai aproape "
+                    "de Movia, costul de aici crește cu circa o treime. Ce lipsește complet: "
+                    "costul de înființare, pentru că modelul dă un an de regim permanent."
+                ),
+                "severity": "material",
+                "affects": ["cost"],
+            },
+            {
+                "id": "biletele-sunt-numarate-de-doua-ori",
+                "text": (
+                    "Cota de administrație a operatorului, 12%, include vânzarea biletelor și "
+                    "controlul, iar în regimul gross-cost din INSTITUTIONS.md acestea aparțin "
+                    "autorității, care este acum o linie separată. Deci sunt numărate de două "
+                    "ori. Suprapunerea umflă costul transportului, ceea ce este sensul prudent "
+                    "atunci când cifra se pune alături de o economie administrativă — dar este o "
+                    "eroare cunoscută, nu o marjă. Împărțirea celor 12% între operator și "
+                    "autoritate ar cere o bază pe care acest depozit nu o are."
+                ),
+                "severity": "note",
+                "affects": ["cost"],
+            },
+            {
                 "id": "economiile-sunt-ale-altui-simulator",
                 "text": (
                     "Economiile administrative și de funcționare sunt calculate de "
@@ -354,7 +422,9 @@ def main(argv: list[str] | None = None) -> int:
         ("  fuel, tyres, maintenance", "running"),
         ("  insurance and depot", "standing"),
         ("  administration", "admin"),
-        ("  = operating", "operating"),
+        ("  = operating (operator)", "operating"),
+        ("  authority (42 bodies)", "authority"),
+        ("  = annual public", "annualPublic"),
         ("  capital (fleet, annualised)", "capital"),
         ("  = total", "total"),
     ):
@@ -426,6 +496,13 @@ def main(argv: list[str] | None = None) -> int:
     print(
         f"    gap vs observed          {speed / observed['kmhWeighted'] - 1:>+6.1%}   "
         "the factor was NOT tuned to close this"
+    )
+    # Below Movia is the expected result, not a failure: Movia runs Rejsekort, DOT, marketing
+    # and customer centres for 45 municipalities. Far below would mean the staffing is thin.
+    print(
+        f"  authority vs operator      {authority_share:>6.1%}   Movia 15.6%  "
+        f"{'ok' if 0.5 <= authority_share / 0.156 <= 1.1 else 'OUTSIDE'}"
+        f"  ({authority.staff_total} staff over {authority.count} bodies)"
     )
 
     print(f"\nWrote {OUT.relative_to(ROOT)}")

@@ -81,7 +81,7 @@
       "value": 0.12,
       "unit": "share of direct cost",
       "confidence": "assumed",
-      "note": "Dispecerat, administrație, vânzare de bilete, control. Ca procent din costul direct, pentru că nu depinde nici de oră, nici de kilometru."
+      "note": "Dispecerat, administrație, vânzare de bilete, control. Ca procent din costul direct, pentru că nu depinde nici de oră, nici de kilometru. ATENȚIE la graniță: în regimul gross-cost din INSTITUTIONS.md, vânzarea biletelor și controlul aparțin AUTORITĂȚII, nu operatorului, deci sunt numărate de două ori — o dată aici și o dată în linia de autoritate. Suprapunerea umflă totalul, ceea ce este sensul PRUDENT pentru un cost pus alături de o economie, și este declarată în loc să fie compensată tacit: împărțirea celor 12% ar cere o bază pe care acest depozit nu o are."
     },
     "serviceSpeedFactor": {
       "value": 0.75,
@@ -214,6 +214,30 @@
       "unit": "hours",
       "confidence": "assumed",
       "note": "Minimul plătit pentru o tură, oricât de puțin s-ar conduce în ea. Aici se vede costul real al unui serviciu concentrat pe vârfuri: patru curse pe zi înseamnă circa trei ore de condus întinse pe douăsprezece, iar nimeni nu este angajat pentru trei ore cu o pauză neplătită de cinci la mijloc. Fără acest minim, modelul plătea timpul mort cu zero și scotea un serviciu de vârf mai ieftin decât este."
+    },
+    "authorityCount": {
+      "value": 42,
+      "unit": "authorities",
+      "confidence": "derived",
+      "note": "Câte autorități de transport: una pe județ, plus Bucureşti-Ilfov, pe care modelul îl tratează deja ca o singură zonă. Numărul urmează împărțirea administrativă existentă, iar comasarea propusă unește comune și lasă județele neatinse, deci nu se schimbă cu scenariul."
+    },
+    "authorityStaffEach": {
+      "value": 22,
+      "unit": "staff/authority",
+      "confidence": "assumed",
+      "note": "Oameni într-o autoritate județeană de transport: planificare de rețea, licitații și administrare de contracte, venituri și ticketing, IT, financiar-juridic, conducere. Pentru un județ cu ordinul a 40 de trasee și o sută de vehicule. Este PARAMETRUL LIBER al acestui nivel — singura cifră care merită contestată aici — și de aceea autoritatea se calculează de jos în sus, din oameni, nu ca o cotă din altceva, care ar fi ascuns-o. Verificarea este Movia: vezi moviaAuthorityShareOfOperatorCost."
+    },
+    "authorityStaffGrossMonthly": {
+      "value": 9564,
+      "unit": "RON/month",
+      "confidence": "derived",
+      "note": "Câștigul salarial mediu brut pe economie, 9.564 lei, iunie 2026 (INS). Folosit ca salariu al unui angajat de autoritate: sunt planificatori, ingineri, juriști și economiști, deci peste un șofer (7.489 lei) și în jurul mediei pe economie. Aceeași serie este citată deja la driverGrossMonthly ca reper de comparație."
+    },
+    "authorityNonStaffShare": {
+      "value": 0.45,
+      "unit": "share of authority budget",
+      "confidence": "assumed",
+      "note": "Cât din bugetul autorității NU este salarii: sisteme de ticketing și IT, sediu, informare, audit. Se aplică asupra TOTALULUI, nu ca adaos peste salarii, pentru că așa raportează Movia și așa se scrie un buget — un adaos procentual ar face ca factura de sisteme să crească odată cu numărul de angajați, ceea ce nu se întâmplă. La Movia partea de suport este dominată de Rejsekort, DOT, marketing și centre de relații cu clienții, deci de sisteme, nu de oameni."
     }
   },
   "vehicles": {
@@ -358,6 +382,12 @@
       "unit": "passenger-km/person/year",
       "confidence": "derived",
       "note": "7.710 milioane pasageri-km cu autobuzul în Danemarca, 2024, la 5.961.249 de locuitori. Eurostat, aceleași serii. Reperul contrafactual: acesta este nivelul de utilizare al sistemului pe care îl imită această reformă. România este deja la 1.150, aproape de Danemarca, pentru că are mai puține automobile și o cale ferată slabă — deci diferența dintre cele două țări nu este cât se circulă cu autobuzul, ci CE FEL de serviciu se primește pentru asta. Pentru context: Ungaria 2.123, Cehia 1.062, Polonia 969 (2016)."
+    },
+    "moviaAuthorityShareOfOperatorCost": {
+      "value": 0.156,
+      "unit": "share of operator payments",
+      "confidence": "derived",
+      "note": "Movia, Årsrapport 2025, cifre de regnskab 2025 în mii DKK. Autobuz: plăți către operatori 3.464.659, cheltuieli de suport proprii 226.593. Fællesudgifter, comune cu căile ferate locale, 371.644, din care autobuzului îi revin 84,4% — cota lui din plățile către operatori, 3.464.659 din 4.103.843. Deci costul de a FI autoritate, pentru partea de autobuz: 226.593 + 313.668 = 540.261 mii DKK, adică 15,6% din plățile către operatori. Este cel mai apropiat reper existent pentru o autoritate de transport care planifică și licitează fără să conducă. Nu este o țintă: Movia rulează Rejsekort, DOT, marketing și centre de clienți pentru 45 de municipalități și două regiuni, iar o autoritate județeană pornită de la zero este un lucru mai mic. Modelul trebuie să iasă SUB acest procent; dacă ar ieși la jumătate, personalul presupus ar fi prea puțin."
     }
   }
 }

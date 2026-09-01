@@ -28,7 +28,10 @@ def main() -> int:
 
     prices = load_fare_prices()
     bus_km = cost["perWeekday"]["busKm"] * WEEKDAYS_PER_YEAR
-    operating = cost["annualRon"]["operating"]
+    # The budget owes the operator AND the authority, less the fares. Using the operator's
+    # line alone understated the subsidy by the whole institution and, worse, made the Movia
+    # comparison apples-to-oranges: Movia's tilskudsbehov is struck after its own costs too.
+    operating = cost["annualRon"]["annualPublic"]
     total = cost["annualRon"]["total"]
 
     central = farebox(bus_km, operating, prices)

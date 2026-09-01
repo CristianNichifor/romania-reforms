@@ -30,8 +30,9 @@ buses.
 otherwise hybrid or diesel by stop density. Electric buses are tied to a depot, because the
 charger is a fixed asset in a fixed place. Whoever owns the depot constrains who can operate.
 
-**Fares cover roughly 46% of operating cost.** The remaining 54% — some 0,95 md lei a year
-against an operating cost of 1,75 md — is owed every year, for as long as the service runs.
+**Fares cover roughly 41% of what the system costs to run.** The remaining 59% — some 1,14 md
+lei a year, 68 lei a head, against a public annual cost of 1,95 md — is owed every year, for as
+long as the service runs.
 That is a compensation payment against an obligation, not a grant, and compensation for a
 public service obligation is a regulated instrument rather than a budget line anyone can
 design freely.
@@ -77,13 +78,17 @@ Two structural lessons, both of which survive translation:
 - **Planning and operating are separated.** The public body decides what runs; private
   operators compete to run it. Neither monopoly operation nor a deregulated market.
 
-Movia is also the check on this model's fare recovery, and the direction matters. Movia
-recovers close to half its cost from fares while serving the Copenhagen region. This model
-recovers 45,9% from a purely rural network with Bucharest excluded — below Movia, which is the
-right side to be on, because rural services recover less than urban ones everywhere. The
-comparison is carried in `data/fares.json` as `benchmark.moviaRecovery`. It is a weak test: it
-would also be passed by a model that was far too pessimistic, and the load factor remains the
-free parameter of the fares layer.
+Movia is also the check on this model's fare recovery, and it is now a like-for-like one.
+Movia's 2025 bus accounts recover 45,2% — 1 811 m DKK of fares against 4 005 m of operator
+payments plus its own costs — while serving the Copenhagen region. This model recovers 41,3%
+on the same basis, operator plus authority, from a purely rural network with Bucharest
+excluded. Below Movia, which is the right side to be on, because rural services recover less
+than urban ones everywhere.
+
+An earlier version of both figures compared against operator payments alone on one side and
+Movia's headline on the other, which measured two different things. It is still a weak test:
+a far too pessimistic model would also pass it, and the load factor remains the free parameter
+of the fares layer.
 
 ## The design
 
@@ -135,10 +140,23 @@ total and stops there.
 
 ## What this design costs, and does not say
 
-**The authorities themselves are not costed.** Forty-two bodies doing planning, procurement,
-contract management and revenue collection is real money and real staff. The nearest line in
-`cost.json` is `admin`, 0,19 md lei, which is an operator's dispatch and overhead charged as a
-share of direct cost — not an authority's payroll. No line contains the authority. It belongs in the ledger against the administrative saving the
+**The authorities are now costed, and the staff count is the argument.** Forty-two bodies at
+22 people each — planning, tendering, contract management, revenue, IT, legal — come to 0,20 md
+lei a year, 4,69 m per county, on the economy-average gross wage plus a 45% non-salary share
+for ticketing systems, premises and information. That is 11,3% of what the operators are paid,
+against the 15,6% it costs Movia to be Movia on its bus side. Below the Danish figure, as a
+body starting from nothing should be against one running Rejsekort and customer centres for 45
+municipalities — but if the truth is nearer Movia, this line grows by about a third.
+
+It is built bottom-up from people rather than as a share of operator cost, because a share
+would have produced a number with no visible assumption. The staff count is assumed and is the
+only figure here worth attacking.
+
+Two things it still does not contain. The cost of *setting them up* — the model prices a
+steady-state year, not a transition. And the 12% operator overhead already includes ticket
+sales and revenue protection, which under gross-cost belong to the authority, so those are
+counted twice; the overlap inflates the transport side, which is the safe direction when the
+figure is being compared against a saving, and it is declared rather than netted off. It belongs in the ledger against the administrative saving the
 consolidation claims, and it is not there. This is the largest known omission in the
 institutional half.
 

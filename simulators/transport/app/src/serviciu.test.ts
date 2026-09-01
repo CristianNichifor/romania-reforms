@@ -124,7 +124,18 @@ describe('cost arithmetic', () => {
     serviceSpeedFactor: 0.75,
     dwellMinPerStop: 0.75,
     weekdaysPerYear: 10,
+    authorityRon: 0,
   };
+
+  it('keeps the authority outside operating but inside the public annual cost', () => {
+    // Load-bearing separation. Every benchmark in this repository — driver share, cost per
+    // bus-km, the wage-adjusted western comparison — describes a bus company. Folding the
+    // authority into operatingRon would break all of them while looking more complete.
+    const c = annualCost(10, { basic: 10 }, { basic: 1 }, { ...prices, authorityRon: 1_000 });
+    expect(c.authorityRon).toBe(1_000);
+    expect(c.annualPublicRon).toBeCloseTo(c.operatingRon + 1_000);
+    expect(c.totalRon).toBeCloseTo(c.annualPublicRon + c.capitalRon);
+  });
 
   it('keeps capital out of operating', () => {
     const c = annualCost(10, { basic: 10 }, { basic: 1 }, prices);
@@ -286,6 +297,8 @@ describe('capacity and whole-life cost', () => {
     adminRon: 100,
     capitalRon: 50,
     operatingRon: 400,
+    authorityRon: 0,
+    annualPublicRon: 400,
     totalRon: 450,
   };
 
@@ -411,7 +424,7 @@ describe.skipIf(!ready)('the mix the routes ask for', () => {
 describe('depot capital follows the traction mix', () => {
   const cost = {
     driverRon: 0, runningRon: 0, standingRon: 0, adminRon: 0,
-    capitalRon: 0, operatingRon: 0, totalRon: 0,
+    capitalRon: 0, operatingRon: 0, authorityRon: 0, annualPublicRon: 0, totalRon: 0,
   };
 
   it('charges the charging premium only to electric spaces', () => {
@@ -472,5 +485,23 @@ describe('driver duties, not driving hours', () => {
 
   it('costs nothing for a route that does not run', () => {
     expect(paidDriverHours(0, 12, prices)).toEqual({ hours: 0, duties: 0 });
+  });
+});
+
+const zeroCost = {
+  driverRon: 0, runningRon: 0, standingRon: 0, adminRon: 0,
+  capitalRon: 0, operatingRon: 0, authorityRon: 0, annualPublicRon: 0, totalRon: 0,
+};
+
+describe('the authority is owed every year', () => {
+  it('is owed every year of the horizon, not once', () => {
+    // The authority plans and tenders for as long as the service runs. Charging it once, or
+    // leaving it out of opex as an earlier version did, understated a twelve-year programme
+    // by the whole institution.
+    const free = lifetimeCost(
+      { ...zeroCost, operatingRon: 100, annualPublicRon: 100 }, 12, 12);
+    const paid = lifetimeCost(
+      { ...zeroCost, operatingRon: 100, authorityRon: 10, annualPublicRon: 110 }, 12, 12);
+    expect(paid.opexRon - free.opexRon).toBeCloseTo(10 * 12);
   });
 });

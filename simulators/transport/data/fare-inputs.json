@@ -45,10 +45,10 @@
   },
   "benchmarks": {
     "moviaFareboxRecovery": {
-      "value": 0.5,
+      "value": 0.452,
       "unit": "share of turnover",
       "confidence": "derived",
-      "note": "Movia, autoritatea de transport public a regiunii Zealand din Danemarca: cifră de afaceri de peste 4 miliarde DKK, din care aproape jumătate acoperită din vânzarea de bilete în autobuz, tren și Flextrafik. Este VERIFICAREA acestui nivel, nu intrarea lui — rata de acoperire se calculează din tarif și ocupare, apoi se compară cu ea. Folosirea ei ca intrare ar fi circulară: ar spune doar subvenția = costul înmulțit cu unu minus rata."
+      "note": "Movia, Årsrapport 2025, regnskab 2025, partea de autobuz, mii DKK: venituri din bilete 1.811.334, plăți către operatori 3.464.659, suport propriu 226.593, plus 84,4% din fællesudgifter de 371.644 — cota autobuzului din plățile către operatori. Deci 1.811.334 din 4.005.020 = 45,2%. Baza este costul PUBLIC total, operator plus autoritate, exact ca în model, pentru că Movia își calculează tilskudsbehov după propriile cheltuieli. O versiune anterioară folosea 50%, care era aproximativ acoperirea raportată doar la plățile către operatori — un reper corect pentru altă mărime decât cea comparată."
     }
   },
   "limitations": [
@@ -56,25 +56,33 @@
       "id": "gradul-de-ocupare-decide-tot",
       "text": "Nu există model de cerere. Numărul de călători se obține din capacitatea oferită înmulțită cu un grad de ocupare presupus, deci venitul și subvenția sunt direct proporționale cu acea presupunere. Pe intervalul plauzibil de 15-30% acoperirea din bilete variază între 33% și 67%, adică subvenția anuală variază cu peste jumătate de miliard de lei. Orice cifră de aici se citește ca interval, nu ca valoare.",
       "severity": "blocking",
-      "affects": ["fares"]
+      "affects": [
+        "fares"
+      ]
     },
     {
       "id": "cererea-nu-raspunde-la-tarif",
       "text": "Modelul nu are elasticitate: dublarea tarifului dublează venitul, ceea ce este fals. Un tarif mai mare alungă călători, iar în mediul rural sensibilitatea la preț este mai mare decât în oraș, pentru că mașina este o alternativă reală. Deci acest nivel poate spune ce ar aduce tariful actual la o rețea dată, dar NU poate compara două politici tarifare.",
       "severity": "blocking",
-      "affects": ["fares"]
+      "affects": [
+        "fares"
+      ]
     },
     {
       "id": "gratuitatile-nu-sunt-modelate",
       "text": "Elevii, pensionarii și celelalte categorii cu gratuitate sau reducere legală nu sunt separate: toți călătorii plătesc tariful întreg în acest calcul. În transportul județean românesc naveta școlară este o parte importantă a cererii și este decontată separat din bugete publice, deci venitul din bilete de aici este supraestimat și, pe cealaltă parte, o parte din ce apare ca subvenție este de fapt decontare.",
       "severity": "material",
-      "affects": ["fares"]
+      "affects": [
+        "fares"
+      ]
     },
     {
       "id": "capacitatea-nu-e-cerere",
       "text": "Călătorii se deduc din locurile oferite, deci rețeaua nu poate fi niciodată supraaglomerată în acest model și nici nu poate arăta o cerere nesatisfăcută. O linie pe care nu încape lumea și una pe care nu urcă nimeni ies la fel dacă au același grad mediu de ocupare.",
       "severity": "material",
-      "affects": ["fares"]
+      "affects": [
+        "fares"
+      ]
     }
   ]
 }

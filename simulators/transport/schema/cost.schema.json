@@ -16,6 +16,7 @@
     "annualRon",
     "ledgerRon",
     "speedCheck",
+    "authority",
     "limitations",
     "drivers"
   ],
@@ -84,20 +85,99 @@
         }
       }
     },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "What the buyer costs. INSTITUTIONS.md proposes 42 county transport authorities; until this block existed the ledger compared a transport cost missing its own institution against a complete administrative saving. Built bottom-up from staff rather than as a share of operator cost, so the assumption a reader should attack — how many people a county authority needs — is visible rather than buried in a percentage. `shareOfOperatorCost` is the figure that compares directly with Movia's 15,6%.",
+      "required": [
+        "count",
+        "staffEach",
+        "staffTotal",
+        "salariesRon",
+        "nonStaffRon",
+        "perAuthorityRon",
+        "shareOfOperatorCost",
+        "moviaShare"
+      ],
+      "properties": {
+        "count": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "staffEach": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "staffTotal": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "salariesRon": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "nonStaffRon": {
+          "type": "number",
+          "minimum": 0
+        },
+        "perAuthorityRon": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "shareOfOperatorCost": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "moviaShare": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
     "speedCheck": {
       "type": "object",
       "additionalProperties": false,
       "description": "The model's commercial speed against recorded Romanian journeys. Published rather than only printed so the check is quotable and can be regression-tested. `tuned` records that the service-speed factor was fixed before the observations existed and was not moved to close the gap — if it ever is, this is a fit and not a test, and the flag must change with it.",
-      "required": ["modelledKmh", "observedKmh", "observedP25Kmh", "observedP75Kmh", "observedJourneys", "gap", "source", "tuned"],
+      "required": [
+        "modelledKmh",
+        "observedKmh",
+        "observedP25Kmh",
+        "observedP75Kmh",
+        "observedJourneys",
+        "gap",
+        "source",
+        "tuned"
+      ],
       "properties": {
-        "modelledKmh": { "type": "number", "exclusiveMinimum": 0 },
-        "observedKmh": { "type": "number", "exclusiveMinimum": 0 },
-        "observedP25Kmh": { "type": "number", "exclusiveMinimum": 0 },
-        "observedP75Kmh": { "type": "number", "exclusiveMinimum": 0 },
-        "observedJourneys": { "type": "integer", "exclusiveMinimum": 0 },
-        "gap": { "type": "number" },
-        "source": { "type": "string" },
-        "tuned": { "type": "boolean" }
+        "modelledKmh": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "observedKmh": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "observedP25Kmh": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "observedP75Kmh": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "observedJourneys": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "gap": {
+          "type": "number"
+        },
+        "source": {
+          "type": "string"
+        },
+        "tuned": {
+          "type": "boolean"
+        }
       }
     },
     "fleet": {
@@ -145,7 +225,9 @@
         "admin",
         "operating",
         "capital",
-        "total"
+        "total",
+        "authority",
+        "annualPublic"
       ],
       "properties": {
         "driver": {
@@ -175,6 +257,14 @@
         "total": {
           "type": "number",
           "minimum": 0
+        },
+        "authority": {
+          "type": "number",
+          "minimum": 0
+        },
+        "annualPublic": {
+          "type": "number",
+          "minimum": 0
         }
       }
     },
@@ -186,7 +276,8 @@
         "transportCost",
         "administrativeSaving",
         "operatingSaving",
-        "netAgainstAdministrativeSaving"
+        "netAgainstAdministrativeSaving",
+        "scope"
       ],
       "properties": {
         "transportCost": {
@@ -201,6 +292,10 @@
         },
         "netAgainstAdministrativeSaving": {
           "type": "number"
+        },
+        "scope": {
+          "type": "string",
+          "description": "What the ledger figure covers. Buses including their authority; rail is deliberately not summed, because rail-cost.json prices unit costs for different passengers on different routes."
         }
       }
     },

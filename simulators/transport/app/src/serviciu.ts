@@ -298,6 +298,14 @@ export interface Prices {
   serviceSpeedFactor: number;
   dwellMinPerStop: number;
   weekdaysPerYear: number;
+  /**
+   * What the 42 county transport authorities cost in a year, already resolved.
+   *
+   * Precomputed at price-load time because it depends on nothing the network does: an
+   * authority is a staff of planners and procurement people whether the buses run twice a day
+   * or ten times. Kept in parity with `scripts/authority.py`.
+   */
+  authorityRon: number;
 }
 
 export interface Cost {
@@ -306,7 +314,12 @@ export interface Cost {
   standingRon: number;
   adminRon: number;
   capitalRon: number;
+  /** The operator alone. Every benchmark in this repository describes a bus company. */
   operatingRon: number;
+  /** The buyer: 42 authorities planning, tendering and collecting the fares. */
+  authorityRon: number;
+  /** Operator plus authority — what a year of the system costs the public. */
+  annualPublicRon: number;
   totalRon: number;
 }
 
@@ -336,6 +349,7 @@ export function annualCost(
     capital += (count * (prices.vehiclePrice[name] ?? 0)) / prices.vehicleLifeYears;
   }
   const operating = driver + running + standing + admin;
+  const annualPublic = operating + prices.authorityRon;
   return {
     driverRon: driver,
     runningRon: running,
@@ -343,7 +357,9 @@ export function annualCost(
     adminRon: admin,
     capitalRon: capital,
     operatingRon: operating,
-    totalRon: operating + capital,
+    authorityRon: prices.authorityRon,
+    annualPublicRon: annualPublic,
+    totalRon: annualPublic + capital,
   };
 }
 
@@ -395,6 +411,13 @@ export function loadPrices(document: {
     perVehicleYear:
       item('insurancePerVehicleYear') + item('depotPerVehicleYear') + item('roadTaxPerVehicleYear'),
     adminShare: item('adminOverheadShare'),
+    authorityRon:
+      (item('authorityCount') *
+        item('authorityStaffEach') *
+        item('authorityStaffGrossMonthly') *
+        (1 + item('employerContributionRate')) *
+        12) /
+      (1 - item('authorityNonStaffShare')),
     vehiclePrice: price,
     vehicleLifeYears: item('vehicleLifeYears'),
     electricRangeKm: item('electricRangeKm'),
@@ -515,7 +538,10 @@ export function lifetimeCost(
   // So the depot bill rises exactly as far as the route rule asks for battery vehicles, rather
   // than by a policy percentage nobody derived.
   const depotCapex = fleet * depotCapexPerBus + electricSpaces * depotElectricPremiumPerBus;
-  const opex = cost.operatingRon * years;
+  // The authority is owed every year the service runs, exactly like the operator, so the
+  // lifetime figure takes the public annual cost rather than the operator's alone. Using
+  // operatingRon here understated a twelve-year programme by the whole institution.
+  const opex = cost.annualPublicRon * years;
   return {
     fleetCapexRon: fleetCapex,
     depotCapexRon: depotCapex,
@@ -702,6 +728,10 @@ export function costNetwork(
   const standing = fleetTotal * prices.perVehicleYear;
   const admin = (driver + running + standing) * prices.adminShare;
   const operating = driver + running + standing + admin;
+  // The authority is owed whatever the traction mix turns out to be: it plans and tenders the
+  // network, it does not drive it. Kept out of `operatingRon` so the operator-side benchmarks
+  // still compare against a bus company.
+  const annualPublic = operating + prices.authorityRon;
   const totals: Cost = {
     driverRon: driver,
     runningRon: running,
@@ -709,7 +739,9 @@ export function costNetwork(
     adminRon: admin,
     capitalRon,
     operatingRon: operating,
-    totalRon: operating + capitalRon,
+    authorityRon: prices.authorityRon,
+    annualPublicRon: annualPublic,
+    totalRon: annualPublic + capitalRon,
   };
 
   return {

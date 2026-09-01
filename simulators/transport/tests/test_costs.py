@@ -136,10 +136,50 @@ def built() -> dict:
 
 
 def test_the_totals_add_up(built):
+    """Three levels, and they must stay distinct.
+
+    `operating` is the OPERATOR alone — every benchmark in this repository describes a bus
+    company, so folding the authority into it would silently break the driver-share and
+    cost-per-km checks. `annualPublic` adds the authority. `total` adds annualised capital.
+    """
     annual = built["annualRon"]
     parts = annual["driver"] + annual["running"] + annual["standing"] + annual["admin"]
     assert annual["operating"] == pytest.approx(parts, rel=1e-6)
-    assert annual["total"] == pytest.approx(annual["operating"] + annual["capital"], rel=1e-6)
+    assert annual["annualPublic"] == pytest.approx(
+        annual["operating"] + annual["authority"], rel=1e-6
+    )
+    assert annual["total"] == pytest.approx(annual["annualPublic"] + annual["capital"], rel=1e-6)
+    assert annual["authority"] > 0, "the buyer must not vanish from the ledger again"
+
+
+def test_the_ledger_counts_the_authority_and_says_it_excludes_rail(built):
+    """The two things that made the headline misleading.
+
+    The transport side of the ledger was missing its own institution, which understated it.
+    And nothing said the figure was buses only, so a reader could not tell that rail's 282 md
+    of extra track sat outside it — deliberately, because rail-cost.json prices unit costs for
+    different passengers on different routes rather than a second helping of the same journeys.
+    """
+    assert built["ledgerRon"]["transportCost"] == pytest.approx(
+        built["annualRon"]["total"], rel=1e-6
+    )
+    assert "cale ferată" in built["ledgerRon"]["scope"]
+
+
+def test_the_authority_is_built_from_people_and_checked_against_movia(built):
+    """Bottom-up on purpose. A share-of-operator-cost model would have produced a number with
+    no visible assumption; this one puts the staff count in the open where it can be attacked.
+
+    Below Movia is the expected result — Movia runs Rejsekort, DOT and customer centres for 45
+    municipalities. Far below would mean the staffing is too thin to be credible.
+    """
+    authority = built["authority"]
+    assert authority["staffTotal"] == authority["count"] * authority["staffEach"]
+    assert authority["salariesRon"] + authority["nonStaffRon"] == pytest.approx(
+        built["annualRon"]["authority"], rel=1e-6
+    )
+    assert authority["shareOfOperatorCost"] < authority["moviaShare"]
+    assert authority["shareOfOperatorCost"] > authority["moviaShare"] * 0.5
 
 
 def test_the_ledger_carries_both_columns(built):

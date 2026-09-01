@@ -50,14 +50,27 @@
     "standing": 51860631,
     "admin": 187479823,
     "operating": 1749811678,
+    "authority": 197148470,
+    "annualPublic": 1946960149,
     "capital": 276441961,
-    "total": 2026253639
+    "total": 2223402110
+  },
+  "authority": {
+    "count": 42,
+    "staffEach": 22,
+    "staffTotal": 924,
+    "salariesRon": 108431659,
+    "nonStaffRon": 88716812,
+    "perAuthorityRon": 4694011,
+    "shareOfOperatorCost": 0.1127,
+    "moviaShare": 0.156
   },
   "ledgerRon": {
-    "transportCost": 2026253639,
+    "scope": "autobuz, inclusiv autoritatea; fără cale ferată",
+    "transportCost": 2223402110,
     "administrativeSaving": 8727843155,
     "operatingSaving": 32651674949,
-    "netAgainstAdministrativeSaving": 6701589516
+    "netAgainstAdministrativeSaving": 6504441045
   },
   "limitations": [
     {
@@ -95,6 +108,22 @@
     {
       "id": "reperul-buzau-nu-se-poate-converti",
       "text": "Costul de funcționare iese 6,87 lei pe kilometru, față de circa 9 lei cât ar fi o operare rurală vest-europeană cu partea de salarii ajustată la nivelul românesc — deci verificarea care se poate face TRECE. Ce nu se poate face este conversia tarifului aprobat la Buzău în 2025, 0,35 lei/km/loc: metodologia ANRSC împarte costul pe kilometru-vehicul la numărul mediu de LOCURI, iar costul pe kilometru nu crește proporțional cu locurile — același șofer, aceleași anvelope, ceva mai multă motorină. Înmulțirea cu numărul de locuri nu corespunde nici unei mărimi reale, iar compoziția parcului din Buzău, care ar fi singura cale de conversie, este într-un PDF scanat. Cifra rămâne consemnată pentru că este singura măsurătoare românească de exploatare găsită, dar nu este un test picat: este un test care nu se poate da.",
+      "severity": "note",
+      "affects": [
+        "cost"
+      ]
+    },
+    {
+      "id": "personalul-autoritatii-e-parametrul-liber",
+      "text": "Autoritatea de transport costă 197,1 milioane de lei pe an, adică 4,69 milioane pe județ, și se construiește de jos în sus din 22 oameni de autoritate — planificare, licitații, contracte, venituri, IT, juridic. Numărul de oameni este PRESUPUS și este singura cifră care contează aici: iese 11,3% din plățile către operator, față de 15,6% cât costă Movia să fie Movia pe partea de autobuz. Sub reperul danez, cum era de așteptat pentru o autoritate pornită de la zero față de una care rulează Rejsekort și centre de clienți — dar dacă adevărul este mai aproape de Movia, costul de aici crește cu circa o treime. Ce lipsește complet: costul de înființare, pentru că modelul dă un an de regim permanent.",
+      "severity": "material",
+      "affects": [
+        "cost"
+      ]
+    },
+    {
+      "id": "biletele-sunt-numarate-de-doua-ori",
+      "text": "Cota de administrație a operatorului, 12%, include vânzarea biletelor și controlul, iar în regimul gross-cost din INSTITUTIONS.md acestea aparțin autorității, care este acum o linie separată. Deci sunt numărate de două ori. Suprapunerea umflă costul transportului, ceea ce este sensul prudent atunci când cifra se pune alături de o economie administrativă — dar este o eroare cunoscută, nu o marjă. Împărțirea celor 12% între operator și autoritate ar cere o bază pe care acest depozit nu o are.",
       "severity": "note",
       "affects": [
         "cost"

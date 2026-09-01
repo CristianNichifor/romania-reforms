@@ -14,23 +14,31 @@ and recomputes centres, routes, journeys, fleet, drivers, capacity and cost for 
 Measured road limits → derived speeds → hubs → routes → fleet → cost in lei → journey times →
 rail track and rail cost, all following the reader's own map.
 
-**Nothing here is validated against a recorded Romanian journey.** No such observation exists in
-this repository. The model is defensible part by part and unverified as a whole; that is a
-declared limitation carried in provenance, and every number inherits it. Rail is the exception in
-one direction only — its speed model is anchored at both ends, to a measurement and to a
-published national average.
+**Checked at both ends, and the two checks disagree in opposite directions.** The composite
+commercial speed is 3,7% *slow* against 552 timetabled county bus runs read out of six county
+councils' transport programmes; the road layer alone is ~10% *fast* against twelve routed car
+drives in Vâlcea. Neither reference is ground truth and no measurement of Romanian free-flow
+speed by class exists, so the errors are bounded and directional rather than resolved — which is
+the most that can honestly be claimed, and is carried in provenance so every number inherits it.
+Rail is anchored separately, at both ends, to a measurement and to a published national average.
 
 ## The headline
 
-At the administrative model's default parameters, proposed service level:
+These are the **committed pipeline run** at the administrative model's default parameters and
+the proposed service level — every figure below is read back out of `data/` by a test, so it
+cannot drift. The browser recomputes the whole network live against whatever scenario the
+reader builds, so its numbers will differ from these.
 
 ```
-network      249 centres  1.961 routes  4.387 buses  4.705 drivers
-capacity     11.766 million seat-km a year   0,172 lei per seat-km
-money        OPEX 1,66 md/yr   vehicles 4,36 md   depots 3,88 md
-             28,20 md lei over twelve years, undiscounted
-demand       25% of offered seats, from population
-             tickets 1,03 md, subsidy 0,63 md, 37 lei a head
+network      249 centres  1.708 routes  2.923 of 3.186 UATs reached
+fleet        4.057 buses  5.552 drivers  6.538 duties a weekday
+money        operator 1,75 md/yr  authority 0,20 md/yr  = 1,95 md public
+             vehicles annualised 0,28 md  → 2,22 md a year, all in
+authority    42 bodies, 22 staff each — 11,3% of operator cost, Movia 15,6%
+demand       22% of offered seats, from population
+             tickets 0,80 md, subsidy 1,14 md, 68 lei a head, 41% recovery
+ledger       transport 2,22 md against an administrative saving of 8,73 md
+             buses only — rail is priced separately and NOT added
 rail         magistrale 9.839 km, secondary 2.677 km, 1.993 stations
              45,0 km/h as the track stands, 74,3 km/h rehabilitated
 ```
