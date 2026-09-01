@@ -179,6 +179,20 @@ interface Eficienta {
   limitations: Limitation[];
 }
 
+interface ParcheteArondare {
+  summary: {
+    seats: number;
+    countiesDiffering: number;
+    volumeChangingSeat: number;
+    shareChangingSeat: number;
+    invariantShare: number;
+    biggestShift: { name: string; delta: number } | null;
+    spread: { min: number; max: number; maxOverMin: number };
+    countySpreadMaxOverMin: number;
+  };
+  limitations: Limitation[];
+}
+
 interface ParcheteIncadrare {
   summary: {
     arrivals: number;
@@ -627,6 +641,7 @@ async function main(): Promise<void> {
     incarcatura,
     parcheteRegiuni,
     incadrare,
+    parcheteArondare,
   ] = await Promise.all([
     fetch(`${base}data/instante.json`).then((r) => r.json() as Promise<Document>),
     fetch(`${base}data/counties.geojson`).then((r) => r.json()),
@@ -653,6 +668,7 @@ async function main(): Promise<void> {
     fetch(`${base}data/incarcatura.json`).then((r) => r.json() as Promise<Incarcatura>),
     fetch(`${base}data/parchete-regiuni.json`).then((r) => r.json() as Promise<ParcheteRegiuni>),
     fetch(`${base}data/parchete-incadrare.json`).then((r) => r.json() as Promise<ParcheteIncadrare>),
+    fetch(`${base}data/parchete-arondare.json`).then((r) => r.json() as Promise<ParcheteArondare>),
   ]);
   const countyName = (code: string): string => manifest.countyNames?.[code] ?? code;
 
@@ -1842,6 +1858,7 @@ async function main(): Promise<void> {
   const cm = comasare.summary;
   const pr = parcheteRegiuni;
   const inc = incadrare;
+  const pa = parcheteArondare;
   el('#comasare-chev').textContent =
     `${dec(cm.spreadBefore.maxOverMin, 1)}× → ${dec(cm.spreadAfter.maxOverMin, 1)}×`;
   el('#comasare-body').innerHTML =
@@ -1883,8 +1900,31 @@ async function main(): Promise<void> {
      <p class="disagree"><strong>Ce nu spune calculul.</strong> Dosarele celor două niveluri
        sunt adunate, deși unul de la tribunal nu e cât unul de la judecătorie — comasarea
        propusă exact asta presupune. Se numără dosare de soluționat, nu muncă dusă la capăt.
-       Și comasarea e pe județ, fiindcă asta scrie în 7.3: spre deosebire de instanțe, parchetele
-       nu se pot aronda după distanță, pentru că nu se publică ce comune acoperă fiecare.</p>
+       Comasarea de mai sus e pe județ, fiindcă asta scrie în 7.3.</p>
+     <h4 class="sub-head">Dacă parchetele merg cu instanțele</h4>
+     <p class="note">Pagina asta a susținut o vreme că parchetele nu se pot aronda după
+       distanță, ca instanțele, fiindcă nu se publică ce comune acoperă un parchet. Era greșit:
+       un parchet <em>de pe lângă</em> o judecătorie lucrează în circumscripția acelei
+       judecătorii, iar circumscripția e publicată — a instanței, în HG 1217/2023. Nu lipsea un
+       document, lipsea o observație. Rutate ca dosarele instanțelor, parchetele ies în aceleași
+       ${pa.summary.seats} de orașe.</p>
+     <p class="disagree"><strong>Asta mută muncă.</strong>
+       ${pa.summary.countiesDiffering} din cele ${pa.summary.seats} de sedii primesc altceva
+       decât la comasarea pe județ, iar ${ro.format(pa.summary.volumeChangingSeat)} de dosare —
+       ${dec(pa.summary.shareChangingSeat * 100, 1)}% din total — schimbă sediul.${
+         pa.summary.biggestShift
+           ? ` Cel mai mult ${pa.summary.biggestShift.name}, cu ${
+               pa.summary.biggestShift.delta > 0 ? '+' : ''
+             }${ro.format(pa.summary.biggestShift.delta)}.`
+           : ''
+       }</p>
+     <p class="disagree"><strong>Și costă ceva.</strong> Încărcătura iese ceva mai puțin egală,
+       nu mai egală: ${dec(pa.summary.spread.maxOverMin, 2)}× între sedii, față de
+       ${dec(pa.summary.countySpreadMaxOverMin, 2)}× la comasarea pe județ. Ăsta e schimbul.
+       Arondarea parchetelor odată cu instanțele nu e o optimizare de încărcătură și nu se dă
+       drept una — cumpără exact ce susține capitolul 7: procurorul, judecătorul și poliția în
+       același oraș cu dosarul. Comasarea pe județ, cu instanțele arondate după distanță, ar fi
+       rupt tocmai asta pentru cele 48 de unități a căror instanță e în alt județ.</p>
      <h4 class="sub-head">Și nivelul de deasupra, pe regiuni</h4>
      <p class="note"><strong>Variantă, nu lucrarea.</strong> 7.3 lasă cele
        ${pr.summary.officesBefore} parchete de pe lângă curțile de apel neatinse. Dar
@@ -2485,6 +2525,7 @@ async function main(): Promise<void> {
     ...incarcatura.limitations,
     ...parcheteRegiuni.limitations,
     ...incadrare.limitations,
+    ...parcheteArondare.limitations,
   ];
   const blocking = allLimits.filter((l) => l.severity === 'blocking');
   const rest = allLimits.filter((l) => l.severity !== 'blocking');

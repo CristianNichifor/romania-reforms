@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/parchete-arondare.schema.json",
+  "title": "Prosecution offices routed by road distance, alongside the courts",
+  "description": "parchete-comasare merged prosecution offices by county and claimed, as a blocking limitation, that they could not be routed by distance because no document publishes which communes an office covers. That was wrong: a parchet de pe lângă a court acts in that court's circumscription, which HG 1217/2023 publishes. This routes prosecution volume the same way the court caseload is routed, so the two maps agree by construction and the prosecutor sits in the same town as the judge. It is a variant of a variant — the paper merges by county — and it is reported with its cost, which is a slightly less even workload than the county merge produces.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "period",
+    "variantOfPaper",
+    "provenance",
+    "summary",
+    "offices",
+    "differences",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "const": "parchete-arondare" },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "period": { "type": "string" },
+    "variantOfPaper": { "const": true },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "seats",
+        "totalVolume",
+        "totalProsecutors",
+        "invariantVolume",
+        "invariantShare",
+        "unreachableVolume",
+        "dormantOffices",
+        "countiesDiffering",
+        "volumeChangingSeat",
+        "shareChangingSeat",
+        "biggestShift",
+        "spread",
+        "countySpreadMaxOverMin"
+      ],
+      "properties": {
+        "seats": { "const": 42 },
+        "totalVolume": { "type": "integer", "exclusiveMinimum": 0 },
+        "totalProsecutors": { "type": "number", "exclusiveMinimum": 0 },
+        "invariantVolume": { "type": "integer", "minimum": 0 },
+        "invariantShare": {
+          "description": "Share of level-one volume belonging to offices whose whole territory lands at one seat, and which therefore does not depend on the population split.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "unreachableVolume": { "type": "integer", "minimum": 0 },
+        "dormantOffices": { "type": "array", "items": { "type": "string" } },
+        "countiesDiffering": { "type": "integer", "minimum": 0 },
+        "volumeChangingSeat": { "type": "integer", "minimum": 0 },
+        "shareChangingSeat": { "type": "number", "minimum": 0, "maximum": 1 },
+        "biggestShift": {
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "required": ["county", "name", "delta"],
+          "properties": {
+            "county": { "type": "string", "minLength": 1, "maxLength": 2 },
+            "name": { "type": "string" },
+            "delta": { "type": "integer" }
+          }
+        },
+        "spread": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["min", "max", "median", "maxOverMin"],
+          "properties": {
+            "min": { "type": "number", "exclusiveMinimum": 0 },
+            "max": { "type": "number", "exclusiveMinimum": 0 },
+            "median": { "type": "number", "exclusiveMinimum": 0 },
+            "maxOverMin": { "type": "number", "exclusiveMinimum": 0 }
+          }
+        },
+        "countySpreadMaxOverMin": {
+          "description": "The same measure for the county merge, carried so the trade is visible rather than asserted.",
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+
+    "offices": {
+      "type": "array",
+      "minItems": 42,
+      "maxItems": 42,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["siruta", "name", "county", "volume", "prosecutors", "perProsecutor"],
+        "properties": {
+          "siruta": { "type": "string" },
+          "name": { "type": "string" },
+          "county": { "type": "string", "minLength": 1, "maxLength": 2 },
+          "volume": { "type": "integer", "minimum": 0 },
+          "prosecutors": { "type": "number", "minimum": 0 },
+          "perProsecutor": { "type": ["number", "null"], "minimum": 0 }
+        }
+      }
+    },
+
+    "differences": {
+      "description": "Seats whose caseload differs from the county merge, largest first.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["county", "name", "delta"],
+        "properties": {
+          "county": { "type": "string", "minLength": 1, "maxLength": 2 },
+          "name": { "type": "string" },
+          "delta": { "type": "integer" }
+        }
+      }
+    },
+
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+    }
+  }
+}
