@@ -137,3 +137,20 @@ def test_the_nearest_region_is_one_of_the_eight(apel):
     names = {r["region"] for r in apel["regions"]}
     for county in apel["counties"]:
         assert county["nearestRegion"] in names
+
+
+def test_the_missing_circumscriptions_name_the_document_that_would_close_them(apel):
+    """A blocking caveat that says only "not published" is unfalsifiable and unactionable.
+
+    This one was re-examined after the identical claim turned out to be wrong for prosecution —
+    there, the office's territory was its court's, and HG 1217/2023 had it all along. Here it
+    held: the decision arondates only judecatorii, and the CSM annexes list courts flat and
+    alphabetically without grouping them under a court of appeal. So the caveat stays blocking,
+    but it now names the source that would close it rather than implying none exists.
+    """
+    caveat = next(
+        x for x in apel["limitations"] if x["id"] == "circumscriptiile-nu-sunt-publicate-aici"
+    )
+    assert caveat["severity"] == "blocking"
+    assert "304/2022" in caveat["text"], "the caveat must name the document it is missing"
+    assert "HG 1217/2023" in caveat["text"], "and say which sources were checked"
