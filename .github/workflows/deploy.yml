@@ -68,6 +68,15 @@ jobs:
           npm ci
           npm run build
 
+      - name: Build impozit-teren
+        working-directory: simulators/impozit-teren/app
+        env:
+          VITE_BASE: /${{ github.event.repository.name }}/impozit-teren/
+        run: |
+          npm ci
+          npm test
+          npm run build
+
       - name: Assemble the site
         run: |
           mkdir -p dist
@@ -76,6 +85,7 @@ jobs:
           cp -r simulators/salarizare/app/dist dist/salarizare
           cp -r simulators/administrativ/web/dist dist/administrativ
           cp -r simulators/justitie/app/dist dist/justitie
+          cp -r simulators/impozit-teren/app/dist dist/impozit-teren
           cp -r simulators/transport/app/dist dist/transport
 
       # One deploy for the whole repository means a simulator that failed to build would
@@ -84,7 +94,8 @@ jobs:
       - name: Check every advertised path exists
         run: |
           fail=0
-          for path in index.html salarizare/index.html administrativ/index.html justitie/index.html transport/index.html; do
+          for path in index.html salarizare/index.html administrativ/index.html \
+                      justitie/index.html transport/index.html impozit-teren/index.html; do
             if [ -s "dist/$path" ]; then
               echo "ok   dist/$path"
             else
@@ -141,15 +152,21 @@ jobs:
           # survives minification as `className:"up"` and never as `class="up"`, so a check on
           # the attribute passed for three apps and failed for the one whose link is built by a
           # framework. The words a reader clicks are the thing being guaranteed anyway.
-          for sim in salarizare administrativ justitie transport; do
+          for sim in salarizare administrativ justitie transport impozit-teren; do
             if grep -rqs 'Toate simulatoarele' "dist/$sim/index.html" dist/$sim/assets/*.js; then
               echo "ok   dist/$sim has a link back"
             else
               echo "MISSING back link in dist/$sim"; fail=1
             fi
           done
+          # The land tax page computes from its data rather than displaying a finished
+          # answer, so without these files it renders an empty table instead of failing.
+          for path in cod-fiscal.json manifest.json valoare-bc.json impozit-bc.json; do
+            [ -s "dist/impozit-teren/data/$path" ] || {
+              echo "MISSING dist/impozit-teren/data/$path"; fail=1; }
+          done
           # Every link on the landing page must resolve to something that was built.
-          for href in $(grep -o 'href="[a-z]*/"' site/index.html | cut -d'"' -f2); do
+          for href in $(grep -o 'href="[a-z-]*/"' site/index.html | cut -d'"' -f2); do
             [ -s "dist/${href}index.html" ] || { echo "landing page links to missing $href"; fail=1; }
           done
           # The icon is mirrored into each app's public/ so it resolves in dev and in preview
@@ -158,7 +175,8 @@ jobs:
           copies=$(sha256sum site/favicon.svg simulators/*/*/public/favicon.svg | cut -d' ' -f1 | sort -u | wc -l)
           [ "$copies" = 1 ] || { echo "favicon copies have drifted apart"; fail=1; }
           for path in favicon.svg salarizare/favicon.svg administrativ/favicon.svg \
-                      justitie/favicon.svg transport/favicon.svg; do
+                      justitie/favicon.svg transport/favicon.svg \
+                      impozit-teren/favicon.svg; do
             [ -s "dist/$path" ] || { echo "MISSING dist/$path"; fail=1; }
           done
           exit $fail

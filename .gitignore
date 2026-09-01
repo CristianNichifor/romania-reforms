@@ -22,3 +22,16 @@ simulators/*/sources/*.pdf
 # And the pension bill: mmuncii.gov.ro may be as unreachable from CI as sgg.gov.ro proved to
 # be, and 235 KB is a cheap way not to find out during a deploy.
 !simulators/justitie/sources/lege-pensii-magistrati-2025.pdf
+simulators/*/sources/*.html
+
+# And the machine-readable sources the importers fetch: the INS matrix definition and the
+# ECB reference rates. Both are re-fetched on every run, and the rates file changes daily,
+# so committing it would put a diff in the repository every morning.
+simulators/impozit-teren/sources/ins-*.json
+simulators/impozit-teren/sources/ecb-*.xml
+
+# The country-wide study cache: ~300 MB of PDFs and their extracted tables, all
+# re-fetchable and re-derivable. Neither belongs in git.
+simulators/impozit-teren/sources/studies/
+simulators/impozit-teren/sources/unnpr-index.html
+simulators/impozit-teren/cache/
