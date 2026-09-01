@@ -34,6 +34,7 @@ import html
 import json
 import re
 import sys
+import time
 import urllib.request
 from pathlib import Path
 
@@ -67,12 +68,34 @@ TO_NOTARY = {
 
 
 def download() -> str:
-    if not SOURCE.exists():
+    """The consolidated Fiscal Code, retried, because the portal hangs up.
+
+    A CI run died on `RemoteDisconnected: Remote end closed connection without response`
+    partway through 7,6 MB from legislatie.just.ro. Nothing was wrong with the request — the
+    same one succeeds on the next attempt — so a single hang-up must not fail a build.
+
+    Not cached in git, unlike the pension law that this repository does commit for the same
+    class of reason. That file is 235 KB and this one is 7,6 MB, which is a different trade:
+    cheap insurance at a quarter of a megabyte, and a third of the repository at seven and a
+    half. A partial write is deleted rather than left, because a truncated 7 MB page parses
+    into a Fiscal Code with some articles missing and no error anywhere.
+    """
+    for retry in range(4):
+        if SOURCE.exists():
+            break
         print(f"downloading {URL} ...")
-        request = urllib.request.Request(URL, headers={"User-Agent": UA})
-        with urllib.request.urlopen(request, timeout=300) as response:  # noqa: S310
+        try:
+            request = urllib.request.Request(URL, headers={"User-Agent": UA})
+            with urllib.request.urlopen(request, timeout=300) as response:  # noqa: S310
+                body = response.read()
             SOURCE.parent.mkdir(parents=True, exist_ok=True)
-            SOURCE.write_bytes(response.read())
+            SOURCE.write_bytes(body)
+        except OSError as error:
+            SOURCE.unlink(missing_ok=True)
+            print(f"  attempt {retry + 1} failed: {error}", file=sys.stderr)
+            time.sleep(5 * (retry + 1))
+    if not SOURCE.exists():
+        raise SystemExit(f"could not download {URL} after 4 attempts")
     return SOURCE.read_text(encoding="utf-8", errors="ignore")
 
 
