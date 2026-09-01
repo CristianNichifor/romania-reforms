@@ -250,6 +250,23 @@ interface Incarcatura {
     busiestJudges: number;
     quietest: string;
     quietestVolume: number;
+    staffing: {
+      judgesInherited: number;
+      tierLoadPerJudge: number;
+      courtsShort: number;
+      courtsLong: number;
+      arrivals: number;
+      departures: number;
+      shareOfBenchMoving: number | null;
+      mostShort: string;
+      mostShortBy: number;
+      mostLong: string;
+      mostLongBy: number;
+      loadPerJudgeSpread: { min: number; max: number; maxOverMin: number };
+      vacantJudgePosts: number;
+      vacanciesCoverArrivals: boolean;
+      arrivalsAsShareOfVacancies: number | null;
+    };
   };
   courts: { name: string; county: string; volume: number; judgesAtNationalLoad: number }[];
   limitations: Limitation[];
@@ -1743,6 +1760,7 @@ async function main(): Promise<void> {
   // The question a court president asks first, and the one the map never answered: not how many
   // judges the country needs, but what this court would have to judge.
   const ic = incarcatura.summary;
+  const st = ic.staffing;
   // Seat names arrive from the UAT register shouting — "MUNICIPIUL MIERCUREA CIUC" — which is
   // fine in a table and wrong in the middle of a sentence.
   const town = (name: string): string =>
@@ -1791,7 +1809,32 @@ async function main(): Promise<void> {
        se împart pe comune după populație, fiindcă nu se publică de unde vine fiecare dosar.
        Dar ${dec(ic.invariantShare * 100, 1)}% din volum merge întreg la o singură instanță
        propusă — pentru partea aceea, împărțirea nu contează deloc. Restul de
-       ${dec((1 - ic.invariantShare) * 100, 1)}% e singurul care depinde de ea.</p>`;
+       ${dec((1 - ic.invariantShare) * 100, 1)}% e singurul care depinde de ea.</p>
+     <h4 class="sub-head">Și cine e acolo să judece</h4>
+     <p class="note">Judecătorii merg pe același drum ca dosarele lor: dacă șapte zecimi din
+       munca unei judecătorii ajung la un sediu, șapte zecimi din completul ei merg cu ea. Cele
+       ${ic.courtsAfter} de instanțe moștenesc așa
+       ${ro.format(Math.round(st.judgesInherited))} de judecători, adică
+       ${ro.format(Math.round(st.tierLoadPerJudge))} de dosare de fiecare.</p>
+     <p class="disagree"><strong>Completele sunt mult mai bine potrivite decât schemele
+       parchetelor.</strong> Între cele ${ic.courtsAfter} de instanțe propuse, încărcătura pe
+       judecător merge de la ${ro.format(Math.round(st.loadPerJudgeSpread.min))} la
+       ${ro.format(Math.round(st.loadPerJudgeSpread.max))} de dosare —
+       ${dec(st.loadPerJudgeSpread.maxOverMin, 2)}×. La parchetele județene raportul e
+       ${dec(comasare.summary.spreadAfter.maxOverMin, 2)}×. Ca fiecare instanță să fie la fel de încărcată ar
+       trebui să ajungă ${ro.format(Math.round(st.arrivals))} de judecători în altă parte —
+       ${dec((st.shareOfBenchMoving ?? 0) * 100, 0)}% din complete. ${st.courtsShort} instanțe
+       sunt sub, ${st.courtsLong} peste; cea mai scurtă e
+       ${town(st.mostShort)} cu ${ro.format(Math.round(st.mostShortBy))}, cea mai lungă
+       ${town(st.mostLong)} cu ${ro.format(Math.round(st.mostLongBy))}.</p>
+     <p class="disagree"><strong>Și aici încap în posturile goale.</strong> Sunt
+       ${ro.format(st.vacantJudgePosts)} de posturi de judecător vacante, iar cei
+       ${ro.format(Math.round(st.arrivals))} sunt
+       ${dec((st.arrivalsAsShareOfVacancies ?? 0) * 100, 0)}% din ele: diferența s-ar acoperi
+       din repartiția celor care intră, nu din mutarea celor care sunt. Ceea ce contează mai
+       mult decât la procurori — un judecător e inamovibil, iar transferul lui e cu atât mai
+       puțin o chestiune de aritmetică. Cifra spune cât de departe e completul de muncă, nu că
+       cineva ar trebui mutat.</p>`;
 
   // The one finding on this page that goes the paper's way — and an argument it never makes.
   // Presented with the concentration it also causes, because reporting only the favourable half

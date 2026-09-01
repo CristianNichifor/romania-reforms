@@ -113,3 +113,78 @@ def test_judges_are_a_size_not_an_establishment(load):
             court["volume"] / judecatorie["perJudge"], rel=1e-2
         )
     assert "judecatorii-la-media-nationala" in {x["id"] for x in load["limitations"]}
+
+
+# --- the bench against the work -------------------------------------------------------------
+#
+# The court half of what parchete-incadrare asks of the prosecution service. The first version
+# equalised against the published judecatorie average and produced 7 courts short against 34
+# long — an imbalance that read like a finding and was an artefact of comparing a bench that
+# includes tribunal judges against a rate derived from one that does not. These tests exist so
+# that cannot come back quietly.
+
+
+def test_the_bench_balances_because_the_target_is_its_own_mean(load):
+    staffing = load["summary"]["staffing"]
+    assert staffing["tierLoadPerJudge"] == pytest.approx(
+        load["summary"]["totalVolume"] / staffing["judgesInherited"], rel=1e-2
+    )
+    # Arrivals and departures can differ only by rounding to one decimal per court.
+    assert staffing["arrivals"] == pytest.approx(staffing["departures"], abs=len(load["courts"]) / 5)
+    assert staffing["courtsShort"] > 5
+    assert staffing["courtsLong"] > 5
+
+
+def test_each_court_carries_its_own_bench_arithmetic(load):
+    tier = load["summary"]["staffing"]["tierLoadPerJudge"]
+    for court in load["courts"]:
+        assert court["judgesToday"] >= 0
+        assert court["judgesEqualised"] == pytest.approx(court["volume"] / tier, rel=1e-2)
+        assert court["judgeDelta"] == pytest.approx(
+            court["judgesEqualised"] - court["judgesToday"], abs=0.15
+        )
+        if court["judgesToday"] > 0:
+            assert court["loadPerJudgeToday"] == pytest.approx(
+                court["volume"] / court["judgesToday"], rel=1e-2
+            )
+
+
+def test_judges_travel_the_same_route_as_their_cases(load):
+    """Apportioned on the same weights, so the two sides are comparable at the far end. If the
+    inherited bench ever stopped totalling the national one, the apportionment has drifted."""
+    if not LOCATED.exists():
+        pytest.skip("court register not built")
+    courts = json.loads(LOCATED.read_text(encoding="utf-8"))["courts"]
+    # Derived from the register rather than pinned to a number: every judge sitting in a
+    # judecatorie or a tribunal today has to arrive somewhere in the merged map, or be counted
+    # as unreachable. A literal here would survive the register changing underneath it.
+    expected = sum(
+        c["judges"] or 0 for c in courts if c["tier"] in ("judecatorie", "tribunal")
+    )
+    staffing = load["summary"]["staffing"]
+    inherited = sum(c["judgesToday"] for c in load["courts"])
+    assert inherited == pytest.approx(staffing["judgesInherited"], rel=1e-3)
+    assert inherited + load["summary"]["unreachableJudges"] == pytest.approx(
+        expected, rel=0.01
+    ), "the bench routed no longer matches the register's derived total"
+
+
+def test_the_court_rebalancing_fits_inside_the_vacancies(load):
+    staffing = load["summary"]["staffing"]
+    assert staffing["vacanciesCoverArrivals"] is True
+    assert staffing["arrivals"] < staffing["vacantJudgePosts"]
+    assert staffing["arrivalsAsShareOfVacancies"] == pytest.approx(
+        staffing["arrivals"] / staffing["vacantJudgePosts"], rel=1e-2
+    )
+
+
+def test_the_bench_is_better_aligned_than_the_prosecution_one(load):
+    """Reported as the contrast it is: courts start far more even than prosecution offices, so
+    there is less here to fix."""
+    assert load["summary"]["staffing"]["loadPerJudgeSpread"]["maxOverMin"] < 3
+
+
+def test_it_refuses_to_be_a_personnel_plan(load):
+    blocking = {x["id"] for x in load["limitations"] if x["severity"] == "blocking"}
+    assert "incadrarea-nu-e-un-plan-de-personal" in blocking
+    assert "judecatorii-mosteniti-sunt-derivati" in {x["id"] for x in load["limitations"]}

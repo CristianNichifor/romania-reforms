@@ -5,15 +5,35 @@
   "description": "The map says where every consolidated unit goes and the cost model says how many judges the country needs, but nothing said what any individual proposed court would have to judge. This routes the CSM's per-court volume through the legal arondare of HG 1217/2023 to communes, through the administrative model to consolidated units, and through arondare-noua to one of 42 seats. The split of a court's cases across its communes is weighted by population and that is an assumption; invariantShare measures how much of the national volume does not depend on it, by counting the courts whose whole territory lands at a single seat.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "title", "publisher", "period", "provenance", "summary", "courts", "limitations"],
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "period",
+    "provenance",
+    "summary",
+    "courts",
+    "limitations"
+  ],
   "properties": {
-    "$schema": { "type": "string" },
-    "id": { "const": "incarcatura-noua" },
-    "title": { "type": "string" },
-    "publisher": { "type": "string" },
-    "period": { "type": "string" },
-    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
-
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "const": "incarcatura-noua"
+    },
+    "title": {
+      "type": "string"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "period": {
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json#/$defs/provenance"
+    },
     "summary": {
       "type": "object",
       "additionalProperties": false,
@@ -41,44 +61,204 @@
         "unreachableVolume",
         "unreachableCommunes",
         "dormantCourts",
-        "localitiesNotInModel"
+        "localitiesNotInModel",
+        "unreachableJudges",
+        "staffing"
       ],
       "properties": {
-        "courtsBefore": { "type": "integer", "exclusiveMinimum": 0 },
-        "courtsAfter": { "const": 42 },
-        "routedVolume": { "type": "integer", "exclusiveMinimum": 0 },
-        "nationalLevelOneVolume": { "type": "integer", "exclusiveMinimum": 0 },
-        "invariantVolume": { "type": "integer", "minimum": 0 },
-        "invariantShare": { "type": "number", "minimum": 0, "maximum": 1 },
-        "splitVolume": { "type": "integer", "minimum": 0 },
-        "tribunalVolume": { "type": "integer", "minimum": 0 },
-        "totalVolume": { "type": "integer", "exclusiveMinimum": 0 },
-        "loadPerJudge": { "type": "number", "exclusiveMinimum": 0 },
-        "judgesNeeded": { "type": "number", "exclusiveMinimum": 0 },
-        "spreadToday": { "$ref": "#/$defs/spread" },
-        "spreadAfter": { "$ref": "#/$defs/spread" },
-        "spreadPerCapita": { "$ref": "#/$defs/spread" },
-        "busiest": { "type": "string" },
-        "busiestVolume": { "type": "integer", "exclusiveMinimum": 0 },
-        "busiestShareOfTotal": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
-        "busiestJudges": { "type": "number", "exclusiveMinimum": 0 },
-        "quietest": { "type": "string" },
-        "quietestVolume": { "type": "integer", "exclusiveMinimum": 0 },
+        "courtsBefore": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "courtsAfter": {
+          "const": 42
+        },
+        "routedVolume": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "nationalLevelOneVolume": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "invariantVolume": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "invariantShare": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "splitVolume": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "tribunalVolume": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "totalVolume": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "loadPerJudge": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "judgesNeeded": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "spreadToday": {
+          "$ref": "#/$defs/spread"
+        },
+        "spreadAfter": {
+          "$ref": "#/$defs/spread"
+        },
+        "spreadPerCapita": {
+          "$ref": "#/$defs/spread"
+        },
+        "busiest": {
+          "type": "string"
+        },
+        "busiestVolume": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "busiestShareOfTotal": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "busiestJudges": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "quietest": {
+          "type": "string"
+        },
+        "quietestVolume": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
         "unreachableVolume": {
           "description": "Cases belonging to communes whose consolidated unit has no road to any seat — the Danube Delta. Counted, not reassigned.",
           "type": "integer",
           "minimum": 0
         },
-        "unreachableCommunes": { "type": "integer", "minimum": 0 },
+        "unreachableCommunes": {
+          "type": "integer",
+          "minimum": 0
+        },
         "dormantCourts": {
           "description": "Courts the government decision defines but the CSM register does not report activity for.",
           "type": "array",
-          "items": { "type": "string" }
+          "items": {
+            "type": "string"
+          }
         },
-        "localitiesNotInModel": { "type": "integer", "minimum": 0 }
+        "localitiesNotInModel": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unreachableJudges": {
+          "type": "number",
+          "minimum": 0
+        },
+        "staffing": {
+          "description": "The court half of the question parchete-incadrare asks of the prosecution service: how far the bench sits from the work. Equalised against this tier's own mean, because these merged courts hold tribunal work and tribunal judges and the published judecatorie average describes a different population.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "judgesInherited",
+            "tierLoadPerJudge",
+            "judgesAtNationalLoad",
+            "courtsShort",
+            "courtsLong",
+            "arrivals",
+            "departures",
+            "shareOfBenchMoving",
+            "mostShort",
+            "mostShortBy",
+            "mostLong",
+            "mostLongBy",
+            "loadPerJudgeSpread",
+            "vacantJudgePosts",
+            "vacanciesCoverArrivals",
+            "arrivalsAsShareOfVacancies"
+          ],
+          "properties": {
+            "judgesInherited": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "tierLoadPerJudge": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "judgesAtNationalLoad": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "What the published judecatorie average would imply. Kept for comparison; it mixes tiers and is not the equalisation target."
+            },
+            "courtsShort": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "courtsLong": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "arrivals": {
+              "type": "number",
+              "minimum": 0
+            },
+            "departures": {
+              "type": "number",
+              "minimum": 0
+            },
+            "shareOfBenchMoving": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "maximum": 1
+            },
+            "mostShort": {
+              "type": "string"
+            },
+            "mostShortBy": {
+              "type": "number"
+            },
+            "mostLong": {
+              "type": "string"
+            },
+            "mostLongBy": {
+              "type": "number"
+            },
+            "loadPerJudgeSpread": {
+              "$ref": "#/$defs/spread"
+            },
+            "vacantJudgePosts": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "vacanciesCoverArrivals": {
+              "type": "boolean"
+            },
+            "arrivalsAsShareOfVacancies": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0
+            }
+          }
+        }
       }
     },
-
     "courts": {
       "type": "array",
       "minItems": 42,
@@ -96,41 +276,119 @@
           "upperVolume",
           "volume",
           "judgesAtNationalLoad",
-          "casesPerThousandPeople"
+          "casesPerThousandPeople",
+          "judgesToday",
+          "loadPerJudgeToday",
+          "judgesEqualised",
+          "judgeDelta"
         ],
         "properties": {
-          "siruta": { "type": "string" },
-          "name": { "type": "string" },
-          "county": { "type": "string", "minLength": 1, "maxLength": 2 },
-          "units": { "type": "integer", "exclusiveMinimum": 0 },
-          "population": { "type": "integer", "minimum": 0 },
-          "lowerVolume": { "type": "integer", "minimum": 0 },
-          "upperVolume": { "type": "integer", "minimum": 0 },
-          "volume": { "type": "integer", "minimum": 0 },
-          "judgesAtNationalLoad": { "type": "number", "minimum": 0 },
-          "casesPerThousandPeople": { "type": ["number", "null"], "minimum": 0 }
+          "siruta": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "county": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2
+          },
+          "units": {
+            "type": "integer",
+            "exclusiveMinimum": 0
+          },
+          "population": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "lowerVolume": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "upperVolume": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "volume": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "judgesAtNationalLoad": {
+            "type": "number",
+            "minimum": 0
+          },
+          "casesPerThousandPeople": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "judgesToday": {
+            "type": "number",
+            "minimum": 0,
+            "description": "The bench this seat inherits: each merging court's judges apportioned on the same weights as its cases."
+          },
+          "loadPerJudgeToday": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "judgesEqualised": {
+            "type": "number",
+            "minimum": 0,
+            "description": "The bench this seat's caseload implies at the merged tier's own mean load."
+          },
+          "judgeDelta": {
+            "type": "number",
+            "description": "Equalised minus inherited. Positive means the seat is short."
+          }
         }
       }
     },
-
     "limitations": {
       "type": "array",
       "minItems": 1,
-      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+      "items": {
+        "$ref": "provenance.schema.json#/$defs/limitation"
+      }
     }
   },
-
   "$defs": {
     "spread": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["min", "max", "median", "maxOverMin", "p90OverP10"],
+      "required": [
+        "min",
+        "max",
+        "median",
+        "maxOverMin",
+        "p90OverP10"
+      ],
       "properties": {
-        "min": { "type": "number", "exclusiveMinimum": 0 },
-        "max": { "type": "number", "exclusiveMinimum": 0 },
-        "median": { "type": "number", "exclusiveMinimum": 0 },
-        "maxOverMin": { "type": "number", "exclusiveMinimum": 0 },
-        "p90OverP10": { "type": "number", "exclusiveMinimum": 0 }
+        "min": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "max": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "median": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "maxOverMin": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "p90OverP10": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
       }
     }
   }

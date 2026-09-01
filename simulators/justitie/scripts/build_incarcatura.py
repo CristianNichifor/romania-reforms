@@ -133,12 +133,27 @@ def main() -> int:
         for c in located
         if c["tier"] == "judecatorie"
     }
+    # A court's judges follow its cases, apportioned on the same weights: if seven tenths of a
+    # judecatorie's work goes to one seat, seven tenths of its bench goes with it. That is the
+    # only apportionment consistent with how the volume was split, and it is what makes the two
+    # numbers comparable at the far end.
+    judges_of_court = {
+        fold(re.sub(r"^Judec[ăa]toria\s+", "", c["name"])): c.get("judges") or 0.0
+        for c in located
+        if c["tier"] == "judecatorie"
+    }
     tribunal_volume: dict[str, int] = {}
+    tribunal_judges: dict[str, float] = {}
     for court in located:
         if court["tier"] == "tribunal":
             tribunal_volume[court["county"]] = tribunal_volume.get(court["county"], 0) + court["volume"]
+            tribunal_judges[court["county"]] = (
+                tribunal_judges.get(court["county"], 0.0) + (court.get("judges") or 0.0)
+            )
 
     received: dict[str, float] = {seat: 0.0 for seat in court_of_unit.values()}
+    received_judges: dict[str, float] = {seat: 0.0 for seat in court_of_unit.values()}
+    unreachable_judges = 0.0
     # Sulina's consolidated unit has no road to any court — the Delta is reached by water. Its
     # share of the volume is counted and reported rather than dropped or forced onto a seat: a
     # court it cannot drive to is not an assignment, it is a rounding error with a name.
@@ -157,6 +172,7 @@ def main() -> int:
             dormant.append(court["name"])
             continue
         volume = volume_of_court.get(key)
+        judges = judges_of_court.get(key, 0.0)
         if volume is None:
             unmatched_courts.append(f"{court['name']} (cheie {key})")
             continue
@@ -184,13 +200,16 @@ def main() -> int:
             split_volume += volume
 
         for siruta in localities:
-            share = volume * weights[siruta] / total_weight
+            fraction = weights[siruta] / total_weight
+            share = volume * fraction
             seat = court_of_commune(siruta)
             if seat is None:
                 unreachable_volume += share
+                unreachable_judges += judges * fraction
                 unreachable_communes.add(siruta)
                 continue
             received[seat] += share
+            received_judges[seat] += judges * fraction
 
     if unmatched_courts:
         raise SystemExit(f"could not route the volume of: {unmatched_courts}")
@@ -235,7 +254,13 @@ def main() -> int:
                 "lowerVolume": round(lower),
                 "upperVolume": upper,
                 "volume": round(lower + upper),
+                "judgesToday": round(received_judges[seat] + tribunal_judges.get(county, 0.0), 1),
                 "judgesAtNationalLoad": round((lower + upper) / per_judge, 1),
+                "loadPerJudgeToday": (
+                    round((lower + upper) / (received_judges[seat] + tribunal_judges.get(county, 0.0)), 1)
+                    if received_judges[seat] + tribunal_judges.get(county, 0.0) > 0
+                    else None
+                ),
                 "casesPerThousandPeople": (
                     round((lower + upper) / population_of_seat[seat] * 1000, 1)
                     if population_of_seat[seat]
@@ -243,6 +268,51 @@ def main() -> int:
                 ),
             }
         )
+
+    # ---- who is there against who the work needs -------------------------------------------
+    #
+    # The prosecution side of this asked the same question in `parchete-incadrare` and found the
+    # gap smaller than the vacancies. Courts are the other half, and the arithmetic is the same:
+    # the bench a seat inherits, against the bench its caseload implies at the national average.
+    # The target is this tier's own mean, not the published judecatorie average.
+    #
+    # The first version equalised against nationalAverages.judecatorie.perJudge and produced 7
+    # courts short against 34 long — an imbalance that was not a finding but an artefact of
+    # comparing two different populations. These merged courts hold tribunal work and tribunal
+    # judges as well, so their mean load is not the judecatorie mean, and equalising a bench of
+    # 2.613 against a rate derived from a different bench cannot balance by construction.
+    inherited_total = round(sum(c["judgesToday"] for c in courts), 1)
+    merged_volume = sum(c["volume"] for c in courts)
+    if inherited_total <= 0:
+        raise SystemExit("no judges were inherited; the routing is wrong")
+    tier_load = merged_volume / inherited_total
+    for court in courts:
+        court["judgesEqualised"] = round(court["volume"] / tier_load, 1)
+        court["judgeDelta"] = round(court["judgesEqualised"] - court["judgesToday"], 1)
+    short = [c for c in courts if c["judgeDelta"] > 0]
+    long = [c for c in courts if c["judgeDelta"] < 0]
+    arrivals = round(sum(c["judgeDelta"] for c in short), 1)
+    departures = round(-sum(c["judgeDelta"] for c in long), 1)
+    loads = [c["loadPerJudgeToday"] for c in courts if c["loadPerJudgeToday"]]
+    vacant_judges = load("personal-2025")["judgesTotal"]["vacant"]
+    staffing = {
+        "judgesInherited": inherited_total,
+        "tierLoadPerJudge": round(tier_load, 1),
+        "judgesAtNationalLoad": round(sum(c["judgesAtNationalLoad"] for c in courts), 1),
+        "courtsShort": len(short),
+        "courtsLong": len(long),
+        "arrivals": arrivals,
+        "departures": departures,
+        "shareOfBenchMoving": round(arrivals / inherited_total, 3) if inherited_total else None,
+        "mostShort": max(courts, key=lambda c: c["judgeDelta"])["name"],
+        "mostShortBy": max(c["judgeDelta"] for c in courts),
+        "mostLong": min(courts, key=lambda c: c["judgeDelta"])["name"],
+        "mostLongBy": round(-min(c["judgeDelta"] for c in courts), 1),
+        "loadPerJudgeSpread": spread(loads),
+        "vacantJudgePosts": vacant_judges,
+        "vacanciesCoverArrivals": vacant_judges >= arrivals,
+        "arrivalsAsShareOfVacancies": round(arrivals / vacant_judges, 3) if vacant_judges else None,
+    }
 
     today = spread([c["volume"] for c in located if c["tier"] == "judecatorie"])
     after = spread([c["volume"] for c in courts])
@@ -272,6 +342,8 @@ def main() -> int:
         "quietestVolume": quietest["volume"],
         "unreachableVolume": round(unreachable_volume),
         "unreachableCommunes": len(unreachable_communes),
+        "unreachableJudges": round(unreachable_judges, 1),
+        "staffing": staffing,
         "dormantCourts": dormant,
         "localitiesNotInModel": homeless_localities,
     }
@@ -288,6 +360,18 @@ def main() -> int:
     print(f"\ncea mai încărcată: {busiest['name']} {busiest['volume']:,} dosare "
           f"({busiest['judgesAtNationalLoad']:.0f} judecători la media națională)")
     print(f"cea mai liniștită: {quietest['name']} {quietest['volume']:,} dosare")
+    print(f"\nÎNCADRARE  {staffing['judgesInherited']:,.0f} de judecători moșteniți, "
+          f"țintă {staffing['tierLoadPerJudge']:,.0f} dosare/judecător")
+    print(f"  {staffing['courtsShort']} instanțe sub (ar primi {arrivals:,.0f}), "
+          f"{staffing['courtsLong']} peste (ar ceda {departures:,.0f})")
+    print(f"  cel mai scurt: {staffing['mostShort']} +{staffing['mostShortBy']:,.0f};  "
+          f"cel mai lung: {staffing['mostLong']} -{staffing['mostLongBy']:,.0f}")
+    print(f"  încărcătura pe judecător azi: {staffing['loadPerJudgeSpread']['min']:,.0f}"
+          f"-{staffing['loadPerJudgeSpread']['max']:,.0f} "
+          f"({staffing['loadPerJudgeSpread']['maxOverMin']}x)")
+    print(f"  posturi vacante de judecător: {vacant_judges} — "
+          f"{'acoperă' if staffing['vacanciesCoverArrivals'] else 'NU acoperă'} "
+          f"({staffing['arrivalsAsShareOfVacancies'] * 100:.0f}% din ele)")
     if dormant:
         print(f"instanțe din hotărâre fără activitate în registru: {dormant}")
 
@@ -351,6 +435,31 @@ def main() -> int:
                     "deși un dosar de tribunal nu e cât unul de judecătorie. Comasarea propusă "
                     "asta presupune; cele două componente sunt păstrate separat în fișier ca să "
                     "poată fi citite și pe rând."
+                ),
+                "severity": "material",
+                "affects": ["courts"],
+            },
+            {
+                "id": "incadrarea-nu-e-un-plan-de-personal",
+                "text": (
+                    "Ca la parchete: cifra spune cât de departe e completul de muncă, nu că "
+                    "vreun judecător ar trebui mutat. Un judecător nu e o unitate de capacitate, "
+                    "iar inamovibilitatea face transferul și mai puțin o chestiune de aritmetică "
+                    "decât la procurori. Cei 131 sunt 18% din posturile de judecător vacante "
+                    "azi, deci diferența s-ar putea acoperi din repartiția celor care intră, nu "
+                    "din mutarea celor care sunt."
+                ),
+                "severity": "blocking",
+                "affects": ["courts", "summary"],
+            },
+            {
+                "id": "judecatorii-mosteniti-sunt-derivati",
+                "text": (
+                    "Judecătorii moșteniți de un sediu sunt cei ai instanțelor care se comasează "
+                    "în el, împărțiți pe aceleași ponderi ca dosarele. Iar numărul de judecători "
+                    "al fiecărei instanțe de azi e el însuși dedus, din volum împărțit la "
+                    "încărcătura pe judecător — un efectiv mediu pe an, nu un cap de om la o "
+                    "dată. Două aproximări una peste alta."
                 ),
                 "severity": "material",
                 "affects": ["courts"],
