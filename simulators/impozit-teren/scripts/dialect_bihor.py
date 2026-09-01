@@ -56,6 +56,12 @@ ZONE_ONLY = re.compile(r"^(zona[\s‐-]*)?([A-D][a-b]?)(\+[A-D][a-b]?)?$", re.I)
 ANNEX_TOWN = re.compile(r"Anexa_\d_([A-Za-zĂÂÎȘŞȚŢăâîșşțţ]+)", re.I)
 
 
+# The five annexes this reader merges, for the same reason Timișoara declares its own: a
+# clean checkout has only the document the importer was asked for, and globbing the cache
+# would quietly read one annex of five.
+NEEDS = re.compile(r"BIHOR_\d{4}.*Anexa_\d", re.I)
+
+
 def number(cell: str) -> float | None:
     """The first number in a cell — never the digits of two numbers run together.
 

@@ -47,6 +47,15 @@ from extract_cache import CACHE, load  # noqa: E402
 M2_PER_HA = 10_000
 # The five circumscriptions the county is published in.
 SIBLINGS = ("Timisoara", "Lugoj", "Deta", "Faget", "Sannicolau_Mare")
+# What this reader needs fetched before it can run, matched against the chamber's own file
+# list in sources/studies-<year>.json.
+#
+# `siblings()` below globs the *cache*, which is right once everything is extracted and wrong
+# on a clean checkout: the importer primed only the document it was asked for, this found one
+# annex of five, and the county came out at 36,4% instead of 93,9%. Nothing errored — four
+# fifths of Timiș simply were not there. The coverage gate caught it, which is what it is for,
+# but the reader has to be able to say what it wants rather than discover it by globbing.
+NEEDS = re.compile(rf"^Anexe_(?:{'|'.join(SIBLINGS)})_\d{{4}}", re.I)
 INTRAVILAN_ANNEX = re.compile(r"euro\s*/\s*mp", re.I)
 EXTRAVILAN_ANNEX = re.compile(r"euro\s*/\s*ha", re.I)
 COLUMN_LABEL = re.compile(r"^Localitate$", re.I)

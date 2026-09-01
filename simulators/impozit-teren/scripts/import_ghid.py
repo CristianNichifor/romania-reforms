@@ -53,6 +53,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import importlib
 import json
 import re
 import sys
@@ -318,40 +319,62 @@ def download(study: Study) -> Path:
     return out
 
 
+def fetch_study(name: str, path: str) -> Path:
+    """One document into sources/studies/, under the name the extraction cache keys on."""
+    from extract_cache import STUDIES  # noqa: PLC0415
+
+    out = STUDIES / name
+    if out.exists() and out.stat().st_size > 0:
+        return out
+    out.parent.mkdir(parents=True, exist_ok=True)
+    url = BASE + urllib.parse.quote(path)
+    print(f"downloading {url} ...")
+    request = urllib.request.Request(url, headers={"User-Agent": UA})
+    with urllib.request.urlopen(request, timeout=300) as response:  # noqa: S310
+        out.write_bytes(response.read())
+    return out
+
+
 def prime_cache(study: Study) -> None:
-    """Make sure this one study's extracted tables exist, fetching the PDF if they do not.
+    """Make sure this study's extracted tables exist — and its dialect's siblings too.
 
     The dialects call `extract_cache.load` directly and it does not fetch: on a missing entry
     it exits and tells you to run the whole country-wide extraction. Locally that is right —
-    the cache is built once for 115 documents and every parser run after that is instant. On a
-    clean checkout it is not, because `sources/studies/` and `cache/` are both untracked, so a
-    fresh CI run had the PDF (this file downloads it) and no tables (nothing built them), and
-    every dialect-based county failed on the first chamber.
+    the cache is built once for 115 documents and every run after that is instant. On a clean
+    checkout it is not, because `sources/studies/` and `cache/` are both untracked, so a fresh
+    CI run had the PDF (this file downloads it) and no tables (nothing built them).
 
-    Fetching all 115 studies in CI to parse 22 of them would be 300 MB for the sake of
-    uniformity. So this primes exactly the one document about to be read.
+    **Two readers need more than the document they are pointed at.** Timiș is five annexes,
+    one per court circumscription, and Bihor is five more; both find their siblings by globbing
+    the cache, which on a clean checkout contains exactly the one file that was primed. That
+    does not error — it reads one annex of five and reports 36,4% coverage for a county that
+    parses at 93,9%. So a dialect declares what it needs as `NEEDS`, a pattern matched against
+    its own chamber's file list in the committed study index, and those are primed with it.
 
-    Named by the study's own filename rather than by its key, because that is what
-    `cache_path` uses and what the dialects pass — the two had drifted apart, which is why the
-    downloaded PDF did not satisfy the cache lookup that immediately followed it.
+    Fetching all 115 studies to parse 22 of them would be 300 MB for the sake of uniformity.
     """
-    from extract_cache import STUDIES, build, cache_path  # noqa: PLC0415
+    from extract_cache import build, cache_path  # noqa: PLC0415
 
-    name = Path(study.path).name
-    if cache_path(name).exists():
-        return
-    source = STUDIES / name
-    if not source.exists():
-        source.parent.mkdir(parents=True, exist_ok=True)
-        url = BASE + urllib.parse.quote(study.path)
-        print(f"downloading {url} ...")
-        request = urllib.request.Request(url, headers={"User-Agent": UA})
-        with urllib.request.urlopen(request, timeout=300) as response:  # noqa: S310
-            source.write_bytes(response.read())
-    _name, seconds, status = build(source)
-    print(f"extracted {name} in {seconds:.0f}s ({status})")
-    if status.startswith("failed"):
-        raise SystemExit(f"could not extract {name}: {status}")
+    wanted = [(Path(study.path).name, study.path)]
+
+    dialect = importlib.import_module(f"dialect_{study.dialect}")
+    needs = getattr(dialect, "NEEDS", None)
+    if needs is not None:
+        chamber = Path(study.path).parent.name
+        index = ROOT / "sources" / f"studies-{study.year}.json"
+        if index.exists():
+            for entry in json.loads(index.read_text(encoding="utf-8"))["studies"]:
+                same = Path(entry["path"]).parent.name == chamber
+                if same and needs.search(entry["file"]):
+                    wanted.append((entry["file"], entry["path"]))
+
+    for name, path in dict(wanted).items():
+        if cache_path(name).exists():
+            continue
+        _name, seconds, status = build(fetch_study(name, path))
+        print(f"extracted {name} in {seconds:.0f}s ({status})")
+        if status.startswith("failed"):
+            raise SystemExit(f"could not extract {name}: {status}")
 
 
 def pages_of(study: Study) -> list[str]:
