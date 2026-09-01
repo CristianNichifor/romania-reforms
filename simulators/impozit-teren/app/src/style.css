@@ -1,0 +1,356 @@
+.up {
+  display: inline-block;
+  margin-bottom: 0.6rem;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.8rem;
+}
+
+.up:hover {
+  color: var(--fg);
+}
+
+:root {
+  --bg: #0b0d10;
+  --panel: #12161b;
+  --line: #232a31;
+  --fg: #e8eaed;
+  --muted: #9aa3ad;
+  --accent: #7fb3ff;
+  --more: #ffb04a;
+  --less: #6fd39b;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--fg);
+  font: 15px/1.55 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+  display: grid;
+  grid-template-columns: min(24rem, 92vw) 1fr;
+}
+
+#panel {
+  padding: 1.25rem 1.1rem 1.5rem;
+  background: var(--panel);
+  border-right: 1px solid var(--line);
+  min-height: 100vh;
+  position: sticky;
+  top: 0;
+  max-height: 100vh;
+  overflow-y: auto;
+}
+
+#main {
+  padding: 1.5rem 1.5rem 3rem;
+  min-width: 0;
+}
+
+h1 {
+  font-size: 1.1rem;
+  margin: 0 0 0.3rem;
+  letter-spacing: -0.01em;
+}
+
+h2 {
+  font-size: 0.95rem;
+  margin: 0;
+  font-weight: 600;
+}
+
+.sub {
+  margin: 0 0 1.1rem;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.note {
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin: 0.45rem 0 0;
+}
+
+.counties,
+.segmented {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.counties {
+  margin-bottom: 1.25rem;
+}
+
+.counties button,
+.segmented button {
+  flex: 1;
+  padding: 0.4rem 0.5rem;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 0.4rem;
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.segmented.small button {
+  font-size: 0.75rem;
+  padding: 0.3rem 0.5rem;
+}
+
+.counties button:hover,
+.segmented button:hover {
+  color: var(--fg);
+}
+
+.counties button.on,
+.segmented button.on {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  color: var(--fg);
+}
+
+.control {
+  margin-bottom: 1.35rem;
+}
+
+.slider-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+}
+
+.slider-label output {
+  color: var(--fg);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+input[type='range'] {
+  width: 100%;
+  accent-color: var(--accent);
+}
+
+.ramp-ends {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 0.72rem;
+  margin-top: 0.2rem;
+}
+
+.headline {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.75rem;
+}
+
+.stat {
+  border: 1px solid var(--line);
+  border-radius: 0.55rem;
+  padding: 0.9rem 1rem;
+  background: var(--panel);
+}
+
+.stat.wide {
+  grid-column: 1 / -1;
+}
+
+.stat-label {
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin-bottom: 0.35rem;
+}
+
+.stat-value {
+  font-size: 1.65rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-value .unit {
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--muted);
+  margin-left: 0.15rem;
+}
+
+.stat-value.accent {
+  color: var(--accent);
+}
+.stat-value.more,
+.num.more {
+  color: var(--more);
+}
+.stat-value.less,
+.num.less {
+  color: var(--less);
+}
+
+.table-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.table-head .segmented {
+  flex: 0 0 auto;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+th,
+td {
+  padding: 0.42rem 0.6rem;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  white-space: nowrap;
+}
+
+th {
+  color: var(--muted);
+  font-weight: 500;
+  font-size: 0.78rem;
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+}
+
+.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.rank {
+  color: var(--muted);
+  font-size: 0.72rem;
+  margin-left: 0.45rem;
+}
+
+.fold {
+  border-top: 1px solid var(--line);
+  padding-top: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+summary {
+  display: flex;
+  justify-content: space-between;
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 0.3rem 0;
+}
+
+.chev {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.limit {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin: 0.6rem 0;
+  padding-left: 0.65rem;
+  border-left: 2px solid var(--line);
+}
+
+.limit .sev {
+  display: block;
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 0.15rem;
+}
+
+.limit.blocking {
+  border-left-color: var(--more);
+}
+.limit.blocking .sev {
+  color: var(--more);
+}
+.limit.material .sev {
+  color: var(--accent);
+}
+
+footer {
+  border-top: 1px solid var(--line);
+  margin-top: 1rem;
+  padding-top: 0.8rem;
+}
+
+@media (max-width: 60rem) {
+  body {
+    grid-template-columns: 1fr;
+  }
+  #panel {
+    position: static;
+    max-height: none;
+    min-height: 0;
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+  }
+  .headline {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* The map. Fixed height rather than aspect-ratio: the panel beside it is a fixed column, and
+   a ratio-sized map jumps every time the limitations fold opens. */
+.map-card #map {
+  height: 30rem;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #0f1418;
+}
+.map-card .legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.9rem;
+  margin-top: 0.6rem;
+  font-size: 0.75rem;
+  color: var(--muted, #9aa4ae);
+}
+.map-card .legend .key { display: inline-flex; align-items: center; gap: 0.35rem; }
+.map-card .legend i {
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 2px;
+  display: inline-block;
+}
+.map-card .legend i.none { background: #232a31; outline: 1px solid #3a434c; }
+/* The same 8px diagonal the map draws, so the key and the shape are recognisably one mark. */
+.map-card .legend i.estimated {
+  background: repeating-linear-gradient(
+    45deg, rgba(255, 255, 255, 0.35) 0 2px, transparent 2px 8px
+  ), #4a5560;
+  outline: 1px solid #3a434c;
+}
+@media (max-width: 40rem) {
+  .map-card #map { height: 20rem; }
+}

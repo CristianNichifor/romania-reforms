@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/fond-funciar.schema.json",
+  "title": "Land area by use category, per locality, from the INS land register",
+  "description": "Hectares per locality per cadastral category, from INS matrix AGR101B. The other half of a land value: the notaries price a square metre, this counts them. The register publishes a total alongside its categories, and the two are independent numbers — so they are required to agree here, which is what catches a category that failed to parse out of the API's HTML table.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "counties",
+    "period",
+    "unit",
+    "provenance",
+    "summary",
+    "categoryMapping",
+    "localities",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^fond-funciar-[a-z]{1,2}-[0-9]{4}$",
+      "description": "Bucharest's county code is a single letter, which is why this is not fixed at two."
+    },
+    "title": {
+      "type": "string"
+    },
+    "publisher": {
+      "const": "Institutul Național de Statistică"
+    },
+    "counties": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z]{1,2}$"
+      }
+    },
+    "period": {
+      "type": "string",
+      "pattern": "^[0-9]{4}$"
+    },
+    "unit": {
+      "const": "ha"
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json#/$defs/provenance"
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "localities",
+        "totalHa",
+        "builtHa",
+        "unbalanced",
+        "problems"
+      ],
+      "properties": {
+        "localities": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "totalHa": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "builtHa": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "unbalanced": {
+          "description": "Localities whose categories do not add up to the register's own total. Must be empty.",
+          "type": "array",
+          "maxItems": 0,
+          "items": {
+            "type": "string"
+          }
+        },
+        "problems": {
+          "type": "array",
+          "maxItems": 0,
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "categoryMapping": {
+      "description": "Register category against the notaries' code it is priced under.",
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "localities": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "siruta",
+          "name",
+          "county",
+          "areaHa",
+          "totalHa",
+          "byCategory",
+          "forestHa"
+        ],
+        "properties": {
+          "siruta": {
+            "description": "The join key to the UAT boundaries and the budget. Read off the head of the register's own locality label.",
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "county": {
+            "type": "string",
+            "pattern": "^[A-Z]{1,2}$"
+          },
+          "areaHa": {
+            "description": "The register's own categories, unmerged.",
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "byCategory": {
+            "description": "The same areas folded onto the notaries' codes. Forest is deliberately absent: it is priced per hectare in a separate table, not per square metre in the grid.",
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": {
+              "type": "number",
+              "minimum": 0
+            }
+          },
+          "forestHa": {
+            "type": "number",
+            "minimum": 0
+          },
+          "totalHa": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "provenance.schema.json#/$defs/limitation"
+      }
+    }
+  }
+}

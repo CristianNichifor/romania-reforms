@@ -1,0 +1,205 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pret-cerut-agricol.schema.json",
+  "title": "Prețul cerut pentru teren agricol extravilan",
+  "description": "Percentile ale prețului cerut în ofertele publicate conform Legii 17/2014, pe județe și pe UAT-uri. Prețuri CERUTE, nu de tranzacționare, și doar pentru teren agricol extravilan — ambele sunt limitări blocante înregistrate în fișier.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "counties",
+    "period",
+    "currency",
+    "provenance",
+    "summary",
+    "prices",
+    "limitations"
+  ],
+  "$defs": {
+    "band": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "low",
+        "central",
+        "high"
+      ],
+      "description": "p25 / mediană / p75. Banda este răspunsul, nu mediana singură: prețurile cerute sunt zgomotoase și o singură cifră ar ascunde asta.",
+      "properties": {
+        "low": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "central": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "high": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    }
+  },
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^pret-cerut-agricol-[0-9]{4}$"
+    },
+    "title": {
+      "type": "string"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "counties": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z]{1,2}$"
+      }
+    },
+    "period": {
+      "type": "string",
+      "pattern": "^[0-9]{4}$"
+    },
+    "currency": {
+      "const": "RON"
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json#/$defs/provenance"
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "counties",
+        "localities",
+        "pricedOffers",
+        "activeOffers",
+        "minOffersPerCounty",
+        "minOffersPerLocality",
+        "updated"
+      ],
+      "properties": {
+        "counties": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "localities": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "pricedOffers": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "activeOffers": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "minOffersPerCounty": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "minOffersPerLocality": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "updated": {
+          "type": "string"
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "provenance.schema.json#/$defs/limitation"
+      }
+    },
+    "prices": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Un rând pe județ, cu UAT-urile care au destule oferte pentru o bandă proprie.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "county",
+          "name",
+          "offers",
+          "ronPerHa",
+          "eurPerM2",
+          "localities"
+        ],
+        "properties": {
+          "county": {
+            "type": "string",
+            "pattern": "^[A-Z]{1,2}$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "offers": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "activeOffers": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "ronPerHa": {
+            "$ref": "#/$defs/band"
+          },
+          "eurPerM2": {
+            "$ref": "#/$defs/band"
+          },
+          "localities": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "siruta",
+                "name",
+                "offers",
+                "ronPerHa",
+                "eurPerM2"
+              ],
+              "properties": {
+                "siruta": {
+                  "type": "string",
+                  "pattern": "^[0-9]+$",
+                  "description": "Cheia pe care se face joncțiunea cu fondul funciar și cu valoarea terenului."
+                },
+                "name": {
+                  "type": "string"
+                },
+                "offers": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "ronPerHa": {
+                  "$ref": "#/$defs/band"
+                },
+                "eurPerM2": {
+                  "$ref": "#/$defs/band"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

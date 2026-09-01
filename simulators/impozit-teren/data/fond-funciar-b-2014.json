@@ -1,0 +1,92 @@
+{
+  "$schema": "../schema/fond-funciar.schema.json",
+  "id": "fond-funciar-b-2014",
+  "title": "Fondul funciar după modul de folosință, județul Municipiul Bucuresti, 2014",
+  "publisher": "Institutul Național de Statistică",
+  "counties": [
+    "B"
+  ],
+  "period": "2014",
+  "unit": "ha",
+  "provenance": {
+    "source": "ins-tempo-agr101b",
+    "locator": "http://statistici.insse.ro:8077/tempo-ins/matrix/AGR101B, anul 2014, forme de proprietate: Total",
+    "confidence": "verbatim",
+    "note": "Suprafețele sunt preluate ca atare din matricea INS. Gruparea pe categoriile notariale (pășuni+fânețe → P+F, vii+livezi → V+L) este făcută aici și urmează gruparea din grilele notariale."
+  },
+  "summary": {
+    "localities": 1,
+    "totalHa": 23787.0,
+    "builtHa": 15817.0,
+    "unbalanced": [],
+    "problems": []
+  },
+  "categoryMapping": {
+    "Arabila": "A",
+    "Pasuni": "P+F",
+    "Finete": "P+F",
+    "Vii si pepiniere viticole": "V+L",
+    "Livezi si pepiniere pomicole": "V+L",
+    "Ocupata cu ape, balti": "AP",
+    "Terenuri degradate si neproductive": "NP",
+    "Ocupata cu constructii": "CC",
+    "Cai de comunicatii si cai ferate": "DR"
+  },
+  "localities": [
+    {
+      "siruta": "179132",
+      "name": "MUNICIPIUL BUCURESTI",
+      "county": "B",
+      "areaHa": {
+        "Arabila": 2566.0,
+        "Pasuni": 355.0,
+        "Vii si pepiniere viticole": 12.0,
+        "Livezi si pepiniere pomicole": 119.0,
+        "Paduri si alta vegetatie forestiera": 611.0,
+        "Ocupata cu ape, balti": 908.0,
+        "Ocupata cu constructii": 15817.0,
+        "Cai de comunicatii si cai ferate": 3306.0,
+        "Terenuri degradate si neproductive": 93.0
+      },
+      "totalHa": 23787.0,
+      "byCategory": {
+        "A": 2566.0,
+        "P+F": 355.0,
+        "V+L": 131.0,
+        "AP": 908.0,
+        "CC": 15817.0,
+        "DR": 3306.0,
+        "NP": 93.0
+      },
+      "forestHa": 611.0
+    }
+  ],
+  "limitations": [
+    {
+      "id": "suprafetele-sunt-din-2014",
+      "text": "INS a oprit seria pe localități: AGR101B nu are date după 2014 și nimic nu a înlocuit-o la această granularitate. Suprafețele sunt deci din 2014, iar valorile din 2026. Compoziția fondului funciar se schimbă lent, dar într-o singură direcție — arabilul devine curți-construcții, nu invers — așa că suprafața construită de aici este un minim, iar valoarea calculată din ea este subestimată, nu umflată.",
+      "severity": "material",
+      "affects": [
+        "valoare-teren",
+        "impozit"
+      ]
+    },
+    {
+      "id": "nu-exista-impartire-intravilan-extravilan",
+      "text": "Fondul funciar nu spune ce este intravilan și ce este extravilan, iar grilele notariale dau prețuri foarte diferite pentru cele două — la Bacău curțile-construcții intravilane din zona A sunt de peste 250 de ori mai scumpe pe metru pătrat decât cele extravilane. Împărțirea trebuie deci presupusă, nu citită, iar presupunerea este cel mai important parametru al oricărei sume calculate din aceste date.",
+      "severity": "blocking",
+      "affects": [
+        "valoare-teren",
+        "impozit"
+      ]
+    },
+    {
+      "id": "padurea-nu-e-in-grila-pe-metru-patrat",
+      "text": "Pădurea este evaluată în studii pe hectar, într-un tabel separat, nu pe metru pătrat în grilă. Suprafața ei este păstrată aici, dar nu este convertită în valoare cu aceeași înmulțire.",
+      "severity": "note",
+      "affects": [
+        "valoare-teren"
+      ]
+    }
+  ]
+}

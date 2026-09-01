@@ -1,0 +1,1476 @@
+{
+  "$schema": "../schema/renta.schema.json",
+  "id": "renta-hd-2026",
+  "title": "Renta funciară și cât din ea ia impozitul, județul HD, 2026",
+  "publisher": "romania-reforms",
+  "counties": [
+    "HD"
+  ],
+  "period": "2026",
+  "currency": "RON",
+  "provenance": {
+    "source": "valoare-teren-hd-2026",
+    "locator": "valoarea terenului × randament, pe unitate administrativ-teritorială",
+    "confidence": "derived",
+    "note": "renta = valoare × randament; captura = impozit ÷ rentă. Randamentul este un parametru, nu o măsurătoare: nu există un randament publicat al terenului pe comune în România."
+  },
+  "assumptions": {
+    "landYieldPercent": {
+      "low": 1.728,
+      "central": 2.5275,
+      "high": 3.1808
+    },
+    "yieldSource": "Dedus, nu măsurat: randament net al proprietății − amortizarea clădirii × ponderea clădirii, r = y_net − δ·(1 − λ). Ponderea terenului λ = 6.2% este calculată din 343 perechi preț-teren/preț-construcție publicate pe aceeași pagină în grilele notariale (HD, IS, MS, HR); randamentul brut este cel al Global Property Guide, amortizarea este cea din HG 2139/2004. Înlocuiește banda presupusă anterior 3–7%. Deducerea separă urbanul (2.73%) de rural (2.52%); diferența de 0.22 puncte este mai mică decât lățimea benzii, deci se folosește una singură.",
+    "landYieldPreviouslyAssumedPercent": {
+      "low": 3.0,
+      "central": 5.0,
+      "high": 7.0
+    },
+    "builtYieldIsDerived": true,
+    "builtLandSharePercent": {
+      "low": 4.762,
+      "central": 6.25,
+      "high": 9.091
+    },
+    "urbanBuiltYieldPercent": {
+      "low": 1.9338,
+      "central": 2.7346,
+      "high": 3.4126
+    },
+    "ruralBuiltYieldPercent": {
+      "low": 1.7172,
+      "central": 2.5162,
+      "high": 3.1676
+    },
+    "agriculturalYieldPercent": {
+      "low": 1.0421,
+      "central": 1.4147,
+      "high": 1.6018
+    },
+    "agriculturalYieldSource": "Arendă ÷ preț pentru teren arabil, regiunea Vest (RO42), anchete INS 2019–2024 raportate la Eurostat (apri_lprc / apri_lrnt); banda este minimul, mediana și maximul anilor măsurați.",
+    "yieldByCategoryPercent": {
+      "A": {
+        "low": 1.0421,
+        "central": 1.4147,
+        "high": 1.6018
+      },
+      "P+F": {
+        "low": 1.0735,
+        "central": 1.5504,
+        "high": 1.8903
+      },
+      "V+L": {
+        "low": 1.0421,
+        "central": 1.4147,
+        "high": 1.6018
+      },
+      "AP": {
+        "low": 1.0421,
+        "central": 1.4147,
+        "high": 1.6018
+      },
+      "DR": {
+        "low": 1.0421,
+        "central": 1.4147,
+        "high": 1.6018
+      },
+      "NP": {
+        "low": 1.0421,
+        "central": 1.4147,
+        "high": 1.6018
+      },
+      "PADURE": {
+        "low": 1.7625,
+        "central": 2.4937,
+        "high": 2.8262
+      }
+    },
+    "yieldByCategorySource": {
+      "A": "Arendă ÷ preț pentru teren arabil, regiunea Vest (RO42), anchete INS 2019–2024 raportate la Eurostat (apri_lprc / apri_lrnt); banda este minimul, mediana și maximul anilor măsurați.",
+      "P+F": "Arendă ÷ preț pentru pășuni și fânețe, regiunea Vest (RO42), anchete INS 2019–2024 raportate la Eurostat (apri_lprc / apri_lrnt); banda este minimul, mediana și maximul anilor măsurați.",
+      "V+L": "Arendă ÷ preț pentru teren arabil, regiunea Vest (RO42), anchete INS 2019–2024 raportate la Eurostat (apri_lprc / apri_lrnt); banda este minimul, mediana și maximul anilor măsurați.",
+      "AP": "Arendă ÷ preț pentru teren arabil, regiunea Vest (RO42), anchete INS 2019–2024 raportate la Eurostat (apri_lprc / apri_lrnt); banda este minimul, mediana și maximul anilor măsurați.",
+      "DR": "Arendă ÷ preț pentru teren arabil, regiunea Vest (RO42), anchete INS 2019–2024 raportate la Eurostat (apri_lprc / apri_lrnt); banda este minimul, mediana și maximul anilor măsurați.",
+      "NP": "Arendă ÷ preț pentru teren arabil, regiunea Vest (RO42), anchete INS 2019–2024 raportate la Eurostat (apri_lprc / apri_lrnt); banda este minimul, mediana și maximul anilor măsurați.",
+      "PADURE": "Recolta de 2.20 m³/ha/an (INS AGR306A, 2025) × prețul masei lemnoase pe picior (Romsilva), minus costurile proprietarului, împărțit la 15,224 lei/ha valoarea pădurii din grilă."
+    },
+    "marketMultiple": 1.0
+  },
+  "summary": {
+    "localities": 65,
+    "landValueRon": {
+      "low": 14835273964,
+      "central": 18166536817,
+      "high": 21659395989
+    },
+    "landRentRon": {
+      "low": 222456920,
+      "central": 401686183,
+      "high": 593439595
+    },
+    "fiscalCodeRon": {
+      "low": 33736595,
+      "central": 83129885,
+      "high": 166867504
+    },
+    "fiscalCaptureOfRentPercent": {
+      "low": 5.6849,
+      "central": 20.6952,
+      "high": 75.0112
+    },
+    "fullRentRatePercent": {
+      "low": 1.4995,
+      "central": 2.2111,
+      "high": 2.7399
+    }
+  },
+  "localities": [
+    {
+      "siruta": "86687",
+      "name": "DEVA",
+      "rank": "municipii",
+      "landValueRon": {
+        "low": 1808340003,
+        "central": 2465390002,
+        "high": 3122440002
+      },
+      "landRentRon": {
+        "low": 26079482,
+        "central": 54015872,
+        "high": 87562074
+      },
+      "fiscalCaptureOfRent": {
+        "low": 1.9749,
+        "central": 10.3927,
+        "high": 48.2349
+      }
+    },
+    {
+      "siruta": "86749",
+      "name": "CARJITI",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 67732998,
+        "central": 68879666,
+        "high": 70313001
+      },
+      "landRentRon": {
+        "low": 994503,
+        "central": 1436164,
+        "high": 1708907
+      },
+      "fiscalCaptureOfRent": {
+        "low": 7.6627,
+        "central": 13.9461,
+        "high": 27.5419
+      }
+    },
+    {
+      "siruta": "86810",
+      "name": "HUNEDOARA",
+      "rank": "municipii",
+      "landValueRon": {
+        "low": 1036087997,
+        "central": 1788150502,
+        "high": 2325337998
+      },
+      "landRentRon": {
+        "low": 17098959,
+        "central": 43877994,
+        "high": 71969407
+      },
+      "fiscalCaptureOfRent": {
+        "low": 4.3457,
+        "central": 26.5143,
+        "high": 157.7978
+      }
+    },
+    {
+      "siruta": "86883",
+      "name": "GHELARI",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 69917001,
+        "central": 78882000,
+        "high": 95326999
+      },
+      "landRentRon": {
+        "low": 1043494,
+        "central": 1708765,
+        "high": 2524074
+      },
+      "fiscalCaptureOfRent": {
+        "low": 4.0244,
+        "central": 10.1631,
+        "high": 24.3206
+      }
+    },
+    {
+      "siruta": "86990",
+      "name": "PETROSANI",
+      "rank": "municipii",
+      "landValueRon": {
+        "low": 575331998,
+        "central": 926394497,
+        "high": 1260331997
+      },
+      "landRentRon": {
+        "low": 8929571,
+        "central": 21717593,
+        "high": 37198275
+      },
+      "fiscalCaptureOfRent": {
+        "low": 5.1264,
+        "central": 25.3181,
+        "high": 132.558
+      }
+    },
+    {
+      "siruta": "87059",
+      "name": "LUPENI",
+      "rank": "municipii",
+      "landValueRon": {
+        "low": 148612002,
+        "central": 199962002,
+        "high": 251311998
+      },
+      "landRentRon": {
+        "low": 2343939,
+        "central": 4660201,
+        "high": 7269656
+      },
+      "fiscalCaptureOfRent": {
+        "low": 11.7715,
+        "central": 61.3269,
+        "high": 274.6343
+      }
+    },
+    {
+      "siruta": "87077",
+      "name": "PETRILA",
+      "rank": "orase",
+      "landValueRon": {
+        "low": 593174001,
+        "central": 677414000,
+        "high": 768134000
+      },
+      "landRentRon": {
+        "low": 9460471,
+        "central": 15666867,
+        "high": 21540454
+      },
+      "fiscalCaptureOfRent": {
+        "low": 6.9072,
+        "central": 27.6929,
+        "high": 103.9569
+      }
+    },
+    {
+      "siruta": "87139",
+      "name": "URICANI",
+      "rank": "orase",
+      "landValueRon": {
+        "low": 383690998,
+        "central": 408251002,
+        "high": 445091000
+      },
+      "landRentRon": {
+        "low": 6322406,
+        "central": 9633638,
+        "high": 12439218
+      },
+      "fiscalCaptureOfRent": {
+        "low": 10.6851,
+        "central": 41.6048,
+        "high": 145.3775
+      }
+    },
+    {
+      "siruta": "87175",
+      "name": "VULCAN",
+      "rank": "municipii",
+      "landValueRon": {
+        "low": 232696999,
+        "central": 258872000,
+        "high": 285047000
+      },
+      "landRentRon": {
+        "low": 3458464,
+        "central": 5648521,
+        "high": 7701649
+      },
+      "fiscalCaptureOfRent": {
+        "low": 13.0743,
+        "central": 50.3752,
+        "high": 175.9242
+      }
+    },
+    {
+      "siruta": "87219",
+      "name": "ANINOASA",
+      "rank": "orase",
+      "landValueRon": {
+        "low": 48824002,
+        "central": 52248998,
+        "high": 55673999
+      },
+      "landRentRon": {
+        "low": 774280,
+        "central": 1193487,
+        "high": 1520859
+      },
+      "fiscalCaptureOfRent": {
+        "low": 17.7379,
+        "central": 72.0147,
+        "high": 259.2291
+      }
+    },
+    {
+      "siruta": "87246",
+      "name": "BANITA",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 119885999,
+        "central": 120011001,
+        "high": 120135999
+      },
+      "landRentRon": {
+        "low": 1691271,
+        "central": 2415804,
+        "high": 2831436
+      },
+      "fiscalCaptureOfRent": {
+        "low": 7.2914,
+        "central": 12.9779,
+        "high": 25.1478
+      }
+    },
+    {
+      "siruta": "87291",
+      "name": "BRAD",
+      "rank": "municipii",
+      "landValueRon": {
+        "low": 392654998,
+        "central": 602535000,
+        "high": 806054999
+      },
+      "landRentRon": {
+        "low": 6046133,
+        "central": 14036078,
+        "high": 23837159
+      },
+      "fiscalCaptureOfRent": {
+        "low": 5.638,
+        "central": 32.3604,
+        "high": 169.9688
+      }
+    },
+    {
+      "siruta": "87362",
+      "name": "CRISCIOR",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 66981000,
+        "central": 68841001,
+        "high": 70701002
+      },
+      "landRentRon": {
+        "low": 988802,
+        "central": 1452836,
+        "high": 1761854
+      },
+      "fiscalCaptureOfRent": {
+        "low": 6.2255,
+        "central": 15.8167,
+        "high": 37.5068
+      }
+    },
+    {
+      "siruta": "87424",
+      "name": "CALAN",
+      "rank": "orase",
+      "landValueRon": {
+        "low": 492899000,
+        "central": 674311502,
+        "high": 839948999
+      },
+      "landRentRon": {
+        "low": 7298638,
+        "central": 15091600,
+        "high": 23920960
+      },
+      "fiscalCaptureOfRent": {
+        "low": 7.5474,
+        "central": 30.5119,
+        "high": 136.7325
+      }
+    },
+    {
+      "siruta": "87576",
+      "name": "HATEG",
+      "rank": "orase",
+      "landValueRon": {
+        "low": 332803000,
+        "central": 423469669,
+        "high": 502803002
+      },
+      "landRentRon": {
+        "low": 4973867,
+        "central": 9448303,
+        "high": 14127105
+      },
+      "fiscalCaptureOfRent": {
+        "low": 5.966,
+        "central": 24.6312,
+        "high": 104.4949
+      }
+    },
+    {
+      "siruta": "87638",
+      "name": "ORASTIE",
+      "rank": "municipii",
+      "landValueRon": {
+        "low": 209632999,
+        "central": 411933002,
+        "high": 614232999
+      },
+      "landRentRon": {
+        "low": 3445519,
+        "central": 10114406,
+        "high": 19071157
+      },
+      "fiscalCaptureOfRent": {
+        "low": 5.6301,
+        "central": 34.2753,
+        "high": 225.1394
+      }
+    },
+    {
+      "siruta": "87665",
+      "name": "SIMERIA",
+      "rank": "orase",
+      "landValueRon": {
+        "low": 428366001,
+        "central": 741040998,
+        "high": 1034765999
+      },
+      "landRentRon": {
+        "low": 6373341,
+        "central": 17068688,
+        "high": 30542314
+      },
+      "fiscalCaptureOfRent": {
+        "low": 3.5027,
+        "central": 16.0158,
+        "high": 93.236
+      }
+    },
+    {
+      "siruta": "87745",
+      "name": "BAIA DE CRIS",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 157019999,
+        "central": 161499998,
+        "high": 165980003
+      },
+      "landRentRon": {
+        "low": 2335692,
+        "central": 3424213,
+        "high": 4133888
+      },
+      "fiscalCaptureOfRent": {
+        "low": 5.9338,
+        "central": 13.8387,
+        "high": 31.6154
+      }
+    },
+    {
+      "siruta": "87843",
+      "name": "BALSA",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 192125998,
+        "central": 195276000,
+        "high": 199325999
+      },
+      "landRentRon": {
+        "low": 3085209,
+        "central": 4448307,
+        "high": 5229557
+      },
+      "fiscalCaptureOfRent": {
+        "low": 4.1946,
+        "central": 7.9593,
+        "high": 16.2169
+      }
+    },
+    {
+      "siruta": "87996",
+      "name": "BARU",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 225130997,
+        "central": 228011002,
+        "high": 231851001
+      },
+      "landRentRon": {
+        "low": 3315269,
+        "central": 4788042,
+        "high": 5690166
+      },
+      "fiscalCaptureOfRent": {
+        "low": 5.7473,
+        "central": 10.5432,
+        "high": 20.8994
+      }
+    },
+    {
+      "siruta": "88047",
+      "name": "BACIA",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 49531998,
+        "central": 60485335,
+        "high": 72851998
+      },
+      "landRentRon": {
+        "low": 620765,
+        "central": 1146444,
+        "high": 1757187
+      },
+      "fiscalCaptureOfRent": {
+        "low": 10.8161,
+        "central": 27.4898,
+        "high": 73.1604
+      }
+    },
+    {
+      "siruta": "88092",
+      "name": "BAITA",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 171289998,
+        "central": 181250002,
+        "high": 191210000
+      },
+      "landRentRon": {
+        "low": 2516880,
+        "central": 3808130,
+        "high": 4756449
+      },
+      "fiscalCaptureOfRent": {
+        "low": 6.993,
+        "central": 17.2247,
+        "high": 41.0312
+      }
+    },
+    {
+      "siruta": "88216",
+      "name": "BATRANA",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 41292001,
+        "central": 41532000,
+        "high": 41771999
+      },
+      "landRentRon": {
+        "low": 654761,
+        "central": 932739,
+        "high": 1075550
+      },
+      "fiscalCaptureOfRent": {
+        "low": 3.6742,
+        "central": 6.8152,
+        "high": 13.6923
+      }
+    },
+    {
+      "siruta": "88261",
+      "name": "BERIU",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 257306001,
+        "central": 286202002,
+        "high": 322020998
+      },
+      "landRentRon": {
+        "low": 4100773,
+        "central": 6538907,
+        "high": 8730427
+      },
+      "fiscalCaptureOfRent": {
+        "low": 4.5933,
+        "central": 11.1781,
+        "high": 26.9983
+      }
+    },
+    {
+      "siruta": "88350",
+      "name": "BLAJENI",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 133619998,
+        "central": 134385001,
+        "high": 135149998
+      },
+      "landRentRon": {
+        "low": 2064159,
+        "central": 2945087,
+        "high": 3428477
+      },
+      "fiscalCaptureOfRent": {
+        "low": 4.4479,
+        "central": 10.3775,
+        "high": 23.4504
+      }
+    },
+    {
+      "siruta": "88449",
+      "name": "BOSOROD",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 191979998,
+        "central": 194582601,
+        "high": 203628001
+      },
+      "landRentRon": {
+        "low": 2915366,
+        "central": 4192285,
+        "high": 5111426
+      },
+      "fiscalCaptureOfRent": {
+        "low": 4.9096,
+        "central": 9.3697,
+        "high": 18.6932
+      }
+    },
+    {
+      "siruta": "88546",
+      "name": "BRANISCA",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 113891002,
+        "central": 124147669,
+        "high": 141040999
+      },
+      "landRentRon": {
+        "low": 1609201,
+        "central": 2535471,
+        "high": 3508626
+      },
+      "fiscalCaptureOfRent": {
+        "low": 7.5243,
+        "central": 18.4744,
+        "high": 43.4884
+      }
+    },
+    {
+      "siruta": "88644",
+      "name": "BRETEA ROMANA",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 176785000,
+        "central": 184903002,
+        "high": 211552999
+      },
+      "landRentRon": {
+        "low": 2243233,
+        "central": 3367689,
+        "high": 4813880
+      },
+      "fiscalCaptureOfRent": {
+        "low": 11.0316,
+        "central": 27.0515,
+        "high": 59.6138
+      }
+    },
+    {
+      "siruta": "88788",
+      "name": "BUCES",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 182149998,
+        "central": 182149998,
+        "high": 182149998
+      },
+      "landRentRon": {
+        "low": 2502767,
+        "central": 3563975,
+        "high": 4170288
+      },
+      "fiscalCaptureOfRent": {
+        "low": 8.6653,
+        "central": 14.9284,
+        "high": 28.233
+      }
+    },
+    {
+      "siruta": "88868",
+      "name": "BUCURESCI",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 109892998,
+        "central": 112393000,
+        "high": 114893001
+      },
+      "landRentRon": {
+        "low": 1517345,
+        "central": 2221384,
+        "high": 2687235
+      },
+      "fiscalCaptureOfRent": {
+        "low": 8.2809,
+        "central": 16.4315,
+        "high": 34.3296
+      }
+    },
+    {
+      "siruta": "88920",
+      "name": "BULZESTII DE SUS",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 163436998,
+        "central": 163896998,
+        "high": 164357003
+      },
+      "landRentRon": {
+        "low": 2366376,
+        "central": 3377638,
+        "high": 3945223
+      },
+      "fiscalCaptureOfRent": {
+        "low": 6.7245,
+        "central": 12.4261,
+        "high": 24.733
+      }
+    },
+    {
+      "siruta": "89026",
+      "name": "BUNILA",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 110677999,
+        "central": 111690498,
+        "high": 112702998
+      },
+      "landRentRon": {
+        "low": 1625802,
+        "central": 2341803,
+        "high": 2763669
+      },
+      "fiscalCaptureOfRent": {
+        "low": 6.2695,
+        "central": 12.3606,
+        "high": 25.6591
+      }
+    },
+    {
+      "siruta": "89080",
+      "name": "BURJUC",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 96908000,
+        "central": 103621331,
+        "high": 113868002
+      },
+      "landRentRon": {
+        "low": 1475295,
+        "central": 2257912,
+        "high": 2948153
+      },
+      "fiscalCaptureOfRent": {
+        "low": 5.6239,
+        "central": 12.8075,
+        "high": 29.0149
+      }
+    },
+    {
+      "siruta": "89151",
+      "name": "CERBAL",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 193727002,
+        "central": 193916998,
+        "high": 194107000
+      },
+      "landRentRon": {
+        "low": 2952895,
+        "central": 4192722,
+        "high": 4835286
+      },
+      "fiscalCaptureOfRent": {
+        "low": 4.8794,
+        "central": 8.145,
+        "high": 15.1785
+      }
+    },
+    {
+      "siruta": "89240",
+      "name": "CERTEJU DE SUS",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 144211000,
+        "central": 154411002,
+        "high": 164610999
+      },
+      "landRentRon": {
+        "low": 2205393,
+        "central": 3386853,
+        "high": 4288069
+      },
+      "fiscalCaptureOfRent": {
+        "low": 5.6803,
+        "central": 13.4514,
+        "high": 31.7134
+      }
+    },
+    {
+      "siruta": "89348",
+      "name": "DENSUS",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 205084999,
+        "central": 212783501,
+        "high": 225844999
+      },
+      "landRentRon": {
+        "low": 3090517,
+        "central": 4563552,
+        "high": 5680794
+      },
+      "fiscalCaptureOfRent": {
+        "low": 5.1383,
+        "central": 10.9218,
+        "high": 23.6002
+      }
+    },
+    {
+      "siruta": "89428",
+      "name": "DOBRA",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 212203999,
+        "central": 227204001,
+        "high": 252704002
+      },
+      "landRentRon": {
+        "low": 3111274,
+        "central": 4780331,
+        "high": 6382230
+      },
+      "fiscalCaptureOfRent": {
+        "low": 6.8568,
+        "central": 15.1183,
+        "high": 33.3488
+      }
+    },
+    {
+      "siruta": "89561",
+      "name": "GEOAGIU",
+      "rank": "orase",
+      "landValueRon": {
+        "low": 215602997,
+        "central": 249660497,
+        "high": 330323002
+      },
+      "landRentRon": {
+        "low": 3056303,
+        "central": 5173791,
+        "high": 8665529
+      },
+      "fiscalCaptureOfRent": {
+        "low": 21.8094,
+        "central": 79.4769,
+        "high": 271.367
+      }
+    },
+    {
+      "siruta": "89687",
+      "name": "GURASADA",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 162533999,
+        "central": 162533999,
+        "high": 162533999
+      },
+      "landRentRon": {
+        "low": 2450285,
+        "central": 3479728,
+        "high": 4077873
+      },
+      "fiscalCaptureOfRent": {
+        "low": 6.9924,
+        "central": 14.7532,
+        "high": 31.5638
+      }
+    },
+    {
+      "siruta": "89801",
+      "name": "HARAU",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 88072000,
+        "central": 93562001,
+        "high": 99052002
+      },
+      "landRentRon": {
+        "low": 1220504,
+        "central": 1862510,
+        "high": 2369929
+      },
+      "fiscalCaptureOfRent": {
+        "low": 10.494,
+        "central": 23.8218,
+        "high": 54.5368
+      }
+    },
+    {
+      "siruta": "89856",
+      "name": "ILIA",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 146561000,
+        "central": 152294333,
+        "high": 161610998
+      },
+      "landRentRon": {
+        "low": 2147441,
+        "central": 3177690,
+        "high": 3993449
+      },
+      "fiscalCaptureOfRent": {
+        "low": 7.8847,
+        "central": 17.3682,
+        "high": 38.1876
+      }
+    },
+    {
+      "siruta": "89954",
+      "name": "LAPUGIU DE JOS",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 156932000,
+        "central": 162924499,
+        "high": 168916998
+      },
+      "landRentRon": {
+        "low": 2246311,
+        "central": 3330084,
+        "high": 4065683
+      },
+      "fiscalCaptureOfRent": {
+        "low": 8.7198,
+        "central": 16.7927,
+        "high": 34.7362
+      }
+    },
+    {
+      "siruta": "90066",
+      "name": "LELESE",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 109732002,
+        "central": 110377003,
+        "high": 111021998
+      },
+      "landRentRon": {
+        "low": 1655404,
+        "central": 2365285,
+        "high": 2749275
+      },
+      "fiscalCaptureOfRent": {
+        "low": 5.1004,
+        "central": 8.8353,
+        "high": 16.9136
+      }
+    },
+    {
+      "siruta": "90119",
+      "name": "LUNCA CERNII DE JOS",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 222045999,
+        "central": 224397998,
+        "high": 227086002
+      },
+      "landRentRon": {
+        "low": 3507516,
+        "central": 5036502,
+        "high": 5874148
+      },
+      "fiscalCaptureOfRent": {
+        "low": 3.4841,
+        "central": 5.8766,
+        "high": 11.0552
+      }
+    },
+    {
+      "siruta": "90208",
+      "name": "LUNCOIU DE JOS",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 84169000,
+        "central": 87288998,
+        "high": 91969001
+      },
+      "landRentRon": {
+        "low": 1279774,
+        "central": 1893305,
+        "high": 2355749
+      },
+      "fiscalCaptureOfRent": {
+        "low": 5.0362,
+        "central": 13.8032,
+        "high": 33.6507
+      }
+    },
+    {
+      "siruta": "90262",
+      "name": "MARTINESTI",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 74852998,
+        "central": 76256002,
+        "high": 77903001
+      },
+      "landRentRon": {
+        "low": 948388,
+        "central": 1366335,
+        "high": 1639150
+      },
+      "fiscalCaptureOfRent": {
+        "low": 20.0782,
+        "central": 34.0986,
+        "high": 63.6341
+      }
+    },
+    {
+      "siruta": "90342",
+      "name": "ORASTIOARA DE SUS",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 307837999,
+        "central": 312020999,
+        "high": 320653998
+      },
+      "landRentRon": {
+        "low": 5003723,
+        "central": 7195383,
+        "high": 8519420
+      },
+      "fiscalCaptureOfRent": {
+        "low": 4.0233,
+        "central": 7.1981,
+        "high": 14.0124
+      }
+    },
+    {
+      "siruta": "90538",
+      "name": "PUI",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 353162999,
+        "central": 366908998,
+        "high": 382787999
+      },
+      "landRentRon": {
+        "low": 4856430,
+        "central": 7241732,
+        "high": 8971348
+      },
+      "fiscalCaptureOfRent": {
+        "low": 8.0662,
+        "central": 15.5006,
+        "high": 31.8595
+      }
+    },
+    {
+      "siruta": "90663",
+      "name": "RAPOLTU MARE",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 124013001,
+        "central": 126377998,
+        "high": 128743000
+      },
+      "landRentRon": {
+        "low": 1798808,
+        "central": 2595579,
+        "high": 3068618
+      },
+      "fiscalCaptureOfRent": {
+        "low": 8.8786,
+        "central": 15.8024,
+        "high": 30.8809
+      }
+    },
+    {
+      "siruta": "90725",
+      "name": "RACHITOVA",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 111388997,
+        "central": 113591200,
+        "high": 116108001
+      },
+      "landRentRon": {
+        "low": 1532082,
+        "central": 2226095,
+        "high": 2673338
+      },
+      "fiscalCaptureOfRent": {
+        "low": 8.6003,
+        "central": 18.0143,
+        "high": 38.7201
+      }
+    },
+    {
+      "siruta": "90805",
+      "name": "RIBITA",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 126271999,
+        "central": 127742001,
+        "high": 129212002
+      },
+      "landRentRon": {
+        "low": 1985857,
+        "central": 2853761,
+        "high": 3355057
+      },
+      "fiscalCaptureOfRent": {
+        "low": 4.2857,
+        "central": 11.2616,
+        "high": 26.8183
+      }
+    },
+    {
+      "siruta": "90878",
+      "name": "RAU DE MORI",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 566878000,
+        "central": 621537091,
+        "high": 910792998
+      },
+      "landRentRon": {
+        "low": 8045223,
+        "central": 12799856,
+        "high": 24206166
+      },
+      "fiscalCaptureOfRent": {
+        "low": 3.8054,
+        "central": 12.1829,
+        "high": 28.1731
+      }
+    },
+    {
+      "siruta": "90994",
+      "name": "ROMOS",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 135584999,
+        "central": 147066800,
+        "high": 166252998
+      },
+      "landRentRon": {
+        "low": 1859611,
+        "central": 2914050,
+        "high": 4023325
+      },
+      "fiscalCaptureOfRent": {
+        "low": 11.979,
+        "central": 25.7735,
+        "high": 55.9597
+      }
+    },
+    {
+      "siruta": "91116",
+      "name": "SALASU DE SUS",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 323299000,
+        "central": 335329125,
+        "high": 366317002
+      },
+      "landRentRon": {
+        "low": 4312170,
+        "central": 6407958,
+        "high": 8469435
+      },
+      "fiscalCaptureOfRent": {
+        "low": 7.5487,
+        "central": 14.8962,
+        "high": 29.7344
+      }
+    },
+    {
+      "siruta": "91330",
+      "name": "SOIMUS",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 117868997,
+        "central": 139208999,
+        "high": 167338999
+      },
+      "landRentRon": {
+        "low": 1693114,
+        "central": 2938996,
+        "high": 4390357
+      },
+      "fiscalCaptureOfRent": {
+        "low": 6.6523,
+        "central": 19.5842,
+        "high": 53.5067
+      }
+    },
+    {
+      "siruta": "91447",
+      "name": "TOMESTI",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 94092001,
+        "central": 95891998,
+        "high": 98591997
+      },
+      "landRentRon": {
+        "low": 1419775,
+        "central": 2053592,
+        "high": 2459218
+      },
+      "fiscalCaptureOfRent": {
+        "low": 5.0115,
+        "central": 10.8327,
+        "high": 23.6199
+      }
+    },
+    {
+      "siruta": "91535",
+      "name": "TOPLITA",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 77074998,
+        "central": 89361665,
+        "high": 111275001
+      },
+      "landRentRon": {
+        "low": 1191061,
+        "central": 2000399,
+        "high": 3037894
+      },
+      "fiscalCaptureOfRent": {
+        "low": 3.0464,
+        "central": 8.7559,
+        "high": 22.6697
+      }
+    },
+    {
+      "siruta": "91624",
+      "name": "TOTESTI",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 49773001,
+        "central": 60560998,
+        "high": 73953002
+      },
+      "landRentRon": {
+        "low": 611262,
+        "central": 1135839,
+        "high": 1802043
+      },
+      "fiscalCaptureOfRent": {
+        "low": 9.9621,
+        "central": 31.4504,
+        "high": 92.4139
+      }
+    },
+    {
+      "siruta": "91688",
+      "name": "TURDAS",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 57026002,
+        "central": 61226002,
+        "high": 65426001
+      },
+      "landRentRon": {
+        "low": 785820,
+        "central": 1223475,
+        "high": 1610758
+      },
+      "fiscalCaptureOfRent": {
+        "low": 13.1588,
+        "central": 29.9194,
+        "high": 68.6994
+      }
+    },
+    {
+      "siruta": "91731",
+      "name": "GENERAL BERTHELOT",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 53719998,
+        "central": 58094998,
+        "high": 64920001
+      },
+      "landRentRon": {
+        "low": 679367,
+        "central": 1067184,
+        "high": 1476963
+      },
+      "fiscalCaptureOfRent": {
+        "low": 11.5523,
+        "central": 29.5775,
+        "high": 70.9744
+      }
+    },
+    {
+      "siruta": "91795",
+      "name": "VATA DE JOS",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 312899998,
+        "central": 319140000,
+        "high": 328499999
+      },
+      "landRentRon": {
+        "low": 4909735,
+        "central": 7092554,
+        "high": 8446683
+      },
+      "fiscalCaptureOfRent": {
+        "low": 3.5649,
+        "central": 7.998,
+        "high": 17.8029
+      }
+    },
+    {
+      "siruta": "91937",
+      "name": "VALISOARA",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 56319999,
+        "central": 60280000,
+        "high": 64960002
+      },
+      "landRentRon": {
+        "low": 721857,
+        "central": 1126036,
+        "high": 1486149
+      },
+      "fiscalCaptureOfRent": {
+        "low": 10.1161,
+        "central": 24.2322,
+        "high": 57.0907
+      }
+    },
+    {
+      "siruta": "91982",
+      "name": "VETEL",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 178121001,
+        "central": 191944336,
+        "high": 214805998
+      },
+      "landRentRon": {
+        "low": 2737596,
+        "central": 4233799,
+        "high": 5674473
+      },
+      "fiscalCaptureOfRent": {
+        "low": 5.1926,
+        "central": 14.2569,
+        "high": 35.2704
+      }
+    },
+    {
+      "siruta": "92097",
+      "name": "VORTA",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 147346999,
+        "central": 148734501,
+        "high": 150121998
+      },
+      "landRentRon": {
+        "low": 2319643,
+        "central": 3323696,
+        "high": 3868088
+      },
+      "fiscalCaptureOfRent": {
+        "low": 4.6791,
+        "central": 9.5192,
+        "high": 20.1909
+      }
+    },
+    {
+      "siruta": "92177",
+      "name": "ZAM",
+      "rank": "comune",
+      "landValueRon": {
+        "low": 246195002,
+        "central": 251294997,
+        "high": 258945002
+      },
+      "landRentRon": {
+        "low": 3849748,
+        "central": 5570668,
+        "high": 6646339
+      },
+      "fiscalCaptureOfRent": {
+        "low": 5.2736,
+        "central": 10.2334,
+        "high": 21.0725
+      }
+    }
+  ],
+  "limitations": [
+    {
+      "id": "randamentul-e-parametru-nu-masuratoare",
+      "text": "Nu există un randament publicat al terenului pe localități în România. Niciuna dintre cele patru benzi folosite aici nu este o măsurătoare la nivel de comună: cea agricolă e măsurată pe regiuni NUTS2, cea a pădurii și cea a terenului construit sunt deduse. Renta se mișcă direct proporțional cu ele — la jumătate de randament, renta se înjumătățește și captura impozitului se dublează.",
+      "severity": "blocking",
+      "affects": [
+        "renta",
+        "captura"
+      ]
+    },
+    {
+      "id": "randamentul-padurii-e-dedus-nu-masurat",
+      "text": "Nimeni nu publică o arendă a pădurii, deci randamentul ei nu poate fi măsurat direct. Nu mai este însă împrumutat de la arabil: se deduce din recolta de lemn pe hectar (INS AGR306A) înmulțită cu prețul masei lemnoase pe picior de la licitațiile Romsilva, minus o cotă declarată de costuri ale proprietarului — circa 2,3%, față de 1,43% măsurat la arabil. Cota de costuri rămâne un parametru, iar prețul este o medie națională.",
+      "severity": "blocking",
+      "affects": [
+        "renta",
+        "captura"
+      ]
+    },
+    {
+      "id": "randamentul-construit-e-dedus-nu-masurat",
+      "text": "Randamentul terenului de sub clădiri nu este măsurat nicăieri în România: grilele notariale publică prețuri, nu chirii, iar redevențele de concesiune se negociază contract cu contract. Banda folosită aici, 1.73–3.18% cu 2.53% la mijloc, este dedusă din identitatea r = randament_net − amortizare × (1 − pondere_teren), ale cărei trei intrări sunt parametri declarați (randament brut, cotă de cheltuieli, raport lot/suprafață construită). Ea înlocuiește banda presupusă 3–7% folosită până acum, care era ancorată într-un randament rezidențial brut și pe care deducerea o contrazicea: renta scade cu circa jumătate și captura impozitului actual se dublează. Cum curțile-construcții sunt circa 64% din valoare, cea mai mare parte a rentei raportate depinde de această deducere. Eșantionul ei — trei județe fără grilă pentru București, Cluj sau Timiș — o înclină în jos.",
+      "severity": "blocking",
+      "affects": [
+        "renta",
+        "captura"
+      ]
+    },
+    {
+      "id": "randamentul-e-national-nu-local",
+      "text": "Randamentul folosit este unul singur pentru tot județul, deși randamentele reale variază puternic — în București periferia depășește 8% iar centrul scade sub 6%. Un randament unic supraestimează renta acolo unde terenul e scump și o subestimează unde e ieftin.",
+      "severity": "material",
+      "affects": [
+        "renta"
+      ]
+    },
+    {
+      "id": "multiplul-de-piata-e-necalibrat",
+      "text": "Multiplul de piață este lăsat la 1: valorile rămân cele publicate. Pentru teren agricol extravilan există acum două referințe de piață — prețul cerut din registrul Legii 17/2014 (circa 1,2× grila) și prețul plătit din ancheta INS (circa 1,7×) — dar acoperă 36% din valoare; pentru curți-construcții, restul de 64%, nu există niciun preț de piață publicat pe localități. A aplica un multiplu agricol pe terenul de sub case ar fi o eroare mai mare decât presupunerea de 1. Cine are date de tranzacții pe curți-construcții îl poate muta, iar totul se rescalează liniar.",
+      "severity": "blocking",
+      "affects": [
+        "renta",
+        "captura",
+        "valoare"
+      ]
+    }
+  ]
+}

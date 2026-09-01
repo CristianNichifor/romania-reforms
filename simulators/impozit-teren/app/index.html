@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="ro">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <title>Impozitul pe teren — pe suprafață sau pe valoare</title>
+    <meta
+      name="description"
+      content="Cât valorează pământul după grilele notarilor, cât se impozitează azi după Codul fiscal, și ce cotă pe valoare ar aduce aceiași bani."
+    />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <aside id="panel">
+      <header>
+        <a class="up" href="../" title="Toate simulatoarele de reformă">← Toate simulatoarele</a>
+        <h1>Impozitul pe teren</h1>
+        <p class="sub">
+          Codul fiscal impozitează hectarele. Un impozit pe valoarea terenului ar impozita
+          valoarea. Aceleași hectare, două reguli.
+        </p>
+      </header>
+
+      <section class="counties" id="counties"></section>
+
+      <section class="control">
+        <label class="slider-label" for="rate">
+          Cota pe valoare <output id="rate-value"></output>
+        </label>
+        <input id="rate" type="range" min="0" max="200" step="1" value="100" />
+        <div class="ramp-ends"><span>0%</span><span>2%</span></div>
+        <p class="note">
+          Singurul dintre cele patru butoane care e o alegere politică. Celelalte trei sunt
+          goluri în surse.
+        </p>
+      </section>
+
+      <section class="control">
+        <label class="slider-label" for="share">
+          Cât e intravilan <output id="share-value"></output>
+        </label>
+        <input id="share" type="range" min="100" max="400" step="5" value="100" />
+        <div class="ramp-ends"><span>doar curți-construcții</span><span>de 4 ori mai mult</span></div>
+        <p class="note">
+          Fondul funciar nu spune ce e intravilan. Implicit se ia exact categoria
+          curți-construcții — greșit tocmai la margine, pentru că grădinile din sate sunt teren
+          arabil în intravilan. Hectarele în plus se iau din arabil, nu se inventează.
+        </p>
+      </section>
+
+      <section class="control">
+        <label class="slider-label" for="yield">
+          Randamentul terenului <output id="yield-value"></output>
+        </label>
+        <input id="yield" type="range" min="100" max="900" step="10" value="250" />
+        <div class="ramp-ends"><span>2%</span><span>9%</span></div>
+        <p class="note">
+          Cât câștigă pământul într-un an, ca procent din valoare. Transformă stocul în flux —
+          unitatea în care se poartă de fapt discuția. Randamentul rezidențial brut observat în
+          România era de cca. 6,3% în 2025; terenul se capitalizează sub el, pentru că nu se
+          amortizează. Nu există un randament publicat pe comune.
+        </p>
+      </section>
+
+      <section class="control">
+        <span class="slider-label">Ce preț ține loc de comună</span>
+        <div class="segmented" id="value-band">
+          <button data-band="low">cel mai ieftin sat</button>
+          <button data-band="central" class="on">media</button>
+          <button data-band="high">cel mai scump</button>
+        </div>
+        <p class="note">
+          Grila publică un preț pe sat și pe zonă, dar niciunele nu au suprafețe publicate, deci
+          nu există cu ce fi ponderate.
+        </p>
+      </section>
+
+      <section class="control">
+        <span class="slider-label">Ce citire a Codului fiscal</span>
+        <div class="segmented" id="fiscal-band">
+          <button data-band="low">cea mai ieftină</button>
+          <button data-band="central" class="on">la mijloc</button>
+          <button data-band="high">cea mai scumpă</button>
+        </div>
+        <p class="note">
+          Art. 465 dă un interval, iar alin. (9) lasă alegerea consiliului local. Zona A–D și
+          rangul sunt tot decizii locale. Ambele capete sunt legale azi.
+        </p>
+      </section>
+
+      <section class="fold">
+        <details id="limits-fold" open>
+          <summary><span>Ce nu putem calcula</span><span class="chev" id="limits-count"></span></summary>
+          <div id="limits"></div>
+        </details>
+      </section>
+
+      <footer>
+        <p class="note" id="sources"></p>
+      </footer>
+    </aside>
+
+    <main id="main">
+      <section class="headline" id="headline"></section>
+      <section class="card" id="national"></section>
+      <section class="card map-card">
+        <div class="card-head">
+          <h2>Harta valorii terenului</h2>
+          <div class="segmented small" id="map-metric">
+            <button data-metric="perHa" class="on">lei / ha</button>
+            <button data-metric="total">valoare totală</button>
+          </div>
+        </div>
+        <div id="map"></div>
+        <div id="map-legend" class="legend"></div>
+        <p class="note">
+          <strong>Mozaicul este citit, suprafața hașurată este estimată.</strong> Județele cu
+          grilă notarială sunt colorate comună cu comună, din prețurile publicate. Celelalte
+          sunt colorate ca o singură formă, la jumătate de opacitate și sub hașură, pentru că
+          valoarea lor vine dintr-un model cu un singur predictor — populația celui mai mare
+          oraș — și este cunoscută la nivel de județ, nu mai fin. Comunele albe dinăuntrul unui
+          județ colorat sunt cele pe care studiul județului nu le prețuiește. Bucureștiul și
+          Ilfovul rămân goale: sunt în afara intervalului pe care s-a estimat modelul.
+        </p>
+      </section>
+      <section class="table-wrap">
+        <div class="table-head">
+          <h2 id="table-title"></h2>
+          <div class="segmented small" id="sort">
+            <button data-sort="delta" class="on">după diferență</button>
+            <button data-sort="value">după valoare</button>
+            <button data-sort="name">alfabetic</button>
+          </div>
+        </div>
+        <table id="table">
+          <thead>
+            <tr>
+              <th>Localitate</th>
+              <th class="num">Suprafață</th>
+              <th class="num">Valoarea terenului</th>
+              <th class="num">Cod fiscal</th>
+              <th class="num">Pe valoare</th>
+              <th class="num">Diferență</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </section>
+    </main>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

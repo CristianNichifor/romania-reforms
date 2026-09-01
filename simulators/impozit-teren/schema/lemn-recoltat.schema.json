@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "lemn-recoltat.schema.json",
+  "title": "Volumul de lemn recoltat pe județe",
+  "description": "Recolta anuală de masă lemnoasă (INS AGR306A) împărțită la suprafața pădurii din fondul funciar, ca metri cubi pe hectar pe an.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "counties",
+    "period",
+    "provenance",
+    "summary",
+    "counties_measured",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^lemn-recoltat-[0-9]{4}$"
+    },
+    "title": {
+      "type": "string"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "counties": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z]{1,2}$"
+      }
+    },
+    "period": {
+      "type": "string",
+      "pattern": "^[0-9]{4}$"
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json#/$defs/provenance"
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "counties",
+        "withForestArea",
+        "harvestM3",
+        "nationalM3PerHaPerYear"
+      ],
+      "properties": {
+        "counties": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "withForestArea": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "harvestM3": {
+          "type": "number",
+          "minimum": 0
+        },
+        "nationalM3PerHaPerYear": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "counties_measured": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "county",
+          "harvestM3",
+          "forestHa",
+          "m3PerHaPerYear"
+        ],
+        "properties": {
+          "county": {
+            "type": "string",
+            "pattern": "^[A-Z]{1,2}$"
+          },
+          "harvestM3": {
+            "type": "number",
+            "minimum": 0
+          },
+          "forestHa": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "m3PerHaPerYear": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "provenance.schema.json#/$defs/limitation"
+      }
+    }
+  }
+}

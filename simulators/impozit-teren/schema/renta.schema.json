@@ -1,0 +1,511 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/renta.schema.json",
+  "title": "Land rent, and the share of it each tax takes",
+  "description": "A land value tax is a claim on the flow land earns, not on the stock. This restates both taxes as a share of land rent, which is the unit the argument is actually about and the one a landowner feels. The yield that turns stock into flow is a parameter and the largest uncertainty in the file; nobody publishes a land yield for Romanian communes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "counties",
+    "period",
+    "currency",
+    "provenance",
+    "assumptions",
+    "summary",
+    "localities",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^renta-[a-z]{1,2}-[0-9]{4}$"
+    },
+    "title": {
+      "type": "string"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "counties": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Z]{1,2}$"
+      }
+    },
+    "period": {
+      "type": "string",
+      "pattern": "^[0-9]{4}$"
+    },
+    "currency": {
+      "const": "RON"
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json#/$defs/provenance"
+    },
+    "assumptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "landYieldPercent",
+        "yieldSource",
+        "marketMultiple",
+        "agriculturalYieldPercent",
+        "agriculturalYieldSource",
+        "yieldByCategoryPercent",
+        "yieldByCategorySource",
+        "landYieldPreviouslyAssumedPercent",
+        "builtYieldIsDerived"
+      ],
+      "properties": {
+        "landYieldPercent": {
+          "description": "The yield turning land value into land rent. A band because no land yield is published for Romanian localities.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "low",
+            "central",
+            "high"
+          ],
+          "properties": {
+            "low": {
+              "type": "number"
+            },
+            "central": {
+              "type": "number"
+            },
+            "high": {
+              "type": "number"
+            }
+          }
+        },
+        "yieldSource": {
+          "type": "string",
+          "minLength": 20
+        },
+        "marketMultiple": {
+          "description": "Restates the published values at a multiple of themselves. 1 leaves them as published; anything else without transaction data would be an invented number.",
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "agriculturalYieldPercent": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "low",
+                "central",
+                "high"
+              ],
+              "properties": {
+                "low": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "central": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "high": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Randamentul măsurat al terenului agricol în regiunea județului — arendă ÷ preț din ancheta INS. Null dacă ancheta nu a fost importată, caz în care banda unică de mai sus s-a aplicat întregii valori."
+        },
+        "agriculturalYieldSource": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "yieldByCategoryPercent": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "low",
+              "central",
+              "high"
+            ],
+            "properties": {
+              "low": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "central": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "high": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            }
+          },
+          "description": "Randamentul aplicat fiecărui cod cadastral. Arabilul și pășunea au fiecare banda măsurată pe ea; pădurea împrumută banda arabilului, ceea ce e declarat ca limitare blocantă."
+        },
+        "yieldByCategorySource": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "landYieldPreviouslyAssumedPercent": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "low",
+            "central",
+            "high"
+          ],
+          "properties": {
+            "low": {
+              "type": "number"
+            },
+            "central": {
+              "type": "number"
+            },
+            "high": {
+              "type": "number"
+            }
+          },
+          "description": "Banda presupusă 3–7% pe care deducerea a înlocuit-o. Păstrată ca mișcarea să fie vizibilă: la jumătate de randament, captura se dublează."
+        },
+        "builtYieldIsDerived": {
+          "type": "boolean",
+          "description": "Fals doar dacă randament-teren-construit nu e construit și s-a căzut înapoi pe presupunere."
+        },
+        "builtLandSharePercent": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "low",
+                "central",
+                "high"
+              ],
+              "properties": {
+                "low": {
+                  "type": "number"
+                },
+                "central": {
+                  "type": "number"
+                },
+                "high": {
+                  "type": "number"
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "urbanBuiltYieldPercent": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "low",
+                "central",
+                "high"
+              ],
+              "properties": {
+                "low": {
+                  "type": "number"
+                },
+                "central": {
+                  "type": "number"
+                },
+                "high": {
+                  "type": "number"
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ruralBuiltYieldPercent": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "low",
+                "central",
+                "high"
+              ],
+              "properties": {
+                "low": {
+                  "type": "number"
+                },
+                "central": {
+                  "type": "number"
+                },
+                "high": {
+                  "type": "number"
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "localities",
+        "landValueRon",
+        "landRentRon",
+        "fiscalCodeRon",
+        "fiscalCaptureOfRentPercent",
+        "fullRentRatePercent"
+      ],
+      "properties": {
+        "localities": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "landValueRon": {
+          "description": "The stock.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "low",
+            "central",
+            "high"
+          ],
+          "properties": {
+            "low": {
+              "type": "number"
+            },
+            "central": {
+              "type": "number"
+            },
+            "high": {
+              "type": "number"
+            }
+          }
+        },
+        "landRentRon": {
+          "description": "The flow it earns in a year.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "low",
+            "central",
+            "high"
+          ],
+          "properties": {
+            "low": {
+              "type": "number"
+            },
+            "central": {
+              "type": "number"
+            },
+            "high": {
+              "type": "number"
+            }
+          }
+        },
+        "fiscalCodeRon": {
+          "description": "What article 465 takes from that flow.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "low",
+            "central",
+            "high"
+          ],
+          "properties": {
+            "low": {
+              "type": "number"
+            },
+            "central": {
+              "type": "number"
+            },
+            "high": {
+              "type": "number"
+            }
+          }
+        },
+        "fiscalCaptureOfRentPercent": {
+          "description": "The share of land rent today's tax takes. The headline.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "low",
+            "central",
+            "high"
+          ],
+          "properties": {
+            "low": {
+              "type": "number"
+            },
+            "central": {
+              "type": "number"
+            },
+            "high": {
+              "type": "number"
+            }
+          }
+        },
+        "fullRentRatePercent": {
+          "description": "The rate on value that would take the whole rent — a full land value tax, and the ceiling to read any proposal against. Equal to the yield by construction.",
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "low",
+            "central",
+            "high"
+          ],
+          "properties": {
+            "low": {
+              "type": "number"
+            },
+            "central": {
+              "type": "number"
+            },
+            "high": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "localities": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "siruta",
+          "name",
+          "rank",
+          "landValueRon",
+          "landRentRon",
+          "fiscalCaptureOfRent"
+        ],
+        "properties": {
+          "siruta": {
+            "type": "string",
+            "pattern": "^[0-9]+$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "rank": {
+            "enum": [
+              "municipii",
+              "orase",
+              "comune",
+              null
+            ]
+          },
+          "landValueRon": {
+            "description": "The stock.",
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "low",
+              "central",
+              "high"
+            ],
+            "properties": {
+              "low": {
+                "type": "number"
+              },
+              "central": {
+                "type": "number"
+              },
+              "high": {
+                "type": "number"
+              }
+            }
+          },
+          "landRentRon": {
+            "description": "The flow.",
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "low",
+              "central",
+              "high"
+            ],
+            "properties": {
+              "low": {
+                "type": "number"
+              },
+              "central": {
+                "type": "number"
+              },
+              "high": {
+                "type": "number"
+              }
+            }
+          },
+          "fiscalCaptureOfRent": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "low",
+              "central",
+              "high"
+            ],
+            "properties": {
+              "low": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "central": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "high": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "provenance.schema.json#/$defs/limitation"
+      }
+    }
+  }
+}

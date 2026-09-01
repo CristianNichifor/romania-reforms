@@ -160,3 +160,116 @@ jobs:
         run: |
           npm ci
           npm run build
+
+  impozit-teren:
+    name: impozit-teren
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: simulators/impozit-teren/app/package-lock.json
+      # Imported before the grids: the register is the roster each grid is checked against,
+      # so a grid cannot be verified before its county's areas exist.
+      #
+      # INS TEMPO is a separate service from unnpr.ro and fails differently: over its cell
+      # budget it answers 200 with an empty body rather than an error, so "it ran" is not
+      # evidence it worked. The importer's own check — the register's categories against the
+      # register's total — is what turns that into a failure.
+      - name: The land areas are reproducible
+        run: |
+          uv run python simulators/impozit-teren/scripts/import_fond_funciar.py --all
+          git diff --exit-code simulators/impozit-teren/data/
+      - name: The land grids are reproducible
+        run: |
+          for chamber in bacau neamt alba iasi sibiu constanta tulcea prahova mures harghita \
+                         vrancea dambovita buzau hunedoara bistrita maramures salaj \
+                         timis cluj bihor satumare vaslui; do
+            uv run --with pypdf python simulators/impozit-teren/scripts/import_ghid.py \
+              --chamber "$chamber"
+          done
+          git diff --exit-code simulators/impozit-teren/data/
+      # Rebuilt at the rate the committed datasets were built with, not today's. Everything
+      # downstream is published in euro and most chambers price in lei, so without pinning the
+      # rate this output moves in the fourth significant figure of every locality whenever the
+      # euro does — which is not a regression and cannot be told apart from one. Pinned, the
+      # diff tests what it was meant to test: the parsing and the arithmetic. The live rate is
+      # exercised by the steps below, which are not diffed for exactly this reason.
+      - name: The land value is reproducible
+        run: |
+          for county in AB BC BH BN BZ CJ CT DB HD HR IS MM MS NT PH SB SJ SM TL TM VN VS; do
+            uv run python simulators/impozit-teren/scripts/build_valoare_teren.py \
+              --county "$county" --reuse-exchange-rate
+          done
+          git diff --exit-code simulators/impozit-teren/data/
+      # The asking-price barometer is someone else's aggregate under CC BY 4.0, so it is
+      # cached in sources/ and the importer reads the cache by default. --refresh is what
+      # goes back to verifi.ro, and CI does not: a build should not depend on a third party
+      # being up, and the comparison is only meaningful against the grid edition beside it.
+      #
+      # This step must stay ahead of "The comparison runs": build_impozit.py and
+      # build_renta.py both read the INS survey for the measured agricultural yield, and
+      # without it they fall back to the single assumed band and write different numbers.
+      - name: The market comparison is reproducible
+        run: |
+          uv run python simulators/impozit-teren/scripts/import_pret_cerut.py
+          uv run python simulators/impozit-teren/scripts/import_teren_agricol_ins.py
+          uv run python simulators/impozit-teren/scripts/import_lemn_recoltat.py
+          uv run python simulators/impozit-teren/scripts/build_multiplu_piata.py
+          uv run python simulators/impozit-teren/scripts/build_randament_construit.py
+          uv run python simulators/impozit-teren/scripts/build_randament_padure.py
+          git diff --exit-code simulators/impozit-teren/data/
+      # What this checks, and what it stopped being able to check.
+      #
+      # It parses the Code's five tables and refuses to write one whose shape no longer
+      # matches the article, so a change to the *parser* still fails here. It does not notice
+      # a change to the *Code*, which is what it was written for — two of the five tables were
+      # replaced with effect from 1 January 2026 — because legislatie.just.ro refuses GitHub
+      # Actions runners outright: four attempts in one run, each closed before a byte arrived,
+      # while the same request succeeds from a laptop. The source is committed instead, so
+      # this reads a fixed copy. Noticing a new edition needs `--refresh` from a network the
+      # portal answers, and until that runs the Code here is the one that was fetched.
+      - name: The Fiscal Code tables are reproducible
+        run: |
+          uv run python simulators/impozit-teren/scripts/import_cod_fiscal.py
+          git diff --exit-code simulators/impozit-teren/data/cod-fiscal-teren-2026.json
+      # Not diffed: the comparison carries the day's ECB reference rate, so it changes when
+      # the euro does and a byte-identical rerun would only prove the cache was warm. The
+      # tests check the claim instead of the bytes.
+      - name: The comparison runs
+        run: |
+          for county in AB BC BH BN BZ CJ CT DB HD HR IS MM MS NT PH SB SJ SM TL TM VN VS; do
+            uv run python simulators/impozit-teren/scripts/build_impozit.py --county "$county"
+            uv run python simulators/impozit-teren/scripts/build_renta.py --county "$county"
+          done
+      # The page redoes both taxes in the browser as the reader moves the assumptions, so it
+      # is a second implementation of the two builders. `npm test` is the parity check
+      # between them: at the Python's own settings the two must agree to the rounding, or the
+      # page keeps rendering confident numbers that no longer match the files behind them.
+      # The map borrows administrativ's boundaries rather than fetching a second copy, so it
+      # only builds where that pipeline's output exists. Not diffed: geopandas versions move
+      # the last decimal of a simplified vertex, and a byte-identical polygon is not the claim.
+      # The national estimate closes the half of the country no chamber publishes. It has to
+      # run after every county's value is built, because it is fitted on them — and after the
+      # population import, because the fit's only predictor is the size of the county seat.
+      # Not diffed: it consumes the tax files, which carry the day's ECB rate.
+      - name: The national estimate runs
+        run: |
+          uv run python simulators/impozit-teren/scripts/import_populatie.py --all
+          uv run python simulators/impozit-teren/scripts/build_valoare_nationala.py
+      - name: The map's shapes build
+        run: |
+          uv run --with geopandas python simulators/impozit-teren/scripts/build_harta.py \
+            --allow-missing-boundaries
+      - name: App
+        working-directory: simulators/impozit-teren/app
+        run: |
+          npm ci
+          npm run typecheck
+          npm test
+          npm run build
