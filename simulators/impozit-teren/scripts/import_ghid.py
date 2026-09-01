@@ -318,6 +318,42 @@ def download(study: Study) -> Path:
     return out
 
 
+def prime_cache(study: Study) -> None:
+    """Make sure this one study's extracted tables exist, fetching the PDF if they do not.
+
+    The dialects call `extract_cache.load` directly and it does not fetch: on a missing entry
+    it exits and tells you to run the whole country-wide extraction. Locally that is right —
+    the cache is built once for 115 documents and every parser run after that is instant. On a
+    clean checkout it is not, because `sources/studies/` and `cache/` are both untracked, so a
+    fresh CI run had the PDF (this file downloads it) and no tables (nothing built them), and
+    every dialect-based county failed on the first chamber.
+
+    Fetching all 115 studies in CI to parse 22 of them would be 300 MB for the sake of
+    uniformity. So this primes exactly the one document about to be read.
+
+    Named by the study's own filename rather than by its key, because that is what
+    `cache_path` uses and what the dialects pass — the two had drifted apart, which is why the
+    downloaded PDF did not satisfy the cache lookup that immediately followed it.
+    """
+    from extract_cache import STUDIES, build, cache_path  # noqa: PLC0415
+
+    name = Path(study.path).name
+    if cache_path(name).exists():
+        return
+    source = STUDIES / name
+    if not source.exists():
+        source.parent.mkdir(parents=True, exist_ok=True)
+        url = BASE + urllib.parse.quote(study.path)
+        print(f"downloading {url} ...")
+        request = urllib.request.Request(url, headers={"User-Agent": UA})
+        with urllib.request.urlopen(request, timeout=300) as response:  # noqa: S310
+            source.write_bytes(response.read())
+    _name, seconds, status = build(source)
+    print(f"extracted {name} in {seconds:.0f}s ({status})")
+    if status.startswith("failed"):
+        raise SystemExit(f"could not extract {name}: {status}")
+
+
 def pages_of(study: Study) -> list[str]:
     """The study's pages as flattened text, from the cache when it has been extracted.
 
@@ -926,6 +962,8 @@ def main() -> int:
     study = STUDIES[args.chamber]
     from_register = not args.from_study_roster
 
+    # Before any reading: the dialects go straight to the extraction cache and cannot fetch.
+    prime_cache(study)
     pages = pages_of(study)
     print(f"{study.title}: {len(pages)} pages")
 
