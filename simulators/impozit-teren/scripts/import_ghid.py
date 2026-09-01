@@ -357,7 +357,14 @@ def prime_cache(study: Study) -> None:
 
     wanted = [(Path(study.path).name, study.path)]
 
-    dialect = importlib.import_module(f"dialect_{study.dialect}")
+    # Missing is normal, not exceptional: `dialect="bacau"` is the sentinel for the built-in
+    # reader and has no module of its own. Catching the import rather than repeating that
+    # sentinel here means a future study without a dialect primes correctly instead of
+    # crashing on a name that was only ever a flag.
+    try:
+        dialect = importlib.import_module(f"dialect_{study.dialect}")
+    except ModuleNotFoundError:
+        dialect = None
     needs = getattr(dialect, "NEEDS", None)
     if needs is not None:
         chamber = Path(study.path).parent.name
