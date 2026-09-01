@@ -114,6 +114,14 @@ interface CurtiApel {
     meanMetresToRegionSeat: number;
     countiesTravellingFurther: number;
     countiesCompared: number;
+    countiesNearerAnotherRegion: number;
+    meanDetourMetres: number;
+    worstDetour: {
+      county: string;
+      region: string;
+      nearestRegion: string;
+      detourMetres: number;
+    } | null;
   };
   limitations: Limitation[];
 }
@@ -1649,7 +1657,23 @@ async function main(): Promise<void> {
        fi ${apKm(ap.meanMetresToRegionSeat)} — mai mult decât dublu. ${
          ap.countiesTravellingFurther
        } din ${ap.countiesCompared} de județe ar avea de mers mai departe, niciunul mai
-       aproape. La apel drumul îl face de obicei avocatul, nu justițiabilul, dar el rămâne.</p>`;
+       aproape. La apel drumul îl face de obicei avocatul, nu justițiabilul, dar el rămâne.</p>
+     <p class="disagree"><strong>Și regiunile nu sunt cele mai apropiate sedii.</strong>
+       ${ap.countiesNearerAnotherRegion} din ${ap.countiesCompared} de județe sunt trimise pe
+       lângă un sediu regional mai apropiat decât al lor, cu un ocol mediu de
+       ${apKm(ap.meanDetourMetres)}.${
+         ap.worstDetour
+           ? ` Cel mai mult ${countyName(ap.worstDetour.county)}: ${apKm(
+               ap.worstDetour.detourMetres,
+             )} în plus, fiindcă e în ${ap.worstDetour.region} și are sediul ${
+               ap.worstDetour.nearestRegion
+             } mai aproape.`
+           : ''
+       } E fix obiecția pe care harta de nivel 1 o ridică față de granițele de județ, un nivel
+       mai sus — dar nu se rezolvă la fel. Regiunile de dezvoltare sunt definite de Legea
+       315/2004, iar a aronda un județ la sediul cel mai apropiat înseamnă a nu mai avea
+       regiuni. Cifra arată prețul; alegerea dintre o geografie legală și un drum mai scurt nu
+       se face din date.</p>`;
 
   const PARCHET_LABEL: Record<string, string> = {
     piccj: 'PÎCCJ + DNA, DIICOT',
