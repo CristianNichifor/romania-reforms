@@ -1,6 +1,6 @@
 """Population by locality, because nothing else in this repository predicts land price.
 
-Twenty-one counties are priced from their notaries' grids and twenty-one are not, and the only
+Twenty-two counties are priced from their notaries' grids and the rest are not, and the only
 way to say anything about the country as a whole is to predict the missing ones from the
 measured ones. That needs a covariate — something known for all 42 counties that moves with the
 price of building land.
@@ -10,7 +10,7 @@ file exists:
 
 * **The built share of the county**, from the land register. Regressing the price of building
   land on it gives a slope of 0,37 and an **R² of 0,04** — no relationship at all. Prahova has
-  the largest built share in the set, 5,5%, and the *lowest* price per hectare. The share
+  the largest built share in the set, 5,5%, and among the lowest prices per hectare. The share
   measures village sprawl, not urban value.
 * **The NUTS2 region.** Under leave-one-out it is *worse than the national mean* — an error
   factor of 2,6 against 2,1. Regions here hold six counties with Cluj and Sălaj in the same
@@ -40,6 +40,7 @@ import html
 import json
 import re
 import sys
+import time
 import urllib.request
 from pathlib import Path
 
@@ -246,11 +247,18 @@ def main() -> int:
     if args.all:
         failed = []
         for code in sorted(labels):
-            try:
-                if build(code, labels[code], meta):
-                    failed.append(code)
-            except Exception as error:  # noqa: BLE001
-                print(f"{code}: {error}", file=sys.stderr)
+            # Retried, for the same reason the land register is: forty-two requests to TEMPO
+            # in a row is more than it reliably answers, and which one it drops is arbitrary.
+            # A county that fails all three attempts still fails the build — the predictor has
+            # to exist for every county or the national estimate silently omits one.
+            for retry in range(3):
+                try:
+                    if build(code, labels[code], meta) == 0:
+                        break
+                except Exception as error:  # noqa: BLE001
+                    print(f"{code}, încercarea {retry + 1}: {error}", file=sys.stderr)
+                time.sleep(2 * (retry + 1))
+            else:
                 failed.append(code)
         if failed:
             print(f"\nFATAL: {len(failed)} counties failed: {failed}", file=sys.stderr)

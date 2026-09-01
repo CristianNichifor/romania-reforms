@@ -205,21 +205,45 @@ def parse(table: str, county: str) -> tuple[dict[str, dict], list[str]]:
 def run_all(workers: int) -> int:
     """Every county at once. The register is the roster every grid is checked against, so it
     has to exist before any chamber can be parsed, and forty-two serial requests to TEMPO is
-    ten minutes of waiting for work that is entirely independent."""
+    ten minutes of waiting for work that is entirely independent.
+
+    **Retried, because the failure is in the service and not in the county.** Forty-two
+    concurrent requests from one runner is more than TEMPO reliably answers: a CI run dropped
+    Arad and Bucharest, both of which import on their own without complaint. Which two fail is
+    arbitrary, so a single miss must not fail a build that would pass on a second attempt —
+    but a county that fails every attempt still has to fail the build, because the register is
+    what every grid is checked against and a missing one silently narrows the roster.
+    """
     import concurrent.futures  # noqa: PLC0415
     import subprocess  # noqa: PLC0415
+    import time  # noqa: PLC0415
 
     here = Path(__file__)
 
-    def one(code: str) -> tuple[str, bool, str]:
+    def attempt(code: str) -> tuple[bool, str]:
         done = subprocess.run(  # noqa: S603
             ["uv", "run", "python", str(here), "--county", code],
             capture_output=True, text=True, cwd=here.parents[3],
         )
-        line = next(
-            (x for x in done.stdout.splitlines() if "localități" in x), done.stderr.strip()[:80]
-        )
-        return code, done.returncode == 0, line
+        if done.returncode == 0:
+            line = next(
+                (x for x in done.stdout.splitlines() if "localități" in x), "imported"
+            )
+            return True, line
+        # The *last* line of the traceback, which is the exception. Reporting the first eighty
+        # characters instead — which is what this did — turns every failure into
+        # "Traceback (most recent call last): File /home/runner/work/rom" and tells nobody
+        # anything; the CI run that prompted this retry could not be diagnosed from its log.
+        tail = [x for x in done.stderr.strip().splitlines() if x.strip()]
+        return False, (tail[-1] if tail else "no output")[:160]
+
+    def one(code: str) -> tuple[str, bool, str]:
+        for retry in range(3):
+            good, line = attempt(code)
+            if good:
+                return code, True, line if retry == 0 else f"{line}  (reîncercat de {retry}x)"
+            time.sleep(2 * (retry + 1))
+        return code, False, line
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
         results = sorted(pool.map(one, sorted(COUNTIES)))
