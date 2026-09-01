@@ -132,9 +132,14 @@ jobs:
       # runs is everything that does not need the artefacts: the speed table, the
       # accumulation, and the gate's own logic.
       #
-      # The speed model is derived from measured limits and kinematics rather than checked
-      # against recorded journeys, and that unvalidated state is declared in provenance
-      # instead of being shouted by a permanently red build.
+      # The speed model IS now checked, at both ends and against two references that disagree
+      # in opposite directions: 3,7% slow against 552 timetabled county bus runs, ~10% fast
+      # against twelve routed car drives in Valcea. Neither is ground truth, so what provenance
+      # declares is no longer "unvalidated" but the size and direction of the two gaps.
+      #
+      # The gate itself still cannot run here — it needs the travel-time artefacts, like the
+      # rest of the pipeline. What pytest covers is its logic and that its reference file stays
+      # filled, so a placeholder cannot come back and make it verify nothing.
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
