@@ -201,6 +201,16 @@ def extravilan_prices(grid: dict) -> dict[str, dict[str, float]]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--county", default="BC", choices=sorted(COUNTY_TO_CHAMBER))
+    parser.add_argument(
+        "--reuse-exchange-rate",
+        action="store_true",
+        help=(
+            "convert at the rate this county's existing dataset was built with, instead of "
+            "today's. For CI, so that rebuilding can be byte-compared: everything here is "
+            "published in euro and most chambers price in lei, so without this the output "
+            "moves whenever the euro does and a diff proves nothing either way."
+        ),
+    )
     args = parser.parse_args()
     county = args.county
 
@@ -216,7 +226,19 @@ def main() -> int:
     extra = extravilan_prices(grid)
     # Everything downstream is in euro, so a chamber that prices in lei is converted here
     # rather than leaving two units in one dataset.
-    ron_per_eur, fx_date = exchange_rate()
+    #
+    # Which makes this file move with the euro, and CI byte-compares it. Those two facts are
+    # incompatible: a rerun on a different day differs in the fourth significant figure of
+    # every locality in every lei-priced county, which is not a regression and cannot be told
+    # apart from one. `--reuse-exchange-rate` pins the rate to whatever the committed dataset
+    # was built at, so the comparison tests the parsing and the arithmetic — which is what it
+    # was meant to test — and leaves the rate to the steps that are not diffed.
+    out_path = ROOT / "data" / f"valoare-teren-{county.lower()}-{grid_year}.json"
+    if args.reuse_exchange_rate and out_path.exists():
+        previous = json.loads(out_path.read_text(encoding="utf-8"))["assumptions"]
+        ron_per_eur, fx_date = previous["ronPerEur"], previous["exchangeRateDate"]
+    else:
+        ron_per_eur, fx_date = exchange_rate()
     to_eur = (1 / ron_per_eur) if grid["currency"] == "RON" else 1.0
 
     rows: list[dict] = []
@@ -474,7 +496,7 @@ def main() -> int:
         ],
     }
 
-    out = ROOT / "data" / f"valoare-teren-{county.lower()}-{grid_year}.json"
+    out = out_path
     out.write_text(json.dumps(document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"\nWrote {out.relative_to(ROOT.parent.parent)}")
     return 0

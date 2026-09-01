@@ -194,11 +194,17 @@ jobs:
               --chamber "$chamber"
           done
           git diff --exit-code simulators/impozit-teren/data/
+      # Rebuilt at the rate the committed datasets were built with, not today's. Everything
+      # downstream is published in euro and most chambers price in lei, so without pinning the
+      # rate this output moves in the fourth significant figure of every locality whenever the
+      # euro does — which is not a regression and cannot be told apart from one. Pinned, the
+      # diff tests what it was meant to test: the parsing and the arithmetic. The live rate is
+      # exercised by the steps below, which are not diffed for exactly this reason.
       - name: The land value is reproducible
         run: |
           for county in AB BC BH BN BZ CJ CT DB HD HR IS MM MS NT PH SB SJ SM TL TM VN VS; do
             uv run python simulators/impozit-teren/scripts/build_valoare_teren.py \
-              --county "$county"
+              --county "$county" --reuse-exchange-rate
           done
           git diff --exit-code simulators/impozit-teren/data/
       # The asking-price barometer is someone else's aggregate under CC BY 4.0, so it is
