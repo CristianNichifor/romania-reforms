@@ -341,6 +341,28 @@ def main() -> int:
         },
         "summary": summary,
         "merged": merged,
+        # The offices themselves, so the distance-routed variant can read them rather than
+        # extract the annexes a second time. Two extractions of one table drift apart.
+        "offices": [
+            {
+                "office": o["office"],
+                "level": "judecatorie",
+                "county": o["county"],
+                "volume": o["volume"],
+                "prosecutors": o["prosecutors"],
+            }
+            for o in judecatorie
+        ]
+        + [
+            {
+                "office": o["office"],
+                "level": "tribunal",
+                "county": o["county"],
+                "volume": o["volume"],
+                "prosecutors": o["prosecutors"],
+            }
+            for o in tribunal
+        ],
         "limitations": [
             {
                 "id": "doua-feluri-de-dosare-adunate",
@@ -367,13 +389,15 @@ def main() -> int:
             {
                 "id": "comasare-pe-judet-nu-pe-distanta",
                 "text": (
-                    "Parchetele sunt comasate pe județ, fiindcă asta spune 7.3. Partea de "
-                    "instanțe a acestui simulator arondează peste granițele de județ, după "
-                    "distanță, și găsește 48 de unități mai aproape de alt județ; la parchete "
-                    "nu se poate face la fel, pentru că circumscripția fiecărui parchet — ce "
-                    "comune acoperă — nu e publicată."
+                    "Parchetele sunt comasate aici pe județ, fiindcă asta spune 7.3. Fișierul "
+                    "acesta a susținut o vreme că nici nu s-ar putea altfel, pentru că nu se "
+                    "publică ce comune acoperă un parchet — ceea ce era greșit: un parchet de pe "
+                    "lângă o judecătorie lucrează în circumscripția acelei judecătorii, deci "
+                    "teritoriul lui e publicat, ca al instanței, în HG 1217/2023. Arondarea după "
+                    "distanță se calculează în „parchete-arondare”; ce rămâne aici e varianta pe "
+                    "județ, cea a lucrării."
                 ),
-                "severity": "blocking",
+                "severity": "note",
                 "affects": ["merged"],
             },
             {

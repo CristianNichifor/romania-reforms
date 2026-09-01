@@ -57,6 +57,8 @@ const sources = [
   [resolve(here, '../../data/parchete-regiuni.json'), 'parchete-regiuni.json'],
   // How far the prosecution establishment sits from its own caseload.
   [resolve(here, '../../data/parchete-incadrare.json'), 'parchete-incadrare.json'],
+  // Prosecution routed by distance with the courts, not merged by county.
+  [resolve(here, '../../data/parchete-arondare.json'), 'parchete-arondare.json'],
   // Chapters 4-5: the Danish comparison the paper's judicial map rests on.
   [resolve(here, '../../data/danemarca-comparatie.json'), 'danemarca.json'],
   // Chapter 16's resource figures, against the pay grid and estate they have to agree with.

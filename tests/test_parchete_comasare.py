@@ -94,11 +94,21 @@ def test_the_two_levels_are_not_pretended_to_be_the_same_case(merger):
     assert "dosare-de-solutionat-nu-munca-facuta" in ids
 
 
-def test_merging_by_county_is_declared_as_the_papers_rule_not_a_choice(merger):
-    """The court half of this simulator routes across county lines by distance. Prosecution
-    cannot, and the reason has to stay visible or the two halves look inconsistent."""
-    blocking = {x["id"] for x in merger["limitations"] if x["severity"] == "blocking"}
-    assert "comasare-pe-judet-nu-pe-distanta" in blocking
+def test_merging_by_county_is_the_papers_rule_and_says_where_the_alternative_lives(merger):
+    """This asserted the opposite until the caveat it guarded turned out to be wrong.
+
+    It required "comasare-pe-judet-nu-pe-distanta" to be blocking, on the reasoning that
+    prosecution could not be routed by distance because no document publishes an office's
+    communes. A parchet de pe lângă a court works in that court's circumscription, and HG
+    1217/2023 publishes it — so the routing was always possible and is now in
+    `parchete-arondare`. What this file still is, correctly, is the paper's own version: merged
+    by county, because that is what 7.3 says.
+    """
+    caveat = next(
+        x for x in merger["limitations"] if x["id"] == "comasare-pe-judet-nu-pe-distanta"
+    )
+    assert caveat["severity"] != "blocking"
+    assert "parchete-arondare" in caveat["text"]
 
 
 def test_the_older_parchete_document_no_longer_claims_this_is_unmodelled(merger):
