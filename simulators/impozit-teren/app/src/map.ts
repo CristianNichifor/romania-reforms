@@ -17,6 +17,11 @@
  * **Missing means missing.** Communes the county's own study does not price stay unpainted
  * inside a painted county — a gap that is honest and visible in a way it is not in a table.
  *
+ * **Nothing is estimated at the moment.** All forty-two counties have a notary grid, so the
+ * hatch below never draws and its legend key is not shown. The machinery stays because the set
+ * is not permanently empty: a chamber that stops publishing puts its county back into it, and
+ * the map would then have to say so again rather than quietly painting a gap as a measurement.
+ *
  * **Estimated means estimated, and it is drawn differently.** The counties with no
  * grid are no longer empty outlines: the national estimate gives each a value, so each is
  * filled — but as one flat county-sized shape, on the same colour scale, at half opacity and
@@ -62,7 +67,7 @@ export type CountyData = {
 const BREAKS = [25_000, 60_000, 150_000, 400_000, 1_000_000, 3_000_000];
 const COLOURS = ['#1b3a4b', '#255e6b', '#2f8f7a', '#7bb661', '#d9c05a', '#d9873f', '#c2453a'];
 
-export function legend(format: (value: number) => string): string {
+export function legend(format: (value: number) => string, estimated = false): string {
   const cells = COLOURS.map((colour, index) => {
     const from = index === 0 ? 0 : BREAKS[index - 1]!;
     const to = BREAKS[index];
@@ -72,9 +77,10 @@ export function legend(format: (value: number) => string): string {
   return (
     `${cells.join('')}` +
     '<span class="key"><i class="none"></i>fără preț</span>' +
-    // The hatch has to be in the legend or it reads as a rendering artefact. It is the only
-    // mark on the map that says something about evidence rather than about value.
-    '<span class="key"><i class="estimated"></i>estimat</span>'
+    // The hatch has to be in the legend or it reads as a rendering artefact — but only while
+    // something is actually hatched. Every county is read now, so a key for a mark that never
+    // appears would be the legend explaining a thing the map does not do.
+    (estimated ? '<span class="key"><i class="estimated"></i>estimat</span>' : '')
   );
 }
 

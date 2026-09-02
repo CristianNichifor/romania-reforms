@@ -157,41 +157,64 @@ async function renderNational(): Promise<void> {
     .filter((r: { basis: string }) => r.basis === 'excluded')
     .map((r: { county: string }) => r.county);
   const mld = (eur: number) => `${percent.format(eur / 1e9)} mld`;
+
+  // Written against the file rather than against what was true when this was first written.
+  // Every sentence here was once a statement about a gap — București missing, nineteen counties
+  // estimated — and each stopped being true as a chamber's study was read. The page now says
+  // what the numbers say, and goes back to saying the other thing if a chamber stops
+  // publishing.
+  const predicted = summary.predictedCounties as number;
+  const missing = summary.excludedCounties as number;
+  const whole = predicted === 0 && missing === 0;
+
+  const coverage = [
+    `${summary.measuredCounties} județe citite`,
+    predicted ? `${predicted} estimate` : '',
+    missing ? `${missing} lăsate în afară (${excluded.join(' și ')})` : '',
+  ]
+    .filter(Boolean)
+    .join(', ');
+
   $('national').innerHTML = `
     <div class="card-head"><h2>Cât valorează tot pământul din România</h2></div>
     <div class="stat-row">
       <div class="stat">
-        <div class="stat-label">Valoarea terenului, fără București și Ilfov</div>
+        <div class="stat-label">Valoarea terenului${
+          whole ? ', toată țara' : ', fără județele lipsă'
+        }</div>
         <div class="stat-value accent">${mld(summary.landValueEur.central)}<span class="unit">EUR</span></div>
         <p class="note">
           între ${mld(summary.landValueEur.low)} și ${mld(summary.landValueEur.high)} —
-          o bandă care este eroarea măsurată a modelului, nu o presupunere
+          ${
+            whole
+              ? 'capetele grilelor notariale, cel mai ieftin și cel mai scump preț publicat pe fiecare localitate'
+              : 'o bandă care este eroarea măsurată a modelului, nu o presupunere'
+          }
         </p>
       </div>
       <div class="stat">
         <div class="stat-label">Din care citit din grile notariale</div>
         <div class="stat-value">${percent.format(100 * summary.measuredShareOfValue)}<span class="unit">%</span></div>
-        <p class="note">
-          ${summary.measuredCounties} județe citite, ${summary.predictedCounties} estimate,
-          ${summary.excludedCounties} lăsate în afară (${excluded.join(' și ')})
-        </p>
+        <p class="note">${coverage}</p>
       </div>
       <div class="stat">
-        <div class="stat-label">Cât greșește modelul un județ pe care nu l-a văzut</div>
+        <div class="stat-label">${
+          whole
+            ? 'Cât greșea modelul un județ pe care nu-l văzuse'
+            : 'Cât greșește modelul un județ pe care nu l-a văzut'
+        }</div>
         <div class="stat-value">×${percent.format(assumptions.builtLeaveOneOutErrorFactor)}</div>
         <p class="note">
           teren construit prezis din populația celui mai mare oraș, R²
-          ${percent.format(assumptions.builtR2)}. Cota construită a județului dă R² 0,04 și
-          regiunea de dezvoltare e mai slabă decât nicio variabilă — de aceea nu sunt folosite.
+          ${percent.format(assumptions.builtR2)}.
+          ${
+            whole
+              ? 'Nu mai prezice niciun județ — toate sunt citite. Rămâne testul pe care fiecare l-a trecut când a fost citit: valoarea prezisă înainte, comparată cu grila după.'
+              : 'Cota construită a județului dă R² 0,04 și regiunea de dezvoltare e mai slabă decât nicio variabilă — de aceea nu sunt folosite.'
+          }
         </p>
       </div>
-    </div>
-    <p class="limit blocking">
-      Bucureștiul lipsește din total. Cel mai mare oraș din eșantionul pe care s-a estimat
-      modelul are 390&nbsp;000 de locuitori, Bucureștiul are 2,14 milioane; o extrapolare de
-      cinci ori peste interval nu ar fi o estimare. Cum acolo e cel mai scump teren din țară,
-      cifra de mai sus este o subestimare a României întregi.
-    </p>`;
+    </div>`;
 }
 
 async function main() {
@@ -213,7 +236,12 @@ async function main() {
   // after the first paint rather than before it: the page is useful the moment the selected
   // county is in, and the other thirteen are a background cost the reader should not wait on.
   const valueMap = new ValueMap('map', base);
-  $('map-legend').innerHTML = legend((v) => `${Math.round(v / 1000)}k`);
+  // The hatch key only when something is hatched; the national file says whether anything is.
+  const anyPredicted = await fetch(`${base}data/national.json`)
+    .then((r) => (r.ok ? r.json() : null))
+    .then((n) => (n?.summary?.predictedCounties ?? 0) > 0)
+    .catch(() => false);
+  $('map-legend').innerHTML = legend((v) => `${Math.round(v / 1000)}k`, anyPredicted);
   // Kept as well as handed to the map: "toate județele" needs every county's own rates, and
   // fetching them twice for two views of the same numbers would be silly.
   const cache = new Map<string, Loaded>();
