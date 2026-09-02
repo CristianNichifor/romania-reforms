@@ -5,6 +5,7 @@
   "publisher": "romania-reforms",
   "counties": [
     "AB",
+    "AR",
     "BC",
     "BH",
     "BN",
@@ -12,6 +13,7 @@
     "BZ",
     "CJ",
     "CL",
+    "CS",
     "CT",
     "CV",
     "DB",
@@ -42,21 +44,22 @@
     "note": "Conversia din EUR/m² în RON/ha folosește cursul 5.2567 RON/EUR, același ca în build_impozit.py. Mediana grilei este pe localitate, mediana prețului cerut este pe ofertă; niciuna nu e ponderată cu suprafața."
   },
   "summary": {
-    "counties": 28,
-    "comparableCounties": 27,
-    "matchedLocalities": 134,
+    "counties": 30,
+    "comparableCounties": 29,
+    "matchedLocalities": 143,
     "countyMultiple": {
-      "low": 0.76,
-      "central": 1.198,
-      "high": 2.314
+      "low": 0.816,
+      "central": 1.185,
+      "high": 2.115
     },
     "localityMultiple": {
-      "low": 0.899,
-      "central": 1.047,
-      "high": 1.288
+      "low": 0.891,
+      "central": 1.038,
+      "high": 1.275
     },
     "countyMultipleVsPaid": 1.119,
     "countiesBelowParity": [
+      "AR",
       "BH",
       "HR",
       "IS",
@@ -65,6 +68,7 @@
     ],
     "countiesBelowParityVsPaid": [
       "AB",
+      "AR",
       "BV",
       "CJ",
       "CL",
@@ -213,6 +217,145 @@
             "low": 0.605,
             "central": 0.967,
             "high": 3.488
+          }
+        }
+      ]
+    },
+    {
+      "county": "AR",
+      "name": "Arad",
+      "surveyRegion": "RO42",
+      "surveyYear": "2024",
+      "paidRonPerHa": 31861.0,
+      "multipleVsPaid": 0.836,
+      "gridYear": "2026",
+      "gridPricedLocalities": 64,
+      "gridLocalities": 71,
+      "gridShare": 0.901,
+      "gridMedianRonPerHa": 38111.07,
+      "offers": 664,
+      "askedRonPerHa": {
+        "low": 38032.0,
+        "central": 38032.0,
+        "high": 40154.0
+      },
+      "multiple": {
+        "low": 0.998,
+        "central": 0.998,
+        "high": 1.054
+      },
+      "comparable": true,
+      "localities": [
+        {
+          "siruta": "10373",
+          "name": "Cermei",
+          "offers": 86,
+          "gridRonPerHa": 34168.55,
+          "askedRonPerHa": {
+            "low": 40154.0,
+            "central": 40154.0,
+            "high": 40154.0
+          },
+          "multiple": {
+            "low": 1.175,
+            "central": 1.175,
+            "high": 1.175
+          }
+        },
+        {
+          "siruta": "10453",
+          "name": "Conop",
+          "offers": 17,
+          "gridRonPerHa": 31540.2,
+          "askedRonPerHa": {
+            "low": 33084.0,
+            "central": 33086.0,
+            "high": 33087.0
+          },
+          "multiple": {
+            "low": 1.049,
+            "central": 1.049,
+            "high": 1.049
+          }
+        },
+        {
+          "siruta": "11664",
+          "name": "Petriş",
+          "offers": 10,
+          "gridRonPerHa": 18398.45,
+          "askedRonPerHa": {
+            "low": 10239.0,
+            "central": 12196.0,
+            "high": 14603.0
+          },
+          "multiple": {
+            "low": 0.557,
+            "central": 0.663,
+            "high": 0.794
+          }
+        },
+        {
+          "siruta": "12055",
+          "name": "Sintea Mare",
+          "offers": 343,
+          "gridRonPerHa": 42053.6,
+          "askedRonPerHa": {
+            "low": 38032.0,
+            "central": 38032.0,
+            "high": 38032.0
+          },
+          "multiple": {
+            "low": 0.904,
+            "central": 0.904,
+            "high": 0.904
+          }
+        },
+        {
+          "siruta": "12368",
+          "name": "Şiria",
+          "offers": 13,
+          "gridRonPerHa": 42053.6,
+          "askedRonPerHa": {
+            "low": 29828.0,
+            "central": 41648.0,
+            "high": 54504.0
+          },
+          "multiple": {
+            "low": 0.709,
+            "central": 0.99,
+            "high": 1.296
+          }
+        },
+        {
+          "siruta": "12457",
+          "name": "Tauţ",
+          "offers": 15,
+          "gridRonPerHa": 31540.2,
+          "askedRonPerHa": {
+            "low": 3479.0,
+            "central": 3479.0,
+            "high": 3479.0
+          },
+          "multiple": {
+            "low": 0.11,
+            "central": 0.11,
+            "high": 0.11
+          }
+        },
+        {
+          "siruta": "12509",
+          "name": "Târnova",
+          "offers": 30,
+          "gridRonPerHa": 39425.25,
+          "askedRonPerHa": {
+            "low": 25000.0,
+            "central": 31847.0,
+            "high": 100000.0
+          },
+          "multiple": {
+            "low": 0.634,
+            "central": 0.808,
+            "high": 2.536
           }
         }
       ]
@@ -1008,6 +1151,65 @@
             "low": 0.891,
             "central": 0.906,
             "high": 1.057
+          }
+        }
+      ]
+    },
+    {
+      "county": "CS",
+      "name": "Caraș-Severin",
+      "surveyRegion": "RO42",
+      "surveyYear": "2024",
+      "paidRonPerHa": 31861.0,
+      "multipleVsPaid": 1.347,
+      "gridYear": "2026",
+      "gridPricedLocalities": 76,
+      "gridLocalities": 76,
+      "gridShare": 1.0,
+      "gridMedianRonPerHa": 23655.15,
+      "offers": 67,
+      "askedRonPerHa": {
+        "low": 19533.0,
+        "central": 25387.0,
+        "high": 37317.0
+      },
+      "multiple": {
+        "low": 0.826,
+        "central": 1.073,
+        "high": 1.578
+      },
+      "comparable": true,
+      "localities": [
+        {
+          "siruta": "51500",
+          "name": "Berzovia",
+          "offers": 12,
+          "gridRonPerHa": 23655.15,
+          "askedRonPerHa": {
+            "low": 20319.0,
+            "central": 32346.0,
+            "high": 36818.0
+          },
+          "multiple": {
+            "low": 0.859,
+            "central": 1.367,
+            "high": 1.556
+          }
+        },
+        {
+          "siruta": "51984",
+          "name": "Ciuchici",
+          "offers": 14,
+          "gridRonPerHa": 18398.45,
+          "askedRonPerHa": {
+            "low": 20382.0,
+            "central": 23469.0,
+            "high": 25387.0
+          },
+          "multiple": {
+            "low": 1.108,
+            "central": 1.276,
+            "high": 1.38
           }
         }
       ]

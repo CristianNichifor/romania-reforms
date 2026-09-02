@@ -261,6 +261,19 @@ STUDIES: dict[str, Study] = {
         currency="EUR",
         dialect="bucuresti",
     ),
+    "arad": Study(
+        key="unnpr-terenuri-arad-2026", chamber="CNP Timișoara", counties=["AR"], year=2026,
+        path="files/expertize2026/CNPTimisoara/Anexe_Arad_2026.pdf",
+        title="Studiu de piață — terenuri, județul Arad, 2026",
+        currency="EUR", dialect="arad",
+    ),
+    "carasseverin": Study(
+        key="unnpr-terenuri-caras-severin-2026", chamber="CNP Timișoara", counties=["CS"],
+        year=2026,
+        path="files/expertize2026/CNPTimisoara/Anexe_Caras_Severin_2026.pdf",
+        title="Studiu de piață — terenuri, județul Caraș-Severin, 2026",
+        currency="EUR", dialect="carasseverin",
+    ),
     "brasov": Study(
         key="unnpr-terenuri-brasov-2026", chamber="CNP Brașov", counties=["BV"], year=2026,
         path="files/expertize2026/CNPBrasov/STUDIU_JUD_BRASOV_COVASNA_PT_2026_final.pdf",
