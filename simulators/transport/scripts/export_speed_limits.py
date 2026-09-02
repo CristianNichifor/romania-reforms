@@ -55,10 +55,19 @@ SUMMARY_OUT = ROOT / "data" / "road-speeds.json"
 # than roads between places — the thing this simulator routes buses over stops at tertiary.
 CLASSES: Final[tuple[str, ...]] = ("motorway", "trunk", "primary", "secondary", "tertiary")
 
-# Matches administrativ's county-roads layer, which draws the same classes. A speed layer that
-# generalised differently from the road layer beneath it would show limits sliding off their
-# own roads at every bend.
-SIMPLIFY_M: Final[float] = 150.0
+# Per class group, because administrativ draws these roads in two layers generalised
+# differently: roads.geojson takes motorway, trunk and primary at 300 m, roads-county.geojson
+# takes secondary and tertiary at 150 m. A single tolerance here looked right in isolation and
+# wrong on the map — at 150 m throughout, the coloured line drifted visibly off the major roads
+# drawn beneath it, which is the bug this pair of constants fixes. Match the layer underneath
+# or do not draw on top of it.
+SIMPLIFY_M: Final[dict[str, float]] = {
+    "motorway": 300.0,
+    "trunk": 300.0,
+    "primary": 300.0,
+    "secondary": 150.0,
+    "tertiary": 150.0,
+}
 
 CRS_WGS84: Final[str] = "EPSG:4326"
 CRS_STEREO70: Final[str] = "EPSG:3844"
@@ -122,9 +131,15 @@ def main(argv: list[str] | None = None) -> int:
         lengths_km.groupby(roads["band"]).sum().sort_values(ascending=False).round(1).to_dict()
     )
 
-    print("Dissolving by signed value...")
+    # Simplify BEFORE dissolving, per class, so each stretch is generalised to match the layer
+    # it will be drawn over. Dissolving first would merge a motorway into a communal road and
+    # leave one tolerance to serve both.
+    print("Simplifying per class, then dissolving by signed value...")
+    for road_class, tolerance in SIMPLIFY_M.items():
+        rows = roads["highway"] == road_class
+        if rows.any():
+            roads.loc[rows, "geometry"] = roads.loc[rows].geometry.simplify(tolerance)
     dissolved = roads[["band", "geometry"]].dissolve(by="band", as_index=False)
-    dissolved["geometry"] = dissolved.geometry.simplify(SIMPLIFY_M)
     dissolved = dissolved.to_crs(CRS_WGS84)
 
     features = []

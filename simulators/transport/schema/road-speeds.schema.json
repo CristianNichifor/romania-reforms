@@ -5,30 +5,81 @@
   "description": "The same OSM measurement that drives speeds.py, exported unreduced so a reader can see where the limits are rather than take eight class averages on trust. Its point is visual: below motorway the open-road limit is the national 90 on every class, and what separates a trunk road from a communal one is how much of it drops to 50 through villages. Untagged is a band in its own right and is never filled with a default — a quarter of these kilometres have no maxspeed recorded, concentrated on the small roads where the model needs them most.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "title", "publisher", "period", "provenance", "classes", "totalKm", "taggedKm", "coverage", "kmByBand", "limitations"],
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "period",
+    "provenance",
+    "classes",
+    "totalKm",
+    "taggedKm",
+    "coverage",
+    "kmByBand",
+    "limitations"
+  ],
   "properties": {
-    "$schema": { "type": "string" },
-    "id": { "type": "string" },
-    "title": { "type": "string" },
-    "publisher": { "type": "string" },
-    "period": { "type": "string" },
-    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
-    "classes": { "type": "array", "minItems": 1, "items": { "type": "string" } },
-    "simplifyM": { "type": "number", "exclusiveMinimum": 0 },
-    "totalKm": { "type": "number", "exclusiveMinimum": 0 },
-    "taggedKm": { "type": "number", "exclusiveMinimum": 0 },
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "period": {
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json#/$defs/provenance"
+    },
+    "classes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "simplifyM": {
+      "type": "object",
+      "description": "Simplification tolerance in metres PER ROAD CLASS. Two values, because administrativ draws these roads in two layers generalised differently (300 m for motorway/trunk/primary, 150 m for secondary/tertiary). One tolerance for all five made the coloured line drift off the major roads drawn beneath it.",
+      "additionalProperties": {
+        "type": "number",
+        "exclusiveMinimum": 0
+      }
+    },
+    "totalKm": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "taggedKm": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
     "coverage": {
-      "type": "number", "exclusiveMinimum": 0, "maximum": 1,
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "maximum": 1,
       "description": "Share of kilometres carrying a numeric maxspeed. Below 1 by a wide margin, and that gap is the honest content of the layer."
     },
     "kmByBand": {
       "type": "object",
       "description": "Kilometres per signed value, plus `untagged`. Keys are strings because one of them is not a number.",
-      "additionalProperties": { "type": "number", "minimum": 0 }
+      "additionalProperties": {
+        "type": "number",
+        "minimum": 0
+      }
     },
     "limitations": {
-      "type": "array", "minItems": 1,
-      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "provenance.schema.json#/$defs/limitation"
+      }
     }
   }
 }

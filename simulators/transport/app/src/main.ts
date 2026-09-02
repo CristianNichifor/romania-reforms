@@ -232,13 +232,24 @@ async function main() {
     map.getCanvas().style.cursor = 'pointer';
     const i = f.properties!.idx as number;
     const row = journeyOf()[i];
+    // Name first, then where the journey actually goes. A time without a destination is not
+    // an answer, and the destination is the thing the administrative sliders move: change the
+    // scenario and this line changes, which is the coupling made visible instead of asserted.
+    const attrs = coupled.data.attributes;
+    const centre = net.regionOf[i];
+    const isCentre = centre === i;
+    const where = isCentre
+      ? '<br><span style="opacity:.7">este centrul acestei zone</span>'
+      : `<br><span style="opacity:.7">prin centrul <strong>${attrs.name[centre]}</strong></span>`;
     popup
       .setLngLat(e.lngLat)
       .setHTML(
-        row
-          ? `<strong>${min(row[scenario === 'pulsed' ? 1 : 0])}</strong> până la reședință` +
-            `<br><span style="opacity:.7">fără corespondență ${min(row[0])} · cu ${min(row[1])}</span>`
-          : 'Fără traseu rutier până la centru',
+        `<strong>${attrs.name[i]}</strong> <span style="opacity:.6">(${attrs.county[i]})</span>` +
+          where +
+          (row
+            ? `<br><strong>${min(row[scenario === 'pulsed' ? 1 : 0])}</strong> până la reședință` +
+              `<br><span style="opacity:.7">fără corespondență ${min(row[0])} · cu ${min(row[1])}</span>`
+            : '<br>Fără traseu rutier până la centru'),
       )
       .addTo(map);
   });
@@ -441,6 +452,7 @@ async function main() {
   // wants to see where the 90 becomes 50, which means drawing the speed layer OVER the plain
   // roads and leaving those toggles alone.
   let speedsLoaded = false;
+  const speedPopup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
 
   async function showSpeeds(on: boolean) {
     if (on && !speedsLoaded) {
@@ -488,6 +500,33 @@ async function main() {
         },
         'uat-line',
       );
+      // The legend gives five bands; the road itself knows its exact signed value, and that
+      // is the number a reader is actually asking for when they point at a line. Untagged is
+      // -1 and must say so rather than reading as a limit of minus one.
+      map.on('mousemove', 'speeds-line', (e: maplibregl.MapLayerMouseEvent) => {
+        const hit = e.features?.[0];
+        if (!hit) return;
+        map.getCanvas().style.cursor = 'crosshair';
+        const kmh = hit.properties!.kmh as number;
+        const km = hit.properties!.km as number;
+        speedPopup
+          .setLngLat(e.lngLat)
+          .setHTML(
+            kmh < 0
+              ? '<strong>fără limită în OSM</strong>' +
+                `<br><span style="opacity:.7">${fmt.format(Math.round(km))} km neetichetați · ` +
+                'legal 90 în afara localității, 50 înăuntru</span>'
+              : `<strong>${kmh} km/h</strong> semnalizat` +
+                `<br><span style="opacity:.7">${fmt.format(Math.round(km))} km în țară la ` +
+                'această limită</span>',
+          )
+          .addTo(map);
+      });
+      map.on('mouseleave', 'speeds-line', () => {
+        map.getCanvas().style.cursor = '';
+        speedPopup.remove();
+      });
+
       speedsLoaded = true;
       box.disabled = false;
     }
@@ -538,12 +577,15 @@ async function main() {
   }
 
   el('speeds-note').textContent =
-    'Limita semnalizată în OpenStreetMap, pe 76.653 km de drum național, județean și ' +
-    'comunal principal. 72% dintre kilometri au o limită înregistrată; restul se desenează ' +
-    'gri, pentru că absența etichetei nu înseamnă absența limitei — un drum netichetat are ' +
-    'tot 90 în afara localității și 50 înăuntru. Se vede modelul: 50 pe 38% din kilometri, ' +
-    '90 pe 21%. Diferența dintre un drum național și unul comunal nu este viteza pe câmp, ' +
-    'ci cât din el trece prin sat. Se încarcă doar când îl ceri — 5,7 MB.';
+    'Limita semnalizată în OpenStreetMap. Stratul își desenează propria rețea, de 76.653 km — ' +
+    'autostradă, expres, principal, secundar și terțiar — adică mult mai mult decât arată ' +
+    'comutatorul „Drumuri naționale”, care are doar 21.400 km. De aceea vezi linii colorate ' +
+    'și acolo unde nu e desenat niciun drum dedesubt: bifează și drumurile județene ca să se ' +
+    'suprapună. 72% dintre kilometri au o limită înregistrată; restul se desenează gri, ' +
+    'pentru că absența etichetei nu înseamnă absența limitei — un drum netichetat are tot 90 ' +
+    'în afara localității și 50 înăuntru. Se vede modelul: 50 pe 38% din kilometri, 90 pe ' +
+    '21%. Diferența dintre un drum național și unul comunal nu este viteza pe câmp, ci cât ' +
+    'din el trece prin sat. Se încarcă doar când îl ceri — 5,4 MB.';
 
   el('roads-note').textContent =
     'Aceleași drumuri peste care este măsurat modelul de timp, din OpenStreetMap. Se încarcă ' +

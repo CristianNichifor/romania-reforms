@@ -69,6 +69,16 @@ export interface Network {
   journeys: Journey[];
   centres: number[];
   /**
+   * Which centre each UAT belongs to — the administrative model's own `regionOf`, exposed
+   * rather than kept inside the build.
+   *
+   * The map needs it to answer the question a reader actually asks of this page: not "how many
+   * minutes" but "minutes to WHERE". Without it the popup reports a journey to an unnamed
+   * destination, and the live coupling to the administrative reform — the whole point of the
+   * page — is invisible, because moving a slider changes a number with no visible cause.
+   */
+  regionOf: Uint16Array;
+  /**
    * Communes with no road route to their own centre — the delta and the river islands.
    *
    * Counted separately from `centresWithoutTrunk` on purpose. Collapsing the two put 45
@@ -397,7 +407,7 @@ export function buildNetwork(coupled: Coupled, params: Params, pins: Pin[] = [])
     (centre) => !Number.isFinite(trunkOfCentre.get(centre) ?? Infinity),
   ).length;
 
-  return { journeys, centres, unroutable, centresWithoutTrunk };
+  return { journeys, centres, unroutable, centresWithoutTrunk, regionOf };
 }
 
 
