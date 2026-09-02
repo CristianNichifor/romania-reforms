@@ -108,6 +108,7 @@ charges it for that.
 | `scripts/build_railnet.py` | Rail graph, station↔UAT join, county-seat times, map geometry. |
 | `scripts/rail_costs.py` `build_rail_cost.py` | TUI, energy, crew, rolling stock, rehabilitation, extra track. |
 | `scripts/export_traveltime.py` | The road graph for the browser: endpoints and times, 109 KB. |
+| `scripts/export_speed_limits.py` | Signed `maxspeed` per road portion → `data/road-speeds.geojson`. |
 | `app/src/consolidare.ts` | Runs the administrative model and routes it, in the browser. |
 | `app/src/serviciu.ts` | Service levels, fleet, drivers, traction, capacity, cost, farebox. |
 | `app/src/feroviar.ts` | The train judged against the bus, for the reader's own network. |
@@ -142,6 +143,26 @@ assumed term, and **where a dispute about these numbers should land.**
 
 **A bus and a car converge below trunk.** Those roads are bound by their geometry, not by the
 vehicle, so on the rural network vehicle choice is not a lever on journey time.
+
+**You can look at the limits instead of taking the averages on trust.** The *Limitele de viteză
+semnalizate* toggle draws `maxspeed` itself over 76 653 km of motorway, trunk, primary,
+secondary and tertiary road — the same tags these three parts are derived from, unreduced. The
+finding above stops being a claim and becomes a picture: **50 km/h on 29 033 km (38%) against
+90 km/h on 16 359 km (21%)**, the villages and the open road, with the 90 dropping to 50 at
+every settlement the length of the country.
+
+Untagged is its own grey band and is never filled with a default. 21 626 km — 28% — carry no
+`maxspeed` in OSM, and the gap is not spread evenly: coverage runs 96% on motorway down to 56%
+on tertiary, so it is thinnest exactly where the model leans hardest. A road without a tag
+still has a limit; what is missing is a mapper's record of it. Painting those at an assumed 90
+would manufacture the very fact the layer exists to show.
+
+The 5,7 MB of geometry is **not committed**. The repository sits at 54 of the 60 MB its own
+size gate allows, and that gate's rule is that the fix for a full repository is to stop
+committing derived payloads rather than to raise the ceiling. Build it with
+`uv run python -m scripts.export_speed_limits` and the layer appears; without it the toggle
+disables itself and says why, and the build does not fail — CI has no OSM extract and never
+will. That means the published site does not currently carry this layer.
 
 **Both ends are now checked, and they disagree in opposite directions.** At the far end, the
 commercial speed this produces is 36,8 km/h against 38,2 measured over 552 timetabled county

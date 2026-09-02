@@ -1,0 +1,72 @@
+{
+  "$schema": "../schema/road-speeds.schema.json",
+  "id": "road-speeds",
+  "title": "Limitele de viteză semnalizate, pe porțiuni de drum",
+  "publisher": "Cristian Nichifor",
+  "period": "2026",
+  "provenance": {
+    "source": "openstreetmap-maxspeed",
+    "locator": "eticheta maxspeed din other_tags, extrasul romania-latest.osm.pbf, clasele motorway, trunk, primary, secondary, tertiary",
+    "confidence": "verbatim",
+    "note": "Valorile sunt citite din etichete, fără ajustare, cu același parser ca scripts/measure_limits.py. Geometria este dizolvată pe valoare și simplificată la 150 m pentru afișare."
+  },
+  "classes": [
+    "motorway",
+    "trunk",
+    "primary",
+    "secondary",
+    "tertiary"
+  ],
+  "simplifyM": 150.0,
+  "totalKm": 76652.7,
+  "taggedKm": 55026.5,
+  "coverage": 0.7179,
+  "kmByBand": {
+    "50": 29032.9,
+    "untagged": 21626.2,
+    "90": 16359.0,
+    "100": 2509.7,
+    "130": 2282.4,
+    "30": 1810.1,
+    "70": 1072.3,
+    "40": 632.5,
+    "60": 505.5,
+    "80": 337.8,
+    "120": 317.3,
+    "20": 116.7,
+    "110": 20.9,
+    "15": 12.0,
+    "5": 6.4,
+    "25": 6.3,
+    "10": 3.6,
+    "8": 0.7,
+    "35": 0.4,
+    "39": 0.1
+  },
+  "limitations": [
+    {
+      "id": "eticheta-nu-e-codul-rutier",
+      "text": "Este o hartă a ETICHETELOR din OpenStreetMap, nu a codului rutier. O etichetă poate lipsi, poate fi veche sau greșită, iar valorile nenumerice — RO:urban, walk, none — sunt tratate ca netichetate, nu convertite într-un număr. Un drum netichetat are totuși o limită legală: 90 în afara localității, 50 înăuntru. Ce lipsește este consemnarea ei.",
+      "severity": "material",
+      "affects": [
+        "road-speeds"
+      ]
+    },
+    {
+      "id": "acoperirea-scade-cu-clasa",
+      "text": "Acoperirea pe ansamblul acestor clase este de 72% din kilometri, dar scade rapid cu clasa: 96% pe autostradă, 84% pe drum expres, 88% pe principal, 74% pe secundar și 56% pe terțiar. Deci porțiunile netichetate nu sunt împrăștiate uniform — sunt concentrate pe drumurile mici, exact acolo unde modelul are cea mai mare nevoie de ele. Banda „netichetat” se desenează separat tocmai ca această concentrare să se vadă, nu să fie acoperită cu o presupunere.",
+      "severity": "material",
+      "affects": [
+        "road-speeds"
+      ]
+    },
+    {
+      "id": "dizolvat-pe-valoare",
+      "text": "Segmentele care au aceeași limită sunt unite într-o singură geometrie, ca stratul să încapă în câteva sute de kilobytes în loc de zeci de megabytes. Se pierde identitatea fiecărui drum: harta poate spune CE limită are o porțiune, nu care este numărul drumului. Stratul este de desenat, nu de rutat — rutarea folosește data/road_time.parquet.",
+      "severity": "note",
+      "affects": [
+        "road-speeds"
+      ]
+    }
+  ]
+}

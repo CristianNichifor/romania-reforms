@@ -12,3 +12,9 @@ data/reports/
 # does, and copies these into its bundle. Ignoring them would turn the rail toggle into a
 # button that fetches a 404 on the published site, which fails at click time rather than at
 # build time. 2,1 MB against 26 MB of headroom in scripts/check_repo_size.py.
+
+# The signed speed-limit layer: 5,7 MB of geometry derived from the OSM extract. Not committed
+# because the repository sits at 54 of the 60 MB its own size gate allows, and that gate says
+# the fix is to stop committing derived payloads rather than to raise the ceiling. Rebuild with
+# `uv run python -m scripts.export_speed_limits`; the app disables the toggle without it.
+data/road-speeds.geojson

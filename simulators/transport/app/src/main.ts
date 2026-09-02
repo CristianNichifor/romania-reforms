@@ -26,6 +26,8 @@ import {
   ROAD_CASING_COLOUR,
   ROAD_COLOUR,
   ROAD_COUNTY_COLOUR,
+  SPEED_BANDS,
+  SPEED_UNTAGGED,
   countyRoadCasingOpacity,
   countyRoadOpacity,
   countyRoadWidth,
@@ -33,6 +35,8 @@ import {
   majorRoadWidth,
   railLinePaint,
   railLineWidth,
+  roadSpeedPaint,
+  roadSpeedWidth,
   stationRadius,
 } from './paint';
 
@@ -421,6 +425,92 @@ async function main() {
     }
   }
 
+  // The signed limits, as their own overlay rather than a restyle of the road layers: a reader
+  // wants to see where the 90 becomes 50, which means drawing the speed layer OVER the plain
+  // roads and leaving those toggles alone.
+  let speedsLoaded = false;
+
+  async function showSpeeds(on: boolean) {
+    if (on && !speedsLoaded) {
+      const box = el<HTMLInputElement>('speeds-toggle');
+      box.disabled = true;
+      // Optional payload: it is not committed, so a build without the OSM extract simply
+      // does not have it. Disable the toggle and say so, rather than letting a 404 fall
+      // through into an empty source that renders as "Romania has no speed limits".
+      const response = await fetch(asset('road-speeds.geojson'));
+      if (!response.ok) {
+        box.checked = false;
+        box.disabled = true;
+        el('speeds-note').textContent =
+          'Stratul cu limitele de viteză nu este în această versiune: se construiește din ' +
+          'extrasul OpenStreetMap, care nu se păstrează în depozit. Rulează ' +
+          'scripts/export_speed_limits.py ca să apară.';
+        el('speed-legend').hidden = true;
+        return;
+      }
+      const data = await response.json();
+      map.addSource('src-speeds', { type: 'geojson', data });
+      map.addLayer(
+        {
+          id: 'speeds-casing',
+          type: 'line',
+          source: 'src-speeds',
+          paint: {
+            'line-color': ROAD_CASING_COLOUR,
+            'line-opacity': 0.55,
+            'line-width': ['+', roadSpeedWidth(), 1.8] as never,
+          },
+        },
+        'uat-line',
+      );
+      map.addLayer(
+        {
+          id: 'speeds-line',
+          type: 'line',
+          source: 'src-speeds',
+          paint: {
+            'line-color': roadSpeedPaint() as never,
+            'line-opacity': 0.95,
+            'line-width': roadSpeedWidth() as never,
+          },
+        },
+        'uat-line',
+      );
+      speedsLoaded = true;
+      box.disabled = false;
+    }
+    for (const id of ['speeds-casing', 'speeds-line']) {
+      if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', on ? 'visible' : 'none');
+    }
+    // One thematic variable at a time. The speed ramp is deliberately the same RdYlBu as the
+    // journey choropleth — blue stays the good end across every layer — which means that with
+    // both at full strength a 50 km/h road is indistinguishable from a two-hour commune
+    // underneath it. Damping the fill hands the colour to whichever layer is answering the
+    // question the reader just asked, instead of making them compete.
+    map.setPaintProperty('uat-fill', 'fill-opacity', on ? 0.16 : 0.85);
+    el('speed-legend').hidden = !on;
+    el('legend').style.opacity = on ? '0.45' : '1';
+  }
+
+  el('speed-legend').innerHTML = [
+    ...SPEED_BANDS.map((b) => `<li><i style="background:${b.colour}"></i>${b.label}</li>`),
+    `<li><i style="background:${SPEED_UNTAGGED}"></i>fără limită în OSM</li>`,
+  ].join('');
+
+  {
+    const box = el<HTMLInputElement>('speeds-toggle');
+    box.addEventListener('change', () => {
+      void showSpeeds(box.checked);
+      const params = hash();
+      params.set('vit', box.checked ? '1' : '0');
+      history.replaceState(null, '', `#${params}`);
+    });
+    if (hash().get('vit') === '1') {
+      box.checked = true;
+      void showSpeeds(true);
+    }
+  }
+
   for (const [id, kind] of [['roads-toggle', 'major'], ['county-roads-toggle', 'county']] as const) {
     const box = el<HTMLInputElement>(id);
     box.addEventListener('change', () => {
@@ -434,6 +524,14 @@ async function main() {
       void showRoads(kind, true);
     }
   }
+
+  el('speeds-note').textContent =
+    'Limita semnalizată în OpenStreetMap, pe 76.653 km de drum național, județean și ' +
+    'comunal principal. 72% dintre kilometri au o limită înregistrată; restul se desenează ' +
+    'gri, pentru că absența etichetei nu înseamnă absența limitei — un drum netichetat are ' +
+    'tot 90 în afara localității și 50 înăuntru. Se vede modelul: 50 pe 38% din kilometri, ' +
+    '90 pe 21%. Diferența dintre un drum național și unul comunal nu este viteza pe câmp, ' +
+    'ci cât din el trece prin sat. Se încarcă doar când îl ceri — 5,7 MB.';
 
   el('roads-note').textContent =
     'Aceleași drumuri peste care este măsurat modelul de timp, din OpenStreetMap. Se încarcă ' +

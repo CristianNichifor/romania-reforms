@@ -14,9 +14,13 @@ import {
   BANDS,
   NO_DATA,
   RAIL_UNTAGGED,
+  SPEED_BANDS,
+  SPEED_UNTAGGED,
   journeyPaint,
   railLinePaint,
   railLineWidth,
+  roadSpeedPaint,
+  roadSpeedWidth,
   stationRadius,
 } from './paint';
 
@@ -138,7 +142,7 @@ describe('the whole style', () => {
     const geo = { type: 'geojson', data: { type: 'FeatureCollection', features: [] } };
     const errors = validateStyleMin({
       version: 8,
-      sources: { uats: geo, counties: geo, rail: geo, stations: geo },
+      sources: { uats: geo, counties: geo, rail: geo, stations: geo, speeds: geo },
       layers: [
         {
           id: 'uat-fill',
@@ -158,8 +162,69 @@ describe('the whole style', () => {
           source: 'stations',
           paint: { 'circle-radius': stationRadius(), 'circle-color': '#e8eaf0' },
         },
+        {
+          id: 'speeds-line',
+          type: 'line',
+          source: 'speeds',
+          paint: { 'line-color': roadSpeedPaint(), 'line-width': roadSpeedWidth() },
+        },
       ],
     } as never);
     expect(errors.map((e: { message: string }) => e.message)).toEqual([]);
+  });
+});
+
+describe('road speed-limit layer', () => {
+  const compile = (expr: unknown) => {
+    const r = createExpression(expr, COLOUR_SPEC as never);
+    if (r.result === 'error') {
+      throw new Error(r.value.map((e: { message: string }) => e.message).join(' | '));
+    }
+    return (kmh: number) =>
+      String(r.value.evaluate({ zoom: 6 }, { type: 'Feature', properties: { kmh } } as never));
+  };
+
+  it('parses — the trap that once left the whole map blank', () => {
+    expect(() => compile(roadSpeedPaint())).not.toThrow();
+  });
+
+  it('puts the two limits Romania actually signs either side of a boundary', () => {
+    // 50 through villages and 90 on the open road are 38% and 21% of these kilometres. If they
+    // ever shared a colour the layer would stop showing the thing it exists to show.
+    const paint = compile(roadSpeedPaint());
+    expect(paint(50)).not.toBe(paint(90));
+    expect(paint(50)).toBe(SPEED_BANDS[3].colour);
+    expect(paint(90)).toBe(SPEED_BANDS[1].colour);
+  });
+
+  it('colours each band from its own floor upward', () => {
+    const paint = compile(roadSpeedPaint());
+    expect(paint(30)).toBe(SPEED_BANDS[4].colour);
+    expect(paint(49)).toBe(SPEED_BANDS[4].colour);
+    expect(paint(70)).toBe(SPEED_BANDS[2].colour);
+    expect(paint(130)).toBe(SPEED_BANDS[0].colour);
+  });
+
+  it('draws an untagged road as unknown, not as the slowest in the country', () => {
+    // 21 626 km carry no maxspeed, concentrated on small roads. Without the guard, -1 falls
+    // into the bottom step and a quarter of the network reads as a finding about its speed.
+    expect(compile(roadSpeedPaint())(-1)).toBe(SPEED_UNTAGGED);
+    expect(compile(roadSpeedPaint())(-1)).not.toBe(SPEED_BANDS[4].colour);
+  });
+
+  it('blue stays the good end, as on the journey and rail layers', () => {
+    // A reader switching layers reads the colour before the legend.
+    const paint = compile(roadSpeedPaint());
+    expect(paint(130)).toBe(BANDS[0].colour);
+    expect(paint(30)).toBe(BANDS[4].colour);
+  });
+
+  it('the width interpolation parses', () => {
+    const numberSpec = {
+      type: 'number',
+      'property-type': 'data-driven',
+      expression: { interpolated: true, parameters: ['zoom', 'feature'] },
+    };
+    expect(createExpression(roadSpeedWidth(), numberSpec as never).result).toBe('success');
   });
 });

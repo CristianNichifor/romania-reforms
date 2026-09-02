@@ -116,3 +116,51 @@ export function journeyPaint(key: 'u' | 'p'): unknown {
   }
   return ['case', ['<', ['get', key], 0], NO_DATA, steps];
 }
+
+/**
+ * Road colour by signed speed limit, for the `road-speeds.geojson` overlay.
+ *
+ * Same ramp as the journey map and the rail lines, and in the same direction: blue is the good
+ * end. On the journey map that means few minutes; here it means a high limit. Keeping the
+ * *meaning* of blue constant across three layers matters more than keeping the arithmetic
+ * constant, because a reader switching layers reads the colour before the legend.
+ *
+ * The bands are chosen around what Romania actually signs — 50 through villages and 90 on the
+ * open road are 38% and 21% of these kilometres between them — so the two dominant values fall
+ * either side of a boundary and the village-versus-country pattern separates on sight.
+ *
+ * Untagged is `-1`, guarded before the step. A step expression has no concept of "missing":
+ * without the guard, -1 would fall into the lowest band and 21 626 km of unrecorded road would
+ * be drawn as the slowest in the country.
+ */
+export const SPEED_UNTAGGED = RAIL_UNTAGGED;
+
+export interface SpeedBand {
+  /** Lower bound in km/h, inclusive. */
+  from: number;
+  colour: string;
+  label: string;
+}
+
+export const SPEED_BANDS: SpeedBand[] = [
+  { from: 110, colour: BANDS[0].colour, label: '110+ km/h' },
+  { from: 90, colour: BANDS[1].colour, label: '90–109 km/h' },
+  { from: 70, colour: BANDS[2].colour, label: '70–89 km/h' },
+  { from: 50, colour: BANDS[3].colour, label: '50–69 km/h' },
+  { from: 0, colour: BANDS[4].colour, label: 'sub 50 km/h' },
+];
+
+export function roadSpeedPaint(): unknown {
+  // Ascending stops, so the bands are reversed against the legend's fastest-first order.
+  const ascending = [...SPEED_BANDS].reverse();
+  const steps: unknown[] = ['step', ['get', 'kmh'], ascending[0].colour];
+  for (let i = 1; i < ascending.length; i += 1) {
+    steps.push(ascending[i].from, ascending[i].colour);
+  }
+  return ['case', ['<', ['get', 'kmh'], 0], SPEED_UNTAGGED, steps];
+}
+
+/** Thicker than the plain road layers: this one carries the information, not the context. */
+export function roadSpeedWidth(): unknown {
+  return ['interpolate', ['linear'], ['zoom'], 6, 1.1, 9, 2.2, 12, 3.6];
+}

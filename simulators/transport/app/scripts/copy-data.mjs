@@ -4,7 +4,7 @@
 // uats.geojson is 3 MB — larger than everything else on the page combined — so the join to
 // it is precomputed here into a compact array indexed by polygon, rather than shipping the
 // 680 KB access file and a lookup table to the browser.
-import { mkdirSync, readFileSync, writeFileSync, copyFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync, copyFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -24,6 +24,7 @@ for (const [from, name] of [
   // about where a road is. Fetched only when the reader asks for them: 6,5 MB together.
   [join(administrativ, 'web/public/data/roads.geojson'), 'roads.geojson'],
   [join(administrativ, 'web/public/data/roads-county.geojson'), 'roads-county.geojson'],
+
   // The administrative model's own payload. The map re-runs that model in the browser so it
   // can follow whatever scenario the reader built next door, rather than a preset frozen here.
   // Copied rather than fetched across apps: a cross-app relative fetch breaks in preview and
@@ -35,6 +36,20 @@ for (const [from, name] of [
   [join(administrativ, 'web/public/data/candidacy.bin'), 'admin-candidacy.bin'],
 ]) {
   copyFileSync(from, join(out, name));
+}
+
+// The signed speed limits are OPTIONAL, and deliberately not committed: 5,7 MB of derived
+// geometry against a repository already at 54 of its 60 MB ceiling, whose own size gate says
+// the fix for that is to stop committing derived payloads rather than raise the limit. Build
+// it with `uv run python -m scripts.export_speed_limits` and it appears; without it the
+// toggle disables itself and says why. A missing optional file must never fail the build,
+// because CI has no OSM extract and never will.
+const speeds = join(sim, 'data/road-speeds.geojson');
+if (existsSync(speeds)) {
+  copyFileSync(speeds, join(out, 'road-speeds.geojson'));
+  console.log('  road-speeds.geojson copied');
+} else {
+  console.log('  road-speeds.geojson absent — the speed-limit toggle will be disabled');
 }
 
 const access = JSON.parse(readFileSync(join(sim, 'data/access.json'), 'utf8'));
