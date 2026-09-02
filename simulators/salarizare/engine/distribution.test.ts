@@ -82,15 +82,28 @@ describe('who moves up and who moves down', () => {
 });
 
 describe('how far the Art. 33 transitional difference could reach', () => {
-  it('settles the half of the question the data can settle', () => {
-    // The reference rises 2500 -> 4100, so a post keeps a smaller base only if it falls
-    // further in standing than that rise makes up. Nothing observed comes close.
+  it('finds the posts whose base falls, and they are all magistrates', () => {
+    // The reference rises 2500 -> 4100, so a post keeps a smaller base only if its
+    // coefficient falls further than that rise makes up: below 2500/4100 = 0,6098.
+    //
+    // This asserted `below` was 0 and that nothing came close, which was true of the grid it
+    // had. Annex V Chapter I was missing from the in-force regime — a thousands separator read
+    // as a decimal point, so the importer's own reference check rejected the table in silence —
+    // and with it the highest coefficients in the public sector. Restored, three links fall
+    // under the breakeven and every one is a magistrate:
+    //
+    //   Judecător ICCJ            10,50 -> 5,50   0,5238   26.250 -> 22.550 lei
+    //   Judecător curte de apel    9,20 -> 5,36   0,5829   23.000 -> 21.976 lei
+    //   Procuror curte de apel     8,76 -> 5,26   0,5999   21.900 -> 21.566 lei
+    //
+    // So the draft does cut a base, and only for senior magistrates. That is the finding this
+    // test now guards; it was invisible while the top of the grid was.
     const t = d.transition;
     expect(t.oldReference).toBe(2500);
     expect(t.newReference).toBe(4100);
     expect(t.breakeven).toBeCloseTo(0.6098, 3);
-    expect(t.worstRatio).toBeGreaterThan(t.breakeven);
-    expect(t.below).toBe(0);
+    expect(t.worstRatio).toBeLessThan(t.breakeven);
+    expect(t.below).toBeGreaterThan(0);
   });
 
   it('does not let that be read as "nobody loses"', () => {
