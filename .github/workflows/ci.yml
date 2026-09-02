@@ -189,7 +189,7 @@ jobs:
         run: |
           for chamber in bacau neamt alba iasi sibiu constanta tulcea prahova mures harghita \
                          vrancea dambovita buzau hunedoara bistrita maramures salaj \
-                         timis cluj bihor satumare vaslui bucuresti ilfov; do
+                         timis cluj bihor satumare vaslui bucuresti ilfov calarasi; do
             uv run --with pypdf python simulators/impozit-teren/scripts/import_ghid.py \
               --chamber "$chamber"
           done
@@ -202,7 +202,7 @@ jobs:
       # exercised by the steps below, which are not diffed for exactly this reason.
       - name: The land value is reproducible
         run: |
-          for county in AB B BC BH BN BZ CJ CT DB HD HR IF IS MM MS NT PH SB SJ SM TL TM VN VS; do
+          for county in AB B BC BH BN BZ CJ CL CT DB HD HR IF IS MM MS NT PH SB SJ SM TL TM VN VS; do
             uv run python simulators/impozit-teren/scripts/build_valoare_teren.py \
               --county "$county" --reuse-exchange-rate
           done
@@ -243,7 +243,7 @@ jobs:
       # tests check the claim instead of the bytes.
       - name: The comparison runs
         run: |
-          for county in AB B BC BH BN BZ CJ CT DB HD HR IF IS MM MS NT PH SB SJ SM TL TM VN VS; do
+          for county in AB B BC BH BN BZ CJ CL CT DB HD HR IF IS MM MS NT PH SB SJ SM TL TM VN VS; do
             uv run python simulators/impozit-teren/scripts/build_impozit.py --county "$county"
             uv run python simulators/impozit-teren/scripts/build_renta.py --county "$county"
           done

@@ -56,6 +56,7 @@ M2_PER_HA = 10_000
 COUNTY_TO_CHAMBER = {
     "B": "bucuresti",
     "IF": "ilfov",
+    "CL": "calarasi",
     "VS": "vaslui",
     "BC": "bacau",
     "NT": "neamt",

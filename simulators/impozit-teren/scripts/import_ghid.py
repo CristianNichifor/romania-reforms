@@ -261,6 +261,17 @@ STUDIES: dict[str, Study] = {
         currency="EUR",
         dialect="bucuresti",
     ),
+    "calarasi": Study(
+        key="cnpb-terenuri-calarasi-2026",
+        chamber="CNP București",
+        counties=["CL"],
+        year=2026,
+        path="2026/2026-CL-GR-IL-TR.pdf",
+        base="https://srv.cnpb.ro/",
+        title="Studiu de piață — terenuri, județul Călărași, 2026",
+        currency="EUR",
+        dialect="calarasi",
+    ),
     "ilfov": Study(
         key="cnpb-terenuri-ilfov-2026",
         chamber="CNP București",
