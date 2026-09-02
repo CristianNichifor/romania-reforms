@@ -1,9 +1,11 @@
 """What all the land in Romania is worth, from the half of it that has been read.
 
-Twenty-one counties are priced from their notaries' grids. Twenty-one are not, and eleven of
-those never will be: four chambers publish no per-locality land table at all. So the only route
-to a national figure is to predict the missing counties from the measured ones and say, in
-numbers, how wrong that is likely to be.
+All forty-two counties are priced from their notaries' grids, and this file now predicts none
+of them. It was written when twenty-one were read and the rest had to be estimated from the
+measured ones, and most of what follows is the record of that estimate: which predictors were
+tried, which were thrown away, and how wide the error was. It is kept because the machinery is
+what makes the total falsifiable — every county was checked against it as it landed, and a
+chamber that stops publishing puts its county back into the predicted half tomorrow.
 
 **The measured half is not re-estimated.** A county with a grid contributes what its grid says,
 band and all. Only the counties without one are predicted, and every output row says which it
@@ -323,7 +325,9 @@ def main() -> int:
 
     # Counted, not written down. This title said "21 de județe măsurate" for thirteen counties
     # after it stopped being true, because nothing rereads a title once it reads correctly once.
-    parts = [f"{len(measured_rows)} județe măsurate", f"{len(predicted_rows)} estimate"]
+    parts = [f"{len(measured_rows)} județe măsurate"]
+    if predicted_rows:
+        parts.append(f"{len(predicted_rows)} estimate")
     if excluded:
         parts.append(f"{len(excluded)} excluse")
 

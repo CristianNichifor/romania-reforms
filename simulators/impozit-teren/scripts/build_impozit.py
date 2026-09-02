@@ -108,6 +108,7 @@ COUNTY_TO_CHAMBER = {
     "PH": "prahova",
     "MS": "mures",
     "HR": "harghita",
+    "VL": "valcea",
     "VN": "vrancea",
     "DB": "dambovita",
     "BZ": "buzau",

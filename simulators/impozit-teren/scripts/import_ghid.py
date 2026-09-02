@@ -267,6 +267,12 @@ STUDIES: dict[str, Study] = {
         title="Studiu de piață — terenuri, județul Arad, 2026",
         currency="EUR", dialect="arad",
     ),
+    "valcea": Study(
+        key="unnpr-terenuri-valcea-2024", chamber="CNP Pitești", counties=["VL"], year=2024,
+        path="files/expertize2024/CNPPitesti/STUDIU_PIATA_2024_JUD_VALCEA.pdf",
+        title="Studiu de piață — terenuri, județul Vâlcea, 2024",
+        currency="RON", dialect="valcea",
+    ),
     "arges": Study(
         key="unnpr-terenuri-arges-2026", chamber="CNP Pitești", counties=["AG"], year=2026,
         path="files/expertize2026/CNPPitesti/Studiu_de_Piata_CNP_Pitesti_2026.pdf",
@@ -632,6 +638,8 @@ ALIASES: dict[str, dict[str, str]] = {
     # Brăila abbreviates one commune in its table and drops the article from another: the
     # register has Tudor Vladimirescu and Bărăganul, the study T.VLADIMIRESCU and BĂRĂGANU.
     "BR": {"tvladimirescu": "tudorvladimirescu", "baraganu": "baraganul"},
+    # The Vâlcea study drops the `Băile` from both its spa towns' names.
+    "VL": {"olanesti": "baileolanesti", "govora": "bailegovora"},
     # The Ilfov study writes the commune's short name and the register writes its full one;
     # "Dărăști" alone is what the annex heading and the extravilan table both use.
     "IF": {"darasti": "darastiilfov"},

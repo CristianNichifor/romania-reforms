@@ -39,6 +39,7 @@
     "TL",
     "TM",
     "TR",
+    "VL",
     "VN",
     "VS"
   ],
@@ -51,20 +52,20 @@
     "note": "Conversia din EUR/m² în RON/ha folosește cursul 5.2567 RON/EUR, același ca în build_impozit.py. Mediana grilei este pe localitate, mediana prețului cerut este pe ofertă; niciuna nu e ponderată cu suprafața."
   },
   "summary": {
-    "counties": 37,
-    "comparableCounties": 35,
-    "matchedLocalities": 192,
+    "counties": 38,
+    "comparableCounties": 36,
+    "matchedLocalities": 197,
     "countyMultiple": {
-      "low": 0.865,
+      "low": 0.866,
       "central": 1.236,
-      "high": 2.0
+      "high": 2.057
     },
     "localityMultiple": {
-      "low": 0.908,
-      "central": 1.148,
-      "high": 1.343
+      "low": 0.934,
+      "central": 1.163,
+      "high": 1.352
     },
-    "countyMultipleVsPaid": 1.145,
+    "countyMultipleVsPaid": 1.239,
     "countiesBelowParity": [
       "AR",
       "BH",
@@ -3839,6 +3840,113 @@
             "low": 1.252,
             "central": 1.352,
             "high": 1.432
+          }
+        }
+      ]
+    },
+    {
+      "county": "VL",
+      "name": "Vâlcea",
+      "surveyRegion": "RO41",
+      "surveyYear": "2024",
+      "paidRonPerHa": 33727.0,
+      "multipleVsPaid": 2.303,
+      "gridYear": "2024",
+      "gridPricedLocalities": 89,
+      "gridLocalities": 89,
+      "gridShare": 1.0,
+      "gridMedianRonPerHa": 14644.01,
+      "offers": 221,
+      "askedRonPerHa": {
+        "low": 16584.0,
+        "central": 30036.0,
+        "high": 90249.0
+      },
+      "multiple": {
+        "low": 1.132,
+        "central": 2.051,
+        "high": 6.163
+      },
+      "comparable": true,
+      "localities": [
+        {
+          "siruta": "167981",
+          "name": "Drăgăşani",
+          "offers": 13,
+          "gridRonPerHa": 10459.99,
+          "askedRonPerHa": {
+            "low": 25191.0,
+            "central": 30036.0,
+            "high": 50779.0
+          },
+          "multiple": {
+            "low": 2.408,
+            "central": 2.872,
+            "high": 4.855
+          }
+        },
+        {
+          "siruta": "168372",
+          "name": "Băbeni",
+          "offers": 17,
+          "gridRonPerHa": 31379.98,
+          "askedRonPerHa": {
+            "low": 38702.0,
+            "central": 50000.0,
+            "high": 200000.0
+          },
+          "multiple": {
+            "low": 1.233,
+            "central": 1.593,
+            "high": 6.373
+          }
+        },
+        {
+          "siruta": "169583",
+          "name": "Făureşti",
+          "offers": 13,
+          "gridRonPerHa": 9937.0,
+          "askedRonPerHa": {
+            "low": 20820.0,
+            "central": 20823.0,
+            "high": 20824.0
+          },
+          "multiple": {
+            "low": 2.095,
+            "central": 2.096,
+            "high": 2.096
+          }
+        },
+        {
+          "siruta": "170097",
+          "name": "Ghioroiu",
+          "offers": 14,
+          "gridRonPerHa": 9937.0,
+          "askedRonPerHa": {
+            "low": 14739.0,
+            "central": 14739.0,
+            "high": 14739.0
+          },
+          "multiple": {
+            "low": 1.483,
+            "central": 1.483,
+            "high": 1.483
+          }
+        },
+        {
+          "siruta": "171325",
+          "name": "Mihăeşti",
+          "offers": 23,
+          "gridRonPerHa": 31379.98,
+          "askedRonPerHa": {
+            "low": 49697.0,
+            "central": 263952.0,
+            "high": 470697.0
+          },
+          "multiple": {
+            "low": 1.584,
+            "central": 8.411,
+            "high": 15.0
           }
         }
       ]
