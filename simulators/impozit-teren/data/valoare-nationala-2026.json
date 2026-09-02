@@ -57,32 +57,32 @@
   },
   "assumptions": {
     "builtModel": "log(EUR/ha) = a + b × log(populația celui mai mare oraș)",
-    "builtIntercept": 0.773192,
-    "builtSlope": 0.960654,
-    "builtR2": 0.7442,
-    "builtLeaveOneOutErrorFactor": 1.6105,
-    "builtFittedOnCounties": 29,
+    "builtIntercept": 0.882547,
+    "builtSlope": 0.951688,
+    "builtR2": 0.7515,
+    "builtLeaveOneOutErrorFactor": 1.585,
+    "builtFittedOnCounties": 31,
     "builtHeldOutOfFit": [
       "IF"
     ],
     "transferEurPerHa": {
-      "A": 6036.36,
-      "P+F": 4691.32,
-      "V+L": 6661.26,
+      "A": 5856.67,
+      "P+F": 4408.21,
+      "V+L": 6492.33,
       "NP": 2329.34,
       "PADURE": 4721.97
     },
     "transferLeaveOneOutErrorFactor": {
-      "A": 1.5396,
-      "P+F": 1.7384,
-      "V+L": 1.8188,
+      "A": 1.5775,
+      "P+F": 1.816,
+      "V+L": 1.808,
       "NP": 1.7841,
       "PADURE": 1.5724
     },
     "transferFittedOnCounties": {
-      "A": 29,
-      "P+F": 29,
-      "V+L": 28,
+      "A": 31,
+      "P+F": 31,
+      "V+L": 30,
       "NP": 18,
       "PADURE": 23
     },
@@ -94,17 +94,17 @@
   },
   "summary": {
     "counties": 42,
-    "measuredCounties": 30,
-    "predictedCounties": 12,
+    "measuredCounties": 32,
+    "predictedCounties": 10,
     "excludedCounties": 0,
     "totalHa": 23839071.0,
     "landValueEur": {
-      "low": 195242537011,
-      "central": 342177979647,
-      "high": 661848078560
+      "low": 195073698682,
+      "central": 338251188301,
+      "high": 650065123164
     },
-    "measuredShareOfValue": 0.7422,
-    "measuredShareOfArea": 0.7038
+    "measuredShareOfValue": 0.7907,
+    "measuredShareOfArea": 0.7418
   },
   "counties_valued": [
     {
@@ -129,17 +129,17 @@
       "builtHa": 24840.0,
       "largestTown": "Pitesti",
       "largestPeople": 164405,
-      "builtEurPerHa": 222067,
+      "builtEurPerHa": 222439,
       "landValueEur": {
-        "low": 5450999011,
-        "central": 8767568718,
-        "high": 14117035216
+        "low": 5434347349,
+        "central": 8700311966,
+        "high": 13951301083
       },
-      "builtValueEur": 5516154737,
+      "builtValueEur": 5525374511,
       "extravilanValueByCodeEur": {
-        "A": 1049760078.0,
-        "P+F": 689145330.0,
-        "V+L": 143503557.0,
+        "A": 1018510678.0,
+        "P+F": 647557472.0,
+        "V+L": 139864289.0,
         "NP": 25599420.0,
         "PADURE": 1343405596.0
       }
@@ -151,17 +151,17 @@
       "builtHa": 22490.0,
       "largestTown": "Arad",
       "largestPeople": 168350,
-      "builtEurPerHa": 227184,
+      "builtEurPerHa": 227515,
       "landValueEur": {
-        "low": 5615924824,
-        "central": 8977649151,
-        "high": 14366575367
+        "low": 5561424076,
+        "central": 8882344311,
+        "high": 14205279326
       },
-      "builtValueEur": 5109368417,
+      "builtValueEur": 5116820278,
       "extravilanValueByCodeEur": {
-        "A": 2116554778.0,
-        "P+F": 633689252.0,
-        "V+L": 59525033.0,
+        "A": 2053548888.0,
+        "P+F": 595448003.0,
+        "V+L": 58015471.0,
         "NP": 23696352.0,
         "PADURE": 1034815319.0
       }
@@ -233,17 +233,17 @@
       "builtHa": 13270.0,
       "largestTown": "Braila",
       "largestPeople": 186322,
-      "builtEurPerHa": 250435,
+      "builtEurPerHa": 250573,
       "landValueEur": {
-        "low": 3643543506,
-        "central": 5784038024,
-        "high": 9189706254
+        "low": 3595641966,
+        "central": 5712685435,
+        "high": 9081791284
       },
-      "builtValueEur": 3323276614,
+      "builtValueEur": 3325098096,
       "extravilanValueByCodeEur": {
-        "A": 2118546779.0,
-        "P+F": 152852545.0,
-        "V+L": 34885027.0,
+        "A": 2055481591.0,
+        "P+F": 143628351.0,
+        "V+L": 34000338.0,
         "NP": 17889313.0,
         "PADURE": 136587746.0
       }
@@ -265,25 +265,18 @@
     },
     {
       "county": "BV",
-      "basis": "predicted",
+      "basis": "measured",
       "totalHa": 536309.0,
       "builtHa": 30522.0,
       "largestTown": "Brasov",
       "largestPeople": 283848,
-      "builtEurPerHa": 375253,
       "landValueEur": {
-        "low": 8648407537,
-        "central": 13928738521,
-        "high": 22443800694
+        "low": 9440848635,
+        "central": 12051788959,
+        "high": 14657513078
       },
-      "builtValueEur": 11453468785,
-      "extravilanValueByCodeEur": {
-        "A": 727550991.0,
-        "P+F": 747721134.0,
-        "V+L": 8919429.0,
-        "NP": 16151627.0,
-        "PADURE": 974926555.0
-      }
+      "coverageShare": 1.0,
+      "pricedHa": 180656.0
     },
     {
       "county": "BZ",
@@ -337,17 +330,17 @@
       "builtHa": 12882.0,
       "largestTown": "Resita",
       "largestPeople": 78678,
-      "builtEurPerHa": 109400,
+      "builtEurPerHa": 110309,
       "landValueEur": {
-        "low": 3367543929,
-        "central": 5440249690,
-        "high": 8806577630
+        "low": 3291850267,
+        "central": 5354318444,
+        "high": 8739381649
       },
-      "builtValueEur": 1409286979,
+      "builtValueEur": 1421001308,
       "extravilanValueByCodeEur": {
-        "A": 782481912.0,
-        "P+F": 1199762527.0,
-        "V+L": 76910926.0,
+        "A": 759188884.0,
+        "P+F": 1127360451.0,
+        "V+L": 74960455.0,
         "NP": 29235516.0,
         "PADURE": 1942571830.0
       }
@@ -369,25 +362,18 @@
     },
     {
       "county": "CV",
-      "basis": "predicted",
+      "basis": "measured",
       "totalHa": 370980.0,
       "builtHa": 11195.0,
       "largestTown": "Sfantu Gheorghe",
       "largestPeople": 61148,
-      "builtEurPerHa": 85872,
       "landValueEur": {
-        "low": 1698075046,
-        "central": 2728672049,
-        "high": 4391738527
+        "low": 1149841153,
+        "central": 1451748242,
+        "high": 1775998250
       },
-      "builtValueEur": 961338614,
-      "extravilanValueByCodeEur": {
-        "A": 501929780.0,
-        "P+F": 479434002.0,
-        "V+L": 3943467.0,
-        "NP": 2140661.0,
-        "PADURE": 779885525.0
-      }
+      "coverageShare": 1.0,
+      "pricedHa": 73436.0
     },
     {
       "county": "DB",
@@ -411,17 +397,17 @@
       "builtHa": 30510.0,
       "largestTown": "Craiova",
       "largestPeople": 285722,
-      "builtEurPerHa": 377633,
+      "builtEurPerHa": 376394,
       "landValueEur": {
-        "low": 9617584861,
-        "central": 15388376212,
-        "high": 24638014833
+        "low": 9585813266,
+        "central": 15238220948,
+        "high": 24237593527
       },
-      "builtValueEur": 11521569813,
+      "builtValueEur": 11483777623,
       "extravilanValueByCodeEur": {
-        "A": 2949126447.0,
-        "P+F": 339332462.0,
-        "V+L": 161488963.0,
+        "A": 2861336450.0,
+        "P+F": 318854764.0,
+        "V+L": 157393584.0,
         "NP": 14036588.0,
         "PADURE": 402821939.0
       }
@@ -433,17 +419,17 @@
       "builtHa": 14497.0,
       "largestTown": "Targu Jiu",
       "largestPeople": 90857,
-      "builtEurPerHa": 125621,
+      "builtEurPerHa": 126502,
       "landValueEur": {
-        "low": 2754880349,
-        "central": 4435860932,
-        "high": 7153985609
+        "low": 2724892027,
+        "central": 4392515733,
+        "high": 7098668470
       },
-      "builtValueEur": 1821126305,
+      "builtValueEur": 1833895854,
       "extravilanValueByCodeEur": {
-        "A": 593006454.0,
-        "P+F": 604696902.0,
-        "V+L": 77696954.0,
+        "A": 575353757.0,
+        "P+F": 568205255.0,
+        "V+L": 75726550.0,
         "NP": 45249712.0,
         "PADURE": 1294084605.0
       }
@@ -455,17 +441,17 @@
       "builtHa": 17397.0,
       "largestTown": "Galati",
       "largestPeople": 300918,
-      "builtEurPerHa": 396907,
+      "builtEurPerHa": 395421,
       "landValueEur": {
-        "low": 5768984046,
-        "central": 9236702992,
-        "high": 14799761265
+        "low": 5747178953,
+        "central": 9142120705,
+        "high": 14552086920
       },
-      "builtValueEur": 6904986683,
+      "builtValueEur": 6879140544,
       "extravilanValueByCodeEur": {
-        "A": 1768208231.0,
-        "P+F": 207675295.0,
-        "V+L": 140665860.0,
+        "A": 1715571969.0,
+        "P+F": 195142713.0,
+        "V+L": 137098556.0,
         "NP": 8278466.0,
         "PADURE": 206888457.0
       }
@@ -567,17 +553,17 @@
       "builtHa": 11279.0,
       "largestTown": "Drobeta-Turnu Severin",
       "largestPeople": 99780,
-      "builtEurPerHa": 137450,
+      "builtEurPerHa": 138298,
       "landValueEur": {
-        "low": 2464034183,
-        "central": 3943717959,
-        "high": 6322726422
+        "low": 2420383154,
+        "central": 3891112160,
+        "high": 6269373236
       },
-      "builtValueEur": 1550303951,
+      "builtValueEur": 1559863736,
       "extravilanValueByCodeEur": {
-        "A": 1134293333.0,
-        "P+F": 435185485.0,
-        "V+L": 84291603.0,
+        "A": 1100527535.0,
+        "P+F": 408923344.0,
+        "V+L": 82153958.0,
         "NP": 31895620.0,
         "PADURE": 707747967.0
       }
@@ -634,17 +620,17 @@
       "builtHa": 20025.0,
       "largestTown": "Slatina",
       "largestPeople": 78797,
-      "builtEurPerHa": 109559,
+      "builtEurPerHa": 110468,
       "landValueEur": {
-        "low": 3210546057,
-        "central": 5078226002,
-        "high": 8041429630
+        "low": 3152706195,
+        "central": 5014655664,
+        "high": 7983205637
       },
-      "builtValueEur": 2193912060,
+      "builtValueEur": 2212118403,
       "extravilanValueByCodeEur": {
-        "A": 2356210538.0,
-        "P+F": 157600159.0,
-        "V+L": 83831976.0,
+        "A": 2286070543.0,
+        "P+F": 148089462.0,
+        "V+L": 81705987.0,
         "NP": 15611221.0,
         "PADURE": 271060048.0
       }
@@ -776,17 +762,17 @@
       "builtHa": 11650.0,
       "largestTown": "Ramnicu Valcea",
       "largestPeople": 113562,
-      "builtEurPerHa": 155641,
+      "builtEurPerHa": 156420,
       "landValueEur": {
-        "low": 2797376193,
-        "central": 4510141230,
-        "high": 7283705839
+        "low": 2764134172,
+        "central": 4461327567,
+        "high": 7219909430
       },
-      "builtValueEur": 1813221697,
+      "builtValueEur": 1822287535,
       "extravilanValueByCodeEur": {
-        "A": 524300548.0,
-        "P+F": 654087105.0,
-        "V+L": 110403749.0,
+        "A": 508693098.0,
+        "P+F": 614614907.0,
+        "V+L": 107603896.0,
         "NP": 20269896.0,
         "PADURE": 1387858235.0
       }
@@ -825,7 +811,7 @@
   "limitations": [
     {
       "id": "jumatate-din-tara-e-estimata-nu-citita",
-      "text": "Din 342 mld EUR, 74% provin din grile notariale citite și restul dintr-un model cu un singur predictor, populația celui mai mare oraș. Modelul explică 74% din varianța prețului terenului construit între județele măsurate și greșește un județ nevăzut cu un factor de 1.61× — adică valoarea estimată a unui județ poate fi cu o treime mai mică sau cu două treimi mai mare decât cifra din tabel.",
+      "text": "Din 338 mld EUR, 79% provin din grile notariale citite și restul dintr-un model cu un singur predictor, populația celui mai mare oraș. Modelul explică 75% din varianța prețului terenului construit între județele măsurate și greșește un județ nevăzut cu un factor de 1.58× — adică valoarea estimată a unui județ poate fi cu o treime mai mică sau cu două treimi mai mare decât cifra din tabel.",
       "severity": "blocking",
       "affects": [
         "valoare-nationala"

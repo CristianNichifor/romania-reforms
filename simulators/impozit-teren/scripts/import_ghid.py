@@ -261,6 +261,18 @@ STUDIES: dict[str, Study] = {
         currency="EUR",
         dialect="bucuresti",
     ),
+    "brasov": Study(
+        key="unnpr-terenuri-brasov-2026", chamber="CNP Brașov", counties=["BV"], year=2026,
+        path="files/expertize2026/CNPBrasov/STUDIU_JUD_BRASOV_COVASNA_PT_2026_final.pdf",
+        title="Studiu de piață — terenuri, județul Brașov, 2026",
+        currency="RON", dialect="brasov",
+    ),
+    "covasna": Study(
+        key="unnpr-terenuri-covasna-2026", chamber="CNP Brașov", counties=["CV"], year=2026,
+        path="files/expertize2026/CNPBrasov/STUDIU_JUD_BRASOV_COVASNA_PT_2026_final.pdf",
+        title="Studiu de piață — terenuri, județul Covasna, 2026",
+        currency="RON", dialect="covasna",
+    ),
     "suceava": Study(
         key="unnpr-terenuri-suceava-2026",
         chamber="CNP Suceava",

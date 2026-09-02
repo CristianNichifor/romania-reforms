@@ -8,10 +8,12 @@
     "BC",
     "BH",
     "BN",
+    "BV",
     "BZ",
     "CJ",
     "CL",
     "CT",
+    "CV",
     "DB",
     "GR",
     "HD",
@@ -40,20 +42,20 @@
     "note": "Conversia din EUR/m² în RON/ha folosește cursul 5.2567 RON/EUR, același ca în build_impozit.py. Mediana grilei este pe localitate, mediana prețului cerut este pe ofertă; niciuna nu e ponderată cu suprafața."
   },
   "summary": {
-    "counties": 26,
-    "comparableCounties": 26,
+    "counties": 28,
+    "comparableCounties": 27,
     "matchedLocalities": 134,
     "countyMultiple": {
-      "low": 0.723,
-      "central": 1.192,
-      "high": 2.215
+      "low": 0.76,
+      "central": 1.198,
+      "high": 2.314
     },
     "localityMultiple": {
       "low": 0.899,
       "central": 1.047,
       "high": 1.288
     },
-    "countyMultipleVsPaid": 1.131,
+    "countyMultipleVsPaid": 1.119,
     "countiesBelowParity": [
       "BH",
       "HR",
@@ -63,6 +65,7 @@
     ],
     "countiesBelowParityVsPaid": [
       "AB",
+      "BV",
       "CJ",
       "CL",
       "IF",
@@ -418,6 +421,32 @@
         "low": 0.443,
         "central": 1.16,
         "high": 4.163
+      },
+      "comparable": true,
+      "localities": []
+    },
+    {
+      "county": "BV",
+      "name": "Brașov",
+      "surveyRegion": "RO12",
+      "surveyYear": "2024",
+      "paidRonPerHa": 31162.0,
+      "multipleVsPaid": 0.742,
+      "gridYear": "2026",
+      "gridPricedLocalities": 35,
+      "gridLocalities": 58,
+      "gridShare": 0.603,
+      "gridMedianRonPerHa": 41999.98,
+      "offers": 53,
+      "askedRonPerHa": {
+        "low": 51190.0,
+        "central": 150000.0,
+        "high": 286042.0
+      },
+      "multiple": {
+        "low": 1.219,
+        "central": 3.571,
+        "high": 6.811
       },
       "comparable": true,
       "localities": []
@@ -1057,6 +1086,32 @@
           }
         }
       ]
+    },
+    {
+      "county": "CV",
+      "name": "Covasna",
+      "surveyRegion": "RO12",
+      "surveyYear": "2024",
+      "paidRonPerHa": 31162.0,
+      "multipleVsPaid": 1.039,
+      "gridYear": "2026",
+      "gridPricedLocalities": 16,
+      "gridLocalities": 45,
+      "gridShare": 0.356,
+      "gridMedianRonPerHa": 30000.01,
+      "offers": 19,
+      "askedRonPerHa": {
+        "low": 27994.0,
+        "central": 52300.0,
+        "high": 74636.0
+      },
+      "multiple": {
+        "low": 0.933,
+        "central": 1.743,
+        "high": 2.488
+      },
+      "comparable": false,
+      "localities": []
     },
     {
       "county": "DB",
