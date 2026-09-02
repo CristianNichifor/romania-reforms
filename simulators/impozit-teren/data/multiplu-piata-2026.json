@@ -17,6 +17,7 @@
     "HD",
     "HR",
     "IF",
+    "IL",
     "IS",
     "NT",
     "PH",
@@ -25,6 +26,7 @@
     "SM",
     "TL",
     "TM",
+    "TR",
     "VN",
     "VS"
   ],
@@ -37,18 +39,18 @@
     "note": "Conversia din EUR/m² în RON/ha folosește cursul 5.2567 RON/EUR, același ca în build_impozit.py. Mediana grilei este pe localitate, mediana prețului cerut este pe ofertă; niciuna nu e ponderată cu suprafața."
   },
   "summary": {
-    "counties": 23,
-    "comparableCounties": 23,
-    "matchedLocalities": 120,
+    "counties": 25,
+    "comparableCounties": 25,
+    "matchedLocalities": 129,
     "countyMultiple": {
-      "low": 0.681,
-      "central": 1.16,
-      "high": 2.314
+      "low": 0.686,
+      "central": 1.185,
+      "high": 2.115
     },
     "localityMultiple": {
-      "low": 0.784,
-      "central": 1.009,
-      "high": 1.212
+      "low": 0.868,
+      "central": 1.012,
+      "high": 1.251
     },
     "countyMultipleVsPaid": 1.119,
     "countiesBelowParity": [
@@ -1590,6 +1592,32 @@
       ]
     },
     {
+      "county": "IL",
+      "name": "Ialomița",
+      "surveyRegion": "RO31",
+      "surveyYear": "2024",
+      "paidRonPerHa": 31894.0,
+      "multipleVsPaid": 1.091,
+      "gridYear": "2026",
+      "gridPricedLocalities": 66,
+      "gridLocalities": 66,
+      "gridShare": 1.0,
+      "gridMedianRonPerHa": 29227.25,
+      "offers": 74,
+      "askedRonPerHa": {
+        "low": 28928.0,
+        "central": 35000.0,
+        "high": 41398.0
+      },
+      "multiple": {
+        "low": 0.99,
+        "central": 1.198,
+        "high": 1.416
+      },
+      "comparable": true,
+      "localities": []
+    },
+    {
       "county": "IS",
       "name": "Iași",
       "surveyRegion": "RO21",
@@ -2299,6 +2327,177 @@
       },
       "comparable": true,
       "localities": []
+    },
+    {
+      "county": "TR",
+      "name": "Teleorman",
+      "surveyRegion": "RO31",
+      "surveyYear": "2024",
+      "paidRonPerHa": 31894.0,
+      "multipleVsPaid": 1.517,
+      "gridYear": "2026",
+      "gridPricedLocalities": 96,
+      "gridLocalities": 96,
+      "gridShare": 1.0,
+      "gridMedianRonPerHa": 21026.8,
+      "offers": 369,
+      "askedRonPerHa": {
+        "low": 25000.0,
+        "central": 30000.0,
+        "high": 35000.0
+      },
+      "multiple": {
+        "low": 1.189,
+        "central": 1.427,
+        "high": 1.665
+      },
+      "comparable": true,
+      "localities": [
+        {
+          "siruta": "151870",
+          "name": "Roşiori De Vede",
+          "offers": 12,
+          "gridRonPerHa": 23655.15,
+          "askedRonPerHa": {
+            "low": 31001.0,
+            "central": 33442.0,
+            "high": 35890.0
+          },
+          "multiple": {
+            "low": 1.311,
+            "central": 1.414,
+            "high": 1.517
+          }
+        },
+        {
+          "siruta": "151978",
+          "name": "Zimnicea",
+          "offers": 45,
+          "gridRonPerHa": 19975.46,
+          "askedRonPerHa": {
+            "low": 30000.0,
+            "central": 30000.0,
+            "high": 30000.0
+          },
+          "multiple": {
+            "low": 1.502,
+            "central": 1.502,
+            "high": 1.502
+          }
+        },
+        {
+          "siruta": "152127",
+          "name": "Bogdana",
+          "offers": 18,
+          "gridRonPerHa": 21026.8,
+          "askedRonPerHa": {
+            "low": 42000.0,
+            "central": 42000.0,
+            "high": 42000.0
+          },
+          "multiple": {
+            "low": 1.997,
+            "central": 1.997,
+            "high": 1.997
+          }
+        },
+        {
+          "siruta": "152332",
+          "name": "Buzescu",
+          "offers": 14,
+          "gridRonPerHa": 21026.8,
+          "askedRonPerHa": {
+            "low": 28506.0,
+            "central": 30026.0,
+            "high": 35000.0
+          },
+          "multiple": {
+            "low": 1.356,
+            "central": 1.428,
+            "high": 1.665
+          }
+        },
+        {
+          "siruta": "152993",
+          "name": "Frumoasa",
+          "offers": 12,
+          "gridRonPerHa": 17347.11,
+          "askedRonPerHa": {
+            "low": 41500.0,
+            "central": 41750.0,
+            "high": 42000.0
+          },
+          "multiple": {
+            "low": 2.392,
+            "central": 2.407,
+            "high": 2.421
+          }
+        },
+        {
+          "siruta": "153204",
+          "name": "Mavrodin",
+          "offers": 11,
+          "gridRonPerHa": 21026.8,
+          "askedRonPerHa": {
+            "low": 12038.0,
+            "central": 14087.0,
+            "high": 20000.0
+          },
+          "multiple": {
+            "low": 0.573,
+            "central": 0.67,
+            "high": 0.951
+          }
+        },
+        {
+          "siruta": "153240",
+          "name": "Măgura",
+          "offers": 12,
+          "gridRonPerHa": 21026.8,
+          "askedRonPerHa": {
+            "low": 20000.0,
+            "central": 20000.0,
+            "high": 30000.0
+          },
+          "multiple": {
+            "low": 0.951,
+            "central": 0.951,
+            "high": 1.427
+          }
+        },
+        {
+          "siruta": "153339",
+          "name": "Mârzăneşti",
+          "offers": 14,
+          "gridRonPerHa": 21026.8,
+          "askedRonPerHa": {
+            "low": 32500.0,
+            "central": 33750.0,
+            "high": 35000.0
+          },
+          "multiple": {
+            "low": 1.546,
+            "central": 1.605,
+            "high": 1.665
+          }
+        },
+        {
+          "siruta": "153936",
+          "name": "Salcia",
+          "offers": 15,
+          "gridRonPerHa": 19975.46,
+          "askedRonPerHa": {
+            "low": 25000.0,
+            "central": 27000.0,
+            "high": 28600.0
+          },
+          "multiple": {
+            "low": 1.252,
+            "central": 1.352,
+            "high": 1.432
+          }
+        }
+      ]
     },
     {
       "county": "VN",

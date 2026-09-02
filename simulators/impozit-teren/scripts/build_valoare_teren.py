@@ -58,6 +58,8 @@ COUNTY_TO_CHAMBER = {
     "IF": "ilfov",
     "CL": "calarasi",
     "GR": "giurgiu",
+    "IL": "ialomita",
+    "TR": "teleorman",
     "VS": "vaslui",
     "BC": "bacau",
     "NT": "neamt",

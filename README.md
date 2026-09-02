@@ -40,7 +40,7 @@ argument. This repository is an index, not a monolith.
 | **justitie** | The judicial reform | migrated to the 2025 report |
 | **salarizare** | Public-sector pay | migrated |
 | **administrativ** | Consolidation of the 3 186 UATs | migrated |
-| **impozit-teren** | Taxing land on its value | 26 counties read, 16 estimated, nothing excluded; 18 readers |
+| **impozit-teren** | Taxing land on its value | 28 counties read, 14 estimated, nothing excluded; 20 readers |
 
 Both live simulators now live here, with their history, on project paths under one Pages
 site: `/romania-reforms/salarizare/` and `/romania-reforms/administrativ/`. Their old
@@ -434,6 +434,59 @@ shaving Bacău and Neamț by about 1% as well.
 
 Sixteen counties now: **1 248 localities, 9,47 M ha, 39,7% of Romania, 110 mld EUR.**
 
+**Ialomița publishes its prices in a sentence and not in a table at all.** The correction pages
+refer to *"valoare teren liber conform grilă"*, and there is no grid anywhere in its 180 pages —
+the numbers are prose at the foot of each annex, under whichever locality and zone that page
+belongs to:
+
+    Municipiul SLOBOZIA – Zona I
+    …
+    Terenuri intravilane in zona : Teren liber = 99,2 euro/mp ;
+    Teren ocupat = 76,2 euro/mp.
+
+**It is the only county in the set that prints the occupied price directly.** Everywhere else
+in this chamber the tables give free land and a sentence says to take 30% off. Here both are
+printed, and they are not in a constant ratio — Slobozia's zone I is 0,768 and its zone IV
+0,735 — which is a quiet argument that the 30% rule applied elsewhere is a convention rather
+than a measurement. **100%**, 7 towns, 59 communes.
+
+Its extravilan covers the five towns and nothing else, so each commune takes the cheapest
+*planul II* price published in its own circumscription. That is an approximation and is carried
+as one: leaving fifty-nine communes of a heavily agricultural county at zero would have been
+worse, but it is a town's surroundings standing in for a county's fields.
+
+**Teleorman is the largest of the four and the only one that prices its countryside properly** —
+an agricultural figure per *circumscription*, not just per town, so a commune draws on its own
+region. **99%**, 5 towns, 91 communes, 199 villages, 97 localities.
+
+Its rural land is one number per annex and there are eleven annexes for six numbers: three
+categories × centre and periphery, split further by building type in ways that do not change
+the land. Four bugs, each a different kind of silent:
+
+- **The contents pages set the town.** They carry the same `CIRCUMSCRIPTIA JUDECATORIEI` words
+  as the real section headings, so Alexandria's land table — twenty pages later — was published
+  under **Videle's** name with Alexandria's prices.
+- **Alexandria's own heading is the only one in mixed case**, so a case-sensitive pattern found
+  the other four and not it.
+- **Two towns label their zones in words** — `Zona Centru`, `Zona Periferie` — so a pattern
+  demanding a numeral found their tables and read nothing out of them.
+- **The extravilan name capture swallowed the price**: `Circum.Jud. Alexandria 7.500` matched
+  nothing in the register, and every commune in the county came out with no farmland at all.
+
+And one loss that narrows a band from the bottom rather than breaking anything: the last column
+of two towns' tables has a header of bare `Zona`, its numeral lost in extraction. Skipping it
+dropped Alexandria's cheapest zone — 19,4 against 70,6 — which makes a town look dearer than it
+is while every number on the page is real.
+
+**Six counties have now been predicted before being read, and the model has passed all six:**
+Vaslui 1,32×, București 1,35×, Călărași 1,01×, Giurgiu 0,99×, Ialomița 1,21×, Teleorman 0,71× —
+against a stated error of 1,58×.
+
+**The București chamber is finished: all six of its counties are read.** With them the set
+reaches **28 counties, 2 006 localities, 15,0 M ha, 63,0% of Romania, 246 mld EUR** — and
+**71% of the national estimate is now read rather than modelled**, against 52% when the chamber
+was still recorded as publishing nothing.
+
 **Giurgiu is the same chamber's conventions in a different arrangement**, and the shared parts
 now live in `cnpb_common.py` rather than being copied: the seven extravilan multipliers, land
 under a building at 70% of free land, the ordinal that Romanian writes two ways. What differs
@@ -687,7 +740,7 @@ chamber was opened and measured rather than guessed at:
 | Galați | GL, BR | GL has 5 land tables in 142 pages; Brăila is a scan |
 | Craiova | DJ, GJ, OT, MH | 23 localities priced out of 359 |
 | Timișoara | AR, CS | annexes contain no land at all |
-| ~~București~~ | B, IF, CL, GR, IL, TR | **wrong — publishes on `srv.cnpb.ro`; B, IF, CL and GR are read, two remain** |
+| ~~București~~ | B, IF, CL, GR, IL, TR | **wrong — publishes on `srv.cnpb.ro`; all six counties are read** |
 
 Those are hard ceilings on what the documents contain, not on what the readers manage. Nothing
 above 37% and most far below, against a 90% bar. **The estimate is not a shortcut around the
@@ -739,7 +792,7 @@ single county-wide average per category for everything else. Timișoara's chambe
 and Caraș-Severin too, and their annexes contain no land at all. Both were checked against the
 source rather than inferred from a low score.
 
-Twenty-six counties read: **1 844 localities, 14,0 M ha, 58,7% of Romania, 238 mld EUR.**
+Twenty-eight counties read: **2 006 localities, 15,0 M ha, 63,0% of Romania, 246 mld EUR.**
 
 **One chamber, four counties, and the same reader for all of them — after four bugs.** CNP Cluj
 publishes Bistrița-Năsăud, Maramureș and Sălaj in Cluj's own layout, and the section-header fix
