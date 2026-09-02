@@ -174,6 +174,28 @@ jobs:
           node-version: '22'
           cache: npm
           cache-dependency-path: simulators/impozit-teren/app/package-lock.json
+      # The extracted tables, cached between runs.
+      #
+      # The readers work from `cache/`, not from the PDFs, and the whole country extracts to
+      # 25 MB. The PDFs it is derived from are 2,5 GB, of which the București chamber alone is
+      # 2 GB — mostly embedded raster maps that carry no data. Without this the job re-fetches
+      # all of it every run, which cost eight minutes and made every build depend on a
+      # notaries' file server serving two gigabytes without faltering.
+      #
+      # `restore-keys` is what makes this safe rather than brittle: a stale cache still
+      # restores, and `prime_cache` then downloads only the studies that are missing from it.
+      # Adding a chamber costs one document, not the whole country.
+      - name: Restore the extracted studies
+        uses: actions/cache@v4
+        with:
+          path: simulators/impozit-teren/cache
+          key: >-
+            impozit-teren-cache-${{ hashFiles(
+              'simulators/impozit-teren/scripts/import_ghid.py',
+              'simulators/impozit-teren/scripts/extract_cache.py'
+            ) }}
+          restore-keys: impozit-teren-cache-
+
       # Imported before the grids: the register is the roster each grid is checked against,
       # so a grid cannot be verified before its county's areas exist.
       #
@@ -189,7 +211,7 @@ jobs:
         run: |
           for chamber in bacau neamt alba iasi sibiu constanta tulcea prahova mures harghita \
                          vrancea dambovita buzau hunedoara bistrita maramures salaj \
-                         timis cluj bihor satumare vaslui bucuresti ilfov; do
+                         timis cluj bihor satumare vaslui bucuresti ilfov calarasi giurgiu; do
             uv run --with pypdf python simulators/impozit-teren/scripts/import_ghid.py \
               --chamber "$chamber"
           done
@@ -202,7 +224,7 @@ jobs:
       # exercised by the steps below, which are not diffed for exactly this reason.
       - name: The land value is reproducible
         run: |
-          for county in AB B BC BH BN BZ CJ CT DB HD HR IF IS MM MS NT PH SB SJ SM TL TM VN VS; do
+          for county in AB B BC BH BN BZ CJ CL CT DB GR HD HR IF IS MM MS NT PH SB SJ SM TL TM VN VS; do
             uv run python simulators/impozit-teren/scripts/build_valoare_teren.py \
               --county "$county" --reuse-exchange-rate
           done
@@ -243,7 +265,7 @@ jobs:
       # tests check the claim instead of the bytes.
       - name: The comparison runs
         run: |
-          for county in AB B BC BH BN BZ CJ CT DB HD HR IF IS MM MS NT PH SB SJ SM TL TM VN VS; do
+          for county in AB B BC BH BN BZ CJ CL CT DB GR HD HR IF IS MM MS NT PH SB SJ SM TL TM VN VS; do
             uv run python simulators/impozit-teren/scripts/build_impozit.py --county "$county"
             uv run python simulators/impozit-teren/scripts/build_renta.py --county "$county"
           done

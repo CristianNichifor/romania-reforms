@@ -10,8 +10,10 @@
     "BN",
     "BZ",
     "CJ",
+    "CL",
     "CT",
     "DB",
+    "GR",
     "HD",
     "HR",
     "IF",
@@ -35,18 +37,18 @@
     "note": "Conversia din EUR/m² în RON/ha folosește cursul 5.2567 RON/EUR, același ca în build_impozit.py. Mediana grilei este pe localitate, mediana prețului cerut este pe ofertă; niciuna nu e ponderată cu suprafața."
   },
   "summary": {
-    "counties": 21,
-    "comparableCounties": 21,
-    "matchedLocalities": 113,
+    "counties": 23,
+    "comparableCounties": 23,
+    "matchedLocalities": 120,
     "countyMultiple": {
-      "low": 0.677,
+      "low": 0.681,
       "central": 1.16,
-      "high": 2.377
+      "high": 2.314
     },
     "localityMultiple": {
-      "low": 0.751,
+      "low": 0.784,
       "central": 1.009,
-      "high": 1.22
+      "high": 1.212
     },
     "countyMultipleVsPaid": 1.119,
     "countiesBelowParity": [
@@ -59,6 +61,7 @@
     "countiesBelowParityVsPaid": [
       "AB",
       "CJ",
+      "CL",
       "IF",
       "IS",
       "NT",
@@ -871,6 +874,113 @@
       ]
     },
     {
+      "county": "CL",
+      "name": "Călărași",
+      "surveyRegion": "RO31",
+      "surveyYear": "2024",
+      "paidRonPerHa": 31894.0,
+      "multipleVsPaid": 0.837,
+      "gridYear": "2026",
+      "gridPricedLocalities": 52,
+      "gridLocalities": 53,
+      "gridShare": 0.981,
+      "gridMedianRonPerHa": 38111.08,
+      "offers": 208,
+      "askedRonPerHa": {
+        "low": 32948.0,
+        "central": 40000.0,
+        "high": 47220.0
+      },
+      "multiple": {
+        "low": 0.865,
+        "central": 1.05,
+        "high": 1.239
+      },
+      "comparable": true,
+      "localities": [
+        {
+          "siruta": "92961",
+          "name": "Borcea",
+          "offers": 19,
+          "gridRonPerHa": 34694.22,
+          "askedRonPerHa": {
+            "low": 24719.0,
+            "central": 35000.0,
+            "high": 50839.0
+          },
+          "multiple": {
+            "low": 0.712,
+            "central": 1.009,
+            "high": 1.465
+          }
+        },
+        {
+          "siruta": "93370",
+          "name": "Dor Mărunt",
+          "offers": 10,
+          "gridRonPerHa": 40476.59,
+          "askedRonPerHa": {
+            "low": 39997.0,
+            "central": 40000.0,
+            "high": 43764.0
+          },
+          "multiple": {
+            "low": 0.988,
+            "central": 0.988,
+            "high": 1.081
+          }
+        },
+        {
+          "siruta": "93815",
+          "name": "Jegălia",
+          "offers": 10,
+          "gridRonPerHa": 28386.18,
+          "askedRonPerHa": {
+            "low": 32000.0,
+            "central": 32000.0,
+            "high": 32000.0
+          },
+          "multiple": {
+            "low": 1.127,
+            "central": 1.127,
+            "high": 1.127
+          }
+        },
+        {
+          "siruta": "93888",
+          "name": "Lehliu-Gară",
+          "offers": 22,
+          "gridRonPerHa": 44681.95,
+          "askedRonPerHa": {
+            "low": 55000.0,
+            "central": 55000.0,
+            "high": 55000.0
+          },
+          "multiple": {
+            "low": 1.231,
+            "central": 1.231,
+            "high": 1.231
+          }
+        },
+        {
+          "siruta": "94125",
+          "name": "Alexandru Odobescu",
+          "offers": 13,
+          "gridRonPerHa": 33117.21,
+          "askedRonPerHa": {
+            "low": 29497.0,
+            "central": 30000.0,
+            "high": 35000.0
+          },
+          "multiple": {
+            "low": 0.891,
+            "central": 0.906,
+            "high": 1.057
+          }
+        }
+      ]
+    },
+    {
       "county": "CT",
       "name": "Constanța",
       "surveyRegion": "RO22",
@@ -1160,6 +1270,65 @@
             "low": 1.167,
             "central": 1.272,
             "high": 1.935
+          }
+        }
+      ]
+    },
+    {
+      "county": "GR",
+      "name": "Giurgiu",
+      "surveyRegion": "RO31",
+      "surveyYear": "2024",
+      "paidRonPerHa": 31894.0,
+      "multipleVsPaid": 1.145,
+      "gridYear": "2026",
+      "gridPricedLocalities": 54,
+      "gridLocalities": 54,
+      "gridShare": 1.0,
+      "gridMedianRonPerHa": 27860.51,
+      "offers": 47,
+      "askedRonPerHa": {
+        "low": 22744.0,
+        "central": 47758.0,
+        "high": 47758.0
+      },
+      "multiple": {
+        "low": 0.816,
+        "central": 1.714,
+        "high": 1.714
+      },
+      "comparable": true,
+      "localities": [
+        {
+          "siruta": "105972",
+          "name": "Vânătorii Mici",
+          "offers": 10,
+          "gridRonPerHa": 27860.51,
+          "askedRonPerHa": {
+            "low": 14707.0,
+            "central": 15000.0,
+            "high": 15355.0
+          },
+          "multiple": {
+            "low": 0.528,
+            "central": 0.538,
+            "high": 0.551
+          }
+        },
+        {
+          "siruta": "154709",
+          "name": "Toporu",
+          "offers": 24,
+          "gridRonPerHa": 27860.51,
+          "askedRonPerHa": {
+            "low": 47758.0,
+            "central": 47758.0,
+            "high": 47758.0
+          },
+          "multiple": {
+            "low": 1.714,
+            "central": 1.714,
+            "high": 1.714
           }
         }
       ]
