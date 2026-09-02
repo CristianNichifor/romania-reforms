@@ -131,6 +131,14 @@
             "type": "string",
             "pattern": "^[A-Z]{1,2}$"
           }
+        },
+        "builtHeldOutOfFit": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Z]{1,2}$"
+          },
+          "description": "Judeţe măsurate, numărate în total, dar ţinute în afara regresiei pentru că mecanismul pieţei lor nu e explicat de predictor. Criteriul e declarat înainte, nu ales după rezultat: Bucureştiul a fost testat la fel şi păstrat, pentru că îmbunătăţeşte potrivirea."
         }
       }
     },

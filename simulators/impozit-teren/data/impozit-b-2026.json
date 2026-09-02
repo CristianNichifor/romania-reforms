@@ -1,0 +1,156 @@
+{
+  "$schema": "../schema/impozit.schema.json",
+  "id": "impozit-b-2026",
+  "title": "Impozitul pe teren azi și pe valoare, județul B, 2026",
+  "publisher": "romania-reforms",
+  "counties": [
+    "B"
+  ],
+  "period": "2026",
+  "currency": "RON",
+  "provenance": {
+    "source": "cod-fiscal-teren-2026",
+    "locator": "Legea nr. 227/2015, art. 465 alin. (2), (4), (5), (7) și art. 457 alin. (6), aplicate pe fondul funciar INS 2014 și pe grila notarială 2026",
+    "confidence": "derived",
+    "note": "Ambele impozite sunt calculate pe aceleași hectare. Impozitul din Codul fiscal este statutar, nu încasat: nu conține scutiri, restanțe sau grad de colectare. Banda lui vine din intervalul legal, din zonă și din rang, toate trei decizii locale nepublicate într-un registru național."
+  },
+  "assumptions": {
+    "ronPerEur": 5.2567,
+    "exchangeRateDate": "2026-09-01",
+    "lvtRatePercent": 1.0,
+    "intravilanCategory": "CC",
+    "rankSource": "Legea nr. 351/2001, anexa IV",
+    "agriculturalYieldPercent": {
+      "low": 0.9983,
+      "central": 1.2712,
+      "high": 1.4819
+    },
+    "agriculturalYieldSource": "Arendă ÷ preț pentru teren arabil, regiunea Bucureşti-Ilfov (RO32), anchete INS 2019–2018 raportate la Eurostat (apri_lprc / apri_lrnt); banda este minimul, mediana și maximul anilor măsurați.",
+    "yieldByCategoryPercent": {
+      "A": {
+        "low": 0.9983,
+        "central": 1.2712,
+        "high": 1.4819
+      },
+      "V+L": {
+        "low": 0.9983,
+        "central": 1.2712,
+        "high": 1.4819
+      },
+      "AP": {
+        "low": 0.9983,
+        "central": 1.2712,
+        "high": 1.4819
+      },
+      "DR": {
+        "low": 0.9983,
+        "central": 1.2712,
+        "high": 1.4819
+      },
+      "NP": {
+        "low": 0.9983,
+        "central": 1.2712,
+        "high": 1.4819
+      }
+    },
+    "builtYieldPercent": {
+      "low": 1.728,
+      "central": 2.5275,
+      "high": 3.1808
+    },
+    "builtYieldSource": "Dedus, nu măsurat: randament net al proprietății − amortizarea clădirii × ponderea clădirii, r = y_net − δ·(1 − λ). Ponderea terenului λ = 6.2% este calculată din 343 perechi preț-teren/preț-construcție publicate pe aceeași pagină în grilele notariale (HD, IS, MS, HR); randamentul brut este cel al Global Property Guide, amortizarea este cea din HG 2139/2004. Înlocuiește banda presupusă anterior 3–7%. Deducerea separă urbanul (2.73%) de rural (2.52%); diferența de 0.22 puncte este mai mică decât lățimea benzii, deci se folosește una singură."
+  },
+  "summary": {
+    "localities": 1,
+    "fiscalCodeRon": {
+      "low": 57027112,
+      "central": 166397153,
+      "high": 328556183
+    },
+    "landValueRon": {
+      "low": 28269376126,
+      "central": 264734993223,
+      "high": 1097516955480
+    },
+    "lvtRon": {
+      "low": 282693761,
+      "central": 2647349932,
+      "high": 10975169555
+    },
+    "revenueNeutralRatePercent": {
+      "low": 0.0052,
+      "central": 0.0629,
+      "high": 1.1622
+    },
+    "lawfulRangeRatio": 5.76
+  },
+  "localities": [
+    {
+      "siruta": "179132",
+      "name": "BUCURESTI",
+      "rank": "municipii",
+      "fiscalRank": {
+        "low": "0",
+        "high": "0"
+      },
+      "totalHa": 23787.0,
+      "fiscalCodeRon": {
+        "low": 57027112,
+        "central": 166397153,
+        "high": 328556183
+      },
+      "landValueRon": {
+        "low": 28269376126,
+        "central": 264734993223,
+        "high": 1097516955480
+      },
+      "extravilanValueRon": 0,
+      "extravilanValueByCodeRon": {},
+      "lvtRon": {
+        "low": 282693761,
+        "central": 2647349932,
+        "high": 10975169555
+      },
+      "effectiveRatePercent": {
+        "low": 0.2017,
+        "central": 0.0629,
+        "high": 0.0299
+      }
+    }
+  ],
+  "limitations": [
+    {
+      "id": "impozitul-de-azi-e-si-el-o-banda",
+      "text": "Impozitul „de azi” nu este un număr. Codul fiscal dă un interval de aproximativ 2,5×, iar consiliul local alege din el; zona A–D este tot decizie locală; iar o comună are satul de reședință la rangul IV și celelalte sate la rangul V. Cele trei necunoscute se înmulțesc, așa că raportul dintre citirea cea mai ieftină și cea mai scumpă permisă de lege este de ordinul zecilor. Nu există un registru național al hotărârilor consiliilor locale din care să se afle cifra reală.",
+      "severity": "blocking",
+      "affects": [
+        "impozit",
+        "cota-neutra"
+      ]
+    },
+    {
+      "id": "statutar-nu-incasat",
+      "text": "Se compară statutar cu statutar. Impozitul calculat aici nu este ce încasează primăriile: nu conține scutiri, restanțe și nici gradul de colectare. Comparația cu încasările ar atribui schimbării de regulă și efectele celor trei.",
+      "severity": "material",
+      "affects": [
+        "impozit"
+      ]
+    },
+    {
+      "id": "cursul-muta-raspunsul",
+      "text": "Grila notarială este în euro, Codul fiscal în lei. Conversia folosește cursul de referință BCE din 2026-09-01 (5.2567 RON/EUR). Cota neutră se mișcă direct proporțional cu el.",
+      "severity": "material",
+      "affects": [
+        "cota-neutra"
+      ]
+    },
+    {
+      "id": "padurea-lipseste-din-ambele-parti",
+      "text": "Pădurea este exclusă din valoare, pentru că studiile o evaluează pe hectar într-un tabel separat. Este exclusă și din impozitul calculat, ca cele două părți să stea pe aceleași hectare — dar Codul fiscal o impozitează, deci impozitul de azi este subestimat cu partea ei.",
+      "severity": "material",
+      "affects": [
+        "impozit"
+      ]
+    }
+  ]
+}

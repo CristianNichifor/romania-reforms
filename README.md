@@ -40,7 +40,7 @@ argument. This repository is an index, not a monolith.
 | **justitie** | The judicial reform | migrated to the 2025 report |
 | **salarizare** | Public-sector pay | migrated |
 | **administrativ** | Consolidation of the 3 186 UATs | migrated |
-| **impozit-teren** | Taxing land on its value | 22 counties read, 18 estimated, 2 named as missing; 14 readers |
+| **impozit-teren** | Taxing land on its value | 24 counties read, 18 estimated, nothing excluded; 16 readers |
 
 Both live simulators now live here, with their history, on project paths under one Pages
 site: `/romania-reforms/salarizare/` and `/romania-reforms/administrativ/`. Their old
@@ -434,6 +434,108 @@ shaving Bacău and Neamț by about 1% as well.
 
 Sixteen counties now: **1 248 localities, 9,47 M ha, 39,7% of Romania, 110 mld EUR.**
 
+**Ilfov closes the last hole: nothing is excluded from the national estimate any more.** Its
+annexes cover all 40 UATs and the parse reaches **100%** — the second county in the set to do
+so with no named gap at all.
+
+Its extravilan grid is **one column and seven published coefficients**. The study prices arable
+land per locality and then states outright what everything else is worth: curți-construcții
+1,5× arable, vii și livezi 1,1×, pășuni și fânețe 0,8×, amenajări piscicole 1,4×, drumuri
+tehnologice 0,7×, neproductiv 0,5×. One number per locality yields the whole grid, and the
+ratios are the chamber's, not this repository's. Forest has a table of its own, by species.
+
+**The towns hide their zones across pages.** A commune is four rows on one page, each labelled.
+A town is four *pages* — `ANEXA 8.1` to `8.4` for Voluntari — with the zone named once in the
+middle and the rows underneath split by landmark instead:
+
+    ZONA CENTRALA   la Est de Autostrada A3 …    167,9   117,5
+                    la Vest de Autostrada A3 …   308,2   215,8
+
+So Voluntari has **six** prices across four pages, not four across one, and the dearest is
+nearly twice the next. A reader keyed on the row label finds nothing there; one that stops at
+the first page of a locality keeps a sixth of the town. The pair is not even on one baseline —
+`167,9` and `117,5` are three points apart — so the columns come from the header instead.
+
+**Ilfov is measured, counted, and kept out of the regression.** Its building land is **286 177
+EUR/ha**; the model, fitted without it, says **68 872** — a factor of **4,2** against an
+out-of-sample error of 1,61. It is not a county the size of its own largest town can explain,
+because its market is set by a city that is not in it, which is exactly why it was excluded
+from the estimate before its study was found. Leaving it in the fit costs all eighteen
+predicted counties: leave-one-out **1,61× → 1,77×**, R² **0,75 → 0,66**.
+
+That criterion is stated in the mechanism rather than chosen from the result, and it was
+applied to București too — where it said *keep*, because including the capital improved the fit
+instead of degrading it. Same test, opposite answers, and both are in the output file.
+
+**Romania, all 42 counties: 349 mld EUR (192–687), 66% of it read rather than modelled.**
+
+And the extravilan unit trap caught me a second time, in the other direction. Vaslui's annex
+prints lei per square metre and needed no conversion; Ilfov's prints EUR per hectare and needed
+dividing by ten thousand. The first run valued Ilfov at **20 727 mld EUR** — with 100%
+coverage, every name matched, and no warning anywhere. The comment I had written on the Vaslui
+fix was three files away.
+
+**The București chamber does publish, and this repository said it did not.** That was a
+statement about unnpr.ro's index, not about the chamber. `srv.cnpb.ro` — the chamber's own file
+server, with an open directory listing — carries 2026 studies for **all six** of its counties:
+București, Ilfov, and one volume for Călărași, Giurgiu, Ialomița and Teleorman. The index has
+thirteen chambers because the fourteenth is not in it.
+
+**Getting it needed the certificate fixed, not skipped.** That server sends a valid certificate
+— `O=CAMERA NOTARILOR PUBLICI BUCUREȘTI`, issued by DigiCert — and omits the intermediate that
+signs it, so no client can build a path. The tempting answer is to turn verification off, and
+it is the wrong one: these documents become published numbers, and an unauthenticated fetch
+means a proxy could rewrite the price of every square metre in Bucharest with nothing to notice
+it. `tls_chain.py` does what a browser does instead — reads the certificate's own **Authority
+Information Access** pointer, fetches the intermediate it names, and reconnects **with
+verification on**. It hardcodes no CA, so it keeps working when DigiCert rotates that
+intermediate, and it does nothing at all for the thirteen chambers whose servers are configured
+properly.
+
+**The capital is one locality with 277 subzones**, not a county with 277 localities: SIRUTA
+179132, 23 787 hectares, a single row in the land register, priced across 59 cadastral zones
+from **34 EUR/m² to 1 320**. There are no ruling lines, so the reader works from word
+coordinates — the second one here to do so after Timiș.
+
+Three things in that document are worth knowing:
+
+- **A price row binds to its nearest label, not the one on its own line.** Digits and letters
+  sit on different baselines, so `ZONA 25-A2`'s prices print *above* it, while two labels wrap
+  onto a second line and push their prices *below*. Both directions, in the same table.
+- **Two zones are cut by the Băneasa railway and priced twice** — `ZONA 25-A3 la NORD de` at
+  454 EUR/m² and `la SUD de` at **945**. Assume one row per label and half of two zones is
+  priced at the other half's figure, with nothing to show for it.
+- **The grid is one number and four coefficients.** Every row satisfies `ocupat = 0,70 × liber`,
+  `alei = 0,49`, `comercial = 1,10`, `industrial = 0,90`, on all 277. So the chamber does not
+  price commercial land by observing commercial land — worth knowing before reading that column
+  as a market signal, and useful here because it makes every row self-checking. The reader
+  drops any row that fails it; none did.
+
+The column taken is **TEREN OCUPAT DE CONSTRUCTII**, because the hectares being priced are the
+register's *Ocupată cu construcții*. TEREN LIBER is 1/0,70 higher and is the right column for a
+redevelopment reading.
+
+**București is 50,3 mld EUR — the most valuable county in the set, twice Timiș.** And its band
+is 39×, by far the widest here, because 277 subzones span 34 to 1 320 EUR/m² and nothing
+publishes the hectares in each. The central figure is the estimate; the ends are bounds, not a
+confidence interval. The study carries a street index — ninety pages mapping every street in
+the city to its subzone — which is the route to narrowing it, and is not used yet.
+
+**Excluding the capital from the national estimate was right, and now it is checked rather than
+argued.** The model, extrapolated to 2,14 M people, says **37,4 mld**; the grid says **50,3**.
+It would have understated Romania's most valuable county by a third, outside its own 1,65×
+error. Reading it also *improved* the model — leave-one-out from 1,65× to 1,61× and R² from
+0,58 to 0,75 — so București now earns a place in the fit it was previously kept out of, and
+Ilfov is the only county still excluded.
+
+**Romania without Ilfov: 339 mld EUR, 65% of it read rather than modelled.**
+
+Three assumptions broke on a county with one letter and no villages, all silent, all found by
+gates rather than by errors: schema minimums that required every county to have communes and
+villages, id patterns of `[a-z]{2}` that rejected `impozit-b-2026`, and — after every upstream
+gate had passed — a regex in the app's copy step that matched two-letter county codes and
+quietly left the country's most valuable county out of the page.
+
 **The yield was wrong, and this repository already knew.** Land rent is value times yield, so
 the yield is the denominator under every capture figure here. Building land — 64% of the value
 — was capitalised at an assumed **3–7%**, anchored on the observed residential yield. But
@@ -522,7 +624,7 @@ chamber was opened and measured rather than guessed at:
 | Galați | GL, BR | GL has 5 land tables in 142 pages; Brăila is a scan |
 | Craiova | DJ, GJ, OT, MH | 23 localities priced out of 359 |
 | Timișoara | AR, CS | annexes contain no land at all |
-| București | B, IF, CL, GR, IL, TR | publishes nothing |
+| ~~București~~ | B, IF, CL, GR, IL, TR | **wrong — publishes on `srv.cnpb.ro`; B and IF are read, four remain** |
 
 Those are hard ceilings on what the documents contain, not on what the readers manage. Nothing
 above 37% and most far below, against a 90% bar. **The estimate is not a shortcut around the
@@ -574,7 +676,7 @@ single county-wide average per category for everything else. Timișoara's chambe
 and Caraș-Severin too, and their annexes contain no land at all. Both were checked against the
 source rather than inferred from a low score.
 
-Twenty-two counties read: **1 696 localities, 13,0 M ha, 54,4% of Romania, 171 mld EUR.**
+Twenty-four counties read: **1 737 localities, 13,2 M ha, 55,2% of Romania, 230 mld EUR.**
 
 **One chamber, four counties, and the same reader for all of them — after four bugs.** CNP Cluj
 publishes Bistrița-Năsăud, Maramureș and Sălaj in Cluj's own layout, and the section-header fix

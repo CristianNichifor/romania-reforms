@@ -115,6 +115,9 @@ class Study:
     # tables, because that chamber's grids use merged cells and a merge is invisible once a
     # PDF has been flattened to lines.
     dialect: str = "bacau"
+    # Where the document lives. Thirteen chambers publish through unnpr.ro and one — București
+    # — publishes only on its own server, which is why this is a field rather than a constant.
+    base: str = BASE
 
 
 STUDIES: dict[str, Study] = {
@@ -244,6 +247,31 @@ STUDIES: dict[str, Study] = {
     ),
     # Vaslui is Iași's chamber and — this is the whole reason it is cheap — Iași's layout.
     # The same reader, pointed at a different file.
+    # The only chamber that does not publish through unnpr.ro. Its own server carries studies
+    # for all six of its counties; this repository previously recorded that it published
+    # nothing, which was a statement about the index rather than about the chamber.
+    "bucuresti": Study(
+        key="cnpb-terenuri-bucuresti-2026",
+        chamber="CNP București",
+        counties=["B"],
+        year=2026,
+        path="2026/2026_B_Teren.pdf",
+        base="https://srv.cnpb.ro/",
+        title="Studiu de piață — terenuri, Municipiul București, 2026",
+        currency="EUR",
+        dialect="bucuresti",
+    ),
+    "ilfov": Study(
+        key="cnpb-terenuri-ilfov-2026",
+        chamber="CNP București",
+        counties=["IF"],
+        year=2026,
+        path="2026/2026_IF.pdf",
+        base="https://srv.cnpb.ro/",
+        title="Studiu de piață — terenuri, județul Ilfov, 2026",
+        currency="EUR",
+        dialect="ilfov",
+    ),
     "vaslui": Study(
         key="unnpr-terenuri-vaslui-2026",
         chamber="CNP Iași",
@@ -319,18 +347,22 @@ def download(study: Study) -> Path:
     return out
 
 
-def fetch_study(name: str, path: str) -> Path:
+def fetch_study(name: str, path: str, base: str = BASE) -> Path:
     """One document into sources/studies/, under the name the extraction cache keys on."""
+    import tls_chain  # noqa: PLC0415
     from extract_cache import STUDIES  # noqa: PLC0415
 
     out = STUDIES / name
     if out.exists() and out.stat().st_size > 0:
         return out
     out.parent.mkdir(parents=True, exist_ok=True)
-    url = BASE + urllib.parse.quote(path)
+    url = base + urllib.parse.quote(path)
     print(f"downloading {url} ...")
     request = urllib.request.Request(url, headers={"User-Agent": UA})
-    with urllib.request.urlopen(request, timeout=300) as response:  # noqa: S310
+    # Verified, always. One chamber's server omits the intermediate that signs its own
+    # certificate; `tls_chain` supplies it from the certificate's own AIA pointer rather than
+    # turning verification off, because these documents become published numbers.
+    with tls_chain.opener_for(url).open(request, timeout=300) as response:
         out.write_bytes(response.read())
     return out
 
@@ -378,7 +410,7 @@ def prime_cache(study: Study) -> None:
     for name, path in dict(wanted).items():
         if cache_path(name).exists():
             continue
-        _name, seconds, status = build(fetch_study(name, path))
+        _name, seconds, status = build(fetch_study(name, path, study.base))
         print(f"extracted {name} in {seconds:.0f}s ({status})")
         if status.startswith("failed"):
             raise SystemExit(f"could not extract {name}: {status}")
@@ -460,6 +492,9 @@ ROSTER_SECTIONS = [("municipii", "municipii"), ("orase", "ora[sșş]e?"), ("comu
 # renamed those too and reported both as communes the study had failed to price. An alias is
 # a statement about one document, not about the Romanian language.
 ALIASES: dict[str, dict[str, str]] = {
+    # The Ilfov study writes the commune's short name and the register writes its full one;
+    # "Dărăști" alone is what the annex heading and the extravilan table both use.
+    "IF": {"darasti": "darastiilfov"},
     "BC": {
         "izvorulberheciului": "izvoruberheciului",
         "faget": "ghimesfaget",

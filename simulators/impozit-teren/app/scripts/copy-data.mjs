@@ -33,11 +33,17 @@ const data = resolve(here, '../../data');
 const out = resolve(here, '../public/data');
 mkdirSync(out, { recursive: true });
 
-/** The newest file per county for one dataset family, keyed by county code. */
+/**
+ * The newest file per county for one dataset family, keyed by county code.
+ *
+ * One-or-two letters, not two. București's code is a single "B", and a pattern that assumed
+ * two silently left the country's most valuable county out of the app while every gate
+ * upstream passed — the data was built, validated and tested, and simply never copied.
+ */
 const editions = (prefix) => {
   const found = new Map();
   for (const name of readdirSync(data).sort()) {
-    const match = new RegExp(`^${prefix}-([a-z]{2})-\\d{4}\\.json$`).exec(name);
+    const match = new RegExp(`^${prefix}-([a-z]{1,2})-\\d{4}\\.json$`).exec(name);
     if (match) found.set(match[1], name);
   }
   return found;

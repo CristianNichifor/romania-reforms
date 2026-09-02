@@ -54,6 +54,8 @@ AREA_YEAR = 2014
 M2_PER_HA = 10_000
 
 COUNTY_TO_CHAMBER = {
+    "B": "bucuresti",
+    "IF": "ilfov",
     "VS": "vaslui",
     "BC": "bacau",
     "NT": "neamt",

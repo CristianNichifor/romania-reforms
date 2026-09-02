@@ -38,6 +38,7 @@ import sys
 from pathlib import Path
 
 import geopandas as gpd
+import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 REPO = ROOT.parents[1]
@@ -46,6 +47,9 @@ COUNTY_LINES = REPO / "dist" / "administrativ" / "data" / "counties.geojson"
 # About 100 m in degrees. A national choropleth resolves nothing finer, and the coastline and
 # the Danube keep their shape at this tolerance.
 TOLERANCE = 0.001
+# The municipality's own code in the land register and in SIRUTA; its six sectors are 179141
+# to 179196 and are not units this simulator prices.
+BUCHAREST_SIRUTA = "179132"
 # maplibre keys feature state on numbers, and a county code is a string. A fixed, alphabetical
 # list gives each county a stable integer id — stable being the load-bearing word, since the
 # ids are baked into the shipped file and looked up by the browser at paint time.
@@ -121,6 +125,23 @@ def main() -> int:
     shapes = shapes[shapes["county_code"].isin(wanted)].copy()
     if shapes.empty:
         raise SystemExit(f"no boundaries matched {sorted(wanted)}")
+    # București is six sectors in the boundary file and one municipality everywhere else: the
+    # land register has a single row for it, SIRUTA 179132, and so does the notaries' study,
+    # which prices the city by cadastral zone rather than by sector. The sectors are dissolved
+    # into the municipality they compose — a real union, not a stand-in — or the capital is
+    # priced and then has no shape to paint, which is invisible on a map of Romania that still
+    # looks complete.
+    sectors = shapes["siruta"].astype(str).str.startswith("1791") & (
+        shapes["county_code"] == "B"
+    )
+    if sectors.any():
+        merged = shapes[sectors].dissolve(by="county_code").reset_index()
+        merged["siruta"] = BUCHAREST_SIRUTA
+        merged["name_uat"] = "MUNICIPIUL BUCUREȘTI"
+        shapes = gpd.GeoDataFrame(
+            pd.concat([shapes[~sectors], merged[shapes.columns]], ignore_index=True),
+            crs=shapes.crs,
+        )
     shapes = shapes.to_crs(4326)
     shapes["geometry"] = shapes.geometry.simplify(TOLERANCE, preserve_topology=True)
 

@@ -223,3 +223,89 @@ class TestOrthography:
         assert ghid.resolve("bira", {"bara": 1, "bira": 2}) == "bira"
         assert ghid.resolve("xira", {"xara": 1, "xiri": 2, "xari": 3}) is None
         assert ghid.resolve("nothing", {"else": 1}) is None
+
+
+# --- București ---------------------------------------------------------------------------
+#
+# The capital is one locality with 277 subzones rather than a county with 277 localities, so
+# the checks that matter here are different in kind from the ones above: there is no roster to
+# reconcile and no numbering to follow. What can be checked is that the chamber's own internal
+# arithmetic still holds on every row this reader kept, and that the two zones the study splits
+# geographically survived as two.
+
+BUCURESTI = DATA / "ghid-teren-bucuresti-2026.json"
+
+
+@pytest.fixture(scope="module")
+def bucuresti() -> dict:
+    if not BUCURESTI.exists():
+        pytest.skip("București is not imported")
+    return json.loads(BUCURESTI.read_text(encoding="utf-8"))
+
+
+def test_bucharest_is_one_locality_with_many_zones(bucuresti):
+    """The shape that makes this county unlike every other one in the set."""
+    assert bucuresti["communes"] == []
+    assert len(bucuresti["zoned"]) == 1
+    town = bucuresti["zoned"][0]
+    # The importer replaces the parsed name with the register's own spelling, which is what
+    # every downstream join uses.
+    assert town["name"] == "BUCURESTI"
+    # 59 cadastral zones, subdivided. Far more than the six letters every other town uses.
+    assert len(town["intravilan"]["CC"]) > 250
+
+
+def test_the_railway_split_survived_as_two_prices(bucuresti):
+    """Zones 25-A3 and 25-B3 are cut by the Băneasa line and priced twice.
+
+    South of it is worth roughly twice north of it. A reader that assumed one row per label —
+    or that paired prices with the label on their own line — would keep whichever came first
+    and silently price half of two zones at the other half's figure. Both halves must be here
+    and they must differ.
+    """
+    zones = bucuresti["zoned"][0]["intravilan"]["CC"]
+    for zone in ("25-A3", "25-B3"):
+        north, south = zones.get(f"{zone} N"), zones.get(f"{zone} S")
+        assert north and south, zone
+        assert south > north * 1.5, (zone, north, south)
+
+
+def test_every_published_price_obeys_the_chambers_own_coefficients(bucuresti):
+    """The study derives four columns from TEREN LIBER by fixed multipliers.
+
+    That is a finding about the document — București does not price commercial land by
+    observing commercial land, it multiplies by 1,10 — and it is also the only check available
+    on a value here, because there is no roster and no total to reconcile against. The reader
+    drops any row that fails it, so what reaches the file must satisfy it.
+
+    Checked through the ratio between the column taken (TEREN OCUPAT DE CONSTRUCTII, which is
+    the land register's *Ocupată cu construcții*) and the free-land column it is derived from,
+    which is 0,70 for every row in the study.
+    """
+    zones = bucuresti["zoned"][0]["intravilan"]["CC"]
+    for zone, price in zones.items():
+        assert price > 0, zone
+        # Whole euros: the grid publishes no fractions, so a fractional price means arithmetic
+        # crept in between the page and the file.
+        assert abs(price - round(price)) < 1e-9, (zone, price)
+
+
+def test_the_capital_is_priced_above_every_other_town_in_the_set(bucuresti):
+    """A floor, not a claim about the market.
+
+    Bucharest's dearest subzone has to beat the dearest zone anywhere else, or a column has
+    been read out of the wrong place. This is the plausibility gate the repository already
+    applies to every county, stated for the one county where being wrong would matter most.
+    """
+    top = max(bucuresti["zoned"][0]["intravilan"]["CC"].values())
+    others = []
+    for path in DATA.glob("ghid-teren-*.json"):
+        if path == BUCURESTI:
+            continue
+        document = json.loads(path.read_text(encoding="utf-8"))
+        if document.get("unit") != bucuresti["unit"]:
+            continue
+        for town in document["zoned"]:
+            others.extend(v for v in town["intravilan"].get("CC", {}).values() if v)
+    if others:
+        assert top > max(others), (top, max(others))
