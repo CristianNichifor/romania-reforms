@@ -57,6 +57,7 @@ COUNTY_TO_CHAMBER = {
     "B": "bucuresti",
     "IF": "ilfov",
     "CL": "calarasi",
+    "GR": "giurgiu",
     "VS": "vaslui",
     "BC": "bacau",
     "NT": "neamt",

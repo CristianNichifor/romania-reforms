@@ -13,6 +13,7 @@
     "CL",
     "CT",
     "DB",
+    "GR",
     "HD",
     "HR",
     "IF",
@@ -36,20 +37,20 @@
     "note": "Conversia din EUR/m² în RON/ha folosește cursul 5.2567 RON/EUR, același ca în build_impozit.py. Mediana grilei este pe localitate, mediana prețului cerut este pe ofertă; niciuna nu e ponderată cu suprafața."
   },
   "summary": {
-    "counties": 22,
-    "comparableCounties": 22,
-    "matchedLocalities": 118,
+    "counties": 23,
+    "comparableCounties": 23,
+    "matchedLocalities": 120,
     "countyMultiple": {
-      "low": 0.679,
-      "central": 1.159,
-      "high": 2.345
+      "low": 0.681,
+      "central": 1.16,
+      "high": 2.314
     },
     "localityMultiple": {
       "low": 0.784,
       "central": 1.009,
       "high": 1.212
     },
-    "countyMultipleVsPaid": 1.059,
+    "countyMultipleVsPaid": 1.119,
     "countiesBelowParity": [
       "BH",
       "HR",
@@ -1269,6 +1270,65 @@
             "low": 1.167,
             "central": 1.272,
             "high": 1.935
+          }
+        }
+      ]
+    },
+    {
+      "county": "GR",
+      "name": "Giurgiu",
+      "surveyRegion": "RO31",
+      "surveyYear": "2024",
+      "paidRonPerHa": 31894.0,
+      "multipleVsPaid": 1.145,
+      "gridYear": "2026",
+      "gridPricedLocalities": 54,
+      "gridLocalities": 54,
+      "gridShare": 1.0,
+      "gridMedianRonPerHa": 27860.51,
+      "offers": 47,
+      "askedRonPerHa": {
+        "low": 22744.0,
+        "central": 47758.0,
+        "high": 47758.0
+      },
+      "multiple": {
+        "low": 0.816,
+        "central": 1.714,
+        "high": 1.714
+      },
+      "comparable": true,
+      "localities": [
+        {
+          "siruta": "105972",
+          "name": "Vânătorii Mici",
+          "offers": 10,
+          "gridRonPerHa": 27860.51,
+          "askedRonPerHa": {
+            "low": 14707.0,
+            "central": 15000.0,
+            "high": 15355.0
+          },
+          "multiple": {
+            "low": 0.528,
+            "central": 0.538,
+            "high": 0.551
+          }
+        },
+        {
+          "siruta": "154709",
+          "name": "Toporu",
+          "offers": 24,
+          "gridRonPerHa": 27860.51,
+          "askedRonPerHa": {
+            "low": 47758.0,
+            "central": 47758.0,
+            "high": 47758.0
+          },
+          "multiple": {
+            "low": 1.714,
+            "central": 1.714,
+            "high": 1.714
           }
         }
       ]
