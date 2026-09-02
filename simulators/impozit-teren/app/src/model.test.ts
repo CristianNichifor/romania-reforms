@@ -85,6 +85,9 @@ function fixture(county: string) {
         ([code, band]) => [code, (band as { central: number }).central],
       ),
     ),
+    // From the tax file for the same reason as the yields: Python's default is 1 and a
+    // literal here would keep passing if that default ever moved.
+    collectionRate: tax.assumptions.collectionRate ?? 1,
     ronPerEur: tax.assumptions.ronPerEur,
   };
   return { localities: value.localities as Locality[], tax, settings };
@@ -129,6 +132,24 @@ describe.each(COUNTIES)('%s', (county) => {
   it('reproduces the Fiscal Code tax the Python wrote', () => {
     const { totals } = evaluate(localities, code, settings);
     expectClose(totals.fiscal, tax.summary.fiscalCodeRon.central);
+  });
+
+  it('reproduces the taxable base and what it would collect', () => {
+    // The taxable base is a second valuation, over a second set of hectares, in a second
+    // language — exactly the shape that drifts silently. It is also the number a revenue
+    // claim rests on, so it gets the same parity treatment as the value itself.
+    const { totals } = evaluate(localities, code, settings);
+    expectClose(totals.taxable, tax.summary.taxableValueRon.central, `${county} taxable`);
+    expectClose(totals.collected, tax.summary.lvtCollectedRon.central, `${county} collected`);
+  });
+
+  it('cannot tax more land than the county has', () => {
+    // The invariant that catches a scope wired to the wrong field: private land is a subset,
+    // so its value is bounded by the whole, and a taxable base equal to the total would mean
+    // the ownership split never arrived rather than that the county is wholly private.
+    const { totals } = evaluate(localities, code, settings);
+    expect(totals.taxable).toBeGreaterThan(0);
+    expect(totals.taxable).toBeLessThan(totals.value);
   });
 
   it('reproduces the revenue-neutral rate, which is the headline', () => {

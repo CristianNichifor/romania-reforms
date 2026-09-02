@@ -50,6 +50,8 @@ type State = {
   value: BandKey;
   fiscal: BandKey;
   landYield: number;
+  /** Share of the tax on private land that is collected, 0 to 1. */
+  collection: number;
   sort: 'delta' | 'value' | 'name';
 };
 
@@ -65,6 +67,9 @@ const DEFAULTS: State = {
   // arrives — `adoptDerivedYield` replaces it with whatever the county's file actually carries,
   // so the browser cannot drift from the Python that produced the numbers beside it.
   landYield: 2.53,
+  // Neutral, like the market multiple in build_renta.py. No collection rate is published per
+  // locality, so the page opens on "all of it" and says so rather than opening on a guess.
+  collection: 1,
   sort: 'delta',
 };
 
@@ -90,6 +95,7 @@ function readHash(): State {
     value: band('pret', DEFAULTS.value),
     fiscal: band('cod', DEFAULTS.fiscal),
     landYield: number('randament', DEFAULTS.landYield),
+    collection: Math.min(1, number('colectare', DEFAULTS.collection)),
     sort: sort === 'value' || sort === 'name' ? sort : DEFAULTS.sort,
   };
 }
@@ -102,6 +108,7 @@ function writeHash(state: State): void {
   params.set('pret', state.value);
   params.set('cod', state.fiscal);
   params.set('randament', String(state.landYield));
+  params.set('colectare', String(state.collection));
   params.set('sort', state.sort);
   history.replaceState(null, '', `#${params}`);
 }
@@ -300,6 +307,7 @@ async function main() {
       value: state.value,
       fiscal: state.fiscal,
       rate: state.rate,
+      collectionRate: state.collection,
       landYield: state.landYield,
       landYieldAgricultural:
         data.tax.assumptions.agriculturalYieldPercent?.central ?? state.landYield,
@@ -341,7 +349,9 @@ async function main() {
     ($('rate') as HTMLInputElement).value = String(Math.round(state.rate * 100));
     ($('share') as HTMLInputElement).value = String(Math.round(state.share * 100));
     ($('yield') as HTMLInputElement).value = String(Math.round(state.landYield * 100));
+    ($('collection') as HTMLInputElement).value = String(Math.round(state.collection * 100));
     $('yield-value').textContent = `${percent.format(state.landYield)}%`;
+    $('collection-value').textContent = `${percent.format(100 * state.collection)}%`;
     $('rate-value').textContent = `${percent.format(state.rate)}%`;
     $('share-value').textContent = `×${percent.format(state.share)}`;
 
@@ -355,6 +365,20 @@ async function main() {
       <div class="stat">
         <div class="stat-label">Impozit pe valoare, la ${percent.format(state.rate)}%</div>
         <div class="stat-value ${direction}">${scaled(totals.lvt)} <span class="unit">lei</span></div>
+        <p class="note">pe tot pământul, ca și cifra de alături — așa se compară cele două reguli</p>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Din el, cât s-ar putea încasa</div>
+        <div class="stat-value">${scaled(totals.collected)} <span class="unit">lei</span></div>
+        <p class="note">
+          doar pe cele ${percent.format(
+            totals.value ? (100 * totals.taxable) / totals.value : 0,
+          )}% din valoare aflate în proprietate privată${
+            state.collection < 1
+              ? `, la un grad de colectare de ${percent.format(100 * state.collection)}%`
+              : '; restul e domeniu public, care nu se impozitează'
+          }
+        </p>
       </div>
       <div class="stat">
         <div class="stat-label">Din renta funciară, ia azi</div>
@@ -453,6 +477,9 @@ async function main() {
     render();
   }
 
+  $('collection').addEventListener('input', (event) =>
+    update({ collection: Number((event.target as HTMLInputElement).value) / 100 }),
+  );
   $('rate').addEventListener('input', (event) =>
     update({ rate: Number((event.target as HTMLInputElement).value) / 100 }),
   );
@@ -494,6 +521,15 @@ async function main() {
   adoptDerivedYield();
   render();
   void renderNational();
+  // Arriving *on* `#j=toate`, rather than switching to it. The dropdown's handler waits for
+  // every county before adding them up; a page loaded straight from that URL used to render
+  // once against an empty cache and never look again, so the scenario the whole hash design
+  // exists to make shareable was the one that showed a confident set of zeros.
+  if (state.county === ALL) {
+    $('table-title').textContent = 'se încarcă toate județele…';
+    await everything;
+    render();
+  }
 }
 
 main().catch((error) => {

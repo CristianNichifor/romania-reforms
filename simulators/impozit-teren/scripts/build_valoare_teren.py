@@ -275,36 +275,59 @@ def main() -> int:
             unmatched.append(f"{record['name']} ({record['siruta']})")
             continue
 
-        built_ha = record["byCategory"].get(INTRAVILAN_CATEGORY, 0.0)
         parts = [value * to_eur for value in intra[key]["parts"].values()]
         legs = {
             "low": min(parts),
             "central": statistics.fmean(parts),
             "high": max(parts),
         }
-        intravilan_value = {k: built_ha * M2_PER_HA * v for k, v in legs.items()}
 
-        # Everything that is not built-up is valued outside the town, category by category.
-        extravilan_value = 0.0
-        priced_ha = 0.0
-        by_code: dict[str, float] = {}
-        forest_price = extra.get(key, {}).get(FOREST_CATEGORY)
-        forest_value = 0.0
-        if record["forestHa"] and forest_price is not None:
-            forest_value = record["forestHa"] * M2_PER_HA * forest_price * to_eur
-            extravilan_value += forest_value
-            by_code[FOREST_CATEGORY] = forest_value
-            priced_ha += record["forestHa"]
-        for code in EXTRAVILAN_CATEGORIES:
-            if code == INTRAVILAN_CATEGORY:
-                continue
-            hectares = record["byCategory"].get(code, 0.0)
-            price = extra.get(key, {}).get(code)
-            price = price * to_eur if price is not None else None
-            if hectares and price is not None:
-                extravilan_value += hectares * M2_PER_HA * price
-                by_code[code] = by_code.get(code, 0.0) + hectares * M2_PER_HA * price
-                priced_ha += hectares
+        def valued_at(areas: dict[str, float], forest_ha: float, legs: dict = legs, key: str = key):
+            """These hectares at this locality's published prices.
+
+            Run twice — once over every hectare in the register, once over the privately
+            owned ones — because the taxable base has to be the *same valuation* on *fewer
+            hectares*, not a second valuation that could drift from the first. A copy of this
+            arithmetic would be a copy of every rounding and every missing-price rule in it.
+            """
+            built_ha = areas.get(INTRAVILAN_CATEGORY, 0.0)
+            intravilan = {k: built_ha * M2_PER_HA * v for k, v in legs.items()}
+            # Everything not built-up is valued outside the town, category by category.
+            extravilan = 0.0
+            priced_ha = 0.0
+            by_code: dict[str, float] = {}
+            forest_price = extra.get(key, {}).get(FOREST_CATEGORY)
+            forest_value = 0.0
+            if forest_ha and forest_price is not None:
+                forest_value = forest_ha * M2_PER_HA * forest_price * to_eur
+                extravilan += forest_value
+                by_code[FOREST_CATEGORY] = forest_value
+                priced_ha += forest_ha
+            for code in EXTRAVILAN_CATEGORIES:
+                if code == INTRAVILAN_CATEGORY:
+                    continue
+                hectares = areas.get(code, 0.0)
+                price = extra.get(key, {}).get(code)
+                price = price * to_eur if price is not None else None
+                if hectares and price is not None:
+                    extravilan += hectares * M2_PER_HA * price
+                    by_code[code] = by_code.get(code, 0.0) + hectares * M2_PER_HA * price
+                    priced_ha += hectares
+            return built_ha, intravilan, extravilan, by_code, priced_ha, forest_value
+
+        built_ha, intravilan_value, extravilan_value, by_code, priced_ha, forest_value = valued_at(
+            record["byCategory"], record["forestHa"]
+        )
+        # The taxable base: art. 456 (1) a) does not tax land in the public domain, and a
+        # quarter of Romania by area is in it. Same prices, private hectares only.
+        (
+            private_built_ha,
+            taxable_intravilan,
+            taxable_extravilan,
+            taxable_by_code,
+            _,
+            _,
+        ) = valued_at(record["byCategoryPrivate"], record["forestPrivateHa"])
 
         rows.append(
             {
@@ -318,7 +341,10 @@ def main() -> int:
                 "parts": len(parts),
                 "totalHa": record["totalHa"],
                 "builtHa": round(built_ha, 2),
+                "privateHa": record["privateHa"],
+                "privateBuiltHa": round(private_built_ha, 2),
                 "forestHa": record["forestHa"],
+                "forestPrivateHa": record["forestPrivateHa"],
                 "forestValueEur": round(forest_value),
                 "pricedExtravilanHa": round(priced_ha, 2),
                 # Six decimals, not two. The central figure is a mean of village prices,
@@ -331,6 +357,10 @@ def main() -> int:
                 # parameter that moves the answer most, and a reader who cannot move it is
                 # being shown a conclusion instead of a calculation.
                 "areaHa": {k: v for k, v in record["byCategory"].items() if v},
+                # The privately owned subset of the same hectares, carried for the same
+                # reason: the browser recomputes the taxable base as the reader moves the
+                # intravilan share, and it cannot do that from a total alone.
+                "privateAreaHa": {k: v for k, v in record["byCategoryPrivate"].items() if v},
                 # Forest is exported alongside the rest, not only used. The value builder
                 # priced it and the page could not see it, so the browser's rent drifted five
                 # per cent from the file it is checked against — which is exactly what the
@@ -348,6 +378,16 @@ def main() -> int:
                 "landValueEur": {
                     k: round(intravilan_value[k] + extravilan_value) for k in legs
                 },
+                # What a land tax could actually reach. Not a share of the line above: the
+                # public domain is concentrated in forest, roads and water, so the taxable
+                # fraction of the *value* is much higher than the taxable fraction of the area.
+                "taxableValueEur": {
+                    k: round(taxable_intravilan[k] + taxable_extravilan) for k in legs
+                },
+                "taxableExtravilanValueEur": round(taxable_extravilan),
+                "taxableExtravilanValueByCodeEur": {
+                    k: round(v) for k, v in taxable_by_code.items() if v
+                },
             }
         )
 
@@ -357,6 +397,10 @@ def main() -> int:
 
     totals = {
         band: sum(row["landValueEur"][band] for row in rows) for band in ("low", "central", "high")
+    }
+    taxable = {
+        band: sum(row["taxableValueEur"][band] for row in rows)
+        for band in ("low", "central", "high")
     }
     built = sum(row["builtHa"] for row in rows)
     covered = sum(row["totalHa"] for row in rows)
@@ -385,6 +429,8 @@ def main() -> int:
     print(f"suprafață acoperită: {covered:,.0f} ha   curți-construcții: {built:,.0f} ha")
     for band in ("low", "central", "high"):
         print(f"  valoarea terenului, {band:<8}: {totals[band] / 1e9:8.2f} mld EUR")
+    print(f"  din care impozabil (privat): {taxable['central'] / 1e9:8.2f} mld EUR "
+          f"({100 * taxable['central'] / totals['central'] if totals['central'] else 0:.1f}%)")
     spread = totals["high"] / totals["low"] if totals["low"] else 0
     print(f"  raportul sus/jos: {spread:.1f}×")
 
@@ -443,6 +489,10 @@ def main() -> int:
             "priceableHa": round(priceable, 2),
             "builtHa": round(built, 2),
             "landValueEur": {band: round(value) for band, value in totals.items()},
+            "taxableValueEur": {band: round(value) for band, value in taxable.items()},
+            "taxableSharePercent": round(100 * taxable["central"] / totals["central"], 2)
+            if totals["central"]
+            else 0,
             "highToLowRatio": round(spread, 2),
         },
         "localities": rows,

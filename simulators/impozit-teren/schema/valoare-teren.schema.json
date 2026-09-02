@@ -1,323 +1,378 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/valoare-teren.schema.json",
-  "title": "Land value per locality, and the assumptions it rests on",
-  "description": "The notaries' price per square metre multiplied by the register's hectares. Every figure is a band rather than a number, because the grid publishes one price per village and per zone and neither has a published area to weight it by. `central` is the midpoint of two published extremes, not a measurement — which is why the band is required and cannot collapse to a point.",
-  "type": "object",
-  "additionalProperties": false,
-  "required": [
-    "id",
-    "title",
-    "publisher",
-    "counties",
-    "period",
-    "currency",
-    "provenance",
-    "assumptions",
-    "summary",
-    "localities",
-    "limitations"
-  ],
-  "$defs": {
-    "band": {
-      "description": "Cheapest published price, unweighted mean, dearest. Ordered, and never equal at both ends unless the locality publishes a single price.",
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "low",
-        "central",
-        "high"
-      ],
-      "properties": {
-        "low": {
-          "type": "number",
-          "minimum": 0
-        },
-        "central": {
-          "type": "number",
-          "minimum": 0
-        },
-        "high": {
-          "type": "number",
-          "minimum": 0
-        }
-      }
-    }
-  },
-  "properties": {
-    "$schema": {
-      "type": "string"
-    },
-    "id": {
-      "type": "string",
-      "pattern": "^valoare-teren-[a-z]{1,2}-[0-9]{4}$"
-    },
-    "title": {
-      "type": "string"
-    },
-    "publisher": {
-      "type": "string"
-    },
-    "counties": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "type": "string",
-        "pattern": "^[A-Z]{1,2}$"
-      }
-    },
-    "period": {
-      "type": "string",
-      "pattern": "^[0-9]{4}$"
-    },
-    "currency": {
-      "const": "EUR"
-    },
-    "provenance": {
-      "$ref": "provenance.schema.json#/$defs/provenance"
-    },
-    "assumptions": {
-      "description": "Named because they move the answer more than the data does.",
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "sourceCurrency",
-        "ronPerEur",
-        "exchangeRateDate",
-        "intravilanCategory",
-        "areaYear",
-        "gridYear",
-        "weighting"
-      ],
-      "properties": {
-        "intravilanCategory": {
-          "type": "string"
-        },
-        "areaYear": {
-          "type": "integer"
-        },
-        "gridYear": {
-          "type": "integer"
-        },
-        "weighting": {
-          "type": "string"
-        },
-        "sourceCurrency": {
-          "description": "The chamber's own unit before conversion to euro.",
-          "enum": [
-            "EUR",
-            "RON"
-          ]
-        },
-        "ronPerEur": {
-          "type": "number",
-          "exclusiveMinimum": 0
-        },
-        "exchangeRateDate": {
-          "type": "string",
-          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
-        }
-      }
-    },
-    "summary": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://cristiannichifor.github.io/romania-reforms/schema/valoare-teren.schema.json",
+    "title": "Land value per locality, and the assumptions it rests on",
+    "description": "The notaries' price per square metre multiplied by the register's hectares. Every figure is a band rather than a number, because the grid publishes one price per village and per zone and neither has a published area to weight it by. `central` is the midpoint of two published extremes, not a measurement — which is why the band is required and cannot collapse to a point.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "id",
+        "title",
+        "publisher",
+        "counties",
+        "period",
+        "currency",
+        "provenance",
+        "assumptions",
+        "summary",
         "localities",
-        "localitiesInRegister",
-        "unmatched",
-        "coveredHa",
-        "builtHa",
-        "landValueEur",
-        "highToLowRatio",
-        "coverage",
-        "pricedHa",
-        "priceableHa"
-      ],
-      "properties": {
-        "localities": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "localitiesInRegister": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "unmatched": {
-          "description": "Localities in the register the study does not price. Recorded, not forbidden; judge the file by summary.coverage.",
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "coveredHa": {
-          "type": "number",
-          "exclusiveMinimum": 0
-        },
-        "builtHa": {
-          "type": "number",
-          "exclusiveMinimum": 0
-        },
-        "landValueEur": {
-          "$ref": "#/$defs/band"
-        },
-        "highToLowRatio": {
-          "type": "number",
-          "minimum": 1
-        },
-        "coverage": {
-          "description": "Share of the county's localities that carry a land value. Below 0.9 the builder refuses to write.",
-          "type": "object",
-          "additionalProperties": false,
-          "required": [
-            "localitiesExpected",
-            "localitiesValued",
-            "share"
-          ],
-          "properties": {
-            "localitiesExpected": {
-              "type": "integer",
-              "minimum": 1
-            },
-            "localitiesValued": {
-              "type": "integer",
-              "minimum": 0
-            },
-            "share": {
-              "type": "number",
-              "minimum": 0.9,
-              "maximum": 1
+        "limitations"
+    ],
+    "$defs": {
+        "band": {
+            "description": "Cheapest published price, unweighted mean, dearest. Ordered, and never equal at both ends unless the locality publishes a single price.",
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "low",
+                "central",
+                "high"
+            ],
+            "properties": {
+                "low": {
+                    "type": "number",
+                    "minimum": 0
+                },
+                "central": {
+                    "type": "number",
+                    "minimum": 0
+                },
+                "high": {
+                    "type": "number",
+                    "minimum": 0
+                }
             }
-          }
-        },
-        "pricedHa": {
-          "type": "number",
-          "description": "Hectarele care au primit efectiv un preț: curți-construcții plus categoriile extravilane pentru care grila publică o valoare. Diferența față de coveredHa este teren aflat într-o localitate evaluată, dar pentru care studiul nu publică niciun preț — contribuie zero la valoare, deci o subevaluează."
-        },
-        "priceableHa": {
-          "type": "number",
-          "description": "Hectarele pe care studiul le-ar fi putut evalua: suprafața localităților evaluate, mai puțin pădurea, care nu este evaluată în niciun județ și are propria limitare. Numitorul față de care se măsoară pricedHa."
         }
-      }
     },
-    "localities": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "siruta",
-          "name",
-          "rank",
-          "pricedBy",
-          "parts",
-          "totalHa",
-          "builtHa",
-          "forestHa",
-          "pricedExtravilanHa",
-          "intravilanEurPerM2",
-          "extravilanValueEur",
-          "landValueEur",
-          "areaHa",
-          "extravilanEurPerM2",
-          "forestValueEur",
-          "extravilanValueByCodeEur"
-        ],
-        "properties": {
-          "siruta": {
+    "properties": {
+        "$schema": {
+            "type": "string"
+        },
+        "id": {
             "type": "string",
-            "pattern": "^[0-9]+$"
-          },
-          "name": {
+            "pattern": "^valoare-teren-[a-z]{1,2}-[0-9]{4}$"
+        },
+        "title": {
             "type": "string"
-          },
-          "rank": {
-            "enum": [
-              "municipii",
-              "orase",
-              "comune",
-              null
-            ]
-          },
-          "pricedBy": {
-            "description": "zone for a town's own grid, village for a rural commune's list.",
-            "enum": [
-              "zone",
-              "village"
-            ]
-          },
-          "parts": {
-            "description": "How many published prices the band was drawn from.",
-            "type": "integer",
-            "minimum": 1
-          },
-          "totalHa": {
-            "type": "number",
-            "exclusiveMinimum": 0
-          },
-          "builtHa": {
-            "type": "number",
-            "minimum": 0
-          },
-          "forestHa": {
-            "type": "number",
-            "minimum": 0
-          },
-          "pricedExtravilanHa": {
-            "type": "number",
-            "minimum": 0
-          },
-          "intravilanEurPerM2": {
-            "$ref": "#/$defs/band"
-          },
-          "extravilanValueEur": {
-            "type": "number",
-            "minimum": 0
-          },
-          "landValueEur": {
-            "$ref": "#/$defs/band"
-          },
-          "areaHa": {
-            "description": "Hectares by notary category, carried so the app can recompute under a different intravilan assumption.",
-            "type": "object",
-            "minProperties": 1,
-            "additionalProperties": {
-              "type": "number",
-              "exclusiveMinimum": 0
+        },
+        "publisher": {
+            "type": "string"
+        },
+        "counties": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "string",
+                "pattern": "^[A-Z]{1,2}$"
             }
-          },
-          "extravilanEurPerM2": {
-            "description": "The commune's extravilan prices, by category.",
+        },
+        "period": {
+            "type": "string",
+            "pattern": "^[0-9]{4}$"
+        },
+        "currency": {
+            "const": "EUR"
+        },
+        "provenance": {
+            "$ref": "provenance.schema.json#/$defs/provenance"
+        },
+        "assumptions": {
+            "description": "Named because they move the answer more than the data does.",
             "type": "object",
-            "minProperties": 0,
-            "additionalProperties": {
-              "type": "number",
-              "minimum": 0
+            "additionalProperties": false,
+            "required": [
+                "sourceCurrency",
+                "ronPerEur",
+                "exchangeRateDate",
+                "intravilanCategory",
+                "areaYear",
+                "gridYear",
+                "weighting"
+            ],
+            "properties": {
+                "intravilanCategory": {
+                    "type": "string"
+                },
+                "areaYear": {
+                    "type": "integer"
+                },
+                "gridYear": {
+                    "type": "integer"
+                },
+                "weighting": {
+                    "type": "string"
+                },
+                "sourceCurrency": {
+                    "description": "The chamber's own unit before conversion to euro.",
+                    "enum": [
+                        "EUR",
+                        "RON"
+                    ]
+                },
+                "ronPerEur": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "exchangeRateDate": {
+                    "type": "string",
+                    "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+                }
             }
-          },
-          "forestValueEur": {
-            "type": "number",
-            "minimum": 0,
-            "description": "Valoarea pădurii: forestHa × prețul PADURE din grilă. Zero acolo unde grila județului nu publică un preț pentru pădure — se vede atunci în pricedHa."
-          },
-          "extravilanValueByCodeEur": {
+        },
+        "summary": {
             "type": "object",
-            "additionalProperties": {
-              "type": "number",
-              "minimum": 0
-            },
-            "description": "Valoarea extravilanului defalcată pe cod cadastral, ca build_renta.py să poată aplica fiecărei categorii randamentul măsurat pe ea: arabilul și pășunea nu randează la fel."
-          }
+            "additionalProperties": false,
+            "required": [
+                "localities",
+                "localitiesInRegister",
+                "unmatched",
+                "coveredHa",
+                "builtHa",
+                "landValueEur",
+                "highToLowRatio",
+                "coverage",
+                "pricedHa",
+                "priceableHa",
+                "taxableValueEur",
+                "taxableSharePercent"
+            ],
+            "properties": {
+                "localities": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "localitiesInRegister": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "unmatched": {
+                    "description": "Localities in the register the study does not price. Recorded, not forbidden; judge the file by summary.coverage.",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "coveredHa": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "builtHa": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "landValueEur": {
+                    "$ref": "#/$defs/band"
+                },
+                "highToLowRatio": {
+                    "type": "number",
+                    "minimum": 1
+                },
+                "coverage": {
+                    "description": "Share of the county's localities that carry a land value. Below 0.9 the builder refuses to write.",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "localitiesExpected",
+                        "localitiesValued",
+                        "share"
+                    ],
+                    "properties": {
+                        "localitiesExpected": {
+                            "type": "integer",
+                            "minimum": 1
+                        },
+                        "localitiesValued": {
+                            "type": "integer",
+                            "minimum": 0
+                        },
+                        "share": {
+                            "type": "number",
+                            "minimum": 0.9,
+                            "maximum": 1
+                        }
+                    }
+                },
+                "pricedHa": {
+                    "type": "number",
+                    "description": "Hectarele care au primit efectiv un preț: curți-construcții plus categoriile extravilane pentru care grila publică o valoare. Diferența față de coveredHa este teren aflat într-o localitate evaluată, dar pentru care studiul nu publică niciun preț — contribuie zero la valoare, deci o subevaluează."
+                },
+                "priceableHa": {
+                    "type": "number",
+                    "description": "Hectarele pe care studiul le-ar fi putut evalua: suprafața localităților evaluate, mai puțin pădurea, care nu este evaluată în niciun județ și are propria limitare. Numitorul față de care se măsoară pricedHa."
+                },
+                "taxableValueEur": {
+                    "$ref": "#/$defs/band",
+                    "description": "County land value restricted to privately owned land."
+                },
+                "taxableSharePercent": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                }
+            }
+        },
+        "localities": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                    "siruta",
+                    "name",
+                    "rank",
+                    "pricedBy",
+                    "parts",
+                    "totalHa",
+                    "builtHa",
+                    "forestHa",
+                    "pricedExtravilanHa",
+                    "intravilanEurPerM2",
+                    "extravilanValueEur",
+                    "landValueEur",
+                    "areaHa",
+                    "extravilanEurPerM2",
+                    "forestValueEur",
+                    "extravilanValueByCodeEur",
+                    "privateHa",
+                    "privateBuiltHa",
+                    "forestPrivateHa",
+                    "privateAreaHa",
+                    "taxableValueEur",
+                    "taxableExtravilanValueEur",
+                    "taxableExtravilanValueByCodeEur"
+                ],
+                "properties": {
+                    "siruta": {
+                        "type": "string",
+                        "pattern": "^[0-9]+$"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "rank": {
+                        "enum": [
+                            "municipii",
+                            "orase",
+                            "comune",
+                            null
+                        ]
+                    },
+                    "pricedBy": {
+                        "description": "zone for a town's own grid, village for a rural commune's list.",
+                        "enum": [
+                            "zone",
+                            "village"
+                        ]
+                    },
+                    "parts": {
+                        "description": "How many published prices the band was drawn from.",
+                        "type": "integer",
+                        "minimum": 1
+                    },
+                    "totalHa": {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                    },
+                    "builtHa": {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    "forestHa": {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    "pricedExtravilanHa": {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    "intravilanEurPerM2": {
+                        "$ref": "#/$defs/band"
+                    },
+                    "extravilanValueEur": {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    "landValueEur": {
+                        "$ref": "#/$defs/band"
+                    },
+                    "areaHa": {
+                        "description": "Hectares by notary category, carried so the app can recompute under a different intravilan assumption.",
+                        "type": "object",
+                        "minProperties": 1,
+                        "additionalProperties": {
+                            "type": "number",
+                            "exclusiveMinimum": 0
+                        }
+                    },
+                    "extravilanEurPerM2": {
+                        "description": "The commune's extravilan prices, by category.",
+                        "type": "object",
+                        "minProperties": 0,
+                        "additionalProperties": {
+                            "type": "number",
+                            "minimum": 0
+                        }
+                    },
+                    "forestValueEur": {
+                        "type": "number",
+                        "minimum": 0,
+                        "description": "Valoarea pădurii: forestHa × prețul PADURE din grilă. Zero acolo unde grila județului nu publică un preț pentru pădure — se vede atunci în pricedHa."
+                    },
+                    "extravilanValueByCodeEur": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "number",
+                            "minimum": 0
+                        },
+                        "description": "Valoarea extravilanului defalcată pe cod cadastral, ca build_renta.py să poată aplica fiecărei categorii randamentul măsurat pe ea: arabilul și pășunea nu randează la fel."
+                    },
+                    "privateHa": {
+                        "description": "Privately owned hectares. The rest is public domain, which art. 456 (1) a) does not tax.",
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    "privateBuiltHa": {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    "forestPrivateHa": {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    "privateAreaHa": {
+                        "description": "The private subset of areaHa, so the browser can recompute the taxable base under a different intravilan share.",
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "number",
+                            "minimum": 0
+                        }
+                    },
+                    "taxableValueEur": {
+                        "$ref": "#/$defs/band",
+                        "description": "The same valuation over privately owned hectares only."
+                    },
+                    "taxableExtravilanValueEur": {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    "taxableExtravilanValueByCodeEur": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "number",
+                            "minimum": 0
+                        },
+                        "description": "Valoarea extravilanului defalcată pe cod cadastral, ca build_renta.py să poată aplica fiecărei categorii randamentul măsurat pe ea: arabilul și pășunea nu randează la fel."
+                    }
+                }
+            }
+        },
+        "limitations": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "$ref": "provenance.schema.json#/$defs/limitation"
+            }
         }
-      }
-    },
-    "limitations": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "$ref": "provenance.schema.json#/$defs/limitation"
-      }
     }
-  }
 }

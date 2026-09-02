@@ -18,6 +18,8 @@
     "ronPerEur": 5.2567,
     "exchangeRateDate": "2026-09-01",
     "lvtRatePercent": 1.0,
+    "collectionRate": 1.0,
+    "taxableBase": "proprietate privată din registrul funciar INS AGR101B; domeniul public nu se impozitează, art. 456 alin. (1) lit. a)",
     "intravilanCategory": "CC",
     "rankSource": "Legea nr. 351/2001, anexa IV",
     "agriculturalYieldPercent": {
@@ -72,10 +74,21 @@
       "central": 264734993223,
       "high": 1097516955480
     },
+    "taxableValueRon": {
+      "low": 15985414432,
+      "central": 149699044030,
+      "high": 620610207360
+    },
+    "taxableSharePercent": 56.55,
     "lvtRon": {
       "low": 282693761,
       "central": 2647349932,
       "high": 10975169555
+    },
+    "lvtCollectedRon": {
+      "low": 159854144,
+      "central": 1496990440,
+      "high": 6206102074
     },
     "revenueNeutralRatePercent": {
       "low": 0.0052,
@@ -104,12 +117,22 @@
         "central": 264734993223,
         "high": 1097516955480
       },
+      "taxableValueRon": {
+        "low": 15985414432,
+        "central": 149699044030,
+        "high": 620610207360
+      },
       "extravilanValueRon": 0,
       "extravilanValueByCodeRon": {},
       "lvtRon": {
         "low": 282693761,
         "central": 2647349932,
         "high": 10975169555
+      },
+      "lvtCollectedRon": {
+        "low": 159854144,
+        "central": 1496990440,
+        "high": 6206102074
       },
       "effectiveRatePercent": {
         "low": 0.2017,
@@ -130,7 +153,23 @@
     },
     {
       "id": "statutar-nu-incasat",
-      "text": "Se compară statutar cu statutar. Impozitul calculat aici nu este ce încasează primăriile: nu conține scutiri, restanțe și nici gradul de colectare. Comparația cu încasările ar atribui schimbării de regulă și efectele celor trei.",
+      "text": "Se compară statutar cu statutar. Nici „impozitul de azi”, nici `lvtRon` nu sunt ce încasează primăriile, iar comparația dintre ele este corectă tocmai pentru că amândouă sunt calculate pe aceleași hectare. `lvtCollectedRon` este singura cifră de aici gândită ca încasare: scoate domeniul public din bază și înmulțește cu gradul de colectare. Nu are corespondent pe partea Codului fiscal, deci nu se compară cu el.",
+      "severity": "material",
+      "affects": [
+        "impozit"
+      ]
+    },
+    {
+      "id": "gradul-de-colectare-e-lasat-la-1",
+      "text": "Gradul de colectare este un parametru, lăsat la 100%. Nu există o serie publicată pe localități a colectării impozitului pe teren, iar o cifră inventată ar arăta ca o măsurătoare. Restanțele, executarea silită și scutirile din art. 464 — teren al cultelor, cimitire, arii protejate — scad toate din încasare, niciuna nu o crește. `lvtCollectedRon` este deci un plafon al încasării, nu încasarea.",
+      "severity": "blocking",
+      "affects": [
+        "impozit"
+      ]
+    },
+    {
+      "id": "privat-nu-e-acelasi-lucru-cu-impozabil",
+      "text": "Baza impozabilă de aici este proprietatea privată din registrul funciar, adică 57% din valoarea terenului județului. Registrul numără însă drept privată și proprietatea privată a statului și a comunei, care se impozitează, iar terenul din domeniul public dat în concesiune se impozitează chiriașului potrivit art. 463 alin. (2). Aproximarea greșește în ambele sensuri cu mărimi nepublicate pe localități.",
       "severity": "material",
       "affects": [
         "impozit"

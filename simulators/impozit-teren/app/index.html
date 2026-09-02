@@ -37,6 +37,20 @@
       </section>
 
       <section class="control">
+        <label class="slider-label" for="collection">
+          Grad de colectare <output id="collection-value"></output>
+        </label>
+        <input id="collection" type="range" min="10" max="100" step="1" value="100" />
+        <div class="ramp-ends"><span>10%</span><span>tot</span></div>
+        <p class="note">
+          Cât din impozitul datorat ajunge efectiv încasat. Se aplică doar bazei impozabile,
+          adică terenului aflat în proprietate privată: domeniul public nu se impozitează
+          (art. 456), iar el înseamnă un sfert din suprafața țării. Nu există o serie publicată
+          pe localități a colectării, așa că pornește de la „tot” — un plafon, nu o estimare.
+        </p>
+      </section>
+
+      <section class="control">
         <label class="slider-label" for="share">
           Cât e intravilan <output id="share-value"></output>
         </label>
