@@ -261,6 +261,28 @@ STUDIES: dict[str, Study] = {
         currency="EUR",
         dialect="bucuresti",
     ),
+    "teleorman": Study(
+        key="cnpb-terenuri-teleorman-2026",
+        chamber="CNP București",
+        counties=["TR"],
+        year=2026,
+        path="2026/2026-CL-GR-IL-TR.pdf",
+        base="https://srv.cnpb.ro/",
+        title="Studiu de piață — terenuri, județul Teleorman, 2026",
+        currency="EUR",
+        dialect="teleorman",
+    ),
+    "ialomita": Study(
+        key="cnpb-terenuri-ialomita-2026",
+        chamber="CNP București",
+        counties=["IL"],
+        year=2026,
+        path="2026/2026-CL-GR-IL-TR.pdf",
+        base="https://srv.cnpb.ro/",
+        title="Studiu de piață — terenuri, județul Ialomița, 2026",
+        currency="EUR",
+        dialect="ialomita",
+    ),
     "giurgiu": Study(
         key="cnpb-terenuri-giurgiu-2026",
         chamber="CNP București",
@@ -514,6 +536,8 @@ ROSTER_SECTIONS = [("municipii", "municipii"), ("orase", "ora[sșş]e?"), ("comu
 # renamed those too and reported both as communes the study had failed to price. An alias is
 # a statement about one document, not about the Romanian language.
 ALIASES: dict[str, dict[str, str]] = {
+    # The study writes the town with two i's and the land register with one.
+    "TR": {"rosioriidevede": "rosioridevede"},
     # The Ilfov study writes the commune's short name and the register writes its full one;
     # "Dărăști" alone is what the annex heading and the extravilan table both use.
     "IF": {"darasti": "darastiilfov"},
