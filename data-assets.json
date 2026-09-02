@@ -14,6 +14,30 @@
       "needs": "simulators/administrativ/data/raw/romania-latest.osm.pbf (327 MB, not committed)",
       "what": "Signed maxspeed per road portion over 76 653 km of motorway to tertiary, dissolved by value.",
       "withoutIt": "The transport map's speed-limit toggle disables itself and says why; nothing else changes and no build fails."
+    },
+    {
+      "id": "administrativ-roads",
+      "tag": "data-v1",
+      "asset": "roads.geojson",
+      "destination": "simulators/administrativ/web/public/data/roads.geojson",
+      "bytes": 2468272,
+      "sha256": "5ff19ac4251c2124ba744940ed55a5e40562d5eec1c00622961f07c09246d907",
+      "producedBy": "simulators/administrativ/pipeline/export.py (write_roads)",
+      "needs": "simulators/administrativ/data/raw/romania-latest.osm.pbf (327 MB, not committed)",
+      "what": "Motorway, trunk and primary roads, dissolved by class and simplified to 300 m — map context for the administrative and transport maps.",
+      "withoutIt": "The administrative map's road toggle disables itself and says so; the transport map's road toggles likewise. No build fails."
+    },
+    {
+      "id": "administrativ-roads-county",
+      "tag": "data-v1",
+      "asset": "roads-county.geojson",
+      "destination": "simulators/administrativ/web/public/data/roads-county.geojson",
+      "bytes": 4043446,
+      "sha256": "0a8f43f71e69e23f5f3bf7834359d38e51e58973ffd3155eec76b739b413cae7",
+      "producedBy": "simulators/administrativ/pipeline/export.py (write_roads)",
+      "needs": "simulators/administrativ/data/raw/romania-latest.osm.pbf (327 MB, not committed)",
+      "what": "Secondary and tertiary roads, simplified to 150 m — the network the model routes most of its distances over.",
+      "withoutIt": "The administrative map's road toggle disables itself and says so; the transport map's road toggles likewise. No build fails."
     }
   ]
 }

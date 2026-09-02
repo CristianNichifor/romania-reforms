@@ -68,6 +68,7 @@ export interface Strings {
   layerCapitals: string;
   layerRoads: string;
   layersRoadsNote: string;
+  layersRoadsUnavailable: string;
   layerCountyRoads: string;
   layersCountyRoadsNote: string;
 
@@ -211,6 +212,7 @@ const ro: Strings = {
   layerCapitals: 'Centre absorbante',
   layerRoads: 'Drumuri principale',
   layersRoadsNote: 'se descarcă la prima activare (4,5 MB)',
+  layersRoadsUnavailable: 'indisponibil în această versiune — geometria drumurilor se descarcă separat, vezi data-assets.json',
   layerCountyRoads: 'Drumuri județene și comunale',
   layersCountyRoadsNote: 'rețeaua pe care modelul calculează majoritatea distanțelor · 7,4 MB la prima activare',
 
@@ -358,6 +360,7 @@ const en: Strings = {
   layerSeats: 'UAT seats',
   layerCapitals: 'Absorbing centres',
   layerRoads: 'Major roads',
+  layersRoadsUnavailable: 'not in this build — the road geometry is fetched separately, see data-assets.json',
   layersRoadsNote: 'downloaded on first use (4.5 MB)',
   layerCountyRoads: 'County and communal roads',
   layersCountyRoadsNote: 'the network the model measures most distances over · 7.4 MB on first use',

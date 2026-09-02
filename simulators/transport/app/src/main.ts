@@ -388,7 +388,19 @@ async function main() {
       const file = kind === 'major' ? 'roads.geojson' : 'roads-county.geojson';
       const toggle = el<HTMLInputElement>(kind === 'major' ? 'roads-toggle' : 'county-roads-toggle');
       toggle.disabled = true;
-      const data = await fetch(asset(file)).then((r) => r.json());
+      // Optional, like the speed limits: these two come from release data-v1 rather than the
+      // repository, so a build without them is a normal state. Parsing a 404 as JSON would
+      // throw inside a change handler and leave the box ticked over an empty map.
+      const response = await fetch(asset(file));
+      if (!response.ok) {
+        toggle.checked = false;
+        toggle.disabled = true;
+        el('roads-note').textContent =
+          'Geometria drumurilor nu este în această versiune: se descarcă separat din ' +
+          'release-ul data-v1, vezi data-assets.json.';
+        return;
+      }
+      const data = await response.json();
       map.addSource(`src-${kind}`, { type: 'geojson', data });
       const width = kind === 'major' ? majorRoadWidth() : countyRoadWidth();
       map.addLayer(

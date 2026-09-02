@@ -166,7 +166,13 @@ export interface MapHandle {
    */
   visibleSeats: (accept: (index: number) => boolean, limit: number) => LabelPoint[];
   /** Show or hide a context layer. Roads are fetched the first time they are shown. */
-  setOverlay: (overlay: Overlay, visible: boolean) => Promise<void>;
+  /**
+   * Show or hide an overlay. Resolves false when the overlay could not be shown because its
+   * payload is not in this build — the road geometry is fetched from a release rather than
+   * committed, so it can legitimately be absent. The caller un-ticks the box and says so;
+   * without a return value a reader would tick "roads" and simply get nothing.
+   */
+  setOverlay: (overlay: Overlay, visible: boolean) => Promise<boolean>;
   /**
    * Mark the seat of every resulting unit.
    *
@@ -400,12 +406,26 @@ export async function createMap(container: HTMLElement, dataBase: string): Promi
 
   const loadedOverlays = new Set<Overlay>();
 
-  const setOverlay = async (overlay: Overlay, visible: boolean): Promise<void> => {
+  // The road payloads are fetched at build time from a release, not committed, so a build
+  // without them is a normal state rather than a fault. MapLibre would swallow the 404 into an
+  // empty source and draw nothing, which looks identical to "Romania has no roads", so the URL
+  // is probed before the source is added.
+  const payloadAvailable = async (url: string): Promise<boolean> => {
+    try {
+      const response = await fetch(url, { method: 'HEAD' });
+      return response.ok;
+    } catch {
+      return false;
+    }
+  };
+
+  const setOverlay = async (overlay: Overlay, visible: boolean): Promise<boolean> => {
     // County and communal roads: the network the model routes most of its distances over.
     // Drawn thinner than the national roads and only once zoomed in, because at national
     // zoom 136,000 ways is a smear rather than information.
     if (overlay === 'countyRoads') {
       if (visible && !loadedOverlays.has('countyRoads')) {
+        if (!(await payloadAvailable(`${dataBase}roads-county.geojson`))) return false;
         map.addSource('county-roads', {
           type: 'geojson',
           data: `${dataBase}roads-county.geojson`,
@@ -448,20 +468,21 @@ export async function createMap(container: HTMLElement, dataBase: string): Promi
           UAT_OUTLINE,
         );
         loadedOverlays.add('countyRoads');
-        return;
+        return true;
       }
       if (loadedOverlays.has('countyRoads')) {
         for (const id of ['county-roads-casing', 'county-roads-line']) {
           map.setLayoutProperty(id, 'visibility', visible ? 'visible' : 'none');
         }
       }
-      return;
+      return true;
     }
 
     if (overlay === 'roads') {
       // Fetched on first use only: at 4.5 MB it is by far the largest artefact, and most
       // visits never turn it on.
       if (visible && !loadedOverlays.has('roads')) {
+        if (!(await payloadAvailable(`${dataBase}roads.geojson`))) return false;
         map.addSource('roads', { type: 'geojson', data: `${dataBase}roads.geojson` });
         const majorWidth: ExpressionSpecification = [
           'interpolate',
@@ -499,14 +520,14 @@ export async function createMap(container: HTMLElement, dataBase: string): Promi
           UAT_OUTLINE,
         );
         loadedOverlays.add('roads');
-        return;
+        return true;
       }
       if (loadedOverlays.has('roads')) {
         for (const id of ['roads-casing', 'roads-line']) {
           map.setLayoutProperty(id, 'visibility', visible ? 'visible' : 'none');
         }
       }
-      return;
+      return true;
     }
 
     const layerId = {
@@ -516,6 +537,7 @@ export async function createMap(container: HTMLElement, dataBase: string): Promi
       capitals: 'centres-point',
     }[overlay];
     map.setLayoutProperty(layerId, 'visibility', visible ? 'visible' : 'none');
+    return true;
   };
 
   /** Outline one county, or none when `code` is null. */

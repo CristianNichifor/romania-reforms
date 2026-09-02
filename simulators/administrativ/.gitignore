@@ -36,3 +36,10 @@ Thumbs.db
 
 # Vite/npm artefacts inside web/
 web/node_modules/
+
+# The two road layers: 6,3 MB of geometry derived from the OSM extract, drawn as map context
+# and read by nothing else. Moved to release data-v1 so the tracked tree stays under the gate
+# in scripts/check_repo_size.py, which names these two files as the candidate. Rebuild with
+# the pipeline's export, or fetch with scripts/fetch_release_data.py.
+web/public/data/roads.geojson
+web/public/data/roads-county.geojson

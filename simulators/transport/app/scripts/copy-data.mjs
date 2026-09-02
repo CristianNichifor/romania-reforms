@@ -19,11 +19,6 @@ for (const [from, name] of [
   [join(administrativ, 'web/public/data/uats.geojson'), 'uats.geojson'],
   [join(administrativ, 'web/public/data/counties.geojson'), 'counties.geojson'],
   [join(administrativ, 'web/public/data/attributes.json'), 'attributes.json'],
-  // The road network the travel-time model is measured over. Same two files the
-  // administrative map draws, copied rather than re-derived so the two pages cannot disagree
-  // about where a road is. Fetched only when the reader asks for them: 6,5 MB together.
-  [join(administrativ, 'web/public/data/roads.geojson'), 'roads.geojson'],
-  [join(administrativ, 'web/public/data/roads-county.geojson'), 'roads-county.geojson'],
 
   // The administrative model's own payload. The map re-runs that model in the browser so it
   // can follow whatever scenario the reader built next door, rather than a preset frozen here.
@@ -44,6 +39,21 @@ for (const [from, name] of [
 // it with `uv run python -m scripts.export_speed_limits` and it appears; without it the
 // toggle disables itself and says why. A missing optional file must never fail the build,
 // because CI has no OSM extract and never will.
+// The road network the travel-time model is measured over. Same two files the administrative
+// map draws, copied rather than re-derived so the two pages cannot disagree about where a road
+// is. OPTIONAL, like the speed limits and for the same reason: they are 6,3 MB of derived
+// geometry fetched from release data-v1 rather than committed, so a checkout that has not run
+// scripts/fetch_release_data.py simply does not have them. Copying them unconditionally
+// crashed the build outright, which is a worse failure than a missing map layer.
+for (const name of ['roads.geojson', 'roads-county.geojson']) {
+  const from = join(administrativ, 'web/public/data', name);
+  if (existsSync(from)) {
+    copyFileSync(from, join(out, name));
+  } else {
+    console.log(`  ${name} absent — that road toggle will disable itself`);
+  }
+}
+
 const speeds = join(sim, 'data/road-speeds.geojson');
 if (existsSync(speeds)) {
   copyFileSync(speeds, join(out, 'road-speeds.geojson'));

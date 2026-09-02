@@ -210,7 +210,19 @@ async function boot(): Promise<void> {
       input.addEventListener('change', () => {
         const key = input.dataset.overlay as Overlay;
         overlayState[key] = input.checked;
-        void mapHandle.setOverlay(key, input.checked);
+        void mapHandle.setOverlay(key, input.checked).then((shown) => {
+          // The road payloads are fetched from a release rather than committed, so they can
+          // legitimately be absent from a build. Say so and un-tick the box: leaving it ticked
+          // over an empty map reads as "there are no roads here" rather than "this build does
+          // not have them".
+          if (input.checked && !shown) {
+            overlayState[key] = false;
+            input.checked = false;
+            input.disabled = true;
+            const note = input.parentElement?.querySelector('.note');
+            if (note) note.textContent = `— ${strings.layersRoadsUnavailable}`;
+          }
+        });
       });
     }
   };
@@ -964,7 +976,14 @@ async function boot(): Promise<void> {
 
   applyStaticText();
   for (const [key, visible] of Object.entries(overlayState) as [Overlay, boolean][]) {
-    if (visible) void mapHandle.setOverlay(key, true);
+    if (visible) {
+      void mapHandle.setOverlay(key, true).then((shown) => {
+        if (!shown) {
+          overlayState[key] = false;
+          renderLayers();
+        }
+      });
+    }
   }
   mapHandle.setSelected(scenario.selected);
   worker.postMessage({ type: 'init', baseUrl: DATA_BASE });
