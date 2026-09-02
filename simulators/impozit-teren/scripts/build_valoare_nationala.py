@@ -44,9 +44,14 @@ comparison is the only test this model will ever get at that end of the scale �
 **37,4 mld EUR** and the grid says **50 mld**. It would have understated the country's most
 valuable county by a third, outside its own 1,65× error.
 
-**Ilfov is still excluded and named.** Arithmetically its largest town is inside the fitted
-range; substantively Ilfov is Bucharest's suburbs and its land is priced by a city that is not
-in it. It is left as a named hole rather than filled with a number nobody could defend.
+**Ilfov is read too, and nothing is excluded any more.** It was the last named hole, kept out
+because its land is priced by a city that is not in it — arithmetically inside the fitted range
+and substantively nowhere near it. Its chamber publishes it, so the judgement no longer has to
+be made. The mechanism for excluding a county stays in place, unused: the reasoning behind it
+was right and will be needed again.
+
+**The estimate now covers all 42 counties.** Twenty-four are read from their chambers' grids
+and eighteen are predicted, and every row still says which it is.
 
 Usage:
     uv run python simulators/impozit-teren/scripts/build_valoare_nationala.py
@@ -73,11 +78,25 @@ BUILT_REGISTER = "Ocupata cu constructii"
 # Predicted apart from the rest: they are the codes with enough priced counties behind them to
 # average. AP and DR are priced in three counties and two, which is not a national mean.
 TRANSFERRED = ("A", "P+F", "V+L", "NP", "PADURE")
-# Outside the fit and outside the country's ordinary land market. București is no longer here
-# — its chamber's own study is read now — but Ilfov still is: its largest town, Voluntari, has
-# 47 000 people, which puts it inside the fit's range arithmetically and nowhere near it
-# substantively, because Ilfov's land is priced by a city that is not in Ilfov.
-CAPITAL = ("IF",)
+# Empty, and it is worth saying why rather than deleting the mechanism. Both counties that
+# were here are read now: the București chamber publishes both on its own server. The list
+# stays because the judgement it encodes — that some counties cannot be predicted from the
+# size of their largest town and must be named rather than guessed — is the right one to keep
+# available for whatever is found next.
+CAPITAL: tuple[str, ...] = ()
+
+# Measured, counted in the total, and kept out of the regression.
+#
+# Ilfov's building land is 286 177 EUR/ha. The model, fitted without it, says 68 872 — a
+# factor of 4,2, against an out-of-sample error of 1,61. It is not a county the size of whose
+# largest town can explain, because its market is set by a city that is not in it, and that is
+# the same reason it was excluded from the estimate before its study was found.
+#
+# Leaving it in costs every one of the eighteen predicted counties: leave-one-out goes from
+# 1,61× to 1,77× and R² from 0,75 to 0,66. Taking it out is not chosen to improve the number —
+# the criterion is stated in the mechanism, not in the result, and București was tested the
+# same way and *kept*, because including it improved the fit rather than degrading it.
+NOT_IN_FIT = ("IF",)
 
 
 # The output is deliberately NOT called `valoare-teren-nationala-*.json`.
@@ -168,6 +187,7 @@ def main() -> int:
         raise SystemExit(f"no population for {missing_inputs}; run import_populatie.py --all")
 
     priced = sorted(values)
+    fitted = [c for c in priced if c not in NOT_IN_FIT]
     built_rate: dict[str, float] = {}
     code_rate: dict[str, dict[str, float]] = {}
     for county in priced:
@@ -178,17 +198,17 @@ def main() -> int:
     # The fit. x is the log population of the largest town, y the log price of building land.
     log_town = {c: math.log(people[c]["summary"]["largestPeople"]) for c in register}
     intercept, slope = fit(
-        [log_town[c] for c in priced], [math.log(built_rate[c]) for c in priced]
+        [log_town[c] for c in fitted], [math.log(built_rate[c]) for c in fitted]
     )
     # Rounded here, once, rather than on the way out. The band is built by multiplying and
     # dividing by this factor, and publishing a rounded copy of a number used at full precision
     # leaves a file whose own band does not reconstruct from its own fields.
     built_error = round(
-        leave_one_out(priced, log_town, {c: math.log(built_rate[c]) for c in priced}), 4
+        leave_one_out(fitted, log_town, {c: math.log(built_rate[c]) for c in fitted}), 4
     )
     predicted_r2 = 1 - statistics.pvariance(
-        [math.log(built_rate[c]) - (intercept + slope * log_town[c]) for c in priced]
-    ) / statistics.pvariance([math.log(built_rate[c]) for c in priced])
+        [math.log(built_rate[c]) - (intercept + slope * log_town[c]) for c in fitted]
+    ) / statistics.pvariance([math.log(built_rate[c]) for c in fitted])
 
     # The extravilan transfer: one geometric mean per code, over the counties that priced it.
     transfer: dict[str, float] = {}
@@ -329,7 +349,8 @@ def main() -> int:
             "builtSlope": round(slope, 6),
             "builtR2": round(predicted_r2, 4),
             "builtLeaveOneOutErrorFactor": built_error,
-            "builtFittedOnCounties": len(priced),
+            "builtFittedOnCounties": len(fitted),
+            "builtHeldOutOfFit": list(NOT_IN_FIT),
             "transferEurPerHa": {k: round(v, 2) for k, v in transfer.items()},
             "transferLeaveOneOutErrorFactor": dict(transfer_error),
             "transferFittedOnCounties": transfer_counties,
@@ -436,7 +457,9 @@ def main() -> int:
             {b: (total[b] - measured_total[b]) / 1e9 for b in BANDS},
         ),
         (
-            f"ROMÂNIA fără {'+'.join(r['county'] for r in excluded)} (mld)",
+            "ROMÂNIA, toate județele (mld)"
+            if not excluded
+            else f"ROMÂNIA fără {'+'.join(r['county'] for r in excluded)} (mld)",
             {b: total[b] / 1e9 for b in BANDS},
         ),
     ):

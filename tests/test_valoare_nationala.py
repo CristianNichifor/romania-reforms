@@ -56,8 +56,11 @@ def test_an_excluded_county_has_no_number_and_no_zero(rows):
     Ilfov stays — its largest town is inside the fitted range and its land market is not, being
     priced by a city that is not in the county.
     """
+    # Empty now, and the test is kept rather than deleted. Both counties that were excluded —
+    # București and Ilfov — turned out to be published by a chamber this repository was not
+    # reading, so the mechanism went unused rather than wrong. The rule it encodes still has to
+    # hold the day something else cannot be predicted: absent, with a reason, never a zero.
     excluded = [r for r in rows if r["basis"] == "excluded"]
-    assert {r["county"] for r in excluded} == {"IF"}
     for row in excluded:
         assert row["landValueEur"] is None
         assert len(row["reason"]) > 20

@@ -14,6 +14,7 @@
     "DB",
     "HD",
     "HR",
+    "IF",
     "IS",
     "NT",
     "PH",
@@ -34,20 +35,20 @@
     "note": "Conversia din EUR/m² în RON/ha folosește cursul 5.2567 RON/EUR, același ca în build_impozit.py. Mediana grilei este pe localitate, mediana prețului cerut este pe ofertă; niciuna nu e ponderată cu suprafața."
   },
   "summary": {
-    "counties": 20,
-    "comparableCounties": 20,
-    "matchedLocalities": 106,
+    "counties": 21,
+    "comparableCounties": 21,
+    "matchedLocalities": 113,
     "countyMultiple": {
-      "low": 0.679,
-      "central": 1.172,
-      "high": 2.345
+      "low": 0.677,
+      "central": 1.16,
+      "high": 2.377
     },
     "localityMultiple": {
-      "low": 0.712,
-      "central": 1.006,
-      "high": 1.201
+      "low": 0.751,
+      "central": 1.009,
+      "high": 1.22
     },
-    "countyMultipleVsPaid": 1.131,
+    "countyMultipleVsPaid": 1.119,
     "countiesBelowParity": [
       "BH",
       "HR",
@@ -58,6 +59,7 @@
     "countiesBelowParityVsPaid": [
       "AB",
       "CJ",
+      "IF",
       "IS",
       "NT",
       "SB",
@@ -1278,6 +1280,145 @@
       },
       "comparable": true,
       "localities": []
+    },
+    {
+      "county": "IF",
+      "name": "Ilfov",
+      "surveyRegion": "RO32",
+      "surveyYear": "2024",
+      "paidRonPerHa": 62477.0,
+      "multipleVsPaid": 0.691,
+      "gridYear": "2026",
+      "gridPricedLocalities": 40,
+      "gridLocalities": 40,
+      "gridShare": 1.0,
+      "gridMedianRonPerHa": 90415.24,
+      "offers": 161,
+      "askedRonPerHa": {
+        "low": 52619.0,
+        "central": 104800.0,
+        "high": 417755.0
+      },
+      "multiple": {
+        "low": 0.582,
+        "central": 1.159,
+        "high": 4.62
+      },
+      "comparable": true,
+      "localities": [
+        {
+          "siruta": "100834",
+          "name": "Afumaţi",
+          "offers": 12,
+          "gridRonPerHa": 58349.37,
+          "askedRonPerHa": {
+            "low": 337500.0,
+            "central": 505401.0,
+            "high": 737250.0
+          },
+          "multiple": {
+            "low": 5.784,
+            "central": 8.662,
+            "high": 12.635
+          }
+        },
+        {
+          "siruta": "103443",
+          "name": "Grădiştea",
+          "offers": 13,
+          "gridRonPerHa": 55721.02,
+          "askedRonPerHa": {
+            "low": 51000.0,
+            "central": 54057.0,
+            "high": 60000.0
+          },
+          "multiple": {
+            "low": 0.915,
+            "central": 0.97,
+            "high": 1.077
+          }
+        },
+        {
+          "siruta": "103513",
+          "name": "Gruiu",
+          "offers": 12,
+          "gridRonPerHa": 95146.27,
+          "askedRonPerHa": {
+            "low": 103000.0,
+            "central": 232225.0,
+            "high": 387611.0
+          },
+          "multiple": {
+            "low": 1.083,
+            "central": 2.441,
+            "high": 4.074
+          }
+        },
+        {
+          "siruta": "104421",
+          "name": "Nuci",
+          "offers": 11,
+          "gridRonPerHa": 50989.99,
+          "askedRonPerHa": {
+            "low": 47650.0,
+            "central": 50303.0,
+            "high": 55501.0
+          },
+          "multiple": {
+            "low": 0.934,
+            "central": 0.987,
+            "high": 1.088
+          }
+        },
+        {
+          "siruta": "104546",
+          "name": "Periş",
+          "offers": 12,
+          "gridRonPerHa": 62029.06,
+          "askedRonPerHa": {
+            "low": 36705.0,
+            "central": 50207.0,
+            "high": 104219.0
+          },
+          "multiple": {
+            "low": 0.592,
+            "central": 0.809,
+            "high": 1.68
+          }
+        },
+        {
+          "siruta": "104582",
+          "name": "Petrăchioaia",
+          "offers": 30,
+          "gridRonPerHa": 41002.26,
+          "askedRonPerHa": {
+            "low": 52502.0,
+            "central": 52672.0,
+            "high": 53321.0
+          },
+          "multiple": {
+            "low": 1.28,
+            "central": 1.285,
+            "high": 1.3
+          }
+        },
+        {
+          "siruta": "105160",
+          "name": "Snagov",
+          "offers": 20,
+          "gridRonPerHa": 201857.28,
+          "askedRonPerHa": {
+            "low": 156233.0,
+            "central": 315005.0,
+            "high": 468000.0
+          },
+          "multiple": {
+            "low": 0.774,
+            "central": 1.561,
+            "high": 2.318
+          }
+        }
+      ]
     },
     {
       "county": "IS",

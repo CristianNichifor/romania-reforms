@@ -79,6 +79,7 @@ BUCHAREST = "bucuresti"
 
 COUNTY_TO_CHAMBER = {
     "B": "bucuresti",
+    "IF": "ilfov",
     "VS": "vaslui",
     "BC": "bacau",
     "NT": "neamt",

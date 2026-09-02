@@ -40,7 +40,7 @@ argument. This repository is an index, not a monolith.
 | **justitie** | The judicial reform | migrated to the 2025 report |
 | **salarizare** | Public-sector pay | migrated |
 | **administrativ** | Consolidation of the 3 186 UATs | migrated |
-| **impozit-teren** | Taxing land on its value | 23 counties read incl. București, 18 estimated, 1 named as missing; 15 readers |
+| **impozit-teren** | Taxing land on its value | 24 counties read, 18 estimated, nothing excluded; 16 readers |
 
 Both live simulators now live here, with their history, on project paths under one Pages
 site: `/romania-reforms/salarizare/` and `/romania-reforms/administrativ/`. Their old
@@ -434,6 +434,47 @@ shaving Bacău and Neamț by about 1% as well.
 
 Sixteen counties now: **1 248 localities, 9,47 M ha, 39,7% of Romania, 110 mld EUR.**
 
+**Ilfov closes the last hole: nothing is excluded from the national estimate any more.** Its
+annexes cover all 40 UATs and the parse reaches **100%** — the second county in the set to do
+so with no named gap at all.
+
+Its extravilan grid is **one column and seven published coefficients**. The study prices arable
+land per locality and then states outright what everything else is worth: curți-construcții
+1,5× arable, vii și livezi 1,1×, pășuni și fânețe 0,8×, amenajări piscicole 1,4×, drumuri
+tehnologice 0,7×, neproductiv 0,5×. One number per locality yields the whole grid, and the
+ratios are the chamber's, not this repository's. Forest has a table of its own, by species.
+
+**The towns hide their zones across pages.** A commune is four rows on one page, each labelled.
+A town is four *pages* — `ANEXA 8.1` to `8.4` for Voluntari — with the zone named once in the
+middle and the rows underneath split by landmark instead:
+
+    ZONA CENTRALA   la Est de Autostrada A3 …    167,9   117,5
+                    la Vest de Autostrada A3 …   308,2   215,8
+
+So Voluntari has **six** prices across four pages, not four across one, and the dearest is
+nearly twice the next. A reader keyed on the row label finds nothing there; one that stops at
+the first page of a locality keeps a sixth of the town. The pair is not even on one baseline —
+`167,9` and `117,5` are three points apart — so the columns come from the header instead.
+
+**Ilfov is measured, counted, and kept out of the regression.** Its building land is **286 177
+EUR/ha**; the model, fitted without it, says **68 872** — a factor of **4,2** against an
+out-of-sample error of 1,61. It is not a county the size of its own largest town can explain,
+because its market is set by a city that is not in it, which is exactly why it was excluded
+from the estimate before its study was found. Leaving it in the fit costs all eighteen
+predicted counties: leave-one-out **1,61× → 1,77×**, R² **0,75 → 0,66**.
+
+That criterion is stated in the mechanism rather than chosen from the result, and it was
+applied to București too — where it said *keep*, because including the capital improved the fit
+instead of degrading it. Same test, opposite answers, and both are in the output file.
+
+**Romania, all 42 counties: 349 mld EUR (192–687), 66% of it read rather than modelled.**
+
+And the extravilan unit trap caught me a second time, in the other direction. Vaslui's annex
+prints lei per square metre and needed no conversion; Ilfov's prints EUR per hectare and needed
+dividing by ten thousand. The first run valued Ilfov at **20 727 mld EUR** — with 100%
+coverage, every name matched, and no warning anywhere. The comment I had written on the Vaslui
+fix was three files away.
+
 **The București chamber does publish, and this repository said it did not.** That was a
 statement about unnpr.ro's index, not about the chamber. `srv.cnpb.ro` — the chamber's own file
 server, with an open directory listing — carries 2026 studies for **all six** of its counties:
@@ -583,7 +624,7 @@ chamber was opened and measured rather than guessed at:
 | Galați | GL, BR | GL has 5 land tables in 142 pages; Brăila is a scan |
 | Craiova | DJ, GJ, OT, MH | 23 localities priced out of 359 |
 | Timișoara | AR, CS | annexes contain no land at all |
-| ~~București~~ | B, IF, CL, GR, IL, TR | **wrong — publishes on `srv.cnpb.ro`; B is read, five remain** |
+| ~~București~~ | B, IF, CL, GR, IL, TR | **wrong — publishes on `srv.cnpb.ro`; B and IF are read, four remain** |
 
 Those are hard ceilings on what the documents contain, not on what the readers manage. Nothing
 above 37% and most far below, against a 90% bar. **The estimate is not a shortcut around the
@@ -635,7 +676,7 @@ single county-wide average per category for everything else. Timișoara's chambe
 and Caraș-Severin too, and their annexes contain no land at all. Both were checked against the
 source rather than inferred from a low score.
 
-Twenty-three counties read: **1 697 localities, 13,0 M ha, 54,5% of Romania, 222 mld EUR.**
+Twenty-four counties read: **1 737 localities, 13,2 M ha, 55,2% of Romania, 230 mld EUR.**
 
 **One chamber, four counties, and the same reader for all of them — after four bugs.** CNP Cluj
 publishes Bistrița-Năsăud, Maramureș and Sălaj in Cluj's own layout, and the section-header fix
