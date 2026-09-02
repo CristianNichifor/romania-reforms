@@ -50,8 +50,9 @@ and substantively nowhere near it. Its chamber publishes it, so the judgement no
 be made. The mechanism for excluding a county stays in place, unused: the reasoning behind it
 was right and will be needed again.
 
-**The estimate now covers all 42 counties.** Twenty-four are read from their chambers' grids
-and eighteen are predicted, and every row still says which it is.
+**The estimate covers all 42 counties**, some read from their chambers' grids and the rest
+predicted, with every row saying which it is. The split moves every time a county is read, so
+it is counted at build time and printed in the title rather than recorded in this sentence.
 
 Usage:
     uv run python simulators/impozit-teren/scripts/build_valoare_nationala.py
@@ -320,10 +321,16 @@ def main() -> int:
     measured_total = {b: sum(r["landValueEur"][b] for r in measured_rows) for b in BANDS}
     excluded = [r for r in rows if r["basis"] == "excluded"]
 
+    # Counted, not written down. This title said "21 de județe măsurate" for thirteen counties
+    # after it stopped being true, because nothing rereads a title once it reads correctly once.
+    parts = [f"{len(measured_rows)} județe măsurate", f"{len(predicted_rows)} estimate"]
+    if excluded:
+        parts.append(f"{len(excluded)} excluse")
+
     document = {
         "$schema": "../schema/valoare-nationala.schema.json",
         "id": "valoare-nationala-2026",
-        "title": "Valoarea terenului în România: 21 de județe măsurate, 19 estimate, 2 excluse",
+        "title": f"Valoarea terenului în România: {', '.join(parts)}",
         "publisher": "romania-reforms",
         "counties": sorted(register),
         "period": "2026",
