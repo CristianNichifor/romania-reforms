@@ -79,10 +79,22 @@ const sources = [
   [ADMIN('adjacency.bin'), 'admin-adjacency.bin'],
   [ADMIN('candidacy.bin'), 'admin-candidacy.bin'],
   // The road network the distances are measured on, for the map to show on request.
-  [ADMIN('roads.geojson'), 'roads.geojson'],
+
   // County codes to full names, so a merged court is "Tribunalul Covasna" and not "CV".
   [resolve(here, '../../../administrativ/web/public/data/manifest.json'), 'manifest.json'],
 ];
+
+// The road geometry is OPTIONAL. It is 2,4 MB of derived map context fetched from release
+// data-v1 rather than committed — see data-assets.json — so a checkout that has not run
+// scripts/fetch_release_data.py legitimately lacks it. Treating it like the required payloads
+// failed the build outright, which is a worse outcome than a map missing one context layer.
+const roads = ADMIN('roads.geojson');
+if (existsSync(roads)) {
+  copyFileSync(roads, resolve(out, 'roads.geojson'));
+  console.log('copied roads.geojson');
+} else {
+  console.log('roads.geojson absent — the roads toggle will disable itself');
+}
 
 for (const [from, name] of sources) {
   if (!existsSync(from)) {

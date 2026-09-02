@@ -1315,13 +1315,18 @@ async function main(): Promise<void> {
      * it reads as terrain rather than as another category of thing.
      */
     let roadsLoaded: Promise<void> | null = null;
+    const roadsToggle = document.querySelector<HTMLInputElement>('#roads-toggle');
+
     const showRoads = (visible: boolean): void => {
       if (!visible) {
         if (map.getLayer('roads-line')) map.setLayoutProperty('roads-line', 'visibility', 'none');
         return;
       }
+      // Optional payload: the geometry comes from release data-v1 rather than the repository,
+      // so a build without it is a normal state. Parsing a 404 as JSON would reject inside a
+      // promise nobody awaits and leave the toggle on over a map that never changes.
       roadsLoaded ??= fetch(`${base}data/roads.geojson`)
-        .then((r) => r.json())
+        .then((r) => (r.ok ? r.json() : Promise.reject(new Error('roads payload not in this build'))))
         .then((roads) => {
           map.addSource('roads', { type: 'geojson', data: roads });
           map.addLayer(
@@ -1342,13 +1347,23 @@ async function main(): Promise<void> {
             'courts',
           );
         });
-      void roadsLoaded.then(() => {
-        if (map.getLayer('roads-line')) {
-          map.setLayoutProperty('roads-line', 'visibility', 'visible');
-        }
-      });
+      void roadsLoaded
+        .then(() => {
+          if (map.getLayer('roads-line')) {
+            map.setLayoutProperty('roads-line', 'visibility', 'visible');
+          }
+        })
+        .catch(() => {
+          // The payload is not in this build. Un-tick and disable rather than leave the box on
+          // over a map that will never change, which reads as "there are no roads here".
+          roadsLoaded = null;
+          if (roadsToggle) {
+            roadsToggle.checked = false;
+            roadsToggle.disabled = true;
+            roadsToggle.title = 'Geometria drumurilor se descarcă separat (data-assets.json)';
+          }
+        });
     };
-    const roadsToggle = document.querySelector<HTMLInputElement>('#roads-toggle');
     roadsToggle?.addEventListener('change', () => showRoads(roadsToggle.checked));
 
     /**
