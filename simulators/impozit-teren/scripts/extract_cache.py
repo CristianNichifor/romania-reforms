@@ -117,9 +117,12 @@ def build(path: Path) -> tuple[str, float, str]:
 
 def load(name: str) -> dict:
     """Read one study back. This is what every parser should call instead of opening a PDF."""
-    path = cache_path(name)
+    # OCR wins over the cache when both exist. A scanned PDF still produces a cache entry —
+    # pdfplumber opens it happily and finds 43 pages of nothing — and that empty entry would
+    # otherwise shadow the reading someone went to the trouble of making.
+    path = OCR / f"{name}.json.gz"
     if not path.exists():
-        path = OCR / f"{name}.json.gz"
+        path = cache_path(name)
     if not path.exists():
         raise SystemExit(
             f"missing {path}\n"

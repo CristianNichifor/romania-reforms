@@ -267,6 +267,40 @@ STUDIES: dict[str, Study] = {
         title="Studiu de piață — terenuri, județul Arad, 2026",
         currency="EUR", dialect="arad",
     ),
+    "braila": Study(
+        key="unnpr-terenuri-braila-2025", chamber="CNP Galați", counties=["BR"], year=2025,
+        path="files/expertize2025/CNPGalati/braila_2025.pdf",
+        title="Studiu de piață — terenuri, județul Brăila, 2025",
+        currency="RON", dialect="braila",
+    ),
+    "dolj": Study(
+        key="unnpr-terenuri-dolj-2026", chamber="CNP Craiova", counties=["DJ"],
+        year=2026,
+        path="files/expertize2026/CNPCraiova/studiu_de_piata_dolj_gorj_olt_mehedinti_2026.pdf",
+        title="Studiu de piață — terenuri, județul Dolj, 2026",
+        currency="RON", dialect="dolj",
+    ),
+    "gorj": Study(
+        key="unnpr-terenuri-gorj-2026", chamber="CNP Craiova", counties=["GJ"],
+        year=2026,
+        path="files/expertize2026/CNPCraiova/studiu_de_piata_dolj_gorj_olt_mehedinti_2026.pdf",
+        title="Studiu de piață — terenuri, județul Gorj, 2026",
+        currency="RON", dialect="gorj",
+    ),
+    "mehedinti": Study(
+        key="unnpr-terenuri-mehedinti-2026", chamber="CNP Craiova", counties=["MH"],
+        year=2026,
+        path="files/expertize2026/CNPCraiova/studiu_de_piata_dolj_gorj_olt_mehedinti_2026.pdf",
+        title="Studiu de piață — terenuri, județul Mehedinți, 2026",
+        currency="RON", dialect="mehedinti",
+    ),
+    "olt": Study(
+        key="unnpr-terenuri-olt-2026", chamber="CNP Craiova", counties=["OT"],
+        year=2026,
+        path="files/expertize2026/CNPCraiova/studiu_de_piata_dolj_gorj_olt_mehedinti_2026.pdf",
+        title="Studiu de piață — terenuri, județul Olt, 2026",
+        currency="RON", dialect="olt",
+    ),
     "galati": Study(
         key="unnpr-terenuri-galati-2026", chamber="CNP Galați", counties=["GL"], year=2026,
         path="files/expertize2026/CNPGalati/studiu_de_piata_CNP_Galati_2026.pdf",
@@ -589,6 +623,9 @@ ROSTER_SECTIONS = [("municipii", "municipii"), ("orase", "ora[sșş]e?"), ("comu
 ALIASES: dict[str, dict[str, str]] = {
     # The study writes the town with two i's and the land register with one.
     "TR": {"rosioriidevede": "rosioridevede"},
+    # Brăila abbreviates one commune in its table and drops the article from another: the
+    # register has Tudor Vladimirescu and Bărăganul, the study T.VLADIMIRESCU and BĂRĂGANU.
+    "BR": {"tvladimirescu": "tudorvladimirescu", "baraganu": "baraganul"},
     # The Ilfov study writes the commune's short name and the register writes its full one;
     # "Dărăști" alone is what the annex heading and the extravilan table both use.
     "IF": {"darasti": "darastiilfov"},

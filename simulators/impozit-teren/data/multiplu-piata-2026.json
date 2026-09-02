@@ -9,6 +9,7 @@
     "BC",
     "BH",
     "BN",
+    "BR",
     "BV",
     "BZ",
     "CJ",
@@ -17,6 +18,8 @@
     "CT",
     "CV",
     "DB",
+    "DJ",
+    "GJ",
     "GL",
     "GR",
     "HD",
@@ -24,7 +27,9 @@
     "IF",
     "IL",
     "IS",
+    "MH",
     "NT",
+    "OT",
     "PH",
     "SB",
     "SJ",
@@ -45,20 +50,20 @@
     "note": "Conversia din EUR/m² în RON/ha folosește cursul 5.2567 RON/EUR, același ca în build_impozit.py. Mediana grilei este pe localitate, mediana prețului cerut este pe ofertă; niciuna nu e ponderată cu suprafața."
   },
   "summary": {
-    "counties": 31,
-    "comparableCounties": 30,
-    "matchedLocalities": 145,
+    "counties": 36,
+    "comparableCounties": 35,
+    "matchedLocalities": 192,
     "countyMultiple": {
-      "low": 0.821,
-      "central": 1.192,
-      "high": 2.115
+      "low": 0.865,
+      "central": 1.236,
+      "high": 2.0
     },
     "localityMultiple": {
-      "low": 0.891,
-      "central": 1.049,
-      "high": 1.275
+      "low": 0.908,
+      "central": 1.148,
+      "high": 1.343
     },
-    "countyMultipleVsPaid": 1.131,
+    "countyMultipleVsPaid": 1.145,
     "countiesBelowParity": [
       "AR",
       "BH",
@@ -70,6 +75,7 @@
     "countiesBelowParityVsPaid": [
       "AB",
       "AR",
+      "BR",
       "BV",
       "CJ",
       "CL",
@@ -568,6 +574,177 @@
       },
       "comparable": true,
       "localities": []
+    },
+    {
+      "county": "BR",
+      "name": "Brăila",
+      "surveyRegion": "RO22",
+      "surveyYear": "2024",
+      "paidRonPerHa": 31537.0,
+      "multipleVsPaid": 0.901,
+      "gridYear": "2025",
+      "gridPricedLocalities": 38,
+      "gridLocalities": 41,
+      "gridShare": 0.927,
+      "gridMedianRonPerHa": 35000.0,
+      "offers": 360,
+      "askedRonPerHa": {
+        "low": 31900.0,
+        "central": 40000.0,
+        "high": 41920.0
+      },
+      "multiple": {
+        "low": 0.911,
+        "central": 1.143,
+        "high": 1.198
+      },
+      "comparable": true,
+      "localities": [
+        {
+          "siruta": "42842",
+          "name": "Berteştii De Jos",
+          "offers": 14,
+          "gridRonPerHa": 29999.99,
+          "askedRonPerHa": {
+            "low": 22522.0,
+            "central": 22523.0,
+            "high": 24381.0
+          },
+          "multiple": {
+            "low": 0.751,
+            "central": 0.751,
+            "high": 0.813
+          }
+        },
+        {
+          "siruta": "42968",
+          "name": "Ciocile",
+          "offers": 18,
+          "gridRonPerHa": 35000.0,
+          "askedRonPerHa": {
+            "low": 16474.0,
+            "central": 16476.0,
+            "high": 29323.0
+          },
+          "multiple": {
+            "low": 0.471,
+            "central": 0.471,
+            "high": 0.838
+          }
+        },
+        {
+          "siruta": "43180",
+          "name": "Galbenu",
+          "offers": 24,
+          "gridRonPerHa": 29999.99,
+          "askedRonPerHa": {
+            "low": 29423.0,
+            "central": 38356.0,
+            "high": 38356.0
+          },
+          "multiple": {
+            "low": 0.981,
+            "central": 1.279,
+            "high": 1.279
+          }
+        },
+        {
+          "siruta": "43411",
+          "name": "Însurăţei",
+          "offers": 10,
+          "gridRonPerHa": 40000.02,
+          "askedRonPerHa": {
+            "low": 61715.0,
+            "central": 61720.0,
+            "high": 61722.0
+          },
+          "multiple": {
+            "low": 1.543,
+            "central": 1.543,
+            "high": 1.543
+          }
+        },
+        {
+          "siruta": "43652",
+          "name": "Movila Miresii",
+          "offers": 17,
+          "gridRonPerHa": 32000.0,
+          "askedRonPerHa": {
+            "low": 29136.0,
+            "central": 40000.0,
+            "high": 40000.0
+          },
+          "multiple": {
+            "low": 0.91,
+            "central": 1.25,
+            "high": 1.25
+          }
+        },
+        {
+          "siruta": "44140",
+          "name": "Şuţeşti",
+          "offers": 11,
+          "gridRonPerHa": 35000.0,
+          "askedRonPerHa": {
+            "low": 22053.0,
+            "central": 22056.0,
+            "high": 30265.0
+          },
+          "multiple": {
+            "low": 0.63,
+            "central": 0.63,
+            "high": 0.865
+          }
+        },
+        {
+          "siruta": "44355",
+          "name": "Unirea",
+          "offers": 14,
+          "gridRonPerHa": 40000.02,
+          "askedRonPerHa": {
+            "low": 52500.0,
+            "central": 52500.0,
+            "high": 78579.0
+          },
+          "multiple": {
+            "low": 1.312,
+            "central": 1.312,
+            "high": 1.964
+          }
+        },
+        {
+          "siruta": "44435",
+          "name": "Victoria",
+          "offers": 18,
+          "gridRonPerHa": 35999.98,
+          "askedRonPerHa": {
+            "low": 40000.0,
+            "central": 42500.0,
+            "high": 45000.0
+          },
+          "multiple": {
+            "low": 1.111,
+            "central": 1.181,
+            "high": 1.25
+          }
+        },
+        {
+          "siruta": "44505",
+          "name": "Viziru",
+          "offers": 29,
+          "gridRonPerHa": 47999.98,
+          "askedRonPerHa": {
+            "low": 47150.0,
+            "central": 47150.0,
+            "high": 47162.0
+          },
+          "multiple": {
+            "low": 0.982,
+            "central": 0.982,
+            "high": 0.983
+          }
+        }
+      ]
     },
     {
       "county": "BV",
@@ -1536,6 +1713,107 @@
       ]
     },
     {
+      "county": "DJ",
+      "name": "Dolj",
+      "surveyRegion": "RO41",
+      "surveyYear": "2024",
+      "paidRonPerHa": 33727.0,
+      "multipleVsPaid": 1.686,
+      "gridYear": "2026",
+      "gridPricedLocalities": 111,
+      "gridLocalities": 111,
+      "gridShare": 1.0,
+      "gridMedianRonPerHa": 20000.01,
+      "offers": 228,
+      "askedRonPerHa": {
+        "low": 11588.0,
+        "central": 24941.0,
+        "high": 40000.0
+      },
+      "multiple": {
+        "low": 0.579,
+        "central": 1.247,
+        "high": 2.0
+      },
+      "comparable": true,
+      "localities": [
+        {
+          "siruta": "70316",
+          "name": "Băileşti",
+          "offers": 11,
+          "gridRonPerHa": 20000.01,
+          "askedRonPerHa": {
+            "low": 24085.0,
+            "central": 34483.0,
+            "high": 39477.0
+          },
+          "multiple": {
+            "low": 1.204,
+            "central": 1.724,
+            "high": 1.974
+          }
+        },
+        {
+          "siruta": "74242",
+          "name": "Sopot",
+          "offers": 24,
+          "gridRonPerHa": 20000.01,
+          "askedRonPerHa": {
+            "low": 9451.0,
+            "central": 10000.0,
+            "high": 11049.0
+          },
+          "multiple": {
+            "low": 0.473,
+            "central": 0.5,
+            "high": 0.552
+          }
+        },
+        {
+          "siruta": "74322",
+          "name": "Teasc",
+          "offers": 11,
+          "gridRonPerHa": 20000.01,
+          "askedRonPerHa": {
+            "low": 20000.0,
+            "central": 20000.0,
+            "high": 20000.0
+          },
+          "multiple": {
+            "low": 1.0,
+            "central": 1.0,
+            "high": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "county": "GJ",
+      "name": "Gorj",
+      "surveyRegion": "RO41",
+      "surveyYear": "2024",
+      "paidRonPerHa": 33727.0,
+      "multipleVsPaid": 1.874,
+      "gridYear": "2026",
+      "gridPricedLocalities": 70,
+      "gridLocalities": 70,
+      "gridShare": 1.0,
+      "gridMedianRonPerHa": 17999.99,
+      "offers": 17,
+      "askedRonPerHa": {
+        "low": 18982.0,
+        "central": 58577.0,
+        "high": 133920.0
+      },
+      "multiple": {
+        "low": 1.055,
+        "central": 3.254,
+        "high": 7.44
+      },
+      "comparable": true,
+      "localities": []
+    },
+    {
       "county": "GL",
       "name": "Galați",
       "surveyRegion": "RO22",
@@ -1995,6 +2273,145 @@
       ]
     },
     {
+      "county": "MH",
+      "name": "Mehedinți",
+      "surveyRegion": "RO41",
+      "surveyYear": "2024",
+      "paidRonPerHa": 33727.0,
+      "multipleVsPaid": 2.248,
+      "gridYear": "2026",
+      "gridPricedLocalities": 66,
+      "gridLocalities": 66,
+      "gridShare": 1.0,
+      "gridMedianRonPerHa": 14999.99,
+      "offers": 196,
+      "askedRonPerHa": {
+        "low": 20000.0,
+        "central": 20000.0,
+        "high": 26075.0
+      },
+      "multiple": {
+        "low": 1.333,
+        "central": 1.333,
+        "high": 1.738
+      },
+      "comparable": true,
+      "localities": [
+        {
+          "siruta": "111417",
+          "name": "Corlăţel",
+          "offers": 13,
+          "gridRonPerHa": 14999.99,
+          "askedRonPerHa": {
+            "low": 18336.0,
+            "central": 18336.0,
+            "high": 18336.0
+          },
+          "multiple": {
+            "low": 1.222,
+            "central": 1.222,
+            "high": 1.222
+          }
+        },
+        {
+          "siruta": "111444",
+          "name": "Cujmir",
+          "offers": 10,
+          "gridRonPerHa": 14999.99,
+          "askedRonPerHa": {
+            "low": 35000.0,
+            "central": 35000.0,
+            "high": 35000.0
+          },
+          "multiple": {
+            "low": 2.333,
+            "central": 2.333,
+            "high": 2.333
+          }
+        },
+        {
+          "siruta": "111480",
+          "name": "Devesel",
+          "offers": 17,
+          "gridRonPerHa": 14999.99,
+          "askedRonPerHa": {
+            "low": 20280.0,
+            "central": 20280.0,
+            "high": 20280.0
+          },
+          "multiple": {
+            "low": 1.352,
+            "central": 1.352,
+            "high": 1.352
+          }
+        },
+        {
+          "siruta": "111587",
+          "name": "Dumbrava",
+          "offers": 11,
+          "gridRonPerHa": 14999.99,
+          "askedRonPerHa": {
+            "low": 2925.0,
+            "central": 3158.0,
+            "high": 3518.0
+          },
+          "multiple": {
+            "low": 0.195,
+            "central": 0.211,
+            "high": 0.235
+          }
+        },
+        {
+          "siruta": "111863",
+          "name": "Gogoşu",
+          "offers": 13,
+          "gridRonPerHa": 14999.99,
+          "askedRonPerHa": {
+            "low": 32100.0,
+            "central": 32100.0,
+            "high": 32100.0
+          },
+          "multiple": {
+            "low": 2.14,
+            "central": 2.14,
+            "high": 2.14
+          }
+        },
+        {
+          "siruta": "112548",
+          "name": "Jiana",
+          "offers": 16,
+          "gridRonPerHa": 14999.99,
+          "askedRonPerHa": {
+            "low": 15192.0,
+            "central": 24823.0,
+            "high": 25009.0
+          },
+          "multiple": {
+            "low": 1.013,
+            "central": 1.655,
+            "high": 1.667
+          }
+        },
+        {
+          "siruta": "113493",
+          "name": "Salcia",
+          "offers": 14,
+          "gridRonPerHa": 14999.99,
+          "askedRonPerHa": {
+            "low": 35000.0,
+            "central": 35000.0,
+            "high": 35000.0
+          },
+          "multiple": {
+            "low": 2.333,
+            "central": 2.333,
+            "high": 2.333
+          }
+        }
+      ]
+    },
+    {
       "county": "NT",
       "name": "Neamț",
       "surveyRegion": "RO21",
@@ -2033,6 +2450,481 @@
             "low": 0.812,
             "central": 0.928,
             "high": 1.11
+          }
+        }
+      ]
+    },
+    {
+      "county": "OT",
+      "name": "Olt",
+      "surveyRegion": "RO41",
+      "surveyYear": "2024",
+      "paidRonPerHa": 33727.0,
+      "multipleVsPaid": 1.466,
+      "gridYear": "2026",
+      "gridPricedLocalities": 112,
+      "gridLocalities": 112,
+      "gridShare": 1.0,
+      "gridMedianRonPerHa": 23000.01,
+      "offers": 790,
+      "askedRonPerHa": {
+        "low": 20000.0,
+        "central": 30000.0,
+        "high": 36864.0
+      },
+      "multiple": {
+        "low": 0.87,
+        "central": 1.304,
+        "high": 1.603
+      },
+      "comparable": true,
+      "localities": [
+        {
+          "siruta": "125490",
+          "name": "Drăghiceni",
+          "offers": 11,
+          "gridRonPerHa": 23000.01,
+          "askedRonPerHa": {
+            "low": 34802.0,
+            "central": 39954.0,
+            "high": 41053.0
+          },
+          "multiple": {
+            "low": 1.513,
+            "central": 1.737,
+            "high": 1.785
+          }
+        },
+        {
+          "siruta": "125622",
+          "name": "Drăgăneşti-Olt",
+          "offers": 29,
+          "gridRonPerHa": 23000.01,
+          "askedRonPerHa": {
+            "low": 30000.0,
+            "central": 30000.0,
+            "high": 30000.0
+          },
+          "multiple": {
+            "low": 1.304,
+            "central": 1.304,
+            "high": 1.304
+          }
+        },
+        {
+          "siruta": "125659",
+          "name": "Băbiciu",
+          "offers": 10,
+          "gridRonPerHa": 23000.01,
+          "askedRonPerHa": {
+            "low": 43216.0,
+            "central": 49981.0,
+            "high": 50000.0
+          },
+          "multiple": {
+            "low": 1.879,
+            "central": 2.173,
+            "high": 2.174
+          }
+        },
+        {
+          "siruta": "125757",
+          "name": "Bărăşti",
+          "offers": 11,
+          "gridRonPerHa": 23000.01,
+          "askedRonPerHa": {
+            "low": 20000.0,
+            "central": 20000.0,
+            "high": 20610.0
+          },
+          "multiple": {
+            "low": 0.87,
+            "central": 0.87,
+            "high": 0.896
+          }
+        },
+        {
+          "siruta": "125999",
+          "name": "Brebeni",
+          "offers": 14,
+          "gridRonPerHa": 23000.01,
+          "askedRonPerHa": {
+            "low": 31891.0,
+            "central": 35000.0,
+            "high": 36854.0
+          },
+          "multiple": {
+            "low": 1.387,
+            "central": 1.522,
+            "high": 1.602
+          }
+        },
+        {
+          "siruta": "126978",
+          "name": "Fălcoiu",
+          "offers": 17,
+          "gridRonPerHa": 23000.01,
+          "askedRonPerHa": {
+            "low": 20000.0,
+            "central": 22180.0,
+            "high": 31200.0
+          },
+          "multiple": {
+            "low": 0.87,
+            "central": 0.964,
+            "high": 1.357
+          }
+        },
+        {
+          "siruta": "127019",
+          "name": "Fărcaşele",
+          "offers": 11,
+          "gridRonPerHa": 23000.01,
+          "askedRonPerHa": {
+            "low": 20000.0,
+            "central": 29167.0,
+            "high": 40000.0
+          },
+          "multiple": {
+            "low": 0.87,
+            "central": 1.268,
+            "high": 1.739
+          }
+        },
+        {
+          "siruta": "127064",
+          "name": "Găneasa",
+          "offers": 30,
+          "gridRonPerHa": 23000.01,
+          "askedRonPerHa": {
+            "low": 18565.0,
+            "central": 31205.0,
+            "high": 39117.0
+          },
+          "multiple": {
+            "low": 0.807,
+            "central": 1.357,
+            "high": 1.701
+          }
+        },
+        {
+          "siruta": "127144",
+          "name": "Gostavăţu",
+          "offers": 37,
+          "gridRonPerHa": 23000.01,
+          "askedRonPerHa": {
+            "low": 10000.0,
+            "central": 31399.0,
+            "high": 31427.0
+          },
+          "multiple": {
+            "low": 0.435,
+            "central": 1.365,
+            "high": 1.366
+          }
+        },
+        {
+          "siruta": "127386",
+          "name": "Izvoarele",
+          "offers": 19,
+          "gridRonPerHa": 23000.01,
+          "askedRonPerHa": {
+            "low": 18097.0,
+            "central": 19856.0,
+            "high": 23304.0
+          },
+          "multiple": {
+            "low": 0.787,
+            "central": 0.863,
+            "high": 1.013
+          }
+        },
+        {
+          "siruta": "127493",
+          "name": "Mărunţei",
+          "offers": 11,
+          "gridRonPerHa": 23000.01,
+          "askedRonPerHa": {
+            "low": 22500.0,
+            "central": 28000.0,
+            "high": 30889.0
+          },
+          "multiple": {
+            "low": 0.978,
+            "central": 1.217,
+            "high": 1.343
+          }
+        },
+        {
+          "siruta": "127983",
+          "name": "Osica De Sus",
+          "offers": 11,
+          "gridRonPerHa": 23000.01,
+          "askedRonPerHa": {
+            "low": 12667.0,
+            "central": 22984.0,
+            "high": 42778.0
+          },
+          "multiple": {
+            "low": 0.551,
+            "central": 0.999,
+            "high": 1.86
+          }
+        },
+        {
+          "siruta": "128052",
+          "name": "Perieţi",
+          "offers": 19,
+          "gridRonPerHa": 23000.01,
+          "askedRonPerHa": {
+            "low": 32501.0,
+            "central": 33800.0,
+            "high": 36002.0
+          },
+          "multiple": {
+            "low": 1.413,
+            "central": 1.47,
+            "high": 1.565
+          }
+        },
+        {
+          "siruta": "128105",
+          "name": "Piatra-Olt",
+          "offers": 12,
+          "gridRonPerHa": 23000.01,
+          "askedRonPerHa": {
+            "low": 20027.0,
+            "central": 26262.0,
+            "high": 30907.0
+          },
+          "multiple": {
+            "low": 0.871,
+            "central": 1.142,
+            "high": 1.344
+          }
+        },
+        {
+          "siruta": "128301",
+          "name": "Poboru",
+          "offers": 14,
+          "gridRonPerHa": 23000.01,
+          "askedRonPerHa": {
+            "low": 15736.0,
+            "central": 33500.0,
+            "high": 37500.0
+          },
+          "multiple": {
+            "low": 0.684,
+            "central": 1.457,
+            "high": 1.63
+          }
+        },
+        {
+          "siruta": "128524",
+          "name": "Redea",
+          "offers": 12,
+          "gridRonPerHa": 23000.01,
+          "askedRonPerHa": {
+            "low": 31046.0,
+            "central": 37000.0,
+            "high": 50000.0
+          },
+          "multiple": {
+            "low": 1.35,
+            "central": 1.609,
+            "high": 2.174
+          }
+        },
+        {
+          "siruta": "128613",
+          "name": "Scărişoara",
+          "offers": 19,
+          "gridRonPerHa": 23000.01,
+          "askedRonPerHa": {
+            "low": 11195.0,
+            "central": 27500.0,
+            "high": 30000.0
+          },
+          "multiple": {
+            "low": 0.487,
+            "central": 1.196,
+            "high": 1.304
+          }
+        },
+        {
+          "siruta": "128659",
+          "name": "Schitu",
+          "offers": 12,
+          "gridRonPerHa": 23000.01,
+          "askedRonPerHa": {
+            "low": 26923.0,
+            "central": 34282.0,
+            "high": 38195.0
+          },
+          "multiple": {
+            "low": 1.171,
+            "central": 1.491,
+            "high": 1.661
+          }
+        },
+        {
+          "siruta": "128711",
+          "name": "Scorniceşti",
+          "offers": 37,
+          "gridRonPerHa": 23000.01,
+          "askedRonPerHa": {
+            "low": 30000.0,
+            "central": 34050.0,
+            "high": 37101.0
+          },
+          "multiple": {
+            "low": 1.304,
+            "central": 1.48,
+            "high": 1.613
+          }
+        },
+        {
+          "siruta": "128962",
+          "name": "Spineni",
+          "offers": 13,
+          "gridRonPerHa": 23000.01,
+          "askedRonPerHa": {
+            "low": 25000.0,
+            "central": 25714.0,
+            "high": 26227.0
+          },
+          "multiple": {
+            "low": 1.087,
+            "central": 1.118,
+            "high": 1.14
+          }
+        },
+        {
+          "siruta": "129040",
+          "name": "Sprâncenata",
+          "offers": 22,
+          "gridRonPerHa": 23000.01,
+          "askedRonPerHa": {
+            "low": 20000.0,
+            "central": 27000.0,
+            "high": 30000.0
+          },
+          "multiple": {
+            "low": 0.87,
+            "central": 1.174,
+            "high": 1.304
+          }
+        },
+        {
+          "siruta": "129139",
+          "name": "Strejeşti",
+          "offers": 10,
+          "gridRonPerHa": 23000.01,
+          "askedRonPerHa": {
+            "low": 20293.0,
+            "central": 40406.0,
+            "high": 50262.0
+          },
+          "multiple": {
+            "low": 0.882,
+            "central": 1.757,
+            "high": 2.185
+          }
+        },
+        {
+          "siruta": "129184",
+          "name": "Studina",
+          "offers": 10,
+          "gridRonPerHa": 23000.01,
+          "askedRonPerHa": {
+            "low": 19004.0,
+            "central": 35160.0,
+            "high": 38777.0
+          },
+          "multiple": {
+            "low": 0.826,
+            "central": 1.529,
+            "high": 1.686
+          }
+        },
+        {
+          "siruta": "129317",
+          "name": "Tătuleşti",
+          "offers": 17,
+          "gridRonPerHa": 23000.01,
+          "askedRonPerHa": {
+            "low": 18752.0,
+            "central": 24993.0,
+            "high": 26243.0
+          },
+          "multiple": {
+            "low": 0.815,
+            "central": 1.087,
+            "high": 1.141
+          }
+        },
+        {
+          "siruta": "129656",
+          "name": "Valea Mare",
+          "offers": 13,
+          "gridRonPerHa": 23000.01,
+          "askedRonPerHa": {
+            "low": 30000.0,
+            "central": 42559.0,
+            "high": 266667.0
+          },
+          "multiple": {
+            "low": 1.304,
+            "central": 1.85,
+            "high": 11.594
+          }
+        },
+        {
+          "siruta": "129763",
+          "name": "Văleni",
+          "offers": 21,
+          "gridRonPerHa": 23000.01,
+          "askedRonPerHa": {
+            "low": 11778.0,
+            "central": 21200.0,
+            "high": 52300.0
+          },
+          "multiple": {
+            "low": 0.512,
+            "central": 0.922,
+            "high": 2.274
+          }
+        },
+        {
+          "siruta": "129816",
+          "name": "Verguleasa",
+          "offers": 11,
+          "gridRonPerHa": 23000.01,
+          "askedRonPerHa": {
+            "low": 15000.0,
+            "central": 15000.0,
+            "high": 16111.0
+          },
+          "multiple": {
+            "low": 0.652,
+            "central": 0.652,
+            "high": 0.7
+          }
+        },
+        {
+          "siruta": "130366",
+          "name": "Sârbii - Măgura",
+          "offers": 10,
+          "gridRonPerHa": 23000.01,
+          "askedRonPerHa": {
+            "low": 30000.0,
+            "central": 31207.0,
+            "high": 38571.0
+          },
+          "multiple": {
+            "low": 1.304,
+            "central": 1.357,
+            "high": 1.677
           }
         }
       ]
