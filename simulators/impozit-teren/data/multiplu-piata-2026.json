@@ -24,6 +24,7 @@
     "SB",
     "SJ",
     "SM",
+    "SV",
     "TL",
     "TM",
     "TR",
@@ -39,20 +40,20 @@
     "note": "Conversia din EUR/m² în RON/ha folosește cursul 5.2567 RON/EUR, același ca în build_impozit.py. Mediana grilei este pe localitate, mediana prețului cerut este pe ofertă; niciuna nu e ponderată cu suprafața."
   },
   "summary": {
-    "counties": 25,
-    "comparableCounties": 25,
-    "matchedLocalities": 129,
+    "counties": 26,
+    "comparableCounties": 26,
+    "matchedLocalities": 134,
     "countyMultiple": {
-      "low": 0.686,
-      "central": 1.185,
-      "high": 2.115
+      "low": 0.723,
+      "central": 1.192,
+      "high": 2.215
     },
     "localityMultiple": {
-      "low": 0.868,
-      "central": 1.012,
-      "high": 1.251
+      "low": 0.899,
+      "central": 1.047,
+      "high": 1.288
     },
-    "countyMultipleVsPaid": 1.119,
+    "countyMultipleVsPaid": 1.131,
     "countiesBelowParity": [
       "BH",
       "HR",
@@ -2207,6 +2208,113 @@
             "low": 0.094,
             "central": 0.132,
             "high": 0.585
+          }
+        }
+      ]
+    },
+    {
+      "county": "SV",
+      "name": "Suceava",
+      "surveyRegion": "RO21",
+      "surveyYear": "2024",
+      "paidRonPerHa": 29720.0,
+      "multipleVsPaid": 1.415,
+      "gridYear": "2026",
+      "gridPricedLocalities": 107,
+      "gridLocalities": 107,
+      "gridShare": 1.0,
+      "gridMedianRonPerHa": 20999.99,
+      "offers": 309,
+      "askedRonPerHa": {
+        "low": 26602.0,
+        "central": 50000.0,
+        "high": 65687.0
+      },
+      "multiple": {
+        "low": 1.267,
+        "central": 2.381,
+        "high": 3.128
+      },
+      "comparable": true,
+      "localities": [
+        {
+          "siruta": "146904",
+          "name": "Baia",
+          "offers": 16,
+          "gridRonPerHa": 20000.01,
+          "askedRonPerHa": {
+            "low": 35866.0,
+            "central": 53689.0,
+            "high": 84915.0
+          },
+          "multiple": {
+            "low": 1.793,
+            "central": 2.684,
+            "high": 4.246
+          }
+        },
+        {
+          "siruta": "147937",
+          "name": "Dărmăneşti",
+          "offers": 41,
+          "gridRonPerHa": 28000.02,
+          "askedRonPerHa": {
+            "low": 52685.0,
+            "central": 52688.0,
+            "high": 52688.0
+          },
+          "multiple": {
+            "low": 1.882,
+            "central": 1.882,
+            "high": 1.882
+          }
+        },
+        {
+          "siruta": "149227",
+          "name": "Liteni",
+          "offers": 10,
+          "gridRonPerHa": 29000.0,
+          "askedRonPerHa": {
+            "low": 10000.0,
+            "central": 11928.0,
+            "high": 46281.0
+          },
+          "multiple": {
+            "low": 0.345,
+            "central": 0.411,
+            "high": 1.596
+          }
+        },
+        {
+          "siruta": "150070",
+          "name": "Rădăşeni",
+          "offers": 16,
+          "gridRonPerHa": 20000.01,
+          "askedRonPerHa": {
+            "low": 26316.0,
+            "central": 27769.0,
+            "high": 41185.0
+          },
+          "multiple": {
+            "low": 1.316,
+            "central": 1.388,
+            "high": 2.059
+          }
+        },
+        {
+          "siruta": "150445",
+          "name": "Şaru Dornei",
+          "offers": 11,
+          "gridRonPerHa": 20000.01,
+          "askedRonPerHa": {
+            "low": 20304.0,
+            "central": 40000.0,
+            "high": 78226.0
+          },
+          "multiple": {
+            "low": 1.015,
+            "central": 2.0,
+            "high": 3.911
           }
         }
       ]

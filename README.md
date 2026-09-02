@@ -40,7 +40,7 @@ argument. This repository is an index, not a monolith.
 | **justitie** | The judicial reform | migrated to the 2025 report |
 | **salarizare** | Public-sector pay | migrated |
 | **administrativ** | Consolidation of the 3 186 UATs | migrated |
-| **impozit-teren** | Taxing land on its value | 28 counties read, 14 estimated, nothing excluded; 20 readers |
+| **impozit-teren** | Taxing land on its value | 30 counties read, 12 estimated, nothing excluded; 21 readers |
 
 Both live simulators now live here, with their history, on project paths under one Pages
 site: `/romania-reforms/salarizare/` and `/romania-reforms/administrativ/`. Their old
@@ -434,6 +434,48 @@ shaving Bacău and Neamț by about 1% as well.
 
 Sixteen counties now: **1 248 localities, 9,47 M ha, 39,7% of Romania, 110 mld EUR.**
 
+**Suceava and Botoșani were written off here, and should not have been.** The verdict was
+"42 land tables for 114 localities, ceiling 37%", reached by counting tables — the same
+measurement that would have discarded Ialomița, whose study contains **no land table at all**
+and reads at 100% because its prices are prose. Counting tables asks how a document is
+typeset. The question that matters is whether it says which localities each price applies to.
+
+Suceava says so twice over. Its countryside is priced in buckets that **name their own
+members**, with a catch-all: `MEDIUL RURAL 1 (piața specifică pentru localitățile: ȘCHEIA,
+BOSANCI, …)` and `MEDIUL RURAL 2 (excepție localitățile: …)`. One list and its complement cover
+the circumscription by construction. And the study publishes **its own circumscription
+rosters**, numbered under Municipii / Orașe / Comune, citing HG 1217/2023 — so the complement
+resolves without leaving the document.
+
+**93,9% for Suceava and 93,6% for Botoșani, on one reader with no changes between them.**
+
+Five things had to be got right, and the shape of each is worth keeping:
+
+- **Three circumscriptions split their countryside in two and three do not.** Fălticeni,
+  Câmpulung, Vatra Dornei and Gura Humorului have a single unnumbered `MEDIUL RURAL` section
+  with no list, which *is* the whole of that circumscription. Requiring a list left 44 communes
+  — four entire circumscriptions — unpriced at 54%.
+- **The rosters print two columns to a line.** `1 Arbore 15 Iaslovăț` read as one entry gives
+  `Arboreiaslovat`, which is not a commune.
+- **The headings are letter-spaced for emphasis** — `SUCEA V A`, `V ATRA DORNEI` — so a name
+  read literally matches nothing.
+- **The smaller towns are never introduced.** Solca, Cajvana, Vicovu de Sus and five others
+  carry their name as a bare running header, and are priced by category rather than by zone.
+  Reading only the zone grid left eleven of sixteen towns unpriced.
+- **The word "circumscripția" is unreliable** — spelled `CICIRCUMSCRIPȚIA` once and not on its
+  own line twice. What every roster page shares is the sentence citing the decision.
+
+**The first out-of-sample failure, and it is real.** Botoșani was predicted at 4,47 mld EUR and
+reads at **2,34** — 0,52×, outside the stated 1,61×. The reader was checked against the source
+before that was accepted: all seven of its towns match to the leu, Botoșani town at 317 lei/m²
+in zone A against Iași's 600 **euro**. Botoșani is simply cheaper than the size of its county
+seat predicts, and it stays in the fit — the test for holding a county out is a *mechanism*,
+as Ilfov has, not that it makes the number worse.
+
+Reading them cost the model a little and that is left visible: leave-one-out **1,58× → 1,61×**,
+R² **0,77 → 0,74**. Thirty counties is a harder thing to fit than twenty-eight, which is what
+finding out looks like.
+
 **Ialomița publishes its prices in a sentence and not in a table at all.** The correction pages
 refer to *"valoare teren liber conform grilă"*, and there is no grid anywhere in its 180 pages —
 the numbers are prose at the foot of each annex, under whichever locality and zone that page
@@ -734,17 +776,23 @@ chamber was opened and measured rather than guessed at:
 
 | chamber | counties | why not |
 |---|---|---|
-| Suceava | SV, BT | 42 land tables for 114 localities — prices circumscription *rural averages*, ceiling **37%** |
-| Brașov | BV, CV | 4 land tables for 103 localities, ceiling **4%** |
+| ~~Suceava~~ | SV, BT | **wrong — both read, 93,9% and 93,6%. The 37% came from counting tables** |
+| Brașov | BV, CV | 4 land tables for 103 localities — **the same discredited measurement; unverified** |
 | Pitești | AG, VL | scanned images: 70 pages, **zero characters** of text |
 | Galați | GL, BR | GL has 5 land tables in 142 pages; Brăila is a scan |
 | Craiova | DJ, GJ, OT, MH | 23 localities priced out of 359 |
 | Timișoara | AR, CS | annexes contain no land at all |
 | ~~București~~ | B, IF, CL, GR, IL, TR | **wrong — publishes on `srv.cnpb.ro`; all six counties are read** |
 
-Those are hard ceilings on what the documents contain, not on what the readers manage. Nothing
-above 37% and most far below, against a 90% bar. **The estimate is not a shortcut around the
-remaining counties — it is the only thing available for them.**
+**Two of those rows were wrong, and the method that produced them is discredited.** Counting
+land tables measures typesetting, not content: Ialomița has none and reads at 100%, Suceava was
+called 37% and reads at 94%. Craiova, Pitești, Galați and Timișoara were each checked a
+different way — a scan has no text at all, and Craiova's own index prices 23 localities of 359
+— so those stand. **Brașov does not**, and it is marked unverified rather than quietly kept:
+it was dismissed by the same table count and has not been re-opened.
+
+The remaining twelve counties are estimated because nothing better has been read yet, not
+because it has been established that nothing better exists.
 
 **The map now shows the whole country, and shows the difference.** Counties with a grid are
 painted commune by commune. The rest are painted as one flat county-sized shape, on the same
@@ -792,7 +840,7 @@ single county-wide average per category for everything else. Timișoara's chambe
 and Caraș-Severin too, and their annexes contain no land at all. Both were checked against the
 source rather than inferred from a low score.
 
-Twenty-eight counties read: **2 006 localities, 15,0 M ha, 63,0% of Romania, 246 mld EUR.**
+Thirty counties read: **2 186 localities, 16,3 M ha, 68,2% of Romania, 254 mld EUR.**
 
 **One chamber, four counties, and the same reader for all of them — after four bugs.** CNP Cluj
 publishes Bistrița-Năsăud, Maramureș and Sălaj in Cluj's own layout, and the section-header fix

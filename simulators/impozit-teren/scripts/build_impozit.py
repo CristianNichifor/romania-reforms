@@ -84,6 +84,8 @@ COUNTY_TO_CHAMBER = {
     "GR": "giurgiu",
     "IL": "ialomita",
     "TR": "teleorman",
+    "SV": "suceava",
+    "BT": "botosani",
     "VS": "vaslui",
     "BC": "bacau",
     "NT": "neamt",
