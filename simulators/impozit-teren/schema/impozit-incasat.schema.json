@@ -1,0 +1,143 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://cristiannichifor.github.io/romania-reforms/schema/impozit-incasat.schema.json",
+    "title": "Land and building tax actually collected, per county, from budget execution",
+    "description": "The only measured tax figure in this simulator. Everything else is the Fiscal Code's arithmetic applied to a land register; this is what local authorities reported banking, filed against the revenue classification and served by transparenta.eu. Collected, not owed: it cannot yield a collection rate, and the ratio against the modelled tax mixes the council's chosen rate, the zone, the rank and the art. 464 exemptions before it reaches collection at all.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "id",
+        "title",
+        "publisher",
+        "counties",
+        "period",
+        "currency",
+        "provenance",
+        "classification",
+        "summary",
+        "localities",
+        "limitations"
+    ],
+    "properties": {
+        "$schema": {
+            "type": "string"
+        },
+        "id": {
+            "type": "string",
+            "pattern": "^impozit-incasat-[0-9]{4}$"
+        },
+        "title": {
+            "type": "string"
+        },
+        "publisher": {
+            "const": "transparenta.eu"
+        },
+        "counties": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "string",
+                "pattern": "^[A-Z]{1,2}$"
+            }
+        },
+        "period": {
+            "type": "string",
+            "pattern": "^[0-9]{4}$"
+        },
+        "currency": {
+            "const": "RON"
+        },
+        "provenance": {
+            "$ref": "provenance.schema.json#/$defs/provenance"
+        },
+        "classification": {
+            "description": "Revenue code against the line's own name, so a reader can check the codes were read as meant.",
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": {
+                "type": "string"
+            }
+        },
+        "summary": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "counties",
+                "landRon",
+                "buildingsRon",
+                "landByCodeRon",
+                "landAsShareOfBuildingsPercent"
+            ],
+            "properties": {
+                "counties": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "landRon": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "buildingsRon": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "landByCodeRon": {
+                    "type": "object",
+                    "minProperties": 1,
+                    "additionalProperties": {
+                        "type": "number",
+                        "minimum": 0
+                    }
+                },
+                "landAsShareOfBuildingsPercent": {
+                    "description": "How the land tax compares with the tax on what is built on it — the ratio the case for a land value tax turns on.",
+                    "type": "number",
+                    "minimum": 0
+                }
+            }
+        },
+        "localities": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                    "county",
+                    "landRon",
+                    "landByCodeRon",
+                    "buildingsRon"
+                ],
+                "properties": {
+                    "county": {
+                        "type": "string",
+                        "pattern": "^[A-Z]{1,2}$"
+                    },
+                    "landRon": {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    "landByCodeRon": {
+                        "type": "object",
+                        "minProperties": 1,
+                        "additionalProperties": {
+                            "type": "number",
+                            "minimum": 0
+                        }
+                    },
+                    "buildingsRon": {
+                        "type": "number",
+                        "minimum": 0
+                    }
+                }
+            }
+        },
+        "limitations": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "$ref": "provenance.schema.json#/$defs/limitation"
+            }
+        }
+    }
+}

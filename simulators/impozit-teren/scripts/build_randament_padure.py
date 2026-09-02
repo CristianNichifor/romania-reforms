@@ -37,6 +37,7 @@ Usage:
 from __future__ import annotations
 
 import json
+import re
 import statistics
 import sys
 from pathlib import Path
@@ -76,9 +77,12 @@ def main() -> int:
         if row["m3PerHaPerYear"]
     }
 
-    rate_files = sorted((ROOT / "data").glob("impozit-*.json"))
+    # County tax files only — see the same guard in build_multiplu_piata.py. `impozit-incasat-*`
+    # matches the prefix and has no `assumptions`.
+    rate_files = [p for p in sorted((ROOT / "data").glob("impozit-*.json"))
+                  if re.fullmatch(r"impozit-[a-z]{1,2}-\d{4}", p.stem)]
     if not rate_files:
-        raise SystemExit("missing impozit-*.json; run build_impozit.py first")
+        raise SystemExit("missing impozit-<judet>-<an>.json; run build_impozit.py first")
     ron_per_eur = json.loads(rate_files[0].read_text(encoding="utf-8"))["assumptions"][
         "ronPerEur"
     ]

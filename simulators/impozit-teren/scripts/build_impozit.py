@@ -49,6 +49,17 @@ one, and they only ever subtract:
 So `lvtRon` is a ceiling, `lvtCollectedRon` at the default is that ceiling minus the public
 domain, and a real receipts figure is below both.
 
+**The modelled tax is now checked against one that was actually banked.**
+`import_impozit_incasat.py` reads what each county collected under revenue codes 07.02.01–03,
+and this file carries it beside its own figure as `collectedRon`. The band claims to be the
+range art. 465 permits, so collections landing inside it is a test the model can fail — and
+in 34 of 42 counties it passes, with every miss falling *below* the cheapest lawful reading
+rather than above the dearest, which is what exemptions and arrears look like.
+
+The ratio is reported and not consumed. It mixes the council's chosen rate, the zone, the rank
+and the art. 464 exemptions before it reaches collection, so feeding it into
+`--collection-rate` would turn four unknowns into one number that looks measured.
+
 Usage:
     uv run python simulators/impozit-teren/scripts/build_impozit.py --county BC
 """
@@ -335,6 +346,17 @@ def main() -> int:
         print(f"FATAL: nothing to compare for {county}", file=sys.stderr)
         return 1
 
+    # What this county actually banked, if the execution filings have been imported. Optional
+    # on purpose: the rest of the pipeline must build without a third party being up, and the
+    # comparison is an added check rather than a dependency of the tax model.
+    collected = None
+    found = sorted((ROOT / "data").glob("impozit-incasat-*.json"))
+    if found:
+        receipts = json.loads(found[-1].read_text(encoding="utf-8"))
+        entry = next((r for r in receipts["localities"] if r["county"] == county), None)
+        if entry:
+            collected = {"ron": entry["landRon"], "period": receipts["period"]}
+
     fiscal_total = {b: sum(r["fiscalCodeRon"][b] for r in rows) for b in BANDS}
     value_total = {b: sum(r["landValueRon"][b] for r in rows) for b in BANDS}
     taxable_total = {b: sum(r["taxableValueRon"][b] for r in rows) for b in BANDS}
@@ -363,6 +385,15 @@ def main() -> int:
     print(f"{'cota neutră (%)':<36}" + "".join(f"{neutral[b]:16.3f}" for b in BANDS))
     print(f"baza impozabilă: {100 * taxable_total['central'] / value_total['central']:.1f}% "
           f"din valoarea terenului, la un grad de colectare de {100 * args.collection_rate:.0f}%")
+    if collected:
+        verdict = (
+            "în bandă" if fiscal_total["low"] <= collected["ron"] <= fiscal_total["high"]
+            else "SUB cea mai ieftină citire legală"
+            if collected["ron"] < fiscal_total["low"]
+            else "PESTE cea mai scumpă citire legală"
+        )
+        print(f"încasat efectiv ({collected['period']}): {collected['ron'] / 1e6:,.1f} mil RON — "
+              f"{collected['ron'] / fiscal_total['central']:.2f}× față de mijlocul modelat, {verdict}")
 
     document = {
         "$schema": "../schema/impozit.schema.json",
@@ -424,6 +455,17 @@ def main() -> int:
             "lvtCollectedRon": {b: round(collected_total[b]) for b in BANDS},
             "revenueNeutralRatePercent": {b: round(neutral[b], 4) for b in BANDS},
             "lawfulRangeRatio": round(fiscal_total["high"] / fiscal_total["low"], 2),
+            # Measured, not modelled — and the one number here that can falsify the band above.
+            "collectedRon": collected["ron"] if collected else None,
+            "collectedPeriod": collected["period"] if collected else None,
+            "collectedOverModelled": round(collected["ron"] / fiscal_total["central"], 3)
+            if collected and fiscal_total["central"]
+            else None,
+            "collectedInsideLawfulBand": (
+                fiscal_total["low"] <= collected["ron"] <= fiscal_total["high"]
+            )
+            if collected
+            else None,
         },
         "localities": rows,
         "limitations": [
