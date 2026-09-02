@@ -62,6 +62,8 @@ COUNTY_TO_CHAMBER = {
     "TR": "teleorman",
     "SV": "suceava",
     "BT": "botosani",
+    "BV": "brasov",
+    "CV": "covasna",
     "VS": "vaslui",
     "BC": "bacau",
     "NT": "neamt",
