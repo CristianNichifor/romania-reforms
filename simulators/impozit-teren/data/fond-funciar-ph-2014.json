@@ -10,14 +10,17 @@
   "unit": "ha",
   "provenance": {
     "source": "ins-tempo-agr101b",
-    "locator": "http://statistici.insse.ro:8077/tempo-ins/matrix/AGR101B, anul 2014, forme de proprietate: Total",
+    "locator": "http://statistici.insse.ro:8077/tempo-ins/matrix/AGR101B, anul 2014, forme de proprietate: Total și Proprietate privata",
     "confidence": "verbatim",
-    "note": "Suprafețele sunt preluate ca atare din matricea INS. Gruparea pe categoriile notariale (pășuni+fânețe → P+F, vii+livezi → V+L) este făcută aici și urmează gruparea din grilele notariale."
+    "note": "Suprafețele sunt preluate ca atare din matricea INS. Gruparea pe categoriile notariale (pășuni+fânețe → P+F, vii+livezi → V+L) este făcută aici și urmează gruparea din grilele notariale. Proprietatea publică nu este publicată separat: este diferența dintre total și proprietatea privată, calculată aici prin scădere."
   },
   "summary": {
     "localities": 104,
     "totalHa": 471587.0,
     "builtHa": 25727.0,
+    "privateHa": 342016.0,
+    "privateBuiltHa": 21458.0,
+    "privateSharePercent": 72.52,
     "unbalanced": [],
     "problems": []
   },
@@ -47,6 +50,13 @@
         "Terenuri degradate si neproductive": 49.0
       },
       "totalHa": 5826.0,
+      "privateAreaHa": {
+        "Arabila": 1444.0,
+        "Livezi si pepiniere pomicole": 7.0,
+        "Ocupata cu constructii": 1016.0,
+        "Cai de comunicatii si cai ferate": 8.0
+      },
+      "privateHa": 2475.0,
       "byCategory": {
         "A": 1467.0,
         "V+L": 8.0,
@@ -55,7 +65,14 @@
         "DR": 784.0,
         "NP": 49.0
       },
-      "forestHa": 281.0
+      "byCategoryPrivate": {
+        "A": 1444.0,
+        "V+L": 7.0,
+        "CC": 1016.0,
+        "DR": 8.0
+      },
+      "forestHa": 281.0,
+      "forestPrivateHa": 0.0
     },
     {
       "siruta": "130552",
@@ -70,6 +87,13 @@
         "Cai de comunicatii si cai ferate": 294.0
       },
       "totalHa": 3725.0,
+      "privateAreaHa": {
+        "Arabila": 2821.0,
+        "Pasuni": 129.0,
+        "Vii si pepiniere viticole": 4.0,
+        "Ocupata cu constructii": 187.0
+      },
+      "privateHa": 3141.0,
       "byCategory": {
         "A": 2997.0,
         "P+F": 129.0,
@@ -77,7 +101,14 @@
         "CC": 298.0,
         "DR": 294.0
       },
-      "forestHa": 0.0
+      "byCategoryPrivate": {
+        "A": 2821.0,
+        "P+F": 129.0,
+        "V+L": 4.0,
+        "CC": 187.0
+      },
+      "forestHa": 0.0,
+      "forestPrivateHa": 0.0
     },
     {
       "siruta": "130614",
@@ -95,6 +126,17 @@
         "Terenuri degradate si neproductive": 10.0
       },
       "totalHa": 3101.0,
+      "privateAreaHa": {
+        "Arabila": 2070.0,
+        "Pasuni": 174.0,
+        "Vii si pepiniere viticole": 11.0,
+        "Livezi si pepiniere pomicole": 1.0,
+        "Paduri si alta vegetatie forestiera": 312.0,
+        "Ocupata cu ape, balti": 1.0,
+        "Ocupata cu constructii": 240.0,
+        "Terenuri degradate si neproductive": 10.0
+      },
+      "privateHa": 2819.0,
       "byCategory": {
         "A": 2097.0,
         "P+F": 174.0,
@@ -104,7 +146,16 @@
         "DR": 149.0,
         "NP": 10.0
       },
-      "forestHa": 313.0
+      "byCategoryPrivate": {
+        "A": 2070.0,
+        "P+F": 174.0,
+        "V+L": 12.0,
+        "AP": 1.0,
+        "CC": 240.0,
+        "NP": 10.0
+      },
+      "forestHa": 313.0,
+      "forestPrivateHa": 312.0
     },
     {
       "siruta": "130678",
@@ -122,6 +173,15 @@
         "Terenuri degradate si neproductive": 9.0
       },
       "totalHa": 2018.0,
+      "privateAreaHa": {
+        "Arabila": 1201.0,
+        "Pasuni": 129.0,
+        "Vii si pepiniere viticole": 13.0,
+        "Livezi si pepiniere pomicole": 7.0,
+        "Ocupata cu constructii": 397.0,
+        "Cai de comunicatii si cai ferate": 5.0
+      },
+      "privateHa": 1752.0,
       "byCategory": {
         "A": 1246.0,
         "P+F": 129.0,
@@ -131,7 +191,15 @@
         "DR": 67.0,
         "NP": 9.0
       },
-      "forestHa": 19.0
+      "byCategoryPrivate": {
+        "A": 1201.0,
+        "P+F": 129.0,
+        "V+L": 20.0,
+        "CC": 397.0,
+        "DR": 5.0
+      },
+      "forestHa": 19.0,
+      "forestPrivateHa": 0.0
     },
     {
       "siruta": "130712",
@@ -149,6 +217,15 @@
         "Terenuri degradate si neproductive": 2.0
       },
       "totalHa": 4546.0,
+      "privateAreaHa": {
+        "Arabila": 3229.0,
+        "Pasuni": 123.0,
+        "Vii si pepiniere viticole": 9.0,
+        "Paduri si alta vegetatie forestiera": 2.0,
+        "Ocupata cu constructii": 528.0,
+        "Terenuri degradate si neproductive": 2.0
+      },
+      "privateHa": 3893.0,
       "byCategory": {
         "A": 3275.0,
         "P+F": 153.0,
@@ -158,7 +235,15 @@
         "DR": 105.0,
         "NP": 2.0
       },
-      "forestHa": 300.0
+      "byCategoryPrivate": {
+        "A": 3229.0,
+        "P+F": 123.0,
+        "V+L": 9.0,
+        "CC": 528.0,
+        "NP": 2.0
+      },
+      "forestHa": 300.0,
+      "forestPrivateHa": 2.0
     },
     {
       "siruta": "130785",
@@ -177,6 +262,19 @@
         "Terenuri degradate si neproductive": 5.0
       },
       "totalHa": 4899.0,
+      "privateAreaHa": {
+        "Arabila": 2361.0,
+        "Pasuni": 619.0,
+        "Finete": 16.0,
+        "Vii si pepiniere viticole": 596.0,
+        "Livezi si pepiniere pomicole": 2.0,
+        "Paduri si alta vegetatie forestiera": 30.0,
+        "Ocupata cu ape, balti": 2.0,
+        "Ocupata cu constructii": 572.0,
+        "Cai de comunicatii si cai ferate": 92.0,
+        "Terenuri degradate si neproductive": 4.0
+      },
+      "privateHa": 4294.0,
       "byCategory": {
         "A": 2385.0,
         "P+F": 642.0,
@@ -186,7 +284,17 @@
         "DR": 155.0,
         "NP": 5.0
       },
-      "forestHa": 150.0
+      "byCategoryPrivate": {
+        "A": 2361.0,
+        "P+F": 635.0,
+        "V+L": 598.0,
+        "AP": 2.0,
+        "CC": 572.0,
+        "DR": 92.0,
+        "NP": 4.0
+      },
+      "forestHa": 150.0,
+      "forestPrivateHa": 30.0
     },
     {
       "siruta": "130847",
@@ -205,6 +313,18 @@
         "Terenuri degradate si neproductive": 1.0
       },
       "totalHa": 5132.0,
+      "privateAreaHa": {
+        "Arabila": 2911.0,
+        "Pasuni": 249.0,
+        "Finete": 270.0,
+        "Vii si pepiniere viticole": 47.0,
+        "Livezi si pepiniere pomicole": 179.0,
+        "Paduri si alta vegetatie forestiera": 611.0,
+        "Ocupata cu ape, balti": 23.0,
+        "Ocupata cu constructii": 134.0,
+        "Cai de comunicatii si cai ferate": 10.0
+      },
+      "privateHa": 4434.0,
       "byCategory": {
         "A": 2924.0,
         "P+F": 534.0,
@@ -214,7 +334,16 @@
         "DR": 131.0,
         "NP": 1.0
       },
-      "forestHa": 1056.0
+      "byCategoryPrivate": {
+        "A": 2911.0,
+        "P+F": 519.0,
+        "V+L": 226.0,
+        "AP": 23.0,
+        "CC": 134.0,
+        "DR": 10.0
+      },
+      "forestHa": 1056.0,
+      "forestPrivateHa": 611.0
     },
     {
       "siruta": "130892",
@@ -230,6 +359,14 @@
         "Cai de comunicatii si cai ferate": 102.0
       },
       "totalHa": 4846.0,
+      "privateAreaHa": {
+        "Arabila": 3537.0,
+        "Pasuni": 73.0,
+        "Livezi si pepiniere pomicole": 14.0,
+        "Paduri si alta vegetatie forestiera": 249.0,
+        "Ocupata cu constructii": 461.0
+      },
+      "privateHa": 4334.0,
       "byCategory": {
         "A": 3657.0,
         "P+F": 73.0,
@@ -238,7 +375,14 @@
         "CC": 494.0,
         "DR": 102.0
       },
-      "forestHa": 396.0
+      "byCategoryPrivate": {
+        "A": 3537.0,
+        "P+F": 73.0,
+        "V+L": 14.0,
+        "CC": 461.0
+      },
+      "forestHa": 396.0,
+      "forestPrivateHa": 249.0
     },
     {
       "siruta": "130954",
@@ -254,6 +398,14 @@
         "Terenuri degradate si neproductive": 7.0
       },
       "totalHa": 8304.0,
+      "privateAreaHa": {
+        "Pasuni": 1694.0,
+        "Finete": 59.0,
+        "Paduri si alta vegetatie forestiera": 3505.0,
+        "Ocupata cu constructii": 96.0,
+        "Terenuri degradate si neproductive": 7.0
+      },
+      "privateHa": 5361.0,
       "byCategory": {
         "P+F": 1753.0,
         "AP": 22.0,
@@ -261,7 +413,13 @@
         "DR": 40.0,
         "NP": 7.0
       },
-      "forestHa": 6372.0
+      "byCategoryPrivate": {
+        "P+F": 1753.0,
+        "CC": 96.0,
+        "NP": 7.0
+      },
+      "forestHa": 6372.0,
+      "forestPrivateHa": 3505.0
     },
     {
       "siruta": "130981",
@@ -280,6 +438,18 @@
         "Terenuri degradate si neproductive": 10.0
       },
       "totalHa": 6798.0,
+      "privateAreaHa": {
+        "Arabila": 3338.0,
+        "Pasuni": 495.0,
+        "Finete": 108.0,
+        "Vii si pepiniere viticole": 12.0,
+        "Livezi si pepiniere pomicole": 907.0,
+        "Paduri si alta vegetatie forestiera": 113.0,
+        "Ocupata cu ape, balti": 3.0,
+        "Ocupata cu constructii": 486.0,
+        "Cai de comunicatii si cai ferate": 14.0
+      },
+      "privateHa": 5476.0,
       "byCategory": {
         "A": 3386.0,
         "P+F": 622.0,
@@ -289,7 +459,16 @@
         "DR": 237.0,
         "NP": 10.0
       },
-      "forestHa": 921.0
+      "byCategoryPrivate": {
+        "A": 3338.0,
+        "P+F": 603.0,
+        "V+L": 919.0,
+        "AP": 3.0,
+        "CC": 486.0,
+        "DR": 14.0
+      },
+      "forestHa": 921.0,
+      "forestPrivateHa": 113.0
     },
     {
       "siruta": "131069",
@@ -308,6 +487,19 @@
         "Terenuri degradate si neproductive": 91.0
       },
       "totalHa": 3490.0,
+      "privateAreaHa": {
+        "Arabila": 1034.0,
+        "Pasuni": 495.0,
+        "Finete": 386.0,
+        "Vii si pepiniere viticole": 190.0,
+        "Livezi si pepiniere pomicole": 20.0,
+        "Paduri si alta vegetatie forestiera": 734.0,
+        "Ocupata cu ape, balti": 9.0,
+        "Ocupata cu constructii": 323.0,
+        "Cai de comunicatii si cai ferate": 33.0,
+        "Terenuri degradate si neproductive": 91.0
+      },
+      "privateHa": 3315.0,
       "byCategory": {
         "A": 1035.0,
         "P+F": 885.0,
@@ -317,7 +509,17 @@
         "DR": 102.0,
         "NP": 91.0
       },
-      "forestHa": 734.0
+      "byCategoryPrivate": {
+        "A": 1034.0,
+        "P+F": 881.0,
+        "V+L": 210.0,
+        "AP": 9.0,
+        "CC": 323.0,
+        "DR": 33.0,
+        "NP": 91.0
+      },
+      "forestHa": 734.0,
+      "forestPrivateHa": 734.0
     },
     {
       "siruta": "131103",
@@ -335,6 +537,17 @@
         "Terenuri degradate si neproductive": 152.0
       },
       "totalHa": 5047.0,
+      "privateAreaHa": {
+        "Arabila": 94.0,
+        "Pasuni": 587.0,
+        "Finete": 2028.0,
+        "Livezi si pepiniere pomicole": 337.0,
+        "Paduri si alta vegetatie forestiera": 560.0,
+        "Ocupata cu constructii": 391.0,
+        "Cai de comunicatii si cai ferate": 5.0,
+        "Terenuri degradate si neproductive": 69.0
+      },
+      "privateHa": 4071.0,
       "byCategory": {
         "A": 94.0,
         "P+F": 2625.0,
@@ -344,7 +557,16 @@
         "DR": 190.0,
         "NP": 152.0
       },
-      "forestHa": 1074.0
+      "byCategoryPrivate": {
+        "A": 94.0,
+        "P+F": 2615.0,
+        "V+L": 337.0,
+        "CC": 391.0,
+        "DR": 5.0,
+        "NP": 69.0
+      },
+      "forestHa": 1074.0,
+      "forestPrivateHa": 560.0
     },
     {
       "siruta": "131210",
@@ -360,6 +582,14 @@
         "Terenuri degradate si neproductive": 688.0
       },
       "totalHa": 7528.0,
+      "privateAreaHa": {
+        "Pasuni": 1616.0,
+        "Finete": 25.0,
+        "Paduri si alta vegetatie forestiera": 3162.0,
+        "Ocupata cu constructii": 300.0,
+        "Terenuri degradate si neproductive": 502.0
+      },
+      "privateHa": 5605.0,
       "byCategory": {
         "P+F": 1641.0,
         "AP": 32.0,
@@ -367,7 +597,13 @@
         "DR": 32.0,
         "NP": 688.0
       },
-      "forestHa": 4835.0
+      "byCategoryPrivate": {
+        "P+F": 1641.0,
+        "CC": 300.0,
+        "NP": 502.0
+      },
+      "forestHa": 4835.0,
+      "forestPrivateHa": 3162.0
     },
     {
       "siruta": "131256",
@@ -385,6 +621,18 @@
         "Terenuri degradate si neproductive": 24.0
       },
       "totalHa": 2423.0,
+      "privateAreaHa": {
+        "Arabila": 105.0,
+        "Pasuni": 248.0,
+        "Finete": 169.0,
+        "Livezi si pepiniere pomicole": 111.0,
+        "Paduri si alta vegetatie forestiera": 20.0,
+        "Ocupata cu ape, balti": 13.0,
+        "Ocupata cu constructii": 610.0,
+        "Cai de comunicatii si cai ferate": 2.0,
+        "Terenuri degradate si neproductive": 16.0
+      },
+      "privateHa": 1294.0,
       "byCategory": {
         "A": 122.0,
         "P+F": 438.0,
@@ -394,7 +642,17 @@
         "DR": 144.0,
         "NP": 24.0
       },
-      "forestHa": 772.0
+      "byCategoryPrivate": {
+        "A": 105.0,
+        "P+F": 417.0,
+        "V+L": 111.0,
+        "AP": 13.0,
+        "CC": 610.0,
+        "DR": 2.0,
+        "NP": 16.0
+      },
+      "forestHa": 772.0,
+      "forestPrivateHa": 20.0
     },
     {
       "siruta": "131274",
@@ -412,6 +670,18 @@
         "Terenuri degradate si neproductive": 17.0
       },
       "totalHa": 1547.0,
+      "privateAreaHa": {
+        "Arabila": 69.0,
+        "Pasuni": 267.0,
+        "Finete": 148.0,
+        "Livezi si pepiniere pomicole": 99.0,
+        "Paduri si alta vegetatie forestiera": 16.0,
+        "Ocupata cu ape, balti": 23.0,
+        "Ocupata cu constructii": 137.0,
+        "Cai de comunicatii si cai ferate": 9.0,
+        "Terenuri degradate si neproductive": 17.0
+      },
+      "privateHa": 785.0,
       "byCategory": {
         "A": 70.0,
         "P+F": 426.0,
@@ -421,7 +691,17 @@
         "DR": 44.0,
         "NP": 17.0
       },
-      "forestHa": 650.0
+      "byCategoryPrivate": {
+        "A": 69.0,
+        "P+F": 415.0,
+        "V+L": 99.0,
+        "AP": 23.0,
+        "CC": 137.0,
+        "DR": 9.0,
+        "NP": 17.0
+      },
+      "forestHa": 650.0,
+      "forestPrivateHa": 16.0
     },
     {
       "siruta": "131336",
@@ -439,6 +719,17 @@
         "Terenuri degradate si neproductive": 81.0
       },
       "totalHa": 8997.0,
+      "privateAreaHa": {
+        "Arabila": 78.0,
+        "Pasuni": 81.0,
+        "Finete": 1311.0,
+        "Livezi si pepiniere pomicole": 387.0,
+        "Paduri si alta vegetatie forestiera": 60.0,
+        "Ocupata cu ape, balti": 11.0,
+        "Ocupata cu constructii": 234.0,
+        "Terenuri degradate si neproductive": 23.0
+      },
+      "privateHa": 2185.0,
       "byCategory": {
         "A": 79.0,
         "P+F": 3375.0,
@@ -448,7 +739,16 @@
         "DR": 122.0,
         "NP": 81.0
       },
-      "forestHa": 4637.0
+      "byCategoryPrivate": {
+        "A": 78.0,
+        "P+F": 1392.0,
+        "V+L": 387.0,
+        "AP": 11.0,
+        "CC": 234.0,
+        "NP": 23.0
+      },
+      "forestHa": 4637.0,
+      "forestPrivateHa": 60.0
     },
     {
       "siruta": "131407",
@@ -464,6 +764,14 @@
         "Terenuri degradate si neproductive": 36.0
       },
       "totalHa": 1919.0,
+      "privateAreaHa": {
+        "Arabila": 1290.0,
+        "Pasuni": 53.0,
+        "Vii si pepiniere viticole": 77.0,
+        "Ocupata cu constructii": 216.0,
+        "Cai de comunicatii si cai ferate": 3.0
+      },
+      "privateHa": 1639.0,
       "byCategory": {
         "A": 1298.0,
         "P+F": 53.0,
@@ -473,7 +781,15 @@
         "DR": 79.0,
         "NP": 36.0
       },
-      "forestHa": 0.0
+      "byCategoryPrivate": {
+        "A": 1290.0,
+        "P+F": 53.0,
+        "V+L": 77.0,
+        "CC": 216.0,
+        "DR": 3.0
+      },
+      "forestHa": 0.0,
+      "forestPrivateHa": 0.0
     },
     {
       "siruta": "131443",
@@ -490,6 +806,15 @@
         "Terenuri degradate si neproductive": 1.0
       },
       "totalHa": 473.0,
+      "privateAreaHa": {
+        "Arabila": 2.0,
+        "Pasuni": 5.0,
+        "Finete": 3.0,
+        "Paduri si alta vegetatie forestiera": 40.0,
+        "Ocupata cu ape, balti": 1.0,
+        "Ocupata cu constructii": 83.0
+      },
+      "privateHa": 134.0,
       "byCategory": {
         "A": 2.0,
         "P+F": 8.0,
@@ -498,7 +823,14 @@
         "DR": 8.0,
         "NP": 1.0
       },
-      "forestHa": 346.0
+      "byCategoryPrivate": {
+        "A": 2.0,
+        "P+F": 8.0,
+        "AP": 1.0,
+        "CC": 83.0
+      },
+      "forestHa": 346.0,
+      "forestPrivateHa": 40.0
     },
     {
       "siruta": "131461",
@@ -516,6 +848,17 @@
         "Terenuri degradate si neproductive": 30.0
       },
       "totalHa": 2951.0,
+      "privateAreaHa": {
+        "Arabila": 901.0,
+        "Pasuni": 444.0,
+        "Finete": 95.0,
+        "Livezi si pepiniere pomicole": 324.0,
+        "Paduri si alta vegetatie forestiera": 322.0,
+        "Ocupata cu ape, balti": 2.0,
+        "Ocupata cu constructii": 83.0,
+        "Terenuri degradate si neproductive": 10.0
+      },
+      "privateHa": 2181.0,
       "byCategory": {
         "A": 902.0,
         "P+F": 541.0,
@@ -525,7 +868,16 @@
         "DR": 83.0,
         "NP": 30.0
       },
-      "forestHa": 680.0
+      "byCategoryPrivate": {
+        "A": 901.0,
+        "P+F": 539.0,
+        "V+L": 324.0,
+        "AP": 2.0,
+        "CC": 83.0,
+        "NP": 10.0
+      },
+      "forestHa": 680.0,
+      "forestPrivateHa": 322.0
     },
     {
       "siruta": "131540",
@@ -541,6 +893,14 @@
         "Terenuri degradate si neproductive": 82.0
       },
       "totalHa": 8927.0,
+      "privateAreaHa": {
+        "Pasuni": 41.0,
+        "Finete": 31.0,
+        "Paduri si alta vegetatie forestiera": 50.0,
+        "Ocupata cu constructii": 162.0,
+        "Cai de comunicatii si cai ferate": 5.0
+      },
+      "privateHa": 289.0,
       "byCategory": {
         "P+F": 1639.0,
         "AP": 36.0,
@@ -548,7 +908,13 @@
         "DR": 54.0,
         "NP": 82.0
       },
-      "forestHa": 6881.0
+      "byCategoryPrivate": {
+        "P+F": 72.0,
+        "CC": 162.0,
+        "DR": 5.0
+      },
+      "forestHa": 6881.0,
+      "forestPrivateHa": 50.0
     },
     {
       "siruta": "131577",
@@ -566,6 +932,16 @@
         "Terenuri degradate si neproductive": 189.0
       },
       "totalHa": 3983.0,
+      "privateAreaHa": {
+        "Arabila": 35.0,
+        "Pasuni": 1054.0,
+        "Finete": 1440.0,
+        "Livezi si pepiniere pomicole": 180.0,
+        "Paduri si alta vegetatie forestiera": 442.0,
+        "Ocupata cu constructii": 177.0,
+        "Terenuri degradate si neproductive": 185.0
+      },
+      "privateHa": 3513.0,
       "byCategory": {
         "A": 35.0,
         "P+F": 2494.0,
@@ -575,7 +951,15 @@
         "DR": 85.0,
         "NP": 189.0
       },
-      "forestHa": 769.0
+      "byCategoryPrivate": {
+        "A": 35.0,
+        "P+F": 2494.0,
+        "V+L": 180.0,
+        "CC": 177.0,
+        "NP": 185.0
+      },
+      "forestHa": 769.0,
+      "forestPrivateHa": 442.0
     },
     {
       "siruta": "131620",
@@ -594,6 +978,18 @@
         "Terenuri degradate si neproductive": 118.0
       },
       "totalHa": 4367.0,
+      "privateAreaHa": {
+        "Arabila": 1266.0,
+        "Pasuni": 831.0,
+        "Finete": 140.0,
+        "Vii si pepiniere viticole": 1215.0,
+        "Livezi si pepiniere pomicole": 9.0,
+        "Paduri si alta vegetatie forestiera": 87.0,
+        "Ocupata cu ape, balti": 6.0,
+        "Ocupata cu constructii": 321.0,
+        "Terenuri degradate si neproductive": 42.0
+      },
+      "privateHa": 3917.0,
       "byCategory": {
         "A": 1266.0,
         "P+F": 971.0,
@@ -603,7 +999,16 @@
         "DR": 225.0,
         "NP": 118.0
       },
-      "forestHa": 138.0
+      "byCategoryPrivate": {
+        "A": 1266.0,
+        "P+F": 971.0,
+        "V+L": 1224.0,
+        "AP": 6.0,
+        "CC": 321.0,
+        "NP": 42.0
+      },
+      "forestHa": 138.0,
+      "forestPrivateHa": 87.0
     },
     {
       "siruta": "131817",
@@ -620,6 +1025,16 @@
         "Terenuri degradate si neproductive": 127.0
       },
       "totalHa": 2158.0,
+      "privateAreaHa": {
+        "Arabila": 336.0,
+        "Pasuni": 412.0,
+        "Finete": 238.0,
+        "Livezi si pepiniere pomicole": 116.0,
+        "Paduri si alta vegetatie forestiera": 352.0,
+        "Ocupata cu constructii": 238.0,
+        "Terenuri degradate si neproductive": 71.0
+      },
+      "privateHa": 1763.0,
       "byCategory": {
         "A": 336.0,
         "P+F": 650.0,
@@ -628,7 +1043,15 @@
         "CC": 325.0,
         "NP": 127.0
       },
-      "forestHa": 522.0
+      "byCategoryPrivate": {
+        "A": 336.0,
+        "P+F": 650.0,
+        "V+L": 116.0,
+        "CC": 238.0,
+        "NP": 71.0
+      },
+      "forestHa": 522.0,
+      "forestPrivateHa": 352.0
     },
     {
       "siruta": "131835",
@@ -646,6 +1069,18 @@
         "Terenuri degradate si neproductive": 157.0
       },
       "totalHa": 3277.0,
+      "privateAreaHa": {
+        "Arabila": 731.0,
+        "Pasuni": 612.0,
+        "Finete": 392.0,
+        "Livezi si pepiniere pomicole": 114.0,
+        "Paduri si alta vegetatie forestiera": 360.0,
+        "Ocupata cu ape, balti": 2.0,
+        "Ocupata cu constructii": 159.0,
+        "Cai de comunicatii si cai ferate": 5.0,
+        "Terenuri degradate si neproductive": 35.0
+      },
+      "privateHa": 2410.0,
       "byCategory": {
         "A": 733.0,
         "P+F": 1010.0,
@@ -655,7 +1090,17 @@
         "DR": 32.0,
         "NP": 157.0
       },
-      "forestHa": 976.0
+      "byCategoryPrivate": {
+        "A": 731.0,
+        "P+F": 1004.0,
+        "V+L": 114.0,
+        "AP": 2.0,
+        "CC": 159.0,
+        "DR": 5.0,
+        "NP": 35.0
+      },
+      "forestHa": 976.0,
+      "forestPrivateHa": 360.0
     },
     {
       "siruta": "131899",
@@ -672,6 +1117,15 @@
         "Cai de comunicatii si cai ferate": 27.0
       },
       "totalHa": 2270.0,
+      "privateAreaHa": {
+        "Arabila": 49.0,
+        "Pasuni": 461.0,
+        "Finete": 805.0,
+        "Livezi si pepiniere pomicole": 174.0,
+        "Paduri si alta vegetatie forestiera": 353.0,
+        "Ocupata cu constructii": 48.0
+      },
+      "privateHa": 1890.0,
       "byCategory": {
         "A": 49.0,
         "P+F": 1266.0,
@@ -680,7 +1134,14 @@
         "CC": 51.0,
         "DR": 27.0
       },
-      "forestHa": 671.0
+      "byCategoryPrivate": {
+        "A": 49.0,
+        "P+F": 1266.0,
+        "V+L": 174.0,
+        "CC": 48.0
+      },
+      "forestHa": 671.0,
+      "forestPrivateHa": 353.0
     },
     {
       "siruta": "131933",
@@ -699,6 +1160,16 @@
         "Terenuri degradate si neproductive": 10.0
       },
       "totalHa": 4973.0,
+      "privateAreaHa": {
+        "Arabila": 3808.0,
+        "Pasuni": 341.0,
+        "Finete": 17.0,
+        "Vii si pepiniere viticole": 180.0,
+        "Livezi si pepiniere pomicole": 6.0,
+        "Paduri si alta vegetatie forestiera": 41.0,
+        "Ocupata cu constructii": 215.0
+      },
+      "privateHa": 4608.0,
       "byCategory": {
         "A": 3844.0,
         "P+F": 358.0,
@@ -708,7 +1179,14 @@
         "DR": 106.0,
         "NP": 10.0
       },
-      "forestHa": 68.0
+      "byCategoryPrivate": {
+        "A": 3808.0,
+        "P+F": 358.0,
+        "V+L": 186.0,
+        "CC": 215.0
+      },
+      "forestHa": 68.0,
+      "forestPrivateHa": 41.0
     },
     {
       "siruta": "131988",
@@ -726,6 +1204,16 @@
         "Terenuri degradate si neproductive": 317.0
       },
       "totalHa": 2679.0,
+      "privateAreaHa": {
+        "Arabila": 144.0,
+        "Pasuni": 574.0,
+        "Finete": 819.0,
+        "Livezi si pepiniere pomicole": 139.0,
+        "Paduri si alta vegetatie forestiera": 83.0,
+        "Ocupata cu constructii": 51.0,
+        "Terenuri degradate si neproductive": 87.0
+      },
+      "privateHa": 1897.0,
       "byCategory": {
         "A": 144.0,
         "P+F": 1408.0,
@@ -735,7 +1223,15 @@
         "DR": 57.0,
         "NP": 317.0
       },
-      "forestHa": 533.0
+      "byCategoryPrivate": {
+        "A": 144.0,
+        "P+F": 1393.0,
+        "V+L": 139.0,
+        "CC": 51.0,
+        "NP": 87.0
+      },
+      "forestHa": 533.0,
+      "forestPrivateHa": 83.0
     },
     {
       "siruta": "132011",
@@ -754,6 +1250,19 @@
         "Terenuri degradate si neproductive": 19.0
       },
       "totalHa": 2023.0,
+      "privateAreaHa": {
+        "Arabila": 220.0,
+        "Pasuni": 576.0,
+        "Finete": 466.0,
+        "Vii si pepiniere viticole": 25.0,
+        "Livezi si pepiniere pomicole": 5.0,
+        "Paduri si alta vegetatie forestiera": 122.0,
+        "Ocupata cu ape, balti": 1.0,
+        "Ocupata cu constructii": 42.0,
+        "Cai de comunicatii si cai ferate": 13.0,
+        "Terenuri degradate si neproductive": 12.0
+      },
+      "privateHa": 1482.0,
       "byCategory": {
         "A": 227.0,
         "P+F": 1046.0,
@@ -763,7 +1272,17 @@
         "DR": 49.0,
         "NP": 19.0
       },
-      "forestHa": 528.0
+      "byCategoryPrivate": {
+        "A": 220.0,
+        "P+F": 1042.0,
+        "V+L": 30.0,
+        "AP": 1.0,
+        "CC": 42.0,
+        "DR": 13.0,
+        "NP": 12.0
+      },
+      "forestHa": 528.0,
+      "forestPrivateHa": 122.0
     },
     {
       "siruta": "132075",
@@ -781,6 +1300,17 @@
         "Terenuri degradate si neproductive": 27.0
       },
       "totalHa": 8148.0,
+      "privateAreaHa": {
+        "Arabila": 4417.0,
+        "Pasuni": 338.0,
+        "Vii si pepiniere viticole": 18.0,
+        "Livezi si pepiniere pomicole": 42.0,
+        "Ocupata cu ape, balti": 13.0,
+        "Ocupata cu constructii": 2051.0,
+        "Cai de comunicatii si cai ferate": 10.0,
+        "Terenuri degradate si neproductive": 7.0
+      },
+      "privateHa": 6896.0,
       "byCategory": {
         "A": 4941.0,
         "P+F": 362.0,
@@ -790,7 +1320,17 @@
         "DR": 160.0,
         "NP": 27.0
       },
-      "forestHa": 173.0
+      "byCategoryPrivate": {
+        "A": 4417.0,
+        "P+F": 338.0,
+        "V+L": 60.0,
+        "AP": 13.0,
+        "CC": 2051.0,
+        "DR": 10.0,
+        "NP": 7.0
+      },
+      "forestHa": 173.0,
+      "forestPrivateHa": 0.0
     },
     {
       "siruta": "132137",
@@ -808,6 +1348,17 @@
         "Terenuri degradate si neproductive": 3.0
       },
       "totalHa": 2066.0,
+      "privateAreaHa": {
+        "Arabila": 92.0,
+        "Pasuni": 427.0,
+        "Finete": 308.0,
+        "Livezi si pepiniere pomicole": 58.0,
+        "Paduri si alta vegetatie forestiera": 283.0,
+        "Ocupata cu constructii": 74.0,
+        "Cai de comunicatii si cai ferate": 2.0,
+        "Terenuri degradate si neproductive": 3.0
+      },
+      "privateHa": 1247.0,
       "byCategory": {
         "A": 92.0,
         "P+F": 737.0,
@@ -817,7 +1368,16 @@
         "DR": 36.0,
         "NP": 3.0
       },
-      "forestHa": 1056.0
+      "byCategoryPrivate": {
+        "A": 92.0,
+        "P+F": 735.0,
+        "V+L": 58.0,
+        "CC": 74.0,
+        "DR": 2.0,
+        "NP": 3.0
+      },
+      "forestHa": 1056.0,
+      "forestPrivateHa": 283.0
     },
     {
       "siruta": "132164",
@@ -830,13 +1390,25 @@
         "Cai de comunicatii si cai ferate": 134.0
       },
       "totalHa": 7866.0,
+      "privateAreaHa": {
+        "Arabila": 7220.0,
+        "Pasuni": 354.0,
+        "Ocupata cu constructii": 131.0
+      },
+      "privateHa": 7705.0,
       "byCategory": {
         "A": 7232.0,
         "P+F": 354.0,
         "CC": 146.0,
         "DR": 134.0
       },
-      "forestHa": 0.0
+      "byCategoryPrivate": {
+        "A": 7220.0,
+        "P+F": 354.0,
+        "CC": 131.0
+      },
+      "forestHa": 0.0,
+      "forestPrivateHa": 0.0
     },
     {
       "siruta": "132226",
@@ -851,6 +1423,15 @@
         "Cai de comunicatii si cai ferate": 35.0
       },
       "totalHa": 3536.0,
+      "privateAreaHa": {
+        "Arabila": 1609.0,
+        "Pasuni": 243.0,
+        "Paduri si alta vegetatie forestiera": 10.0,
+        "Ocupata cu ape, balti": 20.0,
+        "Ocupata cu constructii": 111.0,
+        "Cai de comunicatii si cai ferate": 15.0
+      },
+      "privateHa": 2008.0,
       "byCategory": {
         "A": 1673.0,
         "P+F": 243.0,
@@ -858,7 +1439,15 @@
         "CC": 115.0,
         "DR": 35.0
       },
-      "forestHa": 1377.0
+      "byCategoryPrivate": {
+        "A": 1609.0,
+        "P+F": 243.0,
+        "AP": 20.0,
+        "CC": 111.0,
+        "DR": 15.0
+      },
+      "forestHa": 1377.0,
+      "forestPrivateHa": 10.0
     },
     {
       "siruta": "132271",
@@ -877,6 +1466,17 @@
         "Terenuri degradate si neproductive": 5.0
       },
       "totalHa": 3666.0,
+      "privateAreaHa": {
+        "Arabila": 946.0,
+        "Pasuni": 738.0,
+        "Finete": 165.0,
+        "Vii si pepiniere viticole": 40.0,
+        "Livezi si pepiniere pomicole": 180.0,
+        "Paduri si alta vegetatie forestiera": 412.0,
+        "Ocupata cu constructii": 118.0,
+        "Terenuri degradate si neproductive": 3.0
+      },
+      "privateHa": 2602.0,
       "byCategory": {
         "A": 953.0,
         "P+F": 903.0,
@@ -886,7 +1486,15 @@
         "DR": 79.0,
         "NP": 5.0
       },
-      "forestHa": 1373.0
+      "byCategoryPrivate": {
+        "A": 946.0,
+        "P+F": 903.0,
+        "V+L": 220.0,
+        "CC": 118.0,
+        "NP": 3.0
+      },
+      "forestHa": 1373.0,
+      "forestPrivateHa": 412.0
     },
     {
       "siruta": "132315",
@@ -902,6 +1510,16 @@
         "Terenuri degradate si neproductive": 239.0
       },
       "totalHa": 2139.0,
+      "privateAreaHa": {
+        "Arabila": 1018.0,
+        "Pasuni": 181.0,
+        "Finete": 116.0,
+        "Livezi si pepiniere pomicole": 10.0,
+        "Paduri si alta vegetatie forestiera": 96.0,
+        "Ocupata cu constructii": 288.0,
+        "Terenuri degradate si neproductive": 239.0
+      },
+      "privateHa": 1948.0,
       "byCategory": {
         "A": 1036.0,
         "P+F": 297.0,
@@ -909,7 +1527,15 @@
         "CC": 288.0,
         "NP": 239.0
       },
-      "forestHa": 269.0
+      "byCategoryPrivate": {
+        "A": 1018.0,
+        "P+F": 297.0,
+        "V+L": 10.0,
+        "CC": 288.0,
+        "NP": 239.0
+      },
+      "forestHa": 269.0,
+      "forestPrivateHa": 96.0
     },
     {
       "siruta": "132342",
@@ -927,6 +1553,16 @@
         "Terenuri degradate si neproductive": 210.0
       },
       "totalHa": 5232.0,
+      "privateAreaHa": {
+        "Arabila": 10.0,
+        "Pasuni": 592.0,
+        "Finete": 1321.0,
+        "Livezi si pepiniere pomicole": 400.0,
+        "Paduri si alta vegetatie forestiera": 1056.0,
+        "Ocupata cu constructii": 65.0,
+        "Terenuri degradate si neproductive": 126.0
+      },
+      "privateHa": 3570.0,
       "byCategory": {
         "A": 10.0,
         "P+F": 1913.0,
@@ -936,7 +1572,15 @@
         "DR": 219.0,
         "NP": 210.0
       },
-      "forestHa": 2300.0
+      "byCategoryPrivate": {
+        "A": 10.0,
+        "P+F": 1913.0,
+        "V+L": 400.0,
+        "CC": 65.0,
+        "NP": 126.0
+      },
+      "forestHa": 2300.0,
+      "forestPrivateHa": 1056.0
     },
     {
       "siruta": "132379",
@@ -952,6 +1596,15 @@
         "Terenuri degradate si neproductive": 67.0
       },
       "totalHa": 3946.0,
+      "privateAreaHa": {
+        "Arabila": 2556.0,
+        "Pasuni": 632.0,
+        "Vii si pepiniere viticole": 50.0,
+        "Ocupata cu ape, balti": 291.0,
+        "Ocupata cu constructii": 228.0,
+        "Terenuri degradate si neproductive": 32.0
+      },
+      "privateHa": 3789.0,
       "byCategory": {
         "A": 2570.0,
         "P+F": 632.0,
@@ -961,7 +1614,16 @@
         "DR": 52.0,
         "NP": 67.0
       },
-      "forestHa": 0.0
+      "byCategoryPrivate": {
+        "A": 2556.0,
+        "P+F": 632.0,
+        "V+L": 50.0,
+        "AP": 291.0,
+        "CC": 228.0,
+        "NP": 32.0
+      },
+      "forestHa": 0.0,
+      "forestPrivateHa": 0.0
     },
     {
       "siruta": "132404",
@@ -979,6 +1641,16 @@
         "Terenuri degradate si neproductive": 16.0
       },
       "totalHa": 5845.0,
+      "privateAreaHa": {
+        "Arabila": 398.0,
+        "Pasuni": 284.0,
+        "Finete": 1341.0,
+        "Livezi si pepiniere pomicole": 206.0,
+        "Paduri si alta vegetatie forestiera": 900.0,
+        "Ocupata cu constructii": 288.0,
+        "Terenuri degradate si neproductive": 16.0
+      },
+      "privateHa": 3433.0,
       "byCategory": {
         "A": 399.0,
         "P+F": 2433.0,
@@ -988,7 +1660,15 @@
         "DR": 100.0,
         "NP": 16.0
       },
-      "forestHa": 2285.0
+      "byCategoryPrivate": {
+        "A": 398.0,
+        "P+F": 1625.0,
+        "V+L": 206.0,
+        "CC": 288.0,
+        "NP": 16.0
+      },
+      "forestHa": 2285.0,
+      "forestPrivateHa": 900.0
     },
     {
       "siruta": "132459",
@@ -1006,6 +1686,16 @@
         "Cai de comunicatii si cai ferate": 25.0
       },
       "totalHa": 1992.0,
+      "privateAreaHa": {
+        "Arabila": 125.0,
+        "Pasuni": 1074.0,
+        "Finete": 134.0,
+        "Vii si pepiniere viticole": 67.0,
+        "Livezi si pepiniere pomicole": 9.0,
+        "Paduri si alta vegetatie forestiera": 250.0,
+        "Ocupata cu constructii": 109.0
+      },
+      "privateHa": 1768.0,
       "byCategory": {
         "A": 126.0,
         "P+F": 1272.0,
@@ -1014,7 +1704,14 @@
         "CC": 109.0,
         "DR": 25.0
       },
-      "forestHa": 357.0
+      "byCategoryPrivate": {
+        "A": 125.0,
+        "P+F": 1208.0,
+        "V+L": 76.0,
+        "CC": 109.0
+      },
+      "forestHa": 357.0,
+      "forestPrivateHa": 250.0
     },
     {
       "siruta": "132486",
@@ -1032,6 +1729,18 @@
         "Terenuri degradate si neproductive": 11.0
       },
       "totalHa": 2118.0,
+      "privateAreaHa": {
+        "Arabila": 130.0,
+        "Pasuni": 244.0,
+        "Finete": 497.0,
+        "Livezi si pepiniere pomicole": 215.0,
+        "Paduri si alta vegetatie forestiera": 318.0,
+        "Ocupata cu ape, balti": 1.0,
+        "Ocupata cu constructii": 44.0,
+        "Cai de comunicatii si cai ferate": 36.0,
+        "Terenuri degradate si neproductive": 10.0
+      },
+      "privateHa": 1495.0,
       "byCategory": {
         "A": 130.0,
         "P+F": 768.0,
@@ -1041,7 +1750,17 @@
         "DR": 44.0,
         "NP": 11.0
       },
-      "forestHa": 877.0
+      "byCategoryPrivate": {
+        "A": 130.0,
+        "P+F": 741.0,
+        "V+L": 215.0,
+        "AP": 1.0,
+        "CC": 44.0,
+        "DR": 36.0,
+        "NP": 10.0
+      },
+      "forestHa": 877.0,
+      "forestPrivateHa": 318.0
     },
     {
       "siruta": "132510",
@@ -1060,6 +1779,18 @@
         "Terenuri degradate si neproductive": 28.0
       },
       "totalHa": 4705.0,
+      "privateAreaHa": {
+        "Arabila": 2123.0,
+        "Pasuni": 746.0,
+        "Finete": 142.0,
+        "Vii si pepiniere viticole": 863.0,
+        "Livezi si pepiniere pomicole": 71.0,
+        "Paduri si alta vegetatie forestiera": 196.0,
+        "Ocupata cu constructii": 181.0,
+        "Cai de comunicatii si cai ferate": 42.0,
+        "Terenuri degradate si neproductive": 22.0
+      },
+      "privateHa": 4386.0,
       "byCategory": {
         "A": 2131.0,
         "P+F": 904.0,
@@ -1069,7 +1800,16 @@
         "DR": 72.0,
         "NP": 28.0
       },
-      "forestHa": 376.0
+      "byCategoryPrivate": {
+        "A": 2123.0,
+        "P+F": 888.0,
+        "V+L": 934.0,
+        "CC": 181.0,
+        "DR": 42.0,
+        "NP": 22.0
+      },
+      "forestHa": 376.0,
+      "forestPrivateHa": 196.0
     },
     {
       "siruta": "132574",
@@ -1087,6 +1827,16 @@
         "Terenuri degradate si neproductive": 34.0
       },
       "totalHa": 12063.0,
+      "privateAreaHa": {
+        "Arabila": 214.0,
+        "Pasuni": 1833.0,
+        "Finete": 1945.0,
+        "Livezi si pepiniere pomicole": 115.0,
+        "Paduri si alta vegetatie forestiera": 1089.0,
+        "Ocupata cu constructii": 98.0,
+        "Terenuri degradate si neproductive": 34.0
+      },
+      "privateHa": 5328.0,
       "byCategory": {
         "A": 214.0,
         "P+F": 3789.0,
@@ -1096,7 +1846,15 @@
         "DR": 82.0,
         "NP": 34.0
       },
-      "forestHa": 7667.0
+      "byCategoryPrivate": {
+        "A": 214.0,
+        "P+F": 3778.0,
+        "V+L": 115.0,
+        "CC": 98.0,
+        "NP": 34.0
+      },
+      "forestHa": 7667.0,
+      "forestPrivateHa": 1089.0
     },
     {
       "siruta": "132645",
@@ -1115,6 +1873,17 @@
         "Terenuri degradate si neproductive": 408.0
       },
       "totalHa": 3148.0,
+      "privateAreaHa": {
+        "Arabila": 81.0,
+        "Pasuni": 1034.0,
+        "Finete": 300.0,
+        "Vii si pepiniere viticole": 25.0,
+        "Livezi si pepiniere pomicole": 150.0,
+        "Paduri si alta vegetatie forestiera": 736.0,
+        "Ocupata cu constructii": 142.0,
+        "Terenuri degradate si neproductive": 356.0
+      },
+      "privateHa": 2824.0,
       "byCategory": {
         "A": 85.0,
         "P+F": 1386.0,
@@ -1124,7 +1893,15 @@
         "DR": 71.0,
         "NP": 408.0
       },
-      "forestHa": 860.0
+      "byCategoryPrivate": {
+        "A": 81.0,
+        "P+F": 1334.0,
+        "V+L": 175.0,
+        "CC": 142.0,
+        "NP": 356.0
+      },
+      "forestHa": 860.0,
+      "forestPrivateHa": 736.0
     },
     {
       "siruta": "132681",
@@ -1141,6 +1918,15 @@
         "Terenuri degradate si neproductive": 14.0
       },
       "totalHa": 8045.0,
+      "privateAreaHa": {
+        "Arabila": 6385.0,
+        "Pasuni": 626.0,
+        "Vii si pepiniere viticole": 56.0,
+        "Paduri si alta vegetatie forestiera": 131.0,
+        "Ocupata cu constructii": 347.0,
+        "Terenuri degradate si neproductive": 14.0
+      },
+      "privateHa": 7559.0,
       "byCategory": {
         "A": 6426.0,
         "P+F": 626.0,
@@ -1150,7 +1936,15 @@
         "DR": 154.0,
         "NP": 14.0
       },
-      "forestHa": 244.0
+      "byCategoryPrivate": {
+        "A": 6385.0,
+        "P+F": 626.0,
+        "V+L": 56.0,
+        "CC": 347.0,
+        "NP": 14.0
+      },
+      "forestHa": 244.0,
+      "forestPrivateHa": 131.0
     },
     {
       "siruta": "132716",
@@ -1169,6 +1963,17 @@
         "Terenuri degradate si neproductive": 24.0
       },
       "totalHa": 3435.0,
+      "privateAreaHa": {
+        "Arabila": 584.0,
+        "Pasuni": 221.0,
+        "Finete": 173.0,
+        "Vii si pepiniere viticole": 2.0,
+        "Livezi si pepiniere pomicole": 101.0,
+        "Paduri si alta vegetatie forestiera": 191.0,
+        "Ocupata cu constructii": 94.0,
+        "Terenuri degradate si neproductive": 24.0
+      },
+      "privateHa": 1390.0,
       "byCategory": {
         "A": 584.0,
         "P+F": 399.0,
@@ -1178,7 +1983,15 @@
         "DR": 18.0,
         "NP": 24.0
       },
-      "forestHa": 2142.0
+      "byCategoryPrivate": {
+        "A": 584.0,
+        "P+F": 394.0,
+        "V+L": 103.0,
+        "CC": 94.0,
+        "NP": 24.0
+      },
+      "forestHa": 2142.0,
+      "forestPrivateHa": 191.0
     },
     {
       "siruta": "132752",
@@ -1194,6 +2007,16 @@
         "Terenuri degradate si neproductive": 5.0
       },
       "totalHa": 5923.0,
+      "privateAreaHa": {
+        "Arabila": 4814.0,
+        "Pasuni": 512.0,
+        "Vii si pepiniere viticole": 86.0,
+        "Ocupata cu ape, balti": 10.0,
+        "Ocupata cu constructii": 229.0,
+        "Cai de comunicatii si cai ferate": 2.0,
+        "Terenuri degradate si neproductive": 3.0
+      },
+      "privateHa": 5656.0,
       "byCategory": {
         "A": 4826.0,
         "P+F": 525.0,
@@ -1203,7 +2026,17 @@
         "DR": 115.0,
         "NP": 5.0
       },
-      "forestHa": 0.0
+      "byCategoryPrivate": {
+        "A": 4814.0,
+        "P+F": 512.0,
+        "V+L": 86.0,
+        "AP": 10.0,
+        "CC": 229.0,
+        "DR": 2.0,
+        "NP": 3.0
+      },
+      "forestHa": 0.0,
+      "forestPrivateHa": 0.0
     },
     {
       "siruta": "132805",
@@ -1221,6 +2054,17 @@
         "Terenuri degradate si neproductive": 46.0
       },
       "totalHa": 1511.0,
+      "privateAreaHa": {
+        "Arabila": 85.0,
+        "Pasuni": 382.0,
+        "Finete": 489.0,
+        "Livezi si pepiniere pomicole": 126.0,
+        "Paduri si alta vegetatie forestiera": 61.0,
+        "Ocupata cu constructii": 128.0,
+        "Cai de comunicatii si cai ferate": 2.0,
+        "Terenuri degradate si neproductive": 25.0
+      },
+      "privateHa": 1298.0,
       "byCategory": {
         "A": 85.0,
         "P+F": 879.0,
@@ -1230,7 +2074,16 @@
         "DR": 67.0,
         "NP": 46.0
       },
-      "forestHa": 165.0
+      "byCategoryPrivate": {
+        "A": 85.0,
+        "P+F": 871.0,
+        "V+L": 126.0,
+        "CC": 128.0,
+        "DR": 2.0,
+        "NP": 25.0
+      },
+      "forestHa": 165.0,
+      "forestPrivateHa": 61.0
     },
     {
       "siruta": "132841",
@@ -1248,6 +2101,16 @@
         "Terenuri degradate si neproductive": 57.0
       },
       "totalHa": 2506.0,
+      "privateAreaHa": {
+        "Arabila": 94.0,
+        "Pasuni": 438.0,
+        "Finete": 630.0,
+        "Livezi si pepiniere pomicole": 30.0,
+        "Paduri si alta vegetatie forestiera": 837.0,
+        "Ocupata cu constructii": 33.0,
+        "Terenuri degradate si neproductive": 45.0
+      },
+      "privateHa": 2107.0,
       "byCategory": {
         "A": 95.0,
         "P+F": 1072.0,
@@ -1257,7 +2120,15 @@
         "DR": 24.0,
         "NP": 57.0
       },
-      "forestHa": 1182.0
+      "byCategoryPrivate": {
+        "A": 94.0,
+        "P+F": 1068.0,
+        "V+L": 30.0,
+        "CC": 33.0,
+        "NP": 45.0
+      },
+      "forestHa": 1182.0,
+      "forestPrivateHa": 837.0
     },
     {
       "siruta": "132896",
@@ -1275,6 +2146,17 @@
         "Terenuri degradate si neproductive": 154.0
       },
       "totalHa": 5566.0,
+      "privateAreaHa": {
+        "Arabila": 532.0,
+        "Pasuni": 1054.0,
+        "Finete": 1413.0,
+        "Livezi si pepiniere pomicole": 60.0,
+        "Paduri si alta vegetatie forestiera": 625.0,
+        "Ocupata cu constructii": 310.0,
+        "Cai de comunicatii si cai ferate": 2.0,
+        "Terenuri degradate si neproductive": 140.0
+      },
+      "privateHa": 4136.0,
       "byCategory": {
         "A": 536.0,
         "P+F": 2707.0,
@@ -1284,7 +2166,16 @@
         "DR": 113.0,
         "NP": 154.0
       },
-      "forestHa": 1577.0
+      "byCategoryPrivate": {
+        "A": 532.0,
+        "P+F": 2467.0,
+        "V+L": 60.0,
+        "CC": 310.0,
+        "DR": 2.0,
+        "NP": 140.0
+      },
+      "forestHa": 1577.0,
+      "forestPrivateHa": 625.0
     },
     {
       "siruta": "133018",
@@ -1303,6 +2194,17 @@
         "Terenuri degradate si neproductive": 6.0
       },
       "totalHa": 8756.0,
+      "privateAreaHa": {
+        "Arabila": 6732.0,
+        "Pasuni": 645.0,
+        "Finete": 7.0,
+        "Vii si pepiniere viticole": 11.0,
+        "Livezi si pepiniere pomicole": 4.0,
+        "Paduri si alta vegetatie forestiera": 487.0,
+        "Ocupata cu ape, balti": 3.0,
+        "Ocupata cu constructii": 207.0
+      },
+      "privateHa": 8096.0,
       "byCategory": {
         "A": 6807.0,
         "P+F": 692.0,
@@ -1312,7 +2214,15 @@
         "DR": 134.0,
         "NP": 6.0
       },
-      "forestHa": 659.0
+      "byCategoryPrivate": {
+        "A": 6732.0,
+        "P+F": 652.0,
+        "V+L": 15.0,
+        "AP": 3.0,
+        "CC": 207.0
+      },
+      "forestHa": 659.0,
+      "forestPrivateHa": 487.0
     },
     {
       "siruta": "133090",
@@ -1331,6 +2241,17 @@
         "Terenuri degradate si neproductive": 5.0
       },
       "totalHa": 6347.0,
+      "privateAreaHa": {
+        "Arabila": 5019.0,
+        "Pasuni": 410.0,
+        "Finete": 1.0,
+        "Vii si pepiniere viticole": 7.0,
+        "Livezi si pepiniere pomicole": 2.0,
+        "Paduri si alta vegetatie forestiera": 55.0,
+        "Ocupata cu ape, balti": 4.0,
+        "Ocupata cu constructii": 109.0
+      },
+      "privateHa": 5607.0,
       "byCategory": {
         "A": 5045.0,
         "P+F": 411.0,
@@ -1340,7 +2261,15 @@
         "DR": 77.0,
         "NP": 5.0
       },
-      "forestHa": 511.0
+      "byCategoryPrivate": {
+        "A": 5019.0,
+        "P+F": 411.0,
+        "V+L": 9.0,
+        "AP": 4.0,
+        "CC": 109.0
+      },
+      "forestHa": 511.0,
+      "forestPrivateHa": 55.0
     },
     {
       "siruta": "133161",
@@ -1359,6 +2288,19 @@
         "Terenuri degradate si neproductive": 20.0
       },
       "totalHa": 4864.0,
+      "privateAreaHa": {
+        "Arabila": 1647.0,
+        "Pasuni": 759.0,
+        "Finete": 342.0,
+        "Vii si pepiniere viticole": 5.0,
+        "Livezi si pepiniere pomicole": 173.0,
+        "Paduri si alta vegetatie forestiera": 1281.0,
+        "Ocupata cu ape, balti": 2.0,
+        "Ocupata cu constructii": 268.0,
+        "Cai de comunicatii si cai ferate": 5.0,
+        "Terenuri degradate si neproductive": 2.0
+      },
+      "privateHa": 4484.0,
       "byCategory": {
         "A": 1674.0,
         "P+F": 1101.0,
@@ -1368,7 +2310,17 @@
         "DR": 133.0,
         "NP": 20.0
       },
-      "forestHa": 1331.0
+      "byCategoryPrivate": {
+        "A": 1647.0,
+        "P+F": 1101.0,
+        "V+L": 178.0,
+        "AP": 2.0,
+        "CC": 268.0,
+        "DR": 5.0,
+        "NP": 2.0
+      },
+      "forestHa": 1331.0,
+      "forestPrivateHa": 1281.0
     },
     {
       "siruta": "133214",
@@ -1386,6 +2338,18 @@
         "Terenuri degradate si neproductive": 21.0
       },
       "totalHa": 3669.0,
+      "privateAreaHa": {
+        "Arabila": 2519.0,
+        "Pasuni": 194.0,
+        "Finete": 3.0,
+        "Livezi si pepiniere pomicole": 14.0,
+        "Paduri si alta vegetatie forestiera": 378.0,
+        "Ocupata cu ape, balti": 296.0,
+        "Ocupata cu constructii": 167.0,
+        "Cai de comunicatii si cai ferate": 64.0,
+        "Terenuri degradate si neproductive": 21.0
+      },
+      "privateHa": 3656.0,
       "byCategory": {
         "A": 2519.0,
         "P+F": 197.0,
@@ -1395,7 +2359,17 @@
         "DR": 77.0,
         "NP": 21.0
       },
-      "forestHa": 378.0
+      "byCategoryPrivate": {
+        "A": 2519.0,
+        "P+F": 197.0,
+        "V+L": 14.0,
+        "AP": 296.0,
+        "CC": 167.0,
+        "DR": 64.0,
+        "NP": 21.0
+      },
+      "forestHa": 378.0,
+      "forestPrivateHa": 378.0
     },
     {
       "siruta": "133278",
@@ -1414,6 +2388,18 @@
         "Terenuri degradate si neproductive": 16.0
       },
       "totalHa": 1772.0,
+      "privateAreaHa": {
+        "Arabila": 981.0,
+        "Pasuni": 126.0,
+        "Finete": 6.0,
+        "Vii si pepiniere viticole": 349.0,
+        "Livezi si pepiniere pomicole": 2.0,
+        "Paduri si alta vegetatie forestiera": 25.0,
+        "Ocupata cu constructii": 80.0,
+        "Cai de comunicatii si cai ferate": 30.0,
+        "Terenuri degradate si neproductive": 4.0
+      },
+      "privateHa": 1603.0,
       "byCategory": {
         "A": 987.0,
         "P+F": 134.0,
@@ -1423,7 +2409,16 @@
         "DR": 62.0,
         "NP": 16.0
       },
-      "forestHa": 128.0
+      "byCategoryPrivate": {
+        "A": 981.0,
+        "P+F": 132.0,
+        "V+L": 351.0,
+        "CC": 80.0,
+        "DR": 30.0,
+        "NP": 4.0
+      },
+      "forestHa": 128.0,
+      "forestPrivateHa": 25.0
     },
     {
       "siruta": "133330",
@@ -1438,6 +2433,13 @@
         "Terenuri degradate si neproductive": 34.0
       },
       "totalHa": 2982.0,
+      "privateAreaHa": {
+        "Arabila": 2427.0,
+        "Pasuni": 59.0,
+        "Paduri si alta vegetatie forestiera": 50.0,
+        "Ocupata cu constructii": 238.0
+      },
+      "privateHa": 2774.0,
       "byCategory": {
         "A": 2427.0,
         "P+F": 59.0,
@@ -1445,7 +2447,13 @@
         "CC": 242.0,
         "NP": 34.0
       },
-      "forestHa": 187.0
+      "byCategoryPrivate": {
+        "A": 2427.0,
+        "P+F": 59.0,
+        "CC": 238.0
+      },
+      "forestHa": 187.0,
+      "forestPrivateHa": 50.0
     },
     {
       "siruta": "133394",
@@ -1461,6 +2469,14 @@
         "Terenuri degradate si neproductive": 76.0
       },
       "totalHa": 7456.0,
+      "privateAreaHa": {
+        "Arabila": 6002.0,
+        "Pasuni": 435.0,
+        "Vii si pepiniere viticole": 38.0,
+        "Ocupata cu constructii": 315.0,
+        "Terenuri degradate si neproductive": 34.0
+      },
+      "privateHa": 6824.0,
       "byCategory": {
         "A": 6002.0,
         "P+F": 435.0,
@@ -1470,7 +2486,15 @@
         "DR": 77.0,
         "NP": 76.0
       },
-      "forestHa": 0.0
+      "byCategoryPrivate": {
+        "A": 6002.0,
+        "P+F": 435.0,
+        "V+L": 38.0,
+        "CC": 315.0,
+        "NP": 34.0
+      },
+      "forestHa": 0.0,
+      "forestPrivateHa": 0.0
     },
     {
       "siruta": "133429",
@@ -1488,6 +2512,17 @@
         "Terenuri degradate si neproductive": 2.0
       },
       "totalHa": 3482.0,
+      "privateAreaHa": {
+        "Arabila": 2766.0,
+        "Pasuni": 275.0,
+        "Vii si pepiniere viticole": 2.0,
+        "Livezi si pepiniere pomicole": 6.0,
+        "Paduri si alta vegetatie forestiera": 20.0,
+        "Ocupata cu ape, balti": 1.0,
+        "Ocupata cu constructii": 141.0,
+        "Cai de comunicatii si cai ferate": 1.0
+      },
+      "privateHa": 3212.0,
       "byCategory": {
         "A": 2790.0,
         "P+F": 275.0,
@@ -1497,7 +2532,16 @@
         "DR": 125.0,
         "NP": 2.0
       },
-      "forestHa": 85.0
+      "byCategoryPrivate": {
+        "A": 2766.0,
+        "P+F": 275.0,
+        "V+L": 8.0,
+        "AP": 1.0,
+        "CC": 141.0,
+        "DR": 1.0
+      },
+      "forestHa": 85.0,
+      "forestPrivateHa": 20.0
     },
     {
       "siruta": "133508",
@@ -1515,6 +2559,15 @@
         "Terenuri degradate si neproductive": 16.0
       },
       "totalHa": 3250.0,
+      "privateAreaHa": {
+        "Arabila": 2190.0,
+        "Pasuni": 235.0,
+        "Vii si pepiniere viticole": 10.0,
+        "Livezi si pepiniere pomicole": 10.0,
+        "Paduri si alta vegetatie forestiera": 1.0,
+        "Ocupata cu constructii": 116.0
+      },
+      "privateHa": 2562.0,
       "byCategory": {
         "A": 2218.0,
         "P+F": 235.0,
@@ -1524,7 +2577,14 @@
         "DR": 51.0,
         "NP": 16.0
       },
-      "forestHa": 507.0
+      "byCategoryPrivate": {
+        "A": 2190.0,
+        "P+F": 235.0,
+        "V+L": 20.0,
+        "CC": 116.0
+      },
+      "forestHa": 507.0,
+      "forestPrivateHa": 1.0
     },
     {
       "siruta": "133562",
@@ -1543,6 +2603,17 @@
         "Terenuri degradate si neproductive": 38.0
       },
       "totalHa": 2179.0,
+      "privateAreaHa": {
+        "Arabila": 733.0,
+        "Pasuni": 726.0,
+        "Finete": 314.0,
+        "Vii si pepiniere viticole": 42.0,
+        "Livezi si pepiniere pomicole": 116.0,
+        "Paduri si alta vegetatie forestiera": 71.0,
+        "Ocupata cu constructii": 59.0,
+        "Terenuri degradate si neproductive": 38.0
+      },
+      "privateHa": 2099.0,
       "byCategory": {
         "A": 733.0,
         "P+F": 1040.0,
@@ -1552,7 +2623,15 @@
         "DR": 38.0,
         "NP": 38.0
       },
-      "forestHa": 101.0
+      "byCategoryPrivate": {
+        "A": 733.0,
+        "P+F": 1040.0,
+        "V+L": 158.0,
+        "CC": 59.0,
+        "NP": 38.0
+      },
+      "forestHa": 101.0,
+      "forestPrivateHa": 71.0
     },
     {
       "siruta": "133615",
@@ -1571,6 +2650,19 @@
         "Terenuri degradate si neproductive": 184.0
       },
       "totalHa": 2796.0,
+      "privateAreaHa": {
+        "Arabila": 575.0,
+        "Pasuni": 706.0,
+        "Finete": 322.0,
+        "Vii si pepiniere viticole": 87.0,
+        "Livezi si pepiniere pomicole": 28.0,
+        "Paduri si alta vegetatie forestiera": 205.0,
+        "Ocupata cu ape, balti": 3.0,
+        "Ocupata cu constructii": 142.0,
+        "Cai de comunicatii si cai ferate": 70.0,
+        "Terenuri degradate si neproductive": 181.0
+      },
+      "privateHa": 2319.0,
       "byCategory": {
         "A": 575.0,
         "P+F": 1028.0,
@@ -1580,7 +2672,17 @@
         "DR": 116.0,
         "NP": 184.0
       },
-      "forestHa": 520.0
+      "byCategoryPrivate": {
+        "A": 575.0,
+        "P+F": 1028.0,
+        "V+L": 115.0,
+        "AP": 3.0,
+        "CC": 142.0,
+        "DR": 70.0,
+        "NP": 181.0
+      },
+      "forestHa": 520.0,
+      "forestPrivateHa": 205.0
     },
     {
       "siruta": "133688",
@@ -1598,6 +2700,16 @@
         "Terenuri degradate si neproductive": 120.0
       },
       "totalHa": 3573.0,
+      "privateAreaHa": {
+        "Arabila": 798.0,
+        "Pasuni": 335.0,
+        "Finete": 21.0,
+        "Vii si pepiniere viticole": 1661.0,
+        "Ocupata cu constructii": 214.0,
+        "Cai de comunicatii si cai ferate": 43.0,
+        "Terenuri degradate si neproductive": 120.0
+      },
+      "privateHa": 3192.0,
       "byCategory": {
         "A": 860.0,
         "P+F": 356.0,
@@ -1607,7 +2719,16 @@
         "DR": 248.0,
         "NP": 120.0
       },
-      "forestHa": 77.0
+      "byCategoryPrivate": {
+        "A": 798.0,
+        "P+F": 356.0,
+        "V+L": 1661.0,
+        "CC": 214.0,
+        "DR": 43.0,
+        "NP": 120.0
+      },
+      "forestHa": 77.0,
+      "forestPrivateHa": 0.0
     },
     {
       "siruta": "133722",
@@ -1626,6 +2747,19 @@
         "Terenuri degradate si neproductive": 839.0
       },
       "totalHa": 5492.0,
+      "privateAreaHa": {
+        "Arabila": 960.0,
+        "Pasuni": 771.0,
+        "Finete": 277.0,
+        "Vii si pepiniere viticole": 39.0,
+        "Livezi si pepiniere pomicole": 19.0,
+        "Paduri si alta vegetatie forestiera": 275.0,
+        "Ocupata cu ape, balti": 5.0,
+        "Ocupata cu constructii": 127.0,
+        "Cai de comunicatii si cai ferate": 4.0,
+        "Terenuri degradate si neproductive": 812.0
+      },
+      "privateHa": 3289.0,
       "byCategory": {
         "A": 972.0,
         "P+F": 1079.0,
@@ -1635,7 +2769,17 @@
         "DR": 107.0,
         "NP": 839.0
       },
-      "forestHa": 2179.0
+      "byCategoryPrivate": {
+        "A": 960.0,
+        "P+F": 1048.0,
+        "V+L": 58.0,
+        "AP": 5.0,
+        "CC": 127.0,
+        "DR": 4.0,
+        "NP": 812.0
+      },
+      "forestHa": 2179.0,
+      "forestPrivateHa": 275.0
     },
     {
       "siruta": "133795",
@@ -1653,6 +2797,17 @@
         "Terenuri degradate si neproductive": 381.0
       },
       "totalHa": 7371.0,
+      "privateAreaHa": {
+        "Arabila": 517.0,
+        "Pasuni": 235.0,
+        "Finete": 866.0,
+        "Livezi si pepiniere pomicole": 111.0,
+        "Paduri si alta vegetatie forestiera": 276.0,
+        "Ocupata cu constructii": 143.0,
+        "Cai de comunicatii si cai ferate": 42.0,
+        "Terenuri degradate si neproductive": 61.0
+      },
+      "privateHa": 2251.0,
       "byCategory": {
         "A": 518.0,
         "P+F": 1876.0,
@@ -1662,7 +2817,16 @@
         "DR": 140.0,
         "NP": 381.0
       },
-      "forestHa": 4155.0
+      "byCategoryPrivate": {
+        "A": 517.0,
+        "P+F": 1101.0,
+        "V+L": 111.0,
+        "CC": 143.0,
+        "DR": 42.0,
+        "NP": 61.0
+      },
+      "forestHa": 4155.0,
+      "forestPrivateHa": 276.0
     },
     {
       "siruta": "133866",
@@ -1681,6 +2845,19 @@
         "Terenuri degradate si neproductive": 1.0
       },
       "totalHa": 2685.0,
+      "privateAreaHa": {
+        "Arabila": 306.0,
+        "Pasuni": 1095.0,
+        "Finete": 126.0,
+        "Vii si pepiniere viticole": 63.0,
+        "Livezi si pepiniere pomicole": 32.0,
+        "Paduri si alta vegetatie forestiera": 360.0,
+        "Ocupata cu ape, balti": 16.0,
+        "Ocupata cu constructii": 40.0,
+        "Cai de comunicatii si cai ferate": 63.0,
+        "Terenuri degradate si neproductive": 1.0
+      },
+      "privateHa": 2102.0,
       "byCategory": {
         "A": 318.0,
         "P+F": 1221.0,
@@ -1690,7 +2867,17 @@
         "DR": 63.0,
         "NP": 1.0
       },
-      "forestHa": 931.0
+      "byCategoryPrivate": {
+        "A": 306.0,
+        "P+F": 1221.0,
+        "V+L": 95.0,
+        "AP": 16.0,
+        "CC": 40.0,
+        "DR": 63.0,
+        "NP": 1.0
+      },
+      "forestHa": 931.0,
+      "forestPrivateHa": 360.0
     },
     {
       "siruta": "133919",
@@ -1709,6 +2896,17 @@
         "Terenuri degradate si neproductive": 1.0
       },
       "totalHa": 2987.0,
+      "privateAreaHa": {
+        "Arabila": 281.0,
+        "Pasuni": 56.0,
+        "Finete": 500.0,
+        "Vii si pepiniere viticole": 6.0,
+        "Livezi si pepiniere pomicole": 9.0,
+        "Paduri si alta vegetatie forestiera": 652.0,
+        "Ocupata cu constructii": 46.0,
+        "Terenuri degradate si neproductive": 1.0
+      },
+      "privateHa": 1551.0,
       "byCategory": {
         "A": 285.0,
         "P+F": 874.0,
@@ -1718,7 +2916,15 @@
         "DR": 34.0,
         "NP": 1.0
       },
-      "forestHa": 1709.0
+      "byCategoryPrivate": {
+        "A": 281.0,
+        "P+F": 556.0,
+        "V+L": 15.0,
+        "CC": 46.0,
+        "NP": 1.0
+      },
+      "forestHa": 1709.0,
+      "forestPrivateHa": 652.0
     },
     {
       "siruta": "133964",
@@ -1736,6 +2942,15 @@
         "Terenuri degradate si neproductive": 23.0
       },
       "totalHa": 1806.0,
+      "privateAreaHa": {
+        "Arabila": 1003.0,
+        "Pasuni": 220.0,
+        "Finete": 2.0,
+        "Livezi si pepiniere pomicole": 50.0,
+        "Ocupata cu constructii": 237.0,
+        "Terenuri degradate si neproductive": 23.0
+      },
+      "privateHa": 1535.0,
       "byCategory": {
         "A": 1014.0,
         "P+F": 222.0,
@@ -1745,7 +2960,15 @@
         "DR": 72.0,
         "NP": 23.0
       },
-      "forestHa": 153.0
+      "byCategoryPrivate": {
+        "A": 1003.0,
+        "P+F": 222.0,
+        "V+L": 50.0,
+        "CC": 237.0,
+        "NP": 23.0
+      },
+      "forestHa": 153.0,
+      "forestPrivateHa": 0.0
     },
     {
       "siruta": "134014",
@@ -1764,6 +2987,18 @@
         "Terenuri degradate si neproductive": 24.0
       },
       "totalHa": 2747.0,
+      "privateAreaHa": {
+        "Arabila": 1716.0,
+        "Pasuni": 311.0,
+        "Finete": 11.0,
+        "Vii si pepiniere viticole": 7.0,
+        "Livezi si pepiniere pomicole": 106.0,
+        "Paduri si alta vegetatie forestiera": 67.0,
+        "Ocupata cu ape, balti": 2.0,
+        "Ocupata cu constructii": 59.0,
+        "Terenuri degradate si neproductive": 1.0
+      },
+      "privateHa": 2280.0,
       "byCategory": {
         "A": 1716.0,
         "P+F": 326.0,
@@ -1773,7 +3008,16 @@
         "DR": 119.0,
         "NP": 24.0
       },
-      "forestHa": 306.0
+      "byCategoryPrivate": {
+        "A": 1716.0,
+        "P+F": 322.0,
+        "V+L": 113.0,
+        "AP": 2.0,
+        "CC": 59.0,
+        "NP": 1.0
+      },
+      "forestHa": 306.0,
+      "forestPrivateHa": 67.0
     },
     {
       "siruta": "134050",
@@ -1791,6 +3035,16 @@
         "Terenuri degradate si neproductive": 298.0
       },
       "totalHa": 4814.0,
+      "privateAreaHa": {
+        "Arabila": 1028.0,
+        "Pasuni": 605.0,
+        "Finete": 120.0,
+        "Livezi si pepiniere pomicole": 120.0,
+        "Paduri si alta vegetatie forestiera": 1235.0,
+        "Ocupata cu constructii": 416.0,
+        "Terenuri degradate si neproductive": 290.0
+      },
+      "privateHa": 3814.0,
       "byCategory": {
         "A": 1031.0,
         "P+F": 725.0,
@@ -1800,7 +3054,15 @@
         "DR": 49.0,
         "NP": 298.0
       },
-      "forestHa": 2141.0
+      "byCategoryPrivate": {
+        "A": 1028.0,
+        "P+F": 725.0,
+        "V+L": 120.0,
+        "CC": 416.0,
+        "NP": 290.0
+      },
+      "forestHa": 2141.0,
+      "forestPrivateHa": 1235.0
     },
     {
       "siruta": "134096",
@@ -1818,6 +3080,18 @@
         "Terenuri degradate si neproductive": 106.0
       },
       "totalHa": 23643.0,
+      "privateAreaHa": {
+        "Arabila": 338.0,
+        "Pasuni": 3578.0,
+        "Finete": 1551.0,
+        "Livezi si pepiniere pomicole": 354.0,
+        "Paduri si alta vegetatie forestiera": 2832.0,
+        "Ocupata cu ape, balti": 182.0,
+        "Ocupata cu constructii": 282.0,
+        "Cai de comunicatii si cai ferate": 13.0,
+        "Terenuri degradate si neproductive": 33.0
+      },
+      "privateHa": 9163.0,
       "byCategory": {
         "A": 340.0,
         "P+F": 5191.0,
@@ -1827,7 +3101,17 @@
         "DR": 182.0,
         "NP": 106.0
       },
-      "forestHa": 16689.0
+      "byCategoryPrivate": {
+        "A": 338.0,
+        "P+F": 5129.0,
+        "V+L": 354.0,
+        "AP": 182.0,
+        "CC": 282.0,
+        "DR": 13.0,
+        "NP": 33.0
+      },
+      "forestHa": 16689.0,
+      "forestPrivateHa": 2832.0
     },
     {
       "siruta": "134194",
@@ -1845,6 +3129,16 @@
         "Terenuri degradate si neproductive": 31.0
       },
       "totalHa": 4833.0,
+      "privateAreaHa": {
+        "Arabila": 2544.0,
+        "Pasuni": 253.0,
+        "Finete": 1.0,
+        "Livezi si pepiniere pomicole": 4.0,
+        "Paduri si alta vegetatie forestiera": 1133.0,
+        "Ocupata cu constructii": 401.0,
+        "Terenuri degradate si neproductive": 11.0
+      },
+      "privateHa": 4347.0,
       "byCategory": {
         "A": 2559.0,
         "P+F": 383.0,
@@ -1854,7 +3148,15 @@
         "DR": 40.0,
         "NP": 31.0
       },
-      "forestHa": 1322.0
+      "byCategoryPrivate": {
+        "A": 2544.0,
+        "P+F": 254.0,
+        "V+L": 4.0,
+        "CC": 401.0,
+        "NP": 11.0
+      },
+      "forestHa": 1322.0,
+      "forestPrivateHa": 1133.0
     },
     {
       "siruta": "134336",
@@ -1872,6 +3174,17 @@
         "Terenuri degradate si neproductive": 390.0
       },
       "totalHa": 2717.0,
+      "privateAreaHa": {
+        "Arabila": 183.0,
+        "Pasuni": 1062.0,
+        "Finete": 235.0,
+        "Vii si pepiniere viticole": 5.0,
+        "Livezi si pepiniere pomicole": 61.0,
+        "Paduri si alta vegetatie forestiera": 204.0,
+        "Ocupata cu constructii": 47.0,
+        "Terenuri degradate si neproductive": 390.0
+      },
+      "privateHa": 2187.0,
       "byCategory": {
         "A": 186.0,
         "P+F": 1308.0,
@@ -1880,7 +3193,15 @@
         "CC": 49.0,
         "NP": 390.0
       },
-      "forestHa": 701.0
+      "byCategoryPrivate": {
+        "A": 183.0,
+        "P+F": 1297.0,
+        "V+L": 66.0,
+        "CC": 47.0,
+        "NP": 390.0
+      },
+      "forestHa": 701.0,
+      "forestPrivateHa": 204.0
     },
     {
       "siruta": "134390",
@@ -1899,6 +3220,18 @@
         "Terenuri degradate si neproductive": 70.0
       },
       "totalHa": 4537.0,
+      "privateAreaHa": {
+        "Arabila": 589.0,
+        "Pasuni": 353.0,
+        "Finete": 172.0,
+        "Vii si pepiniere viticole": 94.0,
+        "Livezi si pepiniere pomicole": 120.0,
+        "Paduri si alta vegetatie forestiera": 1335.0,
+        "Ocupata cu constructii": 90.0,
+        "Cai de comunicatii si cai ferate": 1.0,
+        "Terenuri degradate si neproductive": 70.0
+      },
+      "privateHa": 2824.0,
       "byCategory": {
         "A": 598.0,
         "P+F": 538.0,
@@ -1908,7 +3241,16 @@
         "DR": 82.0,
         "NP": 70.0
       },
-      "forestHa": 2918.0
+      "byCategoryPrivate": {
+        "A": 589.0,
+        "P+F": 525.0,
+        "V+L": 214.0,
+        "CC": 90.0,
+        "DR": 1.0,
+        "NP": 70.0
+      },
+      "forestHa": 2918.0,
+      "forestPrivateHa": 1335.0
     },
     {
       "siruta": "134443",
@@ -1927,6 +3269,19 @@
         "Terenuri degradate si neproductive": 95.0
       },
       "totalHa": 3757.0,
+      "privateAreaHa": {
+        "Arabila": 1287.0,
+        "Pasuni": 855.0,
+        "Finete": 425.0,
+        "Vii si pepiniere viticole": 30.0,
+        "Livezi si pepiniere pomicole": 130.0,
+        "Paduri si alta vegetatie forestiera": 191.0,
+        "Ocupata cu ape, balti": 15.0,
+        "Ocupata cu constructii": 120.0,
+        "Cai de comunicatii si cai ferate": 7.0,
+        "Terenuri degradate si neproductive": 89.0
+      },
+      "privateHa": 3149.0,
       "byCategory": {
         "A": 1297.0,
         "P+F": 1296.0,
@@ -1936,7 +3291,17 @@
         "DR": 69.0,
         "NP": 95.0
       },
-      "forestHa": 606.0
+      "byCategoryPrivate": {
+        "A": 1287.0,
+        "P+F": 1280.0,
+        "V+L": 160.0,
+        "AP": 15.0,
+        "CC": 120.0,
+        "DR": 7.0,
+        "NP": 89.0
+      },
+      "forestHa": 606.0,
+      "forestPrivateHa": 191.0
     },
     {
       "siruta": "134559",
@@ -1954,6 +3319,16 @@
         "Terenuri degradate si neproductive": 50.0
       },
       "totalHa": 4902.0,
+      "privateAreaHa": {
+        "Arabila": 3995.0,
+        "Pasuni": 298.0,
+        "Vii si pepiniere viticole": 25.0,
+        "Livezi si pepiniere pomicole": 1.0,
+        "Paduri si alta vegetatie forestiera": 20.0,
+        "Ocupata cu constructii": 220.0,
+        "Terenuri degradate si neproductive": 50.0
+      },
+      "privateHa": 4609.0,
       "byCategory": {
         "A": 3995.0,
         "P+F": 298.0,
@@ -1963,7 +3338,15 @@
         "DR": 101.0,
         "NP": 50.0
       },
-      "forestHa": 70.0
+      "byCategoryPrivate": {
+        "A": 3995.0,
+        "P+F": 298.0,
+        "V+L": 26.0,
+        "CC": 220.0,
+        "NP": 50.0
+      },
+      "forestHa": 70.0,
+      "forestPrivateHa": 20.0
     },
     {
       "siruta": "134648",
@@ -1981,6 +3364,17 @@
         "Terenuri degradate si neproductive": 46.0
       },
       "totalHa": 5499.0,
+      "privateAreaHa": {
+        "Arabila": 268.0,
+        "Pasuni": 1340.0,
+        "Finete": 1080.0,
+        "Livezi si pepiniere pomicole": 707.0,
+        "Paduri si alta vegetatie forestiera": 1295.0,
+        "Ocupata cu constructii": 165.0,
+        "Cai de comunicatii si cai ferate": 9.0,
+        "Terenuri degradate si neproductive": 44.0
+      },
+      "privateHa": 4908.0,
       "byCategory": {
         "A": 268.0,
         "P+F": 2430.0,
@@ -1990,7 +3384,16 @@
         "DR": 134.0,
         "NP": 46.0
       },
-      "forestHa": 1698.0
+      "byCategoryPrivate": {
+        "A": 268.0,
+        "P+F": 2420.0,
+        "V+L": 707.0,
+        "CC": 165.0,
+        "DR": 9.0,
+        "NP": 44.0
+      },
+      "forestHa": 1698.0,
+      "forestPrivateHa": 1295.0
     },
     {
       "siruta": "134755",
@@ -2008,6 +3411,17 @@
         "Terenuri degradate si neproductive": 38.0
       },
       "totalHa": 2433.0,
+      "privateAreaHa": {
+        "Arabila": 248.0,
+        "Pasuni": 852.0,
+        "Finete": 329.0,
+        "Livezi si pepiniere pomicole": 145.0,
+        "Paduri si alta vegetatie forestiera": 609.0,
+        "Ocupata cu ape, balti": 21.0,
+        "Ocupata cu constructii": 28.0,
+        "Terenuri degradate si neproductive": 38.0
+      },
+      "privateHa": 2270.0,
       "byCategory": {
         "A": 248.0,
         "P+F": 1181.0,
@@ -2017,7 +3431,16 @@
         "DR": 163.0,
         "NP": 38.0
       },
-      "forestHa": 609.0
+      "byCategoryPrivate": {
+        "A": 248.0,
+        "P+F": 1181.0,
+        "V+L": 145.0,
+        "AP": 21.0,
+        "CC": 28.0,
+        "NP": 38.0
+      },
+      "forestHa": 609.0,
+      "forestPrivateHa": 609.0
     },
     {
       "siruta": "134853",
@@ -2035,6 +3458,18 @@
         "Terenuri degradate si neproductive": 14.0
       },
       "totalHa": 2530.0,
+      "privateAreaHa": {
+        "Arabila": 123.0,
+        "Pasuni": 303.0,
+        "Finete": 720.0,
+        "Livezi si pepiniere pomicole": 65.0,
+        "Paduri si alta vegetatie forestiera": 109.0,
+        "Ocupata cu ape, balti": 40.0,
+        "Ocupata cu constructii": 55.0,
+        "Cai de comunicatii si cai ferate": 40.0,
+        "Terenuri degradate si neproductive": 12.0
+      },
+      "privateHa": 1467.0,
       "byCategory": {
         "A": 124.0,
         "P+F": 1028.0,
@@ -2044,7 +3479,17 @@
         "DR": 40.0,
         "NP": 14.0
       },
-      "forestHa": 1162.0
+      "byCategoryPrivate": {
+        "A": 123.0,
+        "P+F": 1023.0,
+        "V+L": 65.0,
+        "AP": 40.0,
+        "CC": 55.0,
+        "DR": 40.0,
+        "NP": 12.0
+      },
+      "forestHa": 1162.0,
+      "forestPrivateHa": 109.0
     },
     {
       "siruta": "134899",
@@ -2062,6 +3507,16 @@
         "Terenuri degradate si neproductive": 14.0
       },
       "totalHa": 2004.0,
+      "privateAreaHa": {
+        "Arabila": 74.0,
+        "Pasuni": 503.0,
+        "Finete": 493.0,
+        "Livezi si pepiniere pomicole": 132.0,
+        "Paduri si alta vegetatie forestiera": 509.0,
+        "Ocupata cu constructii": 107.0,
+        "Terenuri degradate si neproductive": 14.0
+      },
+      "privateHa": 1832.0,
       "byCategory": {
         "A": 75.0,
         "P+F": 1002.0,
@@ -2071,7 +3526,15 @@
         "DR": 32.0,
         "NP": 14.0
       },
-      "forestHa": 603.0
+      "byCategoryPrivate": {
+        "A": 74.0,
+        "P+F": 996.0,
+        "V+L": 132.0,
+        "CC": 107.0,
+        "NP": 14.0
+      },
+      "forestHa": 603.0,
+      "forestPrivateHa": 509.0
     },
     {
       "siruta": "134942",
@@ -2089,6 +3552,17 @@
         "Terenuri degradate si neproductive": 5.0
       },
       "totalHa": 5497.0,
+      "privateAreaHa": {
+        "Arabila": 3592.0,
+        "Pasuni": 211.0,
+        "Vii si pepiniere viticole": 3.0,
+        "Livezi si pepiniere pomicole": 4.0,
+        "Paduri si alta vegetatie forestiera": 420.0,
+        "Ocupata cu constructii": 195.0,
+        "Cai de comunicatii si cai ferate": 9.0,
+        "Terenuri degradate si neproductive": 1.0
+      },
+      "privateHa": 4435.0,
       "byCategory": {
         "A": 3614.0,
         "P+F": 211.0,
@@ -2098,7 +3572,16 @@
         "DR": 97.0,
         "NP": 5.0
       },
-      "forestHa": 1212.0
+      "byCategoryPrivate": {
+        "A": 3592.0,
+        "P+F": 211.0,
+        "V+L": 7.0,
+        "CC": 195.0,
+        "DR": 9.0,
+        "NP": 1.0
+      },
+      "forestHa": 1212.0,
+      "forestPrivateHa": 420.0
     },
     {
       "siruta": "135020",
@@ -2113,6 +3596,13 @@
         "Terenuri degradate si neproductive": 172.0
       },
       "totalHa": 4177.0,
+      "privateAreaHa": {
+        "Arabila": 2497.0,
+        "Pasuni": 349.0,
+        "Paduri si alta vegetatie forestiera": 411.0,
+        "Ocupata cu constructii": 233.0
+      },
+      "privateHa": 3490.0,
       "byCategory": {
         "A": 2515.0,
         "P+F": 349.0,
@@ -2120,7 +3610,13 @@
         "DR": 67.0,
         "NP": 172.0
       },
-      "forestHa": 831.0
+      "byCategoryPrivate": {
+        "A": 2497.0,
+        "P+F": 349.0,
+        "CC": 233.0
+      },
+      "forestHa": 831.0,
+      "forestPrivateHa": 411.0
     },
     {
       "siruta": "135128",
@@ -2139,6 +3635,17 @@
         "Terenuri degradate si neproductive": 7.0
       },
       "totalHa": 2156.0,
+      "privateAreaHa": {
+        "Arabila": 305.0,
+        "Pasuni": 256.0,
+        "Finete": 486.0,
+        "Vii si pepiniere viticole": 10.0,
+        "Livezi si pepiniere pomicole": 36.0,
+        "Paduri si alta vegetatie forestiera": 207.0,
+        "Ocupata cu constructii": 99.0,
+        "Terenuri degradate si neproductive": 7.0
+      },
+      "privateHa": 1406.0,
       "byCategory": {
         "A": 306.0,
         "P+F": 972.0,
@@ -2148,7 +3655,15 @@
         "DR": 40.0,
         "NP": 7.0
       },
-      "forestHa": 678.0
+      "byCategoryPrivate": {
+        "A": 305.0,
+        "P+F": 742.0,
+        "V+L": 46.0,
+        "CC": 99.0,
+        "NP": 7.0
+      },
+      "forestHa": 678.0,
+      "forestPrivateHa": 207.0
     },
     {
       "siruta": "135146",
@@ -2165,6 +3680,16 @@
         "Terenuri degradate si neproductive": 29.0
       },
       "totalHa": 3973.0,
+      "privateAreaHa": {
+        "Arabila": 3247.0,
+        "Pasuni": 246.0,
+        "Vii si pepiniere viticole": 128.0,
+        "Paduri si alta vegetatie forestiera": 4.0,
+        "Ocupata cu ape, balti": 55.0,
+        "Ocupata cu constructii": 59.0,
+        "Terenuri degradate si neproductive": 9.0
+      },
+      "privateHa": 3748.0,
       "byCategory": {
         "A": 3247.0,
         "P+F": 246.0,
@@ -2174,7 +3699,16 @@
         "DR": 53.0,
         "NP": 29.0
       },
-      "forestHa": 4.0
+      "byCategoryPrivate": {
+        "A": 3247.0,
+        "P+F": 246.0,
+        "V+L": 128.0,
+        "AP": 55.0,
+        "CC": 59.0,
+        "NP": 9.0
+      },
+      "forestHa": 4.0,
+      "forestPrivateHa": 4.0
     },
     {
       "siruta": "135164",
@@ -2193,6 +3727,17 @@
         "Terenuri degradate si neproductive": 117.0
       },
       "totalHa": 3990.0,
+      "privateAreaHa": {
+        "Arabila": 520.0,
+        "Pasuni": 383.0,
+        "Finete": 225.0,
+        "Vii si pepiniere viticole": 1.0,
+        "Livezi si pepiniere pomicole": 262.0,
+        "Paduri si alta vegetatie forestiera": 333.0,
+        "Ocupata cu constructii": 353.0,
+        "Terenuri degradate si neproductive": 111.0
+      },
+      "privateHa": 2188.0,
       "byCategory": {
         "A": 520.0,
         "P+F": 612.0,
@@ -2202,7 +3747,15 @@
         "DR": 76.0,
         "NP": 117.0
       },
-      "forestHa": 1994.0
+      "byCategoryPrivate": {
+        "A": 520.0,
+        "P+F": 608.0,
+        "V+L": 263.0,
+        "CC": 353.0,
+        "NP": 111.0
+      },
+      "forestHa": 1994.0,
+      "forestPrivateHa": 333.0
     },
     {
       "siruta": "135226",
@@ -2218,6 +3771,15 @@
         "Cai de comunicatii si cai ferate": 69.0
       },
       "totalHa": 4523.0,
+      "privateAreaHa": {
+        "Arabila": 14.0,
+        "Pasuni": 1391.0,
+        "Finete": 828.0,
+        "Livezi si pepiniere pomicole": 41.0,
+        "Paduri si alta vegetatie forestiera": 675.0,
+        "Ocupata cu constructii": 46.0
+      },
+      "privateHa": 2995.0,
       "byCategory": {
         "A": 14.0,
         "P+F": 2226.0,
@@ -2225,7 +3787,14 @@
         "CC": 47.0,
         "DR": 69.0
       },
-      "forestHa": 2126.0
+      "byCategoryPrivate": {
+        "A": 14.0,
+        "P+F": 2219.0,
+        "V+L": 41.0,
+        "CC": 46.0
+      },
+      "forestHa": 2126.0,
+      "forestPrivateHa": 675.0
     },
     {
       "siruta": "135244",
@@ -2244,6 +3813,17 @@
         "Terenuri degradate si neproductive": 95.0
       },
       "totalHa": 3990.0,
+      "privateAreaHa": {
+        "Arabila": 592.0,
+        "Pasuni": 1342.0,
+        "Finete": 409.0,
+        "Vii si pepiniere viticole": 40.0,
+        "Livezi si pepiniere pomicole": 93.0,
+        "Paduri si alta vegetatie forestiera": 343.0,
+        "Ocupata cu constructii": 164.0,
+        "Terenuri degradate si neproductive": 95.0
+      },
+      "privateHa": 3078.0,
       "byCategory": {
         "A": 598.0,
         "P+F": 1763.0,
@@ -2253,7 +3833,15 @@
         "DR": 71.0,
         "NP": 95.0
       },
-      "forestHa": 1109.0
+      "byCategoryPrivate": {
+        "A": 592.0,
+        "P+F": 1751.0,
+        "V+L": 133.0,
+        "CC": 164.0,
+        "NP": 95.0
+      },
+      "forestHa": 1109.0,
+      "forestPrivateHa": 343.0
     },
     {
       "siruta": "135315",
@@ -2271,6 +3859,16 @@
         "Terenuri degradate si neproductive": 82.0
       },
       "totalHa": 8413.0,
+      "privateAreaHa": {
+        "Arabila": 422.0,
+        "Pasuni": 1067.0,
+        "Finete": 2188.0,
+        "Livezi si pepiniere pomicole": 74.0,
+        "Paduri si alta vegetatie forestiera": 879.0,
+        "Ocupata cu constructii": 82.0,
+        "Terenuri degradate si neproductive": 76.0
+      },
+      "privateHa": 4788.0,
       "byCategory": {
         "A": 422.0,
         "P+F": 3406.0,
@@ -2280,7 +3878,15 @@
         "DR": 73.0,
         "NP": 82.0
       },
-      "forestHa": 4243.0
+      "byCategoryPrivate": {
+        "A": 422.0,
+        "P+F": 3255.0,
+        "V+L": 74.0,
+        "CC": 82.0,
+        "NP": 76.0
+      },
+      "forestHa": 4243.0,
+      "forestPrivateHa": 879.0
     },
     {
       "siruta": "135404",
@@ -2299,6 +3905,17 @@
         "Terenuri degradate si neproductive": 75.0
       },
       "totalHa": 1595.0,
+      "privateAreaHa": {
+        "Arabila": 135.0,
+        "Pasuni": 495.0,
+        "Finete": 247.0,
+        "Vii si pepiniere viticole": 1.0,
+        "Livezi si pepiniere pomicole": 20.0,
+        "Paduri si alta vegetatie forestiera": 475.0,
+        "Ocupata cu constructii": 51.0,
+        "Terenuri degradate si neproductive": 75.0
+      },
+      "privateHa": 1499.0,
       "byCategory": {
         "A": 135.0,
         "P+F": 797.0,
@@ -2308,7 +3925,15 @@
         "DR": 29.0,
         "NP": 75.0
       },
-      "forestHa": 475.0
+      "byCategoryPrivate": {
+        "A": 135.0,
+        "P+F": 742.0,
+        "V+L": 21.0,
+        "CC": 51.0,
+        "NP": 75.0
+      },
+      "forestHa": 475.0,
+      "forestPrivateHa": 475.0
     },
     {
       "siruta": "135431",
@@ -2327,6 +3952,19 @@
         "Terenuri degradate si neproductive": 22.0
       },
       "totalHa": 5000.0,
+      "privateAreaHa": {
+        "Arabila": 3434.0,
+        "Pasuni": 160.0,
+        "Finete": 5.0,
+        "Vii si pepiniere viticole": 2.0,
+        "Livezi si pepiniere pomicole": 6.0,
+        "Paduri si alta vegetatie forestiera": 35.0,
+        "Ocupata cu ape, balti": 11.0,
+        "Ocupata cu constructii": 124.0,
+        "Cai de comunicatii si cai ferate": 2.0,
+        "Terenuri degradate si neproductive": 22.0
+      },
+      "privateHa": 3801.0,
       "byCategory": {
         "A": 3441.0,
         "P+F": 171.0,
@@ -2336,7 +3974,17 @@
         "DR": 74.0,
         "NP": 22.0
       },
-      "forestHa": 1091.0
+      "byCategoryPrivate": {
+        "A": 3434.0,
+        "P+F": 165.0,
+        "V+L": 8.0,
+        "AP": 11.0,
+        "CC": 124.0,
+        "DR": 2.0,
+        "NP": 22.0
+      },
+      "forestHa": 1091.0,
+      "forestPrivateHa": 35.0
     },
     {
       "siruta": "135501",
@@ -2355,6 +4003,17 @@
         "Terenuri degradate si neproductive": 9.0
       },
       "totalHa": 3832.0,
+      "privateAreaHa": {
+        "Arabila": 490.0,
+        "Pasuni": 1196.0,
+        "Finete": 446.0,
+        "Vii si pepiniere viticole": 13.0,
+        "Livezi si pepiniere pomicole": 34.0,
+        "Paduri si alta vegetatie forestiera": 952.0,
+        "Ocupata cu constructii": 68.0,
+        "Terenuri degradate si neproductive": 6.0
+      },
+      "privateHa": 3205.0,
       "byCategory": {
         "A": 491.0,
         "P+F": 1663.0,
@@ -2364,7 +4023,15 @@
         "DR": 55.0,
         "NP": 9.0
       },
-      "forestHa": 1467.0
+      "byCategoryPrivate": {
+        "A": 490.0,
+        "P+F": 1642.0,
+        "V+L": 47.0,
+        "CC": 68.0,
+        "NP": 6.0
+      },
+      "forestHa": 1467.0,
+      "forestPrivateHa": 952.0
     },
     {
       "siruta": "135547",
@@ -2382,6 +4049,16 @@
         "Terenuri degradate si neproductive": 62.0
       },
       "totalHa": 2941.0,
+      "privateAreaHa": {
+        "Arabila": 61.0,
+        "Pasuni": 949.0,
+        "Finete": 518.0,
+        "Livezi si pepiniere pomicole": 251.0,
+        "Paduri si alta vegetatie forestiera": 815.0,
+        "Ocupata cu constructii": 96.0,
+        "Terenuri degradate si neproductive": 62.0
+      },
+      "privateHa": 2752.0,
       "byCategory": {
         "A": 61.0,
         "P+F": 1471.0,
@@ -2391,7 +4068,15 @@
         "DR": 93.0,
         "NP": 62.0
       },
-      "forestHa": 838.0
+      "byCategoryPrivate": {
+        "A": 61.0,
+        "P+F": 1467.0,
+        "V+L": 251.0,
+        "CC": 96.0,
+        "NP": 62.0
+      },
+      "forestHa": 838.0,
+      "forestPrivateHa": 815.0
     },
     {
       "siruta": "135618",
@@ -2409,6 +4094,16 @@
         "Terenuri degradate si neproductive": 10.0
       },
       "totalHa": 4369.0,
+      "privateAreaHa": {
+        "Arabila": 46.0,
+        "Pasuni": 406.0,
+        "Finete": 471.0,
+        "Vii si pepiniere viticole": 352.0,
+        "Paduri si alta vegetatie forestiera": 934.0,
+        "Ocupata cu constructii": 60.0,
+        "Cai de comunicatii si cai ferate": 144.0
+      },
+      "privateHa": 2413.0,
       "byCategory": {
         "A": 46.0,
         "P+F": 889.0,
@@ -2418,7 +4113,15 @@
         "DR": 180.0,
         "NP": 10.0
       },
-      "forestHa": 2782.0
+      "byCategoryPrivate": {
+        "A": 46.0,
+        "P+F": 877.0,
+        "V+L": 352.0,
+        "CC": 60.0,
+        "DR": 144.0
+      },
+      "forestHa": 2782.0,
+      "forestPrivateHa": 934.0
     },
     {
       "siruta": "135654",
@@ -2434,6 +4137,16 @@
         "Terenuri degradate si neproductive": 52.0
       },
       "totalHa": 2485.0,
+      "privateAreaHa": {
+        "Arabila": 46.0,
+        "Pasuni": 686.0,
+        "Finete": 645.0,
+        "Livezi si pepiniere pomicole": 141.0,
+        "Paduri si alta vegetatie forestiera": 887.0,
+        "Ocupata cu constructii": 28.0,
+        "Terenuri degradate si neproductive": 52.0
+      },
+      "privateHa": 2485.0,
       "byCategory": {
         "A": 46.0,
         "P+F": 1331.0,
@@ -2441,7 +4154,15 @@
         "CC": 28.0,
         "NP": 52.0
       },
-      "forestHa": 887.0
+      "byCategoryPrivate": {
+        "A": 46.0,
+        "P+F": 1331.0,
+        "V+L": 141.0,
+        "CC": 28.0,
+        "NP": 52.0
+      },
+      "forestHa": 887.0,
+      "forestPrivateHa": 887.0
     },
     {
       "siruta": "135681",
@@ -2460,6 +4181,18 @@
         "Terenuri degradate si neproductive": 41.0
       },
       "totalHa": 2042.0,
+      "privateAreaHa": {
+        "Arabila": 99.0,
+        "Pasuni": 798.0,
+        "Finete": 260.0,
+        "Vii si pepiniere viticole": 84.0,
+        "Livezi si pepiniere pomicole": 38.0,
+        "Paduri si alta vegetatie forestiera": 558.0,
+        "Ocupata cu ape, balti": 2.0,
+        "Ocupata cu constructii": 57.0,
+        "Terenuri degradate si neproductive": 41.0
+      },
+      "privateHa": 1937.0,
       "byCategory": {
         "A": 99.0,
         "P+F": 1141.0,
@@ -2469,7 +4202,16 @@
         "DR": 19.0,
         "NP": 41.0
       },
-      "forestHa": 558.0
+      "byCategoryPrivate": {
+        "A": 99.0,
+        "P+F": 1058.0,
+        "V+L": 122.0,
+        "AP": 2.0,
+        "CC": 57.0,
+        "NP": 41.0
+      },
+      "forestHa": 558.0,
+      "forestPrivateHa": 558.0
     },
     {
       "siruta": "135725",
@@ -2486,6 +4228,16 @@
         "Terenuri degradate si neproductive": 75.0
       },
       "totalHa": 3022.0,
+      "privateAreaHa": {
+        "Arabila": 478.0,
+        "Pasuni": 875.0,
+        "Finete": 812.0,
+        "Livezi si pepiniere pomicole": 110.0,
+        "Paduri si alta vegetatie forestiera": 447.0,
+        "Ocupata cu constructii": 126.0,
+        "Terenuri degradate si neproductive": 75.0
+      },
+      "privateHa": 2923.0,
       "byCategory": {
         "A": 478.0,
         "P+F": 1690.0,
@@ -2494,7 +4246,15 @@
         "DR": 52.0,
         "NP": 75.0
       },
-      "forestHa": 490.0
+      "byCategoryPrivate": {
+        "A": 478.0,
+        "P+F": 1687.0,
+        "V+L": 110.0,
+        "CC": 126.0,
+        "NP": 75.0
+      },
+      "forestHa": 490.0,
+      "forestPrivateHa": 447.0
     },
     {
       "siruta": "135789",
@@ -2512,6 +4272,17 @@
         "Terenuri degradate si neproductive": 41.0
       },
       "totalHa": 4015.0,
+      "privateAreaHa": {
+        "Arabila": 195.0,
+        "Pasuni": 644.0,
+        "Finete": 1246.0,
+        "Livezi si pepiniere pomicole": 175.0,
+        "Paduri si alta vegetatie forestiera": 614.0,
+        "Ocupata cu ape, balti": 1.0,
+        "Ocupata cu constructii": 180.0,
+        "Terenuri degradate si neproductive": 41.0
+      },
+      "privateHa": 3096.0,
       "byCategory": {
         "A": 195.0,
         "P+F": 1942.0,
@@ -2521,7 +4292,16 @@
         "DR": 82.0,
         "NP": 41.0
       },
-      "forestHa": 1327.0
+      "byCategoryPrivate": {
+        "A": 195.0,
+        "P+F": 1890.0,
+        "V+L": 175.0,
+        "AP": 1.0,
+        "CC": 180.0,
+        "NP": 41.0
+      },
+      "forestHa": 1327.0,
+      "forestPrivateHa": 614.0
     },
     {
       "siruta": "135850",
@@ -2539,6 +4319,16 @@
         "Terenuri degradate si neproductive": 21.0
       },
       "totalHa": 1813.0,
+      "privateAreaHa": {
+        "Arabila": 812.0,
+        "Pasuni": 131.0,
+        "Finete": 10.0,
+        "Livezi si pepiniere pomicole": 2.0,
+        "Paduri si alta vegetatie forestiera": 139.0,
+        "Ocupata cu constructii": 63.0,
+        "Terenuri degradate si neproductive": 20.0
+      },
+      "privateHa": 1177.0,
       "byCategory": {
         "A": 813.0,
         "P+F": 141.0,
@@ -2548,7 +4338,15 @@
         "DR": 30.0,
         "NP": 21.0
       },
-      "forestHa": 637.0
+      "byCategoryPrivate": {
+        "A": 812.0,
+        "P+F": 141.0,
+        "V+L": 2.0,
+        "CC": 63.0,
+        "NP": 20.0
+      },
+      "forestHa": 637.0,
+      "forestPrivateHa": 139.0
     },
     {
       "siruta": "135896",
@@ -2565,6 +4363,14 @@
         "Terenuri degradate si neproductive": 1.0
       },
       "totalHa": 4334.0,
+      "privateAreaHa": {
+        "Arabila": 3720.0,
+        "Pasuni": 269.0,
+        "Vii si pepiniere viticole": 11.0,
+        "Livezi si pepiniere pomicole": 1.0,
+        "Ocupata cu constructii": 138.0
+      },
+      "privateHa": 4139.0,
       "byCategory": {
         "A": 3803.0,
         "P+F": 269.0,
@@ -2574,7 +4380,14 @@
         "DR": 67.0,
         "NP": 1.0
       },
-      "forestHa": 0.0
+      "byCategoryPrivate": {
+        "A": 3720.0,
+        "P+F": 269.0,
+        "V+L": 12.0,
+        "CC": 138.0
+      },
+      "forestHa": 0.0,
+      "forestPrivateHa": 0.0
     },
     {
       "siruta": "135949",
@@ -2593,6 +4406,18 @@
         "Terenuri degradate si neproductive": 102.0
       },
       "totalHa": 5217.0,
+      "privateAreaHa": {
+        "Arabila": 1672.0,
+        "Pasuni": 1013.0,
+        "Finete": 54.0,
+        "Vii si pepiniere viticole": 922.0,
+        "Livezi si pepiniere pomicole": 57.0,
+        "Paduri si alta vegetatie forestiera": 8.0,
+        "Ocupata cu constructii": 416.0,
+        "Cai de comunicatii si cai ferate": 13.0,
+        "Terenuri degradate si neproductive": 102.0
+      },
+      "privateHa": 4257.0,
       "byCategory": {
         "A": 1710.0,
         "P+F": 1142.0,
@@ -2602,7 +4427,16 @@
         "DR": 209.0,
         "NP": 102.0
       },
-      "forestHa": 247.0
+      "byCategoryPrivate": {
+        "A": 1672.0,
+        "P+F": 1067.0,
+        "V+L": 979.0,
+        "CC": 416.0,
+        "DR": 13.0,
+        "NP": 102.0
+      },
+      "forestHa": 247.0,
+      "forestPrivateHa": 8.0
     },
     {
       "siruta": "136107",
@@ -2620,6 +4454,16 @@
         "Terenuri degradate si neproductive": 166.0
       },
       "totalHa": 28595.0,
+      "privateAreaHa": {
+        "Arabila": 260.0,
+        "Pasuni": 6250.0,
+        "Finete": 1036.0,
+        "Livezi si pepiniere pomicole": 57.0,
+        "Paduri si alta vegetatie forestiera": 5610.0,
+        "Ocupata cu constructii": 515.0,
+        "Terenuri degradate si neproductive": 155.0
+      },
+      "privateHa": 13883.0,
       "byCategory": {
         "A": 260.0,
         "P+F": 7323.0,
@@ -2629,7 +4473,15 @@
         "DR": 123.0,
         "NP": 166.0
       },
-      "forestHa": 19790.0
+      "byCategoryPrivate": {
+        "A": 260.0,
+        "P+F": 7286.0,
+        "V+L": 57.0,
+        "CC": 515.0,
+        "NP": 155.0
+      },
+      "forestHa": 19790.0,
+      "forestPrivateHa": 5610.0
     },
     {
       "siruta": "136134",
@@ -2648,6 +4500,16 @@
         "Terenuri degradate si neproductive": 99.0
       },
       "totalHa": 4170.0,
+      "privateAreaHa": {
+        "Arabila": 223.0,
+        "Pasuni": 254.0,
+        "Finete": 628.0,
+        "Vii si pepiniere viticole": 1.0,
+        "Livezi si pepiniere pomicole": 504.0,
+        "Paduri si alta vegetatie forestiera": 1445.0,
+        "Ocupata cu constructii": 152.0
+      },
+      "privateHa": 3207.0,
       "byCategory": {
         "A": 223.0,
         "P+F": 1206.0,
@@ -2657,7 +4519,14 @@
         "DR": 85.0,
         "NP": 99.0
       },
-      "forestHa": 1845.0
+      "byCategoryPrivate": {
+        "A": 223.0,
+        "P+F": 882.0,
+        "V+L": 505.0,
+        "CC": 152.0
+      },
+      "forestHa": 1845.0,
+      "forestPrivateHa": 1445.0
     },
     {
       "siruta": "136198",
@@ -2675,6 +4544,18 @@
         "Terenuri degradate si neproductive": 28.0
       },
       "totalHa": 2838.0,
+      "privateAreaHa": {
+        "Arabila": 184.0,
+        "Pasuni": 380.0,
+        "Finete": 471.0,
+        "Livezi si pepiniere pomicole": 87.0,
+        "Paduri si alta vegetatie forestiera": 1304.0,
+        "Ocupata cu ape, balti": 15.0,
+        "Ocupata cu constructii": 110.0,
+        "Cai de comunicatii si cai ferate": 74.0,
+        "Terenuri degradate si neproductive": 28.0
+      },
+      "privateHa": 2653.0,
       "byCategory": {
         "A": 186.0,
         "P+F": 1032.0,
@@ -2684,7 +4565,17 @@
         "DR": 74.0,
         "NP": 28.0
       },
-      "forestHa": 1304.0
+      "byCategoryPrivate": {
+        "A": 184.0,
+        "P+F": 851.0,
+        "V+L": 87.0,
+        "AP": 15.0,
+        "CC": 110.0,
+        "DR": 74.0,
+        "NP": 28.0
+      },
+      "forestHa": 1304.0,
+      "forestPrivateHa": 1304.0
     },
     {
       "siruta": "136241",
@@ -2700,6 +4591,14 @@
         "Terenuri degradate si neproductive": 47.0
       },
       "totalHa": 2632.0,
+      "privateAreaHa": {
+        "Arabila": 1710.0,
+        "Pasuni": 178.0,
+        "Ocupata cu constructii": 205.0,
+        "Cai de comunicatii si cai ferate": 15.0,
+        "Terenuri degradate si neproductive": 35.0
+      },
+      "privateHa": 2143.0,
       "byCategory": {
         "A": 1710.0,
         "P+F": 178.0,
@@ -2708,7 +4607,15 @@
         "DR": 32.0,
         "NP": 47.0
       },
-      "forestHa": 354.0
+      "byCategoryPrivate": {
+        "A": 1710.0,
+        "P+F": 178.0,
+        "CC": 205.0,
+        "DR": 15.0,
+        "NP": 35.0
+      },
+      "forestHa": 354.0,
+      "forestPrivateHa": 0.0
     },
     {
       "siruta": "136250",
@@ -2727,6 +4634,18 @@
         "Terenuri degradate si neproductive": 12.0
       },
       "totalHa": 1809.0,
+      "privateAreaHa": {
+        "Arabila": 1406.0,
+        "Pasuni": 212.0,
+        "Finete": 4.0,
+        "Vii si pepiniere viticole": 6.0,
+        "Livezi si pepiniere pomicole": 2.0,
+        "Paduri si alta vegetatie forestiera": 2.0,
+        "Ocupata cu ape, balti": 20.0,
+        "Ocupata cu constructii": 83.0,
+        "Terenuri degradate si neproductive": 12.0
+      },
+      "privateHa": 1747.0,
       "byCategory": {
         "A": 1414.0,
         "P+F": 216.0,
@@ -2736,7 +4655,16 @@
         "DR": 54.0,
         "NP": 12.0
       },
-      "forestHa": 2.0
+      "byCategoryPrivate": {
+        "A": 1406.0,
+        "P+F": 216.0,
+        "V+L": 8.0,
+        "AP": 20.0,
+        "CC": 83.0,
+        "NP": 12.0
+      },
+      "forestHa": 2.0,
+      "forestPrivateHa": 2.0
     },
     {
       "siruta": "136269",
@@ -2753,6 +4681,17 @@
         "Terenuri degradate si neproductive": 36.0
       },
       "totalHa": 2001.0,
+      "privateAreaHa": {
+        "Arabila": 739.0,
+        "Pasuni": 423.0,
+        "Vii si pepiniere viticole": 320.0,
+        "Paduri si alta vegetatie forestiera": 300.0,
+        "Ocupata cu ape, balti": 34.0,
+        "Ocupata cu constructii": 87.0,
+        "Cai de comunicatii si cai ferate": 62.0,
+        "Terenuri degradate si neproductive": 36.0
+      },
+      "privateHa": 2001.0,
       "byCategory": {
         "A": 739.0,
         "P+F": 423.0,
@@ -2762,7 +4701,17 @@
         "DR": 62.0,
         "NP": 36.0
       },
-      "forestHa": 300.0
+      "byCategoryPrivate": {
+        "A": 739.0,
+        "P+F": 423.0,
+        "V+L": 320.0,
+        "AP": 34.0,
+        "CC": 87.0,
+        "DR": 62.0,
+        "NP": 36.0
+      },
+      "forestHa": 300.0,
+      "forestPrivateHa": 300.0
     },
     {
       "siruta": "136278",
@@ -2780,6 +4729,16 @@
         "Terenuri degradate si neproductive": 392.0
       },
       "totalHa": 4592.0,
+      "privateAreaHa": {
+        "Arabila": 164.0,
+        "Pasuni": 500.0,
+        "Finete": 900.0,
+        "Livezi si pepiniere pomicole": 95.0,
+        "Paduri si alta vegetatie forestiera": 2358.0,
+        "Ocupata cu constructii": 53.0,
+        "Terenuri degradate si neproductive": 392.0
+      },
+      "privateHa": 4462.0,
       "byCategory": {
         "A": 164.0,
         "P+F": 1400.0,
@@ -2789,10 +4748,27 @@
         "DR": 74.0,
         "NP": 392.0
       },
-      "forestHa": 2358.0
+      "byCategoryPrivate": {
+        "A": 164.0,
+        "P+F": 1400.0,
+        "V+L": 95.0,
+        "CC": 53.0,
+        "NP": 392.0
+      },
+      "forestHa": 2358.0,
+      "forestPrivateHa": 2358.0
     }
   ],
   "limitations": [
+    {
+      "id": "privat-nu-inseamna-impozabil",
+      "text": "Împărțirea pe forme de proprietate este măsurată, dar „privat” nu este același lucru cu „impozabil”. Registrul numără drept privată și proprietatea privată a statului și a comunei, care se impozitează; în sens invers, terenul din domeniul public dat în concesiune, închiriere sau administrare se impozitează chiriașului, potrivit art. 463 alin. (2). Niciuna dintre cele două abateri nu este publicată pe localități, așa că împărțirea este cea mai bună aproximare măsurată a bazei impozabile, nu baza însăși.",
+      "severity": "material",
+      "affects": [
+        "valoare-teren",
+        "impozit"
+      ]
+    },
     {
       "id": "suprafetele-sunt-din-2014",
       "text": "INS a oprit seria pe localități: AGR101B nu are date după 2014 și nimic nu a înlocuit-o la această granularitate. Suprafețele sunt deci din 2014, iar valorile din 2026. Compoziția fondului funciar se schimbă lent, dar într-o singură direcție — arabilul devine curți-construcții, nu invers — așa că suprafața construită de aici este un minim, iar valoarea calculată din ea este subestimată, nu umflată.",

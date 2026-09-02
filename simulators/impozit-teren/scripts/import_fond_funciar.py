@@ -19,11 +19,27 @@ built-up area here is a floor and the land value computed from it is understated
 flattering. That is carried as a material limitation, with the direction of the error named,
 because a caveat that does not say which way it cuts is not much of a caveat.
 
+**Who owns it is in the same matrix, and it is what a tax base is made of.** AGR101B's second
+dimension is `Forme de proprietate`, with exactly two options — `Total` and `Proprietate
+privata` — so public land is the subtraction between them, per locality and per category. Both
+are fetched. This matters because a land tax is not charged on the whole country: art. 456 of
+the Fiscal Code exempts land in the public domain, and roads, rivers and state forest are a
+fifth of Romania by area. Valuing every hectare and then taxing every hectare produces a
+revenue figure that no treasury could ever collect.
+
+The split is a **proxy for the taxable base, not the base itself**, and it is wrong in both
+directions by amounts nobody publishes: the register's "private" includes the private domain
+of the state and of the commune, which *is* taxable, while some public-domain land that is
+leased or given in administration is taxed to the tenant under art. 463 (2). It is used
+because it is measured per locality, which no legal exemption list is.
+
 The check is the source's own arithmetic. AGR101B publishes a Total alongside the categories,
 so the ten leaf categories are fetched together with it and must add up. They are independent
 numbers in the register, not a derived sum, which is what makes the check worth running: if a
 category silently fails to parse out of the HTML table, the total no longer balances and the
-import stops rather than publishing a county with land missing.
+import stops rather than publishing a county with land missing. The private side publishes its
+own total too and is checked the same way, which is what catches an ownership row landing on
+the wrong category.
 
 Usage:
     uv run python simulators/impozit-teren/scripts/import_fond_funciar.py --county BC
@@ -85,6 +101,9 @@ TO_NOTARY = {
     "Paduri si alta vegetatie forestiera": None,
 }
 TOTAL_LABEL = "Total"
+# The register's only ownership split. Everything not under it is the public domain, which
+# art. 456 (1) a) of the Fiscal Code does not tax.
+PRIVATE_LABEL = "Proprietate privata"
 
 
 def metadata() -> dict:
@@ -108,6 +127,11 @@ def query(meta: dict, county_label: str) -> str:
     """
     dims = meta["dimensionsMap"]
     wanted = {TOTAL_LABEL, *TO_NOTARY}
+    # The ownership dimension is two options and the import subtracts one from the other. A
+    # third would make that subtraction wrong rather than incomplete, so it stops here.
+    forms = {option["label"].strip() for option in dims[1]["options"]}
+    if forms != {TOTAL_LABEL, PRIVATE_LABEL}:
+        raise SystemExit(f"AGR101B ownership forms changed: {sorted(forms)}")
 
     def options(index: int, match) -> list[dict]:
         return [o for o in dims[index]["options"] if match(o["label"].strip())]
@@ -128,7 +152,9 @@ def query(meta: dict, county_label: str) -> str:
 
     arr = [
         categories,
-        options(1, lambda label: label == "Total"),
+        # Both forms of ownership, not just the total. The difference is the public domain,
+        # which art. 456 does not tax — see the module docstring.
+        dims[1]["options"],
         counties,
         localities,
         options(4, lambda label: label == f"Anul {YEAR}"),
@@ -182,7 +208,7 @@ def parse(table: str, county: str) -> tuple[dict[str, dict], list[str]]:
                 carried[index] = cells[index]
             else:
                 cells[index] = carried[index]
-        category, _ownership, _county, locality, value = cells
+        category, ownership, _county, locality, value = cells
         name_match = LOCALITY.match(locality)
         if not name_match:
             problems.append(f"locality label without a SIRUTA code: {locality!r}")
@@ -193,12 +219,28 @@ def parse(table: str, county: str) -> tuple[dict[str, dict], list[str]]:
         except ValueError:
             continue
         record = localities.setdefault(
-            siruta, {"siruta": siruta, "name": name, "county": county, "areaHa": {}, "totalHa": 0.0}
+            siruta,
+            {
+                "siruta": siruta,
+                "name": name,
+                "county": county,
+                "areaHa": {},
+                "totalHa": 0.0,
+                "privateAreaHa": {},
+                "privateHa": 0.0,
+            },
+        )
+        # The private rows are a subset of the same table, keyed by the same category, so the
+        # ownership cell is what decides which of the two sets a row belongs to. Reading it as
+        # one set — which is what pinning the dimension to Total used to guarantee — would now
+        # double every category, because both forms are fetched.
+        area_key, total_key = (
+            ("privateAreaHa", "privateHa") if ownership == PRIVATE_LABEL else ("areaHa", "totalHa")
         )
         if category == TOTAL_LABEL:
-            record["totalHa"] = hectares
+            record[total_key] = hectares
         else:
-            record["areaHa"][category] = record["areaHa"].get(category, 0.0) + hectares
+            record[area_key][category] = record[area_key].get(category, 0.0) + hectares
     return localities, problems
 
 
@@ -275,14 +317,28 @@ def main() -> int:
         return 1
 
     # The source's own arithmetic, used as the check. The leaves and the total are separate
-    # numbers in the register, so agreement is evidence the parse kept everything.
+    # numbers in the register, so agreement is evidence the parse kept everything. Run on both
+    # forms of ownership: the private side has its own published total, and checking it is
+    # what would catch a private row credited to the wrong category — which the combined
+    # figures would hide, since they would still add up.
     unbalanced = []
     for record in localities.values():
-        leaves = sum(record["areaHa"].values())
-        if record["totalHa"] and abs(leaves - record["totalHa"]) > 1:
+        for area_key, total_key, label in (
+            ("areaHa", "totalHa", "total"),
+            ("privateAreaHa", "privateHa", "privat"),
+        ):
+            leaves = sum(record[area_key].values())
+            if record[total_key] and abs(leaves - record[total_key]) > 1:
+                unbalanced.append(
+                    f"{record['name']} ({record['siruta']}), {label}: categories {leaves:.0f} ha, "
+                    f"total {record[total_key]:.0f} ha"
+                )
+        # Private land is a subset, so more of it than there is land is a parse error rather
+        # than a fact about the commune.
+        if record["privateHa"] > record["totalHa"] + 1:
             unbalanced.append(
-                f"{record['name']} ({record['siruta']}): categories {leaves:.0f} ha, "
-                f"total {record['totalHa']:.0f} ha"
+                f"{record['name']} ({record['siruta']}): privat {record['privateHa']:.0f} ha "
+                f"depășește totalul {record['totalHa']:.0f} ha"
             )
 
     rows = sorted(localities.values(), key=lambda r: r["siruta"])
@@ -290,21 +346,35 @@ def main() -> int:
         # Fold the register's categories onto the notaries', which is the join everything
         # downstream actually uses. Forest keeps its own line: it is priced per hectare in a
         # separate table, not per square metre in the grid.
-        folded: dict[str, float] = {}
-        for label, hectares in record["areaHa"].items():
-            code = TO_NOTARY.get(label)
-            if code:
-                folded[code] = round(folded.get(code, 0.0) + hectares, 2)
-        record["byCategory"] = folded
+        def folded(areas: dict[str, float]) -> dict[str, float]:
+            out: dict[str, float] = {}
+            for label, hectares in areas.items():
+                code = TO_NOTARY.get(label)
+                if code:
+                    out[code] = round(out.get(code, 0.0) + hectares, 2)
+            return out
+
+        record["byCategory"] = folded(record["areaHa"])
+        record["byCategoryPrivate"] = folded(record["privateAreaHa"])
         forest = record["areaHa"].get("Paduri si alta vegetatie forestiera", 0.0)
         record["forestHa"] = round(forest, 2)
+        record["forestPrivateHa"] = round(
+            record["privateAreaHa"].get("Paduri si alta vegetatie forestiera", 0.0), 2
+        )
         record["areaHa"] = {k: round(v, 2) for k, v in record["areaHa"].items()}
+        record["privateAreaHa"] = {k: round(v, 2) for k, v in record["privateAreaHa"].items()}
+        record["privateHa"] = round(record["privateHa"], 2)
 
     total = sum(r["totalHa"] for r in rows)
+    private = sum(r["privateHa"] for r in rows)
     built = sum(r["byCategory"].get("CC", 0.0) for r in rows)
+    built_private = sum(r["byCategoryPrivate"].get("CC", 0.0) for r in rows)
     print(f"{COUNTIES[county]} ({county}), anul {YEAR}: {len(rows)} localități")
     print(f"suprafață totală: {total:,.0f} ha   din care curți-construcții: {built:,.0f} ha "
           f"({100 * built / total:.1f}%)")
+    print(f"proprietate privată: {private:,.0f} ha ({100 * private / total:.1f}%)   "
+          f"din care curți-construcții: {built_private:,.0f} ha "
+          f"({100 * built_private / built if built else 0:.1f}% din ele)")
     if unbalanced:
         print(f"\ncategorii care nu însumează totalul ({len(unbalanced)}):")
         for line in unbalanced[:10]:
@@ -322,24 +392,47 @@ def main() -> int:
         "unit": "ha",
         "provenance": {
             "source": f"ins-tempo-{MATRIX.lower()}",
-            "locator": f"{TEMPO}/matrix/{MATRIX}, anul {YEAR}, forme de proprietate: Total",
+            "locator": (
+                f"{TEMPO}/matrix/{MATRIX}, anul {YEAR}, forme de proprietate: "
+                f"{TOTAL_LABEL} și {PRIVATE_LABEL}"
+            ),
             "confidence": "verbatim",
             "note": (
                 "Suprafețele sunt preluate ca atare din matricea INS. Gruparea pe categoriile "
                 "notariale (pășuni+fânețe → P+F, vii+livezi → V+L) este făcută aici și "
-                "urmează gruparea din grilele notariale."
+                "urmează gruparea din grilele notariale. Proprietatea publică nu este "
+                "publicată separat: este diferența dintre total și proprietatea privată, "
+                "calculată aici prin scădere."
             ),
         },
         "summary": {
             "localities": len(rows),
             "totalHa": round(total, 2),
             "builtHa": round(built, 2),
+            "privateHa": round(private, 2),
+            "privateBuiltHa": round(built_private, 2),
+            "privateSharePercent": round(100 * private / total, 2) if total else 0,
             "unbalanced": unbalanced,
             "problems": problems,
         },
         "categoryMapping": {k: v for k, v in TO_NOTARY.items() if v},
         "localities": rows,
         "limitations": [
+            {
+                "id": "privat-nu-inseamna-impozabil",
+                "text": (
+                    "Împărțirea pe forme de proprietate este măsurată, dar „privat” nu este "
+                    "același lucru cu „impozabil”. Registrul numără drept privată și "
+                    "proprietatea privată a statului și a comunei, care se impozitează; în "
+                    "sens invers, terenul din domeniul public dat în concesiune, închiriere "
+                    "sau administrare se impozitează chiriașului, potrivit art. 463 alin. (2). "
+                    "Niciuna dintre cele două abateri nu este publicată pe localități, așa că "
+                    "împărțirea este cea mai bună aproximare măsurată a bazei impozabile, nu "
+                    "baza însăși."
+                ),
+                "severity": "material",
+                "affects": ["valoare-teren", "impozit"],
+            },
             {
                 "id": "suprafetele-sunt-din-2014",
                 "text": (

@@ -1,455 +1,559 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/impozit.schema.json",
-  "title": "Land tax today against a tax on land value, on the same hectares",
-  "description": "Statutory against statutory. Both figures are bands: the value side because villages have no published areas to weight their prices by, the Fiscal Code side because the statutory range, the zone and the rank are all unpublished local decisions that multiply together. The revenue-neutral rate is the ratio of the two, and is therefore a band as well.",
-  "type": "object",
-  "additionalProperties": false,
-  "required": [
-    "id",
-    "title",
-    "publisher",
-    "counties",
-    "period",
-    "currency",
-    "provenance",
-    "assumptions",
-    "summary",
-    "localities",
-    "limitations"
-  ],
-  "properties": {
-    "$schema": {
-      "type": "string"
-    },
-    "id": {
-      "type": "string",
-      "pattern": "^impozit-[a-z]{1,2}-[0-9]{4}$"
-    },
-    "title": {
-      "type": "string"
-    },
-    "publisher": {
-      "type": "string"
-    },
-    "counties": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "type": "string",
-        "pattern": "^[A-Z]{1,2}$"
-      }
-    },
-    "period": {
-      "type": "string",
-      "pattern": "^[0-9]{4}$"
-    },
-    "currency": {
-      "const": "RON"
-    },
-    "provenance": {
-      "$ref": "provenance.schema.json#/$defs/provenance"
-    },
-    "assumptions": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "ronPerEur",
-        "exchangeRateDate",
-        "lvtRatePercent",
-        "intravilanCategory",
-        "rankSource",
-        "agriculturalYieldPercent",
-        "agriculturalYieldSource",
-        "yieldByCategoryPercent"
-      ],
-      "properties": {
-        "ronPerEur": {
-          "type": "number",
-          "exclusiveMinimum": 0
-        },
-        "exchangeRateDate": {
-          "type": "string",
-          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
-        },
-        "lvtRatePercent": {
-          "type": "number",
-          "exclusiveMinimum": 0
-        },
-        "intravilanCategory": {
-          "type": "string"
-        },
-        "rankSource": {
-          "type": "string"
-        },
-        "agriculturalYieldPercent": {
-          "anyOf": [
-            {
-              "type": "object",
-              "additionalProperties": false,
-              "required": [
-                "low",
-                "central",
-                "high"
-              ],
-              "properties": {
-                "low": {
-                  "type": "number",
-                  "exclusiveMinimum": 0
-                },
-                "central": {
-                  "type": "number",
-                  "exclusiveMinimum": 0
-                },
-                "high": {
-                  "type": "number",
-                  "exclusiveMinimum": 0
-                }
-              }
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "description": "Randamentul măsurat al terenului agricol în regiunea județului, purtat pentru pagină."
-        },
-        "agriculturalYieldSource": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "yieldByCategoryPercent": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-              "low",
-              "central",
-              "high"
-            ],
-            "properties": {
-              "low": {
-                "type": "number",
-                "exclusiveMinimum": 0
-              },
-              "central": {
-                "type": "number",
-                "exclusiveMinimum": 0
-              },
-              "high": {
-                "type": "number",
-                "exclusiveMinimum": 0
-              }
-            }
-          }
-        },
-        "builtYieldPercent": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": [
-            "low",
-            "central",
-            "high"
-          ],
-          "properties": {
-            "low": {
-              "type": "number",
-              "exclusiveMinimum": 0
-            },
-            "central": {
-              "type": "number",
-              "exclusiveMinimum": 0
-            },
-            "high": {
-              "type": "number",
-              "exclusiveMinimum": 0
-            }
-          },
-          "description": "Randamentul dedus al terenului de sub clădiri, purtat până la browser ca să nu existe două copii ale aceleiași cifre în două limbi."
-        },
-        "builtYieldSource": {
-          "type": "string"
-        }
-      }
-    },
-    "summary": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://cristiannichifor.github.io/romania-reforms/schema/impozit.schema.json",
+    "title": "Land tax today against a tax on land value, on the same hectares",
+    "description": "Statutory against statutory. Both figures are bands: the value side because villages have no published areas to weight their prices by, the Fiscal Code side because the statutory range, the zone and the rank are all unpublished local decisions that multiply together. The revenue-neutral rate is the ratio of the two, and is therefore a band as well.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "id",
+        "title",
+        "publisher",
+        "counties",
+        "period",
+        "currency",
+        "provenance",
+        "assumptions",
+        "summary",
         "localities",
-        "fiscalCodeRon",
-        "landValueRon",
-        "lvtRon",
-        "revenueNeutralRatePercent",
-        "lawfulRangeRatio"
-      ],
-      "properties": {
-        "localities": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "fiscalCodeRon": {
-          "description": "What article 465 would raise, cheapest to dearest lawful reading.",
-          "type": "object",
-          "additionalProperties": false,
-          "required": [
-            "low",
-            "central",
-            "high"
-          ],
-          "properties": {
-            "low": {
-              "type": "number"
-            },
-            "central": {
-              "type": "number"
-            },
-            "high": {
-              "type": "number"
-            }
-          }
-        },
-        "landValueRon": {
-          "description": "The land value band, converted at the stated rate.",
-          "type": "object",
-          "additionalProperties": false,
-          "required": [
-            "low",
-            "central",
-            "high"
-          ],
-          "properties": {
-            "low": {
-              "type": "number"
-            },
-            "central": {
-              "type": "number"
-            },
-            "high": {
-              "type": "number"
-            }
-          }
-        },
-        "lvtRon": {
-          "description": "Revenue at the chosen rate.",
-          "type": "object",
-          "additionalProperties": false,
-          "required": [
-            "low",
-            "central",
-            "high"
-          ],
-          "properties": {
-            "low": {
-              "type": "number"
-            },
-            "central": {
-              "type": "number"
-            },
-            "high": {
-              "type": "number"
-            }
-          }
-        },
-        "revenueNeutralRatePercent": {
-          "description": "The rate that matches today's tax.",
-          "type": "object",
-          "additionalProperties": false,
-          "required": [
-            "low",
-            "central",
-            "high"
-          ],
-          "properties": {
-            "low": {
-              "type": "number"
-            },
-            "central": {
-              "type": "number"
-            },
-            "high": {
-              "type": "number"
-            }
-          }
-        },
-        "lawfulRangeRatio": {
-          "description": "How many times dearer the dearest lawful reading of today's tax is than the cheapest. A property of the Code, not of this file.",
-          "type": "number",
-          "minimum": 1
-        }
-      }
-    },
-    "localities": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "siruta",
-          "name",
-          "rank",
-          "fiscalRank",
-          "totalHa",
-          "fiscalCodeRon",
-          "landValueRon",
-          "lvtRon",
-          "effectiveRatePercent",
-          "extravilanValueRon",
-          "extravilanValueByCodeRon"
-        ],
-        "properties": {
-          "siruta": {
-            "type": "string",
-            "pattern": "^[0-9]+$"
-          },
-          "name": {
+        "limitations"
+    ],
+    "properties": {
+        "$schema": {
             "type": "string"
-          },
-          "rank": {
-            "enum": [
-              "municipii",
-              "orase",
-              "comune",
-              null
-            ]
-          },
-          "fiscalRank": {
-            "description": "Legea 351/2001 rank. A commune has two: its seat is IV and its other villages V, with no areas to split them by.",
+        },
+        "id": {
+            "type": "string",
+            "pattern": "^impozit-[a-z]{1,2}-[0-9]{4}$"
+        },
+        "title": {
+            "type": "string"
+        },
+        "publisher": {
+            "type": "string"
+        },
+        "counties": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "string",
+                "pattern": "^[A-Z]{1,2}$"
+            }
+        },
+        "period": {
+            "type": "string",
+            "pattern": "^[0-9]{4}$"
+        },
+        "currency": {
+            "const": "RON"
+        },
+        "provenance": {
+            "$ref": "provenance.schema.json#/$defs/provenance"
+        },
+        "assumptions": {
             "type": "object",
             "additionalProperties": false,
             "required": [
-              "low",
-              "high"
+                "ronPerEur",
+                "exchangeRateDate",
+                "lvtRatePercent",
+                "intravilanCategory",
+                "rankSource",
+                "agriculturalYieldPercent",
+                "agriculturalYieldSource",
+                "yieldByCategoryPercent",
+                "collectionRate",
+                "taxableBase"
             ],
             "properties": {
-              "low": {
-                "type": "string"
-              },
-              "high": {
-                "type": "string"
-              }
+                "ronPerEur": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "exchangeRateDate": {
+                    "type": "string",
+                    "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+                },
+                "lvtRatePercent": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "intravilanCategory": {
+                    "type": "string"
+                },
+                "rankSource": {
+                    "type": "string"
+                },
+                "agriculturalYieldPercent": {
+                    "anyOf": [
+                        {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [
+                                "low",
+                                "central",
+                                "high"
+                            ],
+                            "properties": {
+                                "low": {
+                                    "type": "number",
+                                    "exclusiveMinimum": 0
+                                },
+                                "central": {
+                                    "type": "number",
+                                    "exclusiveMinimum": 0
+                                },
+                                "high": {
+                                    "type": "number",
+                                    "exclusiveMinimum": 0
+                                }
+                            }
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Randamentul măsurat al terenului agricol în regiunea județului, purtat pentru pagină."
+                },
+                "agriculturalYieldSource": {
+                    "type": [
+                        "string",
+                        "null"
+                    ]
+                },
+                "yieldByCategoryPercent": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                            "low",
+                            "central",
+                            "high"
+                        ],
+                        "properties": {
+                            "low": {
+                                "type": "number",
+                                "exclusiveMinimum": 0
+                            },
+                            "central": {
+                                "type": "number",
+                                "exclusiveMinimum": 0
+                            },
+                            "high": {
+                                "type": "number",
+                                "exclusiveMinimum": 0
+                            }
+                        }
+                    }
+                },
+                "builtYieldPercent": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "low",
+                        "central",
+                        "high"
+                    ],
+                    "properties": {
+                        "low": {
+                            "type": "number",
+                            "exclusiveMinimum": 0
+                        },
+                        "central": {
+                            "type": "number",
+                            "exclusiveMinimum": 0
+                        },
+                        "high": {
+                            "type": "number",
+                            "exclusiveMinimum": 0
+                        }
+                    },
+                    "description": "Randamentul dedus al terenului de sub clădiri, purtat până la browser ca să nu existe două copii ale aceleiași cifre în două limbi."
+                },
+                "builtYieldSource": {
+                    "type": "string"
+                },
+                "collectionRate": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "maximum": 1
+                },
+                "taxableBase": {
+                    "type": "string"
+                }
             }
-          },
-          "totalHa": {
-            "type": "number",
-            "exclusiveMinimum": 0
-          },
-          "fiscalCodeRon": {
-            "description": "Article 465 on this locality's hectares.",
+        },
+        "summary": {
             "type": "object",
             "additionalProperties": false,
             "required": [
-              "low",
-              "central",
-              "high"
+                "localities",
+                "fiscalCodeRon",
+                "landValueRon",
+                "lvtRon",
+                "revenueNeutralRatePercent",
+                "lawfulRangeRatio",
+                "taxableValueRon",
+                "taxableSharePercent",
+                "lvtCollectedRon"
             ],
             "properties": {
-              "low": {
-                "type": "number"
-              },
-              "central": {
-                "type": "number"
-              },
-              "high": {
-                "type": "number"
-              }
+                "localities": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "fiscalCodeRon": {
+                    "description": "What article 465 would raise, cheapest to dearest lawful reading.",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "low",
+                        "central",
+                        "high"
+                    ],
+                    "properties": {
+                        "low": {
+                            "type": "number"
+                        },
+                        "central": {
+                            "type": "number"
+                        },
+                        "high": {
+                            "type": "number"
+                        }
+                    }
+                },
+                "landValueRon": {
+                    "description": "The land value band, converted at the stated rate.",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "low",
+                        "central",
+                        "high"
+                    ],
+                    "properties": {
+                        "low": {
+                            "type": "number"
+                        },
+                        "central": {
+                            "type": "number"
+                        },
+                        "high": {
+                            "type": "number"
+                        }
+                    }
+                },
+                "lvtRon": {
+                    "description": "Revenue at the chosen rate.",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "low",
+                        "central",
+                        "high"
+                    ],
+                    "properties": {
+                        "low": {
+                            "type": "number"
+                        },
+                        "central": {
+                            "type": "number"
+                        },
+                        "high": {
+                            "type": "number"
+                        }
+                    }
+                },
+                "revenueNeutralRatePercent": {
+                    "description": "The rate that matches today's tax.",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "low",
+                        "central",
+                        "high"
+                    ],
+                    "properties": {
+                        "low": {
+                            "type": "number"
+                        },
+                        "central": {
+                            "type": "number"
+                        },
+                        "high": {
+                            "type": "number"
+                        }
+                    }
+                },
+                "lawfulRangeRatio": {
+                    "description": "How many times dearer the dearest lawful reading of today's tax is than the cheapest. A property of the Code, not of this file.",
+                    "type": "number",
+                    "minimum": 1
+                },
+                "taxableValueRon": {
+                    "description": "County land value restricted to privately owned land.",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "low",
+                        "central",
+                        "high"
+                    ],
+                    "properties": {
+                        "low": {
+                            "type": "number"
+                        },
+                        "central": {
+                            "type": "number"
+                        },
+                        "high": {
+                            "type": "number"
+                        }
+                    }
+                },
+                "taxableSharePercent": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                },
+                "lvtCollectedRon": {
+                    "description": "County total of lvtCollectedRon.",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "low",
+                        "central",
+                        "high"
+                    ],
+                    "properties": {
+                        "low": {
+                            "type": "number"
+                        },
+                        "central": {
+                            "type": "number"
+                        },
+                        "high": {
+                            "type": "number"
+                        }
+                    }
+                }
             }
-          },
-          "landValueRon": {
-            "description": "Land value in lei.",
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-              "low",
-              "central",
-              "high"
-            ],
-            "properties": {
-              "low": {
-                "type": "number"
-              },
-              "central": {
-                "type": "number"
-              },
-              "high": {
-                "type": "number"
-              }
+        },
+        "localities": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                    "siruta",
+                    "name",
+                    "rank",
+                    "fiscalRank",
+                    "totalHa",
+                    "fiscalCodeRon",
+                    "landValueRon",
+                    "lvtRon",
+                    "effectiveRatePercent",
+                    "extravilanValueRon",
+                    "extravilanValueByCodeRon",
+                    "taxableValueRon",
+                    "lvtCollectedRon"
+                ],
+                "properties": {
+                    "siruta": {
+                        "type": "string",
+                        "pattern": "^[0-9]+$"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "rank": {
+                        "enum": [
+                            "municipii",
+                            "orase",
+                            "comune",
+                            null
+                        ]
+                    },
+                    "fiscalRank": {
+                        "description": "Legea 351/2001 rank. A commune has two: its seat is IV and its other villages V, with no areas to split them by.",
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                            "low",
+                            "high"
+                        ],
+                        "properties": {
+                            "low": {
+                                "type": "string"
+                            },
+                            "high": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "totalHa": {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                    },
+                    "fiscalCodeRon": {
+                        "description": "Article 465 on this locality's hectares.",
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                            "low",
+                            "central",
+                            "high"
+                        ],
+                        "properties": {
+                            "low": {
+                                "type": "number"
+                            },
+                            "central": {
+                                "type": "number"
+                            },
+                            "high": {
+                                "type": "number"
+                            }
+                        }
+                    },
+                    "landValueRon": {
+                        "description": "Land value in lei.",
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                            "low",
+                            "central",
+                            "high"
+                        ],
+                        "properties": {
+                            "low": {
+                                "type": "number"
+                            },
+                            "central": {
+                                "type": "number"
+                            },
+                            "high": {
+                                "type": "number"
+                            }
+                        }
+                    },
+                    "lvtRon": {
+                        "description": "Land value tax at the chosen rate.",
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                            "low",
+                            "central",
+                            "high"
+                        ],
+                        "properties": {
+                            "low": {
+                                "type": "number"
+                            },
+                            "central": {
+                                "type": "number"
+                            },
+                            "high": {
+                                "type": "number"
+                            }
+                        }
+                    },
+                    "effectiveRatePercent": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                            "low",
+                            "central",
+                            "high"
+                        ],
+                        "properties": {
+                            "low": {
+                                "type": [
+                                    "number",
+                                    "null"
+                                ]
+                            },
+                            "central": {
+                                "type": [
+                                    "number",
+                                    "null"
+                                ]
+                            },
+                            "high": {
+                                "type": [
+                                    "number",
+                                    "null"
+                                ]
+                            }
+                        }
+                    },
+                    "extravilanValueRon": {
+                        "type": "number",
+                        "minimum": 0,
+                        "description": "Partea agricolă a valorii terenului. Nu are bandă pentru că doar prețul intravilan e publicat ca interval; partea intravilană este restul fiecărei benzi. Purtată aici ca build_renta.py să poată aplica randamente diferite celor două."
+                    },
+                    "extravilanValueByCodeRon": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "number",
+                            "minimum": 0
+                        }
+                    },
+                    "taxableValueRon": {
+                        "description": "Land value restricted to privately owned land — the base art. 456 (1) a) leaves taxable.",
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                            "low",
+                            "central",
+                            "high"
+                        ],
+                        "properties": {
+                            "low": {
+                                "type": "number"
+                            },
+                            "central": {
+                                "type": "number"
+                            },
+                            "high": {
+                                "type": "number"
+                            }
+                        }
+                    },
+                    "lvtCollectedRon": {
+                        "description": "The rate applied to taxableValueRon and multiplied by the collection rate. A ceiling on receipts, not a comparison figure — the Fiscal Code side has no equivalent.",
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                            "low",
+                            "central",
+                            "high"
+                        ],
+                        "properties": {
+                            "low": {
+                                "type": "number"
+                            },
+                            "central": {
+                                "type": "number"
+                            },
+                            "high": {
+                                "type": "number"
+                            }
+                        }
+                    }
+                }
             }
-          },
-          "lvtRon": {
-            "description": "Land value tax at the chosen rate.",
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-              "low",
-              "central",
-              "high"
-            ],
-            "properties": {
-              "low": {
-                "type": "number"
-              },
-              "central": {
-                "type": "number"
-              },
-              "high": {
-                "type": "number"
-              }
+        },
+        "limitations": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "$ref": "provenance.schema.json#/$defs/limitation"
             }
-          },
-          "effectiveRatePercent": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": [
-              "low",
-              "central",
-              "high"
-            ],
-            "properties": {
-              "low": {
-                "type": [
-                  "number",
-                  "null"
-                ]
-              },
-              "central": {
-                "type": [
-                  "number",
-                  "null"
-                ]
-              },
-              "high": {
-                "type": [
-                  "number",
-                  "null"
-                ]
-              }
-            }
-          },
-          "extravilanValueRon": {
-            "type": "number",
-            "minimum": 0,
-            "description": "Partea agricolă a valorii terenului. Nu are bandă pentru că doar prețul intravilan e publicat ca interval; partea intravilană este restul fiecărei benzi. Purtată aici ca build_renta.py să poată aplica randamente diferite celor două."
-          },
-          "extravilanValueByCodeRon": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "number",
-              "minimum": 0
-            }
-          }
         }
-      }
-    },
-    "limitations": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "$ref": "provenance.schema.json#/$defs/limitation"
-      }
     }
-  }
 }
