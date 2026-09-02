@@ -267,6 +267,12 @@ STUDIES: dict[str, Study] = {
         title="Studiu de piață — terenuri, județul Arad, 2026",
         currency="EUR", dialect="arad",
     ),
+    "galati": Study(
+        key="unnpr-terenuri-galati-2026", chamber="CNP Galați", counties=["GL"], year=2026,
+        path="files/expertize2026/CNPGalati/studiu_de_piata_CNP_Galati_2026.pdf",
+        title="Studiu de piață — terenuri, județul Galați, 2026",
+        currency="RON", dialect="galati",
+    ),
     "carasseverin": Study(
         key="unnpr-terenuri-caras-severin-2026", chamber="CNP Timișoara", counties=["CS"],
         year=2026,

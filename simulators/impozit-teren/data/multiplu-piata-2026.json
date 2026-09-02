@@ -17,6 +17,7 @@
     "CT",
     "CV",
     "DB",
+    "GL",
     "GR",
     "HD",
     "HR",
@@ -44,20 +45,20 @@
     "note": "Conversia din EUR/m² în RON/ha folosește cursul 5.2567 RON/EUR, același ca în build_impozit.py. Mediana grilei este pe localitate, mediana prețului cerut este pe ofertă; niciuna nu e ponderată cu suprafața."
   },
   "summary": {
-    "counties": 30,
-    "comparableCounties": 29,
-    "matchedLocalities": 143,
+    "counties": 31,
+    "comparableCounties": 30,
+    "matchedLocalities": 145,
     "countyMultiple": {
-      "low": 0.816,
-      "central": 1.185,
+      "low": 0.821,
+      "central": 1.192,
       "high": 2.115
     },
     "localityMultiple": {
       "low": 0.891,
-      "central": 1.038,
+      "central": 1.049,
       "high": 1.275
     },
-    "countyMultipleVsPaid": 1.119,
+    "countyMultipleVsPaid": 1.131,
     "countiesBelowParity": [
       "AR",
       "BH",
@@ -1530,6 +1531,65 @@
             "low": 1.167,
             "central": 1.272,
             "high": 1.935
+          }
+        }
+      ]
+    },
+    {
+      "county": "GL",
+      "name": "Galați",
+      "surveyRegion": "RO22",
+      "surveyYear": "2024",
+      "paidRonPerHa": 31537.0,
+      "multipleVsPaid": 1.752,
+      "gridYear": "2026",
+      "gridPricedLocalities": 61,
+      "gridLocalities": 64,
+      "gridShare": 0.953,
+      "gridMedianRonPerHa": 17999.99,
+      "offers": 103,
+      "askedRonPerHa": {
+        "low": 20000.0,
+        "central": 25000.0,
+        "high": 32309.0
+      },
+      "multiple": {
+        "low": 1.111,
+        "central": 1.389,
+        "high": 1.795
+      },
+      "comparable": true,
+      "localities": [
+        {
+          "siruta": "76157",
+          "name": "Cudalbi",
+          "offers": 19,
+          "gridRonPerHa": 23999.99,
+          "askedRonPerHa": {
+            "low": 23001.0,
+            "central": 29418.0,
+            "high": 36731.0
+          },
+          "multiple": {
+            "low": 0.958,
+            "central": 1.226,
+            "high": 1.53
+          }
+        },
+        {
+          "siruta": "76996",
+          "name": "Piscu",
+          "offers": 18,
+          "gridRonPerHa": 21500.01,
+          "askedRonPerHa": {
+            "low": 17000.0,
+            "central": 25000.0,
+            "high": 25000.0
+          },
+          "multiple": {
+            "low": 0.791,
+            "central": 1.163,
+            "high": 1.163
           }
         }
       ]

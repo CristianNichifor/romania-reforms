@@ -89,6 +89,7 @@ COUNTY_TO_CHAMBER = {
     "AR": "arad",
     "BV": "brasov",
     "CS": "carasseverin",
+    "GL": "galati",
     "CV": "covasna",
     "VS": "vaslui",
     "BC": "bacau",
