@@ -87,9 +87,40 @@ h2 {
 
 .counties {
   margin-bottom: 1.25rem;
+  align-items: center;
+  gap: 0.6rem;
 }
 
-.counties button,
+/* Forty-three options is a list, not a row of buttons: the buttons wrapped to four lines and
+   pushed the numbers below the fold on a laptop. */
+.counties select {
+  flex: 1;
+  padding: 0.45rem 0.55rem;
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid var(--line);
+  border-radius: 0.4rem;
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.counties select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.counties option {
+  background: #0f1418;
+  color: var(--fg);
+}
+
+.counties .field {
+  color: var(--muted);
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
 .segmented button {
   flex: 1;
   padding: 0.4rem 0.5rem;
@@ -107,12 +138,10 @@ h2 {
   padding: 0.3rem 0.5rem;
 }
 
-.counties button:hover,
 .segmented button:hover {
   color: var(--fg);
 }
 
-.counties button.on,
 .segmented button.on {
   background: color-mix(in srgb, var(--accent) 16%, transparent);
   border-color: color-mix(in srgb, var(--accent) 45%, transparent);

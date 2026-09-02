@@ -216,6 +216,41 @@ export function fiscalCodeRon(locality: Locality, code: FiscalCode, settings: Se
   return total;
 }
 
+/**
+ * Add up several counties' results into one.
+ *
+ * Not a matter of concatenating rows and calling `evaluate` again: each county is priced at
+ * its own exchange rate and its own measured farmland yield, so the arithmetic has to happen
+ * per county and only the money may be added. The map has done this since it was written —
+ * it paints every county at that county's own rates — and the "toate județele" total is the
+ * same operation with the results summed instead of coloured.
+ *
+ * The three ratios are recomputed from the sums rather than averaged. A mean of forty-two
+ * capture rates answers "what is the typical county's capture"; the sum answers "what does
+ * the country's land raise against what it yields", and that is the question the page asks.
+ */
+export function combine(parts: Array<ReturnType<typeof evaluate>>): ReturnType<typeof evaluate> {
+  const rows = parts.flatMap((part) => part.rows);
+  const total = (get: (t: (typeof parts)[number]['totals']) => number) =>
+    parts.reduce((sum, part) => sum + get(part.totals), 0);
+  const value = total((t) => t.value);
+  const fiscal = total((t) => t.fiscal);
+  const lvt = total((t) => t.lvt);
+  const rent = total((t) => t.rent);
+  return {
+    rows,
+    totals: {
+      fiscal,
+      lvt,
+      value,
+      rent,
+      neutral: value ? (100 * fiscal) / value : 0,
+      fiscalCapture: rent ? (100 * fiscal) / rent : 0,
+      lvtCapture: rent ? (100 * lvt) / rent : 0,
+    },
+  };
+}
+
 export function evaluate(
   localities: Locality[],
   code: FiscalCode,

@@ -15,7 +15,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
-import { DONOR_CATEGORY, evaluate, fiscalRank, landValueParts, splitArea } from './model';
+import { DONOR_CATEGORY, combine, evaluate, fiscalRank, landValueParts, splitArea } from './model';
 import type { FiscalCode, Locality, Settings } from './model';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -286,5 +286,35 @@ describe('locality rank', () => {
   it('gives a commune two ranks, because its seat and its villages differ', () => {
     expect(fiscalRank('comune', 'Cleja', 'low')).toBe('V');
     expect(fiscalRank('comune', 'Cleja', 'high')).toBe('IV');
+  });
+});
+
+describe('toate județele, added up', () => {
+  const parts = COUNTIES.map((county) => {
+    const { localities, settings } = fixture(county);
+    return evaluate(localities, code, settings);
+  });
+  const all = combine(parts);
+
+  it('adds every county the Python priced, at that county own rates', () => {
+    // The sum against the files, not against a re-run of the browser: each county is priced at
+    // its own exchange rate and its own measured farmland yield, and the whole reason this
+    // function exists is that applying one county's rates to another's hectares is wrong.
+    const expected = COUNTIES.reduce(
+      (sum, county) => sum + fixture(county).tax.summary.landValueRon.central,
+      0,
+    );
+    expectClose(all.totals.value, expected);
+    expect(all.rows.length).toBe(parts.reduce((n, part) => n + part.rows.length, 0));
+  });
+
+  it('recomputes the rates from the sums rather than averaging them', () => {
+    // A mean of forty-two revenue-neutral rates answers "what is the typical county's rate".
+    // The page asks what the country's land raises against what it is worth, which is the
+    // ratio of the two totals — and the two differ, so this is a real distinction.
+    expect(all.totals.neutral).toBeCloseTo((100 * all.totals.fiscal) / all.totals.value, 9);
+    expect(all.totals.fiscalCapture).toBeCloseTo((100 * all.totals.fiscal) / all.totals.rent, 9);
+    const mean = parts.reduce((sum, part) => sum + part.totals.neutral, 0) / parts.length;
+    expect(Math.abs(all.totals.neutral - mean)).toBeGreaterThan(1e-6);
   });
 });
