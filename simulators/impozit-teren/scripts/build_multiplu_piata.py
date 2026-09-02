@@ -49,6 +49,7 @@ Usage:
 from __future__ import annotations
 
 import json
+import re
 import statistics
 import sys
 from pathlib import Path
@@ -93,9 +94,14 @@ def main() -> int:
             row = latest[-1]
             for county in region["counties"]:
                 paid[county] = (region["region"], row["year"], row["priceRonPerHa"])
-    rate_source = sorted((ROOT / "data").glob("impozit-*.json"))
+    # A county's tax file, for the exchange rate every dataset here is converted at. Matched
+    # on the county pattern rather than on the `impozit-` prefix alone: `impozit-incasat-*` is
+    # also an `impozit-*` file and carries no `assumptions` at all, so a loose glob would pick
+    # it up the day a county code sorted after it and fail on a missing key.
+    rate_source = [p for p in sorted((ROOT / "data").glob("impozit-*.json"))
+                   if re.fullmatch(r"impozit-[a-z]{1,2}-\d{4}", p.stem)]
     if not rate_source:
-        raise SystemExit("no impozit-*.json; run build_impozit.py first")
+        raise SystemExit("no impozit-<judet>-<an>.json; run build_impozit.py first")
     ron_per_eur = json.loads(rate_source[0].read_text(encoding="utf-8"))["assumptions"][
         "ronPerEur"
     ]

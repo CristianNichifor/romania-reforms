@@ -27,6 +27,13 @@ type TaxFile = {
     builtYieldPercent?: { low: number; central: number; high: number };
     builtYieldSource?: string;
   };
+  // The measured half. `collectedRon` is what the county actually banked under the revenue
+  // classification, and it is null when the execution filings have not been imported — the
+  // page has to render either way, so the type says so rather than the code assuming.
+  summary: {
+    collectedRon: number | null;
+    collectedPeriod: string | null;
+  };
   limitations: Array<{ id: string; text: string; severity: string }>;
 };
 
@@ -355,12 +362,32 @@ async function main() {
     $('rate-value').textContent = `${percent.format(state.rate)}%`;
     $('share-value').textContent = `×${percent.format(state.share)}`;
 
+    // Measured, not modelled: what the counties on screen actually banked under revenue codes
+    // 07.02.01-03. Summed over the cache for the aggregate, so it covers exactly the counties
+    // the figures beside it cover rather than the whole country.
+    const receipts = (all ? [...cache.values()] : [loaded]).map(
+      (d) => d.tax.summary.collectedRon as number | null,
+    );
+    const collectedActual = receipts.every((r) => typeof r === 'number')
+      ? receipts.reduce((sum, r) => sum + (r as number), 0)
+      : null;
+    const collectedPeriod = loaded.tax.summary.collectedPeriod as string | null;
+
     const neutral = totals.neutral;
     const direction = totals.lvt >= totals.fiscal ? 'more' : 'less';
     $('headline').innerHTML = `
       <div class="stat">
         <div class="stat-label">Impozitul de azi, Codul fiscal</div>
         <div class="stat-value">${scaled(totals.fiscal)} <span class="unit">lei</span></div>
+        ${
+          collectedActual === null
+            ? ''
+            : `<p class="note">încasat efectiv în ${collectedPeriod}: <strong>${scaled(
+                collectedActual,
+              )} lei</strong> — ${percent.format(
+                (100 * collectedActual) / totals.fiscal,
+              )}% din cât dă calculul, diferența fiind cota aleasă de consilii, scutirile și restanțele</p>`
+        }
       </div>
       <div class="stat">
         <div class="stat-label">Impozit pe valoare, la ${percent.format(state.rate)}%</div>

@@ -196,7 +196,11 @@
                 "lawfulRangeRatio",
                 "taxableValueRon",
                 "taxableSharePercent",
-                "lvtCollectedRon"
+                "lvtCollectedRon",
+                "collectedRon",
+                "collectedPeriod",
+                "collectedOverModelled",
+                "collectedInsideLawfulBand"
             ],
             "properties": {
                 "localities": {
@@ -338,6 +342,36 @@
                             "type": "number"
                         }
                     }
+                },
+                "collectedRon": {
+                    "description": "Land tax actually banked by this county, from budget execution. Null if the receipts have not been imported.",
+                    "type": [
+                        "number",
+                        "null"
+                    ],
+                    "minimum": 0
+                },
+                "collectedPeriod": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "pattern": "^[0-9]{4}$"
+                },
+                "collectedOverModelled": {
+                    "description": "Collected divided by the modelled midpoint. Not a collection rate — it also carries the council rate, the zone, the rank and the art. 464 exemptions.",
+                    "type": [
+                        "number",
+                        "null"
+                    ],
+                    "minimum": 0
+                },
+                "collectedInsideLawfulBand": {
+                    "description": "Whether receipts land within the range art. 465 permits. The test the modelled band can fail.",
+                    "type": [
+                        "boolean",
+                        "null"
+                    ]
                 }
             }
         },
