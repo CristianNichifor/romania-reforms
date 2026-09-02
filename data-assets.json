@@ -1,0 +1,19 @@
+{
+  "what": "Derived payloads that are published with the site but not committed to the repository.",
+  "why": "scripts/check_repo_size.py caps the tracked tree at 60 MB and says, when that trips, the fix is to stop committing derived payloads rather than to raise the ceiling — they are reproducible from the pipeline, so they belong in a release asset fetched at build time. This file is that list. Each entry names the release it comes from and the checksum it must have, so a commit fetches exactly the payload it was built against rather than whatever the tag points at today.",
+  "howToAdd": "Build the file, then `uv run python scripts/publish_release_data.py --id <id>` to upload it and rewrite this manifest with the size and checksum of exactly what was uploaded. Commit the manifest. The deploy fetches by checksum, so a manifest that is not committed means the site keeps the previous payload.",
+  "assets": [
+    {
+      "id": "transport-road-speeds",
+      "tag": "data-v1",
+      "asset": "road-speeds.geojson",
+      "destination": "simulators/transport/data/road-speeds.geojson",
+      "bytes": 5937561,
+      "sha256": "feebd029198af31c354add23a6cafd9a602231134713742a1f6a8381d4ff227b",
+      "producedBy": "simulators/transport/scripts/export_speed_limits.py",
+      "needs": "simulators/administrativ/data/raw/romania-latest.osm.pbf (327 MB, not committed)",
+      "what": "Signed maxspeed per road portion over 76 653 km of motorway to tertiary, dissolved by value.",
+      "withoutIt": "The transport map's speed-limit toggle disables itself and says why; nothing else changes and no build fails."
+    }
+  ]
+}

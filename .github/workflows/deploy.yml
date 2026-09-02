@@ -28,6 +28,17 @@ jobs:
         with:
           node-version: '22'
 
+      - uses: astral-sh/setup-uv@v5
+
+      # The payloads that are published but not committed. check_repo_size.py caps the tracked
+      # tree and says the fix when that trips is to move derived payloads out rather than raise
+      # the ceiling; this is where they come back in. A missing asset is a warning and the
+      # build continues — the apps degrade on their own and one absent layer must not stop four
+      # other simulators publishing. A payload whose checksum does not match the manifest is
+      # fatal, because publishing a plausible-but-wrong map is the failure nobody would notice.
+      - name: Fetch the derived payloads
+        run: uv run python scripts/fetch_release_data.py
+
       # Built separately rather than through a workspace: the two apps arrived with their own
       # lockfiles and their own dependency trees (one React, one not), and `npm ci` against the
       # lockfile each was tested with is the honest way to build them until there is a reason
@@ -94,6 +105,15 @@ jobs:
       - name: Check every advertised path exists
         run: |
           fail=0
+          # Reported, not enforced: the speed-limit layer is fetched from a release and the
+          # map disables its toggle without it, so a missing payload is a degraded page rather
+          # than a broken one. Printed because a silent regression to "we stopped publishing
+          # it" would otherwise look exactly like a normal deploy.
+          if [ -s dist/transport/data/road-speeds.geojson ]; then
+            echo "ok   speed-limit layer published ($(du -h dist/transport/data/road-speeds.geojson | cut -f1))"
+          else
+            echo "note speed-limit layer absent — the transport toggle will disable itself"
+          fi
           for path in index.html salarizare/index.html administrativ/index.html \
                       justitie/index.html transport/index.html impozit-teren/index.html; do
             if [ -s "dist/$path" ]; then
