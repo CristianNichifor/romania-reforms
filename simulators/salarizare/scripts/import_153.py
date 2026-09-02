@@ -187,10 +187,26 @@ def classify(table: pd.DataFrame) -> dict[str, object] | None:
     }
 
 
+# Romanian prints thousands with a dot and decimals with a comma, and the annexes use both in
+# adjacent columns: a coefficient reads "4,07" and the salary beside it reads "26.250". Replacing
+# every comma with a dot and parsing turned that salary into 26,25 — a thousandfold error that
+# did not become a wrong number, because the law's own check (salary over coefficient equals the
+# reference) then failed and the table was dropped in silence. Annex V's magistrates, the only
+# table where every salary is five figures, were missing from the regime entirely because of it.
+THOUSANDS = re.compile(r"-?\d{1,3}(\.\d{3})+$")
+
+
 def number(value: object) -> float | None:
     if value is None:
         return None
-    text = str(value).strip().replace(" ", "").replace(",", ".")
+    text = str(value).strip().replace(" ", "").replace("\xa0", "")
+    # Groups of exactly three digits after a dot are separators, never decimals: the annexes
+    # print coefficients to two places. The reference check downstream is what proves the
+    # reading right — a mis-parse cannot satisfy the law's own arithmetic.
+    if THOUSANDS.fullmatch(text):
+        text = text.replace(".", "")
+    else:
+        text = text.replace(",", ".")
     if not re.fullmatch(r"-?\d+(\.\d+)?", text):
         return None
     return float(text)

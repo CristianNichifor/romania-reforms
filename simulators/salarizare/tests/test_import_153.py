@@ -36,15 +36,23 @@ def test_every_coefficient_reproduces_a_published_salary(regime):
     assert max(values) <= 15.0
 
 
-def test_the_span_is_narrower_than_the_draft(regime):
-    """1:7,02 today against 1:7,39 at the draft's commencement.
+def test_the_draft_narrows_the_span_rather_than_widening_it(regime):
+    """1:10,5 today against 1:8 in the draft. The draft compresses the grid.
 
-    This is the finding the whole comparison rests on, so it is pinned: the draft widens
-    the distance between the lowest and highest paid rather than narrowing it.
+    This test asserted the opposite, and was right about the data it had. The in-force span
+    read 1:7,02 because Annex V Chapter I — the magistrates, the highest coefficients in the
+    public sector — was absent from the regime: its salary column prints thousands with a dot,
+    the parser read "26.250" as 26,25, and the law's own check that salary over coefficient
+    equals the reference then failed, so the table was dropped without a word. The top of the
+    grid was missing and the grid looked shorter than it is.
+
+    With the magistrates in, the comparison inverts: the draft's 1:8 sits below the 1:10,5 in
+    force. The claim that the draft widens the distance between the lowest and highest paid was
+    an artefact of a missing table, and this is the record of that.
     """
     values = [v["value"] for p in regime["positions"] for v in p["variants"]]
     span = max(values) / min(values)
-    assert 6.9 < span < 7.1
+    assert 10.3 < span < 10.7, "the in-force grid runs to the ICCJ judge's 10,5"
 
     draft = json.loads((ROOT / "data/regimes/ro-draft-2026-07-16.json").read_text(encoding="utf-8"))
     draft_values = [
@@ -53,7 +61,22 @@ def test_the_span_is_narrower_than_the_draft(regime):
         for v in p["variants"]
         if isinstance(v.get("value"), (int, float))
     ]
-    assert max(draft_values) / min(draft_values) > span
+    assert max(draft_values) / min(draft_values) < span
+
+
+def test_the_magistrates_are_in_the_grid(regime):
+    """The table whose absence inverted the headline. Annex V Chapter I carries the four judge
+    grades, the four prosecutor grades and the two trainee rows, and they are the top of the
+    public pay scale — if they ever vanish again the span test above goes with them, but this
+    one names the cause."""
+    import re
+
+    magistrates = [
+        p for p in regime["positions"] if re.search(r"judec[ăa]tor|procuror", p["name"], re.I)
+    ]
+    assert len(magistrates) >= 30, "Annex V Chapter I is missing from the regime again"
+    top = max(v["value"] for p in magistrates for v in p["variants"])
+    assert top == 10.5, "the ICCJ judge's coefficient is the top of the whole grid"
 
 
 def test_coefficients_are_printed_rounded(regime):

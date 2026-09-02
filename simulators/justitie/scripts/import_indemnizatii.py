@@ -193,10 +193,15 @@ def main() -> int:
             {
                 "id": "doar-varful-grilei",
                 "text": (
-                    "Pentru cele patru grade de judecător, legea tipărește doar indemnizația "
-                    "pentru „peste 20 de ani” în funcție. O instanță nu e făcută din "
-                    "judecători cu douăzeci de ani vechime, așa că orice cost calculat din "
-                    "ele este o limită de sus, nu o estimare."
+                    "Se ia indemnizația de la vârful grilei fiecărui grad — rândul „peste 20 de "
+                    "ani”. Fișierul acesta a susținut o vreme că atât tipărește legea; nu e "
+                    "adevărat. Anexa V, Capitolul I are câte un rând pentru fiecare treaptă de "
+                    "vechime — 15-20, 10-15, 6-10 ani — cu valori mai mici: un judecător de "
+                    "curte de apel cu 6-10 ani vechime pornește de la 17.968 lei, nu de la "
+                    "23.000. O instanță nu e făcută din veterani de douăzeci de ani, deci "
+                    "costurile de aici rămân o limită de sus — dar prin alegere, nu fiindcă "
+                    "legea n-ar spune mai mult. Ca să se poată face mai bine lipsește "
+                    "distribuția judecătorilor pe vechime, pe care raportul CSM nu o publică."
                 ),
                 "severity": "material",
                 "affects": ["cost"],
