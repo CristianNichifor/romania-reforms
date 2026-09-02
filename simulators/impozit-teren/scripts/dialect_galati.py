@@ -47,6 +47,11 @@ through tesseract into the ordinary cache, and the second half of this file read
 That half is written for a source that gets digits wrong, because this one does. Every value it
 produces was checked against the page, and the checking is what the design is for — see
 `tecuci_rows` for the three ways a scanned table lies and what is done about each.
+
+That the Tecuci half is OCR is recorded here and not in the output's `numberingProblems`, which
+the schema requires to be empty and which means gaps in the study's own Nr. Crt. sequence. A
+note that fires on every run is not a problem with the parse; it is provenance, and putting it
+there fails the build for something that is working.
 """
 
 from __future__ import annotations
@@ -59,6 +64,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from extract_cache import load  # noqa: E402
+from zones import zone_labels  # noqa: E402
 
 M2_PER_HA = 10_000
 RURAL_START = re.compile(r"COMUNE\s+LIMITROFE\s+MUNICIPIULUI", re.I)
@@ -472,12 +478,12 @@ def parse(name: str, is_local) -> tuple[list[dict], list[dict], list[str]]:
         {
             "name": entry["name"],
             "rank": None,
-            "zones": sorted(dict.fromkeys("ABCDEFGHIJKLMNOPQRSTUVWXYZ"[: len(entry["parts"])])),
+            "zones": zone_labels(len(entry["parts"])),
             "intravilan": {
                 "CC": {
                     letter: price
                     for letter, price in zip(
-                        "ABCDEFGHIJKLMNOPQRSTUVWXYZ", entry["parts"], strict=False
+                        zone_labels(len(entry["parts"])), entry["parts"], strict=False
                     )
                 }
             },
@@ -507,7 +513,4 @@ def parse(name: str, is_local) -> tuple[list[dict], list[dict], list[str]]:
         )
     if not communes:
         notes.append("nicio comună nu s-a citit")
-    notes.append(
-        "circumscripția Tecuci este citită prin OCR dintr-un document scanat separat"
-    )
     return zoned, communes, notes

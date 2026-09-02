@@ -40,6 +40,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from extract_cache import load  # noqa: E402
+from zones import zone_labels  # noqa: E402
 
 M2_PER_HA = 10_000
 
@@ -195,9 +196,9 @@ def parse(name: str, is_local) -> tuple[list[dict], list[dict], list[str]]:
                 {
                     "name": "BRAILA",
                     "rank": None,
-                    "zones": sorted("ABCDEFGH"[: len(prices)]),
+                    "zones": zone_labels(len(prices)),
                     "intravilan": {
-                        "CC": dict(zip("ABCDEFGH", prices, strict=False))
+                        "CC": dict(zip(zone_labels(len(prices)), prices, strict=False))
                     },
                     "extravilan": rates,
                     "page": 23,

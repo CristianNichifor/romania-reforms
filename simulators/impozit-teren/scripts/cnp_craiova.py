@@ -43,6 +43,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from extract_cache import ROOT, load  # noqa: E402
+from zones import zone_labels  # noqa: E402
 
 STUDY = "studiu_de_piata_dolj_gorj_olt_mehedinti_2026.pdf"
 M2_PER_HA = 10_000
@@ -258,14 +259,12 @@ def parse_county(name: str, is_local, county: str, section: str) -> tuple[list, 
         {
             "name": entry["name"],
             "rank": None,
-            "zones": sorted(
-                "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[: len(entry["parts"])]
-            ),
+            "zones": zone_labels(len(entry["parts"])),
             "intravilan": {
                 "CC": {
                     letter: price
                     for letter, price in zip(
-                        "ABCDEFGHIJKLMNOPQRSTUVWXYZ", entry["parts"], strict=False
+                        zone_labels(len(entry["parts"])), entry["parts"], strict=False
                     )
                 }
             },
