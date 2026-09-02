@@ -44,6 +44,14 @@ to the rounding, on all 275 rows. So the chamber does not price commercial land 
 commercial land; it applies a coefficient. Worth knowing before anyone reads that column as a
 market signal — and useful here, because it makes every row self-checking.
 
+**A subzone is about a square kilometre, and that is why they are averaged flat.** The city's
+low, central and high figures are the minimum, mean and maximum over all 277 subzones, with no
+weighting — which is correct precisely because the subzones are roughly equal in area: 277 cells
+over a 238 km² city. Averaging over the 59 numbered blocks instead, as though the block were the
+equal-area unit, gives 276 EUR/m² against 318 and would take 13% off the most valuable county in
+the set. The document does not state its own geometry, so this is written down here rather than
+left to be rediscovered.
+
 **What this does not read.** The study prices no extravilan land at all, so Bucharest's 2 566
 hectares of arable, 611 of forest and 908 of water go unpriced and are reported as the gap
 they are. It prices roads per zone — 3 306 hectares of the city — but the pipeline carries one
