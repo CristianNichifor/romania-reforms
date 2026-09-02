@@ -1,7 +1,7 @@
 {
   "$schema": "../schema/valoare-nationala.schema.json",
   "id": "valoare-nationala-2026",
-  "title": "Valoarea terenului în România: 40 județe măsurate, 2 estimate",
+  "title": "Valoarea terenului în România: 41 județe măsurate, 1 estimate",
   "publisher": "romania-reforms",
   "counties": [
     "AB",
@@ -57,33 +57,33 @@
   },
   "assumptions": {
     "builtModel": "log(EUR/ha) = a + b × log(populația celui mai mare oraș)",
-    "builtIntercept": 0.792797,
-    "builtSlope": 0.957141,
-    "builtR2": 0.7506,
-    "builtLeaveOneOutErrorFactor": 1.5406,
-    "builtFittedOnCounties": 39,
+    "builtIntercept": 0.769699,
+    "builtSlope": 0.95962,
+    "builtR2": 0.7504,
+    "builtLeaveOneOutErrorFactor": 1.5339,
+    "builtFittedOnCounties": 40,
     "builtHeldOutOfFit": [
       "IF"
     ],
     "transferEurPerHa": {
-      "A": 5491.36,
-      "P+F": 3995.75,
-      "V+L": 5755.64,
-      "NP": 2209.13,
+      "A": 5360.12,
+      "P+F": 3831.52,
+      "V+L": 5529.41,
+      "NP": 2177.09,
       "PADURE": 4260.22
     },
     "transferLeaveOneOutErrorFactor": {
-      "A": 1.5698,
-      "P+F": 1.7867,
-      "V+L": 1.8157,
-      "NP": 1.7484,
+      "A": 1.6019,
+      "P+F": 1.8796,
+      "V+L": 1.8951,
+      "NP": 1.7371,
       "PADURE": 1.6919
     },
     "transferFittedOnCounties": {
-      "A": 39,
-      "P+F": 38,
-      "V+L": 37,
-      "NP": 25,
+      "A": 40,
+      "P+F": 39,
+      "V+L": 38,
+      "NP": 26,
       "PADURE": 30
     },
     "rejectedPredictors": {
@@ -94,17 +94,17 @@
   },
   "summary": {
     "counties": 42,
-    "measuredCounties": 40,
-    "predictedCounties": 2,
+    "measuredCounties": 41,
+    "predictedCounties": 1,
     "excludedCounties": 0,
     "totalHa": 23839071.0,
     "landValueEur": {
-      "low": 185015987560,
-      "central": 326764199038,
-      "high": 645714001222
+      "low": 184397288061,
+      "central": 325379122531,
+      "high": 641924879868
     },
-    "measuredShareOfValue": 0.9618,
-    "measuredShareOfArea": 0.9472
+    "measuredShareOfValue": 0.9873,
+    "measuredShareOfArea": 0.9758
   },
   "counties_valued": [
     {
@@ -124,25 +124,18 @@
     },
     {
       "county": "AG",
-      "basis": "predicted",
+      "basis": "measured",
       "totalHa": 682631.0,
       "builtHa": 24840.0,
       "largestTown": "Pitesti",
       "largestPeople": 164405,
-      "builtEurPerHa": 217107,
       "landValueEur": {
-        "low": 5235959218,
-        "central": 8295191250,
-        "high": 13174446947
+        "low": 4650617307,
+        "central": 6938198802,
+        "high": 9375975420
       },
-      "builtValueEur": 5392932409,
-      "extravilanValueByCodeEur": {
-        "A": 954981228.0,
-        "P+F": 586968401.0,
-        "V+L": 123993728.0,
-        "NP": 24278319.0,
-        "PADURE": 1212037165.0
-      }
+      "coverageShare": 0.902,
+      "pricedHa": 37273.0
     },
     {
       "county": "AR",
@@ -706,18 +699,18 @@
       "builtHa": 11650.0,
       "largestTown": "Ramnicu Valcea",
       "largestPeople": 113562,
-      "builtEurPerHa": 152362,
+      "builtEurPerHa": 153242,
       "landValueEur": {
-        "low": 2571423388,
-        "central": 4175855304,
-        "high": 6804041132
+        "low": 2538065800,
+        "central": 4147771245,
+        "high": 6813391305
       },
-      "builtValueEur": 1775023059,
+      "builtValueEur": 1785264487,
       "extravilanValueByCodeEur": {
-        "A": 476963443.0,
-        "P+F": 557108124.0,
-        "V+L": 95393958.0,
-        "NP": 19223834.0,
+        "A": 465564251.0,
+        "P+F": 534210064.0,
+        "V+L": 91644492.0,
+        "NP": 18945065.0,
         "PADURE": 1252142886.0
       }
     },
@@ -755,7 +748,7 @@
   "limitations": [
     {
       "id": "jumatate-din-tara-e-estimata-nu-citita",
-      "text": "Din 327 mld EUR, 96% provin din grile notariale citite și restul dintr-un model cu un singur predictor, populația celui mai mare oraș. Modelul explică 75% din varianța prețului terenului construit între județele măsurate și greșește un județ nevăzut cu un factor de 1.54× — adică valoarea estimată a unui județ poate fi cu o treime mai mică sau cu două treimi mai mare decât cifra din tabel.",
+      "text": "Din 325 mld EUR, 99% provin din grile notariale citite și restul dintr-un model cu un singur predictor, populația celui mai mare oraș. Modelul explică 75% din varianța prețului terenului construit între județele măsurate și greșește un județ nevăzut cu un factor de 1.53× — adică valoarea estimată a unui județ poate fi cu o treime mai mică sau cu două treimi mai mare decât cifra din tabel.",
       "severity": "blocking",
       "affects": [
         "valoare-nationala"

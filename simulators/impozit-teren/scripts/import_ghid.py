@@ -267,6 +267,12 @@ STUDIES: dict[str, Study] = {
         title="Studiu de piață — terenuri, județul Arad, 2026",
         currency="EUR", dialect="arad",
     ),
+    "arges": Study(
+        key="unnpr-terenuri-arges-2026", chamber="CNP Pitești", counties=["AG"], year=2026,
+        path="files/expertize2026/CNPPitesti/Studiu_de_Piata_CNP_Pitesti_2026.pdf",
+        title="Studiu de piață — terenuri, județul Argeș, 2026",
+        currency="RON", dialect="arges",
+    ),
     "braila": Study(
         key="unnpr-terenuri-braila-2025", chamber="CNP Galați", counties=["BR"], year=2025,
         path="files/expertize2025/CNPGalati/braila_2025.pdf",
