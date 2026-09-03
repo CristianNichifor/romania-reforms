@@ -200,7 +200,8 @@
                 "collectedRon",
                 "collectedPeriod",
                 "collectedOverModelled",
-                "collectedInsideLawfulBand"
+                "collectedInsideLawfulBand",
+                "fiscalCodeTaxableRon"
             ],
             "properties": {
                 "localities": {
@@ -372,6 +373,27 @@
                         "boolean",
                         "null"
                     ]
+                },
+                "fiscalCodeTaxableRon": {
+                    "description": "County Fiscal Code tax restricted to privately owned hectares. What collectedRon is checked against.",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "low",
+                        "central",
+                        "high"
+                    ],
+                    "properties": {
+                        "low": {
+                            "type": "number"
+                        },
+                        "central": {
+                            "type": "number"
+                        },
+                        "high": {
+                            "type": "number"
+                        }
+                    }
                 }
             }
         },
@@ -394,7 +416,8 @@
                     "extravilanValueRon",
                     "extravilanValueByCodeRon",
                     "taxableValueRon",
-                    "lvtCollectedRon"
+                    "lvtCollectedRon",
+                    "fiscalCodeTaxableRon"
                 ],
                 "properties": {
                     "siruta": {
@@ -560,6 +583,27 @@
                     },
                     "lvtCollectedRon": {
                         "description": "The rate applied to taxableValueRon and multiplied by the collection rate. A ceiling on receipts, not a comparison figure — the Fiscal Code side has no equivalent.",
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                            "low",
+                            "central",
+                            "high"
+                        ],
+                        "properties": {
+                            "low": {
+                                "type": "number"
+                            },
+                            "central": {
+                                "type": "number"
+                            },
+                            "high": {
+                                "type": "number"
+                            }
+                        }
+                    },
+                    "fiscalCodeTaxableRon": {
+                        "description": "The same Fiscal Code arithmetic over privately owned hectares — the base receipts can reflect.",
                         "type": "object",
                         "additionalProperties": false,
                         "required": [

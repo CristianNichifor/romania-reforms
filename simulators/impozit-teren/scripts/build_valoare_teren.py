@@ -398,6 +398,10 @@ def main() -> int:
     totals = {
         band: sum(row["landValueEur"][band] for row in rows) for band in ("low", "central", "high")
     }
+    # Named rather than asserted: the limitation below used to claim forest was excluded from
+    # the value, and the only way that claim stays honest is to compute it every build.
+    forest_value = sum(row["forestValueEur"] for row in rows)
+    forest_share = forest_value / totals["central"] if totals["central"] else 0.0
     taxable = {
         band: sum(row["taxableValueEur"][band] for row in rows)
         for band in ("low", "central", "high")
@@ -554,11 +558,14 @@ def main() -> int:
                 "affects": ["valoare-teren"],
             },
             {
-                "id": "padurea-nu-e-evaluata",
+                "id": "padurea-e-evaluata-din-alt-tabel",
                 "text": (
-                    "Pădurea este exclusă din valoare: studiile o evaluează pe hectar, într-un "
-                    "tabel separat de grila pe metru pătrat. Suprafața ei este raportată pe "
-                    "fiecare rând, ca să se vadă cât lipsește."
+                    f"Pădurea este evaluată, și anume {100 * forest_share:.0f}% din valoarea "
+                    "terenului acestui județ. Prețul ei nu vine însă din grila pe metru pătrat, "
+                    "ci din tabelul separat pe hectar pe care îl publică studiul, așa că "
+                    "precizia lui este a acelui tabel: un preț pe județ sau pe zonă, nu pe sat. "
+                    "Textul de aici a spus multă vreme că pădurea „este exclusă din valoare”, "
+                    "ceea ce a încetat să fie adevărat în momentul în care a fost prețuită."
                 ),
                 "severity": "material",
                 "affects": ["valoare-teren"],

@@ -110,6 +110,62 @@
     },
     "taxableSharePercent": 74.46,
     "measuredShareOfValue": 1.0,
+    "plausibility": {
+      "period": "2023",
+      "romaniaGdpEur": 321577900000,
+      "thisSimulatorLandOverGdp": 1.0082,
+      "groups": {
+        "toate": {
+          "countries": 9,
+          "medianLandOverGdp": 1.6277,
+          "impliedRomaniaEur": 523432347830
+        },
+        "est": {
+          "countries": 3,
+          "medianLandOverGdp": 0.9741,
+          "impliedRomaniaEur": 313249032390
+        },
+        "vest": {
+          "countries": 6,
+          "medianLandOverGdp": 1.9667,
+          "impliedRomaniaEur": 632463334825
+        }
+      },
+      "movesItUp": [
+        {
+          "id": "hectare-fara-pret",
+          "text": "18,1% dintre hectarele evaluabile intră în total cu zero, pentru că studiul județului lor nu publică niciun preț pentru categoria respectivă.",
+          "measured": 0.1814
+        },
+        {
+          "id": "intravilanul-e-doar-curti-constructii",
+          "text": "Intravilanul este luat drept exact categoria curți-construcții. Grădinile din sate sunt teren arabil în intravilan și intră la prețul de extravilan, de zeci până la sute de ori mai mic.",
+          "measured": null
+        },
+        {
+          "id": "suprafetele-sunt-din-2014",
+          "text": "Suprafețele sunt din 2014, ultimul an publicat pe localități. Arabilul devine curți-construcții, nu invers, deci suprafața construită de aici este un minim.",
+          "measured": null
+        },
+        {
+          "id": "multiplul-de-piata-e-lasat-la-1",
+          "text": "Multiplul de piață este lăsat la 1. Măsurat pe arabil extravilan, prețul cerut este de 1,16× grila pe comunele unde ambele prețuiesc același loc — pentru curți-construcții, 68% din valoare, nu există nicio măsurătoare.",
+          "measured": 1.163
+        }
+      ],
+      "movesItDown": [
+        {
+          "id": "media-pe-sat-si-zona-e-neponderata",
+          "text": "Prețul central al unei localități este media neponderată a prețurilor publicate pe sat și pe zonă. Zona A este întotdeauna cea mai mică și cea mai scumpă, deci media o cântărește ca pe oricare alta și supraevaluează orașele.",
+          "measured": null
+        },
+        {
+          "id": "bucurestiul-e-mediat-plat",
+          "text": "Bucureștiul are 277 de subzone între 34 și 1 320 EUR/mp și nicio suprafață publicată pentru vreuna, deci intră cu media lor plată. Este 16% din total și cea mai largă bandă din set.",
+          "measured": null
+        }
+      ]
+    },
     "measuredShareOfArea": 1.0
   },
   "counties_valued": [
@@ -956,17 +1012,17 @@
   ],
   "limitations": [
     {
-      "id": "jumatate-din-tara-e-estimata-nu-citita",
-      "text": "Din 324 mld EUR, 100% provin din grile notariale citite și restul dintr-un model cu un singur predictor, populația celui mai mare oraș. Modelul explică 74% din varianța prețului terenului construit între județele măsurate și greșește un județ nevăzut cu un factor de 1.53× — adică valoarea estimată a unui județ poate fi cu o treime mai mică sau cu două treimi mai mare decât cifra din tabel.",
-      "severity": "blocking",
+      "id": "toata-tara-e-citita-inclusiv-bucurestiul",
+      "text": "Totalul de 324 mld EUR cuprinde toate cele 42 de județe, Bucureștiul și Ilfovul incluse — Bucureștiul singur este 50.4 mld EUR, 16% din total. Nu mai este estimat niciun județ, deci nicio parte din această cifră nu vine dintr-un model. Ilfovul este ținut în afara *ajustării* modelului, pentru că piața lui e dictată de un oraș care nu se află în județ, dar valoarea lui este citită din grilă și este în total ca oricare alta.",
+      "severity": "note",
       "affects": [
         "valoare-nationala"
       ]
     },
     {
-      "id": "bucurestiul-lipseste-din-total",
-      "text": "Bucureștiul nu mai lipsește: grila camerei notarilor din București este citită, iar comparația confirmă că refuzul de a-l extrapola era corect — modelul spunea 37,4 mld EUR, grila spune 50, deci l-ar fi subestimat cu o treime. Rămâne exclus Ilfovul, a cărui piață e dictată de un oraș care nu se află în județ. Banda Bucureștiului este însă cea mai largă din set, aproape 39×, pentru că orașul are 277 de subzone între 34 și 1 320 EUR/mp și nu există nicăieri suprafața fiecăreia: cifra centrală e estimarea, capetele sunt limite, nu un interval de încredere.",
-      "severity": "blocking",
+      "id": "banda-bucurestiului-e-cea-mai-larga",
+      "text": "Banda Bucureștiului este cea mai largă din set, pentru că orașul are 277 de subzone între 34 și 1 320 EUR/mp și nu există nicăieri suprafața fiecăreia: cifra centrală este media neponderată a acelor prețuri, iar capetele sunt limite, nu un interval de încredere. Când Bucureștiul era încă neevaluat, modelul îi dădea 37,4 mld EUR; grila spune 50, deci refuzul de a-l extrapola era justificat.",
+      "severity": "material",
       "affects": [
         "valoare-nationala"
       ]
@@ -980,8 +1036,8 @@
       ]
     },
     {
-      "id": "estimarea-mosteneste-tot-ce-limiteaza-grilele",
-      "text": "Județele estimate moștenesc fiecare limitare a județelor măsurate, pentru că din ele este estimat modelul: aceleași grile, aceeași lipsă a ponderilor pe zone, același multiplu de piață lăsat la 1. Eroarea leave-one-out măsoară cât de departe cade un județ față de celelalte județe citite, nu cât de departe cad toate față de piață.",
+      "id": "totalul-mosteneste-tot-ce-limiteaza-grilele",
+      "text": "Totalul moștenește fiecare limitare a grilelor din care e făcut: aceleași prețuri publicate fără suprafețe cu care să fie ponderate pe sat și pe zonă, același multiplu de piață lăsat la 1. Este o sumă de citiri, deci nu are o eroare statistică proprie — are limitările documentelor.",
       "severity": "blocking",
       "affects": [
         "valoare-nationala"

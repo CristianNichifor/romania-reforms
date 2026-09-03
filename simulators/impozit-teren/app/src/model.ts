@@ -108,6 +108,10 @@ export type Result = {
 };
 
 const M2_PER_HA = 10_000;
+/** Where the extra intravilan hectares come from when the reader raises the share. */
+export const DONOR_CATEGORY = 'A';
+/** Forest, which the land register reports outside `areaHa` — see `landValueParts`. */
+export const FOREST_CATEGORY = 'PADURE';
 /** The Fiscal Code's extravilan rows, against the categories the land register counts in. */
 const EXTRAVILAN_ROWS: Array<[string, string]> = [
   ['Teren arabil', 'A'],
@@ -118,11 +122,11 @@ const EXTRAVILAN_ROWS: Array<[string, string]> = [
   ['Teren cu apă', 'AP'],
   ['Drumuri și căi ferate', 'DR'],
   ['Teren neproductiv', 'NP'],
+  // Art. 465 (7) taxes forest too. Absent here for the whole life of the file, which meant the
+  // browser's Fiscal Code figure — like the Python's — was computed on fewer hectares than the
+  // land value beside it. Mirrors FISCAL_TO_NOTARY in build_impozit.py.
+  ['Pădure sau alt teren cu vegetație forestieră', FOREST_CATEGORY],
 ];
-/** Where the extra intravilan hectares come from when the reader raises the share. */
-export const DONOR_CATEGORY = 'A';
-/** Forest, which the land register reports outside `areaHa` — see `landValueParts`. */
-export const FOREST_CATEGORY = 'PADURE';
 
 /**
  * A commune's seat is rank IV and its other villages rank V, with no areas to split them by.
@@ -239,8 +243,14 @@ export function fiscalCodeRon(locality: Locality, code: FiscalCode, settings: Se
   const built = mean(zones.map((zone) => pick(code.intravilanBuiltLeiPerHa[zone]![rank]!, band)));
   let total = intravilanHa * built;
 
+  // Forest lives outside `areaHa`, the same way the land register keeps it outside the
+  // agricultural fund — folded back in so its Fiscal Code row has hectares to read.
+  const areas: Record<string, number> = {
+    ...locality.areaHa,
+    [FOREST_CATEGORY]: locality.forestHa,
+  };
   for (const [fiscalName, notaryCode] of EXTRAVILAN_ROWS) {
-    const hectares = locality.areaHa[notaryCode] ?? 0;
+    const hectares = areas[notaryCode] ?? 0;
     if (!hectares) continue;
     const row = Object.entries(code.extravilanLeiPerHa).find(([key]) =>
       key.startsWith(fiscalName),
