@@ -1,0 +1,267 @@
+{
+  "$schema": "../schema/prioritate.schema.json",
+  "id": "prioritate",
+  "title": "Ce centuri merită construite întâi, după traficul măsurat",
+  "publisher": "Cristian Nichifor",
+  "period": "2026",
+  "provenance": {
+    "source": "ocoliri-plus-end-major-roads",
+    "locator": "traversările din data/ocoliri.json, legate spațial la cel mult 60 m de secțiunile raportate sub Directiva 2002/49/CE cu fluxul lor anual",
+    "confidence": "derived",
+    "note": "Câștigul pe vehicul se calculează cu vitezele efective ale modelului, nu cu limitele legale: o centură nu livrează indicatorul, ci ce merge drumul."
+  },
+  "speeds": {
+    "insideKmh": 42.6,
+    "openKmh": 77.9
+  },
+  "join": {
+    "crossings": 2781,
+    "matched": 636,
+    "matchDistanceM": 60.0,
+    "endThresholdAadt": 8219,
+    "matchedKm": 1278.5
+  },
+  "ranked": {
+    "crossings": 636,
+    "costRon": 35641639634,
+    "vehicleHoursYear": 36619905,
+    "medianRonPerVehicleHour": 1044.6,
+    "bestRonPerVehicleHour": 219.7,
+    "worstRonPerVehicleHour": 1680.6
+  },
+  "curve": [
+    {
+      "benefitShare": 0.25,
+      "crossings": 100,
+      "km": 234.0,
+      "costRon": 4660550817,
+      "vehicleHoursYear": 9221989,
+      "worstRonPerVehicleHour": 744.4
+    },
+    {
+      "benefitShare": 0.5,
+      "crossings": 239,
+      "km": 619.7,
+      "costRon": 12340608045,
+      "vehicleHoursYear": 18364954,
+      "worstRonPerVehicleHour": 917.1
+    },
+    {
+      "benefitShare": 0.75,
+      "crossings": 418,
+      "km": 1115.0,
+      "costRon": 22202249995,
+      "vehicleHoursYear": 27483200,
+      "worstRonPerVehicleHour": 1263.1
+    },
+    {
+      "benefitShare": 0.9,
+      "crossings": 536,
+      "km": 1497.9,
+      "costRon": 29827364649,
+      "vehicleHoursYear": 32964421,
+      "worstRonPerVehicleHour": 1493.6
+    },
+    {
+      "benefitShare": 1.0,
+      "crossings": 636,
+      "km": 1789.9,
+      "costRon": 35641639634,
+      "vehicleHoursYear": 36619905,
+      "worstRonPerVehicleHour": 1680.6
+    }
+  ],
+  "unit": {
+    "what": "lei de investiție pentru fiecare oră-vehicul economisită ÎNTR-UN AN",
+    "howToCompare": "Se împarte la numărul de ani de exploatare luați în calcul ca să iasă lei pe oră, comparabil cu valoarea timpului de călătorie. La 30 de ani, o traversare de 1.000 de lei pe oră-vehicul-an costă circa 33 de lei pe oră câștigată.",
+    "note": "Valoarea timpului nu se aplică aici deliberat — vezi limitarea nu-se-aplica-o-valoare-a-timpului."
+  },
+  "top": [
+    {
+      "road": "DN1",
+      "km": 5.79,
+      "aadt": 63079,
+      "costRon": 161545228,
+      "vehicleHoursYear": 735418,
+      "ronPerVehicleHour": 219.7
+    },
+    {
+      "road": "DN1",
+      "km": 0.77,
+      "aadt": 63079,
+      "costRon": 21517496,
+      "vehicleHoursYear": 97956,
+      "ronPerVehicleHour": 219.7
+    },
+    {
+      "road": "DN1",
+      "km": 0.97,
+      "aadt": 63079,
+      "costRon": 27008359,
+      "vehicleHoursYear": 122953,
+      "ronPerVehicleHour": 219.7
+    },
+    {
+      "road": "DN2",
+      "km": 4.2,
+      "aadt": 50623,
+      "costRon": 117011217,
+      "vehicleHoursYear": 427494,
+      "ronPerVehicleHour": 273.7
+    },
+    {
+      "road": "DN2",
+      "km": 4.34,
+      "aadt": 50623,
+      "costRon": 120941301,
+      "vehicleHoursYear": 441853,
+      "ronPerVehicleHour": 273.7
+    },
+    {
+      "road": "DN2A",
+      "km": 0.65,
+      "aadt": 40625,
+      "costRon": 18253060,
+      "vehicleHoursYear": 53516,
+      "ronPerVehicleHour": 341.1
+    },
+    {
+      "road": "DN2A",
+      "km": 0.54,
+      "aadt": 40625,
+      "costRon": 15158907,
+      "vehicleHoursYear": 44444,
+      "ronPerVehicleHour": 341.1
+    },
+    {
+      "road": "DN2A",
+      "km": 0.7,
+      "aadt": 40625,
+      "costRon": 19587723,
+      "vehicleHoursYear": 57429,
+      "ronPerVehicleHour": 341.1
+    },
+    {
+      "road": "DN2A",
+      "km": 1.76,
+      "aadt": 40625,
+      "costRon": 48964620,
+      "vehicleHoursYear": 143559,
+      "ronPerVehicleHour": 341.1
+    },
+    {
+      "road": "DN2A",
+      "km": 0.63,
+      "aadt": 40625,
+      "costRon": 17564793,
+      "vehicleHoursYear": 51498,
+      "ronPerVehicleHour": 341.1
+    },
+    {
+      "road": "DN2A",
+      "km": 0.59,
+      "aadt": 40625,
+      "costRon": 16353596,
+      "vehicleHoursYear": 47947,
+      "ronPerVehicleHour": 341.1
+    },
+    {
+      "road": "DN2A",
+      "km": 0.8,
+      "aadt": 40625,
+      "costRon": 22171979,
+      "vehicleHoursYear": 65006,
+      "ronPerVehicleHour": 341.1
+    },
+    {
+      "road": "DN2A",
+      "km": 1.65,
+      "aadt": 40625,
+      "costRon": 45966650,
+      "vehicleHoursYear": 134769,
+      "ronPerVehicleHour": 341.1
+    },
+    {
+      "road": "A1",
+      "km": 0.59,
+      "aadt": 35913,
+      "costRon": 16337993,
+      "vehicleHoursYear": 42345,
+      "ronPerVehicleHour": 385.8
+    },
+    {
+      "road": "DN2",
+      "km": 2.16,
+      "aadt": 35345,
+      "costRon": 60346721,
+      "vehicleHoursYear": 153935,
+      "ronPerVehicleHour": 392.0
+    },
+    {
+      "road": "DN2",
+      "km": 2.21,
+      "aadt": 35345,
+      "costRon": 61502118,
+      "vehicleHoursYear": 156882,
+      "ronPerVehicleHour": 392.0
+    },
+    {
+      "road": "DN39",
+      "km": 1.8,
+      "aadt": 33179,
+      "costRon": 50186950,
+      "vehicleHoursYear": 120174,
+      "ronPerVehicleHour": 417.6
+    },
+    {
+      "road": "DN39",
+      "km": 1.12,
+      "aadt": 33179,
+      "costRon": 31115482,
+      "vehicleHoursYear": 74507,
+      "ronPerVehicleHour": 417.6
+    },
+    {
+      "road": "DN39",
+      "km": 5.41,
+      "aadt": 33179,
+      "costRon": 150867820,
+      "vehicleHoursYear": 361256,
+      "ronPerVehicleHour": 417.6
+    },
+    {
+      "road": "DN6",
+      "km": 0.83,
+      "aadt": 30238,
+      "costRon": 23078645,
+      "vehicleHoursYear": 50364,
+      "ronPerVehicleHour": 458.2
+    }
+  ],
+  "limitations": [
+    {
+      "id": "doar-traversarile-cu-trafic-masurat",
+      "text": "Se clasează doar cele 636 de traversări care s-au putut lega de o secțiune cu trafic măsurat. din 2.781. Restul nu sunt necunoscute: directiva acoperă tot ce trece de trei milioane de vehicule pe an. deci o traversare care nu se potrivește este SUB 8.219 de vehicule pe zi. nu nemăsurată. Clasamentul este deci vârful distribuției prin construcție — exact partea pe care un program ar construi-o prima. Ce rămâne nesigur: raportarea sub directivă este a CNAIR și a trei consilii județene. deci un drum județean aglomerat poate lipsi din motive administrative. nu de trafic.",
+      "severity": "material",
+      "affects": [
+        "prioritate"
+      ]
+    },
+    {
+      "id": "nu-se-aplica-o-valoare-a-timpului",
+      "text": "Se raportează lei pe oră-vehicul economisită și atât. Transformarea orelor în lei cere o valoare a timpului de călătorie, care este un parametru de politică publică cu interval larg și influență mare; alegerea uneia aici ar îngropa cel mai contestabil număr din lanț într-un singur raport. Cititorul care vrea un raport beneficiu-cost își pune propria valoare și împarte.",
+      "severity": "note",
+      "affects": [
+        "prioritate"
+      ]
+    },
+    {
+      "id": "beneficiul-e-doar-timpul-soferilor",
+      "text": "Orele economisite sunt ale vehiculelor care trec. Nu se numără siguranța rutieră — principalul motiv pentru care se construiesc centuri —, nici zgomotul și aerul scoase din sat, nici timpul câștigat de localnicii care traversează strada. O centură judecată doar pe timpul de parcurs este subevaluată, iar cu cât satul este mai mic cu atât mai mult.",
+      "severity": "material",
+      "affects": [
+        "prioritate"
+      ]
+    }
+  ]
+}

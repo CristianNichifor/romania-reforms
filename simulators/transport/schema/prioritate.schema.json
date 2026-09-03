@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/prioritate.schema.json",
+  "title": "Which bypasses to build first, weighted by measured traffic",
+  "description": "The only form in which a 175 md lei programme is a usable answer: not 'build all of it' but 'these, in this order, and here is where the curve flattens'. Crossings are joined to the traffic sections Romania reports under the noise directive, so the ranked subset is the busy top of the distribution by construction. Cost is reported per vehicle-hour saved and no value of travel time is applied — that parameter is left to the reader rather than buried in a ratio.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id","title","publisher","period","provenance","speeds","join","ranked","curve","unit","top","limitations"],
+  "properties": {
+    "$schema": {"type":"string"}, "id": {"type":"string"}, "title": {"type":"string"},
+    "publisher": {"type":"string"}, "period": {"type":"string"},
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+    "speeds": {
+      "type":"object","additionalProperties":false,"required":["insideKmh","openKmh"],
+      "description":"Effective speeds, not legal limits: a bypass delivers what the road runs at, not what the sign says.",
+      "properties": {"insideKmh":{"type":"number","exclusiveMinimum":0},"openKmh":{"type":"number","exclusiveMinimum":0}}
+    },
+    "join": {
+      "type":"object","additionalProperties":false,
+      "required":["crossings","matched","matchDistanceM","endThresholdAadt","matchedKm"],
+      "properties": {
+        "crossings":{"type":"integer","exclusiveMinimum":0},
+        "matched":{"type":"integer","minimum":0},
+        "matchDistanceM":{"type":"number","exclusiveMinimum":0},
+        "endThresholdAadt":{"type":"number","description":"Below this, a crossing is absent from the source by rule rather than unmeasured."},
+        "matchedKm":{"type":"number","minimum":0}
+      }
+    },
+    "ranked": {
+      "type":"object","additionalProperties":false,
+      "required":["crossings","costRon","vehicleHoursYear","medianRonPerVehicleHour","bestRonPerVehicleHour","worstRonPerVehicleHour"],
+      "properties": {
+        "crossings":{"type":"integer","minimum":0},"costRon":{"type":"number","minimum":0},
+        "vehicleHoursYear":{"type":"number","minimum":0},
+        "medianRonPerVehicleHour":{"type":"number","exclusiveMinimum":0},
+        "bestRonPerVehicleHour":{"type":"number","exclusiveMinimum":0},
+        "worstRonPerVehicleHour":{"type":"number","exclusiveMinimum":0}
+      }
+    },
+    "curve": {
+      "type":"array","minItems":2,
+      "description":"Cheapest-first. Shows how much of the benefit the early crossings buy, which is the whole argument for prioritising rather than programming everything.",
+      "items": {
+        "type":"object","additionalProperties":false,
+        "required":["benefitShare","crossings","km","costRon","vehicleHoursYear","worstRonPerVehicleHour"],
+        "properties": {
+          "benefitShare":{"type":"number","exclusiveMinimum":0,"maximum":1},
+          "crossings":{"type":"integer","minimum":0},"km":{"type":"number","minimum":0},
+          "costRon":{"type":"number","minimum":0},"vehicleHoursYear":{"type":"number","minimum":0},
+          "worstRonPerVehicleHour":{"type":"number","exclusiveMinimum":0}
+        }
+      }
+    },
+    "unit": {
+      "type":"object","additionalProperties":false,"required":["what","howToCompare","note"],
+      "description":"Capital lei per ANNUAL vehicle-hour. Travels with the numbers because it is the thing most likely to be misread.",
+      "properties": {"what":{"type":"string"},"howToCompare":{"type":"string"},"note":{"type":"string"}}
+    },
+    "top": {
+      "type":"array",
+      "items": {
+        "type":"object","additionalProperties":false,
+        "required":["road","km","aadt","costRon","vehicleHoursYear","ronPerVehicleHour"],
+        "properties": {
+          "road":{"type":["string","null"]},"km":{"type":"number","exclusiveMinimum":0},
+          "aadt":{"type":"integer","minimum":0},"costRon":{"type":"number","minimum":0},
+          "vehicleHoursYear":{"type":"number","minimum":0},
+          "ronPerVehicleHour":{"type":"number","exclusiveMinimum":0}
+        }
+      }
+    },
+    "limitations": {"type":"array","minItems":1,"items":{"$ref":"provenance.schema.json#/$defs/limitation"}}
+  }
+}
