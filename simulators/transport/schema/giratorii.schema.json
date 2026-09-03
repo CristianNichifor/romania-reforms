@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/giratorii.schema.json",
+  "title": "At-grade junctions between numbered roads",
+  "description": "A candidate set with an upper bound on it, not a programme. Finding where two numbered roads cross is geometry; deciding which crossing wants a roundabout rather than signals, grade separation or nothing at all is engineering this repository cannot do. The traffic split is what turns the count into something actionable. Already-converted junctions do not appear at all, because a roundabout is mapped as its own loop and the roads then touch it rather than each other.",
+  "type": "object", "additionalProperties": false,
+  "required": ["id","title","publisher","period","provenance","junctions","cost","limitations"],
+  "properties": {
+    "$schema":{"type":"string"},"id":{"type":"string"},"title":{"type":"string"},
+    "publisher":{"type":"string"},"period":{"type":"string"},
+    "provenance":{"$ref":"provenance.schema.json#/$defs/provenance"},
+    "junctions":{
+      "type":"object","additionalProperties":false,
+      "required":["roadNumbers","rawPoints","distinct","alreadyRoundabout","remaining","onMeasuredTraffic","existingRoundaboutWays","clusterM"],
+      "properties":{
+        "roadNumbers":{"type":"integer","exclusiveMinimum":0},
+        "rawPoints":{"type":"integer","minimum":0},
+        "distinct":{"type":"integer","minimum":0,"description":"After clustering: one junction mapped as several nodes is one junction."},
+        "alreadyRoundabout":{"type":"integer","minimum":0,"description":"Small by construction — a converted junction usually stops being an intersection at all."},
+        "remaining":{"type":"integer","minimum":0},
+        "onMeasuredTraffic":{"type":"integer","minimum":0,"description":"The subset on roads above the noise directive's reporting threshold. The actionable part."},
+        "existingRoundaboutWays":{"type":"integer","minimum":0},
+        "clusterM":{"type":"number","exclusiveMinimum":0}
+      }
+    },
+    "cost":{
+      "type":"object","additionalProperties":false,
+      "required":["leiEach","allRemainingRon","onMeasuredTrafficRon"],
+      "properties":{"leiEach":{"type":"number","exclusiveMinimum":0},
+        "allRemainingRon":{"type":"number","minimum":0},
+        "onMeasuredTrafficRon":{"type":"number","minimum":0}}
+    },
+    "limitations":{"type":"array","minItems":1,"items":{"$ref":"provenance.schema.json#/$defs/limitation"}}
+  }
+}

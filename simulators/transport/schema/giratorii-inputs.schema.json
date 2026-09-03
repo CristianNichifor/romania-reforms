@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/giratorii-inputs.schema.json",
+  "title": "Unit price for a roundabout",
+  "description": "One number, resting on one contract, against an observed range spanning an order of magnitude. The composition of the junction list matters more than the average, and this model does not know it.",
+  "type": "object", "additionalProperties": false,
+  "required": ["id","title","publisher","period","provenance","currency","items","limitations"],
+  "properties": {
+    "$schema":{"type":"string"},"id":{"type":"string"},"title":{"type":"string"},
+    "publisher":{"type":"string"},"period":{"type":"string"},
+    "provenance":{"$ref":"provenance.schema.json#/$defs/provenance"},
+    "currency":{"type":"string"},
+    "items":{"type":"object","additionalProperties":{
+      "type":"object","additionalProperties":false,"required":["value","unit","confidence"],
+      "properties":{"value":{"type":"number","exclusiveMinimum":0},"unit":{"type":"string"},
+        "confidence":{"enum":["verbatim","derived","assumed"]},"note":{"type":"string"}}}},
+    "limitations":{"type":"array","minItems":1,"items":{"$ref":"provenance.schema.json#/$defs/limitation"}}
+  }
+}

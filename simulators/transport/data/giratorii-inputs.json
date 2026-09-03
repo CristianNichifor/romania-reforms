@@ -1,0 +1,30 @@
+{
+  "$schema": "../schema/giratorii-inputs.schema.json",
+  "id": "giratorii-inputs",
+  "title": "Prețul unitar al unui sens giratoriu",
+  "publisher": "Cristian Nichifor",
+  "period": "2026",
+  "provenance": {
+    "source": "contracte-drdp",
+    "locator": "contractul pentru amenajarea sensului giratoriu la intersecția DN6 km 495+000 cu strada Tapiei și DJ680, Lugoj, județul Timiș, 2026",
+    "confidence": "derived",
+    "note": "Un contract recent pentru o intersecție obișnuită de drum național cu drum județean. Intervalul real este mult mai larg decât această cifră."
+  },
+  "currency": "RON",
+  "items": {
+    "roundaboutLeiEach": {
+      "value": 3740000,
+      "unit": "RON/junction",
+      "confidence": "derived",
+      "note": "3,74 milioane de lei pentru sensul giratoriu de la Lugoj, DN6 cu DJ680, contractat în 2026. Ales pentru că este exact tipul de intersecție care domină lista: drum național cu drum județean, în afara marilor orașe. Intervalul observat merge însă de la circa 1,5 milioane pentru o amenajare mică pe drum județean (Dudeștii Noi) până la peste 40 de milioane pentru DN7 cu DN76 la Deva — care nu este același lucru mai scump, ci un proiect care include lărgiri și amenajări de acces. Media contează mai puțin decât compoziția, iar compoziția nu este cunoscută aici."
+    }
+  },
+  "limitations": [
+    {
+      "id": "un-singur-contract-si-un-interval-de-zece-ori",
+      "text": "Prețul stă pe un contract, iar exemplele găsite se întind pe un ordin de mărime. Un eșantion de zece contracte recente, separate pe tipul intersecției, ar transforma cifra dintr-un punct într-o distribuție — și ar arăta cât din variație este mărimea intersecției și cât este ce se mai construiește odată cu ea.",
+      "severity": "material",
+      "affects": ["giratorii"]
+    }
+  ]
+}

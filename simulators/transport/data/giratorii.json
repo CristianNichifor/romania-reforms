@@ -1,0 +1,54 @@
+{
+  "$schema": "../schema/giratorii.schema.json",
+  "id": "giratorii",
+  "title": "Intersecțiile la nivel dintre drumurile numerotate, și cât ar costa girațiile",
+  "publisher": "Cristian Nichifor",
+  "period": "2026",
+  "provenance": {
+    "source": "openstreetmap-plus-contracte",
+    "locator": "intersecții geometrice între drumuri cu numere diferite din romania-latest.osm.pbf, clasele trunk, primary și secondary; preț unitar din contractul pentru sensul giratoriu DN6 x DJ680 la Lugoj, 2026",
+    "confidence": "derived",
+    "note": "Se numără traversări geometrice, nu proiecte. O intersecție deja transformată nu apare, pentru că girația se cartografiază ca inel propriu și drumurile nu se mai ating între ele."
+  },
+  "junctions": {
+    "roadNumbers": 1654,
+    "rawPoints": 3945,
+    "distinct": 3396,
+    "alreadyRoundabout": 49,
+    "remaining": 3347,
+    "onMeasuredTraffic": 530,
+    "existingRoundaboutWays": 4690,
+    "clusterM": 20.0
+  },
+  "cost": {
+    "leiEach": 3740000,
+    "allRemainingRon": 12517780000,
+    "onMeasuredTrafficRon": 1982200000
+  },
+  "limitations": [
+    {
+      "id": "candidati-nu-program",
+      "text": "Cele 3.347 de intersecții sunt CANDIDAȚI. nu un program. Unele cer semaforizare. altele pasaj denivelat. multe nu cer nimic pentru că pe ele trec o sută de vehicule pe zi. iar unele au deja semafoare pe care modelul nu le vede. Nimic de aici nu le deosebește. Cifra trebuie citită ca „cel mult atâtea”. iar împărțirea după trafic este singura care o apropie de un program.",
+      "severity": "blocking",
+      "affects": [
+        "giratorii"
+      ]
+    },
+    {
+      "id": "pretul-unitar-variaza-de-zece-ori",
+      "text": "Prețul unitar este cel mai slab element. Reperul folosit este girația de la Lugoj, DN6 cu DJ680, 3,74 milioane de lei în 2026 — o intersecție obișnuită de drum național cu drum județean. Dar intervalul real merge de la circa 1,5 milioane pentru una mică pe drum județean până la peste 40 de milioane pentru DN7 cu DN76 la Deva, care include mult mai mult decât inelul. Compoziția contează mai mult decât media, iar acest model nu o cunoaște.",
+      "severity": "material",
+      "affects": [
+        "giratorii"
+      ]
+    },
+    {
+      "id": "intersectia-geometrica-nu-e-intersectie-rutiera",
+      "text": "Se intersectează geometrii, nu se citesc noduri. Două drumuri care trec unul peste altul printr-un pasaj apar ca o încrucișare, deși nu se întâlnesc. La clasele folosite aici pasajele sunt rare, dar există, iar numărul este cu atât mai mult un prag de sus.",
+      "severity": "material",
+      "affects": [
+        "giratorii"
+      ]
+    }
+  ]
+}
