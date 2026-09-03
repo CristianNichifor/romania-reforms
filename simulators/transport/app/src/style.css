@@ -46,9 +46,19 @@ dt { color: var(--dim); font-size: 13px; }
 dd { margin: 0; text-align: right; font-size: 13px; }
 dd.big { font-size: 17px; font-weight: 600; }
 ul { list-style: none; padding: 0; margin: 8px 0 0; }
-#legend li { display: flex; align-items: center; gap: 9px; font-size: 12.5px; color: var(--dim);
+/* A CLASS, not an id. These rules were written for #legend and then two more legends were
+   added — the speed bands and the road-investment layers — which inherited the `ul` reset and
+   nothing else. The swatches rendered as bare <i> elements: a background colour on an inline
+   box with no width, so zero pixels wide and invisible, while the text beside them still read
+   like a legend. Measured at 0x17 against the working legend's 15x15. */
+.legend li { display: flex; align-items: center; gap: 9px; font-size: 12.5px; color: var(--dim);
   margin-bottom: 4px; }
-#legend i { width: 15px; height: 15px; border-radius: 3px; flex: none; }
+.legend i { width: 15px; height: 15px; border-radius: 3px; flex: none; }
+/* Sub-headings inside a legend that covers more than one thing. Dimmer and spaced above, so a
+   reader can tell "Centuri" from the entries under it without reading the colours. */
+.legend .group { display: block; font-size: 11px; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--dim); opacity: .75; margin: 12px 0 5px; }
+.legend .group:first-child { margin-top: 2px; }
 #caveats li { font-size: 12px; color: var(--dim); margin-bottom: 9px; padding-left: 12px;
   border-left: 2px solid var(--line); }
 .foot { color: var(--dim); font-size: 11.5px; margin-top: 28px; border-top: 1px solid var(--line);
@@ -64,11 +74,14 @@ ul { list-style: none; padding: 0; margin: 8px 0 0; }
      allowed to grow past the viewport or the panel is unreachable below a clipped body. */
   html, body { height: auto; }
   main { grid-template-columns: 1fr; grid-template-rows: 52dvh auto; height: auto; min-height: 100dvh; }
-  #map { height: 52dvh; position: sticky; top: 0; }
-  #panel { border-left: none; border-top: 1px solid var(--line); overflow-y: visible;
-    padding: 16px 16px 40px; }
+  /* z-index, or the intent above is inverted. #panel follows #map in the DOM, so with both at
+     the default stacking order the panel paints OVER the sticky map — legend text floated on
+     top of the geography instead of sliding beneath it. */
+  #map { height: 52dvh; position: sticky; top: 0; z-index: 1; }
   /* The map is sticky, so the page scrolls the panel under it and the reader keeps the
      geography in view while reading the numbers that describe it. */
+  #panel { position: relative; z-index: 0; border-left: none;
+    border-top: 1px solid var(--line); overflow-y: visible; padding: 16px 16px 40px; }
   h2 { margin-top: 20px; }
   select, #toggle button, .up { min-height: 40px; }
   #toggle button { padding: 10px 8px; }

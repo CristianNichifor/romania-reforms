@@ -547,9 +547,9 @@ async function main() {
   }
 
   el('invest-legend').innerHTML = [
-    '<li style="opacity:.75;list-style:none;margin:.35rem 0 .1rem">Trafic măsurat</li>',
+    '<li class="group">Trafic măsurat</li>',
     ...INVEST_TRAFFIC.map((b) => `<li><i style="background:${b.colour}"></i>${b.label}</li>`),
-    '<li style="opacity:.75;list-style:none;margin:.35rem 0 .1rem">Centuri</li>',
+    '<li class="group">Centuri</li>',
     `<li><i style="background:${INVEST_BYPASS.good}"></i>sub 1.000 lei/oră-vehicul-an</li>`,
     `<li><i style="background:${INVEST_BYPASS.poor}"></i>peste — greu de justificat pe timp</li>`,
     `<li><i style="background:${INVEST_JUNCTION}"></i>intersecție candidat</li>`,
