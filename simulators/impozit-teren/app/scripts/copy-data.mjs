@@ -80,6 +80,10 @@ const sources = [
   // estimate is the only value they have.
   ['harta-judete-poligon.geojson', 'harta-judete-poligon.geojson'],
   ['valoare-nationala-2026.json', 'national.json'],
+  // What each commune actually spends. The only file here that is not about land: it is the
+  // denominator the third map metric divides by, and the one number that turns "this land is
+  // worth X" into "that would pay for Y% of what this place does".
+  ['buget-uat-2025.json', 'buget-uat-2025.json'],
 ];
 for (const county of counties) {
   sources.push([values.get(county), `valoare-${county}.json`]);

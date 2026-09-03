@@ -103,7 +103,8 @@ function readHash(): State {
   const sort = params.get('sort');
   const metric = params.get('harta');
   return {
-    metric: metric === 'total' ? 'total' : DEFAULTS.metric,
+    metric:
+      metric === 'total' || metric === 'autofinantare' ? metric : DEFAULTS.metric,
     county: params.get('j') ?? DEFAULTS.county,
     rate: number('cota', DEFAULTS.rate),
     share: number('intravilan', DEFAULTS.share),
@@ -349,6 +350,17 @@ async function main() {
   // after the first paint rather than before it: the page is useful the moment the selected
   // county is in, and the other thirteen are a background cost the reader should not wait on.
   const valueMap = new ValueMap('map', base);
+  // What every commune actually spent, so the map can ask whether a land tax would cover it.
+  // Optional: a data directory built before the execution was imported still renders a map,
+  // and the third metric simply has nothing to colour.
+  const spending = await fetch(`${base}data/buget-uat-2025.json`)
+    .then((r) => (r.ok ? r.json() : null))
+    .then((doc: { uats: Array<{ siruta: string; spendingRon: number }> } | null) =>
+      doc ? new Map(doc.uats.map((u) => [u.siruta, u.spendingRon])) : new Map<string, number>(),
+    )
+    .catch(() => new Map<string, number>());
+  valueMap.setSpending(spending);
+
   // The hatch key only when something is hatched; the national file says whether anything is.
   const anyPredicted = await fetch(`${base}data/national.json`)
     .then((r) => (r.ok ? r.json() : null))
@@ -363,7 +375,11 @@ async function main() {
    */
   function renderLegend(): void {
     const format =
-      state.metric === 'perHa' ? (v: number) => `${Math.round(v / 1000)}k` : scaled;
+      state.metric === 'perHa'
+        ? (v: number) => `${Math.round(v / 1000)}k`
+        : state.metric === 'autofinantare'
+          ? (v: number) => `${percent.format(100 * v)}%`
+          : scaled;
     $('map-legend').innerHTML = legend(state.metric, format, anyPredicted);
   }
   // Kept as well as handed to the map: "toate județele" needs every county's own rates, and

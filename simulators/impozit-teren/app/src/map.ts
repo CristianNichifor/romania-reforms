@@ -75,8 +75,15 @@ export type CountyData = {
  */
 const COLOURS = ['#1b3a4b', '#255e6b', '#2f8f7a', '#7bb661', '#d9c05a', '#d9873f', '#c2453a'];
 
-/** Which number is painted: the price of a hectare, or what the whole commune is worth. */
-export type Metric = 'perHa' | 'total';
+/**
+ * Which number is painted.
+ *
+ * The first two are about the land. The third is about the place: what a land value tax at
+ * the reader's own rate would raise here, against what this commune actually spent — the one
+ * question that needs two of these simulators in the same sentence, and the reason the budget
+ * execution is loaded at all.
+ */
+export type Metric = 'perHa' | 'total' | 'autofinantare';
 
 const BREAKS: Record<Metric, number[]> = {
   perHa: [25_000, 60_000, 150_000, 400_000, 1_000_000, 3_000_000],
@@ -86,6 +93,11 @@ const BREAKS: Record<Metric, number[]> = {
   // Placed where the communes actually are: a twentieth sit below the first break, a
   // twentieth above the last, and the top step is open because București is fifty times it.
   total: [50e6, 100e6, 250e6, 500e6, 1e9, 5e9],
+  // A share of the commune's own spending, so the steps are proportions and the top one is
+  // the only one that matters: at 1,00 the tax on land alone would pay for everything the
+  // place does. Nothing published suggests many communes reach it, which is the finding
+  // rather than a reason to stretch the scale until they appear to.
+  autofinantare: [0.05, 0.1, 0.25, 0.5, 0.75, 1],
 };
 
 export function legend(
@@ -100,9 +112,15 @@ export function legend(
     const label = to === undefined ? `${format(from)}+` : `${format(from)}–${format(to)}`;
     return `<span class="key"><i style="background:${colour}"></i>${label}</span>`;
   });
+  // What an unpainted commune means depends on the question being asked. In the two land
+  // views it is a commune the county's own study never priced; in the third it is one whose
+  // budget execution is not in the file. Saying "fără preț" over the third would name the
+  // wrong missing document.
+  const absent =
+    metric === 'autofinantare' ? 'fără execuție bugetară' : 'fără preț';
   return (
     `${cells.join('')}` +
-    '<span class="key"><i class="none"></i>fără preț</span>' +
+    `<span class="key"><i class="none"></i>${absent}</span>` +
     // The hatch has to be in the legend or it reads as a rendering artefact — but only while
     // something is actually hatched. Every county is read now, so a key for a mark that never
     // appears would be the legend explaining a thing the map does not do.
@@ -115,6 +133,8 @@ export class ValueMap {
   private ready = false;
   private counties = new Map<string, CountyData>();
   private metric: Metric = 'perHa';
+  /** What each commune spent last year, by SIRUTA. Empty until the execution file lands. */
+  private spending = new Map<string, number>();
 
   constructor(container: string, base: string) {
     this.map = new MapLibre({
@@ -214,6 +234,19 @@ export class ValueMap {
     });
   }
 
+  /**
+   * The budget execution, keyed the same way the localities are.
+   *
+   * Optional on purpose: the map has to keep working against a data directory built before
+   * this file existed, and a commune the execution does not cover stays unpainted in the
+   * self-financing view rather than being drawn at the bottom of the scale. "Spends nothing"
+   * and "did not file" are different facts.
+   */
+  setSpending(spending: Map<string, number>): void {
+    this.spending = spending;
+    if (this.ready) this.repaint();
+  }
+
   /** Hand the map every county's data once; it keeps them and repaints on each settings change. */
   load(county: string, data: CountyData): void {
     const first = this.counties.size === 0;
@@ -306,9 +339,20 @@ export class ValueMap {
       for (const row of rows) {
         const hectares = totalHa(data.value.localities, row.siruta);
         if (!hectares) continue;
+        // The tax the reader's own rate would raise here, over what the place spent. Not
+        // the land value over the spending: a commune does not collect its land, it
+        // collects a percentage of it once a year, and the two differ by two orders of
+        // magnitude. Left unset where nothing was filed, so the colour never implies a
+        // ratio that was not computed.
+        const spent = this.spending.get(row.siruta);
+        const selfFunding = spent && spent > 0 ? row.lvtRon / spent : undefined;
         this.map.setFeatureState(
           { source: 'uats', id: Number(row.siruta) },
-          { perHa: row.landValueRon / hectares, total: row.landValueRon },
+          {
+            perHa: row.landValueRon / hectares,
+            total: row.landValueRon,
+            ...(selfFunding === undefined ? {} : { autofinantare: selfFunding }),
+          },
         );
       }
     }
