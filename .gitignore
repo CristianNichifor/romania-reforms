@@ -30,11 +30,21 @@ simulators/*/sources/*.html
 # gzipped is a cheap way not to find out during a build. See import_cod_fiscal.py.
 !simulators/impozit-teren/sources/cod-fiscal-consolidat.html.gz
 
-# And the machine-readable sources the importers fetch: the INS matrix definition and the
-# ECB reference rates. Both are re-fetched on every run, and the rates file changes daily,
-# so committing it would put a diff in the repository every morning.
-simulators/impozit-teren/sources/ins-*.json
+# The ECB reference rates, which change daily: committing them would put a diff in the
+# repository every morning, so this is the one file the pipeline re-fetches on every run.
+#
+# The INS matrix definitions used to be ignored beside it, on the reasoning that both are
+# "re-fetched on every run". That treated a vocabulary like an observation. A matrix
+# definition changes when INS restructures a matrix — rare, and it changes the importer
+# anyway — while the cost of not having it was paid on every CI run: three downloads from a
+# service that times out often enough to have failed a merge to main on a change that
+# touched none of this. So they are committed — gzipped, like the Fiscal Code above, because
+# 516 KB of pretty-printed JSON is 103 KB compressed and this repository has under two
+# megabytes of headroom against its own ceiling. See scripts/retea.py.
 simulators/impozit-teren/sources/ecb-*.xml
+# The uncompressed working copies of those definitions. The .gz beside them is the committed
+# one; this is what a hand-run refresh or an older checkout leaves lying around.
+simulators/impozit-teren/sources/ins-*.json
 
 # The country-wide study cache: ~300 MB of PDFs and their extracted tables, all
 # re-fetchable and re-derivable. Neither belongs in git.

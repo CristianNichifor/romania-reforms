@@ -43,6 +43,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import retea  # noqa: E402
 from import_ghid import key_of, keys_of, resolve  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -138,10 +139,13 @@ def exchange_rate() -> tuple[float, str]:
     """
     cache = ROOT / "sources" / "ecb-eurofxref-daily.xml"
     if not cache.exists():
+        # Retried like the INS calls, and for a sharper reason: this file moves daily, so it
+        # is the one cache that cannot be committed, so CI fetches it on every single run.
+        # It is the last unguarded network call left in the pipeline.
         request = urllib.request.Request(ECB_URL, headers={"User-Agent": UA})
-        with urllib.request.urlopen(request, timeout=120) as response:  # noqa: S310
-            cache.parent.mkdir(parents=True, exist_ok=True)
-            cache.write_bytes(response.read())
+        body = retea.read(request, timeout=120)
+        cache.parent.mkdir(parents=True, exist_ok=True)
+        cache.write_bytes(body)
     body = cache.read_text(encoding="utf-8")
     rate = re.search(r"currency='RON'\s+rate='([\d.]+)'", body)
     date = re.search(r"time='([\d-]+)'", body)

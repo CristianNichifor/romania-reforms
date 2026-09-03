@@ -31,14 +31,18 @@ from __future__ import annotations
 import json
 import re
 import sys
-import urllib.request
 from html import unescape
 from pathlib import Path
 
+# Same sibling-import pattern the builders use: the scripts here are run as files, not as a
+# package, so the directory has to be on the path before one of them can import another.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+import retea  # noqa: E402
+
 ROOT = Path(__file__).resolve().parents[1]
-TEMPO = "http://statistici.insse.ro:8077/tempo-ins"
+TEMPO = retea.TEMPO
 MATRIX = "AGR306A"
-UA = "romania-reforms/0.1 (+https://github.com/CristianNichifor)"
 # The counties as INS spells them here, to the codes the rest of the repository uses. Same
 # spellings as the land register's matrix, which is not a coincidence — one institution.
 COUNTY_CODES = {
@@ -61,14 +65,7 @@ CELL = re.compile(r"<t[dh][^>]*>(.*?)</t[dh][^>]*>", re.S)
 
 
 def metadata() -> dict:
-    cache = ROOT / "sources" / f"ins-{MATRIX.lower()}-metadata.json"
-    if not cache.exists():
-        print(f"downloading {TEMPO}/matrix/{MATRIX} ...")
-        request = urllib.request.Request(f"{TEMPO}/matrix/{MATRIX}", headers={"User-Agent": UA})
-        with urllib.request.urlopen(request, timeout=120) as response:  # noqa: S310
-            cache.parent.mkdir(parents=True, exist_ok=True)
-            cache.write_bytes(response.read())
-    return json.loads(cache.read_text(encoding="utf-8"))
+    return retea.tempo_metadata(MATRIX)
 
 
 def latest_year(meta: dict) -> str:
@@ -91,21 +88,7 @@ def query(meta: dict, year: str) -> str:
     for index, group in enumerate(arr):
         if not group:
             raise SystemExit(f"{MATRIX}: nothing selected for dimension {index + 1}")
-    body = json.dumps(
-        {
-            "language": "ro",
-            "arr": arr,
-            "matrixName": meta["matrixName"],
-            "matrixDetails": meta["details"],
-        }
-    ).encode()
-    request = urllib.request.Request(
-        f"{TEMPO}/matrix/{MATRIX}",
-        data=body,
-        headers={"Content-Type": "application/json", "User-Agent": UA},
-    )
-    with urllib.request.urlopen(request, timeout=300) as response:  # noqa: S310
-        return json.loads(response.read())["resultTable"]
+    return retea.tempo_table(MATRIX, meta, arr)
 
 
 def parse(table: str) -> dict[str, float]:
