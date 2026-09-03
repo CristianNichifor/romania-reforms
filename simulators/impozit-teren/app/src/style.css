@@ -422,3 +422,64 @@ footer {
 @media (max-width: 40rem) {
   .map-card #map { height: 20rem; }
 }
+
+/* The two-directional bias list under the national figure. Two columns so "up" and "down" are
+   read as a pair rather than as one list of worries — the whole point is that they oppose. */
+.bias {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: 1rem 1.75rem;
+  margin-top: 1.1rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--line);
+}
+.bias h3 {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 0.5rem;
+}
+.bias ul {
+  margin: 0;
+  padding-left: 1rem;
+}
+.bias li {
+  font-size: 0.82rem;
+  color: var(--fg);
+  margin-bottom: 0.45rem;
+  line-height: 1.5;
+}
+.bias em {
+  color: var(--muted);
+  font-style: normal;
+  font-size: 0.76rem;
+}
+
+/* The two-directional bias list under the national figure. Two columns so "up" and "down" are
+   read as a pair rather than as one list of worries — the whole point is that they oppose. */
+.bias {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: 1rem 1.75rem;
+  margin-top: 1.1rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--line);
+}
+.bias h3 {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 0.5rem;
+}
+.bias ul { margin: 0; padding-left: 1rem; }
+.bias li {
+  font-size: 0.82rem;
+  color: var(--fg);
+  margin-bottom: 0.45rem;
+  line-height: 1.5;
+}
+.bias em { color: var(--muted); font-style: normal; font-size: 0.76rem; }

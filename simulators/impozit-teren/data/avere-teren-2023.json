@@ -1,0 +1,135 @@
+{
+  "$schema": "../schema/avere-teren.schema.json",
+  "id": "avere-teren-2023",
+  "title": "Valoarea terenului în conturile naționale, pe țări, 2023",
+  "publisher": "Eurostat",
+  "counties": [
+    "RO"
+  ],
+  "period": "2023",
+  "currency": "EUR",
+  "provenance": {
+    "source": "eurostat-nama_10_nfa_bs",
+    "locator": "nama_10_nfa_bs, activ AN.211 „Land”, sector S1 (toată economia), unit CP_MEUR, anul 2023; PIB din nama_10_gdp, B1GQ",
+    "confidence": "verbatim",
+    "note": "Sumele sunt preluate ca atare din conturile naționale. Raportul la PIB este calculat aici. Sectorul S1 este toată economia, singura bază comparabilă cu un total care cuprinde și pădurea statului și terenul firmelor; seria pe gospodării (S14_S15) acoperă mai multe țări, dar nu același lucru."
+  },
+  "assumptions": {
+    "benchmarkYear": "2023",
+    "romaniaGdpEur": 321577900000,
+    "grouping": "aderare la UE: „est” = 2004 sau mai târziu, „vest” = înainte"
+  },
+  "summary": {
+    "countries": 9,
+    "groups": {
+      "toate": {
+        "countries": 9,
+        "medianLandOverGdp": 1.6277,
+        "impliedRomaniaEur": 523432347830
+      },
+      "est": {
+        "countries": 3,
+        "medianLandOverGdp": 0.9741,
+        "impliedRomaniaEur": 313249032390
+      },
+      "vest": {
+        "countries": 6,
+        "medianLandOverGdp": 1.9667,
+        "impliedRomaniaEur": 632463334825
+      }
+    }
+  },
+  "localities": [
+    {
+      "geo": "FR",
+      "landMeur": 8383016.1,
+      "gdpMeur": 2833826.4,
+      "landOverGdp": 2.9582,
+      "group": "vest"
+    },
+    {
+      "geo": "AT",
+      "landMeur": 1021811.9,
+      "gdpMeur": 477837.3,
+      "landOverGdp": 2.1384,
+      "group": "vest"
+    },
+    {
+      "geo": "NL",
+      "landMeur": 2239227.0,
+      "gdpMeur": 1050133.0,
+      "landOverGdp": 2.1323,
+      "group": "vest"
+    },
+    {
+      "geo": "SE",
+      "landMeur": 963947.8,
+      "gdpMeur": 535176.8,
+      "landOverGdp": 1.8012,
+      "group": "vest"
+    },
+    {
+      "geo": "DE",
+      "landMeur": 6925577.0,
+      "gdpMeur": 4254930.0,
+      "landOverGdp": 1.6277,
+      "group": "vest"
+    },
+    {
+      "geo": "CZ",
+      "landMeur": 366074.5,
+      "gdpMeur": 319099.1,
+      "landOverGdp": 1.1472,
+      "group": "est"
+    },
+    {
+      "geo": "EE",
+      "landMeur": 37170.6,
+      "gdpMeur": 38157.9,
+      "landOverGdp": 0.9741,
+      "group": "est"
+    },
+    {
+      "geo": "SK",
+      "landMeur": 111352.5,
+      "gdpMeur": 123538.7,
+      "landOverGdp": 0.9014,
+      "group": "est"
+    },
+    {
+      "geo": "FI",
+      "landMeur": 207892.0,
+      "gdpMeur": 273005.0,
+      "landOverGdp": 0.7615,
+      "group": "vest"
+    }
+  ],
+  "limitations": [
+    {
+      "id": "noua-tari-nu-sunt-o-distributie",
+      "text": "Doar 9 țări compilează valoarea terenului în conturile naționale — activul este opțional în programul de transmisie ESA, iar România nu îl raportează deloc. O mediană pe atâtea observații este un reper, nu o distribuție, și nu suportă un interval de încredere.",
+      "severity": "blocking",
+      "affects": [
+        "avere-teren",
+        "valoare-nationala"
+      ]
+    },
+    {
+      "id": "grupul-de-comparatie-decide-raspunsul",
+      "text": "Europa de Vest stă la 1,6–3,0× PIB, iar statele intrate în UE după 2004 la 0,9–1,2×. „Mediana europeană” poate deci să însemne pentru România orice între 310 și 520 mld EUR. Ambele grupuri sunt publicate, împărțite după anul aderării — un criteriu ales înainte de a vedea cifrele — și niciunul nu este numit răspunsul.",
+      "severity": "blocking",
+      "affects": [
+        "avere-teren",
+        "valoare-nationala"
+      ]
+    },
+    {
+      "id": "conturile-nationale-evalueaza-altfel",
+      "text": "Conturile naționale evaluează terenul la prețul curent de înlocuire, estimat de fiecare institut de statistică cu metoda lui — de regulă valoarea proprietății minus costul de reconstrucție a clădirii. Nu este aceeași operațiune cu înmulțirea hectarelor cu un preț publicat pe localitate, deci reperul spune dacă ordinul de mărime e credibil, nu dacă cifra e corectă.",
+      "severity": "material",
+      "affects": [
+        "valoare-nationala"
+      ]
+    }
+  ]
+}

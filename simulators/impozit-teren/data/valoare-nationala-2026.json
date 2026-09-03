@@ -110,6 +110,62 @@
     },
     "taxableSharePercent": 74.46,
     "measuredShareOfValue": 1.0,
+    "plausibility": {
+      "period": "2023",
+      "romaniaGdpEur": 321577900000,
+      "thisSimulatorLandOverGdp": 1.0082,
+      "groups": {
+        "toate": {
+          "countries": 9,
+          "medianLandOverGdp": 1.6277,
+          "impliedRomaniaEur": 523432347830
+        },
+        "est": {
+          "countries": 3,
+          "medianLandOverGdp": 0.9741,
+          "impliedRomaniaEur": 313249032390
+        },
+        "vest": {
+          "countries": 6,
+          "medianLandOverGdp": 1.9667,
+          "impliedRomaniaEur": 632463334825
+        }
+      },
+      "movesItUp": [
+        {
+          "id": "hectare-fara-pret",
+          "text": "18,1% dintre hectarele evaluabile intră în total cu zero, pentru că studiul județului lor nu publică niciun preț pentru categoria respectivă.",
+          "measured": 0.1814
+        },
+        {
+          "id": "intravilanul-e-doar-curti-constructii",
+          "text": "Intravilanul este luat drept exact categoria curți-construcții. Grădinile din sate sunt teren arabil în intravilan și intră la prețul de extravilan, de zeci până la sute de ori mai mic.",
+          "measured": null
+        },
+        {
+          "id": "suprafetele-sunt-din-2014",
+          "text": "Suprafețele sunt din 2014, ultimul an publicat pe localități. Arabilul devine curți-construcții, nu invers, deci suprafața construită de aici este un minim.",
+          "measured": null
+        },
+        {
+          "id": "multiplul-de-piata-e-lasat-la-1",
+          "text": "Multiplul de piață este lăsat la 1. Măsurat pe arabil extravilan, prețul cerut este de 1,16× grila pe comunele unde ambele prețuiesc același loc — pentru curți-construcții, 68% din valoare, nu există nicio măsurătoare.",
+          "measured": 1.163
+        }
+      ],
+      "movesItDown": [
+        {
+          "id": "media-pe-sat-si-zona-e-neponderata",
+          "text": "Prețul central al unei localități este media neponderată a prețurilor publicate pe sat și pe zonă. Zona A este întotdeauna cea mai mică și cea mai scumpă, deci media o cântărește ca pe oricare alta și supraevaluează orașele.",
+          "measured": null
+        },
+        {
+          "id": "bucurestiul-e-mediat-plat",
+          "text": "Bucureștiul are 277 de subzone între 34 și 1 320 EUR/mp și nicio suprafață publicată pentru vreuna, deci intră cu media lor plată. Este 16% din total și cea mai largă bandă din set.",
+          "measured": null
+        }
+      ]
+    },
     "measuredShareOfArea": 1.0
   },
   "counties_valued": [

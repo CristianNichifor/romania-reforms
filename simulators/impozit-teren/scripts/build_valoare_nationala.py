@@ -328,6 +328,108 @@ def main() -> int:
     taxable_total = {b: sum(r["taxableValueEur"][b] for r in measured_rows) for b in BANDS}
     # Named in the limitation below rather than asserted, so the sentence cannot outlive the
     # fact it describes.
+    # The outside check, and the list of what would move the total either way.
+    #
+    # Added because a reader looked at 324 mld EUR and said it felt too low, which is the
+    # reflex any figure built from administrative minima invites. The reflex deserved a test
+    # rather than a reassurance, and the test does not support it: on the one basis that is
+    # comparable — land as a balance-sheet asset over GDP — Romania at 1,01x sits within 4%
+    # of what the post-2004 members report, and well under western Europe. Both are published
+    # because the peer group is the whole argument.
+    #
+    # The biases are listed in both directions on purpose. Every one of them was already
+    # written down somewhere in this repository as its own limitation, and no page had ever
+    # added them up, so a reader could read four separate caveats and never learn that two of
+    # them push the other way.
+    benchmark = None
+    found_benchmark = sorted((ROOT / "data").glob("avere-teren-*.json"))
+    if found_benchmark:
+        document = json.loads(found_benchmark[-1].read_text(encoding="utf-8"))
+        gdp = document["assumptions"]["romaniaGdpEur"]
+        priced = sum(values[c]["summary"]["pricedHa"] for c in values)
+        priceable = sum(values[c]["summary"]["priceableHa"] for c in values)
+        zero_share = 1 - priced / priceable if priceable else 0.0
+        multiple = None
+        found_multiple = sorted((ROOT / "data").glob("multiplu-piata-*.json"))
+        if found_multiple:
+            summary = json.loads(found_multiple[-1].read_text(encoding="utf-8"))["summary"]
+            multiple = summary["localityMultiple"]["central"]
+        benchmark = {
+            "period": document["period"],
+            "romaniaGdpEur": gdp,
+            "thisSimulatorLandOverGdp": round(total["central"] / gdp, 4),
+            "groups": document["summary"]["groups"],
+            "movesItUp": [
+                {
+                    "id": "hectare-fara-pret",
+                    "text": (
+                        f"{100 * zero_share:.1f}".replace(".", ",")
+                        + "% dintre hectarele evaluabile intră în total cu "
+                        "zero, pentru că studiul județului lor nu publică niciun preț pentru "
+                        "categoria respectivă."
+                    ),
+                    "measured": round(zero_share, 4),
+                },
+                {
+                    "id": "intravilanul-e-doar-curti-constructii",
+                    "text": (
+                        "Intravilanul este luat drept exact categoria curți-construcții. "
+                        "Grădinile din sate sunt teren arabil în intravilan și intră la prețul "
+                        "de extravilan, de zeci până la sute de ori mai mic."
+                    ),
+                    "measured": None,
+                },
+                {
+                    "id": "suprafetele-sunt-din-2014",
+                    "text": (
+                        "Suprafețele sunt din 2014, ultimul an publicat pe localități. "
+                        "Arabilul devine curți-construcții, nu invers, deci suprafața "
+                        "construită de aici este un minim."
+                    ),
+                    "measured": None,
+                },
+                *(
+                    [
+                        {
+                            "id": "multiplul-de-piata-e-lasat-la-1",
+                            "text": (
+                                "Multiplul de piață este lăsat la 1. Măsurat pe arabil "
+                                "extravilan, prețul cerut este de "
+                                + f"{multiple:.2f}".replace(".", ",")
+                                + "× grila pe "
+                                "comunele unde ambele prețuiesc același loc — pentru "
+                                "curți-construcții, 68% din valoare, nu există nicio măsurătoare."
+                            ),
+                            "measured": round(multiple, 3),
+                        }
+                    ]
+                    if multiple
+                    else []
+                ),
+            ],
+            "movesItDown": [
+                {
+                    "id": "media-pe-sat-si-zona-e-neponderata",
+                    "text": (
+                        "Prețul central al unei localități este media neponderată a prețurilor "
+                        "publicate pe sat și pe zonă. Zona A este întotdeauna cea mai mică și "
+                        "cea mai scumpă, deci media o cântărește ca pe oricare alta și "
+                        "supraevaluează orașele."
+                    ),
+                    "measured": None,
+                },
+                {
+                    "id": "bucurestiul-e-mediat-plat",
+                    "text": (
+                        "Bucureștiul are 277 de subzone între 34 și 1 320 EUR/mp și nicio "
+                        "suprafață publicată pentru vreuna, deci intră cu media lor plată. "
+                        "Este 16% din total și cea mai largă bandă din set."
+                    ),
+                    "measured": None,
+                },
+            ],
+        }
+
     capital = next((r for r in rows if r["county"] == "B" and r["landValueEur"]), None)
     bucharest_line = (
         f"Bucureștiul singur este {capital['landValueEur']['central'] / 1e9:.1f} mld EUR, "
@@ -404,6 +506,7 @@ def main() -> int:
             "measuredShareOfValue": round(
                 measured_total["central"] / total["central"], 4
             ),
+            "plausibility": benchmark,
             "measuredShareOfArea": round(
                 sum(r["totalHa"] for r in measured_rows) / sum(r["totalHa"] for r in counted), 4
             ),
