@@ -1,0 +1,127 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://cristiannichifor.github.io/romania-reforms/schema/buget-uat.schema.json",
+    "title": "What each commune raises and spends, from its own budget execution",
+    "description": "The denominator the land value tax was missing. Everything else here says what land is worth and what a tax on it would yield; this says what the place it sits in actually costs to run, filed per authority and joined on the same SIRUTA code. The split between own revenue and transfers is a decision made by the importer on classification chapters, and the chapters are carried in the file so it can be argued with.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "id",
+        "title",
+        "publisher",
+        "period",
+        "currency",
+        "provenance",
+        "assumptions",
+        "excluded",
+        "summary",
+        "uats",
+        "limitations"
+    ],
+    "properties": {
+        "$schema": { "type": "string" },
+        "id": { "type": "string", "pattern": "^buget-uat-[0-9]{4}$" },
+        "title": { "type": "string" },
+        "publisher": { "const": "transparenta.eu" },
+        "period": { "type": "string", "pattern": "^[0-9]{4}$" },
+        "currency": { "const": "RON" },
+        "provenance": { "$ref": "#/$defs/provenance" },
+        "assumptions": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["transferPrefixes", "suspectMultipleOfMedian"],
+            "properties": {
+                "suspectMultipleOfMedian": {
+                    "description": "How far above the country's own median spending per inhabitant a filing may sit before it is set aside as a filing error rather than a budget.",
+                    "type": "number",
+                    "exclusiveMinimum": 1
+                },
+                "transferPrefixes": {
+                    "description": "Revenue chapters treated as arriving from above rather than raised locally. Published because moving one changes every own-revenue figure in the file.",
+                    "type": "array",
+                    "minItems": 1,
+                    "items": { "type": "string", "pattern": "^[0-9]{2}\\.$" }
+                }
+            }
+        },
+        "summary": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["uatsReporting", "revenueRon", "ownRevenueRon", "spendingRon"],
+            "properties": {
+                "uatsReporting": { "type": "integer", "minimum": 3000 },
+                "revenueRon": { "type": "number", "exclusiveMinimum": 0 },
+                "ownRevenueRon": { "type": "number", "exclusiveMinimum": 0 },
+                "spendingRon": { "type": "number", "exclusiveMinimum": 0 },
+                "medianOwnShare": { "type": ["number", "null"], "minimum": 0, "maximum": 1 }
+            }
+        },
+        "excluded": {
+            "description": "Authorities whose filings cannot be budgets, set aside from every total. Named rather than dropped: an exclusion nobody can see is a number nobody can check.",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["siruta", "name", "reportedSpendingRon", "perInhabitantRon", "timesMedian"],
+                "properties": {
+                    "siruta": { "type": "string", "pattern": "^[0-9]+$" },
+                    "name": { "type": "string" },
+                    "reportedSpendingRon": { "type": "number" },
+                    "perInhabitantRon": { "type": "number" },
+                    "timesMedian": { "type": "number" }
+                }
+            }
+        },
+        "uats": {
+            "type": "array",
+            "minItems": 3000,
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["siruta", "level", "name", "revenueRon", "ownRevenueRon", "spendingRon"],
+                "properties": {
+                    "siruta": {
+                        "description": "SIRUTA for a commune, town or city; the county's letter code for a county council, which files without one.",
+                        "type": "string",
+                        "pattern": "^([0-9]+|[A-Z]{1,2})$"
+                    },
+                    "level": { "enum": ["uat", "county"] },
+                    "name": { "type": "string" },
+                    "county": { "type": ["string", "null"] },
+                    "population": { "type": ["integer", "null"], "minimum": 0 },
+                    "revenueRon": { "type": "number", "minimum": 0 },
+                    "ownRevenueRon": { "type": "number", "minimum": 0 },
+                    "spendingRon": { "type": "number", "minimum": 0 },
+                    "ownShare": { "type": ["number", "null"], "minimum": 0, "maximum": 1 }
+                }
+            }
+        },
+        "limitations": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["id", "text"],
+                "properties": {
+                    "id": { "type": "string" },
+                    "text": { "type": "string" },
+                    "severity": { "enum": ["blocking", "material", "note"] }
+                }
+            }
+        }
+    },
+    "$defs": {
+        "provenance": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["source", "locator", "confidence"],
+            "properties": {
+                "source": { "type": "string" },
+                "locator": { "type": "string" },
+                "confidence": { "enum": ["verbatim", "derived", "assumed"] },
+                "note": { "type": "string" }
+            }
+        }
+    }
+}
