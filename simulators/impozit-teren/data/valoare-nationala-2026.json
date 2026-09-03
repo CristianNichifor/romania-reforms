@@ -110,6 +110,38 @@
     },
     "taxableSharePercent": 74.46,
     "measuredShareOfValue": 1.0,
+    "filledGaps": {
+      "landValueEur": {
+        "low": 192315421052,
+        "central": 338133562247,
+        "high": 666363779825
+      },
+      "addedEur": {
+        "low": 8205762360,
+        "central": 13929908633,
+        "high": 23744156211
+      },
+      "addedSharePercent": 4.3,
+      "addedByCodeEur": {
+        "A": 4475986470,
+        "NP": 420440970,
+        "P+F": 2452059648,
+        "PADURE": 6236093112,
+        "V+L": 345328433
+      },
+      "filledHaByCode": {
+        "A": 843959.0,
+        "NP": 189865.0,
+        "P+F": 659437.0,
+        "PADURE": 1447539.0,
+        "V+L": 63449.0
+      },
+      "notFilledHaByCode": {
+        "AP": 679914.0,
+        "DR": 316789.0
+      },
+      "notFilledReason": "sub opt județe publică un preț pentru aceste categorii, deci nu au valoare de transfer; sunt și peste 80% domeniu public — ape, drumuri, căi ferate"
+    },
     "plausibility": {
       "period": "2023",
       "romaniaGdpEur": 321577900000,
@@ -134,8 +166,8 @@
       "movesItUp": [
         {
           "id": "hectare-fara-pret",
-          "text": "18,1% dintre hectarele evaluabile intră în total cu zero, pentru că studiul județului lor nu publică niciun preț pentru categoria respectivă.",
-          "measured": 0.1814
+          "text": "18,1% dintre hectarele evaluabile intră în total cu zero, pentru că studiul județului lor nu publică niciun preț pentru categoria respectivă. Evaluate la prețul de transfer național, ele adaugă 13,9 mld EUR, adică 4,3% — o cincime din suprafață care valorează a douăzecea parte din total, pentru că hectarele fără preț sunt categoriile ieftine, iar valoarea stă în curți-construcții, care sunt prețuite aproape peste tot. Apele și drumurile rămân neevaluate: sub opt județe le publică un preț și sunt oricum peste 80% domeniu public.",
+          "measured": 0.043
         },
         {
           "id": "intravilanul-e-doar-curti-constructii",

@@ -134,7 +134,8 @@
                 "pricedHa",
                 "priceableHa",
                 "taxableValueEur",
-                "taxableSharePercent"
+                "taxableSharePercent",
+                "unpricedHaByCode"
             ],
             "properties": {
                 "localities": {
@@ -208,6 +209,14 @@
                     "type": "number",
                     "minimum": 0,
                     "maximum": 100
+                },
+                "unpricedHaByCode": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    "description": "Hectares that exist in this category and received no price, so entered the value at zero."
                 }
             }
         },
@@ -240,7 +249,8 @@
                     "privateAreaHa",
                     "taxableValueEur",
                     "taxableExtravilanValueEur",
-                    "taxableExtravilanValueByCodeEur"
+                    "taxableExtravilanValueByCodeEur",
+                    "unpricedHaByCode"
                 ],
                 "properties": {
                     "siruta": {
@@ -363,6 +373,14 @@
                             "minimum": 0
                         },
                         "description": "Valoarea extravilanului defalcată pe cod cadastral, ca build_renta.py să poată aplica fiecărei categorii randamentul măsurat pe ea: arabilul și pășunea nu randează la fel."
+                    },
+                    "unpricedHaByCode": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "number",
+                            "minimum": 0
+                        },
+                        "description": "Hectares that exist in this category and received no price, so entered the value at zero."
                     }
                 }
             }

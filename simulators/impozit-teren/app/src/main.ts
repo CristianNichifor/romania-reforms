@@ -180,6 +180,16 @@ async function renderNational(): Promise<void> {
   // The outside check and the bias list. Both directions are rendered, because every one of
   // these was already a limitation somewhere and no page had ever added them up — a reader
   // could meet four separate caveats and never learn that two of them push the other way.
+  // The second total: the headline plus the hectares no study priced, valued at the national
+  // transfer price. Rendered under the headline rather than as its own stat, because it is the
+  // same quantity measured a second way and putting it in a separate box invites reading it as
+  // a separate finding.
+  const filled = summary.filledGaps as {
+    landValueEur: { low: number; central: number; high: number };
+    addedEur: { central: number };
+    addedSharePercent: number;
+  } | null;
+
   const plausibility = summary.plausibility as {
     thisSimulatorLandOverGdp: number;
     groups: Record<string, { countries: number; medianLandOverGdp: number; impliedRomaniaEur: number }>;
@@ -219,6 +229,14 @@ async function renderNational(): Promise<void> {
               : 'o bandă care este eroarea măsurată a modelului, nu o presupunere'
           }
         </p>
+        ${
+          filled
+            ? `<p class="note">Numără doar hectarele pe care un studiu chiar le-a prețuit.
+                 Cu cele neprețuite evaluate la prețul de transfer național:
+                 <strong>${mld(filled.landValueEur.central)} EUR</strong>, adică
+                 +${percent.format(filled.addedSharePercent)}%.</p>`
+            : ''
+        }
       </div>
       <div class="stat">
         <div class="stat-label">Din care citit din grile notariale</div>

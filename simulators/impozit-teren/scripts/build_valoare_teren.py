@@ -318,6 +318,20 @@ def main() -> int:
         built_ha, intravilan_value, extravilan_value, by_code, priced_ha, forest_value = valued_at(
             record["byCategory"], record["forestHa"]
         )
+        # Hectares that exist and got nothing, by cadastral code. They enter the total at zero,
+        # which is the single largest known understatement in this file — and until now it was
+        # only ever reported as one percentage, with no way to tell whether the missing land was
+        # arable worth pricing or riverbed that nobody buys. Named per code so the national
+        # builder can put its transfer price on them and say what the gap is actually worth.
+        unpriced: dict[str, float] = {}
+        for code in [*EXTRAVILAN_CATEGORIES, FOREST_CATEGORY]:
+            if code == INTRAVILAN_CATEGORY:
+                continue
+            hectares = (
+                record["forestHa"] if code == FOREST_CATEGORY else record["byCategory"].get(code, 0.0)
+            )
+            if hectares and extra.get(key, {}).get(code) is None:
+                unpriced[code] = round(hectares, 2)
         # The taxable base: art. 456 (1) a) does not tax land in the public domain, and a
         # quarter of Romania by area is in it. Same prices, private hectares only.
         (
@@ -347,6 +361,7 @@ def main() -> int:
                 "forestPrivateHa": record["forestPrivateHa"],
                 "forestValueEur": round(forest_value),
                 "pricedExtravilanHa": round(priced_ha, 2),
+                "unpricedHaByCode": unpriced,
                 # Six decimals, not two. The central figure is a mean of village prices,
                 # and the app recomputes the value from this number rather than from the
                 # mean itself — so a display rounding here becomes a real disagreement
@@ -400,6 +415,10 @@ def main() -> int:
     }
     # Named rather than asserted: the limitation below used to claim forest was excluded from
     # the value, and the only way that claim stays honest is to compute it every build.
+    unpriced_by_code: dict[str, float] = {}
+    for row in rows:
+        for code, hectares in row["unpricedHaByCode"].items():
+            unpriced_by_code[code] = round(unpriced_by_code.get(code, 0.0) + hectares, 2)
     forest_value = sum(row["forestValueEur"] for row in rows)
     forest_share = forest_value / totals["central"] if totals["central"] else 0.0
     taxable = {
@@ -492,6 +511,7 @@ def main() -> int:
             "pricedHa": round(priced, 2),
             "priceableHa": round(priceable, 2),
             "builtHa": round(built, 2),
+            "unpricedHaByCode": unpriced_by_code,
             "landValueEur": {band: round(value) for band, value in totals.items()},
             "taxableValueEur": {band: round(value) for band, value in taxable.items()},
             "taxableSharePercent": round(100 * taxable["central"] / totals["central"], 2)

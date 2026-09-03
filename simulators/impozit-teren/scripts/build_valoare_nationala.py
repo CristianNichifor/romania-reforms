@@ -328,6 +328,65 @@ def main() -> int:
     taxable_total = {b: sum(r["taxableValueEur"][b] for r in measured_rows) for b in BANDS}
     # Named in the limitation below rather than asserted, so the sentence cannot outlive the
     # fact it describes.
+    # Hectares that exist, are priced nowhere, and therefore enter the headline at zero.
+    #
+    # 18,7% of the country's evaluable surface is in this state, which sounds like the total is
+    # missing a fifth of itself. It is not, and the point of computing this is to find out by
+    # how much rather than to keep quoting the hectare share as if it were a value share: the
+    # unpriced land is overwhelmingly the cheap categories, while the value is dominated by
+    # curți-construcții, which is priced almost everywhere.
+    #
+    # Filled at the same national transfer price the estimate already uses for a county nobody
+    # read — one geometric mean per cadastral code, over the counties that do price it, with
+    # its own leave-one-out error as the band. No new mechanism, and nothing county-specific
+    # invented: a hectare of Argeș forest is valued at what a hectare of forest goes for
+    # nationally, because Argeș publishes no forest price at all.
+    #
+    # Water and roads are deliberately not filled. Fewer than eight counties price either, so
+    # neither has a transfer value to use — and both are over 80% public domain, being rivers,
+    # lakes, railway embankments and county roads. Filling them would add the largest block of
+    # hectares in the gap and the least defensible euro in the file, since none of it is land
+    # anyone buys or could be taxed on.
+    fill_by_code: dict[str, float] = {}
+    fill_low_by_code: dict[str, float] = {}
+    fill_high_by_code: dict[str, float] = {}
+    unfilled_ha: dict[str, float] = {}
+    for county in values:
+        for code, hectares in values[county]["summary"].get("unpricedHaByCode", {}).items():
+            if code in transfer:
+                amount = hectares * transfer[code]
+                error = transfer_error.get(code, 1.0)
+                fill_by_code[code] = fill_by_code.get(code, 0.0) + amount
+                fill_low_by_code[code] = fill_low_by_code.get(code, 0.0) + amount / error
+                fill_high_by_code[code] = fill_high_by_code.get(code, 0.0) + amount * error
+            else:
+                unfilled_ha[code] = unfilled_ha.get(code, 0.0) + hectares
+    fill = {
+        "low": sum(fill_low_by_code.values()),
+        "central": sum(fill_by_code.values()),
+        "high": sum(fill_high_by_code.values()),
+    }
+    filled_total = {b: total[b] + fill[b] for b in BANDS}
+    filled = {
+        "landValueEur": {b: round(filled_total[b]) for b in BANDS},
+        "addedEur": {b: round(fill[b]) for b in BANDS},
+        "addedSharePercent": round(100 * fill["central"] / total["central"], 2)
+        if total["central"]
+        else 0,
+        "addedByCodeEur": {k: round(v) for k, v in sorted(fill_by_code.items())},
+        "filledHaByCode": {
+            code: round(sum(
+                values[c]["summary"].get("unpricedHaByCode", {}).get(code, 0.0) for c in values
+            ), 2)
+            for code in sorted(fill_by_code)
+        },
+        "notFilledHaByCode": {k: round(v, 2) for k, v in sorted(unfilled_ha.items())},
+        "notFilledReason": (
+            "sub opt județe publică un preț pentru aceste categorii, deci nu au valoare de "
+            "transfer; sunt și peste 80% domeniu public — ape, drumuri, căi ferate"
+        ),
+    }
+
     # The outside check, and the list of what would move the total either way.
     #
     # Added because a reader looked at 324 mld EUR and said it felt too low, which is the
@@ -364,11 +423,19 @@ def main() -> int:
                     "id": "hectare-fara-pret",
                     "text": (
                         f"{100 * zero_share:.1f}".replace(".", ",")
-                        + "% dintre hectarele evaluabile intră în total cu "
-                        "zero, pentru că studiul județului lor nu publică niciun preț pentru "
-                        "categoria respectivă."
+                        + "% dintre hectarele evaluabile intră în total cu zero, pentru că "
+                        "studiul județului lor nu publică niciun preț pentru categoria "
+                        "respectivă. Evaluate la prețul de transfer național, ele adaugă "
+                        + f"{fill['central'] / 1e9:.1f}".replace(".", ",")
+                        + " mld EUR, adică "
+                        + f"{filled['addedSharePercent']:.1f}".replace(".", ",")
+                        + "% — o cincime din suprafață care valorează a douăzecea parte din "
+                        "total, pentru că hectarele fără preț sunt categoriile ieftine, iar "
+                        "valoarea stă în curți-construcții, care sunt prețuite aproape peste "
+                        "tot. Apele și drumurile rămân neevaluate: sub opt județe le publică "
+                        "un preț și sunt oricum peste 80% domeniu public."
                     ),
-                    "measured": round(zero_share, 4),
+                    "measured": round(filled["addedSharePercent"] / 100, 4),
                 },
                 {
                     "id": "intravilanul-e-doar-curti-constructii",
@@ -506,6 +573,7 @@ def main() -> int:
             "measuredShareOfValue": round(
                 measured_total["central"] / total["central"], 4
             ),
+            "filledGaps": filled,
             "plausibility": benchmark,
             "measuredShareOfArea": round(
                 sum(r["totalHa"] for r in measured_rows) / sum(r["totalHa"] for r in counted), 4
