@@ -93,3 +93,49 @@ def test_2plus1_is_far_cheaper_than_bypassing_everything(built):
         pytest.skip("bypasses not built")
     other = json.loads(bypasses.read_text(encoding="utf-8"))
     assert built["programme"]["costRon"] < other["headline"]["costRon"]
+
+
+def test_the_2plus1_rate_is_interpolated_between_romanian_contracts(built):
+    """It used to be a foreign guess. It is now bracketed by two CNAIR contracts on existing
+    alignment — modernisation without an extra lane, and widening to four — because the
+    physical work is the same whatever is painted on top. A 2+1 adds one lane, so it must sit
+    strictly between them; outside that range the interpolation has been broken rather than
+    adjusted."""
+    inputs = json.loads(INPUTS.read_text(encoding="utf-8"))
+    marks = inputs["benchmarks"]
+    items = inputs["items"]
+    rate_ron = items["twoPlusOneWidenEurPerKm"]["value"] * items["ronPerEur"]["value"]
+    assert marks["dn29dModernisation"]["value"] < rate_ron < marks["dn7FourLaneWidening"]["value"]
+    assert inputs["items"]["twoPlusOneWidenEurPerKm"]["confidence"] == "derived"
+
+
+def test_the_romanian_ladder_is_ordered(built):
+    """Rehabilitation, then modernisation, then widening. If this ever inverted, two contracts
+    have been transcribed onto the wrong rungs and the interpolation is meaningless."""
+    marks = json.loads(INPUTS.read_text(encoding="utf-8"))["benchmarks"]
+    assert (
+        marks["dn24Rehabilitation"]["value"]
+        < marks["dn29dModernisation"]["value"]
+        < marks["dn7FourLaneWidening"]["value"]
+    )
+
+
+def test_the_irish_figures_survive_only_as_a_cross_check(built):
+    """Kept because a derived figure falling outside them would be a warning, and deleted
+    anchors cannot warn anyone."""
+    inputs = json.loads(INPUTS.read_text(encoding="utf-8"))
+    rate_eur = inputs["items"]["twoPlusOneWidenEurPerKm"]["value"]
+    assert inputs["items"]["twoPlusOneUpgradeEurPerKm"]["value"] < rate_eur
+    assert rate_eur < inputs["benchmarks"]["irelandNewBuildEurPerKm"]["value"]
+
+
+def test_the_interpolation_rule_is_declared_as_assumed(built):
+    """The two ends are measured; the rule between them is not, and pretending otherwise would
+    be the exact dishonesty the rest of this repository avoids."""
+    ids = {limitation["id"] for limitation in built["limitations"]}
+    assert "pretul-benzii-a-treia-e-strain" in ids or "regula-de-jumatate-e-presupusa" in ids
+    input_ids = {
+        limitation["id"]
+        for limitation in json.loads(INPUTS.read_text(encoding="utf-8"))["limitations"]
+    }
+    assert "regula-de-jumatate-e-presupusa" in input_ids

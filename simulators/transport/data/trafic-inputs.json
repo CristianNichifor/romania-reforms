@@ -5,10 +5,10 @@
   "publisher": "Cristian Nichifor",
   "period": "2026",
   "provenance": {
-    "source": "practica-suedeza-si-irlandeza",
-    "locator": "praguri uzuale pentru drumuri 2+1 din practica suedeză, unde tipul a fost inventat; prețuri din programul irlandez de conversie 2+1",
-    "confidence": "assumed",
-    "note": "România nu are drumuri 2+1, deci nici praguri și nici prețuri românești. Reperele străine sunt intrări legitime aici, ca și cele daneze la autobuze: rețeaua evaluată nu există."
+    "source": "contracte-cnair-plus-practica-suedeza",
+    "locator": "praguri de MZA din practica suedeză, unde tipul 2+1 a fost inventat; preț derivat din contractele CNAIR pentru modernizarea DN29D Botoșani-Ștefănești și pentru lărgirea la patru benzi a DN7 Bâldana-Titu",
+    "confidence": "derived",
+    "note": "Pragurile rămân străine — România nu are drumuri 2+1, deci nu are nici praguri proprii. Prețul NU mai este străin: se interpolează între două contracte românești pe drum existent, pentru că lucrarea fizică este aceeași indiferent cum se vopsește banda."
   },
   "currency": "RON",
   "items": {
@@ -19,10 +19,10 @@
       "note": "Curs de lucru, același ca în data/cost-inputs.json."
     },
     "twoPlusOneWidenEurPerKm": {
-      "value": 1500000,
+      "value": 1638000,
       "unit": "EUR/km",
-      "confidence": "assumed",
-      "note": "Transformarea unui drum național românesc de 7 metri în 2+1: lărgire la circa 13 metri, parapet median, marcaje, refacerea acostamentelor. PRESUPUS, între cele două repere irlandeze — 400.000 de euro pe kilometru pentru un drum deja destul de lat, unde se pune doar parapet și marcaj, și 4,1 milioane pentru unul construit de la zero. Drumurile românești nu sunt destul de late, deci prima cifră este prea mică; nu se construiește un traseu nou, deci a doua este prea mare. Este cel mai slab număr din acest fișier și primul de înlocuit cu un deviz românesc."
+      "confidence": "derived",
+      "note": "1,64 milioane de euro pe kilometru, adică 8,14 milioane de lei, DERIVAT din două contracte CNAIR pe drum existent în loc să fie presupus între două repere irlandeze. Scara românească a lucrărilor pe aliniament existent: reabilitare simplă 0,79 milioane de lei pe kilometru (DN24, 74,6 milioane pentru 94,718 km), modernizare completă 4,96 milioane (DN29D Botoșani-Ștefănești, 208,4 milioane pentru 42,046 km), lărgire la patru benzi 11,32 milioane (DN7 Bâldana-Titu, 242,35 milioane pentru 21,4 km). Un drum 2+1 adaugă O bandă, nu două, deci se ia modernizarea plus jumătate din diferența până la lărgirea completă: 4,96 + (11,32 - 4,96)/2 = 8,14. Regula de interpolare este presupusă; cele două capete nu. Verificare încrucișată: reperele irlandeze încadrează cifra — 0,4 milioane de euro pentru un drum deja destul de lat și 4,1 pentru unul construit de la zero. Valoarea presupusă anterior era 1,50 milioane de euro, cu 9% mai mică."
     },
     "twoPlusOneUpgradeEurPerKm": {
       "value": 400000,
@@ -32,17 +32,77 @@
     }
   },
   "bands": [
-    { "id": "sub-prag", "from": 0, "to": 8000, "twoPlusOne": false, "verdict": "sub pragul setului de date — nu apare aici" },
-    { "id": "marginal", "from": 8000, "to": 12000, "twoPlusOne": true, "verdict": "2+1 marginal justificat" },
-    { "id": "potrivit", "from": 12000, "to": 20000, "twoPlusOne": true, "verdict": "2+1 clasic — exact intervalul pentru care a fost inventat" },
-    { "id": "prea-mult", "from": 20000, "to": null, "twoPlusOne": false, "verdict": "peste 2+1 — cere profil de autostradă sau drum expres" }
+    {
+      "id": "sub-prag",
+      "from": 0,
+      "to": 8000,
+      "twoPlusOne": false,
+      "verdict": "sub pragul setului de date — nu apare aici"
+    },
+    {
+      "id": "marginal",
+      "from": 8000,
+      "to": 12000,
+      "twoPlusOne": true,
+      "verdict": "2+1 marginal justificat"
+    },
+    {
+      "id": "potrivit",
+      "from": 12000,
+      "to": 20000,
+      "twoPlusOne": true,
+      "verdict": "2+1 clasic — exact intervalul pentru care a fost inventat"
+    },
+    {
+      "id": "prea-mult",
+      "from": 20000,
+      "to": null,
+      "twoPlusOne": false,
+      "verdict": "peste 2+1 — cere profil de autostradă sau drum expres"
+    }
   ],
   "limitations": [
     {
       "id": "pragurile-sunt-de-practica-nu-de-norma",
-      "text": "Intervalele de MZA vin din practica suedeză și din literatura de specialitate, nu dintr-un normativ românesc. AND 584-2012 reglementează echivalarea vehiculelor, nu pragurile de profil. Un proiectant român ar folosi alte limite, iar rezultatul se mută odată cu ele.",
+      "text": "Intervalele de MZA vin din practica suedeză și din literatura de specialitate, nu dintr-un normativ românesc. AND 584-2012 reglementează echivalarea vehiculelor, nu pragurile de profil. Un proiectant român ar folosi alte limite, iar rezultatul se mută odată cu ele. Prețul, în schimb, nu mai este străin: vine din contracte CNAIR.",
       "severity": "material",
-      "affects": ["trafic"]
+      "affects": [
+        "trafic"
+      ]
+    },
+    {
+      "id": "regula-de-jumatate-e-presupusa",
+      "text": "Cele două capete ale interpolării sunt contracte reale; regula dintre ele nu. Că un drum 2+1 costă exact modernizarea plus jumătate din diferența până la patru benzi este o presupunere de proporționalitate cu numărul de benzi adăugate. În realitate lățimea nu crește liniar cu benzile — se adaugă și parapet median, și acostamente — iar terenul nu este diferențiat deloc. Este însă o presupunere între două măsurători românești, nu între două cifre străine, ceea ce era situația anterioară.",
+      "severity": "material",
+      "affects": [
+        "trafic"
+      ]
     }
-  ]
+  ],
+  "benchmarks": {
+    "dn24Rehabilitation": {
+      "value": 787706,
+      "unit": "RON/km",
+      "confidence": "derived",
+      "note": "74.610.643,39 lei fără TVA pentru 94,718 km de DN24 și DN24B, reabilitare cu 25 de poduri și 142 de podețe. Capătul de jos al scării: se reface îmbrăcămintea și structurile, nu se adaugă nicio bandă."
+    },
+    "dn29dModernisation": {
+      "value": 4957545,
+      "unit": "RON/km",
+      "confidence": "derived",
+      "note": "208.444.894,73 lei fără TVA pentru DN29D Botoșani-Ștefănești, km 2+800-18+500 și 21+800-48+146, adică 42,046 km; 30 de luni, din care 6 de proiectare. Modernizare completă a unui drum existent, fără bandă în plus."
+    },
+    "dn7FourLaneWidening": {
+      "value": 11324766,
+      "unit": "RON/km",
+      "confidence": "derived",
+      "note": "242,35 milioane de lei fără TVA pentru lărgirea la patru benzi a DN7 între Bâldana și Titu, km 30+950-52+350, adică 21,4 km. Capătul de sus: se adaugă două benzi pe un aliniament existent, exact lucrarea din care 2+1 face jumătate."
+    },
+    "irelandNewBuildEurPerKm": {
+      "value": 4100000,
+      "unit": "EUR/km",
+      "confidence": "derived",
+      "note": "Reperul irlandez pentru un drum 2+1 construit de la zero. Păstrat ca verificare încrucișată, nu ca intrare: cifra derivată din contracte românești trebuie să cadă între acesta și cel de transformare."
+    }
+  }
 }
