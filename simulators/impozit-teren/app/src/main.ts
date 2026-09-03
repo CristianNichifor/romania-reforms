@@ -181,8 +181,12 @@ async function renderNational(): Promise<void> {
   const missing = summary.excludedCounties as number;
   const whole = predicted === 0 && missing === 0;
 
+  // "Toată țara" is a claim, and the reader has no way to check it from a percentage. Naming
+  // the capital is the difference between a total that is right and a total that reads right:
+  // București is 16% of it, and a page that never says so invites exactly the suspicion that
+  // it was left out.
   const coverage = [
-    `${summary.measuredCounties} județe citite`,
+    `${summary.measuredCounties} de județe citite, București și Ilfov incluse`,
     predicted ? `${predicted} estimate` : '',
     missing ? `${missing} lăsate în afară (${excluded.join(' și ')})` : '',
   ]
@@ -194,7 +198,7 @@ async function renderNational(): Promise<void> {
     <div class="stat-row">
       <div class="stat">
         <div class="stat-label">Valoarea terenului${
-          whole ? ', toată țara' : ', fără județele lipsă'
+          whole ? ', toată țara, București inclus' : ', fără județele lipsă'
         }</div>
         <div class="stat-value accent">${mld(summary.landValueEur.central)}<span class="unit">EUR</span></div>
         <p class="note">
@@ -386,7 +390,7 @@ async function main() {
                 collectedActual,
               )} lei</strong> — ${percent.format(
                 (100 * collectedActual) / totals.fiscal,
-              )}% din cât dă calculul, diferența fiind cota aleasă de consilii, scutirile și restanțele</p>`
+              )}% din impozitul calculat mai sus, care e pe <em>toate</em> hectarele. O parte din diferență e domeniul public, care nu se impozitează deloc; restul e cota aleasă de consilii, scutirile și restanțele.</p>`
         }
       </div>
       <div class="stat">

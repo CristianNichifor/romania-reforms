@@ -326,6 +326,15 @@ def main() -> int:
     predicted_rows = [r for r in counted if r["basis"] == "predicted"]
     measured_total = {b: sum(r["landValueEur"][b] for r in measured_rows) for b in BANDS}
     taxable_total = {b: sum(r["taxableValueEur"][b] for r in measured_rows) for b in BANDS}
+    # Named in the limitation below rather than asserted, so the sentence cannot outlive the
+    # fact it describes.
+    capital = next((r for r in rows if r["county"] == "B" and r["landValueEur"]), None)
+    bucharest_line = (
+        f"Bucureștiul singur este {capital['landValueEur']['central'] / 1e9:.1f} mld EUR, "
+        f"{100 * capital['landValueEur']['central'] / total['central']:.0f}% din total"
+        if capital
+        else "Bucureștiul nu are încă grilă citită"
+    )
     excluded = [r for r in rows if r["basis"] == "excluded"]
 
     # Counted, not written down. This title said "21 de județe măsurate" for thirteen counties
@@ -401,34 +410,57 @@ def main() -> int:
         },
         "counties_valued": rows,
         "limitations": [
+            # Written from the numbers every build. Each of these was once a statement about a
+            # gap and stopped being true as chambers were read, and the frozen text went on
+            # asserting it — a panel headed "tot pământul din România" carried a blocking note
+            # whose id said București was missing from the total, while București sat inside it.
+            *(
+                [
+                    {
+                        "id": "o-parte-din-tara-e-estimata-nu-citita",
+                        "text": (
+                            f"Din {total['central'] / 1e9:.0f} mld EUR, "
+                            f"{100 * measured_total['central'] / total['central']:.0f}% provin "
+                            "din grile notariale citite, restul dintr-un model cu un singur "
+                            "predictor, populația celui mai mare oraș. Modelul explică "
+                            f"{100 * predicted_r2:.0f}% din varianța prețului terenului "
+                            "construit între județele măsurate și greșește un județ nevăzut cu "
+                            f"un factor de {built_error:.2f}×."
+                        ),
+                        "severity": "blocking",
+                        "affects": ["valoare-nationala"],
+                    }
+                ]
+                if predicted_rows
+                else [
+                    {
+                        "id": "toata-tara-e-citita-inclusiv-bucurestiul",
+                        "text": (
+                            f"Totalul de {total['central'] / 1e9:.0f} mld EUR cuprinde toate "
+                            f"cele {len(measured_rows)} de județe, Bucureștiul și Ilfovul "
+                            f"incluse — {bucharest_line}. Nu mai este estimat niciun județ, "
+                            "deci nicio parte din această cifră nu vine dintr-un model. "
+                            "Ilfovul este ținut în afara *ajustării* modelului, pentru că "
+                            "piața lui e dictată de un oraș care nu se află în județ, dar "
+                            "valoarea lui este citită din grilă și este în total ca oricare "
+                            "alta."
+                        ),
+                        "severity": "note",
+                        "affects": ["valoare-nationala"],
+                    }
+                ]
+            ),
             {
-                "id": "jumatate-din-tara-e-estimata-nu-citita",
+                "id": "banda-bucurestiului-e-cea-mai-larga",
                 "text": (
-                    f"Din {total['central'] / 1e9:.0f} mld EUR, "
-                    f"{100 * measured_total['central'] / total['central']:.0f}% provin din "
-                    "grile notariale citite și restul dintr-un model cu un singur predictor, "
-                    "populația celui mai mare oraș. Modelul explică "
-                    f"{100 * predicted_r2:.0f}% din varianța prețului terenului construit între "
-                    f"județele măsurate și greșește un județ nevăzut cu un factor de "
-                    f"{built_error:.2f}× — adică valoarea estimată a unui județ poate fi cu o "
-                    "treime mai mică sau cu două treimi mai mare decât cifra din tabel."
+                    "Banda Bucureștiului este cea mai largă din set, pentru că orașul are 277 "
+                    "de subzone între 34 și 1 320 EUR/mp și nu există nicăieri suprafața "
+                    "fiecăreia: cifra centrală este media neponderată a acelor prețuri, iar "
+                    "capetele sunt limite, nu un interval de încredere. Când Bucureștiul era "
+                    "încă neevaluat, modelul îi dădea 37,4 mld EUR; grila spune 50, deci "
+                    "refuzul de a-l extrapola era justificat."
                 ),
-                "severity": "blocking",
-                "affects": ["valoare-nationala"],
-            },
-            {
-                "id": "bucurestiul-lipseste-din-total",
-                "text": (
-                    "Bucureștiul nu mai lipsește: grila camerei notarilor din București este "
-                    "citită, iar comparația confirmă că refuzul de a-l extrapola era corect — "
-                    "modelul spunea 37,4 mld EUR, grila spune 50, deci l-ar fi subestimat cu o "
-                    "treime. Rămâne exclus Ilfovul, a cărui piață e dictată de un oraș care nu "
-                    "se află în județ. Banda Bucureștiului este însă cea mai largă din set, "
-                    "aproape 39×, pentru că orașul are 277 de subzone între 34 și 1 320 EUR/mp "
-                    "și nu există nicăieri suprafața fiecăreia: cifra centrală e estimarea, "
-                    "capetele sunt limite, nu un interval de încredere."
-                ),
-                "severity": "blocking",
+                "severity": "material",
                 "affects": ["valoare-nationala"],
             },
             {
@@ -443,13 +475,12 @@ def main() -> int:
                 "affects": ["valoare-nationala"],
             },
             {
-                "id": "estimarea-mosteneste-tot-ce-limiteaza-grilele",
+                "id": "totalul-mosteneste-tot-ce-limiteaza-grilele",
                 "text": (
-                    "Județele estimate moștenesc fiecare limitare a județelor măsurate, pentru "
-                    "că din ele este estimat modelul: aceleași grile, aceeași lipsă a "
-                    "ponderilor pe zone, același multiplu de piață lăsat la 1. Eroarea "
-                    "leave-one-out măsoară cât de departe cade un județ față de celelalte "
-                    "județe citite, nu cât de departe cad toate față de piață."
+                    "Totalul moștenește fiecare limitare a grilelor din care e făcut: aceleași "
+                    "prețuri publicate fără suprafețe cu care să fie ponderate pe sat și pe "
+                    "zonă, același multiplu de piață lăsat la 1. Este o sumă de citiri, deci "
+                    "nu are o eroare statistică proprie — are limitările documentelor."
                 ),
                 "severity": "blocking",
                 "affects": ["valoare-nationala"],
