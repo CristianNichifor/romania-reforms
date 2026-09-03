@@ -164,7 +164,17 @@ FISCAL_TO_NOTARY = {
     "Drumuri și căi ferate": "DR",
     "Teren neproductiv": "NP",
     "Teren cu construcții": "CC",
+    # Art. 465 (7) taxes forest, and this row was missing for the whole life of the file. The
+    # value side has priced forest since randament-padure landed — 7,7% of the country's land
+    # value, 22% of Bacău's — so leaving it out here meant the two taxes were not on the same
+    # hectares after all, which is the one thing this comparison promises. It understated
+    # today's tax, and with it the revenue-neutral rate.
+    "Pădure sau alt teren cu vegetație forestieră": "PADURE",
 }
+# The land register keeps the forest fund apart from the agricultural one, so forest arrives
+# as its own field rather than inside `byCategory`. Folded back in here so the Fiscal Code's
+# forest row has hectares to read.
+FOREST = "PADURE"
 BANDS = ("low", "central", "high")
 M2_PER_HA = 10_000
 
@@ -199,7 +209,9 @@ def rank_of(name: str, roster_rank: str | None) -> tuple[str, str]:
     return "V", "IV"
 
 
-def fiscal_tax_ron(record: dict, code: dict, ranks: tuple[str, str]) -> dict[str, float]:
+def fiscal_tax_ron(
+    record: dict, code: dict, ranks: tuple[str, str], private: bool = False
+) -> dict[str, float]:
     """What the Fiscal Code would raise on these hectares, at its cheapest and dearest.
 
     Built-up land uses art. 465 (2) directly. Every other intravilan category would use
@@ -208,7 +220,16 @@ def fiscal_tax_ron(record: dict, code: dict, ranks: tuple[str, str]) -> dict[str
     through (7) × art. 457 (6) instead.
     """
     zones = code["zones"]
-    built_ha = record["byCategory"].get("CC", 0.0)
+    # `private` computes the same tax over the privately owned hectares. Both are wanted and
+    # they answer different questions. Against the land value tax the comparison must run on
+    # every hectare, or one side gets an exemption the other does not. Against what councils
+    # actually banked it must run on the hectares a tax can reach: 61% of Romania's forest is
+    # public domain, so charging all of it statutorily and then calling collections short is
+    # blaming the collector for land art. 456 never let them bill.
+    source = "byCategoryPrivate" if private else "byCategory"
+    forest_key = "forestPrivateHa" if private else "forestHa"
+    built_ha = record[source].get("CC", 0.0)
+    areas = {**record[source], FOREST: record.get(forest_key, 0.0)}
     per_band: dict[str, float] = {}
 
     for band in BANDS:
@@ -237,7 +258,7 @@ def fiscal_tax_ron(record: dict, code: dict, ranks: tuple[str, str]) -> dict[str
         for fiscal_name, notary_code in FISCAL_TO_NOTARY.items():
             if notary_code == "CC":
                 continue
-            hectares = record["byCategory"].get(notary_code, 0.0)
+            hectares = areas.get(notary_code, 0.0)
             if not hectares:
                 continue
             match = next(
@@ -303,6 +324,7 @@ def main() -> int:
             continue
         ranks = rank_of(strip_rank(record["name"]), valued["rank"])
         fiscal = fiscal_tax_ron(record, code, ranks)
+        fiscal_taxable = fiscal_tax_ron(record, code, ranks, private=True)
         land_value_ron = {b: valued["landValueEur"][b] * ron_per_eur for b in BANDS}
         # The agricultural half of the value, carried forward so the rent builder can put a
         # different yield on it. It does not vary across the bands: only the intravilan price
@@ -329,6 +351,7 @@ def main() -> int:
                 "fiscalRank": {"low": ranks[0], "high": ranks[1]},
                 "totalHa": record["totalHa"],
                 "fiscalCodeRon": {b: round(fiscal[b]) for b in BANDS},
+                "fiscalCodeTaxableRon": {b: round(fiscal_taxable[b]) for b in BANDS},
                 "landValueRon": {b: round(land_value_ron[b]) for b in BANDS},
                 "taxableValueRon": {b: round(taxable_ron[b]) for b in BANDS},
                 "extravilanValueRon": round(extravilan_ron),
@@ -358,6 +381,7 @@ def main() -> int:
             collected = {"ron": entry["landRon"], "period": receipts["period"]}
 
     fiscal_total = {b: sum(r["fiscalCodeRon"][b] for r in rows) for b in BANDS}
+    fiscal_taxable_total = {b: sum(r["fiscalCodeTaxableRon"][b] for r in rows) for b in BANDS}
     value_total = {b: sum(r["landValueRon"][b] for r in rows) for b in BANDS}
     taxable_total = {b: sum(r["taxableValueRon"][b] for r in rows) for b in BANDS}
     collected_total = {b: sum(r["lvtCollectedRon"][b] for r in rows) for b in BANDS}
@@ -387,13 +411,16 @@ def main() -> int:
           f"din valoarea terenului, la un grad de colectare de {100 * args.collection_rate:.0f}%")
     if collected:
         verdict = (
-            "în bandă" if fiscal_total["low"] <= collected["ron"] <= fiscal_total["high"]
+            "în bandă"
+            if fiscal_taxable_total["low"] <= collected["ron"] <= fiscal_taxable_total["high"]
             else "SUB cea mai ieftină citire legală"
-            if collected["ron"] < fiscal_total["low"]
+            if collected["ron"] < fiscal_taxable_total["low"]
             else "PESTE cea mai scumpă citire legală"
         )
         print(f"încasat efectiv ({collected['period']}): {collected['ron'] / 1e6:,.1f} mil RON — "
-              f"{collected['ron'] / fiscal_total['central']:.2f}× față de mijlocul modelat, {verdict}")
+              f"{collected['ron'] / fiscal_taxable_total['central']:.2f}× față de mijlocul "
+              f"modelat pe terenul impozabil ({fiscal_taxable_total['low'] / 1e6:,.1f}–"
+              f"{fiscal_taxable_total['high'] / 1e6:,.1f} mil), {verdict}")
 
     document = {
         "$schema": "../schema/impozit.schema.json",
@@ -461,8 +488,11 @@ def main() -> int:
             "collectedOverModelled": round(collected["ron"] / fiscal_total["central"], 3)
             if collected and fiscal_total["central"]
             else None,
+            "fiscalCodeTaxableRon": {b: round(fiscal_taxable_total[b]) for b in BANDS},
+            # Against the taxable band, not the whole-country one: receipts can only ever
+            # reflect hectares somebody could lawfully be billed for.
             "collectedInsideLawfulBand": (
-                fiscal_total["low"] <= collected["ron"] <= fiscal_total["high"]
+                fiscal_taxable_total["low"] <= collected["ron"] <= fiscal_taxable_total["high"]
             )
             if collected
             else None,
@@ -536,14 +566,16 @@ def main() -> int:
                 "affects": ["cota-neutra"],
             },
             {
-                "id": "padurea-lipseste-din-ambele-parti",
+                "id": "padurea-e-acum-in-amandoua-partile",
                 "text": (
-                    "Pădurea este exclusă din valoare, pentru că studiile o evaluează pe "
-                    "hectar într-un tabel separat. Este exclusă și din impozitul calculat, ca "
-                    "cele două părți să stea pe aceleași hectare — dar Codul fiscal o "
-                    "impozitează, deci impozitul de azi este subestimat cu partea ei."
+                    "Pădurea este acum în amândouă părțile comparației: în valoare, prin "
+                    "tabelul pe hectar al studiului, și în impozitul calculat, prin rândul "
+                    "„Pădure sau alt teren cu vegetație forestieră” din art. 465 alin. (7). "
+                    "Rândul acela lipsea, deci impozitul de azi era subestimat exact cu partea "
+                    "pădurii, iar cota neutră odată cu el. Textul de aici a spus multă vreme "
+                    "că pădurea e exclusă din valoare, ceea ce încetase să fie adevărat."
                 ),
-                "severity": "material",
+                "severity": "note",
                 "affects": ["impozit"],
             },
         ],

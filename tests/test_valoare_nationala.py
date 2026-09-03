@@ -201,16 +201,57 @@ def test_the_bands_are_ordered_everywhere(rows):
             assert band["low"] < band["central"] < band["high"], row["county"]
 
 
-def test_the_missing_capital_is_blocking_not_a_footnote(national):
-    """Bucharest is the dearest land in the country and it is not in the total.
+def test_the_capital_status_is_stated_either_way(national, rows):
+    """The reader must not be able to quote the headline without learning where the capital is.
 
-    That is the single most important thing to know before quoting the headline, so it has to
-    be blocking. Downgrading it to a note would leave a number that reads as "Romania".
+    This used to assert three limitation *ids*, one of which was
+    `bucurestiul-lipseste-din-total`. That was correct until București's grid was read, and
+    then it was a test demanding the file keep saying something false — which is exactly what
+    it did, under `blocking` severity, on a panel headed "tot pământul din România", until
+    somebody read the page and asked why the capital was not summed.
+
+    So the assertion is now conditional on the data rather than on the sentence that was true
+    when it was written. Whichever state the file is in, it has to say so:
+
+      capital absent   a blocking limitation, because a total without București reads as
+                       Romania and is not
+      capital present  a limitation naming it, because "toată țara" is an adjective and the
+                       reader has no way to check an adjective
+    """
+    capital = next((r for r in rows if r["county"] == "B"), None)
+    assert capital is not None, "București is not even listed among the counties"
+    included = bool(capital["landValueEur"])
+
+    mentions = [x for x in national["limitations"] if "ucureşti" in x["text"] or "ucurești" in x["text"]]
+    assert mentions, "nothing in the file tells the reader where București stands"
+
+    if not included:
+        assert any(x["severity"] == "blocking" for x in mentions), (
+            "București is outside the total and no limitation says so at blocking severity"
+        )
+    else:
+        # It is in the total, so no limitation may claim otherwise — the failure this guards
+        # is a frozen sentence outliving the fact it described.
+        for limitation in national["limitations"]:
+            assert "lipseste" not in limitation["id"], (
+                f"{limitation['id']} still says something is missing that is in the total"
+            )
+
+
+def test_an_estimated_country_says_so_at_blocking_severity(national):
+    """Estimation is the thing a reader most needs warned about, when there is any.
+
+    Also conditional: with every county read there is nothing to warn about, and demanding the
+    warning anyway is how a file ends up asserting that half the country is estimated on a page
+    whose own summary says 100% of it was read.
     """
     blocking = {x["id"] for x in national["limitations"] if x["severity"] == "blocking"}
-    assert "bucurestiul-lipseste-din-total" in blocking
-    assert "jumatate-din-tara-e-estimata-nu-citita" in blocking
-    assert "estimarea-mosteneste-tot-ce-limiteaza-grilele" in blocking
+    if national["summary"]["predictedCounties"]:
+        assert any("estimat" in x or "citita" in x for x in blocking), (
+            "counties are predicted and no blocking limitation says the total is part model"
+        )
+    # Either way the total inherits whatever limits the grids it is made of.
+    assert blocking, "a national total with no blocking limitation at all is overconfident"
 
 
 def test_the_measured_half_is_still_the_larger_half(national):

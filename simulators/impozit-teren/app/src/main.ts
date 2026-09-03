@@ -177,12 +177,26 @@ async function renderNational(): Promise<void> {
   // estimated — and each stopped being true as a chamber's study was read. The page now says
   // what the numbers say, and goes back to saying the other thing if a chamber stops
   // publishing.
+  // The outside check and the bias list. Both directions are rendered, because every one of
+  // these was already a limitation somewhere and no page had ever added them up — a reader
+  // could meet four separate caveats and never learn that two of them push the other way.
+  const plausibility = summary.plausibility as {
+    thisSimulatorLandOverGdp: number;
+    groups: Record<string, { countries: number; medianLandOverGdp: number; impliedRomaniaEur: number }>;
+    movesItUp: Array<{ id: string; text: string; measured: number | null }>;
+    movesItDown: Array<{ id: string; text: string; measured: number | null }>;
+  } | null;
+
   const predicted = summary.predictedCounties as number;
   const missing = summary.excludedCounties as number;
   const whole = predicted === 0 && missing === 0;
 
+  // "Toată țara" is a claim, and the reader has no way to check it from a percentage. Naming
+  // the capital is the difference between a total that is right and a total that reads right:
+  // București is 16% of it, and a page that never says so invites exactly the suspicion that
+  // it was left out.
   const coverage = [
-    `${summary.measuredCounties} județe citite`,
+    `${summary.measuredCounties} de județe citite, București și Ilfov incluse`,
     predicted ? `${predicted} estimate` : '',
     missing ? `${missing} lăsate în afară (${excluded.join(' și ')})` : '',
   ]
@@ -194,7 +208,7 @@ async function renderNational(): Promise<void> {
     <div class="stat-row">
       <div class="stat">
         <div class="stat-label">Valoarea terenului${
-          whole ? ', toată țara' : ', fără județele lipsă'
+          whole ? ', toată țara, București inclus' : ', fără județele lipsă'
         }</div>
         <div class="stat-value accent">${mld(summary.landValueEur.central)}<span class="unit">EUR</span></div>
         <p class="note">
@@ -210,6 +224,35 @@ async function renderNational(): Promise<void> {
         <div class="stat-label">Din care citit din grile notariale</div>
         <div class="stat-value">${percent.format(100 * summary.measuredShareOfValue)}<span class="unit">%</span></div>
         <p class="note">${coverage}</p>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Cât spun conturile naționale ale altor țări</div>
+        ${
+          plausibility
+            ? `<div class="stat-value">${percent.format(
+                plausibility.thisSimulatorLandOverGdp,
+              )}<span class="unit">× PIB</span></div>
+              <p class="note">
+                Terenul e activ de bilanț în ESA 2010 și ${
+                  plausibility.groups.toate?.countries ?? 0
+                } state îl raportează; România nu. Raportat la PIB, cifra de aici stă
+                ${
+                  plausibility.groups.est
+                    ? `lângă statele intrate în UE după 2004 (mediana ${percent.format(
+                        plausibility.groups.est.medianLandOverGdp,
+                      )}× — ar însemna ${mld(plausibility.groups.est.impliedRomaniaEur)})`
+                    : ''
+                }
+                ${
+                  plausibility.groups.vest
+                    ? ` și mult sub Europa de Vest (${percent.format(
+                        plausibility.groups.vest.medianLandOverGdp,
+                      )}× — ar însemna ${mld(plausibility.groups.vest.impliedRomaniaEur)})`
+                    : ''
+                }. Grupul de comparație e jumătate din răspuns, deci sunt publicate amândouă.
+              </p>`
+            : '<p class="note">Reperul extern nu este importat.</p>'
+        }
       </div>
       <div class="stat">
         <div class="stat-label">${
@@ -228,7 +271,36 @@ async function renderNational(): Promise<void> {
           }
         </p>
       </div>
-    </div>`;
+    </div>
+    ${
+      plausibility
+        ? `<div class="bias">
+            <div>
+              <h3>Ce ar muta cifra în sus</h3>
+              <ul>${plausibility.movesItUp
+                .map(
+                  (b) =>
+                    `<li>${b.text}${
+                      b.measured === null ? ' <em>(doar direcția e cunoscută)</em>' : ''
+                    }</li>`,
+                )
+                .join('')}</ul>
+            </div>
+            <div>
+              <h3>Ce ar muta-o în jos</h3>
+              <ul>${plausibility.movesItDown
+                .map(
+                  (b) =>
+                    `<li>${b.text}${
+                      b.measured === null ? ' <em>(doar direcția e cunoscută)</em>' : ''
+                    }</li>`,
+                )
+                .join('')}</ul>
+            </div>
+          </div>`
+        : ''
+    }
+  `;
 }
 
 async function main() {
@@ -386,7 +458,7 @@ async function main() {
                 collectedActual,
               )} lei</strong> — ${percent.format(
                 (100 * collectedActual) / totals.fiscal,
-              )}% din cât dă calculul, diferența fiind cota aleasă de consilii, scutirile și restanțele</p>`
+              )}% din impozitul calculat mai sus, care e pe <em>toate</em> hectarele. O parte din diferență e domeniul public, care nu se impozitează deloc; restul e cota aleasă de consilii, scutirile și restanțele.</p>`
         }
       </div>
       <div class="stat">

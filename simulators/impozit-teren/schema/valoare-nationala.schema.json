@@ -155,7 +155,8 @@
                 "measuredShareOfValue",
                 "measuredShareOfArea",
                 "taxableValueEur",
-                "taxableSharePercent"
+                "taxableSharePercent",
+                "plausibility"
             ],
             "properties": {
                 "counties": {
@@ -233,6 +234,117 @@
                     "type": "number",
                     "minimum": 0,
                     "maximum": 100
+                },
+                "plausibility": {
+                    "description": "The outside check on the headline, plus what would move it and which way. Null until the Eurostat benchmark is imported.",
+                    "type": [
+                        "object",
+                        "null"
+                    ],
+                    "additionalProperties": false,
+                    "required": [
+                        "period",
+                        "romaniaGdpEur",
+                        "thisSimulatorLandOverGdp",
+                        "groups",
+                        "movesItUp",
+                        "movesItDown"
+                    ],
+                    "properties": {
+                        "period": {
+                            "type": "string",
+                            "pattern": "^[0-9]{4}$"
+                        },
+                        "romaniaGdpEur": {
+                            "type": "number",
+                            "exclusiveMinimum": 0
+                        },
+                        "thisSimulatorLandOverGdp": {
+                            "type": "number",
+                            "exclusiveMinimum": 0
+                        },
+                        "groups": {
+                            "type": "object",
+                            "minProperties": 1,
+                            "additionalProperties": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                    "countries",
+                                    "medianLandOverGdp",
+                                    "impliedRomaniaEur"
+                                ],
+                                "properties": {
+                                    "countries": {
+                                        "type": "integer",
+                                        "minimum": 1
+                                    },
+                                    "medianLandOverGdp": {
+                                        "type": "number",
+                                        "exclusiveMinimum": 0
+                                    },
+                                    "impliedRomaniaEur": {
+                                        "type": "number",
+                                        "exclusiveMinimum": 0
+                                    }
+                                }
+                            }
+                        },
+                        "movesItUp": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                    "id",
+                                    "text",
+                                    "measured"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "string"
+                                    },
+                                    "text": {
+                                        "type": "string"
+                                    },
+                                    "measured": {
+                                        "type": [
+                                            "number",
+                                            "null"
+                                        ],
+                                        "description": "The size of the bias where it can be measured, null where only its direction is known."
+                                    }
+                                }
+                            }
+                        },
+                        "movesItDown": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                    "id",
+                                    "text",
+                                    "measured"
+                                ],
+                                "properties": {
+                                    "id": {
+                                        "type": "string"
+                                    },
+                                    "text": {
+                                        "type": "string"
+                                    },
+                                    "measured": {
+                                        "type": [
+                                            "number",
+                                            "null"
+                                        ],
+                                        "description": "The size of the bias where it can be measured, null where only its direction is known."
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         },
