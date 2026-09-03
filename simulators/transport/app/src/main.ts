@@ -233,37 +233,135 @@ async function main() {
     paint: { 'line-color': '#7a8399', 'line-width': 0.9 },
   });
 
-  const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
-  map.on('mousemove', 'uat-fill', (e: maplibregl.MapLayerMouseEvent) => {
-    const f = e.features?.[0];
-    if (!f) return;
-    map.getCanvas().style.cursor = 'pointer';
-    const i = f.properties!.idx as number;
+  /*
+   * ONE popup, not one per layer.
+   *
+   * The commune fill, the speed lines and the three investment layers all sit under the same
+   * pixel, and each used to own a `Popup` of its own anchored at the same `e.lngLat`. Hover a
+   * road inside a commune and both fired: two boxes at one coordinate, the second painted over
+   * the first, neither readable. Adding a layer added a way to collide.
+   *
+   * So the hover is answered in one place. Ask what is under the cursor, take at most one
+   * answer per kind, and stack them inside a single box, most specific first — the road the
+   * reader is pointing at, then the commune underneath it as context.
+   */
+  const hoverPopup = new maplibregl.Popup({
+    closeButton: false,
+    closeOnClick: false,
+    offset: 12,
+    maxWidth: '270px',
+  });
+
+  // Precedence, topmost first. Layers that do not exist yet (the optional payloads) are
+  // filtered out on each move, and a layer whose toggle is off returns nothing anyway because
+  // `queryRenderedFeatures` does not see `visibility: none`.
+  const HOVER_LAYERS: readonly string[] = [
+    'inv-giratoriu',
+    'inv-ocolire',
+    'inv-trafic',
+    'speeds-line',
+    'uat-fill',
+  ];
+
+  function uatHtml(i: number): string {
     const row = journeyOf()[i];
     // Name first, then where the journey actually goes. A time without a destination is not
     // an answer, and the destination is the thing the administrative sliders move: change the
     // scenario and this line changes, which is the coupling made visible instead of asserted.
     const attrs = coupled.data.attributes;
     const centre = net.regionOf[i];
-    const isCentre = centre === i;
-    const where = isCentre
-      ? '<br><span style="opacity:.7">este centrul acestei zone</span>'
-      : `<br><span style="opacity:.7">prin centrul <strong>${attrs.name[centre]}</strong></span>`;
-    popup
-      .setLngLat(e.lngLat)
-      .setHTML(
-        `<strong>${attrs.name[i]}</strong> <span style="opacity:.6">(${attrs.county[i]})</span>` +
-          where +
-          (row
-            ? `<br><strong>${min(row[scenario === 'pulsed' ? 1 : 0])}</strong> până la reședință` +
-              `<br><span style="opacity:.7">fără corespondență ${min(row[0])} · cu ${min(row[1])}</span>`
-            : '<br>Fără traseu rutier până la centru'),
-      )
-      .addTo(map);
+    const where =
+      centre === i
+        ? '<br><span style="opacity:.7">este centrul acestei zone</span>'
+        : `<br><span style="opacity:.7">prin centrul <strong>${attrs.name[centre]}</strong></span>`;
+    return (
+      `<strong>${attrs.name[i]}</strong> <span style="opacity:.6">(${attrs.county[i]})</span>` +
+      where +
+      (row
+        ? `<br><strong>${min(row[scenario === 'pulsed' ? 1 : 0])}</strong> până la reședință` +
+          `<br><span style="opacity:.7">fără corespondență ${min(row[0])} · cu ${min(row[1])}</span>`
+        : '<br>Fără traseu rutier până la centru')
+    );
+  }
+
+  // The legend gives five bands; the road itself knows its exact signed value, and that is the
+  // number a reader is actually asking for when they point at a line. Untagged is -1 and must
+  // say so rather than reading as a limit of minus one.
+  function speedHtml(p: Record<string, unknown>): string {
+    const kmh = p.kmh as number;
+    const km = fmt.format(Math.round(p.km as number));
+    return kmh < 0
+      ? '<strong>fără limită în OSM</strong>' +
+          `<br><span style="opacity:.7">${km} km neetichetați · ` +
+          'legal 90 în afara localității, 50 înăuntru</span>'
+      : `<strong>${kmh} km/h</strong> semnalizat` +
+          `<br><span style="opacity:.7">${km} km în țară la această limită</span>`;
+  }
+
+  function investHtml(p: Record<string, unknown>): string {
+    const aadt = `${fmt.format(Number(p.aadt))} vehicule/zi`;
+    if (p.kind === 'trafic') {
+      return (
+        `<strong>${p.road}</strong> · ${aadt}` +
+        `<br><span style="opacity:.7">secțiune de ${p.km} km, măsurată</span>`
+      );
+    }
+    if (p.kind === 'ocolire') {
+      // Rank is the whole point of this layer: not "a bypass could go here" but "this one is
+      // the Nth best use of the money".
+      return (
+        `<strong>#${p.rank}</strong> ca rentabilitate · ${p.road}` +
+        `<br>${p.km} km prin localitate · ${aadt}` +
+        `<br><span style="opacity:.7">${bn(Number(p.costRon))} · ` +
+        `${fmt.format(Number(p.ronPerVehicleHour))} lei per oră-vehicul pe an</span>`
+      );
+    }
+    return (
+      `<strong>Intersecție</strong> pe drum cu ${aadt}` +
+      '<br><span style="opacity:.7">candidat, nu proiect</span>'
+    );
+  }
+
+  function hoverKind(layerId: string): 'uat' | 'speed' | 'invest' {
+    if (layerId === 'uat-fill') return 'uat';
+    return layerId === 'speeds-line' ? 'speed' : 'invest';
+  }
+
+  map.on('mousemove', (e: maplibregl.MapMouseEvent) => {
+    const layers = HOVER_LAYERS.filter((id) => map.getLayer(id));
+    const hits = map
+      .queryRenderedFeatures(e.point, { layers })
+      // Render order is not precedence order — the optional layers are added at whatever
+      // moment their toggle is first ticked — so order by the list above, not by the map's.
+      .sort((a, b) => HOVER_LAYERS.indexOf(a.layer.id) - HOVER_LAYERS.indexOf(b.layer.id));
+
+    const sections: string[] = [];
+    const shown = new Set<string>();
+    for (const hit of hits) {
+      // At most one section per kind. A single pixel on a boundary can hold several speed
+      // segments, and repeating the same sort of answer is the crowding all over again.
+      const kind = hoverKind(hit.layer.id);
+      if (shown.has(kind)) continue;
+      shown.add(kind);
+      const p = hit.properties ?? {};
+      sections.push(
+        kind === 'uat' ? uatHtml(p.idx as number) : kind === 'speed' ? speedHtml(p) : investHtml(p),
+      );
+    }
+
+    if (!sections.length) {
+      map.getCanvas().style.cursor = '';
+      hoverPopup.remove();
+      return;
+    }
+    map.getCanvas().style.cursor = 'pointer';
+    hoverPopup.setLngLat(e.lngLat).setHTML(sections.join('<hr class="pop-sep">')).addTo(map);
   });
-  map.on('mouseleave', 'uat-fill', () => {
+  // No per-layer `mouseleave` any more: leaving the canvas is the only case the move handler
+  // cannot see for itself.
+  map.on('mouseout', () => {
     map.getCanvas().style.cursor = '';
-    popup.remove();
+    hoverPopup.remove();
   });
 
   const el = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -465,7 +563,6 @@ async function main() {
   // addSource and MapLibre throws "Source already exists". Memoising the promise makes the
   // load happen once however many callers arrive while it is in flight.
   let investLoading: Promise<boolean> | null = null;
-  const investPopup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
   const INVEST_KINDS = {
     'trafic-toggle': { kind: 'trafic', layers: ['inv-trafic'] },
     'ocoliri-toggle': { kind: 'ocolire', layers: ['inv-ocolire'] },
@@ -514,35 +611,8 @@ async function main() {
                'circle-stroke-width': 0.8, 'circle-stroke-color': '#0a0d11' },
     });
 
-    for (const id of ['inv-trafic', 'inv-ocolire', 'inv-giratoriu']) {
-      map.on('mousemove', id, (e: maplibregl.MapLayerMouseEvent) => {
-        const hit = e.features?.[0];
-        if (!hit) return;
-        map.getCanvas().style.cursor = 'pointer';
-        const p = hit.properties!;
-        const aadt = `${fmt.format(Number(p.aadt))} vehicule/zi`;
-        let html: string;
-        if (p.kind === 'trafic') {
-          html = `<strong>${p.road}</strong> · ${aadt}` +
-            `<br><span style="opacity:.7">secțiune de ${p.km} km, măsurată</span>`;
-        } else if (p.kind === 'ocolire') {
-          // Rank is the whole point of this layer: not "a bypass could go here" but "this one
-          // is the Nth best use of the money".
-          html = `<strong>#${p.rank}</strong> ca rentabilitate · ${p.road}` +
-            `<br>${p.km} km prin localitate · ${aadt}` +
-            `<br><span style="opacity:.7">${bn(Number(p.costRon))} · ` +
-            `${fmt.format(Number(p.ronPerVehicleHour))} lei per oră-vehicul pe an</span>`;
-        } else {
-          html = `<strong>Intersecție</strong> pe drum cu ${aadt}` +
-            '<br><span style="opacity:.7">candidat, nu proiect</span>';
-        }
-        investPopup.setLngLat(e.lngLat).setHTML(html).addTo(map);
-      });
-      map.on('mouseleave', id, () => {
-        map.getCanvas().style.cursor = '';
-        investPopup.remove();
-      });
-    }
+    // No hover handlers here: the single popup above picks these layers up by name as soon as
+    // they exist.
     return true;
   }
 
@@ -594,7 +664,6 @@ async function main() {
   // wants to see where the 90 becomes 50, which means drawing the speed layer OVER the plain
   // roads and leaving those toggles alone.
   let speedsLoaded = false;
-  const speedPopup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
 
   async function showSpeeds(on: boolean) {
     if (on && !speedsLoaded) {
@@ -642,33 +711,6 @@ async function main() {
         },
         'uat-line',
       );
-      // The legend gives five bands; the road itself knows its exact signed value, and that
-      // is the number a reader is actually asking for when they point at a line. Untagged is
-      // -1 and must say so rather than reading as a limit of minus one.
-      map.on('mousemove', 'speeds-line', (e: maplibregl.MapLayerMouseEvent) => {
-        const hit = e.features?.[0];
-        if (!hit) return;
-        map.getCanvas().style.cursor = 'crosshair';
-        const kmh = hit.properties!.kmh as number;
-        const km = hit.properties!.km as number;
-        speedPopup
-          .setLngLat(e.lngLat)
-          .setHTML(
-            kmh < 0
-              ? '<strong>fără limită în OSM</strong>' +
-                `<br><span style="opacity:.7">${fmt.format(Math.round(km))} km neetichetați · ` +
-                'legal 90 în afara localității, 50 înăuntru</span>'
-              : `<strong>${kmh} km/h</strong> semnalizat` +
-                `<br><span style="opacity:.7">${fmt.format(Math.round(km))} km în țară la ` +
-                'această limită</span>',
-          )
-          .addTo(map);
-      });
-      map.on('mouseleave', 'speeds-line', () => {
-        map.getCanvas().style.cursor = '';
-        speedPopup.remove();
-      });
-
       speedsLoaded = true;
       box.disabled = false;
     }

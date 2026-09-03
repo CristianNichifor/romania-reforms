@@ -66,6 +66,10 @@ ul { list-style: none; padding: 0; margin: 8px 0 0; }
 .maplibregl-popup-content { background: var(--panel); color: var(--ink); border-radius: 8px;
   font: 13px/1.45 system-ui, sans-serif; padding: 10px 12px; }
 .maplibregl-popup-tip { border-top-color: var(--panel); border-bottom-color: var(--panel); }
+/* One box can now hold a road and the commune under it. The rule separates them; without it
+   the two run together into one paragraph that reads as a single claim about one thing. */
+.maplibregl-popup-content hr.pop-sep { border: 0; border-top: 1px solid var(--line);
+  margin: 8px -12px; }
 @media (max-width: 900px) {
   /* dvh, not vh: on mobile Safari and Chrome `100vh` is the viewport with the URL bar
      *hidden*, so a 100vh layout is taller than the screen from the moment it loads and the
