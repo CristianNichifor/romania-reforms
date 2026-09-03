@@ -8,6 +8,7 @@
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 import { ValueMap, legend } from './map';
+import type { Metric } from './map';
 import { combine, evaluate } from './model';
 import type { BandKey, FiscalCode, Locality, Settings } from './model';
 
@@ -60,6 +61,8 @@ type State = {
   /** Share of the tax on private land that is collected, 0 to 1. */
   collection: number;
   sort: 'delta' | 'value' | 'name';
+  /** Which number the map colours by. */
+  metric: Metric;
 };
 
 const DEFAULTS: State = {
@@ -78,6 +81,9 @@ const DEFAULTS: State = {
   // locality, so the page opens on "all of it" and says so rather than opening on a guess.
   collection: 1,
   sort: 'delta',
+  // Price, not size. The whole-commune total is mostly a map of how big communes are, which
+  // is a thing an atlas already says; the price of a hectare is the thing this file measures.
+  metric: 'perHa',
 };
 
 /** Whether the URL pinned a yield. If it did, the file must not overrule the reader. */
@@ -95,7 +101,9 @@ function readHash(): State {
   };
   yieldFromUrl = Number(params.get('randament')) > 0;
   const sort = params.get('sort');
+  const metric = params.get('harta');
   return {
+    metric: metric === 'total' ? 'total' : DEFAULTS.metric,
     county: params.get('j') ?? DEFAULTS.county,
     rate: number('cota', DEFAULTS.rate),
     share: number('intravilan', DEFAULTS.share),
@@ -117,6 +125,7 @@ function writeHash(state: State): void {
   params.set('randament', String(state.landYield));
   params.set('colectare', String(state.collection));
   params.set('sort', state.sort);
+  params.set('harta', state.metric);
   history.replaceState(null, '', `#${params}`);
 }
 
@@ -345,7 +354,18 @@ async function main() {
     .then((r) => (r.ok ? r.json() : null))
     .then((n) => (n?.summary?.predictedCounties ?? 0) > 0)
     .catch(() => false);
-  $('map-legend').innerHTML = legend((v) => `${Math.round(v / 1000)}k`, anyPredicted);
+  /**
+   * The legend, redrawn with the metric.
+   *
+   * It has to move with the toggle: the same seven colours mean thousands of lei a hectare in
+   * one view and hundreds of millions of lei a commune in the other, and a legend left on the
+   * first one while the map shows the second is a caption for a different map.
+   */
+  function renderLegend(): void {
+    const format =
+      state.metric === 'perHa' ? (v: number) => `${Math.round(v / 1000)}k` : scaled;
+    $('map-legend').innerHTML = legend(state.metric, format, anyPredicted);
+  }
   // Kept as well as handed to the map: "toate județele" needs every county's own rates, and
   // fetching them twice for two views of the same numbers would be silly.
   const cache = new Map<string, Loaded>();
@@ -430,8 +450,13 @@ async function main() {
     // Same settings object the totals came from, so the colours and the figures cannot
     // disagree; the map substitutes each county's own rate and yields on top of it.
     valueMap.paint(settings, code);
+    valueMap.setMetric(state.metric);
+    renderLegend();
 
     ($('county') as HTMLSelectElement).value = state.county;
+    for (const button of document.querySelectorAll<HTMLButtonElement>('#map-metric button')) {
+      button.classList.toggle('on', button.dataset.metric === state.metric);
+    }
     for (const [id, current] of [
       ['value-band', state.value],
       ['fiscal-band', state.fiscal],
@@ -615,6 +640,10 @@ async function main() {
       if (band) update({ [key]: band } as Partial<State>);
     });
   }
+  $('map-metric').addEventListener('click', (event) => {
+    const metric = (event.target as HTMLElement).dataset.metric as Metric | undefined;
+    if (metric) update({ metric });
+  });
   $('sort').addEventListener('click', (event) => {
     const sort = (event.target as HTMLElement).dataset.sort as State['sort'] | undefined;
     if (sort) update({ sort });
