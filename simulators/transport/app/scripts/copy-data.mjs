@@ -54,6 +54,10 @@ for (const name of ['roads.geojson', 'roads-county.geojson']) {
   }
 }
 
+// The road-investment overlays: 283 KB of places three models ranked. Small enough to be
+// required rather than optional — unlike the speed layer, it is committed.
+copyFileSync(join(sim, 'data/investitii.geojson'), join(out, 'investitii.geojson'));
+
 const speeds = join(sim, 'data/road-speeds.geojson');
 if (existsSync(speeds)) {
   copyFileSync(speeds, join(out, 'road-speeds.geojson'));

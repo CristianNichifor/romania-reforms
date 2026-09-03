@@ -12,16 +12,23 @@ import { describe, expect, it } from 'vitest';
 
 import {
   BANDS,
+  INVEST_BYPASS,
+  INVEST_TRAFFIC,
   NO_DATA,
   RAIL_UNTAGGED,
   SPEED_BANDS,
   SPEED_UNTAGGED,
+  bypassPaint,
+  bypassWidth,
   journeyPaint,
+  junctionRadius,
   railLinePaint,
   railLineWidth,
   roadSpeedPaint,
   roadSpeedWidth,
   stationRadius,
+  trafficPaint,
+  trafficWidth,
 } from './paint';
 
 const COLOUR_SPEC = {
@@ -226,5 +233,50 @@ describe('road speed-limit layer', () => {
       expression: { interpolated: true, parameters: ['zoom', 'feature'] },
     };
     expect(createExpression(roadSpeedWidth(), numberSpec as never).result).toBe('success');
+  });
+});
+
+describe('road investment overlays', () => {
+  const compile = (expr: unknown) => {
+    const r = createExpression(expr, COLOUR_SPEC as never);
+    if (r.result === 'error') {
+      throw new Error(r.value.map((e: { message: string }) => e.message).join(' | '));
+    }
+    return (props: Record<string, unknown>) =>
+      String(r.value.evaluate({ zoom: 8 }, { type: 'Feature', properties: props } as never));
+  };
+
+  it('the traffic ramp parses and separates the bands', () => {
+    const paint = compile(trafficPaint());
+    expect(paint({ aadt: 9_000 })).toBe(INVEST_TRAFFIC[3].colour);
+    expect(paint({ aadt: 15_000 })).toBe(INVEST_TRAFFIC[2].colour);
+    expect(paint({ aadt: 30_000 })).toBe(INVEST_TRAFFIC[0].colour);
+  });
+
+  it('does NOT reuse the journey ramp', () => {
+    // The two layers answer different questions over the same country. Sharing colours would
+    // make them readable only by whoever remembers which toggle is on.
+    const journey = new Set(BANDS.map((b) => b.colour));
+    for (const band of INVEST_TRAFFIC) expect(journey.has(band.colour)).toBe(false);
+    expect(journey.has(INVEST_BYPASS.good)).toBe(false);
+  });
+
+  it('splits bypasses at the point they stop paying for themselves', () => {
+    // 1 000 lei per annual vehicle-hour is about 33 lei/hour over thirty years — the edge of
+    // any plausible value of travel time.
+    const paint = compile(bypassPaint());
+    expect(paint({ ronPerVehicleHour: 400 })).toBe(INVEST_BYPASS.good);
+    expect(paint({ ronPerVehicleHour: 1_400 })).toBe(INVEST_BYPASS.poor);
+  });
+
+  it('the widths and radii parse', () => {
+    const numberSpec = {
+      type: 'number',
+      'property-type': 'data-driven',
+      expression: { interpolated: true, parameters: ['zoom', 'feature'] },
+    };
+    for (const expr of [trafficWidth(), bypassWidth(), junctionRadius()]) {
+      expect(createExpression(expr, numberSpec as never).result).toBe('success');
+    }
   });
 });

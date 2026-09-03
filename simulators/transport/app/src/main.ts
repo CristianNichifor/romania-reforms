@@ -22,22 +22,30 @@ import {
 import { compareWithBus, loadRailAccess, trainHeadwayMin } from './feroviar';
 import {
   BANDS,
+  INVEST_BYPASS,
+  INVEST_JUNCTION,
+  INVEST_TRAFFIC,
   NO_DATA,
   ROAD_CASING_COLOUR,
   ROAD_COLOUR,
   ROAD_COUNTY_COLOUR,
   SPEED_BANDS,
   SPEED_UNTAGGED,
+  bypassPaint,
+  bypassWidth,
   countyRoadCasingOpacity,
   countyRoadOpacity,
   countyRoadWidth,
   journeyPaint,
+  junctionRadius,
   majorRoadWidth,
   railLinePaint,
   railLineWidth,
   roadSpeedPaint,
   roadSpeedWidth,
   stationRadius,
+  trafficPaint,
+  trafficWidth,
 } from './paint';
 
 /**
@@ -447,6 +455,140 @@ async function main() {
       if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', on ? 'visible' : 'none');
     }
   }
+
+  // The road-investment overlays. One source, three layers filtered on `kind`: the three
+  // models produce places on the same map and a reader compares them by switching, so three
+  // fetches of three files would be three chances for one of them to be missing.
+  // A PROMISE, not a boolean. Three toggles can be ticked before the first fetch resolves —
+  // which is what happens when a reader turns all three on — and a boolean set at the END of
+  // the load lets every concurrent caller past the guard, so the second and third both reach
+  // addSource and MapLibre throws "Source already exists". Memoising the promise makes the
+  // load happen once however many callers arrive while it is in flight.
+  let investLoading: Promise<boolean> | null = null;
+  const investPopup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
+  const INVEST_KINDS = {
+    'trafic-toggle': { kind: 'trafic', layers: ['inv-trafic'] },
+    'ocoliri-toggle': { kind: 'ocolire', layers: ['inv-ocolire'] },
+    'giratorii-toggle': { kind: 'giratoriu', layers: ['inv-giratoriu'] },
+  } as const;
+
+  function loadInvest(): Promise<boolean> {
+    // A failure is not cached: the payload may be absent in this build, but a transient fetch
+    // error should not disable the toggles for the rest of the session.
+    investLoading ??= buildInvest().then((ok) => {
+      if (!ok) investLoading = null;
+      return ok;
+    });
+    return investLoading;
+  }
+
+  async function buildInvest(): Promise<boolean> {
+    const response = await fetch(asset('investitii.geojson'));
+    if (!response.ok) return false;
+    map.addSource('src-invest', { type: 'geojson', data: await response.json() });
+    map.addLayer({
+      id: 'inv-trafic',
+      type: 'line',
+      source: 'src-invest',
+      filter: ['==', ['get', 'kind'], 'trafic'],
+      layout: { visibility: 'none' },
+      paint: { 'line-color': trafficPaint() as never, 'line-width': trafficWidth() as never,
+               'line-opacity': 0.9 },
+    }, 'uat-line');
+    map.addLayer({
+      id: 'inv-ocolire',
+      type: 'line',
+      source: 'src-invest',
+      filter: ['==', ['get', 'kind'], 'ocolire'],
+      layout: { visibility: 'none' },
+      paint: { 'line-color': bypassPaint() as never, 'line-width': bypassWidth() as never,
+               'line-opacity': 0.95 },
+    }, 'uat-line');
+    map.addLayer({
+      id: 'inv-giratoriu',
+      type: 'circle',
+      source: 'src-invest',
+      filter: ['==', ['get', 'kind'], 'giratoriu'],
+      layout: { visibility: 'none' },
+      paint: { 'circle-radius': junctionRadius() as never, 'circle-color': INVEST_JUNCTION,
+               'circle-stroke-width': 0.8, 'circle-stroke-color': '#0a0d11' },
+    });
+
+    for (const id of ['inv-trafic', 'inv-ocolire', 'inv-giratoriu']) {
+      map.on('mousemove', id, (e: maplibregl.MapLayerMouseEvent) => {
+        const hit = e.features?.[0];
+        if (!hit) return;
+        map.getCanvas().style.cursor = 'pointer';
+        const p = hit.properties!;
+        const aadt = `${fmt.format(Number(p.aadt))} vehicule/zi`;
+        let html: string;
+        if (p.kind === 'trafic') {
+          html = `<strong>${p.road}</strong> · ${aadt}` +
+            `<br><span style="opacity:.7">secțiune de ${p.km} km, măsurată</span>`;
+        } else if (p.kind === 'ocolire') {
+          // Rank is the whole point of this layer: not "a bypass could go here" but "this one
+          // is the Nth best use of the money".
+          html = `<strong>#${p.rank}</strong> ca rentabilitate · ${p.road}` +
+            `<br>${p.km} km prin localitate · ${aadt}` +
+            `<br><span style="opacity:.7">${bn(Number(p.costRon))} · ` +
+            `${fmt.format(Number(p.ronPerVehicleHour))} lei per oră-vehicul pe an</span>`;
+        } else {
+          html = `<strong>Intersecție</strong> pe drum cu ${aadt}` +
+            '<br><span style="opacity:.7">candidat, nu proiect</span>';
+        }
+        investPopup.setLngLat(e.lngLat).setHTML(html).addTo(map);
+      });
+      map.on('mouseleave', id, () => {
+        map.getCanvas().style.cursor = '';
+        investPopup.remove();
+      });
+    }
+    return true;
+  }
+
+  el('invest-legend').innerHTML = [
+    '<li style="opacity:.75;list-style:none;margin:.35rem 0 .1rem">Trafic măsurat</li>',
+    ...INVEST_TRAFFIC.map((b) => `<li><i style="background:${b.colour}"></i>${b.label}</li>`),
+    '<li style="opacity:.75;list-style:none;margin:.35rem 0 .1rem">Centuri</li>',
+    `<li><i style="background:${INVEST_BYPASS.good}"></i>sub 1.000 lei/oră-vehicul-an</li>`,
+    `<li><i style="background:${INVEST_BYPASS.poor}"></i>peste — greu de justificat pe timp</li>`,
+    `<li><i style="background:${INVEST_JUNCTION}"></i>intersecție candidat</li>`,
+  ].join('');
+
+  for (const [id, spec] of Object.entries(INVEST_KINDS)) {
+    const box = el<HTMLInputElement>(id);
+    box.addEventListener('change', () => {
+      void (async () => {
+        box.disabled = true;
+        const ok = await loadInvest();
+        box.disabled = false;
+        if (!ok) {
+          box.checked = false;
+          el('invest-note').textContent =
+            'Stratul de investiții nu este în această versiune: se construiește din extrasul ' +
+            'OpenStreetMap și din datele de zgomot, vezi scripts/export_investitii.py.';
+          return;
+        }
+        for (const layer of spec.layers) {
+          map.setLayoutProperty(layer, 'visibility', box.checked ? 'visible' : 'none');
+        }
+        const anyOn = Object.keys(INVEST_KINDS).some(
+          (other) => el<HTMLInputElement>(other).checked,
+        );
+        el('invest-legend').hidden = !anyOn;
+        map.setPaintProperty('uat-fill', 'fill-opacity', anyOn ? 0.16 : 0.85);
+        el('legend').style.opacity = anyOn ? '0.45' : '1';
+      })();
+    });
+  }
+
+  el('invest-note').textContent =
+    'Trei modele, aceleași drumuri. Traficul este cel raportat sub directiva de zgomot, deci ' +
+    'doar drumurile care trec de trei milioane de vehicule pe an. Centurile sunt cele 636 de ' +
+    'traversări cărora li s-a putut atașa un trafic măsurat, din 2.781 — restul nu au cu ce fi ' +
+    'ordonate. Intersecțiile sunt cele 530 aflate pe drumuri cu trafic măsurat, din 3.347 de ' +
+    'candidați. Peste tot: candidați, nu proiecte, iar beneficiul numărat este doar timpul ' +
+    'șoferilor — siguranța rutieră, motivul principal pentru care se construiesc, lipsește.';
 
   // The signed limits, as their own overlay rather than a restyle of the road layers: a reader
   // wants to see where the 90 becomes 50, which means drawing the speed layer OVER the plain

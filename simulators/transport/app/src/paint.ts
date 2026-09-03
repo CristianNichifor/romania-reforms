@@ -164,3 +164,76 @@ export function roadSpeedPaint(): unknown {
 export function roadSpeedWidth(): unknown {
   return ['interpolate', ['linear'], ['zoom'], 6, 1.1, 9, 2.2, 12, 3.6];
 }
+
+/**
+ * The road-investment overlays: measured traffic corridors, ranked bypass crossings, and the
+ * junctions that carry real traffic.
+ *
+ * These answer a different question from the journey map underneath, so they deliberately do
+ * NOT reuse its RdYlBu ramp. On the journey map blue means "close to your county seat"; here a
+ * line means "a lot of vehicles" or "worth building early", and borrowing the same colours
+ * would make the two readable only by whoever remembers which layer is on. Purple-orange is
+ * unrelated to anything else on the page and is colour-blind safe.
+ */
+export const INVEST_TRAFFIC: SpeedBand[] = [
+  { from: 25_000, colour: '#54278f', label: 'peste 25.000 vehicule/zi' },
+  { from: 18_000, colour: '#756bb1', label: '18.000–25.000' },
+  { from: 12_000, colour: '#9e9ac8', label: '12.000–18.000' },
+  { from: 0, colour: '#cbc9e2', label: 'sub 12.000' },
+];
+
+/** Bypass crossings, ranked. Cheap per hour saved is the good end. */
+export const INVEST_BYPASS = { good: '#e6550d', poor: '#fdd0a2' };
+
+/** Junction candidates on measured roads. */
+export const INVEST_JUNCTION = '#31a354';
+
+export function trafficPaint(): unknown {
+  const ascending = [...INVEST_TRAFFIC].reverse();
+  const steps: unknown[] = ['step', ['get', 'aadt'], ascending[0].colour];
+  for (let i = 1; i < ascending.length; i += 1) {
+    steps.push(ascending[i].from, ascending[i].colour);
+  }
+  return steps;
+}
+
+export function trafficWidth(): unknown {
+  // Width carries the volume too, so the layer survives being read in greyscale.
+  return [
+    'interpolate',
+    ['linear'],
+    ['zoom'],
+    6,
+    ['interpolate', ['linear'], ['get', 'aadt'], 8000, 1.2, 40000, 4],
+    11,
+    ['interpolate', ['linear'], ['get', 'aadt'], 8000, 3, 40000, 9],
+  ];
+}
+
+/**
+ * Bypass crossings coloured by cost per vehicle-hour saved, cheapest first.
+ *
+ * The break is at 1 000 lei per annual vehicle-hour, which over a thirty-year appraisal is
+ * about 33 lei per hour — the point where a crossing stops being obviously worth building on
+ * travel time alone. It is a threshold on a policy judgement, not a measurement, so it is one
+ * step rather than a gradient that would imply more precision than exists.
+ */
+export function bypassPaint(): unknown {
+  return ['step', ['get', 'ronPerVehicleHour'], INVEST_BYPASS.good, 1000, INVEST_BYPASS.poor];
+}
+
+export function bypassWidth(): unknown {
+  return ['interpolate', ['linear'], ['zoom'], 6, 2, 11, 6];
+}
+
+export function junctionRadius(): unknown {
+  return [
+    'interpolate',
+    ['linear'],
+    ['zoom'],
+    6,
+    2,
+    11,
+    ['interpolate', ['linear'], ['get', 'aadt'], 8000, 4, 40000, 9],
+  ];
+}
