@@ -128,9 +128,14 @@ def test_county_ids_are_integers_and_unique(county_shapes):
 def test_the_estimated_counties_all_have_a_shape_to_paint(county_shapes):
     """Every county the national estimate predicts must be paintable, or it is invisible.
 
-    The whole reason this file exists is the nineteen counties with no grid. If one of them
-    had no polygon the map would look complete and simply omit it, which is the failure mode
-    the commune-level version of this test was written for.
+    This was written when nineteen counties had no grid: if one of them had no polygon the map
+    would look complete and simply omit it, which is the failure mode the commune-level version
+    of this test was written for.
+
+    Every county is read now, so there is nothing left to predict and nothing for this to check.
+    It stays because the set is not permanently empty — a chamber that stops publishing puts a
+    county back into it — and an assertion that the set is non-empty would now fail for the
+    best possible reason.
     """
     path = DATA / "valoare-nationala-2026.json"
     if not path.exists():
@@ -140,7 +145,6 @@ def test_the_estimated_counties_all_have_a_shape_to_paint(county_shapes):
     predicted = {
         row["county"] for row in national["counties_valued"] if row["basis"] == "predicted"
     }
-    assert predicted
     assert predicted <= drawable
 
 

@@ -1,313 +1,369 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "valoare-nationala.schema.json",
-  "title": "Valoarea terenului în România, măsurată unde există grilă și estimată unde nu",
-  "description": "Fiecare județ își spune temeiul. `measured` înseamnă citit din grila notarială a camerei lui; `predicted` înseamnă estimat dintr-un model cu un singur predictor, cu banda egală cu eroarea leave-one-out a modelului; `excluded` înseamnă că nu s-a estimat deloc și de ce. Un total care amestecă măsurat cu estimat fără să spună care e care nu poate fi contrazis, deci temeiul e obligatoriu pe fiecare rând.",
-  "type": "object",
-  "additionalProperties": false,
-  "required": [
-    "id",
-    "title",
-    "publisher",
-    "counties",
-    "period",
-    "currency",
-    "provenance",
-    "assumptions",
-    "summary",
-    "counties_valued",
-    "limitations"
-  ],
-  "properties": {
-    "$schema": {
-      "type": "string"
-    },
-    "id": {
-      "type": "string",
-      "pattern": "^valoare-nationala-[0-9]{4}$"
-    },
-    "title": {
-      "type": "string"
-    },
-    "publisher": {
-      "type": "string"
-    },
-    "counties": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "type": "string",
-        "pattern": "^[A-Z]{1,2}$"
-      }
-    },
-    "period": {
-      "type": "string",
-      "pattern": "^[0-9]{4}$"
-    },
-    "provenance": {
-      "$ref": "provenance.schema.json#/$defs/provenance"
-    },
-    "limitations": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "$ref": "provenance.schema.json#/$defs/limitation"
-      }
-    },
-    "currency": {
-      "const": "EUR"
-    },
-    "assumptions": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "builtModel",
-        "builtIntercept",
-        "builtSlope",
-        "builtR2",
-        "builtLeaveOneOutErrorFactor",
-        "builtFittedOnCounties",
-        "transferEurPerHa",
-        "transferLeaveOneOutErrorFactor",
-        "transferFittedOnCounties",
-        "rejectedPredictors",
-        "excludedCounties"
-      ],
-      "properties": {
-        "builtModel": {
-          "type": "string"
-        },
-        "builtIntercept": {
-          "type": "number"
-        },
-        "builtSlope": {
-          "type": "number"
-        },
-        "builtR2": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 1
-        },
-        "builtLeaveOneOutErrorFactor": {
-          "type": "number",
-          "exclusiveMinimum": 1,
-          "description": "Factorul cu care modelul greșește un județ pe care nu l-a văzut. Peste 1 prin definiție; dacă ar fi 1 ar însemna că predicția e perfectă, ceea ce ar fi un bug."
-        },
-        "builtFittedOnCounties": {
-          "type": "integer",
-          "minimum": 8
-        },
-        "transferEurPerHa": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "number",
-            "exclusiveMinimum": 0
-          }
-        },
-        "transferLeaveOneOutErrorFactor": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "number",
-            "exclusiveMinimum": 1
-          }
-        },
-        "transferFittedOnCounties": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "integer",
-            "minimum": 8
-          }
-        },
-        "rejectedPredictors": {
-          "type": "object",
-          "additionalProperties": {
-            "type": "string"
-          },
-          "description": "Ce s-a încercat și a picat, cu cifra care l-a picat. Fără asta, cititorul presupune că s-a folosit ce ar fi folosit el."
-        },
-        "excludedCounties": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "pattern": "^[A-Z]{1,2}$"
-          }
-        },
-        "builtHeldOutOfFit": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "pattern": "^[A-Z]{1,2}$"
-          },
-          "description": "Judeţe măsurate, numărate în total, dar ţinute în afara regresiei pentru că mecanismul pieţei lor nu e explicat de predictor. Criteriul e declarat înainte, nu ales după rezultat: Bucureştiul a fost testat la fel şi păstrat, pentru că îmbunătăţeşte potrivirea."
-        }
-      }
-    },
-    "summary": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "valoare-nationala.schema.json",
+    "title": "Valoarea terenului în România, măsurată unde există grilă și estimată unde nu",
+    "description": "Fiecare județ își spune temeiul. `measured` înseamnă citit din grila notarială a camerei lui; `predicted` înseamnă estimat dintr-un model cu un singur predictor, cu banda egală cu eroarea leave-one-out a modelului; `excluded` înseamnă că nu s-a estimat deloc și de ce. Un total care amestecă măsurat cu estimat fără să spună care e care nu poate fi contrazis, deci temeiul e obligatoriu pe fiecare rând.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "id",
+        "title",
+        "publisher",
         "counties",
-        "measuredCounties",
-        "predictedCounties",
-        "excludedCounties",
-        "totalHa",
-        "landValueEur",
-        "measuredShareOfValue",
-        "measuredShareOfArea"
-      ],
-      "properties": {
-        "counties": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "measuredCounties": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "predictedCounties": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "excludedCounties": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "totalHa": {
-          "type": "number",
-          "exclusiveMinimum": 0
-        },
-        "landValueEur": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": [
-            "low",
-            "central",
-            "high"
-          ],
-          "properties": {
-            "low": {
-              "type": "number"
-            },
-            "central": {
-              "type": "number"
-            },
-            "high": {
-              "type": "number"
-            }
-          }
-        },
-        "measuredShareOfValue": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 1
-        },
-        "measuredShareOfArea": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 1
-        }
-      }
-    },
-    "counties_valued": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "county",
-          "basis",
-          "totalHa",
-          "builtHa",
-          "largestTown",
-          "largestPeople",
-          "landValueEur"
-        ],
-        "properties": {
-          "county": {
-            "type": "string",
-            "pattern": "^[A-Z]{1,2}$"
-          },
-          "basis": {
-            "enum": [
-              "measured",
-              "predicted",
-              "excluded"
-            ]
-          },
-          "totalHa": {
-            "type": "number",
-            "exclusiveMinimum": 0
-          },
-          "builtHa": {
-            "type": "number",
-            "exclusiveMinimum": 0
-          },
-          "largestTown": {
+        "period",
+        "currency",
+        "provenance",
+        "assumptions",
+        "summary",
+        "counties_valued",
+        "limitations"
+    ],
+    "properties": {
+        "$schema": {
             "type": "string"
-          },
-          "largestPeople": {
-            "type": "integer",
-            "minimum": 1
-          },
-          "landValueEur": {
-            "oneOf": [
-              {
+        },
+        "id": {
+            "type": "string",
+            "pattern": "^valoare-nationala-[0-9]{4}$"
+        },
+        "title": {
+            "type": "string"
+        },
+        "publisher": {
+            "type": "string"
+        },
+        "counties": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "string",
+                "pattern": "^[A-Z]{1,2}$"
+            }
+        },
+        "period": {
+            "type": "string",
+            "pattern": "^[0-9]{4}$"
+        },
+        "provenance": {
+            "$ref": "provenance.schema.json#/$defs/provenance"
+        },
+        "limitations": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "$ref": "provenance.schema.json#/$defs/limitation"
+            }
+        },
+        "currency": {
+            "const": "EUR"
+        },
+        "assumptions": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "builtModel",
+                "builtIntercept",
+                "builtSlope",
+                "builtR2",
+                "builtLeaveOneOutErrorFactor",
+                "builtFittedOnCounties",
+                "transferEurPerHa",
+                "transferLeaveOneOutErrorFactor",
+                "transferFittedOnCounties",
+                "rejectedPredictors",
+                "excludedCounties"
+            ],
+            "properties": {
+                "builtModel": {
+                    "type": "string"
+                },
+                "builtIntercept": {
+                    "type": "number"
+                },
+                "builtSlope": {
+                    "type": "number"
+                },
+                "builtR2": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                },
+                "builtLeaveOneOutErrorFactor": {
+                    "type": "number",
+                    "exclusiveMinimum": 1,
+                    "description": "Factorul cu care modelul greșește un județ pe care nu l-a văzut. Peste 1 prin definiție; dacă ar fi 1 ar însemna că predicția e perfectă, ceea ce ar fi un bug."
+                },
+                "builtFittedOnCounties": {
+                    "type": "integer",
+                    "minimum": 8
+                },
+                "transferEurPerHa": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                    }
+                },
+                "transferLeaveOneOutErrorFactor": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "number",
+                        "exclusiveMinimum": 1
+                    }
+                },
+                "transferFittedOnCounties": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer",
+                        "minimum": 8
+                    }
+                },
+                "rejectedPredictors": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "description": "Ce s-a încercat și a picat, cu cifra care l-a picat. Fără asta, cititorul presupune că s-a folosit ce ar fi folosit el."
+                },
+                "excludedCounties": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "pattern": "^[A-Z]{1,2}$"
+                    }
+                },
+                "builtHeldOutOfFit": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "pattern": "^[A-Z]{1,2}$"
+                    },
+                    "description": "Judeţe măsurate, numărate în total, dar ţinute în afara regresiei pentru că mecanismul pieţei lor nu e explicat de predictor. Criteriul e declarat înainte, nu ales după rezultat: Bucureştiul a fost testat la fel şi păstrat, pentru că îmbunătăţeşte potrivirea."
+                }
+            }
+        },
+        "summary": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "counties",
+                "measuredCounties",
+                "predictedCounties",
+                "excludedCounties",
+                "totalHa",
+                "landValueEur",
+                "measuredShareOfValue",
+                "measuredShareOfArea",
+                "taxableValueEur",
+                "taxableSharePercent"
+            ],
+            "properties": {
+                "counties": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "measuredCounties": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "predictedCounties": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "excludedCounties": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "totalHa": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "landValueEur": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "low",
+                        "central",
+                        "high"
+                    ],
+                    "properties": {
+                        "low": {
+                            "type": "number"
+                        },
+                        "central": {
+                            "type": "number"
+                        },
+                        "high": {
+                            "type": "number"
+                        }
+                    }
+                },
+                "measuredShareOfValue": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                },
+                "measuredShareOfArea": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                },
+                "taxableValueEur": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "low",
+                        "central",
+                        "high"
+                    ],
+                    "properties": {
+                        "low": {
+                            "type": "number"
+                        },
+                        "central": {
+                            "type": "number"
+                        },
+                        "high": {
+                            "type": "number"
+                        }
+                    },
+                    "description": "Land value restricted to privately owned land, summed over the measured counties."
+                },
+                "taxableSharePercent": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 100
+                }
+            }
+        },
+        "counties_valued": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
                 "type": "object",
                 "additionalProperties": false,
                 "required": [
-                  "low",
-                  "central",
-                  "high"
+                    "county",
+                    "basis",
+                    "totalHa",
+                    "builtHa",
+                    "largestTown",
+                    "largestPeople",
+                    "landValueEur"
                 ],
                 "properties": {
-                  "low": {
-                    "type": "number"
-                  },
-                  "central": {
-                    "type": "number"
-                  },
-                  "high": {
-                    "type": "number"
-                  }
+                    "county": {
+                        "type": "string",
+                        "pattern": "^[A-Z]{1,2}$"
+                    },
+                    "basis": {
+                        "enum": [
+                            "measured",
+                            "predicted",
+                            "excluded"
+                        ]
+                    },
+                    "totalHa": {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                    },
+                    "builtHa": {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                    },
+                    "largestTown": {
+                        "type": "string"
+                    },
+                    "largestPeople": {
+                        "type": "integer",
+                        "minimum": 1
+                    },
+                    "landValueEur": {
+                        "oneOf": [
+                            {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                    "low",
+                                    "central",
+                                    "high"
+                                ],
+                                "properties": {
+                                    "low": {
+                                        "type": "number"
+                                    },
+                                    "central": {
+                                        "type": "number"
+                                    },
+                                    "high": {
+                                        "type": "number"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "description": "Null exact când basis este `excluded`. Un zero ar fi citit ca teren fără valoare."
+                    },
+                    "coverageShare": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                    },
+                    "pricedHa": {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    "builtEurPerHa": {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                    },
+                    "builtValueEur": {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    "extravilanValueByCodeEur": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "type": "number",
+                            "minimum": 0
+                        }
+                    },
+                    "reason": {
+                        "type": "string",
+                        "minLength": 20
+                    },
+                    "taxableValueEur": {
+                        "oneOf": [
+                            {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                    "low",
+                                    "central",
+                                    "high"
+                                ],
+                                "properties": {
+                                    "low": {
+                                        "type": "number"
+                                    },
+                                    "central": {
+                                        "type": "number"
+                                    },
+                                    "high": {
+                                        "type": "number"
+                                    }
+                                }
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "description": "Privately owned share of the county land value. Null for a predicted county — no ownership register backs an estimate."
+                    }
                 }
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Null exact când basis este `excluded`. Un zero ar fi citit ca teren fără valoare."
-          },
-          "coverageShare": {
-            "type": "number",
-            "minimum": 0,
-            "maximum": 1
-          },
-          "pricedHa": {
-            "type": "number",
-            "minimum": 0
-          },
-          "builtEurPerHa": {
-            "type": "number",
-            "exclusiveMinimum": 0
-          },
-          "builtValueEur": {
-            "type": "number",
-            "minimum": 0
-          },
-          "extravilanValueByCodeEur": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "number",
-              "minimum": 0
             }
-          },
-          "reason": {
-            "type": "string",
-            "minLength": 20
-          }
         }
-      }
     }
-  }
 }

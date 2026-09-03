@@ -1,9 +1,11 @@
 """What all the land in Romania is worth, from the half of it that has been read.
 
-Twenty-one counties are priced from their notaries' grids. Twenty-one are not, and eleven of
-those never will be: four chambers publish no per-locality land table at all. So the only route
-to a national figure is to predict the missing counties from the measured ones and say, in
-numbers, how wrong that is likely to be.
+All forty-two counties are priced from their notaries' grids, and this file now predicts none
+of them. It was written when twenty-one were read and the rest had to be estimated from the
+measured ones, and most of what follows is the record of that estimate: which predictors were
+tried, which were thrown away, and how wide the error was. It is kept because the machinery is
+what makes the total falsifiable — every county was checked against it as it landed, and a
+chamber that stops publishing puts its county back into the predicted half tomorrow.
 
 **The measured half is not re-estimated.** A county with a grid contributes what its grid says,
 band and all. Only the counties without one are predicted, and every output row says which it
@@ -247,6 +249,10 @@ def main() -> int:
                     "largestTown": town["largestName"],
                     "largestPeople": town["largestPeople"],
                     "landValueEur": {b: summary["landValueEur"][b] for b in BANDS},
+                    # Only measured counties have one: a predicted county has no register of
+                    # who owns its land, and inventing a taxable share for it would put a
+                    # revenue figure on top of an estimate that is already a factor of 1,5 wide.
+                    "taxableValueEur": {b: summary["taxableValueEur"][b] for b in BANDS},
                     "coverageShare": summary["coverage"]["share"],
                     "pricedHa": summary["pricedHa"],
                 }
@@ -319,11 +325,14 @@ def main() -> int:
     measured_rows = [r for r in counted if r["basis"] == "measured"]
     predicted_rows = [r for r in counted if r["basis"] == "predicted"]
     measured_total = {b: sum(r["landValueEur"][b] for r in measured_rows) for b in BANDS}
+    taxable_total = {b: sum(r["taxableValueEur"][b] for r in measured_rows) for b in BANDS}
     excluded = [r for r in rows if r["basis"] == "excluded"]
 
     # Counted, not written down. This title said "21 de județe măsurate" for thirteen counties
     # after it stopped being true, because nothing rereads a title once it reads correctly once.
-    parts = [f"{len(measured_rows)} județe măsurate", f"{len(predicted_rows)} estimate"]
+    parts = [f"{len(measured_rows)} județe măsurate"]
+    if predicted_rows:
+        parts.append(f"{len(predicted_rows)} estimate")
     if excluded:
         parts.append(f"{len(excluded)} excluse")
 
@@ -374,6 +383,15 @@ def main() -> int:
             "excludedCounties": len(excluded),
             "totalHa": sum(r["totalHa"] for r in counted),
             "landValueEur": total,
+            # The base a land tax could reach, summed over the counties that have one. A tax
+            # levied on the line above would be charged on state forest, county roads and the
+            # Danube; art. 456 (1) a) does not allow that, and it is a quarter of the country.
+            "taxableValueEur": taxable_total,
+            "taxableSharePercent": round(
+                100 * taxable_total["central"] / measured_total["central"], 2
+            )
+            if measured_total["central"]
+            else 0,
             "measuredShareOfValue": round(
                 measured_total["central"] / total["central"], 4
             ),
@@ -469,8 +487,14 @@ def main() -> int:
             else f"ROMÂNIA fără {'+'.join(r['county'] for r in excluded)} (mld)",
             {b: total[b] / 1e9 for b in BANDS},
         ),
+        (
+            "din care impozabil (mld)",
+            {b: taxable_total[b] / 1e9 for b in BANDS},
+        ),
     ):
-        print(f"{label:<26}" + "".join(f"{series[b]:12,.1f}" for b in BANDS))
+        print(f"{label:<30}" + "".join(f"{series[b]:12,.1f}" for b in BANDS))
+    print(f"\nbaza impozabilă: {100 * taxable_total['central'] / measured_total['central']:.1f}% "
+          "din valoarea județelor citite; restul e domeniu public, art. 456 alin. (1) lit. a)")
     print(f"\nexclus: {', '.join(r['county'] for r in excluded)}")
     print("\ncele mai valoroase județe estimate:")
     for row in sorted(predicted_rows, key=lambda r: -r["landValueEur"]["central"])[:6]:

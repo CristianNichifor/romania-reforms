@@ -43,6 +43,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 STUDIES = ROOT / "sources" / "studies"
 CACHE = ROOT / "cache"
+# Where `ocr_cache.py` puts a study that had to be read off a photograph. The cache proper is
+# derived and thrown away — CI rebuilds it from the PDFs — but an OCR reading cannot be rebuilt
+# without tesseract, a language pack and a 17 MB download, and would not come back identical if
+# it were. So it is kept as a source, committed, and read from here when the cache has nothing.
+OCR = ROOT / "sources" / "ocr"
 # The ruling-line strategy. These grids are drawn with real lines; the text strategy invents
 # columns out of whitespace and tears every wrapped caption in half.
 LINE_TABLE = {"vertical_strategy": "lines", "horizontal_strategy": "lines"}
@@ -112,7 +117,12 @@ def build(path: Path) -> tuple[str, float, str]:
 
 def load(name: str) -> dict:
     """Read one study back. This is what every parser should call instead of opening a PDF."""
-    path = cache_path(name)
+    # OCR wins over the cache when both exist. A scanned PDF still produces a cache entry —
+    # pdfplumber opens it happily and finds 43 pages of nothing — and that empty entry would
+    # otherwise shadow the reading someone went to the trouble of making.
+    path = OCR / f"{name}.json.gz"
+    if not path.exists():
+        path = cache_path(name)
     if not path.exists():
         raise SystemExit(
             f"missing {path}\n"

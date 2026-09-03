@@ -1,0 +1,2103 @@
+{
+  "$schema": "../schema/impozit.schema.json",
+  "id": "impozit-br-2025",
+  "title": "Impozitul pe teren azi și pe valoare, județul BR, 2025",
+  "publisher": "romania-reforms",
+  "counties": [
+    "BR"
+  ],
+  "period": "2025",
+  "currency": "RON",
+  "provenance": {
+    "source": "cod-fiscal-teren-2026",
+    "locator": "Legea nr. 227/2015, art. 465 alin. (2), (4), (5), (7) și art. 457 alin. (6), aplicate pe fondul funciar INS 2014 și pe grila notarială 2025",
+    "confidence": "derived",
+    "note": "Ambele impozite sunt calculate pe aceleași hectare. Impozitul din Codul fiscal este statutar, nu încasat: nu conține scutiri, restanțe sau grad de colectare. Banda lui vine din intervalul legal, din zonă și din rang, toate trei decizii locale nepublicate într-un registru național."
+  },
+  "assumptions": {
+    "ronPerEur": 5.2567,
+    "exchangeRateDate": "2026-09-01",
+    "lvtRatePercent": 1.0,
+    "collectionRate": 1.0,
+    "taxableBase": "proprietate privată din registrul funciar INS AGR101B; domeniul public nu se impozitează, art. 456 alin. (1) lit. a)",
+    "intravilanCategory": "CC",
+    "rankSource": "Legea nr. 351/2001, anexa IV",
+    "agriculturalYieldPercent": {
+      "low": 1.3773,
+      "central": 1.712,
+      "high": 2.0384
+    },
+    "agriculturalYieldSource": "Arendă ÷ preț pentru teren arabil, regiunea Sud-Est (RO22), anchete INS 2019–2024 raportate la Eurostat (apri_lprc / apri_lrnt); banda este minimul, mediana și maximul anilor măsurați.",
+    "yieldByCategoryPercent": {
+      "A": {
+        "low": 1.3773,
+        "central": 1.712,
+        "high": 2.0384
+      },
+      "P+F": {
+        "low": 1.5284,
+        "central": 1.6881,
+        "high": 1.7188
+      },
+      "V+L": {
+        "low": 1.3773,
+        "central": 1.712,
+        "high": 2.0384
+      },
+      "AP": {
+        "low": 1.3773,
+        "central": 1.712,
+        "high": 2.0384
+      },
+      "DR": {
+        "low": 1.3773,
+        "central": 1.712,
+        "high": 2.0384
+      },
+      "NP": {
+        "low": 1.3773,
+        "central": 1.712,
+        "high": 2.0384
+      },
+      "PADURE": {
+        "low": 0.4758,
+        "central": 0.6732,
+        "high": 0.763
+      }
+    },
+    "builtYieldPercent": {
+      "low": 1.728,
+      "central": 2.5275,
+      "high": 3.1808
+    },
+    "builtYieldSource": "Dedus, nu măsurat: randament net al proprietății − amortizarea clădirii × ponderea clădirii, r = y_net − δ·(1 − λ). Ponderea terenului λ = 6.2% este calculată din 343 perechi preț-teren/preț-construcție publicate pe aceeași pagină în grilele notariale (HD, IS, MS, HR); randamentul brut este cel al Global Property Guide, amortizarea este cea din HG 2139/2004. Înlocuiește banda presupusă anterior 3–7%. Deducerea separă urbanul (2.73%) de rural (2.52%); diferența de 0.22 puncte este mai mică decât lățimea benzii, deci se folosește una singură."
+  },
+  "summary": {
+    "localities": 41,
+    "fiscalCodeRon": {
+      "low": 43112599,
+      "central": 76161122,
+      "high": 121329938
+    },
+    "landValueRon": {
+      "low": 20161320006,
+      "central": 26752691661,
+      "high": 33602239991
+    },
+    "taxableValueRon": {
+      "low": 13664846000,
+      "central": 17510189333,
+      "high": 21504986015
+    },
+    "taxableSharePercent": 65.45,
+    "lvtRon": {
+      "low": 201613200,
+      "central": 267526917,
+      "high": 336022400
+    },
+    "lvtCollectedRon": {
+      "low": 136648460,
+      "central": 175101894,
+      "high": 215049860
+    },
+    "revenueNeutralRatePercent": {
+      "low": 0.1283,
+      "central": 0.2847,
+      "high": 0.6018
+    },
+    "lawfulRangeRatio": 2.81,
+    "collectedRon": 47259655.04,
+    "collectedPeriod": "2025",
+    "collectedOverModelled": 0.621,
+    "collectedInsideLawfulBand": true
+  },
+  "localities": [
+    {
+      "siruta": "42682",
+      "name": "BRAILA",
+      "rank": "municipii",
+      "fiscalRank": {
+        "low": "I",
+        "high": "I"
+      },
+      "totalHa": 4366.0,
+      "fiscalCodeRon": {
+        "low": 4529008,
+        "central": 19669274,
+        "high": 44363106
+      },
+      "landValueRon": {
+        "low": 6447349999,
+        "central": 12729149998,
+        "high": 19267350003
+      },
+      "taxableValueRon": {
+        "low": 3741199998,
+        "central": 7377000001,
+        "high": 11161199999
+      },
+      "extravilanValueRon": 37349999,
+      "extravilanValueByCodeRon": {
+        "A": 37349999
+      },
+      "lvtRon": {
+        "low": 64473500,
+        "central": 127291500,
+        "high": 192673500
+      },
+      "lvtCollectedRon": {
+        "low": 37412000,
+        "central": 73770000,
+        "high": 111612000
+      },
+      "effectiveRatePercent": {
+        "low": 0.0702,
+        "central": 0.1545,
+        "high": 0.2303
+      }
+    },
+    {
+      "siruta": "42708",
+      "name": "CHISCANI",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 10185.0,
+      "fiscalCodeRon": {
+        "low": 594551,
+        "central": 1009068,
+        "high": 1473909
+      },
+      "landValueRon": {
+        "low": 650460000,
+        "central": 650460000,
+        "high": 650460000
+      },
+      "taxableValueRon": {
+        "low": 320804999,
+        "central": 320804999,
+        "high": 320804999
+      },
+      "extravilanValueRon": 282460001,
+      "extravilanValueByCodeRon": {
+        "PADURE": 37359998,
+        "A": 230309999,
+        "V+L": 1305002,
+        "P+F": 3659998,
+        "NP": 9824998
+      },
+      "lvtRon": {
+        "low": 6504600,
+        "central": 6504600,
+        "high": 6504600
+      },
+      "lvtCollectedRon": {
+        "low": 3208050,
+        "central": 3208050,
+        "high": 3208050
+      },
+      "effectiveRatePercent": {
+        "low": 0.0914,
+        "central": 0.1551,
+        "high": 0.2266
+      }
+    },
+    {
+      "siruta": "42753",
+      "name": "FAUREI",
+      "rank": "orase",
+      "fiscalRank": {
+        "low": "III",
+        "high": "III"
+      },
+      "totalHa": 1890.0,
+      "fiscalCodeRon": {
+        "low": 378906,
+        "central": 967507,
+        "high": 2098792
+      },
+      "landValueRon": {
+        "low": 64717999,
+        "central": 81343001,
+        "high": 97967998
+      },
+      "taxableValueRon": {
+        "low": 57408999,
+        "central": 71909001,
+        "high": 86408999
+      },
+      "extravilanValueRon": 38117998,
+      "extravilanValueByCodeRon": {
+        "PADURE": 2879999,
+        "A": 25443001,
+        "V+L": 435002,
+        "P+F": 9360001
+      },
+      "lvtRon": {
+        "low": 647180,
+        "central": 813430,
+        "high": 979680
+      },
+      "lvtCollectedRon": {
+        "low": 574090,
+        "central": 719090,
+        "high": 864090
+      },
+      "effectiveRatePercent": {
+        "low": 0.5855,
+        "central": 1.1894,
+        "high": 2.1423
+      }
+    },
+    {
+      "siruta": "42771",
+      "name": "SURDILA-GRECI",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 9000.0,
+      "fiscalCodeRon": {
+        "low": 764592,
+        "central": 1085110,
+        "high": 1411716
+      },
+      "landValueRon": {
+        "low": 287109999,
+        "central": 294389998,
+        "high": 301670001
+      },
+      "taxableValueRon": {
+        "low": 256370000,
+        "central": 261010000,
+        "high": 265650000
+      },
+      "extravilanValueRon": 268910000,
+      "extravilanValueByCodeRon": {
+        "PADURE": 16319998,
+        "A": 241534999,
+        "V+L": 2609999,
+        "P+F": 6960002,
+        "NP": 1485002
+      },
+      "lvtRon": {
+        "low": 2871100,
+        "central": 2943900,
+        "high": 3016700
+      },
+      "lvtCollectedRon": {
+        "low": 2563700,
+        "central": 2610100,
+        "high": 2656500
+      },
+      "effectiveRatePercent": {
+        "low": 0.2663,
+        "central": 0.3686,
+        "high": 0.468
+      }
+    },
+    {
+      "siruta": "42824",
+      "name": "BARAGANUL",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 7287.0,
+      "fiscalCodeRon": {
+        "low": 658012,
+        "central": 927259,
+        "high": 1199776
+      },
+      "landValueRon": {
+        "low": 255143002,
+        "central": 259523000,
+        "high": 263902998
+      },
+      "taxableValueRon": {
+        "low": 205792998,
+        "central": 209153001,
+        "high": 212513000
+      },
+      "extravilanValueRon": 240543002,
+      "extravilanValueByCodeRon": {
+        "PADURE": 380002,
+        "A": 228418003,
+        "V+L": 1050000,
+        "P+F": 7050002,
+        "NP": 3645001
+      },
+      "lvtRon": {
+        "low": 2551430,
+        "central": 2595230,
+        "high": 2639030
+      },
+      "lvtCollectedRon": {
+        "low": 2057930,
+        "central": 2091530,
+        "high": 2125130
+      },
+      "effectiveRatePercent": {
+        "low": 0.2579,
+        "central": 0.3573,
+        "high": 0.4546
+      }
+    },
+    {
+      "siruta": "42842",
+      "name": "BERTESTII DE JOS",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 13543.0,
+      "fiscalCodeRon": {
+        "low": 636681,
+        "central": 1027169,
+        "high": 1456260
+      },
+      "landValueRon": {
+        "low": 359054998,
+        "central": 368504999,
+        "high": 377955001
+      },
+      "taxableValueRon": {
+        "low": 260290000,
+        "central": 266890003,
+        "high": 273490000
+      },
+      "extravilanValueRon": 327555002,
+      "extravilanValueByCodeRon": {
+        "PADURE": 151800002,
+        "A": 161279998,
+        "V+L": 2009999,
+        "P+F": 9240001,
+        "NP": 3225001
+      },
+      "lvtRon": {
+        "low": 3590550,
+        "central": 3685050,
+        "high": 3779550
+      },
+      "lvtCollectedRon": {
+        "low": 2602900,
+        "central": 2668900,
+        "high": 2734900
+      },
+      "effectiveRatePercent": {
+        "low": 0.1773,
+        "central": 0.2787,
+        "high": 0.3853
+      }
+    },
+    {
+      "siruta": "42913",
+      "name": "BORDEI VERDE",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 8654.0,
+      "fiscalCodeRon": {
+        "low": 793870,
+        "central": 1142083,
+        "high": 1500482
+      },
+      "landValueRon": {
+        "low": 313692001,
+        "central": 318842000,
+        "high": 323992000
+      },
+      "taxableValueRon": {
+        "low": 297109998,
+        "central": 300210000,
+        "high": 303310002
+      },
+      "extravilanValueRon": 282791998,
+      "extravilanValueByCodeRon": {
+        "A": 265962001,
+        "V+L": 1125002,
+        "P+F": 15375001,
+        "NP": 330000
+      },
+      "lvtRon": {
+        "low": 3136920,
+        "central": 3188420,
+        "high": 3239920
+      },
+      "lvtCollectedRon": {
+        "low": 2971100,
+        "central": 3002100,
+        "high": 3033100
+      },
+      "effectiveRatePercent": {
+        "low": 0.2531,
+        "central": 0.3582,
+        "high": 0.4631
+      }
+    },
+    {
+      "siruta": "42968",
+      "name": "CIOCILE",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 7733.0,
+      "fiscalCodeRon": {
+        "low": 697127,
+        "central": 1058430,
+        "high": 1444373
+      },
+      "landValueRon": {
+        "low": 253285001,
+        "central": 261115003,
+        "high": 268944999
+      },
+      "taxableValueRon": {
+        "low": 233844999,
+        "central": 241675000,
+        "high": 249505002
+      },
+      "extravilanValueRon": 227185002,
+      "extravilanValueByCodeRon": {
+        "PADURE": 1379999,
+        "A": 207760002,
+        "V+L": 1665002,
+        "P+F": 14955001,
+        "NP": 1425002
+      },
+      "lvtRon": {
+        "low": 2532850,
+        "central": 2611150,
+        "high": 2689450
+      },
+      "lvtCollectedRon": {
+        "low": 2338450,
+        "central": 2416750,
+        "high": 2495050
+      },
+      "effectiveRatePercent": {
+        "low": 0.2752,
+        "central": 0.4054,
+        "high": 0.5371
+      }
+    },
+    {
+      "siruta": "43019",
+      "name": "CIRESU",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 10910.0,
+      "fiscalCodeRon": {
+        "low": 867653,
+        "central": 1342673,
+        "high": 1855205
+      },
+      "landValueRon": {
+        "low": 328610000,
+        "central": 339350001,
+        "high": 350090001
+      },
+      "taxableValueRon": {
+        "low": 301684999,
+        "central": 308735001,
+        "high": 315784998
+      },
+      "extravilanValueRon": 292810002,
+      "extravilanValueByCodeRon": {
+        "PADURE": 12120000,
+        "A": 244510002,
+        "V+L": 4679998,
+        "P+F": 23264998,
+        "NP": 8234999
+      },
+      "lvtRon": {
+        "low": 3286100,
+        "central": 3393500,
+        "high": 3500900
+      },
+      "lvtCollectedRon": {
+        "low": 3016850,
+        "central": 3087350,
+        "high": 3157850
+      },
+      "effectiveRatePercent": {
+        "low": 0.264,
+        "central": 0.3957,
+        "high": 0.5299
+      }
+    },
+    {
+      "siruta": "43073",
+      "name": "DUDESTI",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 11757.0,
+      "fiscalCodeRon": {
+        "low": 1056515,
+        "central": 1549582,
+        "high": 2065255
+      },
+      "landValueRon": {
+        "low": 415991998,
+        "central": 425711999,
+        "high": 435432000
+      },
+      "taxableValueRon": {
+        "low": 395671998,
+        "central": 403232000,
+        "high": 410792002
+      },
+      "extravilanValueRon": 383592002,
+      "extravilanValueByCodeRon": {
+        "PADURE": 9840001,
+        "A": 357732003,
+        "V+L": 4109998,
+        "P+F": 8984999,
+        "NP": 2925001
+      },
+      "lvtRon": {
+        "low": 4159920,
+        "central": 4257120,
+        "high": 4354320
+      },
+      "lvtCollectedRon": {
+        "low": 3956720,
+        "central": 4032320,
+        "high": 4107920
+      },
+      "effectiveRatePercent": {
+        "low": 0.254,
+        "central": 0.364,
+        "high": 0.4743
+      }
+    },
+    {
+      "siruta": "43117",
+      "name": "FRECATEI",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 42977.0,
+      "fiscalCodeRon": {
+        "low": 3653770,
+        "central": 4785711,
+        "high": 5832891
+      },
+      "landValueRon": {
+        "low": 1360220002,
+        "central": 1367320000,
+        "high": 1374419999
+      },
+      "taxableValueRon": {
+        "low": 154488000,
+        "central": 159663000,
+        "high": 164838001
+      },
+      "extravilanValueRon": 1346019999,
+      "extravilanValueByCodeRon": {
+        "PADURE": 43480000,
+        "A": 1281959997,
+        "V+L": 615002,
+        "P+F": 3345001,
+        "NP": 16619998
+      },
+      "lvtRon": {
+        "low": 13602200,
+        "central": 13673200,
+        "high": 13744200
+      },
+      "lvtCollectedRon": {
+        "low": 1544880,
+        "central": 1596630,
+        "high": 1648380
+      },
+      "effectiveRatePercent": {
+        "low": 0.2686,
+        "central": 0.35,
+        "high": 0.4244
+      }
+    },
+    {
+      "siruta": "43180",
+      "name": "GALBENU",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 8358.0,
+      "fiscalCodeRon": {
+        "low": 771315,
+        "central": 1143649,
+        "high": 1535853
+      },
+      "landValueRon": {
+        "low": 242950003,
+        "central": 250539999,
+        "high": 258130001
+      },
+      "taxableValueRon": {
+        "low": 231320001,
+        "central": 236239998,
+        "high": 241160002
+      },
+      "extravilanValueRon": 217650000,
+      "extravilanValueByCodeRon": {
+        "A": 210449997,
+        "V+L": 1875002,
+        "P+F": 3855001,
+        "NP": 1469999
+      },
+      "lvtRon": {
+        "low": 2429500,
+        "central": 2505400,
+        "high": 2581300
+      },
+      "lvtCollectedRon": {
+        "low": 2313200,
+        "central": 2362400,
+        "high": 2411600
+      },
+      "effectiveRatePercent": {
+        "low": 0.3175,
+        "central": 0.4565,
+        "high": 0.595
+      }
+    },
+    {
+      "siruta": "43242",
+      "name": "GEMENELE",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 4492.0,
+      "fiscalCodeRon": {
+        "low": 432924,
+        "central": 609288,
+        "high": 787588
+      },
+      "landValueRon": {
+        "low": 146715002,
+        "central": 149565000,
+        "high": 152414999
+      },
+      "taxableValueRon": {
+        "low": 146150001,
+        "central": 148970000,
+        "high": 151789999
+      },
+      "extravilanValueRon": 142915002,
+      "extravilanValueByCodeRon": {
+        "PADURE": 99998,
+        "A": 135239999,
+        "V+L": 1199999,
+        "P+F": 6375000
+      },
+      "lvtRon": {
+        "low": 1467150,
+        "central": 1495650,
+        "high": 1524150
+      },
+      "lvtCollectedRon": {
+        "low": 1461500,
+        "central": 1489700,
+        "high": 1517900
+      },
+      "effectiveRatePercent": {
+        "low": 0.2951,
+        "central": 0.4074,
+        "high": 0.5167
+      }
+    },
+    {
+      "siruta": "43279",
+      "name": "GRADISTEA",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 6457.0,
+      "fiscalCodeRon": {
+        "low": 434936,
+        "central": 643164,
+        "high": 861242
+      },
+      "landValueRon": {
+        "low": 139590002,
+        "central": 143520000,
+        "high": 147449999
+      },
+      "taxableValueRon": {
+        "low": 114139000,
+        "central": 115639000,
+        "high": 117138999
+      },
+      "extravilanValueRon": 126490001,
+      "extravilanValueByCodeRon": {
+        "PADURE": 13119998,
+        "A": 98955001,
+        "V+L": 1755002,
+        "P+F": 9510001,
+        "NP": 3149999
+      },
+      "lvtRon": {
+        "low": 1395900,
+        "central": 1435200,
+        "high": 1474500
+      },
+      "lvtCollectedRon": {
+        "low": 1141390,
+        "central": 1156390,
+        "high": 1171390
+      },
+      "effectiveRatePercent": {
+        "low": 0.3116,
+        "central": 0.4481,
+        "high": 0.5841
+      }
+    },
+    {
+      "siruta": "43313",
+      "name": "GROPENI",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 7948.0,
+      "fiscalCodeRon": {
+        "low": 595331,
+        "central": 906645,
+        "high": 1239607
+      },
+      "landValueRon": {
+        "low": 233525002,
+        "central": 244774997,
+        "high": 256024998
+      },
+      "taxableValueRon": {
+        "low": 179345000,
+        "central": 187494998,
+        "high": 195645001
+      },
+      "extravilanValueRon": 211025002,
+      "extravilanValueByCodeRon": {
+        "PADURE": 19000000,
+        "A": 177939999,
+        "V+L": 2969999,
+        "P+F": 8054999,
+        "NP": 3059999
+      },
+      "lvtRon": {
+        "low": 2335250,
+        "central": 2447750,
+        "high": 2560250
+      },
+      "lvtCollectedRon": {
+        "low": 1793450,
+        "central": 1874950,
+        "high": 1956450
+      },
+      "effectiveRatePercent": {
+        "low": 0.2549,
+        "central": 0.3704,
+        "high": 0.4842
+      }
+    },
+    {
+      "siruta": "43411",
+      "name": "INSURATEI",
+      "rank": "orase",
+      "fiscalRank": {
+        "low": "III",
+        "high": "III"
+      },
+      "totalHa": 21270.0,
+      "fiscalCodeRon": {
+        "low": 4196816,
+        "central": 6381208,
+        "high": 10090813
+      },
+      "landValueRon": {
+        "low": 732914998,
+        "central": 732914998,
+        "high": 732914998
+      },
+      "taxableValueRon": {
+        "low": 643450001,
+        "central": 643450001,
+        "high": 643450001
+      },
+      "extravilanValueRon": 696715002,
+      "extravilanValueByCodeRon": {
+        "PADURE": 30540002,
+        "A": 614919998,
+        "V+L": 7860002,
+        "P+F": 35820000,
+        "NP": 7574999
+      },
+      "lvtRon": {
+        "low": 7329150,
+        "central": 7329150,
+        "high": 7329150
+      },
+      "lvtCollectedRon": {
+        "low": 6434500,
+        "central": 6434500,
+        "high": 6434500
+      },
+      "effectiveRatePercent": {
+        "low": 0.5726,
+        "central": 0.8707,
+        "high": 1.3768
+      }
+    },
+    {
+      "siruta": "43466",
+      "name": "JIRLAU",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 5223.0,
+      "fiscalCodeRon": {
+        "low": 395313,
+        "central": 614848,
+        "high": 852107
+      },
+      "landValueRon": {
+        "low": 159568001,
+        "central": 166993000,
+        "high": 174418000
+      },
+      "taxableValueRon": {
+        "low": 152736000,
+        "central": 159800999,
+        "high": 166865999
+      },
+      "extravilanValueRon": 141417999,
+      "extravilanValueByCodeRon": {
+        "PADURE": 7099999,
+        "A": 124297999,
+        "V+L": 2039999,
+        "P+F": 7590002,
+        "NP": 390000
+      },
+      "lvtRon": {
+        "low": 1595680,
+        "central": 1669930,
+        "high": 1744180
+      },
+      "lvtCollectedRon": {
+        "low": 1527360,
+        "central": 1598010,
+        "high": 1668660
+      },
+      "effectiveRatePercent": {
+        "low": 0.2477,
+        "central": 0.3682,
+        "high": 0.4885
+      }
+    },
+    {
+      "siruta": "43493",
+      "name": "MARASU",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 37152.0,
+      "fiscalCodeRon": {
+        "low": 3224443,
+        "central": 4316680,
+        "high": 5360659
+      },
+      "landValueRon": {
+        "low": 1197076998,
+        "central": 1207396999,
+        "high": 1216427000
+      },
+      "taxableValueRon": {
+        "low": 183852000,
+        "central": 193158666,
+        "high": 201301999
+      },
+      "extravilanValueRon": 1177727001,
+      "extravilanValueByCodeRon": {
+        "PADURE": 50420001,
+        "A": 1118952001,
+        "V+L": 720000,
+        "P+F": 7634999
+      },
+      "lvtRon": {
+        "low": 11970770,
+        "central": 12073970,
+        "high": 12164270
+      },
+      "lvtCollectedRon": {
+        "low": 1838520,
+        "central": 1931587,
+        "high": 2013020
+      },
+      "effectiveRatePercent": {
+        "low": 0.2694,
+        "central": 0.3575,
+        "high": 0.4407
+      }
+    },
+    {
+      "siruta": "43625",
+      "name": "MIRCEA VODA",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 10641.0,
+      "fiscalCodeRon": {
+        "low": 963077,
+        "central": 1337714,
+        "high": 1711486
+      },
+      "landValueRon": {
+        "low": 370453001,
+        "central": 379039668,
+        "high": 390692999
+      },
+      "taxableValueRon": {
+        "low": 358972999,
+        "central": 365179669,
+        "high": 373603000
+      },
+      "extravilanValueRon": 352053000,
+      "extravilanValueByCodeRon": {
+        "A": 334248000,
+        "V+L": 1589999,
+        "P+F": 11444998,
+        "NP": 4769998
+      },
+      "lvtRon": {
+        "low": 3704530,
+        "central": 3790397,
+        "high": 3906930
+      },
+      "lvtCollectedRon": {
+        "low": 3589730,
+        "central": 3651797,
+        "high": 3736030
+      },
+      "effectiveRatePercent": {
+        "low": 0.26,
+        "central": 0.3529,
+        "high": 0.4381
+      }
+    },
+    {
+      "siruta": "43652",
+      "name": "MOVILA MIRESII",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 8591.0,
+      "fiscalCodeRon": {
+        "low": 705561,
+        "central": 1055690,
+        "high": 1425822
+      },
+      "landValueRon": {
+        "low": 217550001,
+        "central": 228170002,
+        "high": 238790003
+      },
+      "taxableValueRon": {
+        "low": 214831998,
+        "central": 221896998,
+        "high": 228961997
+      },
+      "extravilanValueRon": 210469999,
+      "extravilanValueByCodeRon": {
+        "PADURE": 1760001,
+        "A": 191040001,
+        "V+L": 2775001,
+        "P+F": 14309999,
+        "NP": 585002
+      },
+      "lvtRon": {
+        "low": 2175500,
+        "central": 2281700,
+        "high": 2387900
+      },
+      "lvtCollectedRon": {
+        "low": 2148320,
+        "central": 2218970,
+        "high": 2289620
+      },
+      "effectiveRatePercent": {
+        "low": 0.3243,
+        "central": 0.4627,
+        "high": 0.5971
+      }
+    },
+    {
+      "siruta": "43732",
+      "name": "RAMNICELU",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 7897.0,
+      "fiscalCodeRon": {
+        "low": 645290,
+        "central": 916937,
+        "high": 1193737
+      },
+      "landValueRon": {
+        "low": 10640002,
+        "central": 14440002,
+        "high": 18240003
+      },
+      "taxableValueRon": {
+        "low": 6160001,
+        "central": 8359998,
+        "high": 10560001
+      },
+      "extravilanValueRon": 0,
+      "extravilanValueByCodeRon": {},
+      "lvtRon": {
+        "low": 106400,
+        "central": 144400,
+        "high": 182400
+      },
+      "lvtCollectedRon": {
+        "low": 61600,
+        "central": 83600,
+        "high": 105600
+      },
+      "effectiveRatePercent": {
+        "low": 6.0648,
+        "central": 6.35,
+        "high": 6.5446
+      }
+    },
+    {
+      "siruta": "43787",
+      "name": "ROMANU",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 7089.0,
+      "fiscalCodeRon": {
+        "low": 646052,
+        "central": 899236,
+        "high": 1152263
+      },
+      "landValueRon": {
+        "low": 228540000,
+        "central": 232289998,
+        "high": 236040002
+      },
+      "taxableValueRon": {
+        "low": 225295002,
+        "central": 228115001,
+        "high": 230935000
+      },
+      "extravilanValueRon": 217290000,
+      "extravilanValueByCodeRon": {
+        "PADURE": 1359998,
+        "A": 205310001,
+        "V+L": 510000,
+        "P+F": 10034998,
+        "NP": 75003
+      },
+      "lvtRon": {
+        "low": 2285400,
+        "central": 2322900,
+        "high": 2360400
+      },
+      "lvtCollectedRon": {
+        "low": 2252950,
+        "central": 2281150,
+        "high": 2309350
+      },
+      "effectiveRatePercent": {
+        "low": 0.2827,
+        "central": 0.3871,
+        "high": 0.4882
+      }
+    },
+    {
+      "siruta": "43812",
+      "name": "ROSIORI",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 7338.0,
+      "fiscalCodeRon": {
+        "low": 678880,
+        "central": 936280,
+        "high": 1191174
+      },
+      "landValueRon": {
+        "low": 239624998,
+        "central": 243225002,
+        "high": 246825000
+      },
+      "taxableValueRon": {
+        "low": 238239999,
+        "central": 241839998,
+        "high": 245440001
+      },
+      "extravilanValueRon": 227624998,
+      "extravilanValueByCodeRon": {
+        "PADURE": 420000,
+        "A": 215880000,
+        "V+L": 915002,
+        "P+F": 10094998,
+        "NP": 315002
+      },
+      "lvtRon": {
+        "low": 2396250,
+        "central": 2432250,
+        "high": 2468250
+      },
+      "lvtCollectedRon": {
+        "low": 2382400,
+        "central": 2418400,
+        "high": 2454400
+      },
+      "effectiveRatePercent": {
+        "low": 0.2833,
+        "central": 0.3849,
+        "high": 0.4826
+      }
+    },
+    {
+      "siruta": "43867",
+      "name": "SALCIA TUDOR",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 10707.0,
+      "fiscalCodeRon": {
+        "low": 925856,
+        "central": 1314879,
+        "high": 1710236
+      },
+      "landValueRon": {
+        "low": 305857999,
+        "central": 310017998,
+        "high": 314177998
+      },
+      "taxableValueRon": {
+        "low": 272820002,
+        "central": 276780000,
+        "high": 280739998
+      },
+      "extravilanValueRon": 289217999,
+      "extravilanValueByCodeRon": {
+        "PADURE": 120000,
+        "A": 253473001,
+        "V+L": 2009999,
+        "P+F": 32640002,
+        "NP": 975002
+      },
+      "lvtRon": {
+        "low": 3058580,
+        "central": 3100180,
+        "high": 3141780
+      },
+      "lvtCollectedRon": {
+        "low": 2728200,
+        "central": 2767800,
+        "high": 2807400
+      },
+      "effectiveRatePercent": {
+        "low": 0.3027,
+        "central": 0.4241,
+        "high": 0.5444
+      }
+    },
+    {
+      "siruta": "43929",
+      "name": "SCORTARU NOU",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 9815.0,
+      "fiscalCodeRon": {
+        "low": 875510,
+        "central": 1242423,
+        "high": 1616064
+      },
+      "landValueRon": {
+        "low": 291509999,
+        "central": 295630001,
+        "high": 299750002
+      },
+      "taxableValueRon": {
+        "low": 273146001,
+        "central": 275126000,
+        "high": 277106000
+      },
+      "extravilanValueRon": 275030003,
+      "extravilanValueByCodeRon": {
+        "PADURE": 6139999,
+        "A": 256319998,
+        "V+L": 1275002,
+        "P+F": 8670001,
+        "NP": 2625001
+      },
+      "lvtRon": {
+        "low": 2915100,
+        "central": 2956300,
+        "high": 2997500
+      },
+      "lvtCollectedRon": {
+        "low": 2731460,
+        "central": 2751260,
+        "high": 2771060
+      },
+      "effectiveRatePercent": {
+        "low": 0.3003,
+        "central": 0.4203,
+        "high": 0.5391
+      }
+    },
+    {
+      "siruta": "43992",
+      "name": "SILISTEA",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 11920.0,
+      "fiscalCodeRon": {
+        "low": 1076094,
+        "central": 1447622,
+        "high": 1805191
+      },
+      "landValueRon": {
+        "low": 443540003,
+        "central": 450589999,
+        "high": 457640002
+      },
+      "taxableValueRon": {
+        "low": 435105002,
+        "central": 441854999,
+        "high": 448605001
+      },
+      "extravilanValueRon": 422390001,
+      "extravilanValueByCodeRon": {
+        "PADURE": 5759997,
+        "A": 406159998,
+        "V+L": 1529999,
+        "P+F": 6075000,
+        "NP": 2865001
+      },
+      "lvtRon": {
+        "low": 4435400,
+        "central": 4505900,
+        "high": 4576400
+      },
+      "lvtCollectedRon": {
+        "low": 4351050,
+        "central": 4418550,
+        "high": 4486050
+      },
+      "effectiveRatePercent": {
+        "low": 0.2426,
+        "central": 0.3213,
+        "high": 0.3945
+      }
+    },
+    {
+      "siruta": "44060",
+      "name": "STANCUTA",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 25608.0,
+      "fiscalCodeRon": {
+        "low": 1346990,
+        "central": 2190266,
+        "high": 3118909
+      },
+      "landValueRon": {
+        "low": 67900000,
+        "central": 88270002,
+        "high": 108639998
+      },
+      "taxableValueRon": {
+        "low": 39200000,
+        "central": 50960001,
+        "high": 62720001
+      },
+      "extravilanValueRon": 0,
+      "extravilanValueByCodeRon": {},
+      "lvtRon": {
+        "low": 679000,
+        "central": 882700,
+        "high": 1086400
+      },
+      "lvtCollectedRon": {
+        "low": 392000,
+        "central": 509600,
+        "high": 627200
+      },
+      "effectiveRatePercent": {
+        "low": 1.9838,
+        "central": 2.4813,
+        "high": 2.8709
+      }
+    },
+    {
+      "siruta": "44113",
+      "name": "SURDILA-GAISEANCA",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 6164.0,
+      "fiscalCodeRon": {
+        "low": 556296,
+        "central": 795671,
+        "high": 1041096
+      },
+      "landValueRon": {
+        "low": 196007997,
+        "central": 196007997,
+        "high": 196007997
+      },
+      "taxableValueRon": {
+        "low": 180328003,
+        "central": 180328003,
+        "high": 180328003
+      },
+      "extravilanValueRon": 170807998,
+      "extravilanValueByCodeRon": {
+        "PADURE": 440002,
+        "A": 158368002,
+        "V+L": 1635002,
+        "P+F": 7604999,
+        "NP": 2759999
+      },
+      "lvtRon": {
+        "low": 1960080,
+        "central": 1960080,
+        "high": 1960080
+      },
+      "lvtCollectedRon": {
+        "low": 1803280,
+        "central": 1803280,
+        "high": 1803280
+      },
+      "effectiveRatePercent": {
+        "low": 0.2838,
+        "central": 0.4059,
+        "high": 0.5311
+      }
+    },
+    {
+      "siruta": "44140",
+      "name": "SUTESTI",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 6796.0,
+      "fiscalCodeRon": {
+        "low": 580208,
+        "central": 855125,
+        "high": 1143260
+      },
+      "landValueRon": {
+        "low": 214020001,
+        "central": 223020002,
+        "high": 232019999
+      },
+      "taxableValueRon": {
+        "low": 206104998,
+        "central": 214205000,
+        "high": 222305002
+      },
+      "extravilanValueRon": 196019999,
+      "extravilanValueByCodeRon": {
+        "PADURE": 8340002,
+        "A": 174930002,
+        "V+L": 1979999,
+        "P+F": 10770001
+      },
+      "lvtRon": {
+        "low": 2140200,
+        "central": 2230200,
+        "high": 2320200
+      },
+      "lvtCollectedRon": {
+        "low": 2061050,
+        "central": 2142050,
+        "high": 2223050
+      },
+      "effectiveRatePercent": {
+        "low": 0.2711,
+        "central": 0.3834,
+        "high": 0.4927
+      }
+    },
+    {
+      "siruta": "44177",
+      "name": "TICHILESTI",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 6348.0,
+      "fiscalCodeRon": {
+        "low": 547761,
+        "central": 776925,
+        "high": 1010157
+      },
+      "landValueRon": {
+        "low": 244264998,
+        "central": 244264998,
+        "high": 244264998
+      },
+      "taxableValueRon": {
+        "low": 223545000,
+        "central": 223545000,
+        "high": 223545000
+      },
+      "extravilanValueRon": 212264999,
+      "extravilanValueByCodeRon": {
+        "PADURE": 5740001,
+        "A": 203120002,
+        "V+L": 1215002,
+        "P+F": 2189999
+      },
+      "lvtRon": {
+        "low": 2442650,
+        "central": 2442650,
+        "high": 2442650
+      },
+      "lvtCollectedRon": {
+        "low": 2235450,
+        "central": 2235450,
+        "high": 2235450
+      },
+      "effectiveRatePercent": {
+        "low": 0.2242,
+        "central": 0.3181,
+        "high": 0.4135
+      }
+    },
+    {
+      "siruta": "44202",
+      "name": "TRAIAN",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 16419.0,
+      "fiscalCodeRon": {
+        "low": 1566433,
+        "central": 2177714,
+        "high": 2788697
+      },
+      "landValueRon": {
+        "low": 735629999,
+        "central": 743329998,
+        "high": 751030001
+      },
+      "taxableValueRon": {
+        "low": 718450000,
+        "central": 724525000,
+        "high": 730600000
+      },
+      "extravilanValueRon": 674030002,
+      "extravilanValueByCodeRon": {
+        "PADURE": 440002,
+        "A": 661860000,
+        "V+L": 795002,
+        "P+F": 10230001,
+        "NP": 705002
+      },
+      "lvtRon": {
+        "low": 7356300,
+        "central": 7433300,
+        "high": 7510300
+      },
+      "lvtCollectedRon": {
+        "low": 7184500,
+        "central": 7245250,
+        "high": 7306000
+      },
+      "effectiveRatePercent": {
+        "low": 0.2129,
+        "central": 0.293,
+        "high": 0.3713
+      }
+    },
+    {
+      "siruta": "44257",
+      "name": "TUDOR VLADIMIRESCU",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 7888.0,
+      "fiscalCodeRon": {
+        "low": 684559,
+        "central": 1064552,
+        "high": 1475995
+      },
+      "landValueRon": {
+        "low": 44100002,
+        "central": 58800001,
+        "high": 73499999
+      },
+      "taxableValueRon": {
+        "low": 34050001,
+        "central": 45399999,
+        "high": 56749998
+      },
+      "extravilanValueRon": 0,
+      "extravilanValueByCodeRon": {},
+      "lvtRon": {
+        "low": 441000,
+        "central": 588000,
+        "high": 735000
+      },
+      "lvtCollectedRon": {
+        "low": 340500,
+        "central": 454000,
+        "high": 567500
+      },
+      "effectiveRatePercent": {
+        "low": 1.5523,
+        "central": 1.8105,
+        "high": 2.0082
+      }
+    },
+    {
+      "siruta": "44300",
+      "name": "TUFESTI",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 7217.0,
+      "fiscalCodeRon": {
+        "low": 680615,
+        "central": 985953,
+        "high": 1302285
+      },
+      "landValueRon": {
+        "low": 240614997,
+        "central": 246315000,
+        "high": 252014998
+      },
+      "taxableValueRon": {
+        "low": 235900000,
+        "central": 240579998,
+        "high": 245260002
+      },
+      "extravilanValueRon": 221615002,
+      "extravilanValueByCodeRon": {
+        "PADURE": 20002,
+        "A": 211680002,
+        "V+L": 2595001,
+        "P+F": 7230002,
+        "NP": 90000
+      },
+      "lvtRon": {
+        "low": 2406150,
+        "central": 2463150,
+        "high": 2520150
+      },
+      "lvtCollectedRon": {
+        "low": 2359000,
+        "central": 2405800,
+        "high": 2452600
+      },
+      "effectiveRatePercent": {
+        "low": 0.2829,
+        "central": 0.4003,
+        "high": 0.5167
+      }
+    },
+    {
+      "siruta": "44328",
+      "name": "ULMU",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 10151.0,
+      "fiscalCodeRon": {
+        "low": 879468,
+        "central": 1209876,
+        "high": 1535890
+      },
+      "landValueRon": {
+        "low": 234204998,
+        "central": 238645002,
+        "high": 243085000
+      },
+      "taxableValueRon": {
+        "low": 225295002,
+        "central": 228625001,
+        "high": 231954999
+      },
+      "extravilanValueRon": 219405001,
+      "extravilanValueByCodeRon": {
+        "PADURE": 5025000,
+        "A": 192224998,
+        "V+L": 3149999,
+        "P+F": 17985000,
+        "NP": 1020000
+      },
+      "lvtRon": {
+        "low": 2342050,
+        "central": 2386450,
+        "high": 2430850
+      },
+      "lvtCollectedRon": {
+        "low": 2252950,
+        "central": 2286250,
+        "high": 2319550
+      },
+      "effectiveRatePercent": {
+        "low": 0.3755,
+        "central": 0.507,
+        "high": 0.6318
+      }
+    },
+    {
+      "siruta": "44355",
+      "name": "UNIREA",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 6819.0,
+      "fiscalCodeRon": {
+        "low": 622191,
+        "central": 872089,
+        "high": 1123725
+      },
+      "landValueRon": {
+        "low": 257994999,
+        "central": 257994999,
+        "high": 257994999
+      },
+      "taxableValueRon": {
+        "low": 248860000,
+        "central": 248860000,
+        "high": 248860000
+      },
+      "extravilanValueRon": 238345002,
+      "extravilanValueByCodeRon": {
+        "PADURE": 1619999,
+        "A": 227559999,
+        "V+L": 1080000,
+        "P+F": 6570002,
+        "NP": 1515002
+      },
+      "lvtRon": {
+        "low": 2579950,
+        "central": 2579950,
+        "high": 2579950
+      },
+      "lvtCollectedRon": {
+        "low": 2488600,
+        "central": 2488600,
+        "high": 2488600
+      },
+      "effectiveRatePercent": {
+        "low": 0.2412,
+        "central": 0.338,
+        "high": 0.4356
+      }
+    },
+    {
+      "siruta": "44391",
+      "name": "VADENI",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 15582.0,
+      "fiscalCodeRon": {
+        "low": 1222621,
+        "central": 2119132,
+        "high": 3133263
+      },
+      "landValueRon": {
+        "low": 837545001,
+        "central": 879445001,
+        "high": 921345000
+      },
+      "taxableValueRon": {
+        "low": 350955002,
+        "central": 362505002,
+        "high": 374055002
+      },
+      "extravilanValueRon": 418544999,
+      "extravilanValueByCodeRon": {
+        "PADURE": 34860001,
+        "A": 371174998,
+        "V+L": 675002,
+        "P+F": 8070002,
+        "NP": 3765001
+      },
+      "lvtRon": {
+        "low": 8375450,
+        "central": 8794450,
+        "high": 9213450
+      },
+      "lvtCollectedRon": {
+        "low": 3509550,
+        "central": 3625050,
+        "high": 3740550
+      },
+      "effectiveRatePercent": {
+        "low": 0.146,
+        "central": 0.241,
+        "high": 0.3401
+      }
+    },
+    {
+      "siruta": "44435",
+      "name": "VICTORIA",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 7524.0,
+      "fiscalCodeRon": {
+        "low": 725528,
+        "central": 1074306,
+        "high": 1441468
+      },
+      "landValueRon": {
+        "low": 268767002,
+        "central": 275876999,
+        "high": 282987001
+      },
+      "taxableValueRon": {
+        "low": 231809999,
+        "central": 234239998,
+        "high": 236670002
+      },
+      "extravilanValueRon": 245067002,
+      "extravilanValueByCodeRon": {
+        "A": 235511998,
+        "V+L": 750000,
+        "P+F": 8220002,
+        "NP": 585002
+      },
+      "lvtRon": {
+        "low": 2687670,
+        "central": 2758770,
+        "high": 2829870
+      },
+      "lvtCollectedRon": {
+        "low": 2318100,
+        "central": 2342400,
+        "high": 2366700
+      },
+      "effectiveRatePercent": {
+        "low": 0.2699,
+        "central": 0.3894,
+        "high": 0.5094
+      }
+    },
+    {
+      "siruta": "44462",
+      "name": "VISANI",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 7678.0,
+      "fiscalCodeRon": {
+        "low": 510190,
+        "central": 806279,
+        "high": 1128437
+      },
+      "landValueRon": {
+        "low": 184910000,
+        "central": 189450001,
+        "high": 193989998
+      },
+      "taxableValueRon": {
+        "low": 147235000,
+        "central": 148875001,
+        "high": 150515002
+      },
+      "extravilanValueRon": 162209998,
+      "extravilanValueByCodeRon": {
+        "PADURE": 22560001,
+        "A": 121829999,
+        "V+L": 1949999,
+        "P+F": 15689998,
+        "NP": 180000
+      },
+      "lvtRon": {
+        "low": 1849100,
+        "central": 1894500,
+        "high": 1939900
+      },
+      "lvtCollectedRon": {
+        "low": 1472350,
+        "central": 1488750,
+        "high": 1505150
+      },
+      "effectiveRatePercent": {
+        "low": 0.2759,
+        "central": 0.4256,
+        "high": 0.5817
+      }
+    },
+    {
+      "siruta": "44505",
+      "name": "VIZIRU",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 10565.0,
+      "fiscalCodeRon": {
+        "low": 1016844,
+        "central": 1428495,
+        "high": 1844303
+      },
+      "landValueRon": {
+        "low": 485290002,
+        "central": 504245000,
+        "high": 523199998
+      },
+      "taxableValueRon": {
+        "low": 475702002,
+        "central": 489301999,
+        "high": 502902002
+      },
+      "extravilanValueRon": 462989998,
+      "extravilanValueByCodeRon": {
+        "A": 456000001,
+        "V+L": 1755002,
+        "P+F": 4155001,
+        "NP": 1080000
+      },
+      "lvtRon": {
+        "low": 4852900,
+        "central": 5042450,
+        "high": 5232000
+      },
+      "lvtCollectedRon": {
+        "low": 4757020,
+        "central": 4893020,
+        "high": 5029020
+      },
+      "effectiveRatePercent": {
+        "low": 0.2095,
+        "central": 0.2833,
+        "high": 0.3525
+      }
+    },
+    {
+      "siruta": "44532",
+      "name": "ZAVOAIA",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 8856.0,
+      "fiscalCodeRon": {
+        "low": 717934,
+        "central": 1089842,
+        "high": 1486365
+      },
+      "landValueRon": {
+        "low": 258639002,
+        "central": 266468999,
+        "high": 274299001
+      },
+      "taxableValueRon": {
+        "low": 251440998,
+        "central": 258311000,
+        "high": 265181002
+      },
+      "extravilanValueRon": 232538998,
+      "extravilanValueByCodeRon": {
+        "PADURE": 3760002,
+        "A": 199784001,
+        "V+L": 1005002,
+        "P+F": 24555002,
+        "NP": 3435001
+      },
+      "lvtRon": {
+        "low": 2586390,
+        "central": 2664690,
+        "high": 2742990
+      },
+      "lvtCollectedRon": {
+        "low": 2514410,
+        "central": 2583110,
+        "high": 2651810
+      },
+      "effectiveRatePercent": {
+        "low": 0.2776,
+        "central": 0.409,
+        "high": 0.5419
+      }
+    },
+    {
+      "siruta": "44560",
+      "name": "CAZASU",
+      "rank": "comune",
+      "fiscalRank": {
+        "low": "V",
+        "high": "IV"
+      },
+      "totalHa": 2723.0,
+      "fiscalCodeRon": {
+        "low": 256878,
+        "central": 384768,
+        "high": 520481
+      },
+      "landValueRon": {
+        "low": 195740000,
+        "central": 195740000,
+        "high": 195740000
+      },
+      "taxableValueRon": {
+        "low": 195740000,
+        "central": 195740000,
+        "high": 195740000
+      },
+      "extravilanValueRon": 104740000,
+      "extravilanValueByCodeRon": {
+        "PADURE": 219998,
+        "A": 100305001,
+        "V+L": 1845002,
+        "P+F": 1499999,
+        "NP": 870000
+      },
+      "lvtRon": {
+        "low": 1957400,
+        "central": 1957400,
+        "high": 1957400
+      },
+      "lvtCollectedRon": {
+        "low": 1957400,
+        "central": 1957400,
+        "high": 1957400
+      },
+      "effectiveRatePercent": {
+        "low": 0.1312,
+        "central": 0.1966,
+        "high": 0.2659
+      }
+    }
+  ],
+  "limitations": [
+    {
+      "id": "impozitul-de-azi-e-si-el-o-banda",
+      "text": "Impozitul „de azi” nu este un număr. Codul fiscal dă un interval de aproximativ 2,5×, iar consiliul local alege din el; zona A–D este tot decizie locală; iar o comună are satul de reședință la rangul IV și celelalte sate la rangul V. Cele trei necunoscute se înmulțesc, așa că raportul dintre citirea cea mai ieftină și cea mai scumpă permisă de lege este de ordinul zecilor. Nu există un registru național al hotărârilor consiliilor locale din care să se afle cifra reală.",
+      "severity": "blocking",
+      "affects": [
+        "impozit",
+        "cota-neutra"
+      ]
+    },
+    {
+      "id": "statutar-nu-incasat",
+      "text": "Se compară statutar cu statutar. Nici „impozitul de azi”, nici `lvtRon` nu sunt ce încasează primăriile, iar comparația dintre ele este corectă tocmai pentru că amândouă sunt calculate pe aceleași hectare. `lvtCollectedRon` este singura cifră de aici gândită ca încasare: scoate domeniul public din bază și înmulțește cu gradul de colectare. Nu are corespondent pe partea Codului fiscal, deci nu se compară cu el.",
+      "severity": "material",
+      "affects": [
+        "impozit"
+      ]
+    },
+    {
+      "id": "gradul-de-colectare-e-lasat-la-1",
+      "text": "Gradul de colectare este un parametru, lăsat la 100%. Nu există o serie publicată pe localități a colectării impozitului pe teren, iar o cifră inventată ar arăta ca o măsurătoare. Restanțele, executarea silită și scutirile din art. 464 — teren al cultelor, cimitire, arii protejate — scad toate din încasare, niciuna nu o crește. `lvtCollectedRon` este deci un plafon al încasării, nu încasarea.",
+      "severity": "blocking",
+      "affects": [
+        "impozit"
+      ]
+    },
+    {
+      "id": "privat-nu-e-acelasi-lucru-cu-impozabil",
+      "text": "Baza impozabilă de aici este proprietatea privată din registrul funciar, adică 65% din valoarea terenului județului. Registrul numără însă drept privată și proprietatea privată a statului și a comunei, care se impozitează, iar terenul din domeniul public dat în concesiune se impozitează chiriașului potrivit art. 463 alin. (2). Aproximarea greșește în ambele sensuri cu mărimi nepublicate pe localități.",
+      "severity": "material",
+      "affects": [
+        "impozit"
+      ]
+    },
+    {
+      "id": "cursul-muta-raspunsul",
+      "text": "Grila notarială este în euro, Codul fiscal în lei. Conversia folosește cursul de referință BCE din 2026-09-01 (5.2567 RON/EUR). Cota neutră se mișcă direct proporțional cu el.",
+      "severity": "material",
+      "affects": [
+        "cota-neutra"
+      ]
+    },
+    {
+      "id": "padurea-lipseste-din-ambele-parti",
+      "text": "Pădurea este exclusă din valoare, pentru că studiile o evaluează pe hectar într-un tabel separat. Este exclusă și din impozitul calculat, ca cele două părți să stea pe aceleași hectare — dar Codul fiscal o impozitează, deci impozitul de azi este subestimat cu partea ei.",
+      "severity": "material",
+      "affects": [
+        "impozit"
+      ]
+    }
+  ]
+}

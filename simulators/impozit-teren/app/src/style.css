@@ -1,3 +1,14 @@
+:root {
+  --bg: #0b0d10;
+  --panel: #12161b;
+  --line: #232a31;
+  --fg: #e8eaed;
+  --muted: #9aa3ad;
+  --accent: #7fb3ff;
+  --more: #ffb04a;
+  --less: #6fd39b;
+}
+
 .up {
   display: inline-block;
   margin-bottom: 0.6rem;
@@ -8,17 +19,6 @@
 
 .up:hover {
   color: var(--fg);
-}
-
-:root {
-  --bg: #0b0d10;
-  --panel: #12161b;
-  --line: #232a31;
-  --fg: #e8eaed;
-  --muted: #9aa3ad;
-  --accent: #7fb3ff;
-  --more: #ffb04a;
-  --less: #6fd39b;
 }
 
 * {
@@ -53,6 +53,9 @@ body {
 #main {
   padding: 1.5rem 1.5rem 3rem;
   min-width: 0;
+  /* Past about this width the four headline figures stretch into a very long line and the
+     table's numbers drift away from their labels. */
+  max-width: 78rem;
 }
 
 h1 {
@@ -86,10 +89,43 @@ h2 {
 }
 
 .counties {
-  margin-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.35rem;
+  margin-bottom: 1.5rem;
 }
 
-.counties button,
+/* Forty-three options is a list, not a row of buttons: the buttons wrapped to four lines and
+   pushed the numbers below the fold on a laptop. */
+.counties select {
+  width: 100%;
+  padding: 0.45rem 0.55rem;
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid var(--line);
+  border-radius: 0.4rem;
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.counties select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.counties option {
+  background: #0f1418;
+  color: var(--fg);
+}
+
+.counties .field {
+  color: var(--muted);
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
 .segmented button {
   flex: 1;
   padding: 0.4rem 0.5rem;
@@ -107,12 +143,10 @@ h2 {
   padding: 0.3rem 0.5rem;
 }
 
-.counties button:hover,
 .segmented button:hover {
   color: var(--fg);
 }
 
-.counties button.on,
 .segmented button.on {
   background: color-mix(in srgb, var(--accent) 16%, transparent);
   border-color: color-mix(in srgb, var(--accent) 45%, transparent);
@@ -201,6 +235,39 @@ input[type='range'] {
   color: var(--less);
 }
 
+/* `card`, `card-head` and `stat-row` are used by the markup and were never styled, so the
+   national panel had no border, no padding and no gap to the map below it: three sections ran
+   together as one column of text. They are the page's section wrapper, its heading row, and
+   the grid the national figures sit in. */
+.card {
+  border: 1px solid var(--line);
+  border-radius: 0.55rem;
+  padding: 1rem;
+  background: var(--panel);
+  margin-bottom: 1.75rem;
+}
+
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.85rem;
+}
+
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 0.75rem;
+}
+
+/* Inside a card the stats already sit on the card's own panel, so a second panel-on-panel
+   reads as a box in a box. */
+.card .stat {
+  background: transparent;
+}
+
 .table-head {
   display: flex;
   justify-content: space-between;
@@ -216,6 +283,7 @@ input[type='range'] {
 
 .table-wrap {
   overflow-x: auto;
+  margin-top: 0.5rem;
 }
 
 table {

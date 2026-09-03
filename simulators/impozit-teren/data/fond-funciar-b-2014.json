@@ -10,14 +10,17 @@
   "unit": "ha",
   "provenance": {
     "source": "ins-tempo-agr101b",
-    "locator": "http://statistici.insse.ro:8077/tempo-ins/matrix/AGR101B, anul 2014, forme de proprietate: Total",
+    "locator": "http://statistici.insse.ro:8077/tempo-ins/matrix/AGR101B, anul 2014, forme de proprietate: Total și Proprietate privata",
     "confidence": "verbatim",
-    "note": "Suprafețele sunt preluate ca atare din matricea INS. Gruparea pe categoriile notariale (pășuni+fânețe → P+F, vii+livezi → V+L) este făcută aici și urmează gruparea din grilele notariale."
+    "note": "Suprafețele sunt preluate ca atare din matricea INS. Gruparea pe categoriile notariale (pășuni+fânețe → P+F, vii+livezi → V+L) este făcută aici și urmează gruparea din grilele notariale. Proprietatea publică nu este publicată separat: este diferența dintre total și proprietatea privată, calculată aici prin scădere."
   },
   "summary": {
     "localities": 1,
     "totalHa": 23787.0,
     "builtHa": 15817.0,
+    "privateHa": 11118.0,
+    "privateBuiltHa": 8944.0,
+    "privateSharePercent": 46.74,
     "unbalanced": [],
     "problems": []
   },
@@ -49,6 +52,18 @@
         "Terenuri degradate si neproductive": 93.0
       },
       "totalHa": 23787.0,
+      "privateAreaHa": {
+        "Arabila": 1798.0,
+        "Pasuni": 20.0,
+        "Vii si pepiniere viticole": 7.0,
+        "Livezi si pepiniere pomicole": 119.0,
+        "Paduri si alta vegetatie forestiera": 118.0,
+        "Ocupata cu ape, balti": 8.0,
+        "Ocupata cu constructii": 8944.0,
+        "Cai de comunicatii si cai ferate": 99.0,
+        "Terenuri degradate si neproductive": 5.0
+      },
+      "privateHa": 11118.0,
       "byCategory": {
         "A": 2566.0,
         "P+F": 355.0,
@@ -58,10 +73,29 @@
         "DR": 3306.0,
         "NP": 93.0
       },
-      "forestHa": 611.0
+      "byCategoryPrivate": {
+        "A": 1798.0,
+        "P+F": 20.0,
+        "V+L": 126.0,
+        "AP": 8.0,
+        "CC": 8944.0,
+        "DR": 99.0,
+        "NP": 5.0
+      },
+      "forestHa": 611.0,
+      "forestPrivateHa": 118.0
     }
   ],
   "limitations": [
+    {
+      "id": "privat-nu-inseamna-impozabil",
+      "text": "Împărțirea pe forme de proprietate este măsurată, dar „privat” nu este același lucru cu „impozabil”. Registrul numără drept privată și proprietatea privată a statului și a comunei, care se impozitează; în sens invers, terenul din domeniul public dat în concesiune, închiriere sau administrare se impozitează chiriașului, potrivit art. 463 alin. (2). Niciuna dintre cele două abateri nu este publicată pe localități, așa că împărțirea este cea mai bună aproximare măsurată a bazei impozabile, nu baza însăși.",
+      "severity": "material",
+      "affects": [
+        "valoare-teren",
+        "impozit"
+      ]
+    },
     {
       "id": "suprafetele-sunt-din-2014",
       "text": "INS a oprit seria pe localități: AGR101B nu are date după 2014 și nimic nu a înlocuit-o la această granularitate. Suprafețele sunt deci din 2014, iar valorile din 2026. Compoziția fondului funciar se schimbă lent, dar într-o singură direcție — arabilul devine curți-construcții, nu invers — așa că suprafața construită de aici este un minim, iar valoarea calculată din ea este subestimată, nu umflată.",

@@ -29,6 +29,37 @@ range is this wide is a finding about the current tax, not a weakness of this fi
 The headline is the **revenue-neutral rate**: the percentage of land value that raises what
 the Fiscal Code's midpoint raises. It is a ratio of two bands, so it is reported as one.
 
+**A rate on the land value is not what anyone would collect, and this file says both.**
+`lvtRon` is the rate applied to every hectare in the county, which is the right figure for the
+comparison above — the Fiscal Code side is computed on the same hectares, so neither side gets
+an exemption the other does not. It is not a revenue estimate. Two things stand between it and
+one, and they only ever subtract:
+
+* **The public domain.** Art. 456 (1) a) does not tax it, and it is 26,6% of Romania by area —
+  concentrated in forest, roads and water rather than spread evenly, so it is a much smaller
+  share of the *value* than of the surface. `taxableValueRon` is the same valuation over the
+  privately owned hectares the land register counts separately, and `lvtCollectedRon` is the
+  rate applied to that.
+* **Collection.** Arrears, enforcement and the exemptions in art. 464 that no per-locality
+  source records. This is a parameter, `--collection-rate`, and it defaults to 1. Like the
+  market multiple in `build_renta.py`, it is left at its neutral value rather than filled with
+  a guess: a made-up collection rate would look like a measurement, and the one number here
+  that is measured is the ownership split.
+
+So `lvtRon` is a ceiling, `lvtCollectedRon` at the default is that ceiling minus the public
+domain, and a real receipts figure is below both.
+
+**The modelled tax is now checked against one that was actually banked.**
+`import_impozit_incasat.py` reads what each county collected under revenue codes 07.02.01–03,
+and this file carries it beside its own figure as `collectedRon`. The band claims to be the
+range art. 465 permits, so collections landing inside it is a test the model can fail — and
+in 34 of 42 counties it passes, with every miss falling *below* the cheapest lawful reading
+rather than above the dearest, which is what exemptions and arrears look like.
+
+The ratio is reported and not consumed. It mixes the council's chosen rate, the zone, the rank
+and the art. 464 exemptions before it reaches collection, so feeding it into
+`--collection-rate` would turn four unknowns into one number that looks measured.
+
 Usage:
     uv run python simulators/impozit-teren/scripts/build_impozit.py --county BC
 """
@@ -89,6 +120,13 @@ COUNTY_TO_CHAMBER = {
     "AR": "arad",
     "BV": "brasov",
     "CS": "carasseverin",
+    "AG": "arges",
+    "BR": "braila",
+    "DJ": "dolj",
+    "GJ": "gorj",
+    "GL": "galati",
+    "MH": "mehedinti",
+    "OT": "olt",
     "CV": "covasna",
     "VS": "vaslui",
     "BC": "bacau",
@@ -101,6 +139,7 @@ COUNTY_TO_CHAMBER = {
     "PH": "prahova",
     "MS": "mures",
     "HR": "harghita",
+    "VL": "valcea",
     "VN": "vrancea",
     "DB": "dambovita",
     "BZ": "buzau",
@@ -222,7 +261,19 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--county", default="BC", choices=sorted(COUNTY_TO_CHAMBER))
     parser.add_argument("--rate", type=float, default=1.0, help="LVT rate, percent of land value")
+    parser.add_argument(
+        "--collection-rate",
+        type=float,
+        default=1.0,
+        help=(
+            "share of the tax charged on private land that is actually collected; 1 assumes "
+            "all of it. Left neutral by default because no per-locality collection rate is "
+            "published — see the module docstring."
+        ),
+    )
     args = parser.parse_args()
+    if not 0 < args.collection_rate <= 1:
+        raise SystemExit("--collection-rate is a share between 0 and 1")
     county = args.county
 
     code = load("cod-fiscal-teren-2026.json")
@@ -264,6 +315,12 @@ def main() -> int:
             for code, value in valued["extravilanValueByCodeEur"].items()
         }
         lvt = {b: land_value_ron[b] * args.rate / 100 for b in BANDS}
+        # The same rate on the hectares a tax can actually reach. `taxableValueEur` is the
+        # value builder's own arithmetic over private land, not a share applied afterwards:
+        # the public domain is not distributed like the value is, so a county-wide percentage
+        # would be wrong locality by locality even where it happened to land right in total.
+        taxable_ron = {b: valued["taxableValueEur"][b] * ron_per_eur for b in BANDS}
+        collected = {b: taxable_ron[b] * args.rate / 100 * args.collection_rate for b in BANDS}
         rows.append(
             {
                 "siruta": record["siruta"],
@@ -273,9 +330,11 @@ def main() -> int:
                 "totalHa": record["totalHa"],
                 "fiscalCodeRon": {b: round(fiscal[b]) for b in BANDS},
                 "landValueRon": {b: round(land_value_ron[b]) for b in BANDS},
+                "taxableValueRon": {b: round(taxable_ron[b]) for b in BANDS},
                 "extravilanValueRon": round(extravilan_ron),
                 "extravilanValueByCodeRon": {k: round(v) for k, v in by_code_ron.items()},
                 "lvtRon": {b: round(lvt[b]) for b in BANDS},
+                "lvtCollectedRon": {b: round(collected[b]) for b in BANDS},
                 "effectiveRatePercent": {
                     b: round(100 * fiscal[b] / land_value_ron[b], 4) if land_value_ron[b] else None
                     for b in BANDS
@@ -287,8 +346,21 @@ def main() -> int:
         print(f"FATAL: nothing to compare for {county}", file=sys.stderr)
         return 1
 
+    # What this county actually banked, if the execution filings have been imported. Optional
+    # on purpose: the rest of the pipeline must build without a third party being up, and the
+    # comparison is an added check rather than a dependency of the tax model.
+    collected = None
+    found = sorted((ROOT / "data").glob("impozit-incasat-*.json"))
+    if found:
+        receipts = json.loads(found[-1].read_text(encoding="utf-8"))
+        entry = next((r for r in receipts["localities"] if r["county"] == county), None)
+        if entry:
+            collected = {"ron": entry["landRon"], "period": receipts["period"]}
+
     fiscal_total = {b: sum(r["fiscalCodeRon"][b] for r in rows) for b in BANDS}
     value_total = {b: sum(r["landValueRon"][b] for r in rows) for b in BANDS}
+    taxable_total = {b: sum(r["taxableValueRon"][b] for r in rows) for b in BANDS}
+    collected_total = {b: sum(r["lvtCollectedRon"][b] for r in rows) for b in BANDS}
     # The headline. The midpoint of the lawful range against the midpoint of the value band;
     # the ends of the reported band pair the cheapest lawful tax with the dearest land and
     # vice versa, which is the widest honest reading rather than a flattering one.
@@ -299,15 +371,29 @@ def main() -> int:
     }
 
     print(f"{county}: {len(rows)} localități, curs BNR/BCE {ron_per_eur} RON/EUR ({fx_date})")
-    print(f"{'':<26}{'low':>16}{'central':>16}{'high':>16}")
+    print(f"{'':<36}{'low':>16}{'central':>16}{'high':>16}")
     for label, series in (
         ("impozit Cod fiscal (mil RON)", {b: fiscal_total[b] / 1e6 for b in BANDS}),
         ("valoarea terenului (mld RON)", {b: value_total[b] / 1e9 for b in BANDS}),
+        ("din care impozabil (mld RON)", {b: taxable_total[b] / 1e9 for b in BANDS}),
         (f"impozit pe valoare @{args.rate}% (mil RON)",
          {b: value_total[b] * args.rate / 100 / 1e6 for b in BANDS}),
+        (f"din care încasabil @{args.rate}% (mil RON)",
+         {b: collected_total[b] / 1e6 for b in BANDS}),
     ):
-        print(f"{label:<26}" + "".join(f"{series[b]:16,.1f}" for b in BANDS))
-    print(f"{'cota neutră (%)':<26}" + "".join(f"{neutral[b]:16.3f}" for b in BANDS))
+        print(f"{label:<36}" + "".join(f"{series[b]:16,.1f}" for b in BANDS))
+    print(f"{'cota neutră (%)':<36}" + "".join(f"{neutral[b]:16.3f}" for b in BANDS))
+    print(f"baza impozabilă: {100 * taxable_total['central'] / value_total['central']:.1f}% "
+          f"din valoarea terenului, la un grad de colectare de {100 * args.collection_rate:.0f}%")
+    if collected:
+        verdict = (
+            "în bandă" if fiscal_total["low"] <= collected["ron"] <= fiscal_total["high"]
+            else "SUB cea mai ieftină citire legală"
+            if collected["ron"] < fiscal_total["low"]
+            else "PESTE cea mai scumpă citire legală"
+        )
+        print(f"încasat efectiv ({collected['period']}): {collected['ron'] / 1e6:,.1f} mil RON — "
+              f"{collected['ron'] / fiscal_total['central']:.2f}× față de mijlocul modelat, {verdict}")
 
     document = {
         "$schema": "../schema/impozit.schema.json",
@@ -335,6 +421,11 @@ def main() -> int:
             "ronPerEur": ron_per_eur,
             "exchangeRateDate": fx_date,
             "lvtRatePercent": args.rate,
+            "collectionRate": args.collection_rate,
+            "taxableBase": (
+                "proprietate privată din registrul funciar INS AGR101B; domeniul public nu "
+                "se impozitează, art. 456 alin. (1) lit. a)"
+            ),
             "intravilanCategory": value["assumptions"]["intravilanCategory"],
             "rankSource": "Legea nr. 351/2001, anexa IV",
             # Carried here, though this file computes no rent, because the page does compute
@@ -354,9 +445,27 @@ def main() -> int:
             "localities": len(rows),
             "fiscalCodeRon": {b: round(fiscal_total[b]) for b in BANDS},
             "landValueRon": {b: round(value_total[b]) for b in BANDS},
+            "taxableValueRon": {b: round(taxable_total[b]) for b in BANDS},
+            "taxableSharePercent": round(
+                100 * taxable_total["central"] / value_total["central"], 2
+            )
+            if value_total["central"]
+            else 0,
             "lvtRon": {b: round(value_total[b] * args.rate / 100) for b in BANDS},
+            "lvtCollectedRon": {b: round(collected_total[b]) for b in BANDS},
             "revenueNeutralRatePercent": {b: round(neutral[b], 4) for b in BANDS},
             "lawfulRangeRatio": round(fiscal_total["high"] / fiscal_total["low"], 2),
+            # Measured, not modelled — and the one number here that can falsify the band above.
+            "collectedRon": collected["ron"] if collected else None,
+            "collectedPeriod": collected["period"] if collected else None,
+            "collectedOverModelled": round(collected["ron"] / fiscal_total["central"], 3)
+            if collected and fiscal_total["central"]
+            else None,
+            "collectedInsideLawfulBand": (
+                fiscal_total["low"] <= collected["ron"] <= fiscal_total["high"]
+            )
+            if collected
+            else None,
         },
         "localities": rows,
         "limitations": [
@@ -377,10 +486,41 @@ def main() -> int:
             {
                 "id": "statutar-nu-incasat",
                 "text": (
-                    "Se compară statutar cu statutar. Impozitul calculat aici nu este ce "
-                    "încasează primăriile: nu conține scutiri, restanțe și nici gradul de "
-                    "colectare. Comparația cu încasările ar atribui schimbării de regulă și "
-                    "efectele celor trei."
+                    "Se compară statutar cu statutar. Nici „impozitul de azi”, nici "
+                    "`lvtRon` nu sunt ce încasează primăriile, iar comparația dintre ele este "
+                    "corectă tocmai pentru că amândouă sunt calculate pe aceleași hectare. "
+                    "`lvtCollectedRon` este singura cifră de aici gândită ca încasare: scoate "
+                    "domeniul public din bază și înmulțește cu gradul de colectare. Nu are "
+                    "corespondent pe partea Codului fiscal, deci nu se compară cu el."
+                ),
+                "severity": "material",
+                "affects": ["impozit"],
+            },
+            {
+                "id": "gradul-de-colectare-e-lasat-la-1",
+                "text": (
+                    f"Gradul de colectare este un parametru, lăsat la "
+                    f"{100 * args.collection_rate:.0f}%. Nu există o serie publicată pe "
+                    "localități a colectării impozitului pe teren, iar o cifră inventată ar "
+                    "arăta ca o măsurătoare. Restanțele, executarea silită și scutirile din "
+                    "art. 464 — teren al cultelor, cimitire, arii protejate — scad toate din "
+                    "încasare, niciuna nu o crește. `lvtCollectedRon` este deci un plafon al "
+                    "încasării, nu încasarea."
+                ),
+                "severity": "blocking",
+                "affects": ["impozit"],
+            },
+            {
+                "id": "privat-nu-e-acelasi-lucru-cu-impozabil",
+                "text": (
+                    f"Baza impozabilă de aici este proprietatea privată din registrul funciar, "
+                    f"adică {100 * taxable_total['central'] / value_total['central']:.0f}% din "
+                    "valoarea terenului județului. Registrul numără însă drept privată și "
+                    "proprietatea "
+                    "privată a statului și a comunei, care se impozitează, iar terenul din "
+                    "domeniul public dat în concesiune se impozitează chiriașului potrivit "
+                    "art. 463 alin. (2). Aproximarea greșește în ambele sensuri cu mărimi "
+                    "nepublicate pe localități."
                 ),
                 "severity": "material",
                 "affects": ["impozit"],

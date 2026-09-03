@@ -37,6 +37,20 @@
       </section>
 
       <section class="control">
+        <label class="slider-label" for="collection">
+          Grad de colectare <output id="collection-value"></output>
+        </label>
+        <input id="collection" type="range" min="10" max="100" step="1" value="100" />
+        <div class="ramp-ends"><span>10%</span><span>tot</span></div>
+        <p class="note">
+          Cât din impozitul datorat ajunge efectiv încasat. Se aplică doar bazei impozabile,
+          adică terenului aflat în proprietate privată: domeniul public nu se impozitează
+          (art. 456), iar el înseamnă un sfert din suprafața țării. Nu există o serie publicată
+          pe localități a colectării, așa că pornește de la „tot” — un plafon, nu o estimare.
+        </p>
+      </section>
+
+      <section class="control">
         <label class="slider-label" for="share">
           Cât e intravilan <output id="share-value"></output>
         </label>
@@ -115,13 +129,11 @@
         <div id="map"></div>
         <div id="map-legend" class="legend"></div>
         <p class="note">
-          <strong>Mozaicul este citit, suprafața hașurată este estimată.</strong> Județele cu
-          grilă notarială sunt colorate comună cu comună, din prețurile publicate. Celelalte
-          sunt colorate ca o singură formă, la jumătate de opacitate și sub hașură, pentru că
-          valoarea lor vine dintr-un model cu un singur predictor — populația celui mai mare
-          oraș — și este cunoscută la nivel de județ, nu mai fin. Comunele albe dinăuntrul unui
-          județ colorat sunt cele pe care studiul județului nu le prețuiește. Bucureștiul și
-          Ilfovul rămân goale: sunt în afara intervalului pe care s-a estimat modelul.
+          <strong>Totul de pe hartă este citit, comună cu comună, din prețurile publicate.</strong>
+          Toate cele 42 de județe au grilă notarială, inclusiv Bucureștiul și Ilfovul, așa că nu
+          mai există suprafețe estimate și nici hașură. Comunele albe dinăuntrul unui județ
+          colorat sunt singurul gol rămas: cele pe care studiul județului însuși nu le
+          prețuiește.
         </p>
       </section>
       <section class="table-wrap">

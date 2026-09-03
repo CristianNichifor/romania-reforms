@@ -32,6 +32,14 @@ export type Locality = {
   builtHa: number;
   forestHa: number;
   areaHa: Record<string, number>;
+  /**
+   * The privately owned subset of the three fields above. Art. 456 (1) a) does not tax land
+   * in the public domain, and a quarter of Romania by area is in it — so the value of the
+   * country's land and the base a tax could reach are two different numbers.
+   */
+  privateBuiltHa: number;
+  forestPrivateHa: number;
+  privateAreaHa: Record<string, number>;
   intravilanEurPerM2: Band;
   extravilanEurPerM2: Record<string, number>;
 };
@@ -51,6 +59,13 @@ export type Settings = {
   fiscal: BandKey;
   /** Percent of land value. */
   rate: number;
+  /**
+   * Share of the tax charged on private land that is actually collected, 0 to 1. Arrears,
+   * enforcement and the art. 464 exemptions that no per-locality source records all sit here.
+   * It starts at 1 for the same reason the market multiple does: no collection rate is
+   * published per locality, and a number typed in here would read as a measurement.
+   */
+  collectionRate: number;
   /**
    * Percent of land value that the land under buildings earns in a year. Turns the stock into
    * the flow, which is the unit a land tax argument is actually about: "takes 7% of what the
@@ -81,8 +96,12 @@ export type Result = {
   rank: Locality['rank'];
   intravilanHa: number;
   landValueRon: number;
+  /** The same valuation over privately owned hectares — what a tax can reach. */
+  taxableValueRon: number;
   fiscalCodeRon: number;
   lvtRon: number;
+  /** The rate on the taxable base, after collection. A ceiling on receipts, not a comparison. */
+  lvtCollectedRon: number;
   /** Positive means the land value tax charges more than the Fiscal Code would. */
   deltaRon: number;
   landRentRon: number;
@@ -135,14 +154,31 @@ function pick(cell: { min: number; max: number }, band: BandKey): number {
   return (cell.min + cell.max) / 2;
 }
 
+/**
+ * Which hectares an evaluation runs over: all of them, or the privately owned ones.
+ *
+ * The taxable base has to be the *same valuation* on *fewer hectares*, so every function
+ * below takes a scope rather than there being a second copy of the arithmetic. A copy would
+ * be a copy of the donor cap, the fold of two register categories onto one price, and the
+ * forest special case — and it would drift from the original the first time one changed.
+ */
+export type Scope = 'total' | 'private';
+
+export function hectaresOf(locality: Locality, scope: Scope) {
+  return scope === 'private'
+    ? { builtHa: locality.privateBuiltHa, areaHa: locality.privateAreaHa, forestHa: locality.forestPrivateHa }
+    : { builtHa: locality.builtHa, areaHa: locality.areaHa, forestHa: locality.forestHa };
+}
+
 /** How the built-up area and its donor category move when the reader raises the share. */
-export function splitArea(locality: Locality, share: number) {
-  const donor = locality.areaHa[DONOR_CATEGORY] ?? 0;
+export function splitArea(locality: Locality, share: number, scope: Scope = 'total') {
+  const { builtHa, areaHa } = hectaresOf(locality, scope);
+  const donor = areaHa[DONOR_CATEGORY] ?? 0;
   // Capped at the donor: the intravilan cannot eat land the commune does not have, and an
   // uncapped multiplier silently invents hectares in communes that are mostly forest.
-  const wanted = locality.builtHa * (share - 1);
+  const wanted = builtHa * (share - 1);
   const moved = Math.max(0, Math.min(wanted, donor));
-  return { intravilanHa: locality.builtHa + moved, movedFromDonor: moved };
+  return { intravilanHa: builtHa + moved, movedFromDonor: moved };
 }
 
 /**
@@ -155,12 +191,14 @@ export function splitArea(locality: Locality, share: number) {
 export function landValueParts(
   locality: Locality,
   settings: Settings,
+  scope: Scope = 'total',
 ): { built: number; agricultural: number; byCode: Record<string, number> } {
-  const { intravilanHa, movedFromDonor } = splitArea(locality, settings.share);
+  const { areaHa, forestHa } = hectaresOf(locality, scope);
+  const { intravilanHa, movedFromDonor } = splitArea(locality, settings.share, scope);
   const built = intravilanHa * M2_PER_HA * locality.intravilanEurPerM2[settings.value];
   const byCode: Record<string, number> = {};
   let agricultural = 0;
-  for (const [code, hectares] of Object.entries(locality.areaHa)) {
+  for (const [code, hectares] of Object.entries(areaHa)) {
     if (code === 'CC') continue;
     const price = locality.extravilanEurPerM2[code];
     if (price === undefined) continue;
@@ -177,7 +215,7 @@ export function landValueParts(
   // the surface of these counties, absent from the browser and present in the file.
   const forest = locality.extravilanEurPerM2[FOREST_CATEGORY];
   if (forest !== undefined) {
-    const amount = locality.forestHa * M2_PER_HA * forest;
+    const amount = forestHa * M2_PER_HA * forest;
     agricultural += amount;
     byCode[FOREST_CATEGORY] = (byCode[FOREST_CATEGORY] ?? 0) + amount;
   }
@@ -216,6 +254,45 @@ export function fiscalCodeRon(locality: Locality, code: FiscalCode, settings: Se
   return total;
 }
 
+/**
+ * Add up several counties' results into one.
+ *
+ * Not a matter of concatenating rows and calling `evaluate` again: each county is priced at
+ * its own exchange rate and its own measured farmland yield, so the arithmetic has to happen
+ * per county and only the money may be added. The map has done this since it was written —
+ * it paints every county at that county's own rates — and the "toate județele" total is the
+ * same operation with the results summed instead of coloured.
+ *
+ * The three ratios are recomputed from the sums rather than averaged. A mean of forty-two
+ * capture rates answers "what is the typical county's capture"; the sum answers "what does
+ * the country's land raise against what it yields", and that is the question the page asks.
+ */
+export function combine(parts: Array<ReturnType<typeof evaluate>>): ReturnType<typeof evaluate> {
+  const rows = parts.flatMap((part) => part.rows);
+  const total = (get: (t: (typeof parts)[number]['totals']) => number) =>
+    parts.reduce((sum, part) => sum + get(part.totals), 0);
+  const value = total((t) => t.value);
+  const taxable = total((t) => t.taxable);
+  const fiscal = total((t) => t.fiscal);
+  const lvt = total((t) => t.lvt);
+  const collected = total((t) => t.collected);
+  const rent = total((t) => t.rent);
+  return {
+    rows,
+    totals: {
+      fiscal,
+      lvt,
+      collected,
+      value,
+      taxable,
+      rent,
+      neutral: value ? (100 * fiscal) / value : 0,
+      fiscalCapture: rent ? (100 * fiscal) / rent : 0,
+      lvtCapture: rent ? (100 * lvt) / rent : 0,
+    },
+  };
+}
+
 export function evaluate(
   localities: Locality[],
   code: FiscalCode,
@@ -225,7 +302,9 @@ export function evaluate(
   totals: {
     fiscal: number;
     lvt: number;
+    collected: number;
     value: number;
+    taxable: number;
     neutral: number;
     rent: number;
     fiscalCapture: number;
@@ -235,8 +314,14 @@ export function evaluate(
   const rows = localities.map((locality) => {
     const parts = landValueParts(locality, settings);
     const value = (parts.built + parts.agricultural) * settings.ronPerEur;
+    // The same prices over the private hectares. Not a percentage of the line above: the
+    // public domain sits in forest, roads and water rather than spread evenly, so the taxable
+    // share of the value differs commune by commune and is far higher than the share of area.
+    const taxableParts = landValueParts(locality, settings, 'private');
+    const taxable = (taxableParts.built + taxableParts.agricultural) * settings.ronPerEur;
     const fiscal = fiscalCodeRon(locality, code, settings);
     const lvt = (value * settings.rate) / 100;
+    const collected = (taxable * settings.rate * settings.collectionRate) / 100;
     // A yield per cadastral code, mirroring build_renta.py. Anything the breakdown does not
     // account for keeps the general agricultural band rather than dropping out of the rent.
     let rent = (parts.built * settings.ronPerEur * settings.landYield) / 100;
@@ -257,23 +342,29 @@ export function evaluate(
       rank: locality.rank,
       intravilanHa: splitArea(locality, settings.share).intravilanHa,
       landValueRon: value,
+      taxableValueRon: taxable,
       fiscalCodeRon: fiscal,
       lvtRon: lvt,
+      lvtCollectedRon: collected,
       deltaRon: lvt - fiscal,
       landRentRon: rent,
     };
   });
   const sum = (get: (row: Result) => number) => rows.reduce((a, row) => a + get(row), 0);
   const value = sum((r) => r.landValueRon);
+  const taxable = sum((r) => r.taxableValueRon);
   const fiscal = sum((r) => r.fiscalCodeRon);
   const lvt = sum((r) => r.lvtRon);
+  const collected = sum((r) => r.lvtCollectedRon);
   const rent = sum((r) => r.landRentRon);
   return {
     rows,
     totals: {
       fiscal,
       lvt,
+      collected,
       value,
+      taxable,
       rent,
       // The headline: the rate that raises what the Fiscal Code raises under the same reading.
       neutral: value ? (100 * fiscal) / value : 0,

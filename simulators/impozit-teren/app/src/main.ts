@@ -8,7 +8,7 @@
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 import { ValueMap, legend } from './map';
-import { evaluate } from './model';
+import { combine, evaluate } from './model';
 import type { BandKey, FiscalCode, Locality, Settings } from './model';
 
 type ValueFile = {
@@ -26,6 +26,13 @@ type TaxFile = {
     yieldByCategoryPercent: Record<string, { low: number; central: number; high: number }>;
     builtYieldPercent?: { low: number; central: number; high: number };
     builtYieldSource?: string;
+  };
+  // The measured half. `collectedRon` is what the county actually banked under the revenue
+  // classification, and it is null when the execution filings have not been imported — the
+  // page has to render either way, so the type says so rather than the code assuming.
+  summary: {
+    collectedRon: number | null;
+    collectedPeriod: string | null;
   };
   limitations: Array<{ id: string; text: string; severity: string }>;
 };
@@ -50,6 +57,8 @@ type State = {
   value: BandKey;
   fiscal: BandKey;
   landYield: number;
+  /** Share of the tax on private land that is collected, 0 to 1. */
+  collection: number;
   sort: 'delta' | 'value' | 'name';
 };
 
@@ -65,6 +74,9 @@ const DEFAULTS: State = {
   // arrives — `adoptDerivedYield` replaces it with whatever the county's file actually carries,
   // so the browser cannot drift from the Python that produced the numbers beside it.
   landYield: 2.53,
+  // Neutral, like the market multiple in build_renta.py. No collection rate is published per
+  // locality, so the page opens on "all of it" and says so rather than opening on a guess.
+  collection: 1,
   sort: 'delta',
 };
 
@@ -90,6 +102,7 @@ function readHash(): State {
     value: band('pret', DEFAULTS.value),
     fiscal: band('cod', DEFAULTS.fiscal),
     landYield: number('randament', DEFAULTS.landYield),
+    collection: Math.min(1, number('colectare', DEFAULTS.collection)),
     sort: sort === 'value' || sort === 'name' ? sort : DEFAULTS.sort,
   };
 }
@@ -102,12 +115,22 @@ function writeHash(state: State): void {
   params.set('pret', state.value);
   params.set('cod', state.fiscal);
   params.set('randament', String(state.landYield));
+  params.set('colectare', String(state.collection));
   params.set('sort', state.sort);
   history.replaceState(null, '', `#${params}`);
 }
 
 // All forty-two, not only the built ones. The list used to hold eight and a county added to
 // the data showed up in the selector as its own two-letter code.
+/**
+ * The whole country, as a selectable "county".
+ *
+ * A sentinel rather than a separate control, because it answers the same question the county
+ * selector answers and belongs in the same place. It is `toate` in the URL, so a link to the
+ * national reading is as shareable as a link to Bacău's.
+ */
+const ALL = 'toate';
+
 const COUNTY_NAMES: Record<string, string> = {
   ab: 'Alba', ag: 'Argeș', ar: 'Arad', b: 'București', bc: 'Bacău', bh: 'Bihor',
   bn: 'Bistrița-Năsăud', br: 'Brăila', bt: 'Botoșani', bv: 'Brașov', bz: 'Buzău',
@@ -119,7 +142,9 @@ const COUNTY_NAMES: Record<string, string> = {
   vl: 'Vâlcea', vn: 'Vrancea', vs: 'Vaslui',
 };
 
-async function load(county: string) {
+type Loaded = { value: ValueFile; tax: TaxFile };
+
+async function load(county: string): Promise<Loaded> {
   const [value, tax] = await Promise.all([
     fetch(`${base}data/valoare-${county}.json`).then((r) => r.json() as Promise<ValueFile>),
     fetch(`${base}data/impozit-${county}.json`).then((r) => r.json() as Promise<TaxFile>),
@@ -146,41 +171,64 @@ async function renderNational(): Promise<void> {
     .filter((r: { basis: string }) => r.basis === 'excluded')
     .map((r: { county: string }) => r.county);
   const mld = (eur: number) => `${percent.format(eur / 1e9)} mld`;
+
+  // Written against the file rather than against what was true when this was first written.
+  // Every sentence here was once a statement about a gap — București missing, nineteen counties
+  // estimated — and each stopped being true as a chamber's study was read. The page now says
+  // what the numbers say, and goes back to saying the other thing if a chamber stops
+  // publishing.
+  const predicted = summary.predictedCounties as number;
+  const missing = summary.excludedCounties as number;
+  const whole = predicted === 0 && missing === 0;
+
+  const coverage = [
+    `${summary.measuredCounties} județe citite`,
+    predicted ? `${predicted} estimate` : '',
+    missing ? `${missing} lăsate în afară (${excluded.join(' și ')})` : '',
+  ]
+    .filter(Boolean)
+    .join(', ');
+
   $('national').innerHTML = `
     <div class="card-head"><h2>Cât valorează tot pământul din România</h2></div>
     <div class="stat-row">
       <div class="stat">
-        <div class="stat-label">Valoarea terenului, fără București și Ilfov</div>
+        <div class="stat-label">Valoarea terenului${
+          whole ? ', toată țara' : ', fără județele lipsă'
+        }</div>
         <div class="stat-value accent">${mld(summary.landValueEur.central)}<span class="unit">EUR</span></div>
         <p class="note">
           între ${mld(summary.landValueEur.low)} și ${mld(summary.landValueEur.high)} —
-          o bandă care este eroarea măsurată a modelului, nu o presupunere
+          ${
+            whole
+              ? 'capetele grilelor notariale, cel mai ieftin și cel mai scump preț publicat pe fiecare localitate'
+              : 'o bandă care este eroarea măsurată a modelului, nu o presupunere'
+          }
         </p>
       </div>
       <div class="stat">
         <div class="stat-label">Din care citit din grile notariale</div>
         <div class="stat-value">${percent.format(100 * summary.measuredShareOfValue)}<span class="unit">%</span></div>
-        <p class="note">
-          ${summary.measuredCounties} județe citite, ${summary.predictedCounties} estimate,
-          ${summary.excludedCounties} lăsate în afară (${excluded.join(' și ')})
-        </p>
+        <p class="note">${coverage}</p>
       </div>
       <div class="stat">
-        <div class="stat-label">Cât greșește modelul un județ pe care nu l-a văzut</div>
+        <div class="stat-label">${
+          whole
+            ? 'Cât greșea modelul un județ pe care nu-l văzuse'
+            : 'Cât greșește modelul un județ pe care nu l-a văzut'
+        }</div>
         <div class="stat-value">×${percent.format(assumptions.builtLeaveOneOutErrorFactor)}</div>
         <p class="note">
           teren construit prezis din populația celui mai mare oraș, R²
-          ${percent.format(assumptions.builtR2)}. Cota construită a județului dă R² 0,04 și
-          regiunea de dezvoltare e mai slabă decât nicio variabilă — de aceea nu sunt folosite.
+          ${percent.format(assumptions.builtR2)}.
+          ${
+            whole
+              ? 'Nu mai prezice niciun județ — toate sunt citite. Rămâne testul pe care fiecare l-a trecut când a fost citit: valoarea prezisă înainte, comparată cu grila după.'
+              : 'Cota construită a județului dă R² 0,04 și regiunea de dezvoltare e mai slabă decât nicio variabilă — de aceea nu sunt folosite.'
+          }
         </p>
       </div>
-    </div>
-    <p class="limit blocking">
-      Bucureștiul lipsește din total. Cel mai mare oraș din eșantionul pe care s-a estimat
-      modelul are 390&nbsp;000 de locuitori, Bucureștiul are 2,14 milioane; o extrapolare de
-      cinci ori peste interval nu ar fi o estimare. Cum acolo e cel mai scump teren din țară,
-      cifra de mai sus este o subestimare a României întregi.
-    </p>`;
+    </div>`;
 }
 
 async function main() {
@@ -190,24 +238,47 @@ async function main() {
   );
 
   let state = readHash();
-  if (!manifest.counties.includes(state.county)) state.county = DEFAULTS.county;
-  let loaded = await load(state.county);
+  if (state.county !== ALL && !manifest.counties.includes(state.county)) {
+    state.county = DEFAULTS.county;
+  }
+  // Even with the whole country selected one county's file is loaded first, because the
+  // assumptions the page prints beside the numbers — the exchange rate, the derived built-land
+  // yield — are stamped per build and identical across the forty-two.
+  let loaded = await load(state.county === ALL ? DEFAULTS.county : state.county);
 
   // The map covers every built county, not the selected one, so it needs all of them. Fetched
   // after the first paint rather than before it: the page is useful the moment the selected
   // county is in, and the other thirteen are a background cost the reader should not wait on.
   const valueMap = new ValueMap('map', base);
-  $('map-legend').innerHTML = legend((v) => `${Math.round(v / 1000)}k`);
-  void (async () => {
+  // The hatch key only when something is hatched; the national file says whether anything is.
+  const anyPredicted = await fetch(`${base}data/national.json`)
+    .then((r) => (r.ok ? r.json() : null))
+    .then((n) => (n?.summary?.predictedCounties ?? 0) > 0)
+    .catch(() => false);
+  $('map-legend').innerHTML = legend((v) => `${Math.round(v / 1000)}k`, anyPredicted);
+  // Kept as well as handed to the map: "toate județele" needs every county's own rates, and
+  // fetching them twice for two views of the same numbers would be silly.
+  const cache = new Map<string, Loaded>();
+  if (state.county !== ALL) cache.set(state.county, loaded);
+  const everything = (async () => {
     for (const county of manifest.counties) {
-      const data = county === state.county ? loaded : await load(county);
+      const data = cache.get(county) ?? (await load(county));
+      cache.set(county, data);
       valueMap.load(county, data as never);
     }
   })();
 
-  $('counties').innerHTML = manifest.counties
-    .map((c) => `<button data-county="${c}">${COUNTY_NAMES[c] ?? c.toUpperCase()}</button>`)
-    .join('');
+  const named = [...manifest.counties].sort((a, b) =>
+    (COUNTY_NAMES[a] ?? a).localeCompare(COUNTY_NAMES[b] ?? b, 'ro'),
+  );
+  $('counties').innerHTML = `
+    <label class="field" for="county">Județul</label>
+    <select id="county">
+      <option value="${ALL}">Toate județele (${manifest.counties.length})</option>
+      ${named
+        .map((c) => `<option value="${c}">${COUNTY_NAMES[c] ?? c.toUpperCase()}</option>`)
+        .join('')}
+    </select>`;
 
   /**
    * The measured farmland yield for the county on screen.
@@ -236,29 +307,41 @@ async function main() {
     }
   }
 
-  function render() {
-    const settings: Settings = {
+  /** The reader's controls, with one county's own measured rates substituted in. */
+  function settingsFor(data: Loaded): Settings {
+    return {
       share: state.share,
       value: state.value,
       fiscal: state.fiscal,
       rate: state.rate,
+      collectionRate: state.collection,
       landYield: state.landYield,
-      landYieldAgricultural: agriculturalYield(),
+      landYieldAgricultural:
+        data.tax.assumptions.agriculturalYieldPercent?.central ?? state.landYield,
       landYieldByCategory: Object.fromEntries(
-        Object.entries(loaded.tax.assumptions.yieldByCategoryPercent ?? {}).map(
-          ([code, band]) => [code, band.central],
-        ),
+        Object.entries(data.tax.assumptions.yieldByCategoryPercent ?? {}).map(([code, band]) => [
+          code,
+          band.central,
+        ]),
       ),
-      ronPerEur: loaded.tax.assumptions.ronPerEur,
+      ronPerEur: data.tax.assumptions.ronPerEur,
     };
-    const { rows, totals } = evaluate(loaded.value.localities, code, settings);
+  }
+
+  function render() {
+    const all = state.county === ALL;
+    const settings = settingsFor(loaded);
+    // Every county at its own rates, then the money added — never one county's yields applied
+    // to another's hectares. Counties still arriving are simply not in the sum yet, which the
+    // heading says out loud rather than quietly understating the country.
+    const { rows, totals } = all
+      ? combine([...cache.values()].map((d) => evaluate(d.value.localities, code, settingsFor(d))))
+      : evaluate(loaded.value.localities, code, settings);
     // Same settings object the totals came from, so the colours and the figures cannot
     // disagree; the map substitutes each county's own rate and yields on top of it.
     valueMap.paint(settings, code);
 
-    for (const button of document.querySelectorAll<HTMLButtonElement>('#counties button')) {
-      button.classList.toggle('on', button.dataset.county === state.county);
-    }
+    ($('county') as HTMLSelectElement).value = state.county;
     for (const [id, current] of [
       ['value-band', state.value],
       ['fiscal-band', state.fiscal],
@@ -273,9 +356,22 @@ async function main() {
     ($('rate') as HTMLInputElement).value = String(Math.round(state.rate * 100));
     ($('share') as HTMLInputElement).value = String(Math.round(state.share * 100));
     ($('yield') as HTMLInputElement).value = String(Math.round(state.landYield * 100));
+    ($('collection') as HTMLInputElement).value = String(Math.round(state.collection * 100));
     $('yield-value').textContent = `${percent.format(state.landYield)}%`;
+    $('collection-value').textContent = `${percent.format(100 * state.collection)}%`;
     $('rate-value').textContent = `${percent.format(state.rate)}%`;
     $('share-value').textContent = `×${percent.format(state.share)}`;
+
+    // Measured, not modelled: what the counties on screen actually banked under revenue codes
+    // 07.02.01-03. Summed over the cache for the aggregate, so it covers exactly the counties
+    // the figures beside it cover rather than the whole country.
+    const receipts = (all ? [...cache.values()] : [loaded]).map(
+      (d) => d.tax.summary.collectedRon as number | null,
+    );
+    const collectedActual = receipts.every((r) => typeof r === 'number')
+      ? receipts.reduce((sum, r) => sum + (r as number), 0)
+      : null;
+    const collectedPeriod = loaded.tax.summary.collectedPeriod as string | null;
 
     const neutral = totals.neutral;
     const direction = totals.lvt >= totals.fiscal ? 'more' : 'less';
@@ -283,10 +379,33 @@ async function main() {
       <div class="stat">
         <div class="stat-label">Impozitul de azi, Codul fiscal</div>
         <div class="stat-value">${scaled(totals.fiscal)} <span class="unit">lei</span></div>
+        ${
+          collectedActual === null
+            ? ''
+            : `<p class="note">încasat efectiv în ${collectedPeriod}: <strong>${scaled(
+                collectedActual,
+              )} lei</strong> — ${percent.format(
+                (100 * collectedActual) / totals.fiscal,
+              )}% din cât dă calculul, diferența fiind cota aleasă de consilii, scutirile și restanțele</p>`
+        }
       </div>
       <div class="stat">
         <div class="stat-label">Impozit pe valoare, la ${percent.format(state.rate)}%</div>
         <div class="stat-value ${direction}">${scaled(totals.lvt)} <span class="unit">lei</span></div>
+        <p class="note">pe tot pământul, ca și cifra de alături — așa se compară cele două reguli</p>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Din el, cât s-ar putea încasa</div>
+        <div class="stat-value">${scaled(totals.collected)} <span class="unit">lei</span></div>
+        <p class="note">
+          doar pe cele ${percent.format(
+            totals.value ? (100 * totals.taxable) / totals.value : 0,
+          )}% din valoare aflate în proprietate privată${
+            state.collection < 1
+              ? `, la un grad de colectare de ${percent.format(100 * state.collection)}%`
+              : '; restul e domeniu public, care nu se impozitează'
+          }
+        </p>
       </div>
       <div class="stat">
         <div class="stat-label">Din renta funciară, ia azi</div>
@@ -299,8 +418,17 @@ async function main() {
         <p class="note">
           un impozit care ia toată renta ar fi o cotă pe valoare de
           ${percent.format(totals.value ? (100 * totals.rent) / totals.value : 0)}% —
-          amestecul dintre ${percent.format(state.landYield)}% pe terenul de sub clădiri și
-          ${percent.format(agriculturalYield())}% măsurat pe terenul agricol
+          ${
+            all
+              ? `amestecul dintre ${percent.format(
+                  state.landYield,
+                )}% pe terenul de sub clădiri și randamentul agricol al fiecărui județ, măsurat separat`
+              : `amestecul dintre ${percent.format(
+                  state.landYield,
+                )}% pe terenul de sub clădiri și ${percent.format(
+                  agriculturalYield(),
+                )}% măsurat pe terenul agricol`
+          }
         </p>
       </div>
       <div class="stat wide">
@@ -317,10 +445,16 @@ async function main() {
       if (state.sort === 'value') return b.landValueRon - a.landValueRon;
       return b.deltaRon - a.deltaRon;
     });
-    $('table-title').textContent = `${sorted.length} localități din județul ${
-      COUNTY_NAMES[state.county] ?? state.county
-    }`;
-    $('rows').innerHTML = sorted
+    // The table is capped and the total is not. Three thousand rows is a slow page and a
+    // worse answer than the first few hundred sorted the way the reader asked for; the count
+    // says how many there are so the cap cannot be mistaken for the whole.
+    const LIMIT = 400;
+    const shown = sorted.slice(0, LIMIT);
+    $('table-title').textContent = all
+      ? `${money.format(sorted.length)} localități din ${cache.size} județe` +
+        (sorted.length > LIMIT ? ` — primele ${LIMIT}` : '')
+      : `${sorted.length} localități din județul ${COUNTY_NAMES[state.county] ?? state.county}`;
+    $('rows').innerHTML = shown
       .map(
         (row) => `<tr>
           <td>${row.name}<span class="rank">${
@@ -339,7 +473,16 @@ async function main() {
 
     // The caveats travel with the data rather than living in a footnote, so the page shows
     // exactly the ones its own numbers carry, blocking first.
-    const limits = [...loaded.value.limitations, ...loaded.tax.limitations];
+    // With every county selected the same caveat arrives forty-two times, so they are folded
+    // by id: the reader wants the list of things that are wrong, not one per county.
+    const source = all ? [...cache.values()] : [loaded];
+    const seen = new Map<string, { id: string; text: string; severity: string }>();
+    for (const data of source) {
+      for (const limit of [...data.value.limitations, ...data.tax.limitations]) {
+        if (!seen.has(limit.id)) seen.set(limit.id, limit);
+      }
+    }
+    const limits = [...seen.values()];
     const order = { blocking: 0, material: 1, note: 2 } as Record<string, number>;
     limits.sort((a, b) => (order[a.severity] ?? 3) - (order[b.severity] ?? 3));
     $('limits-count').textContent = `${limits.length}`;
@@ -349,7 +492,9 @@ async function main() {
           `<p class="limit ${limit.severity}"><span class="sev">${limit.severity}</span>${limit.text}</p>`,
       )
       .join('');
-    $('sources').textContent = `Sursele: ${loaded.value.provenance.locator}. Curs BCE din ${loaded.tax.assumptions.exchangeRateDate}.`;
+    $('sources').textContent = all
+      ? `Sursele: grilele notariale ale celor ${cache.size} județe. Curs BCE din ${loaded.tax.assumptions.exchangeRateDate}.`
+      : `Sursele: ${loaded.value.provenance.locator}. Curs BCE din ${loaded.tax.assumptions.exchangeRateDate}.`;
 
     writeHash(state);
   }
@@ -359,6 +504,9 @@ async function main() {
     render();
   }
 
+  $('collection').addEventListener('input', (event) =>
+    update({ collection: Number((event.target as HTMLInputElement).value) / 100 }),
+  );
   $('rate').addEventListener('input', (event) =>
     update({ rate: Number((event.target as HTMLInputElement).value) / 100 }),
   );
@@ -381,10 +529,18 @@ async function main() {
     const sort = (event.target as HTMLElement).dataset.sort as State['sort'] | undefined;
     if (sort) update({ sort });
   });
-  $('counties').addEventListener('click', async (event) => {
-    const county = (event.target as HTMLElement).dataset.county;
+  $('counties').addEventListener('change', async (event) => {
+    const county = (event.target as HTMLSelectElement).value;
     if (!county || county === state.county) return;
-    loaded = await load(county);
+    if (county === ALL) {
+      // The total is only honest once every county is in it, so this waits for the background
+      // fetch to finish rather than adding up whichever half happens to have arrived.
+      $('table-title').textContent = 'se încarcă toate județele…';
+      await everything;
+    } else {
+      loaded = cache.get(county) ?? (await load(county));
+      cache.set(county, loaded);
+    }
     adoptDerivedYield();
     update({ county });
   });
@@ -392,6 +548,15 @@ async function main() {
   adoptDerivedYield();
   render();
   void renderNational();
+  // Arriving *on* `#j=toate`, rather than switching to it. The dropdown's handler waits for
+  // every county before adding them up; a page loaded straight from that URL used to render
+  // once against an empty cache and never look again, so the scenario the whole hash design
+  // exists to make shareable was the one that showed a confident set of zeros.
+  if (state.county === ALL) {
+    $('table-title').textContent = 'se încarcă toate județele…';
+    await everything;
+    render();
+  }
 }
 
 main().catch((error) => {
