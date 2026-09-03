@@ -30,10 +30,19 @@
  * resolution and nowhere finer; painting it commune by commune would dress one coefficient up
  * as local knowledge. The mosaic and the flat shape are the difference in evidence, drawn.
  */
-import { Map as MapLibre, type ExpressionSpecification } from 'maplibre-gl';
+import { Map as MapLibre, setWorkerUrl, type ExpressionSpecification } from 'maplibre-gl';
+// maplibre 6 does its geometry work off the main thread, and it finds that worker by resolving
+// `./maplibre-gl-worker.mjs` against its own `import.meta.url`. After bundling that resolves to
+// a file next to our own bundle, which nobody ever put there — so the worker 404s, no source
+// is ever parsed, and the map paints its background and nothing else. Handing the URL over
+// explicitly is the supported way out: `?worker&url` makes the bundler emit the worker (with
+// the shared chunk it imports folded in) and hands back where it landed.
+import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 
 import { evaluate } from './model';
 import type { FiscalCode, Locality, Settings } from './model';
+
+setWorkerUrl(workerUrl);
 
 /** The national estimate, as much of it as the map needs. */
 export type NationalFile = {
@@ -64,13 +73,30 @@ export type CountyData = {
  * Iași. The steps are round numbers a reader can hold, and the top one is open-ended because
  * the cities have no ceiling worth drawing.
  */
-const BREAKS = [25_000, 60_000, 150_000, 400_000, 1_000_000, 3_000_000];
 const COLOURS = ['#1b3a4b', '#255e6b', '#2f8f7a', '#7bb661', '#d9c05a', '#d9873f', '#c2453a'];
 
-export function legend(format: (value: number) => string, estimated = false): string {
+/** Which number is painted: the price of a hectare, or what the whole commune is worth. */
+export type Metric = 'perHa' | 'total';
+
+const BREAKS: Record<Metric, number[]> = {
+  perHa: [25_000, 60_000, 150_000, 400_000, 1_000_000, 3_000_000],
+  // The commune's whole land value, so the steps are round lei rather than round lei per
+  // hectare — and they are a different question, not the same map rescaled. A large poor
+  // commune and a small rich one land in the same bucket here and in opposite ones above.
+  // Placed where the communes actually are: a twentieth sit below the first break, a
+  // twentieth above the last, and the top step is open because București is fifty times it.
+  total: [50e6, 100e6, 250e6, 500e6, 1e9, 5e9],
+};
+
+export function legend(
+  metric: Metric,
+  format: (value: number) => string,
+  estimated = false,
+): string {
+  const breaks = BREAKS[metric];
   const cells = COLOURS.map((colour, index) => {
-    const from = index === 0 ? 0 : BREAKS[index - 1]!;
-    const to = BREAKS[index];
+    const from = index === 0 ? 0 : breaks[index - 1]!;
+    const to = breaks[index];
     const label = to === undefined ? `${format(from)}+` : `${format(from)}–${format(to)}`;
     return `<span class="key"><i style="background:${colour}"></i>${label}</span>`;
   });
@@ -88,6 +114,7 @@ export class ValueMap {
   private map: MapLibre;
   private ready = false;
   private counties = new Map<string, CountyData>();
+  private metric: Metric = 'perHa';
 
   constructor(container: string, base: string) {
     this.map = new MapLibre({
@@ -135,12 +162,7 @@ export class ValueMap {
           type: 'fill',
           source: 'county-shapes',
           paint: {
-            'fill-color': [
-              'case',
-              ['==', ['coalesce', ['feature-state', 'perHa'], -1], -1],
-              'rgba(0,0,0,0)',
-              ['step', ['feature-state', 'perHa'], ...interleave()],
-            ] as unknown as ExpressionSpecification,
+            'fill-color': fill(this.metric, 'rgba(0,0,0,0)'),
             // Half, so an estimate never reads as loud as a measurement.
             'fill-opacity': 0.5,
           },
@@ -170,12 +192,7 @@ export class ValueMap {
           // A commune with no feature state has no price. It is drawn as the background
           // rather than as the bottom of the scale, because "cheap" and "not published" are
           // different things and the second is common here.
-          'fill-color': [
-            'case',
-            ['==', ['coalesce', ['feature-state', 'perHa'], -1], -1],
-            '#232a31',
-            ['step', ['feature-state', 'perHa'], ...interleave()],
-          ] as unknown as ExpressionSpecification,
+          'fill-color': fill(this.metric, '#232a31'),
           'fill-opacity': 0.92,
         },
       });
@@ -227,9 +244,13 @@ export class ValueMap {
       if (id === undefined || row.basis !== 'predicted' || !row.landValueEur) continue;
       // Euro to lei at a fixed rate would be a second source of truth; the scale is in lei,
       // so the same conversion the tax files carry is used, read off any one of them.
+      const value = row.landValueEur.central * this.ronPerEur;
       this.map.setFeatureState(
         { source: 'county-shapes', id },
-        { perHa: (row.landValueEur.central * this.ronPerEur) / row.totalHa, estimated: true },
+        // Both metrics, or the toggle would blank the estimated counties instead of switching
+        // them. A county's total is not on the same scale as a commune's, and it is not meant
+        // to be: the flat shape is already saying this is a county, not a mosaic.
+        { perHa: value / row.totalHa, total: value, estimated: true },
       );
     }
   }
@@ -238,6 +259,22 @@ export class ValueMap {
   private get ronPerEur(): number {
     const first = this.counties.values().next().value;
     return first ? first.tax.assumptions.ronPerEur : 5;
+  }
+
+  /**
+   * Switch which of the two numbers is coloured.
+   *
+   * Both are already on every commune — `repaint` sets them together — so this only swaps the
+   * expression the fill reads and the scale it reads it against. Nothing is recomputed, which
+   * is why the toggle is instant and why the two views can never disagree about a commune.
+   */
+  setMetric(metric: Metric): void {
+    this.metric = metric;
+    if (!this.ready) return;
+    this.map.setPaintProperty('uat-fill', 'fill-color', fill(metric, '#232a31'));
+    if (this.map.getLayer('county-fill')) {
+      this.map.setPaintProperty('county-fill', 'fill-color', fill(metric, 'rgba(0,0,0,0)'));
+    }
   }
 
   private current: { settings: Settings; code: FiscalCode } | null = null;
@@ -309,10 +346,26 @@ function hatch(): ImageData {
 }
 
 /** The step expression wants value, colour, value, colour…, starting from the second colour. */
-function interleave(): Array<string | number> {
+function interleave(metric: Metric): Array<string | number> {
   const out: Array<string | number> = [COLOURS[0]!];
-  BREAKS.forEach((breakpoint, index) => {
+  BREAKS[metric].forEach((breakpoint, index) => {
     out.push(breakpoint, COLOURS[index + 1]!);
   });
   return out;
+}
+
+/**
+ * The fill colour for one metric, with a colour of its own for "no number here".
+ *
+ * Built rather than written twice because the communes and the estimated counties differ only
+ * in what they show where the state is missing — a commune shows the background, a county
+ * shows nothing at all — and two copies of a seven-step expression drift.
+ */
+function fill(metric: Metric, missing: string): ExpressionSpecification {
+  return [
+    'case',
+    ['==', ['coalesce', ['feature-state', metric], -1], -1],
+    missing,
+    ['step', ['feature-state', metric], ...interleave(metric)],
+  ] as unknown as ExpressionSpecification;
 }
