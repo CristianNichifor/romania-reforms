@@ -5,32 +5,108 @@
   "description": "Two numbers carry the whole cost: what a kilometre of ordinary town bypass costs, and how much longer a bypass is than the street it replaces. Both are named here rather than buried, because the total is simply their product with a measured length.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "title", "publisher", "period", "provenance", "currency", "items", "limitations"],
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "period",
+    "provenance",
+    "currency",
+    "items",
+    "limitations"
+  ],
   "properties": {
-    "$schema": { "type": "string" },
-    "id": { "type": "string" },
-    "title": { "type": "string" },
-    "publisher": { "type": "string" },
-    "period": { "type": "string" },
-    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
-    "currency": { "type": "string" },
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "period": {
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json#/$defs/provenance"
+    },
+    "currency": {
+      "type": "string"
+    },
     "items": {
       "type": "object",
       "additionalProperties": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["value", "unit", "confidence"],
+        "required": [
+          "value",
+          "unit",
+          "confidence"
+        ],
         "properties": {
-          "value": { "type": "number", "exclusiveMinimum": 0 },
-          "unit": { "type": "string" },
-          "confidence": { "enum": ["verbatim", "derived", "assumed"] },
-          "note": { "type": "string" }
+          "value": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "unit": {
+            "type": "string"
+          },
+          "confidence": {
+            "enum": [
+              "verbatim",
+              "derived",
+              "assumed"
+            ]
+          },
+          "note": {
+            "type": "string"
+          }
         }
       }
     },
     "limitations": {
-      "type": "array", "minItems": 1,
-      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "provenance.schema.json#/$defs/limitation"
+      }
+    },
+    "benchmarks": {
+      "type": "object",
+      "description": "Contracts found while sourcing and deliberately NOT used. Recorded because their exclusion is itself a finding: most published Romanian bypass contracts pay to finish a stalled project rather than to build one, so dividing them by length gives a price for a different thing.",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "value",
+          "unit",
+          "confidence",
+          "note"
+        ],
+        "properties": {
+          "value": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "unit": {
+            "type": "string"
+          },
+          "confidence": {
+            "enum": [
+              "verbatim",
+              "derived",
+              "assumed"
+            ]
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
     }
   }
 }

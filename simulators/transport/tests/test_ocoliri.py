@@ -149,3 +149,24 @@ def test_the_benefit_declares_what_it_leaves_out(built):
     ids = {limitation["id"] for limitation in built["limitations"]}
     assert "beneficiul-e-doar-timp-de-drum" in ids
     assert "castigul-e-pe-clasa-nu-pe-segment" in ids
+
+
+def test_completion_contracts_are_recorded_but_never_priced_from(inputs):
+    """The trap this file exists to avoid.
+
+    Most published Romanian bypass contracts pay to FINISH a stalled project — Targu Jiu,
+    Mihailesti — not to build one. Dividing them by length gives a convincing lei-per-km for a
+    different thing, and averaging them with a real execution contract would drag the national
+    figure down by a factor of two. They are kept as benchmarks so the exclusion is visible,
+    and the unit price must stay above them.
+    """
+    document = json.loads(INPUTS.read_text(encoding="utf-8"))
+    benchmarks = document.get("benchmarks", {})
+    assert "targuJiuCompletion" in benchmarks, "the exclusion has to stay visible"
+    for entry in benchmarks.values():
+        assert "finaliz" in entry["note"].lower() or "terminare" in entry["note"].lower(), (
+            "a benchmark kept here must say why it is not used"
+        )
+    # Targu Jiu is 207 m lei over 20 km. If the working price ever fell to that, someone has
+    # averaged a completion contract into a construction price.
+    assert inputs["bypassLeiPerKm"]["value"] > 207_000_000 / 20

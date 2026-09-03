@@ -16,7 +16,7 @@
       "value": 19913000,
       "unit": "RON/km",
       "confidence": "derived",
-      "note": "260.000.000 lei fără TVA împărțiți la 13,057 km de Variantă de Ocolire Sighișoara, adică 19,91 milioane de lei pe kilometru, circa 4,0 milioane de euro. Este cel mai apropiat reper de o centură obișnuită de oraș mic: două benzi, teren de deal, contract din octombrie 2025. Ce NU este: o centură metropolitană. Clujul iese la 27 de milioane de euro pe kilometru și Sibiul la 21, dar acelea sunt inele de tip autostradă, cu zeci de poduri și tuneluri — alt produs, nu același produs mai scump. Pentru scară istorică: Satu Mare a fost contractat în 2015 la 149,7 milioane de lei pentru 19,54 km, adică 7,7 milioane de lei pe kilometru, ceea ce arată cât a urcat prețul în zece ani mai degrabă decât cât costă azi."
+      "note": "260.000.000 lei fără TVA împărțiți la 13,057 km de Variantă de Ocolire Sighișoara, adică 19,91 milioane de lei pe kilometru, circa 4,0 milioane de euro. Este cel mai apropiat reper de o centură obișnuită de oraș mic: două benzi, teren de deal, contract din octombrie 2025. Ce NU este: o centură metropolitană. Clujul iese la 27 de milioane de euro pe kilometru și Sibiul la 21, dar acelea sunt inele de tip autostradă, cu zeci de poduri și tuneluri — alt produs, nu același produs mai scump. Pentru scară istorică: Satu Mare a fost contractat în 2015 la 149,7 milioane de lei pentru 19,54 km, adică 7,7 milioane de lei pe kilometru, ceea ce arată cât a urcat prețul în zece ani mai degrabă decât cât costă azi. Căutarea unui al doilea reper curat a dat peste o problemă care merită spusă: cele mai multe contracte de centură publicate sunt de FINALIZARE a unor lucrări începute și oprite — Târgu Jiu, Mihăilești — nu de construire de la zero. Sunt consemnate în benchmarks și nu se folosesc, pentru că împărțirea lor la lungime dă un preț pe kilometru care nu este al aceluiași lucru. Sighișoara rămâne singurul contract de execuție întreagă găsit."
     },
     "bypassLengthFactor": {
       "value": 1.4,
@@ -28,9 +28,25 @@
   "limitations": [
     {
       "id": "un-singur-pret",
-      "text": "Tot costul stă pe un singur contract. Un al doilea și un al treilea proiect recent, în câmpie și în munte, ar transforma cifra dintr-un punct într-un interval — și ar arăta cât din variație este teren și cât este piață.",
+      "text": "Tot costul stă pe un singur contract, și nu din lipsă de căutare: contractele de centură publicate sunt în majoritate de finalizare a unor lucrări oprite, nu de construire, deci nu se pot compara. Ce ar rezolva problema este un eșantion de contracte de execuție întreagă, în câmpie și în munte — atunci cifra ar deveni o distribuție cu terenul separat de piață, în loc de un punct.",
       "severity": "material",
-      "affects": ["ocoliri"]
+      "affects": [
+        "ocoliri"
+      ]
     }
-  ]
+  ],
+  "benchmarks": {
+    "targuJiuCompletion": {
+      "value": 207000000,
+      "unit": "RON, contract",
+      "confidence": "verbatim",
+      "note": "207.000.000 de lei fără TVA pentru 20 km de Variantă de Ocolire Târgu Jiu, adică 10,35 milioane pe kilometru. NU se folosește ca reper și nu intră în nicio medie: contractul este pentru FINALIZAREA lucrărilor la un proiect început și oprit, deci prețul acoperă ce mai rămăsese de făcut, nu construirea unei centuri de la zero. Este consemnat tocmai pentru că arată de ce o medie a contractelor publicate ar subevalua costul: cele mai multe centuri românești ajung în presă când se reia lucrarea, nu când începe."
+    },
+    "mihailestiCompletion": {
+      "value": 36862651,
+      "unit": "RON, contract",
+      "confidence": "verbatim",
+      "note": "36.862.651,20 lei fără TVA pentru finalizarea Variantei de Ocolire Mihăilești. Aceeași problemă ca la Târgu Jiu: este un contract de terminare, nu de construire, deci nu se poate transforma într-un preț pe kilometru comparabil."
+    }
+  }
 }
