@@ -1,0 +1,103 @@
+{
+  "$schema": "../schema/ocoliri.schema.json",
+  "id": "ocoliri",
+  "title": "Câte centuri ocolitoare cer drumurile naționale, și cât ar costa",
+  "publisher": "Cristian Nichifor",
+  "period": "2026",
+  "provenance": {
+    "source": "openstreetmap-maxspeed-plus-contract-sighisoara",
+    "locator": "traversările de localitate deduse din limita de 50 km/h pe clasele trunk și primary din romania-latest.osm.pbf; prețul pe kilometru din contractul de execuție al Variantei de Ocolire Sighișoara, octombrie 2025",
+    "confidence": "derived",
+    "note": "Traversările sunt măsurate din etichete, nu numărate dintr-o listă de proiecte. Prețul vine dintr-un singur contract recent, iar lungimea de construit este traversarea înmulțită cu un factor de ocolire presupus."
+  },
+  "classes": [
+    "trunk",
+    "primary"
+  ],
+  "network": {
+    "totalKm": 18761.5,
+    "coverage": 0.8657,
+    "throughLocalityKm": 6748.0,
+    "throughLocalityShare": 0.3597
+  },
+  "defaultThresholdM": 500,
+  "byThreshold": {
+    "200": {
+      "crossings": 3714,
+      "throughTownKm": 6602.0,
+      "bypassKm": 9242.7,
+      "medianCrossingM": 1077.0,
+      "costRon": 184050579705
+    },
+    "500": {
+      "crossings": 2781,
+      "throughTownKm": 6291.7,
+      "bypassKm": 8808.4,
+      "medianCrossingM": 1513.0,
+      "costRon": 175402367994
+    },
+    "1000": {
+      "crossings": 1953,
+      "throughTownKm": 5689.4,
+      "bypassKm": 7965.2,
+      "medianCrossingM": 2025.0,
+      "costRon": 158611357028
+    },
+    "2000": {
+      "crossings": 1002,
+      "throughTownKm": 4305.0,
+      "bypassKm": 6027.0,
+      "medianCrossingM": 3064.0,
+      "costRon": 120015114405
+    }
+  },
+  "headline": {
+    "crossings": 2781,
+    "throughTownKm": 6291.7,
+    "bypassKm": 8808.4,
+    "medianCrossingM": 1513.0,
+    "costRon": 175402367994
+  },
+  "limitations": [
+    {
+      "id": "numarul-e-un-prag-nu-o-descoperire",
+      "text": "Câte centuri sunt necesare depinde de unde se trage linia: la 200 de metri ies 3,714 de traversări, la un kilometru 1,953, la doi kilometri 1,002. Pragul implicit este de 500 de metri și este o alegere, nu o măsurătoare. Curba întreagă este publicată tocmai ca cifra să nu poată fi citată fără pragul ei.",
+      "severity": "material",
+      "affects": [
+        "ocoliri"
+      ]
+    },
+    {
+      "id": "traversarile-sunt-un-prag-de-jos",
+      "text": "Acoperirea cu maxspeed este de 87% din kilometri pe aceste clase, deci traversările de pe porțiunile neetichetate nu se văd aici. Numărul este un prag de jos, nu un total. În plus, se numără ce traversează drumul ASTĂZI: o localitate ocolită deja nu apare, ceea ce este corect, iar una a cărei zonă de 50 nu a fost cartografiată tot nu apare, ceea ce nu este.",
+      "severity": "material",
+      "affects": [
+        "ocoliri"
+      ]
+    },
+    {
+      "id": "un-singur-contract-de-referinta",
+      "text": "Prețul pe kilometru vine dintr-un singur contract: Varianta de Ocolire Sighișoara, 260 de milioane de lei fără TVA pentru 13,057 km, ordin de începere octombrie 2025. Este cel mai potrivit reper găsit — recent, drum de două benzi, teren de deal — dar este UNUL. Terenul nu este diferențiat: în câmpie o centură ar fi mai ieftină, iar în munte considerabil mai scumpă. Centurile metropolitane nu sunt folosite ca reper pentru că sunt alt produs: Cluj iese la 27 de milioane de euro pe kilometru cu 156 de poduri și tuneluri, Sibiu la 21.",
+      "severity": "material",
+      "affects": [
+        "ocoliri"
+      ]
+    },
+    {
+      "id": "pretul-de-contract-nu-e-costul-total",
+      "text": "Valoarea contractului de execuție nu include, de regulă, exproprierile, mutarea utilităților, proiectarea anterioară și avizele. La proiectele rutière românești acestea adaugă frecvent între 10 și 30 la sută. Cifra de aici este deci un cost de execuție, iar bugetul real este mai mare.",
+      "severity": "material",
+      "affects": [
+        "ocoliri"
+      ]
+    },
+    {
+      "id": "nu-e-inca-legat-de-timpii-de-parcurs",
+      "text": "Modelul spune cât costă ocolirea, nu cât timp câștigă. Legătura există și este calculabilă din același model — o localitate ocolită scoate acei kilometri din regimul de 50 și îi trece în cel de 90 — dar nu este încă făcută. Până atunci, cifra este un cost fără beneficiul lui alături, adică exact jumătatea de care un decident nu are nevoie singură.",
+      "severity": "blocking",
+      "affects": [
+        "ocoliri"
+      ]
+    }
+  ]
+}

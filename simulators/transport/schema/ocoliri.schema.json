@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/ocoliri.schema.json",
+  "title": "The bypass programme Romania's national roads imply",
+  "description": "Turns the speed model's central finding — that a national road is slow because a third of it runs through villages — from a share into a list of places. Every contiguous stretch of trunk or primary road signed at 50 km/h is one settlement the road passes through rather than around. How many of those deserve a bypass depends on where the length threshold is drawn, so the whole curve is published rather than one number.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "title", "publisher", "period", "provenance", "classes", "network", "defaultThresholdM", "byThreshold", "headline", "limitations"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "type": "string" },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "period": { "type": "string" },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+    "classes": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "network": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["totalKm", "coverage", "throughLocalityKm", "throughLocalityShare"],
+      "properties": {
+        "totalKm": { "type": "number", "exclusiveMinimum": 0 },
+        "coverage": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "throughLocalityKm": { "type": "number", "exclusiveMinimum": 0 },
+        "throughLocalityShare": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 }
+      }
+    },
+    "defaultThresholdM": { "type": "integer", "exclusiveMinimum": 0 },
+    "byThreshold": {
+      "type": "object",
+      "description": "Keyed by minimum crossing length in metres. Published in full because the count is a function of the threshold, and a count quoted without its threshold is not an answer.",
+      "additionalProperties": { "$ref": "#/$defs/tally" }
+    },
+    "headline": { "$ref": "#/$defs/tally" },
+    "limitations": {
+      "type": "array", "minItems": 1,
+      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+    }
+  },
+  "$defs": {
+    "tally": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["crossings", "throughTownKm", "bypassKm", "medianCrossingM", "costRon"],
+      "properties": {
+        "crossings": { "type": "integer", "minimum": 0 },
+        "throughTownKm": { "type": "number", "minimum": 0 },
+        "bypassKm": { "type": "number", "minimum": 0, "description": "Longer than throughTownKm: a bypass arcs around the settlement it replaces." },
+        "medianCrossingM": { "type": "number", "minimum": 0 },
+        "costRon": { "type": "number", "minimum": 0 }
+      }
+    }
+  }
+}

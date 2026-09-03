@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/ocoliri-inputs.schema.json",
+  "title": "Unit prices for the bypass programme",
+  "description": "Two numbers carry the whole cost: what a kilometre of ordinary town bypass costs, and how much longer a bypass is than the street it replaces. Both are named here rather than buried, because the total is simply their product with a measured length.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "title", "publisher", "period", "provenance", "currency", "items", "limitations"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "type": "string" },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "period": { "type": "string" },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+    "currency": { "type": "string" },
+    "items": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["value", "unit", "confidence"],
+        "properties": {
+          "value": { "type": "number", "exclusiveMinimum": 0 },
+          "unit": { "type": "string" },
+          "confidence": { "enum": ["verbatim", "derived", "assumed"] },
+          "note": { "type": "string" }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array", "minItems": 1,
+      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+    }
+  }
+}

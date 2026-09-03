@@ -1,0 +1,36 @@
+{
+  "$schema": "../schema/ocoliri-inputs.schema.json",
+  "id": "ocoliri-inputs",
+  "title": "Prețurile unitare pentru centurile ocolitoare",
+  "publisher": "Cristian Nichifor",
+  "period": "2026",
+  "provenance": {
+    "source": "contracte-cnair",
+    "locator": "contractul de execuție al Variantei de Ocolire Sighișoara, ordin de începere martie 2026, valoare aproximativ 260.000.000 lei fără TVA pentru 13,057 km",
+    "confidence": "derived",
+    "note": "Un singur contract recent, pentru un drum de două benzi în teren de deal. Reperele metropolitane nu se folosesc pentru că sunt alt produs."
+  },
+  "currency": "RON",
+  "items": {
+    "bypassLeiPerKm": {
+      "value": 19913000,
+      "unit": "RON/km",
+      "confidence": "derived",
+      "note": "260.000.000 lei fără TVA împărțiți la 13,057 km de Variantă de Ocolire Sighișoara, adică 19,91 milioane de lei pe kilometru, circa 4,0 milioane de euro. Este cel mai apropiat reper de o centură obișnuită de oraș mic: două benzi, teren de deal, contract din octombrie 2025. Ce NU este: o centură metropolitană. Clujul iese la 27 de milioane de euro pe kilometru și Sibiul la 21, dar acelea sunt inele de tip autostradă, cu zeci de poduri și tuneluri — alt produs, nu același produs mai scump. Pentru scară istorică: Satu Mare a fost contractat în 2015 la 149,7 milioane de lei pentru 19,54 km, adică 7,7 milioane de lei pe kilometru, ceea ce arată cât a urcat prețul în zece ani mai degrabă decât cât costă azi."
+    },
+    "bypassLengthFactor": {
+      "value": 1.4,
+      "unit": "ratio",
+      "confidence": "assumed",
+      "note": "Cu cât este mai lungă centura decât strada pe care o înlocuiește. O ocolire nu merge drept: ocolește localitatea, deci parcurge un arc, și se leagă de drumul național la ambele capete. 1,4 este o presupunere de lucru — la Sighișoara, 13,057 km de centură pentru o traversare de ordinul a 8-9 km dă un raport apropiat. Este parametrul cu a doua influență ca mărime asupra costului total, după prețul pe kilometru, și primul care ar trebui înlocuit cu o măsurătoare pe un eșantion de centuri construite."
+    }
+  },
+  "limitations": [
+    {
+      "id": "un-singur-pret",
+      "text": "Tot costul stă pe un singur contract. Un al doilea și un al treilea proiect recent, în câmpie și în munte, ar transforma cifra dintr-un punct într-un interval — și ar arăta cât din variație este teren și cât este piață.",
+      "severity": "material",
+      "affects": ["ocoliri"]
+    }
+  ]
+}
