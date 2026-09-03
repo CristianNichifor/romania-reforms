@@ -156,7 +156,8 @@
                 "measuredShareOfArea",
                 "taxableValueEur",
                 "taxableSharePercent",
-                "plausibility"
+                "plausibility",
+                "filledGaps"
             ],
             "properties": {
                 "counties": {
@@ -343,6 +344,90 @@
                                     }
                                 }
                             }
+                        }
+                    }
+                },
+                "filledGaps": {
+                    "description": "The headline with the unpriced hectares valued at the national transfer price per cadastral code. A second total, not a replacement: the headline counts only what a study actually priced.",
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "landValueEur",
+                        "addedEur",
+                        "addedSharePercent",
+                        "addedByCodeEur",
+                        "filledHaByCode",
+                        "notFilledHaByCode",
+                        "notFilledReason"
+                    ],
+                    "properties": {
+                        "landValueEur": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [
+                                "low",
+                                "central",
+                                "high"
+                            ],
+                            "properties": {
+                                "low": {
+                                    "type": "number"
+                                },
+                                "central": {
+                                    "type": "number"
+                                },
+                                "high": {
+                                    "type": "number"
+                                }
+                            }
+                        },
+                        "addedEur": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [
+                                "low",
+                                "central",
+                                "high"
+                            ],
+                            "properties": {
+                                "low": {
+                                    "type": "number"
+                                },
+                                "central": {
+                                    "type": "number"
+                                },
+                                "high": {
+                                    "type": "number"
+                                }
+                            }
+                        },
+                        "addedSharePercent": {
+                            "type": "number",
+                            "minimum": 0
+                        },
+                        "addedByCodeEur": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "number",
+                                "minimum": 0
+                            }
+                        },
+                        "filledHaByCode": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "number",
+                                "minimum": 0
+                            }
+                        },
+                        "notFilledHaByCode": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "number",
+                                "minimum": 0
+                            }
+                        },
+                        "notFilledReason": {
+                            "type": "string"
                         }
                     }
                 }
