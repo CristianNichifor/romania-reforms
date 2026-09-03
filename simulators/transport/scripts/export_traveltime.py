@@ -62,12 +62,20 @@ def pair_checksum(a: list[str], b: list[str]) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
-    argparse.ArgumentParser(description=__doc__).parse_args(argv)
+    parser = argparse.ArgumentParser(description=__doc__)
+    # The bypass counterfactual is exported through this same code, so the browser can hold
+    # both networks and recompute journeys against either. The edge ORDER must be identical
+    # between the two — the app indexes them positionally — which it is, because both come
+    # from the same adjacency file in the same order.
+    parser.add_argument("--times", type=Path, default=None, help="alternate road_time parquet")
+    parser.add_argument("--bin", type=Path, default=None, help="alternate output .bin")
+    args = parser.parse_args(argv)
+    out_bin = args.bin or OUT_BIN
 
     import pandas as pd
 
     adjacency_path = PROCESSED / "adjacency.parquet"
-    times_path = ROOT / "data" / "road_time.parquet"
+    times_path = args.times or ROOT / "data" / "road_time.parquet"
     needed = (
         (adjacency_path, "administrativ build_adjacency"),
         (times_path, "scripts.build_road_time"),
@@ -142,7 +150,7 @@ def main(argv: list[str] | None = None) -> int:
     # and modelled a country nobody had built.
     seconds = times["road_s"].to_numpy(dtype=np.float32)
     metres = distances["road_m"].to_numpy(dtype=np.float32)
-    OUT_BIN.write_bytes(
+    out_bin.write_bytes(
         a_index.tobytes() + b_index.tobytes() + seconds.tobytes() + metres.tobytes()
     )
 
@@ -197,12 +205,12 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     print(
-        f"  {len(seconds):,} edges, {OUT_BIN.stat().st_size / 1024:.0f} KB "
+        f"  {len(seconds):,} edges, {out_bin.stat().st_size / 1024:.0f} KB "
         f"(a+b indices and seconds)"
     )
     print(f"  impassable {int((~finite).sum()):,}   median {manifest['medianSeconds']:.0f} s")
     print(f"  pair checksum {manifest['pairChecksum']}")
-    print(f"Wrote {OUT_BIN} and {OUT_MANIFEST}")
+    print(f"Wrote {out_bin} and {OUT_MANIFEST}")
     return 0
 
 

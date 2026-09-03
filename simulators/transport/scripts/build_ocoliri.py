@@ -41,6 +41,10 @@ ROOT = Path(__file__).resolve().parents[1]
 ADMINISTRATIV = ROOT.parent / "administrativ"
 PBF = ADMINISTRATIV / "data" / "raw" / "romania-latest.osm.pbf"
 OUT = ROOT / "data" / "ocoliri.json"
+LIMITS_IN = ROOT / "data" / "road-limits.json"
+LIMITS_OUT = ROOT / "data" / "road-limits-bypassed.json"
+TIMES_BASE = ROOT / "data" / "road_time.parquet"
+TIMES_BYPASSED = ROOT / "data" / "road_time_bypassed.parquet"
 INPUTS = ROOT / "data" / "ocoliri-inputs.json"
 
 # The national network. County roads are left out on purpose: a DJ through a village is a
@@ -132,6 +136,36 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     default = by_threshold[str(DEFAULT_THRESHOLD_M)]
+
+    # The benefit, if the counterfactual has been routed. Both files come from the same graph
+    # and the same code with only the limits changed, which is what makes them comparable —
+    # and it is why the benefit is measured here rather than estimated from the speed table.
+    benefit = None
+    if TIMES_BASE.exists() and TIMES_BYPASSED.exists():
+        import pandas as pd
+
+        merged = pd.read_parquet(TIMES_BASE).merge(
+            pd.read_parquet(TIMES_BYPASSED), on=["a_siruta", "b_siruta"], suffixes=("_b", "_y")
+        )
+        good = np.isfinite(merged["road_min_b"]) & np.isfinite(merged["road_min_y"])
+        good &= merged["road_min_b"] > 0
+        before, after = merged.loc[good, "road_min_b"], merged.loc[good, "road_min_y"]
+        benefit = {
+            "pairs": int(good.sum()),
+            "medianMinBefore": round(float(before.median()), 2),
+            "medianMinAfter": round(float(after.median()), 2),
+            "meanMinBefore": round(float(before.mean()), 2),
+            "meanMinAfter": round(float(after.mean()), 2),
+            "totalHoursSaved": round(float((before - after).sum()) / 60, 1),
+            "timeRatio": round(float(after.sum() / before.sum()), 4),
+            "pairsFaster": int((after < before).sum()),
+            "pairsSlower": int((after > before).sum()),
+        }
+        print(
+            f"  benefit: median {benefit['medianMinBefore']} -> "
+            f"{benefit['medianMinAfter']} min ({benefit['timeRatio'] - 1:+.1%} on total), "
+            f"{benefit['pairsFaster']:,} of {benefit['pairs']:,} pairs faster"
+        )
     document = {
         "$schema": "../schema/ocoliri.schema.json",
         "id": "ocoliri",
@@ -162,6 +196,7 @@ def main(argv: list[str] | None = None) -> int:
         "defaultThresholdM": DEFAULT_THRESHOLD_M,
         "byThreshold": by_threshold,
         "headline": default,
+        "benefit": benefit,
         "limitations": [
             {
                 "id": "numarul-e-un-prag-nu-o-descoperire",
@@ -217,20 +252,76 @@ def main(argv: list[str] | None = None) -> int:
                 "affects": ["ocoliri"],
             },
             {
-                "id": "nu-e-inca-legat-de-timpii-de-parcurs",
+                "id": "castigul-e-pe-clasa-nu-pe-segment",
                 "text": (
-                    "Modelul spune cât costă ocolirea, nu cât timp câștigă. Legătura există și "
-                    "este calculabilă din același model — o localitate ocolită scoate acei "
-                    "kilometri din regimul de 50 și îi trece în cel de 90 — dar nu este încă "
-                    "făcută. Până atunci, cifra este un cost fără beneficiul lui alături, "
-                    "adică exact jumătatea de care un decident nu are nevoie singură."
+                    "Beneficiul este măsurat, nu estimat: aceeași rețea, același cod, singura "
+                    "diferență fiind fișierul de limite. Dar câștigul se aplică pe CLASĂ, nu pe "
+                    "segment. speeds.py calculează o singură viteză pentru tot ce e trunk și "
+                    "una pentru tot ce e primary, pornind de la cota medie de localitate a "
+                    "clasei; a ocoli 93% dintre traversări ridică acea medie peste tot deodată, "
+                    "inclusiv pe porțiuni care nu ar fi ocolite niciodată, cum sunt cele din "
+                    "interiorul orașelor mari. Pe totalul celor 9.235 de perechi estimarea este "
+                    "rezonabilă; pentru o pereche anume este întinsă, în ambele sensuri. O "
+                    "variantă pe segment ar cere reconstruirea grafului cu limite per muchie."
                 ),
-                "severity": "blocking",
+                "severity": "material",
+                "affects": ["ocoliri"],
+            },
+            {
+                "id": "beneficiul-e-doar-timp-de-drum",
+                "text": (
+                    "Ce se măsoară aici este timpul de parcurs între reședințe, adică exact "
+                    "mărimea pe care o folosește restul acestui simulator. Ce NU se măsoară: "
+                    "siguranța rutieră, zgomotul și poluarea scoase din sat, valoarea "
+                    "terenului, și mai ales traficul care nu e autobuz. Justificarea "
+                    "economică a unei centuri stă în tot traficul care o folosește, iar "
+                    "volumele de trafic nu există în OpenStreetMap — recensământul de "
+                    "circulație al CNAIR ar fi sursa. Deci beneficiul de aici este un prag de "
+                    "jos, calculat pentru o singură categorie de utilizatori."
+                ),
+                "severity": "material",
                 "affects": ["ocoliri"],
             },
         ],
     }
     OUT.write_text(json.dumps(document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+    # The counterfactual limits: the same measurement, with the bypassed settlements taken out
+    # of the in-locality share. Feeding this through speeds.py and build_road_time gives the
+    # journey times of a country that built the programme — computed by the same code as the
+    # baseline, which is the only way the two are comparable.
+    #
+    # The bypassed kilometres are split between trunk and primary in proportion to each
+    # class's in-locality length, rather than measured per class. Merging crossings per class
+    # would cut a village in half wherever the road changes classification mid-settlement and
+    # drop both halves below the threshold; this approximation keeps the crossing whole and is
+    # declared in the limitation below.
+    limits = json.loads(LIMITS_IN.read_text(encoding="utf-8"))
+    bypassed_share = default["throughTownKm"] / inside_km if inside_km else 0.0
+    for name in CLASSES:
+        entry = limits["classes"].get(name)
+        if entry and entry.get("usable"):
+            entry["locality_share"] = round(entry["locality_share"] * (1 - bypassed_share), 6)
+    limits["provenance"]["note"] = (
+        f"CONTRAFACTUAL: aceleași măsurători, cu {bypassed_share:.0%} din traversările de "
+        f"localitate de pe trunk și primary scoase din cota de localitate — programul de "
+        f"{default['crossings']:,} de centuri din data/ocoliri.json. Nu este o măsurătoare a "
+        "României de azi și nu trebuie folosit ca atare."
+    ).replace(",", ".")
+    limits["limitations"] = list(limits.get("limitations", [])) + [
+        {
+            "id": "acest-fisier-e-contrafactual",
+            "text": (
+                "Fișierul descrie o rețea care nu există: cea de după construirea centurilor. "
+                "Se folosește doar ca intrare pentru varianta ocolită a timpilor de parcurs. "
+                "Baza reală este data/road-limits.json."
+            ),
+            "severity": "blocking",
+            "affects": ["road-limits-bypassed"],
+        }
+    ]
+    LIMITS_OUT.write_text(json.dumps(limits, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(f"  bypassed {bypassed_share:.0%} of in-locality km -> {LIMITS_OUT.name}")
 
     print(
         f"\nAt the {DEFAULT_THRESHOLD_M} m threshold: {default['crossings']:,} bypasses, "

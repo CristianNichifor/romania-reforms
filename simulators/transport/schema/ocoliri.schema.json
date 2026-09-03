@@ -5,49 +5,188 @@
   "description": "Turns the speed model's central finding — that a national road is slow because a third of it runs through villages — from a share into a list of places. Every contiguous stretch of trunk or primary road signed at 50 km/h is one settlement the road passes through rather than around. How many of those deserve a bypass depends on where the length threshold is drawn, so the whole curve is published rather than one number.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "title", "publisher", "period", "provenance", "classes", "network", "defaultThresholdM", "byThreshold", "headline", "limitations"],
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "period",
+    "provenance",
+    "classes",
+    "network",
+    "defaultThresholdM",
+    "byThreshold",
+    "headline",
+    "limitations",
+    "benefit"
+  ],
   "properties": {
-    "$schema": { "type": "string" },
-    "id": { "type": "string" },
-    "title": { "type": "string" },
-    "publisher": { "type": "string" },
-    "period": { "type": "string" },
-    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
-    "classes": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "period": {
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json#/$defs/provenance"
+    },
+    "classes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
     "network": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["totalKm", "coverage", "throughLocalityKm", "throughLocalityShare"],
+      "required": [
+        "totalKm",
+        "coverage",
+        "throughLocalityKm",
+        "throughLocalityShare"
+      ],
       "properties": {
-        "totalKm": { "type": "number", "exclusiveMinimum": 0 },
-        "coverage": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
-        "throughLocalityKm": { "type": "number", "exclusiveMinimum": 0 },
-        "throughLocalityShare": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 }
+        "totalKm": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "coverage": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "throughLocalityKm": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "throughLocalityShare": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        }
       }
     },
-    "defaultThresholdM": { "type": "integer", "exclusiveMinimum": 0 },
+    "defaultThresholdM": {
+      "type": "integer",
+      "exclusiveMinimum": 0
+    },
     "byThreshold": {
       "type": "object",
       "description": "Keyed by minimum crossing length in metres. Published in full because the count is a function of the threshold, and a count quoted without its threshold is not an answer.",
-      "additionalProperties": { "$ref": "#/$defs/tally" }
+      "additionalProperties": {
+        "$ref": "#/$defs/tally"
+      }
     },
-    "headline": { "$ref": "#/$defs/tally" },
+    "headline": {
+      "$ref": "#/$defs/tally"
+    },
     "limitations": {
-      "type": "array", "minItems": 1,
-      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "provenance.schema.json#/$defs/limitation"
+      }
+    },
+    "benefit": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "description": "Measured, not estimated: the same road graph routed twice through the same code, with only the limits file differing. Null when the counterfactual has not been routed. The saving applies per road CLASS rather than per segment — see the limitations — so it is sound in aggregate and smeared for any single pair.",
+      "required": [
+        "pairs",
+        "medianMinBefore",
+        "medianMinAfter",
+        "meanMinBefore",
+        "meanMinAfter",
+        "totalHoursSaved",
+        "timeRatio",
+        "pairsFaster",
+        "pairsSlower"
+      ],
+      "properties": {
+        "pairs": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "medianMinBefore": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "medianMinAfter": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "meanMinBefore": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "meanMinAfter": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "totalHoursSaved": {
+          "type": "number"
+        },
+        "timeRatio": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "pairsFaster": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "pairsSlower": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Must be zero. A bypass cannot lengthen a journey; anything else means the counterfactual limits were built wrong."
+        }
+      }
     }
   },
   "$defs": {
     "tally": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["crossings", "throughTownKm", "bypassKm", "medianCrossingM", "costRon"],
+      "required": [
+        "crossings",
+        "throughTownKm",
+        "bypassKm",
+        "medianCrossingM",
+        "costRon"
+      ],
       "properties": {
-        "crossings": { "type": "integer", "minimum": 0 },
-        "throughTownKm": { "type": "number", "minimum": 0 },
-        "bypassKm": { "type": "number", "minimum": 0, "description": "Longer than throughTownKm: a bypass arcs around the settlement it replaces." },
-        "medianCrossingM": { "type": "number", "minimum": 0 },
-        "costRon": { "type": "number", "minimum": 0 }
+        "crossings": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "throughTownKm": {
+          "type": "number",
+          "minimum": 0
+        },
+        "bypassKm": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Longer than throughTownKm: a bypass arcs around the settlement it replaces."
+        },
+        "medianCrossingM": {
+          "type": "number",
+          "minimum": 0
+        },
+        "costRon": {
+          "type": "number",
+          "minimum": 0
+        }
       }
     }
   }

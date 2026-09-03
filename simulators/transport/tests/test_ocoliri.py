@@ -91,11 +91,14 @@ def test_it_says_the_price_rests_on_a_single_contract(built):
     assert "pretul-de-contract-nu-e-costul-total" in ids
 
 
-def test_the_missing_benefit_is_blocking(built):
-    """A cost with no benefit beside it is half an answer, and the half a decision-maker
-    cannot use. It stays blocking until the journey-time coupling exists."""
-    by_id = {limitation["id"]: limitation for limitation in built["limitations"]}
-    assert by_id["nu-e-inca-legat-de-timpii-de-parcurs"]["severity"] == "blocking"
+def test_the_cost_no_longer_stands_without_its_benefit(built):
+    """This file shipped with a blocking limitation saying the benefit was not computed — a
+    cost with nothing beside it is the half of an answer a decision-maker cannot use. The
+    counterfactual now exists, so what must be true is the inverse: the benefit is present and
+    the confession of its absence is gone."""
+    ids = {limitation["id"] for limitation in built["limitations"]}
+    assert "nu-e-inca-legat-de-timpii-de-parcurs" not in ids, "stale: the benefit is computed"
+    assert built.get("benefit") is not None
 
 
 def test_the_programme_is_reported_against_something(built):
@@ -108,3 +111,41 @@ def test_the_programme_is_reported_against_something(built):
     assert built["headline"]["costRon"] > annual, (
         "if bypasses ever cost less than one year of running the buses, check the price"
     )
+
+
+def test_no_journey_gets_slower_from_a_bypass(built):
+    """The strongest correctness signal available, and it is free.
+
+    A bypass can only remove a 50 zone from a route; it cannot lengthen one. If a single pair
+    came out slower, the counterfactual limits were built wrong — most likely by raising a
+    locality share instead of lowering it, which would otherwise produce a perfectly plausible
+    total in the wrong direction.
+    """
+    benefit = built.get("benefit")
+    if benefit is None:
+        pytest.skip("counterfactual not routed")
+    assert benefit["pairsSlower"] == 0
+    assert benefit["pairsFaster"] > 0
+    assert benefit["medianMinAfter"] < benefit["medianMinBefore"]
+    assert 0 < benefit["timeRatio"] < 1
+
+
+def test_the_saving_is_plausible_rather_than_miraculous(built):
+    """Bypassing 93% of village crossings on the national network buys single digits, not a
+    transformation — because a bypass is longer than the street it replaces, and because most
+    of a rural journey is not on a DN at all. A 40% saving would mean the limits file had been
+    corrupted into something like an all-motorway country."""
+    benefit = built.get("benefit")
+    if benefit is None:
+        pytest.skip("counterfactual not routed")
+    saving = 1 - benefit["timeRatio"]
+    assert 0.02 < saving < 0.20, saving
+
+
+def test_the_benefit_declares_what_it_leaves_out(built):
+    """It counts one category of user and one kind of gain. Safety, noise and — decisively —
+    all non-bus traffic are outside it, and the traffic volumes that would price them do not
+    exist in OSM."""
+    ids = {limitation["id"] for limitation in built["limitations"]}
+    assert "beneficiul-e-doar-timp-de-drum" in ids
+    assert "castigul-e-pe-clasa-nu-pe-segment" in ids

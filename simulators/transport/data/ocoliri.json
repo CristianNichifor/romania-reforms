@@ -58,6 +58,17 @@
     "medianCrossingM": 1513.0,
     "costRon": 175402367994
   },
+  "benefit": {
+    "pairs": 9235,
+    "medianMinBefore": 15.95,
+    "medianMinAfter": 14.68,
+    "meanMinBefore": 19.83,
+    "meanMinAfter": 18.11,
+    "totalHoursSaved": 264.1,
+    "timeRatio": 0.9135,
+    "pairsFaster": 5891,
+    "pairsSlower": 0
+  },
   "limitations": [
     {
       "id": "numarul-e-un-prag-nu-o-descoperire",
@@ -92,9 +103,17 @@
       ]
     },
     {
-      "id": "nu-e-inca-legat-de-timpii-de-parcurs",
-      "text": "Modelul spune cât costă ocolirea, nu cât timp câștigă. Legătura există și este calculabilă din același model — o localitate ocolită scoate acei kilometri din regimul de 50 și îi trece în cel de 90 — dar nu este încă făcută. Până atunci, cifra este un cost fără beneficiul lui alături, adică exact jumătatea de care un decident nu are nevoie singură.",
-      "severity": "blocking",
+      "id": "castigul-e-pe-clasa-nu-pe-segment",
+      "text": "Beneficiul este măsurat, nu estimat: aceeași rețea, același cod, singura diferență fiind fișierul de limite. Dar câștigul se aplică pe CLASĂ, nu pe segment. speeds.py calculează o singură viteză pentru tot ce e trunk și una pentru tot ce e primary, pornind de la cota medie de localitate a clasei; a ocoli 93% dintre traversări ridică acea medie peste tot deodată, inclusiv pe porțiuni care nu ar fi ocolite niciodată, cum sunt cele din interiorul orașelor mari. Pe totalul celor 9.235 de perechi estimarea este rezonabilă; pentru o pereche anume este întinsă, în ambele sensuri. O variantă pe segment ar cere reconstruirea grafului cu limite per muchie.",
+      "severity": "material",
+      "affects": [
+        "ocoliri"
+      ]
+    },
+    {
+      "id": "beneficiul-e-doar-timp-de-drum",
+      "text": "Ce se măsoară aici este timpul de parcurs între reședințe, adică exact mărimea pe care o folosește restul acestui simulator. Ce NU se măsoară: siguranța rutieră, zgomotul și poluarea scoase din sat, valoarea terenului, și mai ales traficul care nu e autobuz. Justificarea economică a unei centuri stă în tot traficul care o folosește, iar volumele de trafic nu există în OpenStreetMap — recensământul de circulație al CNAIR ar fi sursa. Deci beneficiul de aici este un prag de jos, calculat pentru o singură categorie de utilizatori.",
+      "severity": "material",
       "affects": [
         "ocoliri"
       ]

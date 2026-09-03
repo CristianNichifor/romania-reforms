@@ -238,13 +238,19 @@ SPEED_PROVENANCE: Final[dict[str, str]] = {
 }
 
 
-def speeds_for_classes(classes: np.ndarray) -> np.ndarray:
+def speeds_for_classes(classes: np.ndarray, table: dict[str, float] | None = None) -> np.ndarray:
     """Map an array of OSM `highway` values to effective speeds in km/h.
 
     Unknown or missing values take FALLBACK_KMH rather than raising: OSM gains new highway
     values without notice, and one unrecognised way must not fail a national build.
+
+    `table` overrides the default so a counterfactual network can be driven through the same
+    code — the bypass programme rebuilds the road graph against a limits file in which the
+    bypassed settlements no longer hold their class inside a 50 zone. Passing a different table
+    is the ONLY supported way to model a different road network: editing EFFECTIVE_KMH would
+    change every consumer at once, including the journeys this is meant to be compared against.
     """
     out = np.full(len(classes), FALLBACK_KMH, dtype=np.float64)
-    for name, kmh in EFFECTIVE_KMH.items():
+    for name, kmh in (table or EFFECTIVE_KMH).items():
         out[classes == name] = kmh
     return out

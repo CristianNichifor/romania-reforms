@@ -35,7 +35,13 @@ ADMINISTRATIV = ROOT.parent / "administrativ"
 # docs/superpowers/specs/2026-08-29-transport-design.md §3.
 sys.path.insert(0, str(ADMINISTRATIV))
 
-from scripts.speeds import EFFECTIVE_KMH, FALLBACK_KMH, speeds_for_classes  # noqa: E402
+from scripts.speeds import (  # noqa: E402
+    DEFAULT_VEHICLE,
+    EFFECTIVE_KMH,
+    FALLBACK_KMH,
+    effective_kmh,
+    speeds_for_classes,
+)
 
 OUT_DIR = ROOT / "data"
 
@@ -88,7 +94,17 @@ def plausibility(distance_m: np.ndarray, seconds: np.ndarray) -> dict:
 
 
 def main(argv: list[str] | None = None) -> int:
-    argparse.ArgumentParser(description=__doc__).parse_args(argv)
+    parser = argparse.ArgumentParser(description=__doc__)
+    # A counterfactual network is driven through this same code rather than a copy of it: the
+    # bypass programme writes a limits file in which the bypassed settlements no longer hold
+    # their class inside a 50 zone, and the two runs are comparable precisely because only the
+    # limits differ. See scripts/build_ocoliri.py.
+    parser.add_argument("--limits", type=Path, default=None, help="alternate road-limits.json")
+    parser.add_argument("--out", type=Path, default=None, help="alternate output parquet")
+    args = parser.parse_args(argv)
+    table = effective_kmh(DEFAULT_VEHICLE, args.limits) if args.limits else None
+    if args.limits:
+        print(f"Using {args.limits.name}: trunk {table['trunk']}, primary {table['primary']} km/h")
 
     import geopandas as gpd
     from pipeline.build_geometry import Check, Report, write_report
@@ -115,7 +131,7 @@ def main(argv: list[str] | None = None) -> int:
     roads = load_roads()
 
     print("Pricing each road class...")
-    speed = speeds_for_classes(roads["highway"].to_numpy())
+    speed = speeds_for_classes(roads["highway"].to_numpy(), table)
 
     print("Building the timed road graph...")
     graph, node_of_vertex, coords, _ = build_graph(roads, report, speed_kmh=speed)
@@ -183,7 +199,7 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    out = OUT_DIR / "road_time.parquet"
+    out = args.out or OUT_DIR / "road_time.parquet"
     time_table(pairs, road_s).to_parquet(out, index=False)
 
     reports_dir = OUT_DIR / "reports"
