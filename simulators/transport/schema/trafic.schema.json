@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/trafic.schema.json",
+  "title": "Traffic on the major road network, and where a third lane would pay",
+  "description": "The one question in this repository OpenStreetMap could not answer. CNAIR's traffic census is not published as data, so the volumes come from Romania's Environmental Noise Directive return, which is obliged to report the flow on every road above three million vehicles a year. That inclusion rule makes the dataset the busy end of the network by construction: every figure here is 'among the busy roads', never a national total.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id","title","publisher","period","provenance","source","network","byBand","programme","limitations"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "type": "string" }, "title": { "type": "string" },
+    "publisher": { "type": "string" }, "period": { "type": "string" },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+    "source": {
+      "type": "object", "additionalProperties": false,
+      "required": ["url","layer","title"],
+      "properties": { "url": {"type":"string","pattern":"^https://"}, "layer": {"type":"string"}, "title": {"type":"string"} }
+    },
+    "network": {
+      "type": "object", "additionalProperties": false,
+      "required": ["sections","km","minAadt","medianAadt","p90Aadt","maxAadt","kmWeightedAadt","motorwayKm"],
+      "properties": {
+        "sections": {"type":"integer","exclusiveMinimum":0},
+        "km": {"type":"number","exclusiveMinimum":0},
+        "minAadt": {"type":"integer","description":"Cannot fall below ~8 219: that is the directive's inclusion threshold, not a property of Romanian roads."},
+        "medianAadt": {"type":"integer"}, "p90Aadt": {"type":"integer"},
+        "maxAadt": {"type":"integer"}, "kmWeightedAadt": {"type":"integer"},
+        "motorwayKm": {"type":"number","minimum":0}
+      }
+    },
+    "byBand": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object", "additionalProperties": false,
+        "required": ["fromAadt","toAadt","sections","km","verdict","costRon"],
+        "properties": {
+          "fromAadt": {"type":"number"}, "toAadt": {"type":["number","null"]},
+          "sections": {"type":"integer","minimum":0}, "km": {"type":"number","minimum":0},
+          "verdict": {"type":"string"},
+          "costRon": {"type":["number","null"],"description":"Null where the band is not a 2+1 candidate — below the range or above it."}
+        }
+      }
+    },
+    "programme": {
+      "type": "object", "additionalProperties": false,
+      "required": ["km","costRon","costEur","eurPerKm","upgradeOnlyEurPerKm"],
+      "properties": {
+        "km": {"type":"number","minimum":0}, "costRon": {"type":"number","minimum":0},
+        "costEur": {"type":"number","minimum":0}, "eurPerKm": {"type":"number","exclusiveMinimum":0},
+        "upgradeOnlyEurPerKm": {"type":"number","exclusiveMinimum":0,"description":"The Irish floor, kept beside the working figure so the reader can see how much of the cost is widening rather than barrier and paint."}
+      }
+    },
+    "limitations": { "type": "array", "minItems": 1, "items": { "$ref": "provenance.schema.json#/$defs/limitation" } }
+  }
+}

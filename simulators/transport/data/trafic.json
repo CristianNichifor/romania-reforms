@@ -1,0 +1,104 @@
+{
+  "$schema": "../schema/trafic.schema.json",
+  "id": "trafic",
+  "title": "Traficul pe drumurile principale, și unde ar merita banda a treia",
+  "publisher": "Cristian Nichifor",
+  "period": "2026",
+  "provenance": {
+    "source": "end-major-roads-2024",
+    "locator": "Drumurile principale din România din afara aglomerărilor (art. 7, Directiva 2002/49/CE), Ministerul Mediului, Apelor și Pădurilor, versiune 2024, publicat pe data.gov.ro",
+    "confidence": "verbatim",
+    "note": "Fluxul anual de vehicule este citit din câmpul annualTrafficFlow al fiecărei secțiuni, așa cum a fost raportat de România sub Directiva 2002/49/CE. MZA este acel flux împărțit la 365."
+  },
+  "source": {
+    "url": "https://data.gov.ro/dataset/03731237-07c7-4b83-a968-4a32f9758114/resource/30f7eb95-a89c-4a5d-8490-90bb9fe8165e/download/majorroadsource299_outsideagg.gpkg",
+    "layer": "MajorRoadSource",
+    "title": "Drumurile principale din România din afara aglomerărilor (art. 7, Directiva 2002/49/CE), Ministerul Mediului, Apelor și Pădurilor, versiune 2024, publicat pe data.gov.ro"
+  },
+  "network": {
+    "sections": 299,
+    "km": 3940.8,
+    "minAadt": 8245,
+    "medianAadt": 13217,
+    "p90Aadt": 24229,
+    "maxAadt": 73522,
+    "kmWeightedAadt": 14562,
+    "motorwayKm": 553.4
+  },
+  "byBand": {
+    "sub-prag": {
+      "fromAadt": 0,
+      "toAadt": 8000,
+      "sections": 0,
+      "km": 0.0,
+      "verdict": "sub pragul setului de date — nu apare aici",
+      "costRon": null
+    },
+    "marginal": {
+      "fromAadt": 8000,
+      "toAadt": 12000,
+      "sections": 118,
+      "km": 1567.5,
+      "verdict": "2+1 marginal justificat",
+      "costRon": 11686047975
+    },
+    "potrivit": {
+      "fromAadt": 12000,
+      "toAadt": 20000,
+      "sections": 113,
+      "km": 1496.8,
+      "verdict": "2+1 clasic — exact intervalul pentru care a fost inventat",
+      "costRon": 11158554540
+    },
+    "prea-mult": {
+      "fromAadt": 20000,
+      "toAadt": null,
+      "sections": 39,
+      "km": 323.1,
+      "verdict": "peste 2+1 — cere profil de autostradă sau drum expres",
+      "costRon": null
+    }
+  },
+  "programme": {
+    "km": 3064.3,
+    "costRon": 22844602515,
+    "costEur": 4596499500,
+    "eurPerKm": 1500000,
+    "upgradeOnlyEurPerKm": 400000
+  },
+  "limitations": [
+    {
+      "id": "doar-drumurile-aglomerate",
+      "text": "Setul conține DOAR drumurile care depășesc trei milioane de vehicule pe an. adică o MZA de 8.219 — pragul din articolul 7 al directivei. Sunt 299 de secțiuni și 3.941 km. iar cea mai puțin circulată are 8.245 de vehicule pe zi. Deci orice cifră de aici este „dintre drumurile aglomerate”. niciodată un total național. Pentru banda a treia asta nu deranjează — un drum pe care nu circulă nimeni nu are nevoie de ea — dar pentru orice altceva. da.",
+      "severity": "material",
+      "affects": [
+        "trafic"
+      ]
+    },
+    {
+      "id": "pretul-benzii-a-treia-e-strain",
+      "text": "România nu are practic drumuri 2+1, deci nu există preț românesc de citit. Reperele sunt irlandeze: circa 4,1 milioane de euro pe kilometru pentru un drum 2+1 construit de la zero și până la 400.000 de euro pe kilometru pentru transformarea unui drum destul de lat. Drumurile naționale românești au de regulă 7 metri, prea puțin pentru a doua variantă fără lărgire, așa că modelul folosește o valoare intermediară, presupusă. Este cel mai slab element al acestui calcul. Folosirea unui reper străin este însă corectă aici din același motiv pentru care se folosesc cifre daneze la autobuze: rețeaua evaluată nu există încă, deci o cifră românească de exploatare pentru ea nu poate exista.",
+      "severity": "material",
+      "affects": [
+        "trafic"
+      ]
+    },
+    {
+      "id": "mza-nu-spune-varful",
+      "text": "Media zilnică anuală ascunde vârful. Un drum cu MZA de 12.000 uniform și unul cu 12.000 concentrat în două ore de vineri seara cer lucruri diferite, iar al doilea este cazul obișnuit pe drumurile de ieșire din orașe. Datele raportate sub directivă nu conțin distribuția orară, deci clasificarea de aici este pe medie.",
+      "severity": "material",
+      "affects": [
+        "trafic"
+      ]
+    },
+    {
+      "id": "sectiunile-nu-sunt-legate-de-model",
+      "text": "Secțiunile sunt geometrii proprii, în EPSG:3035, nelegate încă de graful rutier al acestui simulator. Deci traficul nu ponderează încă beneficiul centurilor din data/ocoliri.json — care rămâne calculat pe perechi de reședințe, nu pe vehicule. Legătura este următorul pas și este ceea ce ar transforma ambele modele dintr-o listă de costuri într-o comparație de rentabilitate.",
+      "severity": "blocking",
+      "affects": [
+        "trafic",
+        "ocoliri"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "$schema": "../schema/trafic-inputs.schema.json",
+  "id": "trafic-inputs",
+  "title": "Praguri de trafic și prețuri pentru banda a treia",
+  "publisher": "Cristian Nichifor",
+  "period": "2026",
+  "provenance": {
+    "source": "practica-suedeza-si-irlandeza",
+    "locator": "praguri uzuale pentru drumuri 2+1 din practica suedeză, unde tipul a fost inventat; prețuri din programul irlandez de conversie 2+1",
+    "confidence": "assumed",
+    "note": "România nu are drumuri 2+1, deci nici praguri și nici prețuri românești. Reperele străine sunt intrări legitime aici, ca și cele daneze la autobuze: rețeaua evaluată nu există."
+  },
+  "currency": "RON",
+  "items": {
+    "ronPerEur": {
+      "value": 4.97,
+      "unit": "RON/EUR",
+      "confidence": "assumed",
+      "note": "Curs de lucru, același ca în data/cost-inputs.json."
+    },
+    "twoPlusOneWidenEurPerKm": {
+      "value": 1500000,
+      "unit": "EUR/km",
+      "confidence": "assumed",
+      "note": "Transformarea unui drum național românesc de 7 metri în 2+1: lărgire la circa 13 metri, parapet median, marcaje, refacerea acostamentelor. PRESUPUS, între cele două repere irlandeze — 400.000 de euro pe kilometru pentru un drum deja destul de lat, unde se pune doar parapet și marcaj, și 4,1 milioane pentru unul construit de la zero. Drumurile românești nu sunt destul de late, deci prima cifră este prea mică; nu se construiește un traseu nou, deci a doua este prea mare. Este cel mai slab număr din acest fișier și primul de înlocuit cu un deviz românesc."
+    },
+    "twoPlusOneUpgradeEurPerKm": {
+      "value": 400000,
+      "unit": "EUR/km",
+      "confidence": "derived",
+      "note": "Reperul irlandez pentru transformarea unui drum care are deja lățimea necesară: parapet median, marcaje, semnalizare. Păstrat separat ca prag de jos, ca să se vadă cât din cost este lărgirea propriu-zisă."
+    }
+  },
+  "bands": [
+    { "id": "sub-prag", "from": 0, "to": 8000, "twoPlusOne": false, "verdict": "sub pragul setului de date — nu apare aici" },
+    { "id": "marginal", "from": 8000, "to": 12000, "twoPlusOne": true, "verdict": "2+1 marginal justificat" },
+    { "id": "potrivit", "from": 12000, "to": 20000, "twoPlusOne": true, "verdict": "2+1 clasic — exact intervalul pentru care a fost inventat" },
+    { "id": "prea-mult", "from": 20000, "to": null, "twoPlusOne": false, "verdict": "peste 2+1 — cere profil de autostradă sau drum expres" }
+  ],
+  "limitations": [
+    {
+      "id": "pragurile-sunt-de-practica-nu-de-norma",
+      "text": "Intervalele de MZA vin din practica suedeză și din literatura de specialitate, nu dintr-un normativ românesc. AND 584-2012 reglementează echivalarea vehiculelor, nu pragurile de profil. Un proiectant român ar folosi alte limite, iar rezultatul se mută odată cu ele.",
+      "severity": "material",
+      "affects": ["trafic"]
+    }
+  ]
+}

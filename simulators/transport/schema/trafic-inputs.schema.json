@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/trafic-inputs.schema.json",
+  "title": "Traffic thresholds and third-lane prices",
+  "description": "Romania has essentially no 2+1 roads, so neither the thresholds nor the prices can be Romanian. Both are foreign practice, which is legitimate here for the same reason Danish bus figures are: the network being priced does not exist yet.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id","title","publisher","period","provenance","currency","items","bands","limitations"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "type": "string" }, "title": { "type": "string" },
+    "publisher": { "type": "string" }, "period": { "type": "string" },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+    "currency": { "type": "string" },
+    "items": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object", "additionalProperties": false,
+        "required": ["value","unit","confidence"],
+        "properties": {
+          "value": { "type": "number", "exclusiveMinimum": 0 },
+          "unit": { "type": "string" },
+          "confidence": { "enum": ["verbatim","derived","assumed"] },
+          "note": { "type": "string" }
+        }
+      }
+    },
+    "bands": {
+      "type": "array", "minItems": 2,
+      "description": "AADT bands and what each implies. Ordered low to high; `to: null` is unbounded.",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["id","from","to","twoPlusOne","verdict"],
+        "properties": {
+          "id": { "type": "string" },
+          "from": { "type": "number", "minimum": 0 },
+          "to": { "type": ["number","null"] },
+          "twoPlusOne": { "type": "boolean", "description": "Whether this band is a 2+1 candidate. False both below the range, where it is not needed, and above it, where 2+1 is not enough." },
+          "verdict": { "type": "string" }
+        }
+      }
+    },
+    "limitations": { "type": "array", "minItems": 1, "items": { "$ref": "provenance.schema.json#/$defs/limitation" } }
+  }
+}
