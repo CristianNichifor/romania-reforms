@@ -41,13 +41,17 @@ import json
 import re
 import sys
 import time
-import urllib.request
 from pathlib import Path
 
+# Same sibling-import pattern the builders use: the scripts here are run as files, not as a
+# package, so the directory has to be on the path before one of them can import another.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+import retea  # noqa: E402
+
 ROOT = Path(__file__).resolve().parents[1]
-TEMPO = "http://statistici.insse.ro:8077/tempo-ins"
+TEMPO = retea.TEMPO
 MATRIX = "POP107D"
-UA = "romania-reforms/0.1 (+https://github.com/CristianNichifor)"
 YEAR = "2024"
 
 # The same spelling table the land register uses. INS writes county names in its own way and
@@ -72,14 +76,7 @@ def fold(text: str) -> str:
 
 
 def metadata() -> dict:
-    cache = ROOT / "sources" / f"ins-{MATRIX.lower()}-metadata.json"
-    if not cache.exists():
-        print(f"downloading {TEMPO}/matrix/{MATRIX} ...")
-        request = urllib.request.Request(f"{TEMPO}/matrix/{MATRIX}", headers={"User-Agent": UA})
-        with urllib.request.urlopen(request, timeout=180) as response:  # noqa: S310
-            cache.parent.mkdir(parents=True, exist_ok=True)
-            cache.write_bytes(response.read())
-    return json.loads(cache.read_text(encoding="utf-8"))
+    return retea.tempo_metadata(MATRIX, timeout=180)
 
 
 def query(meta: dict, county_label: str) -> str:
@@ -109,21 +106,7 @@ def query(meta: dict, county_label: str) -> str:
         raise SystemExit(f"{MATRIX}: no localities under {county_label}")
 
     arr = [ages[:1], sexes, counties, localities, years, dims[5]["options"]]
-    body = json.dumps(
-        {
-            "language": "ro",
-            "arr": arr,
-            "matrixName": meta["matrixName"],
-            "matrixDetails": meta["details"],
-        }
-    ).encode()
-    request = urllib.request.Request(
-        f"{TEMPO}/matrix/{MATRIX}",
-        data=body,
-        headers={"Content-Type": "application/json", "User-Agent": UA},
-    )
-    with urllib.request.urlopen(request, timeout=300) as response:  # noqa: S310
-        return json.loads(response.read())["resultTable"]
+    return retea.tempo_table(MATRIX, meta, arr)
 
 
 ROW = re.compile(r"<tr>\s*(<th>.*?</tr>)", re.S)
