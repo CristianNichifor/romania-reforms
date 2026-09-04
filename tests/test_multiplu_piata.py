@@ -157,3 +157,41 @@ def test_matched_localities_are_matched_on_both_sides(multiple, asked):
             assert pair["siruta"] in known
             seen += 1
     assert seen >= multiple["summary"]["matchedLocalities"]
+
+
+def test_building_land_is_calibrated_separately_by_kind_of_place():
+    """The finding this file exists to stop being averaged away.
+
+    For its whole life this builder said it could not calibrate curți-construcții, which is 68%
+    of the simulator's land value. It can now, and the answer is not one number: against the
+    notaries' price the median asking price is about parity in municipalities and more than
+    twice that in communes. A single national multiple describes neither, so if the three ever
+    collapse toward each other that is a change in the grid worth noticing rather than a tidier
+    dataset.
+    """
+    found = load("multiplu-piata-2026.json")["summary"].get("buildingLand")
+    if not found:
+        pytest.skip("anunturi-teren is not built, so building land is not calibrated")
+    ranks = found["byRank"]
+    for kind in ("municipii", "orase", "comune"):
+        assert kind in ranks, f"{kind} missing from the split"
+    assert (
+        ranks["municipii"]["medianMultiple"]
+        < ranks["orase"]["medianMultiple"]
+        < ranks["comune"]["medianMultiple"]
+    ), f"the grid no longer tracks the market better in cities than in communes: {ranks}"
+
+
+def test_the_two_building_land_aggregates_answer_different_questions():
+    """Median over localities against mean weighted by value, and they must not be conflated.
+
+    Two thirds of the building-land value sits in twenty cities where the grid is close to
+    right, so the value-weighted figure — the one a revenue argument needs — has to come out
+    below the median over localities, which is the one a fairness argument needs. Equal would
+    mean the weighting had stopped doing anything.
+    """
+    found = load("multiplu-piata-2026.json")["summary"].get("buildingLand")
+    if not found:
+        pytest.skip("anunturi-teren is not built")
+    assert found["valueWeightedMultiple"] < found["medianMultiple"]
+    assert found["localities"] >= 50

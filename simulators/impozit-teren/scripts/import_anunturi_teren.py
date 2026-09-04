@@ -25,10 +25,18 @@ in order to have them fetched. Reduced to one page per county-and-town — the n
 pages beneath a town are a subset of it — that is about seven hundred requests, one every five
 seconds, which is an overnight job and not a spike.
 
-**One request per locality, not one per offer.** The pages are server-rendered and carry their
-own data in `__NEXT_DATA__`, so a single fetch yields up to thirty-six offers with price, area
+**A handful of requests per locality, not one per offer.** The pages are server-rendered and
+carry their own data in `__NEXT_DATA__`, so one fetch yields thirty-six offers with price, area
 and price per square metre already in euro — the same unit the notaries' grid publishes. Going
-on to fetch each offer would multiply the traffic by thirty for fields this does not use.
+on to fetch each offer would multiply the traffic by thirty for fields this does not use. Where
+a locality has more than one page it is read up to `MAX_PAGES`, because the places with more
+than one page are the cities and the cities are where the value is.
+
+**The grid is not wrong by the same amount everywhere, and that is the finding.** Against the
+notaries' price the median asking price is about parity in municipalities, half again in towns,
+and more than two and a half times in communes. So a single national ratio describes nothing:
+the chambers price carefully where the transactions are and carelessly where they are not.
+`summary.byRank` carries the three separately for exactly that reason.
 
 **What is written down is a statistic, not a copy.** Per locality: how many offers, the median
 and quartiles of the asking price per square metre, the median parcel. No titles, no
@@ -91,6 +99,20 @@ MIN_OFFERS = 5
 # Storia's own page size. Localities with more than this need paging; most have far fewer.
 PER_PAGE = 36
 
+# How many pages deep to go where there are more.
+#
+# The first version read one page and marked the rest "truncated", on the reasoning that a
+# relevance-sorted first page is not a sample. That was right, and it was not enough: the
+# localities with more than one page are the cities, and the cities are where the land value is
+# — twenty of them hold 64% of it. Read six pages of Cluj-Napoca against one and the median
+# rises from 305 to 355 EUR/m², so page one understated that city by 16%, and it is not
+# monotonic: page five came back at 208 and page four at 460. Relevance ordering is not price
+# ordering, which is exactly why one page cannot stand for eight hundred offers.
+#
+# Five pages is 180 offers, enough for a stable median everywhere it matters, and it costs
+# about six hundred extra requests over the whole country rather than twenty thousand.
+MAX_PAGES = 5
+
 # The slug each county appears under, against the two-letter code the rest of the project uses.
 COUNTY_SLUG = {
     "alba": "AB", "arad": "AR", "arges": "AG", "bacau": "BC", "bihor": "BH",
@@ -130,6 +152,11 @@ def localities() -> dict[str, dict[str, str]]:
             index.setdefault(county, {})[fold(locality["name"])] = {
                 "siruta": locality["siruta"],
                 "name": locality["name"],
+                # Carried so the output can be split by kind of place. It is the single most
+                # informative cut in this dataset: the grid tracks the market in cities and
+                # falls behind it in communes, and a national median that mixes the two hides
+                # both halves of that.
+                "rank": locality["rank"] or "comune",
             }
     return index
 
@@ -246,21 +273,34 @@ def main() -> int:
         if not known:
             unmatched.append(f"{county_slug}/{town_slug}")
             continue
-        try:
-            page = fetcher.get(url)
-        except politete.BudgetSpent as spent:
-            stopped = str(spent)
+        found: list[dict] = []
+        total = 0
+        pages_read = 0
+        for number in range(1, MAX_PAGES + 1):
+            try:
+                page = fetcher.get(url if number == 1 else f"{url}?page={number}")
+            except politete.BudgetSpent as spent:
+                stopped = str(spent)
+                break
+            except politete.Disallowed as no:
+                stopped = str(no)
+                break
+            batch, reported = offers(page)
+            if not batch:
+                break
+            found.extend(batch)
+            total = max(total, reported)
+            pages_read = number
+            if reported <= PER_PAGE * number:
+                break
+        if stopped:
             break
-        except politete.Disallowed as no:
-            stopped = str(no)
-            break
-        found, total = offers(page)
         if not found:
             continue
-        # Paging is not walked. A locality with more offers than one page holds is recorded as
-        # truncated rather than quietly summarised from its first thirty-six, because the first
-        # page is sorted by relevance and is not a sample.
-        if total > PER_PAGE:
+        # Still declared rather than hidden, but now it means "deeper than five pages" instead
+        # of "deeper than one". What is left truncated is a handful of the largest markets.
+        short = total > PER_PAGE * pages_read
+        if short:
             truncated.append(known["siruta"])
         summary = summarise(found)
         rows.append(
@@ -268,8 +308,10 @@ def main() -> int:
                 "siruta": known["siruta"],
                 "name": known["name"],
                 "county": county,
+                "rank": known["rank"],
                 "totalOffersReported": total,
-                "truncated": total > PER_PAGE,
+                "pagesRead": pages_read,
+                "truncated": short,
                 **summary,
             }
         )
@@ -285,6 +327,16 @@ def main() -> int:
 
     priced = [r for r in rows if r["askedEurPerM2"]]
     medians = sorted(r["askedEurPerM2"]["median"] for r in priced)
+    # The split that matters. Reported here rather than left for a reader to compute, because
+    # the national median is a median over localities and four in five of them are communes.
+    by_rank = {}
+    for kind in ("municipii", "orase", "comune"):
+        seen = sorted(r["askedEurPerM2"]["median"] for r in priced if r["rank"] == kind)
+        if seen:
+            by_rank[kind] = {
+                "localities": len(seen),
+                "medianAskedEurPerM2": round(statistics.median(seen), 2),
+            }
 
     document = {
         "$schema": "../schema/anunturi-teren.schema.json",
@@ -325,6 +377,11 @@ def main() -> int:
             "truncatedLocalities": len(truncated),
             "unmatchedTownPages": len(unmatched),
             "medianOfMediansEurPerM2": round(statistics.median(medians), 2) if medians else None,
+            "byRank": by_rank,
+            "pagesPerLocality": {
+                "max": max((r["pagesRead"] for r in rows), default=0),
+                "localitiesReadDeep": sum(1 for r in rows if r["pagesRead"] > 1),
+            },
             "crawl": fetcher.report(),
             "stoppedBecause": stopped,
         },
@@ -338,6 +395,18 @@ def main() -> int:
                     "cunosc, mediana cerută și mediana plătită ies aproape egale, dar "
                     "distribuțiile nu — deci acesta e un motiv de a le aștepta apropiate, nu de "
                     "a le presupune identice."
+                ),
+                "affects": ["anunturi-teren", "multiplu-piata"],
+            },
+            {
+                "id": "grila-nu-greseste-la-fel-peste-tot",
+                "severity": "material",
+                "text": (
+                    "Comparat cu grila notarială, raportul nu este același peste tot și media "
+                    "națională ascunde asta: în municipii prețul cerut este cam cât grila, în "
+                    "orașe de o dată și jumătate, în comune de peste două ori și jumătate. "
+                    "„byRank” din „summary” dă cele trei mediane separat, tocmai pentru ca o "
+                    "singură cifră pe țară să nu fie citită ca o proprietate a grilei."
                 ),
                 "affects": ["anunturi-teren", "multiplu-piata"],
             },
@@ -356,10 +425,12 @@ def main() -> int:
                 "id": "o-singura-pagina",
                 "severity": "material",
                 "text": (
-                    "Se citește o singură pagină de rezultate pe localitate. Localitățile cu "
-                    "mai multe anunțuri decât încape sunt marcate „truncated”: pentru ele "
-                    "mediana e calculată pe primele rezultate, sortate după relevanță, nu pe "
-                    "toate. Sunt numărate în „summary”."
+                    "Se citesc cel mult cinci pagini de rezultate pe localitate, adică 180 de "
+                    "anunțuri. Prima versiune citea una singură, iar diferența s-a măsurat: pe "
+                    "Cluj-Napoca, șase pagini dau o mediană de 355 EUR/mp față de 305 pe prima, "
+                    "cu 16% mai mult, și nu monoton — pagina a cincea a venit cu 208, a patra "
+                    "cu 460. Ordinea după relevanță nu este ordine după preț. Ce rămâne peste "
+                    "cinci pagini este marcat „truncated” și numărat în „summary”."
                 ),
                 "affects": ["anunturi-teren"],
             },
