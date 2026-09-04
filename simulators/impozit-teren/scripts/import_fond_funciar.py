@@ -227,6 +227,33 @@ def parse(table: str, county: str) -> tuple[dict[str, dict], list[str]]:
     return localities, problems
 
 
+def outcome(results: list[tuple[str, bool, str]]) -> int:
+    """What a whole-country run means: 0 ok, `retea.UNREACHABLE` outage, 1 anything else.
+
+    Separated from the run so it can be tested without a network, because this is the piece
+    that decides whether CI is allowed to continue and it must not quietly widen. The claim it
+    makes is deliberately narrow: **nothing** was imported, and **every** county failed for the
+    same reason, and that reason was that TEMPO did not answer.
+
+    A partial import is a failure. Some counties answering and others not is a flaky network
+    mid-run at best, and at worst a change that breaks a subset — and either way the roster on
+    disk is now half old and half new, which is the state most worth stopping on.
+    """
+    ok = [code for code, good, _ in results if good]
+    if len(ok) == len(results):
+        return 0
+    failures = [line for _, good, line in results if not good]
+    if not ok and all("TempoUnavailable" in line for line in failures):
+        print(
+            "\nEvery county failed the same way: TEMPO did not answer. Nothing was imported "
+            "and nothing was written, so this is the source being down rather than the parse "
+            "being wrong.",
+            file=sys.stderr,
+        )
+        return retea.UNREACHABLE
+    return 1
+
+
 def run_all(workers: int) -> int:
     """Every county at once. The register is the roster every grid is checked against, so it
     has to exist before any chamber can be parsed, and forty-two serial requests to TEMPO is
@@ -276,7 +303,7 @@ def run_all(workers: int) -> int:
     for code, good, line in results:
         print(f"  {'ok  ' if good else 'FAIL'} {code}: {line}")
     print(f"\n{len(ok)} of {len(results)} counties imported")
-    return 0 if len(ok) == len(results) else 1
+    return outcome(results)
 
 
 def main() -> int:
@@ -463,4 +490,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(retea.guarded(main))

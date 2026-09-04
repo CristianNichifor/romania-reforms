@@ -140,3 +140,64 @@ def test_the_matrix_definitions_are_in_the_repository():
     assert not [n for n in names if n.startswith("ecb-")], (
         "the ECB rates change daily and must not be committed"
     )
+
+
+def test_an_outage_and_a_regression_are_different_exit_codes():
+    """The narrow claim `retea.UNREACHABLE` makes, and the wide one it must never make.
+
+    A statistics server in Bucharest going down should not fail a pull request that changes
+    four TypeScript files — that is what this exists for. But the moment it starts covering
+    anything else it becomes a way of ignoring failures, so the four cases are pinned here:
+    only "nothing imported, everything failed the same way, and that way was the host" is an
+    outage. A partial import is a failure precisely because the roster on disk is then half
+    old and half new.
+    """
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(
+        0, str(Path(__file__).resolve().parents[1] / "simulators" / "impozit-teren" / "scripts")
+    )
+    import import_fond_funciar as importer
+    import retea as network
+
+    tempo = "retea.TempoUnavailable: connection refused (după 3 încercări)"
+
+    everything = [("AB", True, "ok"), ("AR", True, "ok")]
+    assert importer.outcome(everything) == 0
+
+    nothing = [("AB", False, tempo), ("AR", False, tempo)]
+    assert importer.outcome(nothing) == network.UNREACHABLE
+
+    # Half the country imported and half did not. Not an outage — the data is now mixed.
+    partial = [("AB", True, "ok"), ("AR", False, tempo)]
+    assert importer.outcome(partial) == 1
+
+    # Everything failed, but not all for the same reason. Something else is wrong.
+    mixed = [("AB", False, tempo), ("AR", False, "SystemExit: AGR101B categories changed")]
+    assert importer.outcome(mixed) == 1
+
+
+def test_the_guard_only_swallows_the_one_exception():
+    """Anything that is not an unreachable TEMPO keeps its traceback."""
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(
+        0, str(Path(__file__).resolve().parents[1] / "simulators" / "impozit-teren" / "scripts")
+    )
+    import retea as network
+
+    assert network.guarded(lambda: 0) == 0
+    assert network.guarded(lambda: 7) == 7
+
+    def gone():
+        raise network.TempoUnavailable("nobody home")
+
+    assert network.guarded(gone) == network.UNREACHABLE
+
+    def broken():
+        raise ValueError("a real bug")
+
+    with pytest.raises(ValueError):
+        network.guarded(broken)
