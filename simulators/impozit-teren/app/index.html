@@ -26,14 +26,27 @@
 
       <section class="control">
         <label class="slider-label" for="rate">
-          Cota pe valoare <output id="rate-value"></output>
+          Cota pe valoare
+          <span class="typed">
+            <input
+              id="rate-value"
+              type="number"
+              min="0"
+              step="0.05"
+              inputmode="decimal"
+              aria-label="Cota pe valoare, în procente"
+            /><span class="unit">%</span>
+          </span>
         </label>
-        <input id="rate" type="range" min="0" max="200" step="1" value="100" />
-        <div class="ramp-ends"><span>0%</span><span>2%</span></div>
+        <input id="rate" type="range" min="0" max="500" step="1" value="100" />
+        <div class="ramp-ends"><span>0%</span><span>5%</span></div>
         <p class="note">
           Singurul dintre cele patru butoane care e o alegere politică. Celelalte trei sunt
-          goluri în surse.
+          goluri în surse. Cota nu are plafon: slider-ul merge până la 5%, iar în casetă se
+          poate scrie orice — inclusiv peste cotele pe care le folosește oricine azi, dacă asta
+          e întrebarea.
         </p>
+        <p class="note" id="rate-context"></p>
       </section>
 
       <section class="control">
@@ -101,6 +114,14 @@
           Art. 465 dă un interval, iar alin. (9) lasă alegerea consiliului local. Zona A–D și
           rangul sunt tot decizii locale. Ambele capete sunt legale azi.
         </p>
+      </section>
+
+      <section class="control" id="gdp-control">
+        <label class="slider-label" for="gdp-year">
+          Cât face asta din economie <output id="gdp-value"></output>
+        </label>
+        <select id="gdp-year"></select>
+        <p class="note" id="gdp-note"></p>
       </section>
 
       <section class="fold">

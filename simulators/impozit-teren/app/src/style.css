@@ -177,6 +177,70 @@ input[type='range'] {
   accent-color: var(--accent);
 }
 
+/* The rate readout is a box you can type in, because the rate is the one control on this page
+   that is a choice rather than a gap in the sources — and a choice with a stop on it is not
+   really being offered. It sits where the read-only `output` sits on every other slider, so
+   the panel reads the same whether a control has a ceiling or not. */
+.slider-label .typed {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.1rem;
+  color: var(--fg);
+  font-weight: 600;
+}
+
+.slider-label .typed input {
+  width: 4.2rem;
+  padding: 0.1rem 0.3rem;
+  background: transparent;
+  color: inherit;
+  border: 1px solid var(--line);
+  border-radius: 0.3rem;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.slider-label .typed input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.slider-label .typed .unit {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+/* The GDP year. A select rather than a slider: eleven published years are a list of facts, not
+   a ramp, and nothing lives between two of them. */
+.control select {
+  width: 100%;
+  padding: 0.4rem 0.55rem;
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid var(--line);
+  border-radius: 0.4rem;
+  font: inherit;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.control select:disabled {
+  color: var(--muted);
+  cursor: default;
+}
+
+.control select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.control option {
+  background: #0f1418;
+  color: var(--fg);
+}
+
 .ramp-ends {
   display: flex;
   justify-content: space-between;

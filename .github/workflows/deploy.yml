@@ -181,7 +181,7 @@ jobs:
           done
           # The land tax page computes from its data rather than displaying a finished
           # answer, so without these files it renders an empty table instead of failing.
-          for path in cod-fiscal.json manifest.json valoare-bc.json impozit-bc.json; do
+          for path in cod-fiscal.json manifest.json valoare-bc.json impozit-bc.json pib.json; do
             [ -s "dist/impozit-teren/data/$path" ] || {
               echo "MISSING dist/impozit-teren/data/$path"; fail=1; }
           done

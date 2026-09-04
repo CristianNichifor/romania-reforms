@@ -1,0 +1,176 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://cristiannichifor.github.io/romania-reforms/schema/pib.schema.json",
+    "title": "Gross domestic product, Romania and its counties, by year",
+    "description": "The denominator that turns a levy in lei into a share of the economy. Two series because the page has two scopes: the country when every county is selected, and the county itself otherwise — dividing one county's land tax by the whole country's output would understate it by an order of magnitude. Both currencies come from the same Eurostat rows so a ratio never needs an exchange rate applied to one side of it.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "id",
+        "title",
+        "publisher",
+        "counties",
+        "period",
+        "currency",
+        "provenance",
+        "assumptions",
+        "summary",
+        "series",
+        "regions",
+        "limitations"
+    ],
+    "properties": {
+        "$schema": {
+            "type": "string"
+        },
+        "id": {
+            "type": "string",
+            "pattern": "^pib-[0-9]{4}$"
+        },
+        "title": {
+            "type": "string"
+        },
+        "publisher": {
+            "const": "Eurostat"
+        },
+        "counties": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "string",
+                "pattern": "^[A-Z]{1,2}$"
+            }
+        },
+        "period": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{4}$"
+        },
+        "currency": {
+            "const": "RON"
+        },
+        "provenance": {
+            "$ref": "provenance.schema.json#/$defs/provenance"
+        },
+        "assumptions": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "fromYear",
+                "nationalLatestYear",
+                "countyLatestYear",
+                "note"
+            ],
+            "properties": {
+                "fromYear": {
+                    "type": "integer",
+                    "description": "First year kept. Earlier years exist at Eurostat and are dropped: the land is priced from one current edition of the notaries' grids, so a denominator from 2001 answers nothing."
+                },
+                "nationalLatestYear": {
+                    "type": "integer"
+                },
+                "countyLatestYear": {
+                    "type": "integer",
+                    "description": "Regional accounts lag the national ones by a year, so this is normally one less."
+                },
+                "note": {
+                    "type": "string"
+                }
+            }
+        },
+        "summary": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "years",
+                "counties"
+            ],
+            "properties": {
+                "years": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "counties": {
+                    "type": "integer",
+                    "minimum": 1
+                }
+            }
+        },
+        "series": {
+            "type": "array",
+            "minItems": 1,
+            "description": "The national series. Millions, in the unit Eurostat publishes — nothing is rescaled on the way in.",
+            "items": {
+                "$ref": "#/$defs/year"
+            }
+        },
+        "regions": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                    "county",
+                    "nuts3",
+                    "name",
+                    "series"
+                ],
+                "properties": {
+                    "county": {
+                        "type": "string",
+                        "pattern": "^[A-Z]{1,2}$"
+                    },
+                    "nuts3": {
+                        "type": "string",
+                        "pattern": "^RO[0-9]{3}$"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "series": {
+                        "type": "array",
+                        "minItems": 1,
+                        "items": {
+                            "$ref": "#/$defs/year"
+                        }
+                    }
+                }
+            }
+        },
+        "limitations": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "$ref": "provenance.schema.json#/$defs/limitation"
+            }
+        }
+    },
+    "$defs": {
+        "year": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "year",
+                "gdpMron",
+                "gdpMeur"
+            ],
+            "description": "One year, both currencies, from the same Eurostat row. A year missing either currency is dropped rather than half-published.",
+            "properties": {
+                "year": {
+                    "type": "integer",
+                    "minimum": 1990
+                },
+                "gdpMron": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "description": "Million lei, current prices."
+                },
+                "gdpMeur": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "description": "Million euro, current prices."
+                }
+            }
+        }
+    }
+}

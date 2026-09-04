@@ -49,6 +49,20 @@ const editions = (prefix) => {
   return found;
 };
 
+/**
+ * The newest edition of a dataset that has no county in its name, e.g. `pib-2025.json`.
+ *
+ * Same reasoning as `editions` and the same failure it prevents: a year written into the copy
+ * list is a year somebody has to remember to change, and the way you find out they forgot is a
+ * page dividing this year's tax by a denominator two revisions old.
+ */
+const newest = (prefix) => {
+  const found = readdirSync(data)
+    .filter((name) => new RegExp(`^${prefix}-\\d{4}\\.json$`).test(name))
+    .sort();
+  return found.at(-1);
+};
+
 const values = editions('valoare-teren');
 const taxes = editions('impozit');
 // Both halves or neither: a county with a value dataset and no tax dataset would render as a
@@ -85,6 +99,13 @@ const sources = [
   // worth X" into "that would pay for Y% of what this place does".
   ['buget-uat-2025.json', 'buget-uat-2025.json'],
 ];
+
+// The denominator. Optional in the same way the budget file is: a data directory built before
+// the GDP import ran still renders every figure on this page, and the share-of-GDP line simply
+// says it has nothing to divide by.
+const gdp = newest('pib');
+if (gdp) sources.push([gdp, 'pib.json']);
+else console.log('no pib-<year>.json; the page will render without the share of GDP');
 for (const county of counties) {
   sources.push([values.get(county), `valoare-${county}.json`]);
   sources.push([taxes.get(county), `impozit-${county}.json`]);

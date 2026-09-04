@@ -37,6 +37,22 @@ type TaxFile = {
   };
   limitations: Array<{ id: string; text: string; severity: string }>;
 };
+/**
+ * What the economy produced, so a levy in lei can be said as a share of it.
+ *
+ * Two series rather than one, because the page has two scopes and they need different
+ * denominators: with every county selected the country's output is the right divisor, and with
+ * one county selected the country's output would understate that county's tax by a factor of
+ * thirty. Eurostat publishes both, and the county series is a year shorter than the national
+ * one, which is why the year list is rebuilt per scope instead of being written once.
+ */
+type GdpYear = { year: number; gdpMron: number; gdpMeur: number };
+type Gdp = {
+  assumptions: { fromYear: number; nationalLatestYear: number; countyLatestYear: number };
+  series: GdpYear[];
+  regions: Array<{ county: string; name: string; series: GdpYear[] }>;
+  limitations: Array<{ id: string; text: string; severity: string }>;
+};
 
 const base = import.meta.env.BASE_URL;
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -63,6 +79,12 @@ type State = {
   sort: 'delta' | 'value' | 'name';
   /** Which number the map colours by. */
   metric: Metric;
+  /**
+   * Which year's GDP the tax is compared against. Zero means "whichever is the most recent one
+   * the data has", which is what a reader who never touched the control wants and what a link
+   * written before the next annual release should keep meaning.
+   */
+  gdpYear: number;
 };
 
 const DEFAULTS: State = {
@@ -84,6 +106,7 @@ const DEFAULTS: State = {
   // Price, not size. The whole-commune total is mostly a map of how big communes are, which
   // is a thing an atlas already says; the price of a hectare is the thing this file measures.
   metric: 'perHa',
+  gdpYear: 0,
 };
 
 /** Whether the URL pinned a yield. If it did, the file must not overrule the reader. */
@@ -94,6 +117,15 @@ function readHash(): State {
   const number = (key: string, fallback: number) => {
     const value = Number(params.get(key));
     return Number.isFinite(value) && value > 0 ? value : fallback;
+  };
+  // Zero is a rate somebody may want to look at — it is the "what does the Fiscal Code raise
+  // on its own" reading — and `number` above cannot express it, because for every other
+  // control zero means "absent". So the rate gets its own reader rather than the shared one
+  // silently turning a deliberate 0 back into 1%.
+  const rateFrom = (key: string, fallback: number) => {
+    const raw = params.get(key);
+    const value = Number(raw);
+    return raw !== null && Number.isFinite(value) && value >= 0 ? value : fallback;
   };
   const band = (key: string, fallback: BandKey): BandKey => {
     const value = params.get(key);
@@ -106,7 +138,8 @@ function readHash(): State {
     metric:
       metric === 'total' || metric === 'autofinantare' ? metric : DEFAULTS.metric,
     county: params.get('j') ?? DEFAULTS.county,
-    rate: number('cota', DEFAULTS.rate),
+    rate: rateFrom('cota', DEFAULTS.rate),
+    gdpYear: Math.round(number('pib', DEFAULTS.gdpYear)),
     share: number('intravilan', DEFAULTS.share),
     value: band('pret', DEFAULTS.value),
     fiscal: band('cod', DEFAULTS.fiscal),
@@ -127,6 +160,7 @@ function writeHash(state: State): void {
   params.set('colectare', String(state.collection));
   params.set('sort', state.sort);
   params.set('harta', state.metric);
+  if (state.gdpYear) params.set('pib', String(state.gdpYear));
   history.replaceState(null, '', `#${params}`);
 }
 
@@ -361,6 +395,51 @@ async function main() {
     .catch(() => new Map<string, number>());
   valueMap.setSpending(spending);
 
+  // The denominator. Optional in the same way the budget file is: without it every figure on
+  // this page still renders and the share-of-GDP box says what it is missing rather than
+  // printing a ratio against a number nobody imported.
+  const gdp: Gdp | null = await fetch(`${base}data/pib.json`)
+    .then((r) => (r.ok ? (r.json() as Promise<Gdp>) : null))
+    .catch(() => null);
+
+  /**
+   * The years the reader may pick from, which depend on which scope is on screen.
+   *
+   * Regional accounts are published a year behind the national ones, so the country has a 2025
+   * and no county does. Offering that year on a county view and quietly falling back would
+   * print last year's denominator under this year's label; the list is therefore rebuilt per
+   * scope, and the year is clamped into it rather than substituted behind the reader's back.
+   */
+  function gdpSeries(county: string): GdpYear[] {
+    if (!gdp) return [];
+    if (county === ALL) return gdp.series;
+    return gdp.regions.find((r) => r.county.toLowerCase() === county)?.series ?? [];
+  }
+
+  /** The chosen year's GDP for the scope on screen, in lei. */
+  function gdpRon(): { year: number; ron: number; scope: string } | null {
+    const rows = gdpSeries(state.county);
+    if (!rows.length) return null;
+    const row = rows.find((r) => r.year === state.gdpYear) ?? rows[rows.length - 1]!;
+    return {
+      year: row.year,
+      ron: row.gdpMron * 1e6,
+      scope:
+        state.county === ALL
+          ? 'României'
+          : `județului ${COUNTY_NAMES[state.county] ?? state.county.toUpperCase()}`,
+    };
+  }
+
+  /** Clamp the chosen year into what this scope actually publishes, latest by default. */
+  function settleGdpYear(county: string): void {
+    const rows = gdpSeries(county);
+    if (!rows.length) return;
+    if (!rows.some((r) => r.year === state.gdpYear)) {
+      state.gdpYear = rows[rows.length - 1]!.year;
+    }
+  }
+
   // The hatch key only when something is hatched; the national file says whether anything is.
   const anyPredicted = await fetch(`${base}data/national.json`)
     .then((r) => (r.ok ? r.json() : null))
@@ -484,14 +563,76 @@ async function main() {
     for (const button of document.querySelectorAll<HTMLButtonElement>('#sort button')) {
       button.classList.toggle('on', button.dataset.sort === state.sort);
     }
-    ($('rate') as HTMLInputElement).value = String(Math.round(state.rate * 100));
+    // The slider runs to 5% and the box has no ceiling, so above 5% the slider sits at its end
+    // and the box carries the answer. That is the honest arrangement: the slider is for the
+    // range worth dragging through, and the ceiling is the reader's to decide, not this file's.
+    const RATE_SLIDER_MAX = 500;
+    ($('rate') as HTMLInputElement).value = String(
+      Math.min(RATE_SLIDER_MAX, Math.round(state.rate * 100)),
+    );
     ($('share') as HTMLInputElement).value = String(Math.round(state.share * 100));
     ($('yield') as HTMLInputElement).value = String(Math.round(state.landYield * 100));
     ($('collection') as HTMLInputElement).value = String(Math.round(state.collection * 100));
     $('yield-value').textContent = `${percent.format(state.landYield)}%`;
     $('collection-value').textContent = `${percent.format(100 * state.collection)}%`;
-    $('rate-value').textContent = `${percent.format(state.rate)}%`;
+    // Written back only when it disagrees with the state, so a half-typed "1." is not rewritten
+    // to "1" under the cursor. A number input carries a dot; `percent` carries a comma, and
+    // putting a Romanian decimal into `value` empties the box.
+    // An empty box is written back too, or a rate of 0 renders as a blank one: `Number('')`
+    // is 0, so "already correct" and "nothing there" look the same to a bare comparison.
+    const rateBox = $('rate-value') as HTMLInputElement;
+    if (rateBox.value.trim() === '' || Number(rateBox.value) !== state.rate) {
+      rateBox.value = String(state.rate);
+    }
     $('share-value').textContent = `×${percent.format(state.share)}`;
+
+    // What the chosen rate means against the flow the land produces. The full-rent rate is the
+    // textbook ceiling for a land value tax — above it the tax is charging more than the land
+    // earns in a year — and now that the control has no stop, the page has to say where that
+    // line is instead of the slider's end implying one.
+    const fullRent = totals.value ? (100 * totals.rent) / totals.value : 0;
+    $('rate-context').innerHTML = !fullRent
+      ? ''
+      : state.rate > fullRent
+        ? `La ${percent.format(state.rate)}% impozitul cere mai mult decât produce pământul
+           într-un an: renta lui e ${percent.format(fullRent)}% din valoare, deci restul s-ar
+           plăti din altceva sau prin vânzarea terenului.`
+        : `Renta pământului e ${percent.format(fullRent)}% din valoarea lui pe an, deci cota
+           aleasă ia ${percent.format(fullRent ? (100 * state.rate) / fullRent : 0)}% din ce
+           produce.`;
+
+    // The year list belongs to the scope, so it is rebuilt when the scope changes and left
+    // alone when it does not — rewriting the options on every keystroke of the rate box would
+    // close the dropdown under a reader who had it open.
+    const years = gdpSeries(state.county);
+    const yearSelect = $('gdp-year') as HTMLSelectElement;
+    const offered = years.map((y) => y.year).join(',');
+    if (yearSelect.dataset.years !== offered) {
+      yearSelect.dataset.years = offered;
+      yearSelect.innerHTML = [...years]
+        .reverse()
+        .map((y) => `<option value="${y.year}">${y.year}</option>`)
+        .join('');
+    }
+    yearSelect.disabled = years.length === 0;
+    yearSelect.value = String(state.gdpYear);
+
+    const denominator = gdpRon();
+    const overGdp = (amount: number) =>
+      denominator && denominator.ron ? (100 * amount) / denominator.ron : null;
+    const collectedOverGdp = overGdp(totals.collected);
+    $('gdp-value').textContent =
+      collectedOverGdp === null ? '—' : `${percent.format(collectedOverGdp)}% din PIB`;
+    $('gdp-note').innerHTML = !denominator
+      ? 'Seria PIB nu este importată, deci nu există numitor.'
+      : `Numitorul e PIB-ul ${denominator.scope} în ${denominator.year}:
+         <strong>${scaled(denominator.ron)} lei</strong>. Anul mută numitorul, nu și valoarea
+         pământului — grila notarială e una singură, cea în vigoare${
+           state.county === ALL
+             ? '.'
+             : `. PIB-ul județean spune unde e înregistrată firma, nu unde e terenul, așa că
+                Bucureștiul iese mic și județele din jurul lui, mari.`
+         }`;
 
     // Measured, not modelled: what the counties on screen actually banked under revenue codes
     // 07.02.01-03. Summed over the cache for the aggregate, so it covers exactly the counties
@@ -538,6 +679,29 @@ async function main() {
           }
         </p>
       </div>
+      ${
+        denominator === null
+          ? ''
+          : `<div class="stat">
+              <div class="stat-label">Cât ar însemna din economie</div>
+              <div class="stat-value ${direction}">${percent.format(
+                collectedOverGdp ?? 0,
+              )}<span class="unit">% din PIB</span></div>
+              <p class="note">
+                ${scaled(totals.collected)} lei din ${scaled(denominator.ron)} lei — PIB-ul
+                ${denominator.scope} în ${denominator.year}. Impozitul de azi, calculat pe
+                aceleași hectare, ar fi ${percent.format(
+                  overGdp(totals.fiscal) ?? 0,
+                )}%${
+                  collectedActual === null
+                    ? ''
+                    : `, iar cât se încasează efectiv e ${percent.format(
+                        overGdp(collectedActual) ?? 0,
+                      )}%`
+                }.
+              </p>
+            </div>`
+      }
       <div class="stat">
         <div class="stat-label">Din renta funciară, ia azi</div>
         <div class="stat-value">${percent.format(totals.fiscalCapture)}<span class="unit">%</span></div>
@@ -613,6 +777,14 @@ async function main() {
         if (!seen.has(limit.id)) seen.set(limit.id, limit);
       }
     }
+    // The GDP file's caveats join the rest, but only while its number is on screen. They are
+    // about a denominator; folding them in when nothing is being divided would be four
+    // warnings about a figure the page is not showing.
+    if (denominator) {
+      for (const limit of gdp?.limitations ?? []) {
+        if (!seen.has(limit.id)) seen.set(limit.id, limit);
+      }
+    }
     const limits = [...seen.values()];
     const order = { blocking: 0, material: 1, note: 2 } as Record<string, number>;
     limits.sort((a, b) => (order[a.severity] ?? 3) - (order[b.severity] ?? 3));
@@ -640,6 +812,18 @@ async function main() {
   );
   $('rate').addEventListener('input', (event) =>
     update({ rate: Number((event.target as HTMLInputElement).value) / 100 }),
+  );
+  // The typed box is the one control on the page with no ceiling. An empty box is left alone
+  // rather than read as zero: clearing it to type a new number would otherwise repaint the
+  // whole page at 0% between two keystrokes.
+  $('rate-value').addEventListener('input', (event) => {
+    const raw = (event.target as HTMLInputElement).value.trim();
+    if (raw === '') return;
+    const typed = Number(raw);
+    if (Number.isFinite(typed) && typed >= 0) update({ rate: typed });
+  });
+  $('gdp-year').addEventListener('change', (event) =>
+    update({ gdpYear: Number((event.target as HTMLSelectElement).value) }),
   );
   $('share').addEventListener('input', (event) =>
     update({ share: Number((event.target as HTMLInputElement).value) / 100 }),
@@ -677,10 +861,14 @@ async function main() {
       cache.set(county, loaded);
     }
     adoptDerivedYield();
+    // The county series is a year shorter than the national one, so arriving at a county from
+    // "toate județele" on the newest year has to land on the newest year that county has.
+    settleGdpYear(county);
     update({ county });
   });
 
   adoptDerivedYield();
+  settleGdpYear(state.county);
   render();
   void renderNational();
   // Arriving *on* `#j=toate`, rather than switching to it. The dropdown's handler waits for
