@@ -12,22 +12,25 @@ The Legea 17/2014 offer register says what sellers *ask*, per county, as a media
 The INS survey behind Eurostat's `apri_lprc` says what buyers *paid*, per NUTS2 region, as a
 mean. Both are reported per county, side by side, with the multiple each implies.
 
-**The answer is smaller than the objection assumes.** Against asking prices the median
-multiple is about **1,2×**; against INS transaction prices about **1,7×**. So the notaries'
-floor for farmland sits somewhere around 60–80% of the market rather than a fraction of it.
+**The answer is smaller than the objection assumes.** Over the 36 comparable counties the
+median multiple is **1,236×** against asking prices and **1,239×** against INS transaction
+prices; matched on the same commune it is **1,163×**. So the notaries' floor for farmland sits
+at about **81% of the market**, and about 86% where the comparison is of the same place rather
+than of the same county — not a fraction of it.
 
-**The two references disagree in the direction that needs saying.** Transactions come out
-*above* asking prices, which is backwards from the obvious expectation and is mostly an
-artefact of what each number is: INS reports a mean over a right-skewed distribution and the
-barometer reports a median, INS is regional where the barometer is per county, and the survey
-year is 2024 against offers collected in 2026. It also means the "grid above market" reading is
-weaker than the offer register alone suggests — against asking prices three counties are below
-parity, against transactions only Iași, and only just.
+**The two references agree on the middle and disagree about the spread**, which is the part
+worth saying. Their medians are within three thousandths of each other, so "how far below
+market is the grid" gets the same answer from what sellers ask and from what buyers paid. But
+six counties fall below parity against asking prices and thirteen against transactions, so the
+*distributions* are not the same shape, and neither is a substitute for the other: INS reports
+a regional mean over a right-skewed distribution, the barometer a per-county median, and the
+survey year is 2024 against offers collected in 2026.
 
 Two things stop this generalising, and both are in the output:
 
-**It is the wrong 36%.** Curți-construcții is 64% of the land value this simulator computes,
-on under 3% of its surface, and no source in the register prices it. So this calibrates the
+**It is the wrong 32%.** Curți-construcții is 68% of the land value this simulator computes —
+220,8 of 324,2 mld EUR across the forty-two counties — on under 3% of its surface, and no
+source in the register prices it. So this calibrates the
 cheap majority of hectares and says nothing about the expensive minority — which is where a
 land value tax mostly falls. `marketMultiple` in `build_renta.py` therefore stays a knob the
 reader moves rather than a constant this file sets: applying an arable multiple to house plots
