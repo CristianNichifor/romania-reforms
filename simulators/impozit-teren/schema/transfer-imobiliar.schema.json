@@ -1,0 +1,241 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://cristiannichifor.github.io/romania-reforms/schema/transfer-imobiliar.schema.json",
+    "title": "The property transfer tax banked by each commune",
+    "description": "The only per-locality trace of what Romanian property actually sold for. Art. 111 (1) Cod fiscal charges every transfer at 3% of the transaction value when the seller held it three years or less and 1% above that, and art. 111 (7) gives half the proceeds to the commune the property stands in, where it appears in the budget execution as revenue code 03.18.00. Doubling that half and dividing by a rate turns a receipt into a declared transaction value — which is why the rates are carried in `assumptions` and the division is never done here: the mix between 1% and 3% is not published, and an effective rate invented in the importer would read as a measurement.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "id",
+        "title",
+        "publisher",
+        "period",
+        "currency",
+        "provenance",
+        "assumptions",
+        "excluded",
+        "summary",
+        "uats",
+        "limitations"
+    ],
+    "properties": {
+        "$schema": {
+            "type": "string"
+        },
+        "id": {
+            "type": "string",
+            "pattern": "^transfer-imobiliar-[0-9]{4}$"
+        },
+        "title": {
+            "type": "string"
+        },
+        "publisher": {
+            "const": "transparenta.eu"
+        },
+        "period": {
+            "type": "string",
+            "pattern": "^[0-9]{4}$"
+        },
+        "currency": {
+            "const": "RON"
+        },
+        "provenance": {
+            "$ref": "provenance.schema.json#/$defs/provenance"
+        },
+        "assumptions": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "functionalCode",
+                "localShare",
+                "rateMinPercent",
+                "rateMaxPercent",
+                "formula",
+                "legalBasis",
+                "suspectMultipleOfMedian"
+            ],
+            "properties": {
+                "functionalCode": {
+                    "const": "03.18.00",
+                    "description": "The revenue classification line. Verified as the only 03.* code any sampled UAT files, and every one of them files it."
+                },
+                "localShare": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "maximum": 1,
+                    "description": "The share of the tax that reaches the commune under art. 111 (7). The exception in (7^1) sends some transfers wholly to the state, so doubling the local half understates rather than overstates."
+                },
+                "rateMinPercent": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "description": "Art. 111 (1) b): held more than three years."
+                },
+                "rateMaxPercent": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "description": "Art. 111 (1) a): held three years or less."
+                },
+                "formula": {
+                    "type": "string"
+                },
+                "legalBasis": {
+                    "type": "string"
+                },
+                "suspectMultipleOfMedian": {
+                    "type": "number",
+                    "exclusiveMinimum": 1,
+                    "description": "How far above the median receipt per inhabitant a filing may sit before it is quarantined."
+                }
+            }
+        },
+        "excluded": {
+            "type": "array",
+            "description": "Filings set aside as impossible, named rather than dropped silently. An exclusion nobody can see is a number nobody can check.",
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                    "siruta",
+                    "name",
+                    "reportedLocalTaxRon",
+                    "perInhabitantRon",
+                    "timesMedian"
+                ],
+                "properties": {
+                    "siruta": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "reportedLocalTaxRon": {
+                        "type": "number"
+                    },
+                    "perInhabitantRon": {
+                        "type": "number"
+                    },
+                    "timesMedian": {
+                        "type": "number"
+                    }
+                }
+            }
+        },
+        "summary": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "uatsReporting",
+                "localTaxRon",
+                "taxRon",
+                "declaredValueRon",
+                "largestFiler"
+            ],
+            "properties": {
+                "uatsReporting": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "localTaxRon": {
+                    "type": "number",
+                    "description": "What the town halls banked: the sum of the surviving rows."
+                },
+                "taxRon": {
+                    "type": "number",
+                    "description": "The whole tax, both halves."
+                },
+                "declaredValueRon": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "low",
+                        "high"
+                    ],
+                    "description": "Both ends and never a point. The same receipt implies the least value at 3% and the most at 1%.",
+                    "properties": {
+                        "low": {
+                            "type": "number"
+                        },
+                        "high": {
+                            "type": "number"
+                        }
+                    }
+                },
+                "largestFiler": {
+                    "description": "The biggest single filing and what share of the country it is. Not a quarantine — an expensive city is allowed to be large — but the way a filing that is not a property market gets noticed instead of averaged away.",
+                    "type": [
+                        "object",
+                        "null"
+                    ],
+                    "additionalProperties": false,
+                    "required": [
+                        "siruta",
+                        "name",
+                        "localTaxRon",
+                        "shareOfCountry"
+                    ],
+                    "properties": {
+                        "siruta": {
+                            "type": "string"
+                        },
+                        "name": {
+                            "type": "string"
+                        },
+                        "localTaxRon": {
+                            "type": "number"
+                        },
+                        "shareOfCountry": {
+                            "type": "number"
+                        }
+                    }
+                }
+            }
+        },
+        "uats": {
+            "type": "array",
+            "minItems": 1,
+            "description": "Only communes with a non-zero receipt. Population is deliberately absent: it joins from buget-uat-<year>.json on the same SIRUTA, and repeating it here costs 80 KB in a repository with about a megabyte of room left.",
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                    "siruta",
+                    "level",
+                    "name",
+                    "localTaxRon"
+                ],
+                "properties": {
+                    "siruta": {
+                        "type": "string"
+                    },
+                    "level": {
+                        "enum": [
+                            "uat",
+                            "county"
+                        ],
+                        "description": "County councils file under a letter code rather than a SIRUTA number. The transfer tax belongs to the UAT the property stands in, so one appearing here is worth seeing rather than dropping."
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "county": {
+                        "type": [
+                            "string",
+                            "null"
+                        ]
+                    },
+                    "localTaxRon": {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                    }
+                }
+            }
+        },
+        "limitations": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "$ref": "provenance.schema.json#/$defs/limitation"
+            }
+        }
+    }
+}
