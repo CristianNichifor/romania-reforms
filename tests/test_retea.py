@@ -208,3 +208,33 @@ def test_the_guard_only_swallows_the_one_exception():
 
     with pytest.raises(ValueError):
         network.guarded(broken)
+
+
+def test_the_ci_wrapper_skips_only_the_outage_code():
+    """`scripts/ins_step.sh` is the other half of the contract, and it is shell.
+
+    The Python decides what an outage is; this decides what CI does about it. Worth a test of
+    its own because an earlier version put this logic inline in three workflow steps and got it
+    wrong in two of them — `exit 0` ended the whole step, so an unreachable INS also skipped
+    four builders that never touch INS. Exiting 0 from a wrapper lets the step continue.
+    """
+    import subprocess
+
+    wrapper = Path(__file__).resolve().parents[1] / "scripts" / "ins_step.sh"
+    assert wrapper.exists()
+
+    def run(code: int) -> subprocess.CompletedProcess:
+        return subprocess.run(  # noqa: S603
+            [str(wrapper), "bash", "-c", f"exit {code}"],
+            capture_output=True,
+            text=True,
+        )
+
+    assert run(0).returncode == 0
+    # The one code that is forgiven, and it announces itself in the run's annotations.
+    skipped = run(3)
+    assert skipped.returncode == 0
+    assert "INS TEMPO unreachable" in skipped.stdout
+    # Everything else keeps its own code, so a broken parse still fails the build.
+    assert run(1).returncode == 1
+    assert run(2).returncode == 2
