@@ -23,7 +23,8 @@ export type ViewId =
   | 'payslip'
   | 'structure'
   | 'envelope'
-  | 'distributie';
+  | 'distributie'
+  | 'functii';
 
 export interface Scenario {
   view: ViewId;
@@ -146,6 +147,7 @@ export function decodeScenario(hash: string): Scenario {
     path === 'meserii' ||
     path === 'echivalente' ||
     path === 'distributie' ||
+    path === 'functii' ||
     path === 'acasa'
       ? path
       : DEFAULT_SCENARIO.view;

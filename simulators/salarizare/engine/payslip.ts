@@ -55,6 +55,14 @@ export interface SupplementLine {
   countsToCap: boolean | 'partial';
   capCountingAmount: Money;
   suppressedBy?: string;
+  /**
+   * Why this supplement does not belong to this job, when it does not.
+   *
+   * Kept as a line rather than dropped, so a scenario that asks for an impossible
+   * combination is answered with the refusal instead of quietly priced at zero. The page
+   * shows the sentence; the amount is zero either way.
+   */
+  ineligible?: { rule: 'families' | 'positionKinds' | 'requires'; reason: string };
 }
 
 export interface CapUtilisation {
@@ -95,6 +103,59 @@ export interface Payslip {
   pensionSplit: { employee: Money; employer: Money; total: Money } | null;
   capUtilisation: CapUtilisation[];
   diagnostics: Diagnostic[];
+}
+
+/**
+ * Whether a supplement is one this job can be paid at all.
+ *
+ * The regimes have carried `eligibility` since the schema was written and nothing read it,
+ * so the page would let a legal adviser claim the sanitary shift premium and the Danube
+ * Delta isolation premium at once and print a cap utilisation for that person. The rules
+ * were in the data; only the arithmetic was missing.
+ *
+ * **Enforced from the data, not from a flag.** A regime that declares no eligibility stays
+ * exactly as permissive as it was — which is the honest rendering of a law that does not
+ * restrict, and it is why `ro-153-2017` is untouched by this. The proposal restricts because
+ * the proposal says it does, and Denmark restricts two of its three because Danish
+ * agreements attach pay for a duty to the job rather than selling it separately.
+ *
+ * **What is deliberately not enforced.** `eligibility.condition` is a sentence for a human —
+ * "only where the institution is in a locality with fewer than N inhabitants" — and a
+ * machine that guessed at it would refuse real people. `maxStaffShare` is a limit on what
+ * share of an institution's staff may hold the supplement, which no single payslip can
+ * breach or comply with; it belongs to the aggregate. Both are surfaced as diagnostics
+ * beside the number instead, which is what the rest of this engine does with a caveat it
+ * cannot compute.
+ */
+export function ineligibility(
+  supplement: Supplement,
+  position: Position,
+  claimed: Set<string> = new Set(),
+  byId: Map<string, Supplement> = new Map(),
+): SupplementLine['ineligible'] | undefined {
+  const families = supplement.eligibility?.families;
+  if (families && families.length > 0 && !families.includes(position.family)) {
+    return {
+      rule: 'families',
+      reason: `${supplement.name} se plătește numai în ${families.join(', ')}; funcția aceasta este în ${position.family}.`,
+    };
+  }
+  const kinds = supplement.eligibility?.positionKinds;
+  if (kinds && kinds.length > 0 && !kinds.includes(position.kind)) {
+    return {
+      rule: 'positionKinds',
+      reason: `${supplement.name} se plătește numai pentru funcții de tip ${kinds.join(', ')}; aceasta este ${position.kind}.`,
+    };
+  }
+  const missing = (supplement.requires ?? []).filter((id) => !claimed.has(id));
+  if (missing.length > 0) {
+    const names = missing.map((id) => byId.get(id)?.name ?? id);
+    return {
+      rule: 'requires',
+      reason: `${supplement.name} se plătește numai împreună cu ${names.join(', ')}.`,
+    };
+  }
+  return undefined;
 }
 
 // ------------------------------------------------------------------- rounding
@@ -286,6 +347,28 @@ export function payslip(person: Person, regime: Regime, opts?: { asOf?: IsoDate 
   const claimed = new Set(claims.map((c) => c.supplementId));
   const lines: SupplementLine[] = [];
 
+  /**
+   * The claims that survive the eligibility gate, and therefore the only ones that can
+   * exclude another.
+   *
+   * Without this an auditor who ticked the sanitary shift premium lost the night premium
+   * to it: the shift premium replaces the night rate, so it suppressed it — while being
+   * itself refused for not belonging to health. The person ended up with neither, which
+   * is not what either rule says. A supplement this job cannot be paid cannot displace
+   * one it can.
+   *
+   * `requires` is still resolved against every claim rather than against this set: it asks
+   * whether the reader claimed the companion supplement at all, and a companion that is
+   * itself refused will fail its own check on its own line.
+   */
+  const effective = new Set(
+    claims
+      .map((c) => byId.get(c.supplementId))
+      .filter((s): s is Supplement => s !== undefined)
+      .filter((s) => !ineligibility(s, position, claimed, byId))
+      .map((s) => s.id),
+  );
+
   for (const claim of claims) {
     const supplement = byId.get(claim.supplementId);
     if (!supplement) {
@@ -297,8 +380,32 @@ export function payslip(person: Person, regime: Regime, opts?: { asOf?: IsoDate 
 
     // Mutually exclusive supplements: the three-shift 15% replaces the 25% night rate.
     const blocker = regime.supplements.find(
-      (s) => claimed.has(s.id) && s.id !== supplement.id && s.excludes?.includes(supplement.id),
+      (s) => effective.has(s.id) && s.id !== supplement.id && s.excludes?.includes(supplement.id),
     );
+
+    const ineligible = ineligibility(supplement, position, claimed, byId);
+    if (ineligible) {
+      diagnostics.push(
+        note('supplement-ineligible', 'material', ineligible.reason, 'supplements'),
+      );
+    }
+    // Said out loud rather than acted on: the condition is prose meant for a person, and
+    // the staff-share limit is a property of an institution's payroll, not of one payslip.
+    if (!ineligible && supplement.eligibility?.condition) {
+      diagnostics.push(
+        note('supplement-condition', 'note',
+          `${supplement.name} se plătește numai dacă: ${supplement.eligibility.condition}`,
+          'supplements'),
+      );
+    }
+    if (!ineligible && supplement.eligibility?.maxStaffShare !== undefined) {
+      const share = resolveSeries(supplement.eligibility.maxStaffShare, asOf);
+      diagnostics.push(
+        note('supplement-staff-share', 'material',
+          `${supplement.name} poate fi dat la cel mult ${(share * 100).toFixed(0)}% din personalul instituției. Un singur stat de plată nu poate spune dacă limita e respectată.`,
+          'supplements'),
+      );
+    }
 
     const ceiling = supplement.rate !== undefined ? resolveSeries(supplement.rate, asOf) : null;
     const requested = claim.rate ?? ceiling;
@@ -312,7 +419,7 @@ export function payslip(person: Person, regime: Regime, opts?: { asOf?: IsoDate 
     }
 
     let amount = 0;
-    if (!blocker) {
+    if (!blocker && !ineligible) {
       switch (supplement.base) {
         case 'baseSalary':
           amount = round(base * (allowed ?? 0), supplement.rounding ?? rounding);
@@ -364,6 +471,7 @@ export function payslip(person: Person, regime: Regime, opts?: { asOf?: IsoDate 
       countsToCap: supplement.countsToCap,
       capCountingAmount: capCounting,
       suppressedBy: blocker?.id,
+      ineligible,
     });
   }
 

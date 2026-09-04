@@ -16,6 +16,7 @@ import CompareView from './CompareView';
 import HomeView from './HomeView';
 import DistributionView from './DistributionView';
 import EnvelopeView from './EnvelopeView';
+import MergesView from './MergesView';
 import OccupationsView from './OccupationsView';
 import EquivalenceView from './EquivalenceView';
 import PayslipView from './PayslipView';
@@ -57,6 +58,10 @@ const VIEW_META: Record<ViewId, { label: string; blurb: string }> = {
   payslip: { label: 'Un salariu, calculat', blurb: 'un om anume, sub fiecare regim' },
   echivalente: { label: 'Echivalențe de post', blurb: 'ce denumire daneză corespunde fiecărei funcții' },
   envelope: { label: 'Cât costă tot', blurb: 'plicul, plafonul de 20% și cine trece de el' },
+  functii: {
+    label: 'Funcție cu funcție',
+    blurb: 'ce denumiri a înghițit fiecare post, și cât ia în trei sisteme',
+  },
 };
 
 /** Views whose numbers move as the draft phases itself in. */
@@ -65,7 +70,7 @@ const PHASED_VIEWS: ViewId[] = ['compare', 'structure', 'payslip'];
 const NAV_GROUPS: Array<{ title: string; ask: string; views: ViewId[] }> = [
   { title: 'Începe aici', ask: 'Ce e asta?', views: ['acasa'] },
   { title: 'Reforma', ask: 'Ce se schimbă?', views: ['compare', 'distributie', 'structure'] },
-  { title: 'Oamenii', ask: 'Cine cât ia?', views: ['meserii', 'payslip', 'echivalente'] },
+  { title: 'Oamenii', ask: 'Cine cât ia?', views: ['functii', 'meserii', 'payslip', 'echivalente'] },
   { title: 'Banii', ask: 'Ne permitem?', views: ['envelope'] },
 ];
 
@@ -294,7 +299,13 @@ export default function App() {
     // be called, and without it that block renders with the titles and no coefficients.
     // Leaving it to `wanted` once left the landing page — headed "ways to pay the state" —
     // with its entire Danish column as explained dashes.
-    const NEEDS_ALL: ViewId[] = ['compare', 'echivalente', 'payslip', 'distributie', 'acasa'];
+    // `functii` belongs here for the same reason `payslip` does: its whole left column is
+    // what the post was worth under the law in force, and without that regime loaded the
+    // page renders a confident "0 au un corespondent" — which is a statement about the
+    // fetch, not about the crosswalk.
+    const NEEDS_ALL: ViewId[] = [
+      'compare', 'echivalente', 'payslip', 'distributie', 'acasa', 'functii',
+    ];
     const needed = NEEDS_ALL.includes(scenario.view) ? AVAILABLE : wanted;
     const missing = needed.filter((id) => !regimes[id] && AVAILABLE.includes(id));
     if (missing.length === 0) return;
@@ -442,6 +453,19 @@ export default function App() {
           inForce={regimes['ro-153-2017'] ?? null}
           draft={ministry}
           crosswalk={assimilation}
+        />
+      )}
+      {scenario.view === 'functii' && ministry && fx && (
+        <MergesView
+          draft={ministry}
+          ours={ours?.regime ?? null}
+          inForce={regimes['ro-153-2017'] ?? null}
+          crosswalk={assimilation ?? null}
+          groups={occGroups}
+          danish={dkOcc ?? []}
+          rates={fx}
+          scenario={scenario}
+          onScenario={setScenario}
         />
       )}
       {scenario.view === 'meserii' && ministry && occGroups && dkOcc && occBench && fx && (
