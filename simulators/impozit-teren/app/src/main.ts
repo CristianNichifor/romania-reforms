@@ -79,6 +79,8 @@ type State = {
   sort: 'delta' | 'value' | 'name';
   /** Which number the map colours by. */
   metric: Metric;
+  /** Which page of the locality table is on screen, 1-based. */
+  page: number;
   /**
    * Which year's GDP the tax is compared against. Zero means "whichever is the most recent one
    * the data has", which is what a reader who never touched the control wants and what a link
@@ -107,6 +109,7 @@ const DEFAULTS: State = {
   // is a thing an atlas already says; the price of a hectare is the thing this file measures.
   metric: 'perHa',
   gdpYear: 0,
+  page: 1,
 };
 
 /** Whether the URL pinned a yield. If it did, the file must not overrule the reader. */
@@ -140,6 +143,7 @@ function readHash(): State {
     county: params.get('j') ?? DEFAULTS.county,
     rate: rateFrom('cota', DEFAULTS.rate),
     gdpYear: Math.round(number('pib', DEFAULTS.gdpYear)),
+    page: Math.max(1, Math.round(number('pag', DEFAULTS.page))),
     share: number('intravilan', DEFAULTS.share),
     value: band('pret', DEFAULTS.value),
     fiscal: band('cod', DEFAULTS.fiscal),
@@ -161,6 +165,7 @@ function writeHash(state: State): void {
   params.set('sort', state.sort);
   params.set('harta', state.metric);
   if (state.gdpYear) params.set('pib', String(state.gdpYear));
+  if (state.page > 1) params.set('pag', String(state.page));
   history.replaceState(null, '', `#${params}`);
 }
 
@@ -174,6 +179,15 @@ function writeHash(state: State): void {
  * national reading is as shareable as a link to Bacău's.
  */
 const ALL = 'toate';
+
+/**
+ * Localities per page.
+ *
+ * Two hundred is a table a browser lays out without thinking and a reader can scroll. The
+ * whole list is three thousand and eighty-one, which is sixteen pages — long, but every one of
+ * them reachable, which the old cap of four hundred was not.
+ */
+const PAGE_SIZE = 200;
 
 const COUNTY_NAMES: Record<string, string> = {
   ab: 'Alba', ag: 'Argeș', ar: 'Arad', b: 'București', bc: 'Bacău', bh: 'Bihor',
@@ -539,9 +553,20 @@ async function main() {
     // Every county at its own rates, then the money added — never one county's yields applied
     // to another's hectares. Counties still arriving are simply not in the sum yet, which the
     // heading says out loud rather than quietly understating the country.
-    const { rows, totals } = all
-      ? combine([...cache.values()].map((d) => evaluate(d.value.localities, code, settingsFor(d))))
-      : evaluate(loaded.value.localities, code, settings);
+    // Kept per county rather than immediately flattened, so a row can say where it is. The
+    // table groups by county with every county selected, and `Result` carries a SIRUTA but not
+    // a county — the county is the key the data arrived under, and throwing it away here is
+    // what used to make grouping impossible downstream.
+    const parts: Array<readonly [string, ReturnType<typeof evaluate>]> = all
+      ? [...cache.entries()].map(
+          ([county, d]) => [county, evaluate(d.value.localities, code, settingsFor(d))] as const,
+        )
+      : [[state.county, evaluate(loaded.value.localities, code, settings)] as const];
+    const { rows, totals } = all ? combine(parts.map(([, result]) => result)) : parts[0]![1];
+    const countyOf = new Map<string, string>();
+    for (const [county, result] of parts) {
+      for (const row of result.rows) countyOf.set(row.siruta, county);
+    }
     // Same settings object the totals came from, so the colours and the figures cannot
     // disagree; the map substitutes each county's own rate and yields on top of it.
     valueMap.paint(settings, code);
@@ -735,23 +760,57 @@ async function main() {
         </p>
       </div>`;
 
-    const sorted = [...rows].sort((a, b) => {
+    const within = (a: (typeof rows)[number], b: (typeof rows)[number]) => {
       if (state.sort === 'name') return a.name.localeCompare(b.name, 'ro');
       if (state.sort === 'value') return b.landValueRon - a.landValueRon;
       return b.deltaRon - a.deltaRon;
+    };
+    // With every county on screen the order is county-major, because the table is grouped by
+    // county and a national sort makes each page a mix of forty-two of them — which produced
+    // forty-two headings over two hundred rows, one of them reading "București, 1 localitate".
+    // The counties are ordered by the same criterion the reader chose, aggregated: alphabetical
+    // when sorting by name, by the county's own total otherwise. So the sort still means what
+    // the button says, one level up.
+    const countyRank = new Map<string, number>();
+    if (all) {
+      const scored = parts.map(([county, result]) => {
+        const totals = result.totals;
+        return {
+          county,
+          score: state.sort === 'value' ? totals.value : totals.lvt - totals.fiscal,
+        };
+      });
+      scored.sort((a, b) =>
+        state.sort === 'name'
+          ? (COUNTY_NAMES[a.county] ?? a.county).localeCompare(
+              COUNTY_NAMES[b.county] ?? b.county,
+              'ro',
+            )
+          : b.score - a.score,
+      );
+      scored.forEach((entry, index) => countyRank.set(entry.county, index));
+    }
+    const sorted = [...rows].sort((a, b) => {
+      if (all) {
+        const left = countyRank.get(countyOf.get(a.siruta) ?? '') ?? 0;
+        const right = countyRank.get(countyOf.get(b.siruta) ?? '') ?? 0;
+        if (left !== right) return left - right;
+      }
+      return within(a, b);
     });
-    // The table is capped and the total is not. Three thousand rows is a slow page and a
-    // worse answer than the first few hundred sorted the way the reader asked for; the count
-    // says how many there are so the cap cannot be mistaken for the whole.
-    const LIMIT = 400;
-    const shown = sorted.slice(0, LIMIT);
+    // Every locality is reachable, a page at a time. It used to be the first four hundred of
+    // three thousand and the rest simply did not exist for the reader — which is a strange
+    // thing for a page whose argument is that the tax should be computed commune by commune.
+    // Three thousand rows at once is a slow page; three thousand rows in pages is a table.
+    const pages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
+    const page = Math.min(Math.max(1, state.page), pages);
+    const from = (page - 1) * PAGE_SIZE;
+    const shown = sorted.slice(from, from + PAGE_SIZE);
     $('table-title').textContent = all
-      ? `${money.format(sorted.length)} localități din ${cache.size} județe` +
-        (sorted.length > LIMIT ? ` — primele ${LIMIT}` : '')
+      ? `${money.format(sorted.length)} localități din ${cache.size} județe`
       : `${sorted.length} localități din județul ${COUNTY_NAMES[state.county] ?? state.county}`;
-    $('rows').innerHTML = shown
-      .map(
-        (row) => `<tr>
+
+    const cell = (row: (typeof sorted)[number]) => `<tr>
           <td>${row.name}<span class="rank">${
             row.rank === 'municipii' ? 'municipiu' : row.rank === 'orase' ? 'oraș' : 'comună'
           }</span></td>
@@ -762,9 +821,45 @@ async function main() {
           <td class="num ${row.deltaRon >= 0 ? 'more' : 'less'}">${
             row.deltaRon >= 0 ? '+' : '−'
           }${scaled(Math.abs(row.deltaRon))}</td>
-        </tr>`,
-      )
-      .join('');
+        </tr>`;
+
+    // Grouped by county, but only when every county is on screen — inside one county the
+    // heading would repeat itself down the page saying nothing. The grouping is applied to the
+    // page rather than to the whole list, so the sort still decides what a page contains and
+    // the county headings describe what actually arrived on it.
+    if (all) {
+      const groups = new Map<string, typeof shown>();
+      for (const row of shown) {
+        const county = countyOf.get(row.siruta) ?? '';
+        (groups.get(county) ?? groups.set(county, []).get(county)!).push(row);
+      }
+      $('rows').innerHTML = [...groups.entries()]
+        .map(([county, group]) => {
+          const value = group.reduce((sum, row) => sum + row.landValueRon, 0);
+          const delta = group.reduce((sum, row) => sum + row.deltaRon, 0);
+          return `<tr class="county-head"><th colspan="2">${
+            COUNTY_NAMES[county] ?? county.toUpperCase()
+          }<span class="rank">${group.length} ${
+            group.length === 1 ? 'localitate' : 'localități'
+          }</span></th>
+            <th class="num">${scaled(value)}</th><th></th><th></th>
+            <th class="num ${delta >= 0 ? 'more' : 'less'}">${delta >= 0 ? '+' : '−'}${scaled(
+              Math.abs(delta),
+            )}</th></tr>${group.map(cell).join('')}`;
+        })
+        .join('');
+    } else {
+      $('rows').innerHTML = shown.map(cell).join('');
+    }
+
+    $('pager').innerHTML =
+      pages === 1
+        ? ''
+        : `<button data-page="${page - 1}" ${page === 1 ? 'disabled' : ''}>← înapoi</button>
+           <span>${money.format(from + 1)}–${money.format(
+             Math.min(from + PAGE_SIZE, sorted.length),
+           )} din ${money.format(sorted.length)}</span>
+           <button data-page="${page + 1}" ${page === pages ? 'disabled' : ''}>înainte →</button>`;
 
     // The caveats travel with the data rather than living in a footnote, so the page shows
     // exactly the ones its own numbers carry, blocking first.
@@ -803,7 +898,10 @@ async function main() {
   }
 
   function update(next: Partial<State>) {
-    state = { ...state, ...next };
+    // Changing what the list contains sends the reader back to the first page. Staying on
+    // page nine of a different list is how a table shows you nothing and looks like it broke.
+    const resets = 'page' in next ? {} : { page: 1 };
+    state = { ...state, ...resets, ...next };
     render();
   }
 
@@ -844,6 +942,13 @@ async function main() {
     const metric = (event.target as HTMLElement).dataset.metric as Metric | undefined;
     if (metric) update({ metric });
   });
+  $('pager').addEventListener('click', (event) => {
+    const to = (event.target as HTMLElement).dataset.page;
+    if (to) {
+      update({ page: Number(to) });
+      $('table').scrollIntoView({ block: 'start' });
+    }
+  });
   $('sort').addEventListener('click', (event) => {
     const sort = (event.target as HTMLElement).dataset.sort as State['sort'] | undefined;
     if (sort) update({ sort });
@@ -869,17 +974,24 @@ async function main() {
 
   adoptDerivedYield();
   settleGdpYear(state.county);
+  // Nothing is painted for "toate județele" until the counties are in.
+  //
+  // The first render used to run against an empty cache, so `combine([])` returned zeros and
+  // the page showed a confident 0 lei for however long forty-two fetches took — then quietly
+  // corrected itself. A reader who touched any control in between got the right numbers and
+  // concluded the control had fixed something. Zeros that are about to be replaced are worse
+  // than a sentence saying so.
+  if (state.county === ALL) {
+    $('table-title').textContent = 'se încarcă toate județele…';
+    $('headline').innerHTML = '<p class="note">se încarcă cele 42 de județe…</p>';
+    await everything;
+  }
   render();
   void renderNational();
   // Arriving *on* `#j=toate`, rather than switching to it. The dropdown's handler waits for
   // every county before adding them up; a page loaded straight from that URL used to render
   // once against an empty cache and never look again, so the scenario the whole hash design
   // exists to make shareable was the one that showed a confident set of zeros.
-  if (state.county === ALL) {
-    $('table-title').textContent = 'se încarcă toate județele…';
-    await everything;
-    render();
-  }
 }
 
 main().catch((error) => {
