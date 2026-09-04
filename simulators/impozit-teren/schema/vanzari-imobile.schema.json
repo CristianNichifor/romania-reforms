@@ -1,0 +1,201 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://cristiannichifor.github.io/romania-reforms/schema/vanzari-imobile.schema.json",
+    "title": "Registered property sales, per county and year",
+    "description": "The denominator that turns the transfer tax into a price. The tax says how much money changed hands; this says how many things changed hands, and a sum is not a price until it is divided by a count. ANCPI files it monthly per county on data.gov.ro, split by what was sold — including `withoutBuildings`, the only place in Romanian public data where bare land is counted apart from land with a house on it. Two properties of this source are traps and both are enforced here: the six categories are not a partition and do not sum, and the months do not make a year.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "id",
+        "title",
+        "publisher",
+        "period",
+        "currency",
+        "provenance",
+        "assumptions",
+        "summary",
+        "counties",
+        "limitations"
+    ],
+    "properties": {
+        "$schema": {
+            "type": "string"
+        },
+        "id": {
+            "type": "string",
+            "pattern": "^vanzari-imobile-[0-9]{4}$"
+        },
+        "title": {
+            "type": "string"
+        },
+        "publisher": {
+            "const": "ANCPI"
+        },
+        "period": {
+            "type": "string",
+            "pattern": "^[0-9]{4}-[0-9]{4}$"
+        },
+        "currency": {
+            "const": "RON"
+        },
+        "provenance": {
+            "$ref": "provenance.schema.json#/$defs/provenance"
+        },
+        "assumptions": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "monthsByYear",
+                "types",
+                "fullestYear",
+                "note"
+            ],
+            "properties": {
+                "monthsByYear": {
+                    "type": "object",
+                    "description": "Exactly which months each year is built from. Two years are missing entirely and no year is complete, so this is what makes a comparison between years possible at all.",
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 12
+                        }
+                    }
+                },
+                "types": {
+                    "type": "object",
+                    "description": "ANCPI's own labels against the names used here, so a reader can see what was renamed and what was not interpreted.",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "fullestYear": {
+                    "type": "integer"
+                },
+                "note": {
+                    "type": "string"
+                }
+            }
+        },
+        "summary": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "counties",
+                "files",
+                "years",
+                "fullestYear",
+                "salesInFullestYear",
+                "agriculturalPlusNonAgriculturalOverWithoutBuildings",
+                "crawl"
+            ],
+            "properties": {
+                "counties": {
+                    "const": 42,
+                    "description": "Forty-two or a county is silently missing from every national figure below it."
+                },
+                "files": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "years": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "fullestYear": {
+                    "type": "integer"
+                },
+                "salesInFullestYear": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                },
+                "agriculturalPlusNonAgriculturalOverWithoutBuildings": {
+                    "type": [
+                        "number",
+                        "null"
+                    ],
+                    "description": "Measured, not assumed. If the categories were a decomposition this would be 1; it is about 0,41, which is why the blocking limitation exists and why nothing here sums them."
+                },
+                "crawl": {
+                    "type": "string"
+                }
+            }
+        },
+        "counties": {
+            "type": "array",
+            "minItems": 42,
+            "maxItems": 42,
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                    "county",
+                    "name",
+                    "series"
+                ],
+                "properties": {
+                    "county": {
+                        "type": "string",
+                        "pattern": "^[A-Z]{1,2}$"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "series": {
+                        "type": "array",
+                        "minItems": 1,
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [
+                                "year",
+                                "monthsReported",
+                                "sales"
+                            ],
+                            "properties": {
+                                "year": {
+                                    "type": "integer",
+                                    "minimum": 2000
+                                },
+                                "monthsReported": {
+                                    "type": "integer",
+                                    "minimum": 1,
+                                    "maximum": 12,
+                                    "description": "How many months this row was summed over. Never 12 in the data as published, so a year-on-year comparison must divide by this first."
+                                },
+                                "sales": {
+                                    "type": "object",
+                                    "description": "Counts as ANCPI reports them. Cross-classifications, not a partition — summing these double-counts.",
+                                    "additionalProperties": {
+                                        "type": "integer",
+                                        "minimum": 0
+                                    },
+                                    "propertyNames": {
+                                        "enum": [
+                                            "unspecified",
+                                            "withBuildings",
+                                            "withoutBuildings",
+                                            "agricultural",
+                                            "nonAgricultural",
+                                            "apartments"
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "limitations": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "$ref": "provenance.schema.json#/$defs/limitation"
+            }
+        }
+    }
+}
