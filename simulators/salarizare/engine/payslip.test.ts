@@ -142,8 +142,13 @@ describe('payslip — Romania', () => {
   });
 
   it('suppresses a supplement excluded by another that was claimed', () => {
+    // A nurse, not the auditor this test used to use. The shift premium is a health
+    // supplement, so an auditor cannot hold it — and once eligibility was enforced, a
+    // premium the auditor could not have was still cancelling one they could, leaving
+    // them with neither. The exclusion rule is real; it needed a person it applies to.
+    const nurse: Person = { positionCode: '21.00201027.11', seniorityYears: 0 };
     const slip = payslip(
-      { ...auditor, claims: [{ supplementId: 'ture-sanitare' }, { supplementId: 'noapte' }] },
+      { ...nurse, claims: [{ supplementId: 'ture-sanitare' }, { supplementId: 'noapte' }] },
       RO,
     );
     const night = slip.supplements.find((l) => l.id === 'noapte')!;
@@ -165,6 +170,86 @@ describe('payslip — Romania', () => {
     // Art. 17(2) exempts the night supplement, so it raises gross but not the ratio.
     expect(slip.supplements[0].amount).toBeGreaterThan(0);
     expect(cap.numerator).toBe(0);
+  });
+});
+
+/**
+ * The proposal restricts who may be paid what, and for a long time only the schema knew it.
+ *
+ * `eligibility` was carried in every regime document and read by nothing, so the page would
+ * price an auditor claiming the sanitary shift premium and print a cap utilisation for a
+ * person who cannot exist. These pin the gate shut — and pin open the two rules that are
+ * deliberately *not* enforced, because enforcing them would be guessing.
+ */
+describe('payslip — a supplement belongs to a job or it does not', () => {
+  const auditor: Person = { positionCode: '81.10104001.01', seniorityYears: 0 };
+  const nurse: Person = { positionCode: '21.00201027.11', seniorityYears: 0 };
+
+  it('refuses the sanitary shift premium to an auditor, and says why', () => {
+    const slip = payslip({ ...auditor, claims: [{ supplementId: 'ture-sanitare' }] }, RO);
+    const line = slip.supplements[0];
+    expect(line.amount).toBe(0);
+    expect(line.ineligible?.rule).toBe('families');
+    // The refusal names both sides, or the reader cannot tell which end is wrong.
+    expect(line.ineligible?.reason).toContain('II-sanatate-asistenta-sociala');
+    expect(line.ineligible?.reason).toContain('VIII-administratie');
+  });
+
+  it('pays the same premium to a nurse', () => {
+    const slip = payslip({ ...nurse, claims: [{ supplementId: 'ture-sanitare' }] }, RO);
+    expect(slip.supplements[0].ineligible).toBeUndefined();
+    expect(slip.supplements[0].amount).toBeGreaterThan(0);
+  });
+
+  it('keeps the refused line instead of dropping it', () => {
+    // A vanished checkbox teaches nobody. The line stays, at zero, carrying the sentence.
+    const slip = payslip({ ...auditor, claims: [{ supplementId: 'ture-sanitare' }] }, RO);
+    expect(slip.supplements).toHaveLength(1);
+    expect(slip.diagnostics.some((d) => d.code === 'supplement-ineligible')).toBe(true);
+  });
+
+  it('does not let a refused supplement displace one the job can have', () => {
+    // The shift premium replaces the night rate, and an auditor cannot have the shift
+    // premium. Before the gate knew that, claiming both left the auditor with neither.
+    const slip = payslip(
+      { ...auditor, claims: [{ supplementId: 'ture-sanitare' }, { supplementId: 'noapte' }] },
+      RO,
+    );
+    const night = slip.supplements.find((l) => l.id === 'noapte')!;
+    expect(night.suppressedBy).toBeUndefined();
+    expect(night.amount).toBeGreaterThan(0);
+  });
+
+  it('leaves a regime that restricts nothing exactly as permissive as it was', () => {
+    // ro-153-2017 publishes no supplements at all, and dk-stat's availability supplement
+    // declares no eligibility. Enforcement follows the data, so neither changes.
+    const engineer: Person = { positionCode: 'dk-stat-eng', seniorityYears: 0 };
+    const slip = payslip({ ...engineer, claims: [{ supplementId: 'raadighedstillaeg' }] }, DK);
+    expect(slip.supplements[0].ineligible).toBeUndefined();
+  });
+
+  it('refuses the professor supplement to a non-academic post', () => {
+    const consultant: Person = { positionCode: 'dk-stat-specialkonsulent', seniorityYears: 0 };
+    const slip = payslip({ ...consultant, claims: [{ supplementId: 'professortillaeg' }] }, DK);
+    expect(slip.supplements[0].ineligible?.rule).toBe('positionKinds');
+  });
+
+  it('says a written condition out loud without pretending to check it', () => {
+    // "Only where the institution is in the Delta" is a sentence for a person to read. A
+    // machine that guessed would refuse real people, so it is a note and the money is paid.
+    // The Delta premium is an administration supplement, so the auditor is the eligible one.
+    const slip = payslip({ ...auditor, claims: [{ supplementId: 'izolare-delta' }] }, RO);
+    expect(slip.supplements[0].ineligible).toBeUndefined();
+    expect(slip.diagnostics.some((d) => d.code === 'supplement-condition')).toBe(true);
+  });
+
+  it('flags the staff-share limit as unanswerable from one payslip', () => {
+    const slip = payslip({ ...nurse, claims: [{ supplementId: 'conditii-periculoase-i' }] }, RO);
+    const staffShare = slip.diagnostics.find((d) => d.code === 'supplement-staff-share');
+    expect(staffShare?.severity).toBe('material');
+    expect(staffShare?.message).toContain('10%');
+    // Material, not blocking: the person may well be inside the tenth. Nobody can say here.
+    expect(slip.supplements[0].amount).toBeGreaterThan(0);
   });
 });
 
