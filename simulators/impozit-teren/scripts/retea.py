@@ -37,6 +37,7 @@ from __future__ import annotations
 
 import gzip
 import json
+import sys
 import time
 import urllib.error
 import urllib.request
@@ -57,6 +58,41 @@ BACKOFF = (5.0, 20.0)
 
 class TempoUnavailable(RuntimeError):
     """TEMPO did not answer usefully, after every attempt."""
+
+
+# The exit code an importer uses when the only thing that went wrong is that INS was not there.
+#
+# "The source was offline" and "the source now says something else" are different events with
+# different responses, and until this existed CI could not tell them apart: a statistics server
+# in Bucharest going down failed pull requests that changed four TypeScript files, because
+# every step exits 1 and every 1 means the same thing.
+#
+# So this is not a way of ignoring failures. Anything else — a parse that broke, a total that
+# no longer balances, some counties importing and others not — is still exit 1 and still fails,
+# because those are regressions and a half-imported roster is exactly when a human is wanted.
+# What this code claims is narrower and checkable: nothing was imported, and every attempt
+# failed for the same reason, which was that the host refused.
+#
+# The repository already made this call once, for a source that will not answer a runner at
+# all. `import_cod_fiscal.py` says: "legislatie.just.ro refuses GitHub Actions runners outright
+# ... The source is committed instead, so this reads a fixed copy." Same problem, different
+# shape: TEMPO answers most days, so the check is worth running most days.
+UNREACHABLE = 3
+
+
+def guarded(main) -> int:
+    """Run an importer's `main`, turning an unreachable TEMPO into `UNREACHABLE`.
+
+    Wrapped at the entry point rather than around each call, because the distinction is about
+    the run as a whole: if the exception reached here then nothing downstream of it ran, and
+    the importer wrote nothing. Any other exception is left to propagate and print its
+    traceback, which is what a genuine bug should do.
+    """
+    try:
+        return main()
+    except TempoUnavailable as gone:
+        print(f"TEMPO nu a răspuns: {gone}", file=sys.stderr)
+        return UNREACHABLE
 
 
 def read(

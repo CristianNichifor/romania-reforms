@@ -140,3 +140,101 @@ def test_the_matrix_definitions_are_in_the_repository():
     assert not [n for n in names if n.startswith("ecb-")], (
         "the ECB rates change daily and must not be committed"
     )
+
+
+def test_an_outage_and_a_regression_are_different_exit_codes():
+    """The narrow claim `retea.UNREACHABLE` makes, and the wide one it must never make.
+
+    A statistics server in Bucharest going down should not fail a pull request that changes
+    four TypeScript files — that is what this exists for. But the moment it starts covering
+    anything else it becomes a way of ignoring failures, so the four cases are pinned here:
+    only "nothing imported, everything failed the same way, and that way was the host" is an
+    outage. A partial import is a failure precisely because the roster on disk is then half
+    old and half new.
+    """
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(
+        0, str(Path(__file__).resolve().parents[1] / "simulators" / "impozit-teren" / "scripts")
+    )
+    import import_fond_funciar as importer
+    import retea as network
+
+    gone = network.UNREACHABLE
+    broke = 1
+
+    everything = [("AB", 0, "ok"), ("AR", 0, "ok")]
+    assert importer.outcome(everything) == 0
+
+    nothing = [("AB", gone, "TEMPO nu a răspuns"), ("AR", gone, "TEMPO nu a răspuns")]
+    assert importer.outcome(nothing) == network.UNREACHABLE
+
+    # Half the country imported and half did not. Not an outage — the data is now mixed.
+    partial = [("AB", 0, "ok"), ("AR", gone, "TEMPO nu a răspuns")]
+    assert importer.outcome(partial) == 1
+
+    # Everything failed, but not all for the same reason. Something else is wrong.
+    mixed = [("AB", gone, "TEMPO nu a răspuns"), ("AR", broke, "AGR101B categories changed")]
+    assert importer.outcome(mixed) == 1
+
+    # The decision is on exit codes, never on the wording of a message. A version of this that
+    # grepped stderr for "TempoUnavailable" passed its tests and failed in CI the moment the
+    # exception started being caught and reported as a sentence instead of a traceback.
+    worded_differently = [("AB", gone, "anything at all"), ("AR", gone, "")]
+    assert importer.outcome(worded_differently) == network.UNREACHABLE
+
+
+def test_the_guard_only_swallows_the_one_exception():
+    """Anything that is not an unreachable TEMPO keeps its traceback."""
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(
+        0, str(Path(__file__).resolve().parents[1] / "simulators" / "impozit-teren" / "scripts")
+    )
+    import retea as network
+
+    assert network.guarded(lambda: 0) == 0
+    assert network.guarded(lambda: 7) == 7
+
+    def gone():
+        raise network.TempoUnavailable("nobody home")
+
+    assert network.guarded(gone) == network.UNREACHABLE
+
+    def broken():
+        raise ValueError("a real bug")
+
+    with pytest.raises(ValueError):
+        network.guarded(broken)
+
+
+def test_the_ci_wrapper_skips_only_the_outage_code():
+    """`scripts/ins_step.sh` is the other half of the contract, and it is shell.
+
+    The Python decides what an outage is; this decides what CI does about it. Worth a test of
+    its own because an earlier version put this logic inline in three workflow steps and got it
+    wrong in two of them — `exit 0` ended the whole step, so an unreachable INS also skipped
+    four builders that never touch INS. Exiting 0 from a wrapper lets the step continue.
+    """
+    import subprocess
+
+    wrapper = Path(__file__).resolve().parents[1] / "scripts" / "ins_step.sh"
+    assert wrapper.exists()
+
+    def run(code: int) -> subprocess.CompletedProcess:
+        return subprocess.run(  # noqa: S603
+            [str(wrapper), "bash", "-c", f"exit {code}"],
+            capture_output=True,
+            text=True,
+        )
+
+    assert run(0).returncode == 0
+    # The one code that is forgiven, and it announces itself in the run's annotations.
+    skipped = run(3)
+    assert skipped.returncode == 0
+    assert "INS TEMPO unreachable" in skipped.stdout
+    # Everything else keeps its own code, so a broken parse still fails the build.
+    assert run(1).returncode == 1
+    assert run(2).returncode == 2

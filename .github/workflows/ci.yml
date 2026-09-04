@@ -203,9 +203,14 @@ jobs:
       # budget it answers 200 with an empty body rather than an error, so "it ran" is not
       # evidence it worked. The importer's own check — the register's categories against the
       # register's total — is what turns that into a failure.
+      # `scripts/ins_step.sh` turns retea.UNREACHABLE — the source was not there — into a skip
+      # with a warning, and leaves every other exit code alone. The diff still runs after it:
+      # an unreachable import writes nothing, so there is nothing to diff and the check is
+      # vacuous rather than either failing or being quietly dropped.
       - name: The land areas are reproducible
         run: |
-          uv run python simulators/impozit-teren/scripts/import_fond_funciar.py --all
+          scripts/ins_step.sh uv run python \
+            simulators/impozit-teren/scripts/import_fond_funciar.py --all
           git diff --exit-code simulators/impozit-teren/data/
       - name: The land grids are reproducible
         run: |
@@ -241,7 +246,8 @@ jobs:
         run: |
           uv run python simulators/impozit-teren/scripts/import_pret_cerut.py
           uv run python simulators/impozit-teren/scripts/import_teren_agricol_ins.py
-          uv run python simulators/impozit-teren/scripts/import_lemn_recoltat.py
+          scripts/ins_step.sh uv run python \
+            simulators/impozit-teren/scripts/import_lemn_recoltat.py
           uv run python simulators/impozit-teren/scripts/build_multiplu_piata.py
           uv run python simulators/impozit-teren/scripts/build_randament_construit.py
           uv run python simulators/impozit-teren/scripts/build_randament_padure.py
@@ -282,7 +288,8 @@ jobs:
       # Not diffed: it consumes the tax files, which carry the day's ECB rate.
       - name: The national estimate runs
         run: |
-          uv run python simulators/impozit-teren/scripts/import_populatie.py --all
+          scripts/ins_step.sh uv run python \
+            simulators/impozit-teren/scripts/import_populatie.py --all
           uv run python simulators/impozit-teren/scripts/build_valoare_nationala.py
       - name: The map's shapes build
         run: |

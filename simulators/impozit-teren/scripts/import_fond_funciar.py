@@ -227,6 +227,33 @@ def parse(table: str, county: str) -> tuple[dict[str, dict], list[str]]:
     return localities, problems
 
 
+def outcome(results: list[tuple[str, int, str]]) -> int:
+    """What a whole-country run means: 0 ok, `retea.UNREACHABLE` outage, 1 anything else.
+
+    Separated from the run so it can be tested without a network, because this is the piece
+    that decides whether CI is allowed to continue and it must not quietly widen. The claim it
+    makes is deliberately narrow: **nothing** was imported, and **every** county failed for the
+    same reason, and that reason was that TEMPO did not answer.
+
+    A partial import is a failure. Some counties answering and others not is a flaky network
+    mid-run at best, and at worst a change that breaks a subset — and either way the roster on
+    disk is now half old and half new, which is the state most worth stopping on.
+    """
+    ok = [code for code, status, _ in results if status == 0]
+    if len(ok) == len(results):
+        return 0
+    failures = [status for _, status, _ in results if status != 0]
+    if not ok and all(status == retea.UNREACHABLE for status in failures):
+        print(
+            "\nEvery county failed the same way: TEMPO did not answer. Nothing was imported "
+            "and nothing was written, so this is the source being down rather than the parse "
+            "being wrong.",
+            file=sys.stderr,
+        )
+        return retea.UNREACHABLE
+    return 1
+
+
 def run_all(workers: int) -> int:
     """Every county at once. The register is the roster every grid is checked against, so it
     has to exist before any chamber can be parsed, and forty-two serial requests to TEMPO is
@@ -245,7 +272,16 @@ def run_all(workers: int) -> int:
 
     here = Path(__file__)
 
-    def attempt(code: str) -> tuple[bool, str]:
+    def attempt(code: str) -> tuple[int, str]:
+        """The child's exit code and one line about it.
+
+        The code, not a substring of the code's message. An earlier version of `outcome` read
+        the last line of stderr looking for "TempoUnavailable", which worked exactly until
+        `retea.guarded` started catching that exception and printing a sentence instead — so
+        the detector was keyed to the shape of a traceback that no longer happened, and a whole
+        country of outages counted as ordinary failures. Exit codes are the interface between
+        a process and its caller; the text is for the human reading the log.
+        """
         done = subprocess.run(  # noqa: S603
             ["uv", "run", "python", str(here), "--county", code],
             capture_output=True, text=True, cwd=here.parents[3],
@@ -254,29 +290,34 @@ def run_all(workers: int) -> int:
             line = next(
                 (x for x in done.stdout.splitlines() if "localități" in x), "imported"
             )
-            return True, line
-        # The *last* line of the traceback, which is the exception. Reporting the first eighty
-        # characters instead — which is what this did — turns every failure into
+            return 0, line
+        # The *last* line of stderr, which is the exception or the explanation. Reporting the
+        # first eighty characters instead — which is what this did — turns every failure into
         # "Traceback (most recent call last): File /home/runner/work/rom" and tells nobody
         # anything; the CI run that prompted this retry could not be diagnosed from its log.
         tail = [x for x in done.stderr.strip().splitlines() if x.strip()]
-        return False, (tail[-1] if tail else "no output")[:160]
+        return done.returncode, (tail[-1] if tail else "no output")[:160]
 
-    def one(code: str) -> tuple[str, bool, str]:
+    def one(code: str) -> tuple[str, int, str]:
         for retry in range(3):
-            good, line = attempt(code)
-            if good:
-                return code, True, line if retry == 0 else f"{line}  (reîncercat de {retry}x)"
+            status, line = attempt(code)
+            if status == 0:
+                return code, 0, line if retry == 0 else f"{line}  (reîncercat de {retry}x)"
+            # A host that is refusing connections will refuse them again in two seconds. The
+            # retry is for a service that is slow, and `retea.read` has already spent three
+            # attempts and twenty-five seconds establishing that this one is not.
+            if status == retea.UNREACHABLE:
+                return code, status, line
             time.sleep(2 * (retry + 1))
-        return code, False, line
+        return code, status, line
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
         results = sorted(pool.map(one, sorted(COUNTIES)))
-    ok = [c for c, good, _ in results if good]
-    for code, good, line in results:
-        print(f"  {'ok  ' if good else 'FAIL'} {code}: {line}")
+    ok = [c for c, status, _ in results if status == 0]
+    for code, status, line in results:
+        print(f"  {'ok  ' if status == 0 else 'FAIL'} {code}: {line}")
     print(f"\n{len(ok)} of {len(results)} counties imported")
-    return 0 if len(ok) == len(results) else 1
+    return outcome(results)
 
 
 def main() -> int:
@@ -463,4 +504,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(retea.guarded(main))
