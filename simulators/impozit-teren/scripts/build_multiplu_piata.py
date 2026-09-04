@@ -28,9 +28,15 @@ survey year is 2024 against offers collected in 2026.
 
 Two things stop this generalising, and both are in the output:
 
-**It is the wrong 32%.** Curți-construcții is 68% of the land value this simulator computes —
-220,8 of 324,2 mld EUR across the forty-two counties — on under 3% of its surface, and no
-source in the register prices it. So this calibrates the
+**It used to be the wrong 32%, and `summary.buildingLand` is the other two thirds.**
+Curți-construcții is 68% of the land value this simulator computes — 220,8 of 324,2 mld EUR
+across the forty-two counties — on under 3% of its surface, and nothing in the Legea 17/2014
+register prices it. `anunturi-teren` now does, from listing asking prices in euro per square
+metre, and the answer is that **the grid is not wrong by the same amount everywhere**: about
+parity in municipalities, half again in towns, more than two and a half times in communes. The
+median over localities and the value-weighted mean therefore differ by roughly a factor of two,
+because two thirds of the building-land value sits in twenty cities where the grid is close to
+right. Both are published; neither is "the" multiple. What follows still calibrates the
 cheap majority of hectares and says nothing about the expensive minority — which is where a
 land value tax mostly falls. `marketMultiple` in `build_renta.py` therefore stays a knob the
 reader moves rather than a constant this file sets: applying an arable multiple to house plots
@@ -81,6 +87,64 @@ def editions(prefix: str) -> dict[str, Path]:
         if county and year.isdigit():
             found[county.upper()] = path
     return found
+
+
+def building_land() -> dict | None:
+    """The other 68% of the value, which this file could not calibrate until now.
+
+    `anunturi-teren` reads asking prices for building land off a listing portal, in euro per
+    square metre — the same unit the grid publishes intravilan in — so the two divide directly.
+    Optional: without that dataset the rest of this file is unchanged and this section is
+    simply absent, which is what the docstring above described for the whole of its life.
+
+    Two aggregates, because they answer different questions and disagree by a factor of two.
+    The median over localities says how wrong the grid is in a typical place. The value-weighted
+    mean says how wrong it is about the money, and the money is in the cities — twenty
+    localities hold roughly two thirds of the built-land value in this comparison. A revenue
+    argument wants the second; a fairness argument wants the first.
+    """
+    found = sorted((ROOT / "data").glob("anunturi-teren-*.json"))
+    if not found:
+        return None
+    asked_doc = json.loads(found[-1].read_text(encoding="utf-8"))
+    grid: dict[tuple[str, str], dict] = {}
+    for path in sorted((ROOT / "data").glob("valoare-teren-*.json")):
+        if "nationala" in path.name:
+            continue
+        county = re.search(r"valoare-teren-([a-z]{1,2})-", path.name).group(1).upper()
+        for locality in json.loads(path.read_text(encoding="utf-8"))["localities"]:
+            grid[(county, locality["siruta"])] = locality
+
+    by_rank: dict[str, list[float]] = {}
+    every: list[float] = []
+    weighted_top = weighted_bottom = 0.0
+    for row in asked_doc["localities"]:
+        place = grid.get((row["county"], row["siruta"]))
+        if not row.get("askedEurPerM2") or not place:
+            continue
+        published = place["intravilanEurPerM2"]["central"]
+        if not published:
+            continue
+        multiple = row["askedEurPerM2"]["median"] / published
+        every.append(multiple)
+        by_rank.setdefault(row.get("rank") or "comune", []).append(multiple)
+        # Weighted by what the grid itself says the locality's building land is worth, so the
+        # weight comes from the thing being tested rather than from the thing testing it.
+        value = place["builtHa"] * M2_PER_HA * published
+        weighted_top += multiple * value
+        weighted_bottom += value
+    if len(every) < 50:
+        return None
+    return {
+        "localities": len(every),
+        "medianMultiple": round(statistics.median(every), 3),
+        "valueWeightedMultiple": round(weighted_top / weighted_bottom, 3),
+        "byRank": {
+            kind: {"localities": len(v), "medianMultiple": round(statistics.median(v), 3)}
+            for kind, v in sorted(by_rank.items())
+        },
+        "source": asked_doc["id"],
+    }
 
 
 def main() -> int:
@@ -202,6 +266,7 @@ def main() -> int:
             for row in usable
             if row["multipleVsPaid"] and row["multipleVsPaid"] < 1
         ),
+        "buildingLand": building_land(),
     }
 
     document = {

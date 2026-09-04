@@ -1,280 +1,336 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "multiplu-piata.schema.json",
-  "title": "Raportul dintre prețul cerut și grila notarială",
-  "description": "Cât de departe este minimul notarial de prețul cerut, pentru arabil extravilan, pe județ și pe UAT. Ambele limitări blocante — preț cerut, nu de tranzacționare, și doar teren agricol — sunt înregistrate în fișier.",
-  "type": "object",
-  "additionalProperties": false,
-  "required": [
-    "id",
-    "title",
-    "publisher",
-    "counties",
-    "period",
-    "currency",
-    "provenance",
-    "summary",
-    "counties_compared",
-    "limitations"
-  ],
-  "$defs": {
-    "band": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "low",
-        "central",
-        "high"
-      ],
-      "properties": {
-        "low": {
-          "type": "number"
-        },
-        "central": {
-          "type": "number"
-        },
-        "high": {
-          "type": "number"
-        }
-      }
-    }
-  },
-  "properties": {
-    "$schema": {
-      "type": "string"
-    },
-    "id": {
-      "type": "string",
-      "pattern": "^multiplu-piata-[0-9]{4}$"
-    },
-    "title": {
-      "type": "string"
-    },
-    "publisher": {
-      "type": "string"
-    },
-    "counties": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "type": "string",
-        "pattern": "^[A-Z]{1,2}$"
-      }
-    },
-    "period": {
-      "type": "string",
-      "pattern": "^[0-9]{4}$"
-    },
-    "currency": {
-      "const": "RON"
-    },
-    "provenance": {
-      "$ref": "provenance.schema.json#/$defs/provenance"
-    },
-    "summary": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "multiplu-piata.schema.json",
+    "title": "Raportul dintre prețul cerut și grila notarială",
+    "description": "Cât de departe este minimul notarial de prețul cerut, pentru arabil extravilan, pe județ și pe UAT. Ambele limitări blocante — preț cerut, nu de tranzacționare, și doar teren agricol — sunt înregistrate în fișier.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "id",
+        "title",
+        "publisher",
         "counties",
-        "comparableCounties",
-        "matchedLocalities",
-        "countyMultiple",
-        "localityMultiple",
-        "countiesBelowParity",
-        "countyMultipleVsPaid",
-        "countiesBelowParityVsPaid"
-      ],
-      "properties": {
-        "counties": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "comparableCounties": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "matchedLocalities": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "countyMultiple": {
-          "$ref": "#/$defs/band"
-        },
-        "localityMultiple": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/band"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "description": "Multiplul măsurat pe aceleași UAT-uri în ambele surse — comparația cea mai apropiată de like-for-like."
-        },
-        "countiesBelowParity": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "Județele în care grila cere mai mult decât se cere pe piață."
-        },
-        "countyMultipleVsPaid": {
-          "type": [
-            "number",
-            "null"
-          ]
-        },
-        "countiesBelowParityVsPaid": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    "counties_compared": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "county",
-          "name",
-          "gridYear",
-          "gridPricedLocalities",
-          "gridLocalities",
-          "gridShare",
-          "gridMedianRonPerHa",
-          "offers",
-          "askedRonPerHa",
-          "multiple",
-          "comparable",
-          "localities",
-          "surveyRegion",
-          "surveyYear",
-          "paidRonPerHa",
-          "multipleVsPaid"
-        ],
-        "properties": {
-          "county": {
-            "type": "string",
-            "pattern": "^[A-Z]{1,2}$"
-          },
-          "name": {
-            "type": "string"
-          },
-          "gridYear": {
-            "type": "string",
-            "pattern": "^[0-9]{4}$"
-          },
-          "gridPricedLocalities": {
-            "type": "integer",
-            "minimum": 1
-          },
-          "gridLocalities": {
-            "type": "integer",
-            "minimum": 1
-          },
-          "gridShare": {
-            "type": "number",
-            "minimum": 0,
-            "maximum": 1
-          },
-          "gridMedianRonPerHa": {
-            "type": "number",
-            "exclusiveMinimum": 0
-          },
-          "offers": {
-            "type": "integer",
-            "minimum": 1
-          },
-          "askedRonPerHa": {
-            "$ref": "#/$defs/band"
-          },
-          "multiple": {
-            "$ref": "#/$defs/band"
-          },
-          "comparable": {
-            "type": "boolean",
-            "description": "Fals când grila prețuiește extravilanul pentru prea puține localități ca mediana ei să fie a județului."
-          },
-          "localities": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "additionalProperties": false,
-              "required": [
-                "siruta",
-                "name",
-                "offers",
-                "gridRonPerHa",
-                "askedRonPerHa",
-                "multiple"
-              ],
-              "properties": {
-                "siruta": {
-                  "type": "string",
-                  "pattern": "^[0-9]+$"
+        "period",
+        "currency",
+        "provenance",
+        "summary",
+        "counties_compared",
+        "limitations"
+    ],
+    "$defs": {
+        "band": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "low",
+                "central",
+                "high"
+            ],
+            "properties": {
+                "low": {
+                    "type": "number"
                 },
-                "name": {
-                  "type": "string"
+                "central": {
+                    "type": "number"
                 },
-                "offers": {
-                  "type": "integer",
-                  "minimum": 1
-                },
-                "gridRonPerHa": {
-                  "type": "number",
-                  "exclusiveMinimum": 0
-                },
-                "askedRonPerHa": {
-                  "$ref": "#/$defs/band"
-                },
-                "multiple": {
-                  "$ref": "#/$defs/band"
+                "high": {
+                    "type": "number"
                 }
-              }
             }
-          },
-          "surveyRegion": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "pattern": "^RO[0-9]{2}$",
-            "description": "Regiunea NUTS2 din care provine prețul plătit; județele aceleiași regiuni au aceeași cifră."
-          },
-          "surveyYear": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "pattern": "^[0-9]{4}$"
-          },
-          "paidRonPerHa": {
-            "type": [
-              "number",
-              "null"
-            ],
-            "description": "Prețul mediu de tranzacționare pentru arabil, ancheta INS raportată la Eurostat."
-          },
-          "multipleVsPaid": {
-            "type": [
-              "number",
-              "null"
-            ],
-            "description": "Prețul plătit ÷ mediana grilei. Se citește separat de multiplul față de prețul cerut."
-          }
         }
-      }
     },
-    "limitations": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "$ref": "provenance.schema.json#/$defs/limitation"
-      }
+    "properties": {
+        "$schema": {
+            "type": "string"
+        },
+        "id": {
+            "type": "string",
+            "pattern": "^multiplu-piata-[0-9]{4}$"
+        },
+        "title": {
+            "type": "string"
+        },
+        "publisher": {
+            "type": "string"
+        },
+        "counties": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "string",
+                "pattern": "^[A-Z]{1,2}$"
+            }
+        },
+        "period": {
+            "type": "string",
+            "pattern": "^[0-9]{4}$"
+        },
+        "currency": {
+            "const": "RON"
+        },
+        "provenance": {
+            "$ref": "provenance.schema.json#/$defs/provenance"
+        },
+        "summary": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "counties",
+                "comparableCounties",
+                "matchedLocalities",
+                "countyMultiple",
+                "localityMultiple",
+                "countiesBelowParity",
+                "countyMultipleVsPaid",
+                "countiesBelowParityVsPaid",
+                "buildingLand"
+            ],
+            "properties": {
+                "counties": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "comparableCounties": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "matchedLocalities": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "countyMultiple": {
+                    "$ref": "#/$defs/band"
+                },
+                "localityMultiple": {
+                    "anyOf": [
+                        {
+                            "$ref": "#/$defs/band"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "description": "Multiplul măsurat pe aceleași UAT-uri în ambele surse — comparația cea mai apropiată de like-for-like."
+                },
+                "countiesBelowParity": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Județele în care grila cere mai mult decât se cere pe piață."
+                },
+                "countyMultipleVsPaid": {
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                },
+                "countiesBelowParityVsPaid": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "buildingLand": {
+                    "type": [
+                        "object",
+                        "null"
+                    ],
+                    "additionalProperties": false,
+                    "required": [
+                        "localities",
+                        "medianMultiple",
+                        "valueWeightedMultiple",
+                        "byRank",
+                        "source"
+                    ],
+                    "description": "The other 68% of the land value, calibrated from listing asking prices. Null when anunturi-teren is not built. Two aggregates on purpose: the median over localities answers how wrong the grid is in a typical place, the value-weighted mean answers how wrong it is about the money. They differ by about a factor of two because two thirds of the building-land value sits in twenty cities where the grid is close to right.",
+                    "properties": {
+                        "localities": {
+                            "type": "integer",
+                            "minimum": 50
+                        },
+                        "medianMultiple": {
+                            "type": "number",
+                            "exclusiveMinimum": 0
+                        },
+                        "valueWeightedMultiple": {
+                            "type": "number",
+                            "exclusiveMinimum": 0,
+                            "description": "Weighted by what the grid itself says each locality's building land is worth, so the weight comes from the thing being tested rather than from the thing testing it."
+                        },
+                        "byRank": {
+                            "type": "object",
+                            "description": "municipii / orase / comune, separately. A single national ratio describes none of them.",
+                            "additionalProperties": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                    "localities",
+                                    "medianMultiple"
+                                ],
+                                "properties": {
+                                    "localities": {
+                                        "type": "integer",
+                                        "minimum": 1
+                                    },
+                                    "medianMultiple": {
+                                        "type": "number",
+                                        "exclusiveMinimum": 0
+                                    }
+                                }
+                            }
+                        },
+                        "source": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "counties_compared": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                    "county",
+                    "name",
+                    "gridYear",
+                    "gridPricedLocalities",
+                    "gridLocalities",
+                    "gridShare",
+                    "gridMedianRonPerHa",
+                    "offers",
+                    "askedRonPerHa",
+                    "multiple",
+                    "comparable",
+                    "localities",
+                    "surveyRegion",
+                    "surveyYear",
+                    "paidRonPerHa",
+                    "multipleVsPaid"
+                ],
+                "properties": {
+                    "county": {
+                        "type": "string",
+                        "pattern": "^[A-Z]{1,2}$"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "gridYear": {
+                        "type": "string",
+                        "pattern": "^[0-9]{4}$"
+                    },
+                    "gridPricedLocalities": {
+                        "type": "integer",
+                        "minimum": 1
+                    },
+                    "gridLocalities": {
+                        "type": "integer",
+                        "minimum": 1
+                    },
+                    "gridShare": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1
+                    },
+                    "gridMedianRonPerHa": {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                    },
+                    "offers": {
+                        "type": "integer",
+                        "minimum": 1
+                    },
+                    "askedRonPerHa": {
+                        "$ref": "#/$defs/band"
+                    },
+                    "multiple": {
+                        "$ref": "#/$defs/band"
+                    },
+                    "comparable": {
+                        "type": "boolean",
+                        "description": "Fals când grila prețuiește extravilanul pentru prea puține localități ca mediana ei să fie a județului."
+                    },
+                    "localities": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [
+                                "siruta",
+                                "name",
+                                "offers",
+                                "gridRonPerHa",
+                                "askedRonPerHa",
+                                "multiple"
+                            ],
+                            "properties": {
+                                "siruta": {
+                                    "type": "string",
+                                    "pattern": "^[0-9]+$"
+                                },
+                                "name": {
+                                    "type": "string"
+                                },
+                                "offers": {
+                                    "type": "integer",
+                                    "minimum": 1
+                                },
+                                "gridRonPerHa": {
+                                    "type": "number",
+                                    "exclusiveMinimum": 0
+                                },
+                                "askedRonPerHa": {
+                                    "$ref": "#/$defs/band"
+                                },
+                                "multiple": {
+                                    "$ref": "#/$defs/band"
+                                }
+                            }
+                        }
+                    },
+                    "surveyRegion": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "pattern": "^RO[0-9]{2}$",
+                        "description": "Regiunea NUTS2 din care provine prețul plătit; județele aceleiași regiuni au aceeași cifră."
+                    },
+                    "surveyYear": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "pattern": "^[0-9]{4}$"
+                    },
+                    "paidRonPerHa": {
+                        "type": [
+                            "number",
+                            "null"
+                        ],
+                        "description": "Prețul mediu de tranzacționare pentru arabil, ancheta INS raportată la Eurostat."
+                    },
+                    "multipleVsPaid": {
+                        "type": [
+                            "number",
+                            "null"
+                        ],
+                        "description": "Prețul plătit ÷ mediana grilei. Se citește separat de multiplul față de prețul cerut."
+                    }
+                }
+            }
+        },
+        "limitations": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "$ref": "provenance.schema.json#/$defs/limitation"
+            }
+        }
     }
-  }
 }

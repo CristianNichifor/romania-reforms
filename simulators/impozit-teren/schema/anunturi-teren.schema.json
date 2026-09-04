@@ -87,7 +87,9 @@
                 "unmatchedTownPages",
                 "medianOfMediansEurPerM2",
                 "crawl",
-                "stoppedBecause"
+                "stoppedBecause",
+                "byRank",
+                "pagesPerLocality"
             ],
             "properties": {
                 "localities": {
@@ -123,6 +125,46 @@
                         "null"
                     ],
                     "description": "Non-null when the run ended before the whole sitemap — a spent budget, or the host declining. A partial file says so rather than looking complete."
+                },
+                "byRank": {
+                    "type": "object",
+                    "description": "Median asking price per square metre, split by kind of place.",
+                    "additionalProperties": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                            "localities",
+                            "medianAskedEurPerM2"
+                        ],
+                        "properties": {
+                            "localities": {
+                                "type": "integer",
+                                "minimum": 1
+                            },
+                            "medianAskedEurPerM2": {
+                                "type": "number",
+                                "exclusiveMinimum": 0
+                            }
+                        }
+                    }
+                },
+                "pagesPerLocality": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "max",
+                        "localitiesReadDeep"
+                    ],
+                    "properties": {
+                        "max": {
+                            "type": "integer",
+                            "minimum": 0
+                        },
+                        "localitiesReadDeep": {
+                            "type": "integer",
+                            "minimum": 0
+                        }
+                    }
                 }
             }
         },
@@ -135,7 +177,9 @@
                     "siruta",
                     "name",
                     "county",
+                    "rank",
                     "totalOffersReported",
+                    "pagesRead",
                     "truncated",
                     "offers",
                     "usableOffers",
@@ -214,6 +258,19 @@
                         ],
                         "minimum": 0,
                         "maximum": 1
+                    },
+                    "rank": {
+                        "enum": [
+                            "municipii",
+                            "orase",
+                            "comune"
+                        ],
+                        "description": "Kind of place, carried from the notary grid's own roster. The most informative cut in this dataset: against the grid the asking price is about parity in municipalities and more than two and a half times in communes, so a national figure that mixes them describes neither."
+                    },
+                    "pagesRead": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "description": "How many result pages this locality was summarised from. One page understated Cluj-Napoca's median by 16%, so the cities are read deeper."
                     }
                 }
             }

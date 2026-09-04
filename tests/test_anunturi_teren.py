@@ -71,7 +71,9 @@ def test_truncation_is_declared_rather_than_hidden(listings):
     """One page is read per locality, so a busy one is a partial count and must say so."""
     per_page = listings["assumptions"]["perPage"]
     for row in listings["localities"]:
-        assert row["truncated"] == (row["totalOffersReported"] > per_page)
+        # Truncated now means "deeper than the pages actually read", not "deeper than one".
+        assert row["truncated"] == (row["totalOffersReported"] > per_page * row["pagesRead"])
+        assert row["pagesRead"] >= 1
     declared = sum(1 for r in listings["localities"] if r["truncated"])
     assert listings["summary"]["truncatedLocalities"] == declared
 
@@ -109,8 +111,9 @@ def test_a_partial_run_says_so(listings):
 def test_no_listing_content_is_stored(listings):
     """Statistics, not a mirror. The distinction is the whole basis for reading the source."""
     allowed = {
-        "siruta", "name", "county", "totalOffersReported", "truncated", "offers",
-        "usableOffers", "droppedBelowFloor", "askedEurPerM2", "medianAreaM2", "privateShare",
+        "siruta", "name", "county", "rank", "totalOffersReported", "pagesRead", "truncated",
+        "offers", "usableOffers", "droppedBelowFloor", "askedEurPerM2", "medianAreaM2",
+        "privateShare",
     }
     for row in listings["localities"]:
         assert set(row) <= allowed, f"unexpected field: {set(row) - allowed}"
