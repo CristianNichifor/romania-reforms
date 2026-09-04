@@ -26,13 +26,14 @@ Usage:
 
 from __future__ import annotations
 
+import gzip
 import json
 import re
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-LAW = ROOT.parent / "salarizare" / "sources" / "legea-153-2017.html"
+LAW = ROOT.parent / "salarizare" / "sources" / "legea-153-2017.html.gz"
 OUT = ROOT / "data" / "indemnizatii-2022.json"
 
 HEADING = "Indemnizația de încadrare pentru judecători, procurori"
@@ -66,7 +67,8 @@ def main() -> int:
     if not LAW.exists():
         raise SystemExit(f"Missing {LAW}; the pay simulator holds the law")
 
-    html = LAW.read_text(encoding="utf-8", errors="ignore")
+    with gzip.open(LAW, "rt", encoding="utf-8", errors="ignore") as handle:
+        html = handle.read()
     start = html.find(HEADING)
     if start < 0:
         raise SystemExit("Chapter I of Annex V not found in the law")

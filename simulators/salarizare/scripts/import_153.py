@@ -30,6 +30,8 @@ Two things worth knowing about the numbers:
 
 from __future__ import annotations
 
+import gzip
+import io
 import json
 import re
 import unicodedata
@@ -39,7 +41,10 @@ from pathlib import Path
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parent.parent
-SOURCE_FILE = ROOT / "sources/legea-153-2017.html"
+# Stored compressed: 6,0 MB of markup and 0,47 MB gzipped, in a repository whose tracked tree
+# is capped at 60 MB and was within a tenth of it. Same reasoning, and the same on-disk shape,
+# as impozit-teren's cod-fiscal-consolidat.html.gz.
+SOURCE_FILE = ROOT / "sources/legea-153-2017.html.gz"
 FRAME = ROOT / "data/frames/ro-153-2017.frame.json"
 OUT = ROOT / "data/regimes/ro-153-2017.json"
 
@@ -79,13 +84,17 @@ FUNCTION = re.compile(r"func[țt]ia|denumirea", re.IGNORECASE)
 def download() -> str:
     """Fetch once and keep the file, so a re-import does not depend on the site being up."""
     if SOURCE_FILE.exists():
-        return SOURCE_FILE.read_text(encoding="utf-8", errors="replace")
+        with gzip.open(SOURCE_FILE, "rt", encoding="utf-8", errors="replace") as handle:
+            return handle.read()
     print(f"downloading {URL} ...")
     request = urllib.request.Request(URL, headers={"User-Agent": UA})
     with urllib.request.urlopen(request, timeout=180) as response:  # noqa: S310
         text = response.read().decode("utf-8", errors="replace")
     SOURCE_FILE.parent.mkdir(parents=True, exist_ok=True)
-    SOURCE_FILE.write_text(text, encoding="utf-8")
+    # mtime pinned, so re-downloading unchanged markup produces an identical file rather than
+    # a diff whose only content is the moment it was fetched.
+    with gzip.GzipFile(SOURCE_FILE, "wb", compresslevel=9, mtime=0) as handle:
+        handle.write(text.encode("utf-8"))
     return text
 
 
@@ -216,7 +225,9 @@ def main() -> None:
     html = download()
     print(f"read {len(html):,} bytes\n")
 
-    tables = pd.read_html(SOURCE_FILE)
+    # The markup already in hand, not the file a second time: pandas cannot infer gzip for
+    # read_html, and passing it a literal HTML string is deprecated. StringIO is both.
+    tables = pd.read_html(io.StringIO(html))
     offsets = table_offsets(html)
     if len(offsets) != len(tables):
         print(f"  warning: {len(offsets)} <table> tags but {len(tables)} parsed tables")
