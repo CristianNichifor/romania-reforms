@@ -161,21 +161,28 @@ def test_an_outage_and_a_regression_are_different_exit_codes():
     import import_fond_funciar as importer
     import retea as network
 
-    tempo = "retea.TempoUnavailable: connection refused (după 3 încercări)"
+    gone = network.UNREACHABLE
+    broke = 1
 
-    everything = [("AB", True, "ok"), ("AR", True, "ok")]
+    everything = [("AB", 0, "ok"), ("AR", 0, "ok")]
     assert importer.outcome(everything) == 0
 
-    nothing = [("AB", False, tempo), ("AR", False, tempo)]
+    nothing = [("AB", gone, "TEMPO nu a răspuns"), ("AR", gone, "TEMPO nu a răspuns")]
     assert importer.outcome(nothing) == network.UNREACHABLE
 
     # Half the country imported and half did not. Not an outage — the data is now mixed.
-    partial = [("AB", True, "ok"), ("AR", False, tempo)]
+    partial = [("AB", 0, "ok"), ("AR", gone, "TEMPO nu a răspuns")]
     assert importer.outcome(partial) == 1
 
     # Everything failed, but not all for the same reason. Something else is wrong.
-    mixed = [("AB", False, tempo), ("AR", False, "SystemExit: AGR101B categories changed")]
+    mixed = [("AB", gone, "TEMPO nu a răspuns"), ("AR", broke, "AGR101B categories changed")]
     assert importer.outcome(mixed) == 1
+
+    # The decision is on exit codes, never on the wording of a message. A version of this that
+    # grepped stderr for "TempoUnavailable" passed its tests and failed in CI the moment the
+    # exception started being caught and reported as a sentence instead of a traceback.
+    worded_differently = [("AB", gone, "anything at all"), ("AR", gone, "")]
+    assert importer.outcome(worded_differently) == network.UNREACHABLE
 
 
 def test_the_guard_only_swallows_the_one_exception():
