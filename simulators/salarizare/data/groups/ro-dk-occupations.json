@@ -141,6 +141,52 @@
       "confidence": "derived"
     },
     {
+      "id": "soferi",
+      "sector": "Administrație",
+      "label": "Șoferi",
+      "proposedName": "Șofer",
+      "ro": {
+        "family": ["VIII-administratie", "II-sanatate-asistenta-sociala"],
+        "kind": ["execution"],
+        "nameMatches": "^(sofer|şofer|șofer|soferi|şoferi|conducator auto|conducător auto|conducator autospeciala|conducător autospecială)"
+      },
+      "dkOccupations": [],
+      "basis": "Aceeași meserie, în două anexe. Grupa există tocmai pentru că grila nu o are: proiectul plătește permisul de conducere cu 1,15 la o primărie și cu 1,57 pe o autosanitară, iar diferența nu e o atribuție scrisă undeva, ci anexa în care e trecut postul. Anexa VI nu apare aici deloc — acolo cine conduce e plătit după gradul militar, deci nu există funcție de șofer de căutat. Partea daneză lipsește: LONSOFF nu publică o grupă pentru conducători auto din sectorul public, iar a împrumuta cifra altei ocupații ar fi o comparație inventată.",
+      "confidence": "assumed",
+      "disputed": true
+    },
+    {
+      "id": "meserii-calificate",
+      "sector": "Administrație",
+      "label": "Meserii calificate",
+      "proposedName": "Muncitor calificat (pe meserie)",
+      "ro": {
+        "family": ["VIII-administratie", "III-cultura", "I-invatamant"],
+        "kind": ["execution"],
+        "nameMatches": "^(muncitor calificat|maistru|electrician|instalator|lacatus|lăcătuș|sudor|tamplar|tâmplar|zidar|fochist|mecanic)"
+      },
+      "dkOccupations": [],
+      "basis": "Meseriile manuale calificate din instituțiile publice. Grupa e cea mai slab definită de pe pagină și asta e constatarea: grila nu numește meseria. „Muncitor calificat treapta I-IV” spune ce treaptă de vechime în meserie se plătește, nu dacă omul e electrician, instalator sau sudor — calificarea concretă o stabilește statul de funcții al fiecărui ordonator și nu se publică. Fără denumirea meseriei nu există nici comparație cu piața muncii, nici comparator danez.",
+      "confidence": "assumed",
+      "disputed": true
+    },
+    {
+      "id": "curatenie-paza-suport",
+      "sector": "Administrație",
+      "label": "Curățenie, pază și suport",
+      "proposedName": "Personal de întreținere și pază",
+      "ro": {
+        "family": ["VIII-administratie", "III-cultura"],
+        "kind": ["execution"],
+        "nameMatches": "^(ingrijitor|îngrijitor|portar|paznic|guard|bucatar|bucătar|spalatoreasa|spălătoreasă|lenjereasa|lenjereasă|muncitor necalificat|garderobier)",
+        "excludeMatches": "animale"
+      },
+      "dkOccupations": [],
+      "basis": "Capătul de jos al grilei: îngrijitori, portari, paznici, bucătari, muncitori necalificați. Aici stă coeficientul 1,00, adică salariul minim al întregului sistem. Multe dintre rânduri sunt celule cu mai multe meserii pe un singur coeficient — „Portar; paznic; pompier; guard; bufetier; manipulant bunuri; curier” sunt șapte meserii și o singură cifră — deci grupa numără funcții din grilă, nu ocupații reale. Partea daneză lipsește din același motiv ca la șoferi: LONSOFF nu publică aceste ocupații separat.",
+      "confidence": "assumed",
+      "disputed": true
+    },
+    {
       "id": "politie",
       "sector": "Ordine publică",
       "label": "Poliție și ordine publică",

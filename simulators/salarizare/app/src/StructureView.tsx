@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 
 import { structure } from '../../engine/structure';
+import { Term } from './Glossary';
 import type { Regime } from '../../engine/types';
 import { ColumnChart, GradeChart, SpanChart } from './charts';
 import type { Bar } from './charts';
@@ -105,8 +106,8 @@ export default function StructureView({
           <div className="kpi">
             <div className="v accent">{pct(metrics.backSolvedShare)}</div>
             <div className="k">
-              din coeficienții distincți au 14 zecimale sau mai multe — retro-calculați, nu
-              proiectați
+              din <Term id="coeficient">coeficienții</Term> distincți au 14 zecimale sau mai
+              multe — <Term id="coeficient-retrocalculat">retro-calculați</Term>, nu proiectați
             </div>
           </div>
           <div className="kpi">
@@ -119,7 +120,9 @@ export default function StructureView({
           </div>
           <div className="kpi">
             <div className="v">{ro(metrics.variantsInGaps)}</div>
-            <div className="k">variante cad între gradele salariale, în niciunul</div>
+            <div className="k">
+              variante cad între <Term id="grad-salarial">gradele salariale</Term>, în niciunul
+            </div>
           </div>
           <div className="kpi">
             <div className="v">{ro(metrics.assimilation.mergedPositions)}</div>
@@ -186,8 +189,9 @@ export default function StructureView({
       <section>
         <h2>Structura de grade are goluri în care cad coeficienți reali</h2>
         <p className="lede">
-          Art. 9 alin. (2) scrie cele 12 intervale cu două zecimale — gradul 1 se termină la 1,19,
-          gradul 2 începe la 1,20 — în timp ce anexele livrează coeficienți cu 16 zecimale. Un
+          Art. 9 alin. (2) scrie cele 12 <Term id="grad-salarial">intervale</Term> cu două
+          zecimale — gradul 1 se termină la 1,19, gradul 2 începe la 1,20 — în timp ce{' '}
+          <Term id="anexa">anexele</Term> livrează coeficienți cu 16 zecimale. Un
           coeficient de 1,1907527 este peste plafonul unuia și sub pragul celuilalt:{' '}
           nu aparține niciunui grad salarial. {ro(metrics.variantsInGaps)} de variante stau în
           aceste goluri de o sutime, desenate mai jos exact acolo unde se află — între bare.

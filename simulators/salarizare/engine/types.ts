@@ -181,6 +181,27 @@ export interface Position {
    * job. Kept so a merged row can still be traced back to every cell it came from.
    */
   mergedFrom?: ReadonlyArray<string>;
+  /**
+   * What a proposal folded into this trade when it stopped paying the trade by annex, and
+   * how much of each former coefficient the declared duties actually account for.
+   *
+   * `residual` is the part the annex paid that no duty explains. It is deliberately kept
+   * rather than absorbed into a multiplier: it is the finding. A residual near zero means
+   * the sector premium was buying something nameable; a large one means the same work was
+   * priced differently for no reason the law states.
+   */
+  tradeFold?: ReadonlyArray<{
+    code: string;
+    name: string;
+    family: string;
+    /** Its own entry coefficient, before the fold. */
+    was: number;
+    /** Duties the declared rules matched to it, and their combined rate. */
+    duties: ReadonlyArray<string>;
+    dutyRate: number;
+    /** (was / floor - 1) - dutyRate. Positive: a premium no duty accounts for. */
+    residual: number;
+  }>;
   provenance: Provenance;
 }
 

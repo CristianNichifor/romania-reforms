@@ -121,3 +121,32 @@ describe('the sector filter travels in the link', () => {
     expect(decodeScenario('#/meserii').sector).toBeUndefined();
   });
 });
+
+describe('switching a patch off travels in the link', () => {
+  it('round-trips the refusals', () => {
+    const round = decodeScenario(
+      encodeScenario({
+        ...DEFAULT_SCENARIO,
+        view: 'propunere',
+        offPatches: ['spor-de-conditii-proportionat', 'meseria-nu-anexa'],
+      }),
+    );
+    expect(round.view).toBe('propunere');
+    expect(round.offPatches).toEqual(['spor-de-conditii-proportionat', 'meseria-nu-anexa']);
+  });
+
+  it('names what is refused, never what is kept', () => {
+    // The distinction decides what happens to a link when the proposal grows. Listing the
+    // survivors would mean a link written today arrives at a later version silently
+    // switching off every patch added since — a reader would see an older proposal and be
+    // told it is the current one. Listing refusals means a link asserts only its author's
+    // actual decision, and a patch nobody has refused is on.
+    expect(decodeScenario('#/propunere').offPatches).toBeUndefined();
+    expect(encodeScenario({ ...DEFAULT_SCENARIO, view: 'propunere' })).not.toContain('x=');
+  });
+
+  it('an unknown patch id is harmless', () => {
+    // Patches get renamed. A stale id must not throw and must not disable something else.
+    expect(decodeScenario('#/propunere?x=nu-exista').offPatches).toEqual(['nu-exista']);
+  });
+});

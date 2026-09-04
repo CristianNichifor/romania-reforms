@@ -8,6 +8,7 @@ the wrong place. Each one pins a class of mistake that was actually made and fix
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -17,7 +18,7 @@ import pytest
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from import_coeficienti import classify_columns, parse_titles  # noqa: E402
+from import_coeficienti import classify_columns, parse_titles, rank_label  # noqa: E402
 
 WORKBOOK = ROOT / "sources/Proiect-COEFICIENTI-1-8-MMFTSS-16.07.2026-1000.xlsx"
 REGIME = ROOT / "data/regimes/ro-draft-2026-07-16.json"
@@ -97,6 +98,42 @@ def test_semicolons_inside_one_title_are_flagged_not_split():
 
 def test_plain_title_is_left_alone():
     assert parse_titles("Auditor")[1] == "single"
+
+
+# ------------------------------------------------------------------ rank recognition
+
+
+def test_a_step_spelled_with_a_diacritic_is_still_a_rank():
+    """Column D of the Annex VIII sheets is headed "Grad sau treaptă profesională".
+
+    The pattern that recognises ranks was written without diacritics, so "debutant" and
+    "gradul I" were caught and every "treaptă …" fell through — the importer read the
+    step as a job and minted 24 positions literally named "treaptă II".
+    """
+    for cell in ("treaptă I", "treaptă II", "treaptă III", "treaptă IV", "treaptă IA"):
+        assert rank_label(cell) == cell, cell
+    # The undiacriticked spelling appears too, and must behave identically.
+    assert rank_label("treapta I") == "treapta I"
+
+
+def test_a_step_with_a_note_attached_is_still_a_rank():
+    """"treaptă  II - fără sporuri" is a step plus a footnote, not an occupation.
+
+    Word count cannot decide this one, which is why the unambiguous rank words are
+    tested without a length limit.
+    """
+    assert rank_label("treaptă  II - fără sporuri") == "treaptă II - fără sporuri"
+
+
+def test_a_rank_word_that_can_head_a_job_still_needs_to_be_short():
+    """"asistent" alone is a grade; "Asistent medical principal" is an occupation."""
+    assert rank_label("asistent") == "asistent"
+    assert rank_label("Asistent medical de laborator principal") is None
+
+
+def test_an_occupation_is_never_read_as_a_rank():
+    for cell in ("Muncitor calificat", "Grădinar", "Şofer", "Nivelator"):
+        assert rank_label(cell) is None, cell
 
 
 # ------------------------------------------------------------ column classification
@@ -213,6 +250,36 @@ def test_the_health_unit_band_lands_on_the_right_sheets(positions):
         if "II CI 3" in p["provenance"]["locator"] and p.get("institutionFactor")
     ]
     assert social == []
+
+
+def test_the_skilled_worker_keeps_the_qualification_it_is_paid_for(positions):
+    """Annex VIII CII C rows 33-36 are one job at four steps, not one job.
+
+    The step is the only thing in the grid that says what a "muncitor calificat" is
+    actually paid for. Losing it left four coefficients under one undifferentiated name,
+    told apart afterwards by the cell they came from — so the reader saw a pay difference
+    with no stated reason, and `separateInstitutionFactor` went on to explain it as a
+    difference between institutions, which it is not.
+    """
+    worker = positions["82.40302012.01"]
+    assert worker["name"] == "Muncitor calificat"
+    assert [v["dims"]["gradProfesional"] for v in worker["variants"]] == [
+        "treaptă I", "treaptă II", "treaptă III", "treaptă IV",
+    ]
+    assert [v["value"] for v in worker["variants"]] == [
+        1.2803792515093386, 1.2093310521929996, 1.1966199999999998, 1.1522082458275196,
+    ]
+    # Nothing is left needing the cell reference to tell the four apart.
+    assert all("celula" not in v["dims"] for v in worker["variants"])
+
+
+def test_no_position_is_named_after_a_bare_step(positions):
+    """A step is a dimension of a job, never a job. Read as one it looks like data."""
+    bare = [
+        p["name"] for p in positions.values()
+        if re.match(r"^\s*(treapt|gradul|clasa|nivel)\b", p["name"], re.IGNORECASE)
+    ]
+    assert bare == []
 
 
 def test_no_coefficient_escapes_the_declared_range(positions):

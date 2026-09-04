@@ -18,6 +18,22 @@ function pct(n: number): string {
 function ratio(n: number): string {
   return `1:${n.toLocaleString('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
+function num(n: number): string {
+  return n.toLocaleString('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+/** The annexes as a reader would name them, rather than as the importer keys them. */
+const FAMILY_LABEL: Record<string, string> = {
+  'I-invatamant': 'Anexa I — învățământ',
+  'II-sanatate-asistenta-sociala': 'Anexa II — sănătate',
+  'III-cultura': 'Anexa III — cultură',
+  'IV-diplomatie': 'Anexa IV — diplomație',
+  'V-justitie': 'Anexa V — justiție',
+  'VI-aparare-ordine-securitate': 'Anexa VI — apărare și ordine publică',
+  'VII-venituri-proprii': 'Anexa VII — venituri proprii',
+  'VIII-administratie': 'Anexa VIII — administrație',
+  'IX-demnitati-publice': 'Anexa IX — demnități publice',
+};
 
 type Col = 'inForce' | 'ministry' | 'ours' | 'dk';
 
@@ -67,9 +83,14 @@ function columnsFor(proposal: Proposal): Array<{ key: Col; title: string; sub: s
   ];
 }
 
-/** Positions whose variants differ only by where the post sits, not by what the job is. */
+/**
+ * Positions whose variants differ only by where the post sits, not by what the job is.
+ *
+ * Kept in step with `separateInstitutionFactor`, which is what the count is counting:
+ * `celula` is not context, it is the importer saying it could not tell two rows apart.
+ */
 function fusedCount(regime: Regime): number {
-  const context = new Set(['institutionLevel', 'sursa', 'celula']);
+  const context = new Set(['institutionLevel', 'sursa']);
   return regime.positions.filter((p) => {
     if (p.variants.length < 2) return false;
     const jobs = new Set(
@@ -103,12 +124,31 @@ export default function CompareView({
   denmark: Regime | null;
   proposal: Proposal;
   effects: PatchEffect[];
-  onOpen: (view: 'structure' | 'payslip' | 'echivalente') => void;
+  onOpen: (view: 'structure' | 'payslip' | 'echivalente' | 'propunere') => void;
   rates: Rates;
   capSeries: CapSeries[] | null;
   period: string | null;
 }) {
   const COLUMNS = useMemo(() => columnsFor(proposal), [proposal]);
+
+  // Trades the proposal stopped paying by annex, with what each absorbed post used to
+  // earn. Read off the applied regime rather than recomputed here, so the table cannot
+  // disagree with the patch that produced it.
+  const tradeFolds = useMemo(
+    () =>
+      ours.positions
+        .filter((p) => p.tradeFold?.length)
+        .map((position) => ({ position, folds: position.tradeFold! })),
+    [ours],
+  );
+  const dutyName = useMemo(() => {
+    const byId = new Map(
+      (proposal.patches.flatMap((p) => p.trades ?? []) ?? []).flatMap((t) =>
+        t.duties.map((d) => [d.id, d.name] as const),
+      ),
+    );
+    return (id: string) => byId.get(id) ?? id;
+  }, [proposal]);
   const opts = period ? { period } : undefined;
   const m = useMemo(() => structure(ministry, opts), [ministry, period]);
   const o = useMemo(() => structure(ours, opts), [ours, period]);
@@ -474,9 +514,76 @@ export default function CompareView({
         </ol>
       </section>
 
+      {tradeFolds.length > 0 && (
+        <section>
+          <h2>Ce plătea anexa, și pentru ce</h2>
+          <p className="lede">
+            Pentru meseriile manuale grila plătește anexa, nu meseria: același permis de
+            conducere valorează cu 37% mai mult pe o autosanitară decât la o primărie mică, fără
+            ca legea să numească vreo atribuție care să explice diferența. Mai jos, fiecare
+            funcție absorbită în meserie: cât lua, ce atribuție declarată o justifică, și cât
+            rămâne neexplicat. <b>Restul e rezultatul</b> — acolo unde e mic, anexa plătea ceva
+            ce se poate numi; acolo unde e mare, plătea faptul că postul e trecut în altă anexă.
+          </p>
+          {tradeFolds.map(({ position, folds }) => (
+            <div className="card" key={position.code}>
+              <h3>
+                {position.name}{' '}
+                <small>
+                  coeficient de bază {num(Math.min(...position.variants.map((v) => Number(v.value ?? 0))))}
+                </small>
+              </h3>
+              <div className="table-scroll">
+                <table className="data">
+                  <thead>
+                    <tr>
+                      <th>Funcția absorbită</th>
+                      <th>Anexa</th>
+                      <th className="num">Coeficient</th>
+                      <th>Atribuție declarată</th>
+                      <th className="num">Rest neexplicat</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[...folds]
+                      .sort((a, b) => b.residual - a.residual)
+                      .map((f) => (
+                        <tr key={f.code}>
+                          <td>{f.name}</td>
+                          <td>{FAMILY_LABEL[f.family] ?? f.family}</td>
+                          <td className="num">{num(f.was)}</td>
+                          <td>
+                            {f.duties.length
+                              ? `${dutyName(f.duties[0])} · +${pct(f.dutyRate)}`
+                              : <span className="muted">niciuna</span>}
+                          </td>
+                          <td className="num">
+                            <b>+{pct(f.residual)}</b>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ))}
+          <p className="src">
+            Cuantumurile atribuțiilor sunt scrise de noi, nu citite din caietul ministerului —
+            sursa nu conține niciun spor de acest fel. Reperul e cota sporului de condiții
+            măsurată în Danemarca: 8,8% la personalul de îngrijire, 4,9% la polițiști, 0,2% la
+            profesori. Fiecare atribuție e marcată „assumed” în regim și poate fi contestată
+            separat de restul propunerii.
+          </p>
+        </section>
+      )}
+
       <section>
         <h2>Mai departe</h2>
         <div className="next-grid">
+          <button className="next" onClick={() => onOpen('propunere')}>
+            <strong>Propunerea, corectură cu corectură</strong>
+            <span>Fiecare modificare cu întrerupătorul ei — stinge una și restul se recalculează</span>
+          </button>
           <button className="next" onClick={() => onOpen('structure')}>
             <strong>Cum e construită grila</strong>
             <span>Zecimalele, golurile dintre grade, funcțiile comasate</span>

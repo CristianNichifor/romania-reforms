@@ -90,26 +90,135 @@ describe('each patch fixes its stated defect', () => {
   });
 
   it('takes the institution out of the job title without moving any pay', () => {
-    // 95 positions carried variants that differed only by institutional tier — one title
-    // paid up to 1,5x more depending where the post sat. After the patch the job appears
-    // once and the institutional difference is an explicit multiplier.
-    const context = new Set(['institutionLevel', 'sursa', 'celula']);
-    const stillFused = applied.regime.positions.filter((p) => {
-      if (p.variants.length < 2) return false;
-      const jobs = new Set(
-        p.variants.map((v) =>
-          JSON.stringify(Object.entries(v.dims ?? {}).filter(([k]) => !context.has(k)).sort()),
-        ),
-      );
-      return jobs.size === 1 && p.variants.some((v) =>
-        Object.keys(v.dims ?? {}).some((k) => context.has(k)));
-    });
-    expect(stillFused).toHaveLength(0);
+    // Positions carrying variants that differ only by institutional tier — one title paid
+    // up to 1,5x more depending where the post sat. After the patch the job appears once
+    // and the institutional difference is an explicit multiplier.
+    const context = new Set(['institutionLevel', 'sursa']);
+    const fused = (regime: Regime) =>
+      regime.positions.filter((p) => {
+        if (p.variants.length < 2) return false;
+        const jobs = new Set(
+          p.variants.map((v) =>
+            JSON.stringify(Object.entries(v.dims ?? {}).filter(([k]) => !context.has(k)).sort()),
+          ),
+        );
+        return jobs.size === 1 && p.variants.some((v) =>
+          Object.keys(v.dims ?? {}).some((k) => context.has(k)));
+      });
+    expect(fused(BASE).length).toBeGreaterThan(0);
+    expect(fused(applied.regime)).toHaveLength(0);
 
     const withFactor = applied.regime.positions.filter((p) => p.institutionFactor);
     expect(withFactor.length).toBeGreaterThan(50);
     // The spread is preserved, not discarded: the widest is the 1,5x TIC case.
     expect(Math.max(...withFactor.map((p) => p.institutionFactor!.max))).toBeGreaterThan(1.4);
+  });
+
+  it('refuses to call an unexplained difference institutional', () => {
+    // `celula` is not a fact about institutions. It is the importer recording that two
+    // rows of the source could be told apart by nothing but their place on the page —
+    // Annex I repeats whole blocks of "Administrator financiar", grade for grade. Reading
+    // it as context turned that ambiguity into a confident institutional multiplier, and
+    // it also swallowed the professional step before the importer learned to read it.
+    // Where the distinction is unknown the patch must decline and leave the variants.
+    const onlyCell = (regime: Regime) =>
+      regime.positions.filter((p) => {
+        if (p.variants.length < 2) return false;
+        const withoutCell = new Set(
+          p.variants.map((v) =>
+            JSON.stringify(
+              Object.entries(v.dims ?? {}).filter(([k]) => k !== 'celula').sort(),
+            ),
+          ),
+        );
+        return withoutCell.size < p.variants.length;
+      });
+
+    const ambiguous = onlyCell(BASE);
+    expect(ambiguous.length).toBeGreaterThan(0);
+
+    const effect = applied.effects.find((e) => e.patchId === 'institutia-nu-e-denumire')!;
+    const touched = new Set(effect.touchedCodes);
+    expect(ambiguous.filter((p) => touched.has(p.code))).toHaveLength(0);
+
+    // Applied on its own — the full proposal also merges duplicate titles, which may
+    // legitimately absorb one of these codes into another. Alone, every variant survives.
+    const patch = PROPOSAL.patches.find((p) => p.id === 'institutia-nu-e-denumire')!;
+    const alone = applyProposal(BASE, { ...PROPOSAL, patches: [patch] });
+    for (const position of ambiguous) {
+      const after = alone.regime.positions.find((p) => p.code === position.code);
+      expect(after?.variants.length, position.code).toBe(position.variants.length);
+    }
+  });
+
+  it('pays a trade for what it does, not for the annex it sits in', () => {
+    // Eight driving posts across two annexes, 1,15 to 1,57 — a 37% spread for the same
+    // licence. After the patch there is one Șofer, at the floor, and the annexes' premium
+    // has to survive as a named duty or not at all.
+    const driver = applied.regime.positions.find((p) => p.name === 'Șofer' && p.tradeFold);
+    expect(driver, 'the trade should be named once').toBeTruthy();
+    expect(driver!.tradeFold!.length).toBe(7);
+
+    // Every folded post came from one of the two annexes that pay drivers, and the fold
+    // crossed between them — which is the whole point, and what mergeDuplicateTitles
+    // refuses to do.
+    const families = new Set(driver!.tradeFold!.map((f) => f.family));
+    expect(families.size).toBeGreaterThan(1);
+
+    // The base is the cheapest, never an average: an average would quietly invent a raise
+    // for some and a cut for others without either being stated.
+    const base = Math.min(...driver!.variants.map((v) => v.value as number));
+    expect(Math.min(...driver!.tradeFold!.map((f) => f.was))).toBeGreaterThanOrEqual(base);
+
+    // Ambulance driving is named and priced; driving for the health ministry is not.
+    const ambulance = driver!.tradeFold!.find((f) => /autosanitar/i.test(f.name))!;
+    expect(ambulance.duties).toContain('conducere-autosanitara');
+    expect(ambulance.residual).toBeGreaterThan(0.1);
+
+    // And where a duty does explain the premium, the residual collapses. This pair is the
+    // finding: the same 5% duty accounts for nearly all of one premium and almost none of
+    // the other, which is only visible because the residual is kept instead of absorbed.
+    const special = driver!.tradeFold!.find((f) => /autospecial/i.test(f.name))!;
+    expect(special.duties).toContain('conducere-vehicul-special');
+    expect(special.residual).toBeLessThan(0.05);
+  });
+
+  it('authored duty rates never claim to come from the workbook', () => {
+    // The source contains no duty premium at all, so every rate here is ours. If one of
+    // them ever arrives marked `verbatim` or `derived`, a reader would take it for the
+    // ministry's number, and the patch would be laundering a policy choice as a finding.
+    const patch = PROPOSAL.patches.find((p) => p.op === 'unifyTradeByDuty')!;
+    expect(patch.policyChange, 'a patch that moves money must say so').toBe(true);
+
+    const dutyIds = new Set((patch.trades ?? []).flatMap((t) => t.duties.map((d) => d.id)));
+    expect(dutyIds.size).toBeGreaterThan(0);
+    for (const id of dutyIds) {
+      const supplement = applied.regime.supplements.find((s) => s.id === id);
+      expect(supplement, `${id} should exist as a supplement`).toBeTruthy();
+      expect(supplement!.provenance.confidence, id).toBe('assumed');
+      expect(supplement!.provenance.note, `${id} must say where its rate comes from`).toBeTruthy();
+      // A duty inside the ceiling can be argued about; one outside it cannot be refused.
+      expect(supplement!.countsToCap, id).toBe(true);
+    }
+  });
+
+  it('refuses to fold a row that is several jobs on one coefficient', () => {
+    // "Bucătar, lenjereasă" is a cook and a laundry worker sharing a coefficient, and
+    // "Secretar cabinet, secretar dactilograf, curier personal (şofer)" is three jobs of
+    // which only one drives. Folding either into a trade would carry the other jobs along
+    // and pay them the trade's floor. The guard is the importer's own verdict on the cell.
+    const folded = new Set(
+      applied.regime.positions.flatMap((p) => (p.tradeFold ?? []).map((f) => f.code)),
+    );
+    const bundles = BASE.positions.filter(
+      (p) => p.assimilation?.parse === 'needsReview' || (p.assimilation?.fanIn ?? 1) > 1,
+    );
+    expect(bundles.length).toBeGreaterThan(0);
+    expect(bundles.filter((p) => folded.has(p.code))).toHaveLength(0);
+
+    // Specifically the cabinet driver, which matches the trade pattern on its own words.
+    const cabinet = BASE.positions.find((p) => /curier personal/i.test(p.name))!;
+    expect(folded.has(cabinet.code)).toBe(false);
   });
 
   it('unifying seniority puts every execution position on one ladder', () => {
@@ -133,6 +242,9 @@ describe('the proposal does not quietly change pay policy', () => {
     for (const p of applied.regime.positions) {
       reachable.add(p.code);
       for (const code of p.mergedFrom ?? []) reachable.add(code);
+      // A trade fold absorbs across families, so it records itself separately — but it is
+      // just as much an absorption, and nothing may disappear through it either.
+      for (const f of p.tradeFold ?? []) reachable.add(f.code);
     }
     const lost = BASE.positions.filter((p) => !reachable.has(p.code));
     expect(lost.map((p) => p.code)).toEqual([]);

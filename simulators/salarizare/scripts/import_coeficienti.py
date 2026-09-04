@@ -290,21 +290,42 @@ def dim_for(label: str | None, index: int) -> tuple[str, str, str]:
 # "    clasa a II-a", "         debutant" - and they are never jobs in their own right.
 # Read as positions they produce 46 posts called "debutant" and 30 called "clasa a II-a",
 # which is both wrong and the kind of wrong that looks like data.
-RANK_PREFIX = re.compile(
-    r"^(gradul|grad|clasa|treapta|nivel|definitiv|debutant|principal|asistent"
-    r"|superior|specialist|practicant|stagiar)\b",
+#
+# Two families of rank word, because they need different tests.
+#
+# These can never head a job title: the workbook uses them only to name a step inside an
+# occupation, so length says nothing about whether the cell is a rank. It matters because
+# the sheets write "treaptă  II - fără sporuri" - a rank with a note hung off it - and any
+# word-count test reads that as an occupation.
+RANK_ONLY = re.compile(r"^(gradul|grad|gradatia|clasa|treapta|nivel)\b", re.IGNORECASE)
+
+# These double as the head of a real occupation - "Asistent medical principal" - so a cell
+# is a rank only when it is too short to carry a noun of its own.
+RANK_AMBIGUOUS = re.compile(
+    r"^(definitiv|debutant|principal|asistent|superior|specialist|practicant|stagiar)\b",
     re.IGNORECASE,
 )
 
 
 def rank_label(cell: str) -> str | None:
-    """The rank a continuation row carries, or None when the cell names a job."""
-    text = (cell or "").strip()
-    if not text or not RANK_PREFIX.match(text):
+    """The rank a continuation row carries, or None when the cell names a job.
+
+    Matching folds the diacritics away. Column D of the Annex VIII sheets is headed
+    "Grad sau treaptă profesională" and fills it with "treaptă I".."treaptă IV", spelled
+    with the ă the pattern here was written without - so every step in it read as a job
+    and the importer minted 24 positions literally named "treaptă II".
+    """
+    text = re.sub(r"\s+", " ", (cell or "").strip())
+    if not text:
         return None
+    flat = strip_accents(text)
+    if RANK_ONLY.match(flat):
+        return text
     # "Asistent medical" is an occupation; "asistent" alone is a professional grade.
     # Anything long enough to carry a noun after the rank word is a title, not a rank.
-    return text if len(text.split()) <= 3 else None
+    if RANK_AMBIGUOUS.match(flat) and len(text.split()) <= 3:
+        return text
+    return None
 
 
 def parse_titles(cell: str) -> tuple[list[dict], str, int]:
@@ -364,9 +385,12 @@ def parse_titles(cell: str) -> tuple[list[dict], str, int]:
 # ------------------------------------------------------------------ extraction
 
 
-VECHIME = re.compile(r"(ani|peste|pana|până|luni)|^\d+\s*-\s*\d+", re.IGNORECASE)
+# Tested against the accent-folded cell, so one spelling of each word is enough. The
+# sheets are inconsistent - "treaptă" and "treapta", "gradaţia" and "gradatia" - and
+# writing both spellings into the pattern is how "treaptă" came to be missing from it.
+VECHIME = re.compile(r"(ani|peste|pana|luni)|^\d+\s*-\s*\d+", re.IGNORECASE)
 GRAD = re.compile(
-    r"(gradul|grad\b|treapta|debutant|principal|superior|asistent|specialist|"
+    r"(gradul|grad\b|gradatia|treapta|debutant|principal|superior|asistent|specialist|"
     r"rezident|maestru|categoria|clasa)",
     re.IGNORECASE,
 )
@@ -389,9 +413,11 @@ def row_dims(row: tuple, roles: dict[int, str], title_cell: str) -> dict[str, st
         value = re.sub(r"\s+", " ", value.strip())
         if not value or value == title_cell or value == "-":
             continue
-        if VECHIME.search(value) and len(value) < 40:
+        # The value is kept as the sheet spells it; only the test is folded.
+        flat = strip_accents(value)
+        if VECHIME.search(flat) and len(value) < 40:
             dims.setdefault("vechime", value)
-        elif GRAD.search(value) and len(value) < 40:
+        elif GRAD.search(flat) and len(value) < 40:
             dims.setdefault("gradProfesional", value)
     return dims
 

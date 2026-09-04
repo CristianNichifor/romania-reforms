@@ -21,7 +21,15 @@ import type { Money } from './types';
 import type { Regime } from './types';
 
 export interface GroupRule {
-  family?: string;
+  /**
+   * One occupational family, or several.
+   *
+   * Several is not a convenience. A trade is not an annex: drivers sit in Annex VIII and
+   * Annex II, skilled workers across four, and a rule that could only name one family
+   * would have to either drop half the occupation or pretend the halves are different
+   * jobs — which is the defect this page exists to show.
+   */
+  family?: string | ReadonlyArray<string>;
   kind?: string[];
   studyLevel?: string[];
   nameMatches?: string;
@@ -112,7 +120,10 @@ function matches(
   position: { family: string; kind: string; studyLevel?: string; name: string },
   rule: GroupRule,
 ): boolean {
-  if (rule.family && position.family !== rule.family) return false;
+  if (rule.family) {
+    const families = typeof rule.family === 'string' ? [rule.family] : rule.family;
+    if (!families.includes(position.family)) return false;
+  }
   if (rule.kind && !rule.kind.includes(position.kind)) return false;
   if (rule.studyLevel && !rule.studyLevel.includes(position.studyLevel ?? '')) return false;
 

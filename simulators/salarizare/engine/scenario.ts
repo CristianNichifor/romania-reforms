@@ -18,6 +18,7 @@ import type { Person, SupplementClaim } from './payslip';
 export type ViewId =
   | 'acasa'
   | 'compare'
+  | 'propunere'
   | 'meserii'
   | 'echivalente'
   | 'payslip'
@@ -35,6 +36,15 @@ export interface Scenario {
   asOf?: string;
   /** Which occupational sector the meserii page is narrowed to, if any. */
   sector?: string;
+  /**
+   * Patches the reader has switched OFF, never the ones left on.
+   *
+   * Encoding the survivors would look tidier and would be wrong: a link made today would
+   * arrive at a later version listing patches that version has never heard of, and the
+   * ones added since would silently vanish from the proposal. Naming the refusals means a
+   * link says only what its author actually decided, and everything else stays on.
+   */
+  offPatches?: string[];
   /** Envelope mode: the ceiling on total spend, as a proportion of today's bill. */
   envelopeTarget?: number;
   /** Envelope mode: a proportional change per occupational family, and its reason. */
@@ -43,7 +53,7 @@ export interface Scenario {
   extra?: Record<string, string>;
 }
 
-const KNOWN = new Set(['r', 'p', 'y', 'd', 's', 'a', 't', 'm', 'f']);
+const KNOWN = new Set(['r', 'p', 'y', 'd', 's', 'a', 't', 'm', 'f', 'x']);
 
 export interface EnvelopeMove {
   family: string;
@@ -125,6 +135,7 @@ export function encodeScenario(scenario: Scenario): string {
   if (scenario.claims?.length) params.set('s', scenario.claims.map(encodeClaim).join(','));
   if (scenario.asOf) params.set('a', scenario.asOf);
   if (scenario.sector) params.set('f', scenario.sector);
+  if (scenario.offPatches?.length) params.set('x', scenario.offPatches.join(','));
   if (scenario.envelopeTarget !== undefined) params.set('t', String(scenario.envelopeTarget));
   if (scenario.envelopeMoves?.length) {
     params.set('m', scenario.envelopeMoves.map(encodeMove).join(','));
@@ -143,6 +154,7 @@ export function decodeScenario(hash: string): Scenario {
     path === 'envelope' ||
     path === 'structure' ||
     path === 'compare' ||
+    path === 'propunere' ||
     path === 'meserii' ||
     path === 'echivalente' ||
     path === 'distributie' ||
@@ -172,6 +184,11 @@ export function decodeScenario(hash: string): Scenario {
   const extra: Record<string, string> = {};
   for (const [key, value] of params) if (!KNOWN.has(key)) extra[key] = value;
 
+  const offPatches = (params.get('x') ?? '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+
   const years = Number(params.get('y'));
   const target = Number(params.get('t'));
 
@@ -191,6 +208,7 @@ export function decodeScenario(hash: string): Scenario {
     claims: claims.length ? claims : undefined,
     asOf: params.get('a') ?? undefined,
     sector: params.get('f') ?? undefined,
+    offPatches: offPatches.length ? offPatches : undefined,
     envelopeTarget:
       Number.isFinite(target) && params.get('t') !== null ? target : undefined,
     envelopeMoves: moves.length ? moves : undefined,

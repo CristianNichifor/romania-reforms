@@ -19,6 +19,7 @@ import EnvelopeView from './EnvelopeView';
 import OccupationsView from './OccupationsView';
 import EquivalenceView from './EquivalenceView';
 import PayslipView from './PayslipView';
+import ProposalView from './ProposalView';
 import StructureView from './StructureView';
 
 const AVAILABLE = ['ro-153-2017', 'ro-draft-2026-07-16', 'dk-stat-2026'];
@@ -48,6 +49,7 @@ const INS_ID = 'ins-ocupatii';
 const VIEW_META: Record<ViewId, { label: string; blurb: string }> = {
   acasa: { label: 'Despre proiect', blurb: 'ce este, pe ce date stă, ce nu poate spune' },
   compare: { label: 'Ce se schimbă', blurb: 'proiectul, propunerea și Danemarca, față în față' },
+  propunere: { label: 'Propunerea noastră', blurb: 'nouă corecturi, fiecare cu întrerupătorul ei' },
   structure: { label: 'Cum e construită grila', blurb: 'zecimalele, golurile, funcțiile comasate' },
   distributie: {
     label: 'Cine urcă, cine coboară',
@@ -65,6 +67,7 @@ const PHASED_VIEWS: ViewId[] = ['compare', 'structure', 'payslip'];
 const NAV_GROUPS: Array<{ title: string; ask: string; views: ViewId[] }> = [
   { title: 'Începe aici', ask: 'Ce e asta?', views: ['acasa'] },
   { title: 'Reforma', ask: 'Ce se schimbă?', views: ['compare', 'distributie', 'structure'] },
+  { title: 'Alternativa', ask: 'Se poate altfel?', views: ['propunere'] },
   { title: 'Oamenii', ask: 'Cine cât ia?', views: ['meserii', 'payslip', 'echivalente'] },
   { title: 'Banii', ask: 'Ne permitem?', views: ['envelope'] },
 ];
@@ -314,9 +317,20 @@ export default function App() {
 
   // The proposal is derived, never stored: applying five patches to the ministry's grid
   // is cheap, and keeping it derived means it cannot drift from the data it edits.
+  // Patches the reader switched off on the proposal page stay off everywhere else. A
+  // scenario that showed one proposal on its own page and a different one on the
+  // comparison table would make the link unusable as an argument, which is the only
+  // thing the link is for.
+  const active: Proposal | null = useMemo(() => {
+    if (!proposal) return null;
+    const off = new Set(scenario.offPatches ?? []);
+    if (off.size === 0) return proposal;
+    return { ...proposal, patches: proposal.patches.filter((p) => !off.has(p.id)) };
+  }, [proposal, scenario.offPatches]);
+
   const ours: AppliedProposal | null = useMemo(
-    () => (ministry && proposal ? applyProposal(ministry, proposal) : null),
-    [ministry, proposal],
+    () => (ministry && active ? applyProposal(ministry, active) : null),
+    [ministry, active],
   );
 
   const medianBase = useMemo(() => {
@@ -420,20 +434,29 @@ export default function App() {
           ministry={ministry ?? null}
           inForce={regimes['ro-153-2017'] ?? null}
           denmark={regimes['dk-stat-2026'] ?? null}
-          onOpen={(view) => setScenario({ ...scenario, view })}
+          onOpen={(view, patch) => setScenario({ ...scenario, view, ...patch })}
         />
       )}
-      {scenario.view === 'compare' && ministry && ours && proposal && fx && (
+      {scenario.view === 'compare' && ministry && ours && active && fx && (
         <CompareView
           ministry={ministry}
           ours={ours.regime}
           inForce={regimes['ro-153-2017'] ?? null}
           denmark={regimes['dk-stat-2026'] ?? null}
-          proposal={proposal}
+          proposal={active}
           effects={ours.effects}
           rates={fx}
           capSeries={capSeries}
           period={period}
+          onOpen={(view) => setScenario({ ...scenario, view })}
+        />
+      )}
+      {scenario.view === 'propunere' && ministry && proposal && (
+        <ProposalView
+          ministry={ministry}
+          proposal={proposal}
+          scenario={scenario}
+          onScenario={setScenario}
           onOpen={(view) => setScenario({ ...scenario, view })}
         />
       )}

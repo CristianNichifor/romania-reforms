@@ -12,6 +12,40 @@ function pct(n: number, digits = 1): string {
 
 const PERIOD_LABEL: Record<string, string> = { month: 'pe lună', year: 'pe an' };
 
+/**
+ * Variant dimensions, named as a reader would name them.
+ *
+ * The picker used to print the field as the engine spells it — `gradProfesional: treaptă
+ * III` — the one place in the app where reading the screen required knowing how the data
+ * is stored. It matters most for the trades: for a *muncitor calificat* the step is the
+ * only thing in the whole grid that says what the qualification being paid actually is,
+ * so it must not arrive looking like a debugging aid.
+ *
+ * `sursa` and `celula` are deliberately labelled as what they are. They are not a
+ * distinction the law draws — they are where the row came from, kept only because two
+ * variants would otherwise be indistinguishable and unaddressable. Naming them honestly
+ * is how a reader can tell a real difference from a gap in the source.
+ */
+const DIM_LABEL: Record<string, string> = {
+  grad: 'grad',
+  gradProfesional: 'grad/treaptă',
+  gradManagerial: 'grad managerial',
+  gradatie: 'gradație',
+  treapta: 'treaptă',
+  vechime: 'vechime',
+  institutionLevel: 'nivelul instituției',
+  an: 'anul',
+  variant: 'varianta',
+  sursa: 'din foaia',
+  celula: 'din celula',
+};
+
+function dimText(dims: Readonly<Record<string, string>> | undefined): string {
+  return Object.entries(dims ?? {})
+    .map(([key, value]) => `${DIM_LABEL[key] ?? key}: ${value}`)
+    .join(' · ');
+}
+
 export default function PayslipView({
   regimes,
   scenario,
@@ -229,15 +263,14 @@ export default function PayslipView({
 
           {chosen && chosen.variants.length > 1 && chosen.variants[0].dims && (
             <label className="field">
-              <span>Varianta</span>
+              <span>Gradul sau treapta</span>
               <select
                 value={JSON.stringify(scenario.dims ?? chosen.variants[0].dims)}
                 onChange={(e) => set({ dims: JSON.parse(e.target.value) })}
               >
                 {chosen.variants.map((v, i) => (
                   <option key={i} value={JSON.stringify(v.dims ?? {})}>
-                    {Object.entries(v.dims ?? {}).map(([k, val]) => `${k}: ${val}`).join(' · ') ||
-                      `varianta ${i + 1}`}
+                    {dimText(v.dims) || `varianta ${i + 1}`}
                   </option>
                 ))}
               </select>

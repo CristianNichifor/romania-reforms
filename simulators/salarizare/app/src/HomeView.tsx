@@ -1,7 +1,17 @@
-import type { ViewId } from '../../engine/scenario';
+import { useMemo, useState } from 'react';
+
+import type { Scenario, ViewId } from '../../engine/scenario';
 import type { Regime } from '../../engine/types';
+import { GlossaryList } from './Glossary';
 
 const ro = (n: number) => n.toLocaleString('ro-RO');
+
+/** Accents are inconsistent across the source sheets, and nobody types them into a search. */
+const fold = (s: string) =>
+  s
+    .normalize('NFKD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase();
 
 interface Entry {
   view: ViewId;
@@ -85,9 +95,22 @@ export default function HomeView({
   ministry: Regime | null;
   inForce: Regime | null;
   denmark: Regime | null;
-  onOpen: (view: ViewId) => void;
+  onOpen: (view: ViewId, patch?: Partial<Scenario>) => void;
 }) {
   const positions = (regime: Regime | null) => (regime ? regime.positions.length : null);
+
+  // The front door. Every route into this tool used to start with a question about the
+  // system — what changes, who wins, what it costs — and none of them started with the
+  // question people actually arrive with, which is about their own job. The payslip page
+  // could always answer it; there was simply no way to ask from here.
+  const [query, setQuery] = useState('');
+  const hits = useMemo(() => {
+    const q = fold(query.trim());
+    if (q.length < 2 || !ministry) return [];
+    return ministry.positions
+      .filter((p) => fold(p.name).includes(q) || p.code.includes(q))
+      .slice(0, 8);
+  }, [query, ministry]);
 
   return (
     <>
@@ -111,6 +134,46 @@ export default function HomeView({
         care provine, iar unde datele nu ajung, scrie asta pe pagină în loc să fie completat cu o
         presupunere.
       </div>
+
+      <section>
+        <h2>Caută-ți funcția</h2>
+        <p className="lede">
+          Scrie o denumire din grilă — <em>asistent medical</em>, <em>șofer</em>,{' '}
+          <em>muncitor calificat</em>, <em>consilier</em> — și mergi direct la salariul
+          calculat pentru ea, sub fiecare dintre cele patru sisteme.
+        </p>
+        <div className="card home-search">
+          <input
+            type="search"
+            value={query}
+            placeholder="caută după denumire sau cod"
+            aria-label="Caută o funcție din grilă"
+            onChange={(e) => setQuery(e.target.value)}
+          />
+          {hits.length > 0 && (
+            <ul className="home-hits">
+              {hits.map((p) => (
+                <li key={p.code}>
+                  <button onClick={() => onOpen('payslip', { positionCode: p.code, dims: undefined })}>
+                    <strong>{p.name}</strong>
+                    <span>
+                      {p.titles && p.titles.length > 1 && `+${p.titles.length - 1} denumiri · `}
+                      <code>{p.code}</code>
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+          {query.trim().length >= 2 && hits.length === 0 && (
+            <p className="home-nohit">
+              Nicio funcție cu numele ăsta în grila proiectului. Denumirile sunt cele din anexe,
+              iar multe posturi reale sunt comasate sub un titlu care nu le conține: caută cuvântul
+              cel mai general din meserie.
+            </p>
+          )}
+        </div>
+      </section>
 
       {QUESTIONS.map((q) => (
         <section key={q.ask}>
@@ -158,6 +221,17 @@ export default function HomeView({
             Toate importurile sunt scripturi din depozit, care se pot rula din nou. Codul și datele
             sunt publice, iar orice cifră de pe ecran se poate urmări până la celula din care vine.
           </p>
+        </div>
+      </section>
+
+      <section>
+        <h2>Cuvintele legii</h2>
+        <p className="lede">
+          Paginile de aici folosesc vocabularul statutului, pentru că altfel nicio cifră nu s-ar
+          mai putea urmări până la articolul din care vine. Iată ce înseamnă, o dată pentru toate.
+        </p>
+        <div className="card">
+          <GlossaryList />
         </div>
       </section>
 

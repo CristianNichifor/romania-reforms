@@ -17,24 +17,26 @@ document and article it came from.
 **Done**
 
 - `schema/` — regime, crosswalk and fiscal document types; one schema swallows RO and DK
-- `engine/` — pure, no runtime dependencies, 124 tests. `payslip()` reproduces the Danish
+- `engine/` — pure, no runtime dependencies, 137 tests. `payslip()` reproduces the Danish
   published figures to the krone
-- `ro-draft-2026-07-16` — 1 049 positions, 2 929 variants, from the ministry's workbook
+- `ro-draft-2026-07-16` — 1 031 positions, 2 929 variants, from the ministry's workbook
 - `ro-153-2017` — 1 524 positions, from the consolidated annexes; every coefficient
   confirmed against the salary printed beside it
 - `dk-stat-2026` — 16 positions transcribed from the IDA tables, plus 165 measured series
   from Danmarks Statistik
 - Budget execution, the 20% ceiling per *ordonator*, and INS measured base pay
-- A home page explaining the scope, seven views behind it, a year control, and every
-  scenario in the URL
-- 27 Python tests over the importers, schema validation in CI, Pages deploy
+- A home page that explains the scope, searches all 1 031 posts by name, and defines the
+  statute's vocabulary; eight views behind it, a year control, and every scenario in the URL
+- A proposal page where each of the nine patches has a switch, and the switches are in the
+  link — so "your proposal minus the two I don't accept" is something you can send
+- 34 Python tests over the importers, schema validation in CI, Pages deploy
 
 **Blocked, and not by us**
 
 These are properties of what Romania publishes. They are recorded in the data, surfaced
 on the pages they affect, and are not work waiting to be done.
 
-- **Filled posts per position.** Nothing published maps headcount to the 1 049 functions.
+- **Filled posts per position.** Nothing published maps headcount to the 1 031 functions.
   The MF report stops at the *ordonator*; INS stops at ten ISCO groups and omits public
   administration entirely. `aggregate()` is implemented and tested and has nothing to run
   on, which is why envelope mode is top-down.
@@ -51,7 +53,7 @@ on the pages they affect, and are not work waiting to be done.
   was tried and resolved none of the seven ambiguous groups. Going further means reading
   duty descriptions.
 - 97 positions where the importer refused to split a merged title and said so.
-- The Danish comparator is 16 transcribed positions against 1 049 Romanian ones. Counts
+- The Danish comparator is 16 transcribed positions against 1 031 Romanian ones. Counts
   and spans derived from it are marked as a sample on the landing page and do not win
   their row; the measured comparison on *Meserii RO–DK* is the one to trust.
 
@@ -191,10 +193,10 @@ The result changes what the comparison is about:
 
 | | 153/2017, today | Proiectul MMFTSS | Propunerea | Danemarca |
 | --- | --- | --- | --- | --- |
-| Numbers to decide | **230** | 1 264 | 324 | 16 |
+| Numbers to decide | **230** | 1 264 | 323 | 16 |
 | Back-solved (≥14 decimals) | **0%** | 60,3% | 0% | 0% |
 | Span | **1:7,02** | 1:7,39 → 1:8,00 | 1:7,00 | 1:3,55 |
-| Names hiding the institution | **0** | 37 | 0 | 0 |
+| Names hiding the institution | **0** | 11 | 0 | 0 |
 
 The draft is not simplifying a tangle. The law in force decides 230 numbers, every one
 printed to two decimals. The draft asks for 1 264, five and a half times as many, and
@@ -216,14 +218,14 @@ Denmark. The strongest single result:
 
 | | MMFTSS | Propunerea noastră |
 | --- | --- | --- |
-| Named positions | 1 049 | **767** |
-| Distinct coefficients | 1 264 | **324** |
+| Named positions | 1 031 | **734** |
+| Distinct coefficients | 1 264 | **323** |
 | Back-solved (≥14 decimals) | 61,9% | **0%** |
 | Coefficients in no salary grade | 92 | **0** |
 | Years until the declared grid applies | 5 | **0** |
 
-Rounding to two decimals reveals that the grid only ever needed 324 distinct values. The
-other 940 were the residue of dividing one salary by another.
+Rounding to two decimals reveals that the grid only ever needed 323 distinct values. The
+other 941 were the residue of dividing one salary by another.
 
 The position count falls for a different reason. The draft names a job once *per
 employer*: "Director" appears under 25 codes across six annexes, "Șef serviciu" under 25
@@ -234,30 +236,154 @@ difference between employers into an explicit multiplier instead of a second job
 
 That import defect is now fixed at the source. The workbook writes a rank under the
 occupation it belongs to and indents the cell — `"         gradul  I"`, `"    clasa a
-II-a"` — and the importer had two ways of losing the parent. In Annex I the occupation
+II-a"` — and the importer had three ways of losing the parent. In Annex I the occupation
 sits on its own line with no coefficient beside it, so the row was skipped and its name
 thrown away. In Annex VIII the occupation is in one column and the class in the next, and
 a "longest text cell in the row" fallback promoted `"    clasa a II-a"` to a job title
 whenever the occupation cell was blank — defeating the importer's own continuation logic.
 
-Both are repaired: ranks now become a `grad` dimension on the position above. `Pilot
-instructor` is one position with three class variants instead of three positions, 524
-positions carry a grad dimension across 958 variants, and the grid went from 1 176
-positions to 1 049 without losing a single coefficient. Positions named after a bare rank
-fell from 116 to 12, and those twelve are real occupations — *asistent medical*,
-*asistent social*.
+The third was a single missing diacritic. Annex VIII heads that second column `Grad sau
+treaptă profesională` and fills it with `treaptă I`..`treaptă IV`, while the pattern that
+recognises a rank was written `treapta`. So `debutant` and `gradul I` were caught and
+every step spelled with an `ă` fell through — 174 rows across 15 sheets. Where the row
+carried its own code the importer minted a position literally named `treaptă II`, 24 of
+them; where it did not, the step was dropped and the four coefficients of a *muncitor
+calificat* arrived under one undifferentiated name, told apart only by the spreadsheet
+cell they came from. That mattered beyond the nomenclature: a reader saw four different
+rates for one job with no stated reason, and `separateInstitutionFactor` went on to
+explain the difference as a difference between *institutions*, which it is not. The step
+is the only thing in the grid that says what a skilled worker is actually paid for.
+
+All three are repaired: ranks become a dimension on the position above, and the patterns
+that recognise them fold the diacritics away instead of listing both spellings. `Pilot
+instructor` is one position with three class variants instead of three positions, 640
+positions carry a grade dimension across 1 718 variants, and the grid went from 1 176
+positions to 1 031 without losing a single coefficient — the variant count is unchanged at
+2 929 and the multiset of coefficients is byte-identical. The number of variants the
+importer had to tell apart by spreadsheet cell, having nothing better, fell from 479
+to 362. Names that are a bare rank and nothing else fell from 116 to four, and those four
+are real occupations — *asistent medical*, *asistent social*, *asistent veterinar*,
+*asistent securitate cibernetică*.
 
 The merge keeps its own guard anyway, because the two fixes are independent and a future
 sheet layout could reintroduce the rows. A test builds a regime containing exactly the
 defect and asserts the merge refuses it.
 
-**Our proposal is a patch list, not a second grid.** Five named edits against the
+**What a cell reference means, and what it does not.** The 362 variants above are told
+apart by the spreadsheet cell they came from, and that is the importer admitting defeat,
+not describing the law: the source distinguishes those rows by nothing at all. Annex I
+repeats whole blocks of *Administrator financiar*, grade for grade; Annex VI prints two
+Min/Max columns side by side on one row. Until now `separateInstitutionFactor` read the
+cell reference as *context* — the same bucket as the institutional tier — so every one of
+those ambiguities came out of the proposal as a confident claim that the difference is
+institutional, complete with a multiplier. It is not a claim anyone is in a position to
+make. The patch now declines wherever the cell is the only thing separating two variants,
+and the regime carries `variante-fara-criteriu` to say what is unknown and how much of it
+there is: **60 positions, 411 variants**, concentrated in Annex VIII (24) and Annex VI
+(21). Dropping the false positives takes the patch from 30 positions to **11** — and those
+eleven are the ones where the criterion really is the institution.
+
+This is the second time the same instinct had to be resisted. A stable wrong answer is
+still wrong: the importer's job is to carry the ambiguity forward intact, and the tool's
+job is to name it on the page, not to resolve it with the nearest plausible story.
+
+**Our proposal is a patch list, not a second grid.** Nine named edits against the
 ministry's document, each naming the defect it fixes — and a test asserts every patch
 points at a limitation the base regime actually declares, so a policy preference cannot
-enter dressed as a repair. None of the five moves any salary relative to any other:
+enter dressed as a repair. Seven of the nine move no salary relative to any other:
 compression, the reference value, and the split between occupational families are left
 exactly as the ministry proposed. What changes is whether the rules written in the law can
-be applied at all.
+be applied at all. Two of them do redistribute, are flagged `policyChange`, and are
+described below and in the tool itself as changes rather than repairs.
+
+### Paying a trade for what it does, not for the annex it sits in
+
+`mergeDuplicateTitles` keeps the occupational family in its key on purpose: a director in
+education and a director in administration are genuinely different posts. For a manual
+trade that is exactly backwards, and it is why merging by title alone never fixed what a
+reader actually sees.
+
+A driver drives. The annex says which ministry employs them. The grid pays the annex:
+
+| Post | Annex | Coefficient |
+| --- | --- | --- |
+| Șofer | VIII, local administration | 1,15 |
+| Șofer | VIII, central administration | 1,21 |
+| Conducător autospecială | VIII | 1,22 |
+| Șofer autosanitară III | II, health | 1,41 |
+| Șofer autosanitară II | II, health | 1,48 |
+| Șoferi II — ambulanțe veterinare, autolaboratoare, mașini de dezinfecție | VIII | 1,49 |
+| Șoferi I — same list | VIII | 1,56 |
+| Șofer autosanitară I | II, health | 1,57 |
+
+(Coefficients as this patch sees them — the rounding patch runs first, so 1,1489 has
+already become 1,15. The draft's own sixteen-decimal figures are in the regime document.)
+
+A 37% spread for the same licence, and the law names no duty anywhere that would account
+for it. Annex VI has no driving post at all: whoever drives for the defence or protection
+services is paid on the military rank ladder, so the duty is not merely unpriced, it is
+unnamed.
+
+`unifyTradeByDuty` names the trade once, at the floor, and requires whatever the richer
+annexes were buying to be declared as a *duty* or not paid. Driving an ambulance is a
+duty; driving for the health ministry is not. The duties and their rates are authored —
+the source contains no such supplement — so each carries its basis, lands in the regime
+marked `assumed`, and sits inside the 20% ceiling where it can be argued with. The rates
+are anchored to the one thing here that is measured rather than asserted: what Denmark
+actually pays as a condition supplement, 8,8% of earnings for care staff, 4,9% for police,
+0,2% for teachers. Percentages of a figure, not thirds of one.
+
+The part a duty does *not* explain is kept as `residual` on every absorbed post rather
+than folded into a multiplier, because that residual is the result:
+
+| Absorbed post | Duty | Residual |
+| --- | --- | --- |
+| Conducător autospecială | special vehicle, +5% | **+1,1%** |
+| Șofer, central administration | none | +5,2% |
+| Șofer autosanitară III | ambulance, +8% | +14,6% |
+| Șofer autosanitară II | ambulance, +8% | +20,7% |
+| Șoferi II — veterinary ambulances | special vehicle, +5% | +24,6% |
+| Șofer autosanitară I | ambulance, +8% | +28,5% |
+| Șoferi I — veterinary ambulances | special vehicle, +5% | +30,6% |
+
+The same 5% duty accounts for almost all of one premium and almost none of another. That
+contrast is only visible because the residual is kept: absorb it into an institutional
+multiplier — which is what the tool used to do — and both rows read as "the institution
+differs", which explains nothing and asserts a lot.
+
+*Muncitor calificat*, *muncitor necalificat* and *îngrijitor* unify with no duty at all,
+because there is none to name; their residuals are small (5,5%, 0%, 6,7%), which says the
+problem there is the naming rather than the money. And the naming is the original
+complaint: `Muncitor calificat` states a pay step, never the qualification being paid for.
+
+Three guards keep this from over-reaching. A row the importer marked `needsReview`, or
+that carries more than one former title, is never folded — `Bucătar, lenjereasă` is a cook
+and a laundry worker on one coefficient, and `Secretar cabinet, secretar dactilograf,
+curier personal (şofer)` is three jobs of which one drives. The base is the cheapest post,
+never an average, so the patch cannot quietly hand out a raise and a cut at once. And the
+fold records itself in `tradeFold` rather than `mergedFrom`, because `mergedFrom` carries
+the promise that a merge stayed inside one family — the promise this patch deliberately
+breaks, and which stays testable for everything else.
+
+### Nine patches, nine switches
+
+The proposal used to exist only as a column on the comparison table and a folded list
+underneath it. Nine edits arrived as one finished object, and a reader who doubted one of
+them had no way to ask what the other eight would do without it — the wrong shape for a
+document whose entire claim is that it can be audited edit by edit.
+
+`#/propunere` gives every patch a switch. Turning one off re-applies the proposal without
+it and recomputes the headline numbers, which is the only honest way to show what a single
+edit is worth: the patches interact, and what one is worth depends on which others are on.
+Switching off the trade fold and the condition supplement, for instance, takes the named
+positions from 734 back to 744 and the distinct coefficients from 323 to 324.
+
+The switches live in the URL, so a disagreement is shareable — "your proposal minus the
+two I don't accept" is a link. The parameter lists what is **refused**, never what is
+kept, and that is not a stylistic choice: encoding the survivors would mean a link written
+today arrives at a later version silently switching off every patch added since, showing a
+reader an older proposal while telling them it is the current one. Naming refusals means a
+link asserts only what its author actually decided.
 
 ## Comparing Romanian and Danish pay
 
@@ -282,6 +408,20 @@ standard of living.
 group beside what the same job earns in the Danish public sector. Every group states the
 rule that selected it and how many positions it caught, so the grouping can be disputed
 rather than only the numbers.
+
+A group's rule may now name **several** annexes, and the trades are why. A driver is in
+Annex VIII and Annex II; a skilled worker is in four. While a rule could only name one
+family, the page had to either drop half of an occupation or treat the halves as different
+jobs — the exact defect it exists to expose. Three groups were missing entirely as a
+result, and they were the bottom of the grid: drivers, skilled manual trades, and
+cleaning, catering and portering. Coefficient 1,00 — the floor of the whole system —
+belongs to that last group, so until it had a row the page's lowest Romanian bar was a
+clerk's and the grid looked narrower at the bottom than it is.
+
+None of the three has a Danish counterpart, and the row is left empty rather than filled:
+LONSOFF publishes no group for public-sector drivers or manual trades, and borrowing the
+nearest occupation's quartiles would be the easiest invented comparison in the project.
+The page says so in place of the bar instead of printing a dash that reads as a zero.
 
 Both sides are expressed against the middle of their own system — the median base salary
 of the Romanian grid, the median earnings of all Danish public employees — so the units
@@ -378,7 +518,7 @@ The annexes are not what anyone is paid.
 
 Three limits ship with it, one of them blocking:
 
-- **Ten ISCO major groups, not 1 049 positions.** It answers "what does a public-sector
+- **Ten ISCO major groups, not 1 031 positions.** It answers "what does a public-sector
   specialist in education earn", never "what does an auditor earn", and cannot weight the
   grid by position — that gap stays exactly where it was.
 - **The grid counts positions; the survey counts people.** A grid median treats a post held

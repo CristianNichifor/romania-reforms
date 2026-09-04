@@ -224,9 +224,16 @@ def main() -> None:
     document = json.loads(OUT.read_text(encoding="utf-8"))
     document["links"] = links
     document.pop("needs", None)
+    # The note is rebuilt, never appended to. This script reads its own previous output as
+    # the template, so appending accumulated one coverage sentence per run - the committed
+    # file had grown six of them, each with a different pair of figures and only the last
+    # one true. A stale sentence sitting beside a fresh one is worse than no sentence: both
+    # look authored, and nothing on the page says which run produced which.
+    COVERAGE = " Reconstructia acopera "
+    prefix = document["provenance"]["note"].split(COVERAGE)[0].rstrip()
     document["provenance"]["note"] = (
-        document["provenance"]["note"]
-        + f" Reconstructia acopera {len(used_old)} din {len(old_positions)} functii din legea "
+        prefix
+        + f"{COVERAGE}{len(used_old)} din {len(old_positions)} functii din legea "
           f"in vigoare si {len(used_new)} din {len(new_positions)} din proiect. Restul raman "
           "nelegate: o functie fara corespondent cu acelasi nume nu inseamna ca a fost "
           "desfiintata, ci ca scriptul nu a putut-o rezolva, iar 'abolished' ar fi o "

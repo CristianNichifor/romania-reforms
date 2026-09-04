@@ -15,6 +15,38 @@
 import { resolveSeries } from './structure';
 import type { Grade, Position, PositionVariant, Regime, ValueSeries } from './types';
 
+/**
+ * A duty is something a person does, priced on its own.
+ *
+ * The draft prices the same trade differently by annex: a driver is paid for the ministry
+ * that employs them, not for what they drive. Naming the duty is the alternative — it
+ * survives a transfer, it can be argued about on its own, and it is the only version of
+ * the question a labour market can answer.
+ *
+ * `rate` is authored, never read out of the workbook, because the source contains no such
+ * figure. Every duty must carry `basis` saying where its number comes from, and the
+ * supplements it produces are marked `assumed` so nothing downstream can mistake them for
+ * something the ministry proposed.
+ */
+export interface TradeDuty {
+  id: string;
+  name: string;
+  /** Share of the base salary. */
+  rate: number;
+  basis: string;
+  /** Matched against the folded former title, to decide who performs the duty. */
+  appliesTo: string;
+}
+
+export interface Trade {
+  id: string;
+  /** What the trade is called once it is no longer called after its annex. */
+  name: string;
+  matches: string;
+  excludeMatches?: string;
+  duties: TradeDuty[];
+}
+
 export interface Patch {
   id: string;
   title: string;
@@ -30,7 +62,9 @@ export interface Patch {
     | 'setSupplementRate'
     | 'separateInstitutionFactor'
     | 'mergeDuplicateTitles'
+    | 'unifyTradeByDuty'
     | 'unifySeniority';
+  trades?: Trade[];
   decimals?: number;
   dimension?: string;
   keep?: 'first' | 'last';
@@ -74,6 +108,33 @@ export interface AppliedProposal {
 
 function firstOf(series: ValueSeries): number {
   return resolveSeries(series);
+}
+
+/**
+ * Titles compared with the accents folded away and the punctuation dropped. The sheets
+ * spell the same word several ways — ș and ş, ț and ţ — so anything that compares titles
+ * has to fold, or it silently decides two spellings are two jobs.
+ */
+function normTitle(title: string): string {
+  return title
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function canonicalTitle(p: Position): string {
+  return p.titles?.find((t) => t.canonical)?.name ?? p.name;
+}
+
+/** The entry-level coefficient, which is what compares one employer to another. */
+function entryValue(p: Position): number | null {
+  const values = p.variants
+    .map((v) => (v.value === undefined ? null : firstOf(v.value)))
+    .filter((n): n is number => n !== null);
+  return values.length ? Math.min(...values) : null;
 }
 
 /**
@@ -233,7 +294,14 @@ export function applyProposal(base: Regime, proposal: Proposal): AppliedProposal
         // fuses the two, so one title carries several coefficients and the reader cannot
         // tell a promotion from a transfer. Keep the job once, and make the institutional
         // effect an explicit multiplier that can be argued about on its own.
-        const contextDims = new Set(['institutionLevel', 'sursa', 'celula']);
+        //
+        // `celula` is deliberately not in this set. It is not a claim about institutions —
+        // it is the importer recording that two rows of the source could be told apart by
+        // nothing but their place on the page. Reading it as context turned every such
+        // ambiguity into a confident statement that the difference is institutional, which
+        // is the one thing nobody knows. Where the distinction is unknown the patch
+        // declines to act, and the regime carries `variante-fara-criteriu` to say so.
+        const contextDims = new Set(['institutionLevel', 'sursa']);
         const positions = regime.positions.map((p) => {
           if (p.variants.length < 2) return p;
           const jobKeys = (v: PositionVariant) =>
@@ -257,7 +325,10 @@ export function applyProposal(base: Regime, proposal: Proposal): AppliedProposal
           if (lo <= 0) return p;
 
           const keep = p.variants.find((v) => v.value !== undefined && firstOf(v.value) === lo)!;
-          const { institutionLevel: _l, sursa: _s, celula: _c, ...rest } = keep.dims ?? {};
+          // Strip exactly what the set calls context, so the two cannot drift apart.
+          const rest = Object.fromEntries(
+            Object.entries(keep.dims ?? {}).filter(([k]) => !contextDims.has(k)),
+          );
 
           effect.positionsTouched += 1;
           effect.variantsTouched += p.variants.length - 1;
@@ -308,23 +379,9 @@ export function applyProposal(base: Regime, proposal: Proposal): AppliedProposal
             (raw.length > 0 && raw !== raw.replace(/^\s+/, ''))
           );
         };
-        const norm = (t: string) =>
-          t
-            .normalize('NFKD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .toLowerCase()
-            .replace(/[^a-z0-9 ]+/g, ' ')
-            .replace(/\s+/g, ' ')
-            .trim();
-        const canonical = (p: Position) =>
-          p.titles?.find((t) => t.canonical)?.name ?? p.name;
-        /** The entry-level coefficient, which is what compares one employer to another. */
-        const entry = (p: Position): number | null => {
-          const values = p.variants
-            .map((v) => (v.value === undefined ? null : firstOf(v.value)))
-            .filter((n): n is number => n !== null);
-          return values.length ? Math.min(...values) : null;
-        };
+        const norm = normTitle;
+        const canonical = canonicalTitle;
+        const entry = entryValue;
 
         const groups = new Map<string, Position[]>();
         for (const position of regime.positions) {
@@ -380,6 +437,119 @@ export function applyProposal(base: Regime, proposal: Proposal): AppliedProposal
           });
         }
         regime = { ...regime, positions };
+        break;
+      }
+
+      case 'unifyTradeByDuty': {
+        // mergeDuplicateTitles keeps the occupational family in its key on purpose: a
+        // director in education and a director in administration are different posts. For
+        // a trade that is exactly backwards. A driver drives. The annex says which
+        // ministry employs them, not what they do, and the grid pays the annex: the same
+        // licence is worth 1,1489 in a small town hall and 1,5714 in an ambulance
+        // service, a 37% spread with no duty named anywhere in the law.
+        //
+        // So the trade is named once, at the lowest coefficient in the grid, and what the
+        // higher-paying annexes were buying has to be stated as a duty or not paid for at
+        // all. Driving an ambulance is a duty; driving for the health ministry is not.
+        //
+        // Nothing is inferred. The trades and their duties are declared in the patch, the
+        // duty rates are authored against a stated basis, and the part of each former
+        // coefficient the duties do NOT account for is kept as `residual` rather than
+        // quietly absorbed — that residual is the finding this patch exists to produce.
+        const trades = patch.trades ?? [];
+        const supplements = [...regime.supplements];
+        let positions = [...regime.positions];
+
+        for (const trade of trades) {
+          const matches = new RegExp(trade.matches);
+          const excludes = trade.excludeMatches ? new RegExp(trade.excludeMatches) : null;
+          const candidates = positions.filter((p) => {
+            if (p.kind !== 'execution') return false;
+            // A row whose title the importer could not split is several jobs on one
+            // coefficient. Folding it would carry the other jobs along with the trade.
+            if (p.assimilation?.parse === 'needsReview') return false;
+            if ((p.assimilation?.fanIn ?? 1) > 1) return false;
+            const title = normTitle(canonicalTitle(p));
+            if (!matches.test(title)) return false;
+            if (excludes?.test(title)) return false;
+            return entryValue(p) !== null;
+          });
+          if (candidates.length < 2) continue;
+
+          const floors = candidates.map((p) => entryValue(p) as number);
+          const floor = Math.min(...floors);
+          if (floor <= 0) continue;
+          const keep = candidates[floors.indexOf(floor)];
+
+          const fold = candidates
+            .map((p, i) => ({ position: p, was: floors[i] }))
+            .filter(({ position }) => position.code !== keep.code)
+            .map(({ position: p, was }) => {
+              const title = normTitle(canonicalTitle(p));
+              const performed = trade.duties.filter((d) => new RegExp(d.appliesTo).test(title));
+              const dutyRate = performed.reduce((sum, d) => sum + d.rate, 0);
+              return {
+                code: p.code,
+                name: canonicalTitle(p),
+                family: p.family,
+                was,
+                duties: performed.map((d) => d.id),
+                dutyRate: Number(dutyRate.toFixed(4)),
+                residual: Number((was / floor - 1 - dutyRate).toFixed(4)),
+              };
+            });
+
+          // Every name the folded rows carried, kept once, so nothing disappears.
+          const seen = new Set<string>();
+          const titles = candidates
+            .flatMap((p) => p.titles ?? [{ name: p.name, canonical: true }])
+            .filter((t) => (seen.has(normTitle(t.name)) ? false : (seen.add(normTitle(t.name)), true)));
+
+          const folded = new Set(fold.map((f) => f.code));
+          effect.positionsTouched += fold.length;
+          effect.touchedCodes.push(...candidates.map((p) => p.code));
+          positions = positions
+            .filter((p) => !folded.has(p.code))
+            .map((p) =>
+              p.code === keep.code
+                ? {
+                    ...p,
+                    name: trade.name,
+                    titles: [{ name: trade.name, canonical: true }, ...titles.filter((t) => normTitle(t.name) !== normTitle(trade.name))],
+                    // Deliberately NOT mergedFrom. That field carries the promise that a
+                    // merge stayed inside one occupational family — the guard that keeps
+                    // a director in education apart from one in administration, and it is
+                    // tested. This fold crosses families on purpose, so it records itself
+                    // separately and in more detail rather than weakening that promise.
+                    tradeFold: fold,
+                  }
+                : p,
+            );
+
+          for (const duty of trade.duties) {
+            if (supplements.some((s) => s.id === duty.id)) continue;
+            effect.supplementsTouched += 1;
+            supplements.push({
+              id: duty.id,
+              name: duty.name,
+              mode: 'fixed',
+              rate: duty.rate,
+              base: 'baseSalary',
+              // A duty is paid for work actually done, and the whole point of naming it is
+              // that it can be argued about — so it sits inside the ceiling like any other
+              // supplement rather than beside it.
+              countsToCap: true,
+              eligibility: { condition: `Se plătește pentru ${duty.name.toLowerCase()}.` },
+              provenance: {
+                source: 'propunere-alternativa',
+                locator: `data/proposals/${proposal.id}.json#${patch.id}/${trade.id}/${duty.id}`,
+                confidence: 'assumed',
+                note: duty.basis,
+              },
+            });
+          }
+        }
+        regime = { ...regime, positions, supplements };
         break;
       }
 

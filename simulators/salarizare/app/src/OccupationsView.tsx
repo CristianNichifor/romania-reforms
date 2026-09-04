@@ -284,6 +284,18 @@ function OccupationRow({
             {row.dkRatio ? `${times(row.dkRatio.q1)}–${times(row.dkRatio.q3)}` : '—'}
           </span>
         </div>
+        {/*
+          An empty Danish bar has two very different meanings, and a bare dash gives the
+          wrong one. For most groups the comparator exists and the number simply did not
+          load; for the trades it does not exist at all, and borrowing another occupation's
+          figure to fill the row would be the easiest invented comparison on the page.
+        */}
+        {row.group.dkOccupations.length === 0 && (
+          <p className="occ-nocomp">
+            Statistica daneză nu publică această ocupație separat, deci nu există cu ce fi
+            comparată. Rândul rămâne gol intenționat.
+          </p>
+        )}
       </div>
 
       <div className="occ-money">

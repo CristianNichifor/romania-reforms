@@ -4,8 +4,8 @@
   "name": "Propunere alternativă v1 — grila reparată",
   "base": "ro-draft-2026-07-16",
   "status": "proposal",
-  "summary": "Cinci corecturi la proiectul MMFTSS. Niciuna nu schimbă cine cât ia unul față de altul: fiecare repară un defect pe care instrumentul îl arată deja în datele publicate. Este o versiune corectată a propunerii ministerului, nu o politică salarială alternativă.",
-  "notPolicy": "Această propunere nu ridică și nu scade salarii în raport unele cu altele. Compresia grilei, nivelul valorii de referință și repartiția între familii ocupaționale rămân exact cele propuse de minister. Ce se schimbă este dacă regulile scrise în lege pot fi de fapt aplicate. Excepția este ultima corectură, marcată ca atare: ea schimbă cine cât ia, pentru că mută sporuri legate de instituție în interiorul plafonului.",
+  "summary": "Nouă modificări la proiectul MMFTSS: șapte reparații și două schimbări de politică, marcate ca atare. Reparațiile nu schimbă cine cât ia unul față de altul — fiecare repară un defect pe care instrumentul îl arată deja în datele publicate. Cele două schimbări de politică mută bani între oameni și își scriu temeiul.",
+  "notPolicy": "Cele șapte reparații nu ridică și nu scad salarii în raport unele cu altele. Compresia grilei, nivelul valorii de referință și repartiția între familii ocupaționale rămân exact cele propuse de minister; ce se schimbă este dacă regulile scrise în lege pot fi de fapt aplicate. Două modificări fac altceva și sunt marcate „policyChange”: „Sporul pentru condiții se aduce la un nivel proporțional cu munca”, care mută sporuri legate de instituție în interiorul plafonului, și „Meseriile manuale se plătesc după ce fac, nu după anexa în care sunt trecute”, care ia din coeficient partea plătită pentru anexă și cere ca ea să fie declarată ca atribuție sau să dispară. Amândouă redistribuie, amândouă o spun, și niciuna nu se sprijină pe caietul ministerului pentru cuantum.",
   "provenance": {
     "source": "propunere-alternativa",
     "locator": "data/proposals/propunere-v1.json",
@@ -35,8 +35,66 @@
       "op": "separateInstitutionFactor",
       "title": "Tipul instituției iese din denumirea funcției",
       "fixes": "asimilare-prin-punctuatie",
-      "rationale": "Meseria e ce faci; instituția e unde o faci. Proiectul le amestecă: 95 de funcții au variante care diferă numai după categoria instituției — nivel central I sau II, cele patru trepte de administrație locală, categoria unității sanitare — iar una și aceeași denumire ajunge plătită cu până la 50% mai mult după unde e postul. Consecința practică e că nu se mai poate deosebi o promovare de un transfer, iar comparația cu piața muncii devine imposibilă, pentru că piața cunoaște o singură meserie. Corectura păstrează funcția o singură dată, la coeficientul cel mai mic, și transformă diferența într-un multiplicator explicit al instituției, care poate fi discutat separat de grila de funcții. Nimeni nu pierde și nimeni nu câștigă: aceleași sume, altfel scrise.",
-      "expectedEffect": "215 variante dispar din nomenclator fără ca vreun salariu să se schimbe. Diferența pe instituție rămâne, dar se vede."
+      "rationale": "Meseria e ce faci; instituția e unde o faci. Proiectul le amestecă: 11 funcții au variante care diferă numai după categoria instituției — nivel central I sau II, cele patru trepte de administrație locală, categoria unității sanitare — iar una și aceeași denumire ajunge plătită cu până la 50% mai mult după unde e postul. Consecința practică e că nu se mai poate deosebi o promovare de un transfer, iar comparația cu piața muncii devine imposibilă, pentru că piața cunoaște o singură meserie. Corectura păstrează funcția o singură dată, la coeficientul cel mai mic, și transformă diferența într-un multiplicator explicit al instituției, care poate fi discutat separat de grila de funcții. Nimeni nu pierde și nimeni nu câștigă: aceleași sume, altfel scrise.",
+      "expectedEffect": "11 variante dispar din nomenclator fără ca vreun salariu să se schimbe. Diferența pe instituție rămâne, dar se vede. Corectura prindea de trei ori mai mult înainte, din două motive care nu erau motive: fără citirea treptei profesionale, cele patru trepte ale unui muncitor calificat arătau ca patru instituții; iar acolo unde sursa nu deosebește două rânduri prin nimic (vezi „variante-fara-criteriu”), diferența era declarată instituțională fără să știe nimeni asta. Corectura se aplică acum doar acolo unde criteriul chiar e instituția."
+    },
+    {
+      "id": "meseria-nu-anexa",
+      "op": "unifyTradeByDuty",
+      "policyChange": true,
+      "title": "Meseriile manuale se plătesc după ce fac, nu după anexa în care sunt trecute",
+      "fixes": "meseria-platita-dupa-anexa",
+      "rationale": "Este o schimbare de politică, nu o reparație — mută bani între oameni, și o spune. Un șofer conduce. Anexa spune ce minister îl angajează, nu ce face, iar grila plătește anexa: același permis valorează 1,1489 la o primărie mică și 1,5714 pe o autosanitară, cu 37% diferență și fără ca legea să numească vreo atribuție care să o justifice. Corectura numește meseria o singură dată, la cel mai mic coeficient din grilă, și cere ca tot ce plăteau anexele mai generoase să fie declarat ca atribuție sau să nu mai fie plătit. A conduce o ambulanță este o atribuție; a conduce pentru Ministerul Sănătății nu este. Atribuțiile și cuantumurile lor sunt scrise aici, nu deduse din caietul ministerului, pentru că sursa nu conține așa ceva: sunt marcate „assumed” și pot fi contestate una câte una. Reperul pentru cuantum este ce se plătește efectiv în Danemarca pentru condiții de muncă — 8,8% din câștig la personalul de îngrijire, 4,9% la polițiști, 0,2-0,3% la profesori și personal de birou — adică procente dintr-o cifră, nu treimi. Ce nu acoperă atribuțiile nu se ascunde într-un multiplicator: rămâne scris ca „rest neexplicat” pe fiecare funcție absorbită, iar acela este rezultatul.",
+      "expectedEffect": "Opt funcții de șofer din două anexe devin una singură, la coeficientul 1,15, cu trei atribuții numite. Rezultatul e că atribuția explică diferența acolo unde chiar există o atribuție și nu o explică unde nu există: la „Conducător autospecială” rămâne un rest de 1,1%, la „Șoferi I - ambulanțe veterinare” 30,6%, la șoferul de autosanitară între 14,6% și 28,5%. Restul acela e ce plătea anexa fără să spună pentru ce. Muncitorul calificat, muncitorul necalificat și îngrijitorul se unifică fără nicio atribuție, pentru că nu e niciuna de numit — resturile lor sunt mici (5,5%, 0%, 6,7%), ceea ce arată că acolo problema e denumirea, nu banii. Zece funcții dispar din nomenclator. Cine urcă și cine coboară se vede pe pagina de distribuție: nu e o corectură neutră și nu pretinde să fie.",
+      "trades": [
+        {
+          "id": "sofer",
+          "name": "Șofer",
+          "matches": "^(sofer|soferi|conducator auto|conducator autospeciala)\\b",
+          "duties": [
+            {
+              "id": "conducere-autosanitara",
+              "name": "Conducere autosanitară",
+              "rate": 0.08,
+              "appliesTo": "autosanitar",
+              "basis": "Transport medical de urgență: tură continuă, pacient în vehicul, intervenție alături de echipaj. Cel mai apropiat reper măsurat este cota sporului de condiții la personalul de îngrijire din Danemarca, 8,8% din câștig — cea mai mare cotă publicată pentru orice ocupație din sectorul public danez."
+            },
+            {
+              "id": "conducere-vehicul-special",
+              "name": "Conducere vehicul special",
+              "rate": 0.05,
+              "appliesTo": "ambulante veterinare|autolaboratoare|dezinfectie|interventie|autospeciala|salupa",
+              "basis": "Vehicule de intervenție, autolaboratoare, mașini de dezinfecție, șalupe: risc operațional și calificare suplimentară, fără componenta de îngrijire. Reperul danez apropiat este cota la polițiști, 4,9%."
+            },
+            {
+              "id": "transport-demnitari",
+              "name": "Transport demnitari și misiune de protecție",
+              "rate": 0.05,
+              "appliesTo": "demnitar|cabinet|protectie",
+              "basis": "Disponibilitate în afara programului, verificare de securitate, răspundere pentru persoana transportată. Nicio funcție din grilă nu poartă azi această atribuție: Anexa VI nu are funcții de șofer, iar cine conduce acolo e plătit după gradul militar. Atribuția e declarată tocmai ca rolul să poată fi numit și plătit explicit, în loc să fie ascuns într-un grad. Cuantumul e cel mai slab fundamentat din listă — reperul danez cel mai apropiat rămâne cota la polițiști, 4,9% — și e cel dintâi care ar trebui contestat."
+            }
+          ]
+        },
+        {
+          "id": "muncitor-calificat",
+          "name": "Muncitor calificat",
+          "matches": "^muncitor calificat",
+          "duties": []
+        },
+        {
+          "id": "muncitor-necalificat",
+          "name": "Muncitor necalificat",
+          "matches": "^muncitor necalificat",
+          "duties": []
+        },
+        {
+          "id": "ingrijitor",
+          "name": "Îngrijitor",
+          "matches": "^ingrijitor",
+          "excludeMatches": "animale",
+          "duties": []
+        }
+      ]
     },
     {
       "id": "o-functie-un-nume",
