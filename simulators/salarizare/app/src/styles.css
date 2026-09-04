@@ -178,6 +178,11 @@ fieldset.field { border: 0; padding: 0; margin: 0; }
 .claims { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 7px; }
 .claim { display: flex; gap: 8px; align-items: baseline; font-size: 13.5px; }
 .claim em { color: var(--text-muted); font-style: normal; font-size: 12px; }
+/* A supplement this job cannot be paid. Dimmed rather than hidden: the rule is the
+   proposal's argument, so the reader has to be able to see it refuse. */
+.claim.barred { opacity: 0.55; cursor: not-allowed; }
+.claim.barred input { cursor: not-allowed; }
+.claim .why-not { display: block; margin-top: 2px; }
 
 /* --- payslip cards --- */
 .slips { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; }
@@ -817,3 +822,83 @@ i.k-measured { background: var(--series-1); border-radius: 50% !important; }
   opacity: 1;
   text-decoration: underline;
 }
+
+/* The second line of a KPI here: what the count does not cover, and why. Its own class
+   rather than the one the proposal page uses, so this view does not depend on a style
+   defined elsewhere — it borrowed one once and rendered the caption glued to the label. */
+.kpi .k em.merge-kpi-note {
+  display: block;
+  margin-top: 4px;
+  font-style: normal;
+  color: var(--text-muted);
+  font-size: 11.5px;
+  line-height: 1.3;
+}
+
+/* --- funcție cu funcție: one card per merged job ---------------------------------
+ *
+ * A grid rather than a list, because the unit here is a card and cards are compared by
+ * eye across, not down. Wide enough for a Danish amount with both conversions on one
+ * line — the currency rule in money.ts means every foreign figure carries two more, and
+ * a card that wraps them looks like three numbers instead of one. */
+.merges-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+  margin: 18px 0 10px;
+}
+.merges-controls .field { min-width: 220px; }
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+.merge-card { padding: 14px 16px; }
+.merge-card header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+.merge-card h3 { margin: 0; font-size: 15px; line-height: 1.3; }
+.merge-meta {
+  color: var(--text-muted);
+  font-size: 11.5px;
+  margin: 4px 0 10px;
+  word-break: break-word;
+}
+.merge-card table.data { margin: 0; }
+.merge-card table.data td { padding: 3px 0; font-size: 13px; }
+.merge-card table.data td em {
+  display: block;
+  font-style: normal;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+/* The same two colours the distribution page uses for a post moving up or down, so
+   "this went up" looks the same wherever the reader meets it. */
+.merge-card tr.more .num { color: var(--dist-up-2); }
+.merge-card tr.less .num { color: var(--dist-down-2); }
+.merge-titles { margin-top: 10px; font-size: 12.5px; }
+.merge-titles summary { cursor: pointer; color: var(--text-secondary); }
+.merge-titles ul { margin: 8px 0 0; padding-left: 18px; }
+.merge-titles li { margin-bottom: 3px; line-height: 1.35; }
+
+/* "Show me sixty more". A page that renders a thousand cards is a page nobody scrolls,
+   and a page that renders sixty without saying how many it kept back is a page that lies
+   by omission — so the count above this button is part of the control. */
+button.more {
+  display: block;
+  margin: 18px auto 0;
+  padding: 8px 18px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+button.more:hover { border-color: var(--accent); }

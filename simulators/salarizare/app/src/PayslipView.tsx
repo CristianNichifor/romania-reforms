@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 
-import { payslip } from '../../engine/payslip';
+import { ineligibility, payslip } from '../../engine/payslip';
 import type { Payslip, Person } from '../../engine/payslip';
 import type { Scenario } from '../../engine/scenario';
 import type { Crosswalk, Position, Regime } from '../../engine/types';
@@ -281,22 +281,42 @@ export default function PayslipView({
             <fieldset className="field">
               <legend>Sporuri revendicate</legend>
               <div className="claims">
-                {primary.supplements.map((s) => (
-                  <label key={s.id} className="claim">
-                    <input
-                      type="checkbox"
-                      checked={(scenario.claims ?? []).some((c) => c.supplementId === s.id)}
-                      onChange={() => toggleClaim(s.id)}
-                    />
-                    <span>
-                      {s.name}
-                      {s.mode === 'upTo' && <em> (până la)</em>}
-                      {s.countsToCap === false && <em> · exceptat de la plafon</em>}
-                      {s.countsToCap === 'partial' && <em> · parțial în plafon</em>}
-                    </span>
-                  </label>
-                ))}
+                {primary.supplements.map((s) => {
+                  // Shown even when it cannot be claimed, greyed and with the reason. A
+                  // checkbox that silently disappears teaches nobody why: the point of the
+                  // proposal is that a supplement belongs to a job, and the reader only sees
+                  // that rule exists if the refusal is on the page.
+                  const barred = chosen ? ineligibility(s, chosen) : undefined;
+                  return (
+                    <label
+                      key={s.id}
+                      className={barred ? 'claim barred' : 'claim'}
+                      title={barred?.reason}
+                    >
+                      <input
+                        type="checkbox"
+                        disabled={Boolean(barred)}
+                        checked={(scenario.claims ?? []).some((c) => c.supplementId === s.id)}
+                        onChange={() => toggleClaim(s.id)}
+                      />
+                      <span>
+                        {s.name}
+                        {s.mode === 'upTo' && <em> (până la)</em>}
+                        {s.countsToCap === false && <em> · exceptat de la plafon</em>}
+                        {s.countsToCap === 'partial' && <em> · parțial în plafon</em>}
+                        {barred && <em className="why-not"> · {barred.reason}</em>}
+                      </span>
+                    </label>
+                  );
+                })}
               </div>
+              <p className="note">
+                Sporurile stinse nu se aplică acestei funcții. Regula este a propunerii, nu a
+                paginii: fiecare spor își declară familia sau tipul de funcție pentru care se
+                plătește, iar aici nu se poate bifa în afara ei. Un regim care nu declară nimic
+                — cum e legea în vigoare, care nu publică niciun spor — rămâne la fel de permisiv
+                cum era.
+              </p>
             </fieldset>
           )}
         </div>
@@ -411,7 +431,11 @@ function PayslipCard({
   rates: Rates;
 }) {
   const cur = (m: number) => amountLine(m / 100, slip.currency, rates);
-  const supplements = slip.supplements.filter((l) => l.amount > 0 || l.suppressedBy);
+  // A refused supplement is worth a row at zero: it is the only place the reader sees that
+  // the proposal has a rule about who gets what.
+  const supplements = slip.supplements.filter(
+    (l) => l.amount > 0 || l.suppressedBy || l.ineligible,
+  );
 
   if (!position) {
     return (
@@ -448,11 +472,12 @@ function PayslipCard({
             </tr>
           )}
           {supplements.map((line) => (
-            <tr key={line.id} className={line.suppressedBy ? 'struck' : undefined}>
+            <tr key={line.id} className={line.suppressedBy || line.ineligible ? 'struck' : undefined}>
               <td>
                 {line.name}
                 {line.allowedRate !== null && <> · {pct(line.allowedRate, 1)}</>}
                 {line.suppressedBy && <em> — exclus de „{line.suppressedBy}”</em>}
+                {line.ineligible && <em> — {line.ineligible.reason}</em>}
               </td>
               <td className="num">{cur(line.amount)}</td>
             </tr>
