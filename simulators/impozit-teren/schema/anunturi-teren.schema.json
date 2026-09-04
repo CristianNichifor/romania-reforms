@@ -1,0 +1,229 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://cristiannichifor.github.io/romania-reforms/schema/anunturi-teren.schema.json",
+    "title": "Asking prices for land, per locality, from listing pages",
+    "description": "The measurement the notaries' grid never had for building land. The Legea 17/2014 register prices extravilan arable and nothing prices curți-construcții, which is 68% of this simulator's land value; listing sites are the only broad source. What is stored is a statistic and never a copy: counts and quartiles of the asking price per square metre, in the same euro-per-square-metre unit the grid publishes, with no titles, descriptions, images, sellers or offer identifiers. Asking is not paid and an advertised parcel is not the average hectare, so both are blocking limitations rather than footnotes.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "id",
+        "title",
+        "publisher",
+        "period",
+        "currency",
+        "provenance",
+        "assumptions",
+        "summary",
+        "localities",
+        "limitations"
+    ],
+    "properties": {
+        "$schema": {
+            "type": "string"
+        },
+        "id": {
+            "type": "string",
+            "pattern": "^anunturi-teren-[0-9]{4}$"
+        },
+        "title": {
+            "type": "string"
+        },
+        "publisher": {
+            "const": "storia.ro"
+        },
+        "period": {
+            "type": "string",
+            "pattern": "^[0-9]{4}$"
+        },
+        "currency": {
+            "const": "EUR"
+        },
+        "provenance": {
+            "$ref": "provenance.schema.json#/$defs/provenance"
+        },
+        "assumptions": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "minEurPerM2",
+                "minOffers",
+                "perPage",
+                "delaySeconds",
+                "note"
+            ],
+            "properties": {
+                "minEurPerM2": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "description": "Below this a price per square metre is a placeholder — 'preț la cerere' with a number in the box — not an offer."
+                },
+                "minOffers": {
+                    "type": "integer",
+                    "minimum": 2,
+                    "description": "Fewer usable offers than this and the locality is kept with a null median, so thinness stays visible."
+                },
+                "perPage": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "description": "The source's page size. Localities reporting more are marked truncated rather than summarised from a relevance-sorted first page."
+                },
+                "delaySeconds": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "description": "The floor under the gap between live requests, recorded so the crawl's manners are part of the dataset."
+                },
+                "note": {
+                    "type": "string"
+                }
+            }
+        },
+        "summary": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "localities",
+                "localitiesWithMedian",
+                "truncatedLocalities",
+                "unmatchedTownPages",
+                "medianOfMediansEurPerM2",
+                "crawl",
+                "stoppedBecause"
+            ],
+            "properties": {
+                "localities": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "localitiesWithMedian": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "truncatedLocalities": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "unmatchedTownPages": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Town pages whose name did not fold onto a known locality. The join is by name because the source publishes no SIRUTA."
+                },
+                "medianOfMediansEurPerM2": {
+                    "type": [
+                        "number",
+                        "null"
+                    ]
+                },
+                "crawl": {
+                    "type": "string",
+                    "description": "Live requests, cache hits and rate-limit answers for the run that wrote this."
+                },
+                "stoppedBecause": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "description": "Non-null when the run ended before the whole sitemap — a spent budget, or the host declining. A partial file says so rather than looking complete."
+                }
+            }
+        },
+        "localities": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                    "siruta",
+                    "name",
+                    "county",
+                    "totalOffersReported",
+                    "truncated",
+                    "offers",
+                    "usableOffers",
+                    "droppedBelowFloor",
+                    "askedEurPerM2",
+                    "medianAreaM2",
+                    "privateShare"
+                ],
+                "properties": {
+                    "siruta": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "county": {
+                        "type": "string",
+                        "pattern": "^[A-Z]{1,2}$"
+                    },
+                    "totalOffersReported": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "What the source says exists for this locality, which exceeds what one page returns."
+                    },
+                    "truncated": {
+                        "type": "boolean"
+                    },
+                    "offers": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Distinct parcels on the page. Deduplicated on price, area and title rather than on id: a promoted offer reappears organically under a different id."
+                    },
+                    "usableOffers": {
+                        "type": "integer",
+                        "minimum": 0
+                    },
+                    "droppedBelowFloor": {
+                        "type": "integer",
+                        "minimum": 0
+                    },
+                    "askedEurPerM2": {
+                        "type": [
+                            "object",
+                            "null"
+                        ],
+                        "additionalProperties": false,
+                        "required": [
+                            "p25",
+                            "median",
+                            "p75"
+                        ],
+                        "description": "Null where there were too few offers to have a middle.",
+                        "properties": {
+                            "p25": {
+                                "type": "number"
+                            },
+                            "median": {
+                                "type": "number"
+                            },
+                            "p75": {
+                                "type": "number"
+                            }
+                        }
+                    },
+                    "medianAreaM2": {
+                        "type": [
+                            "number",
+                            "null"
+                        ],
+                        "description": "The best available clue to what is being sold: hundreds of square metres is a house plot, thousands is a field. The listings do not say intravilan or extravilan."
+                    },
+                    "privateShare": {
+                        "type": [
+                            "number",
+                            "null"
+                        ],
+                        "minimum": 0,
+                        "maximum": 1
+                    }
+                }
+            }
+        },
+        "limitations": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "$ref": "provenance.schema.json#/$defs/limitation"
+            }
+        }
+    }
+}

@@ -1,0 +1,268 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://cristiannichifor.github.io/romania-reforms/schema/pret-tranzactie.schema.json",
+    "title": "Average declared price per property transaction, per county",
+    "description": "The first average transaction price in this repository that comes from administrative records rather than from an advertisement: the art. 111 transfer tax divided by ANCPI's count of registered sales. Every figure is a band and never a point, because the statutory rate is 1% above three years of ownership and 3% below with no published mix. It is a price per transaction and not per square metre — neither source carries an area — so the share of sales that were bare land travels with each row to make the composition visible.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "id",
+        "title",
+        "publisher",
+        "period",
+        "currency",
+        "provenance",
+        "assumptions",
+        "excluded",
+        "droppedCounties",
+        "summary",
+        "counties",
+        "limitations"
+    ],
+    "properties": {
+        "$schema": {
+            "type": "string"
+        },
+        "id": {
+            "type": "string",
+            "pattern": "^pret-tranzactie-[0-9]{4}$"
+        },
+        "title": {
+            "type": "string"
+        },
+        "publisher": {
+            "const": "romania-reforms"
+        },
+        "period": {
+            "type": "string",
+            "pattern": "^[0-9]{4}$"
+        },
+        "currency": {
+            "const": "RON"
+        },
+        "provenance": {
+            "$ref": "provenance.schema.json#/$defs/provenance"
+        },
+        "assumptions": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "localShare",
+                "rateMinPercent",
+                "rateMaxPercent",
+                "minMonths",
+                "minYear",
+                "minSalesPer1000",
+                "salesCounted",
+                "note"
+            ],
+            "properties": {
+                "localShare": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "maximum": 1
+                },
+                "rateMinPercent": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "rateMaxPercent": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "minMonths": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 12,
+                    "description": "Below this many reported months a year is not annualised at all: scaling five months by 12/5 is one season with a multiplier on it."
+                },
+                "minYear": {
+                    "type": "integer",
+                    "description": "No year before ANCPI's 2018 reclassification. Apartments fell from 111 028 sales in 2017 to 20 in 2018 for the same country, so the pair of categories used as the denominator misses about a quarter of the market before that break and the price comes out some 40% too high."
+                },
+                "minSalesPer1000": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "description": "A county filing fewer registered sales than this per thousand inhabitants is not a quiet market, it is a county that does not report. The national spread is 6,3 to 41,8; Olt files 2,0 and came out as the dearest county in Romania before this guard existed."
+                },
+                "salesCounted": {
+                    "type": "string",
+                    "description": "Which ANCPI categories form the denominator. Apartments and the agricultural split are deliberately left out — they are second classification axes over the same files, not extra sales."
+                },
+                "note": {
+                    "type": "string"
+                }
+            }
+        },
+        "excluded": {
+            "type": "array",
+            "description": "Communes whose filings were quarantined before the county roll-up. Done on communes rather than counties on purpose: an impossible Bucharest sector folded into its county would leave nothing to notice it by.",
+            "items": {
+                "type": "object"
+            }
+        },
+        "droppedCounties": {
+            "type": "array",
+            "description": "Counties removed from the table, each with the rule that removed it. Two things disqualify a county and both break the quotient rather than colour it: a numerator made incomplete by a quarantined commune, and a denominator too small to be the county's market.",
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["county", "name", "reason", "detail"],
+                "properties": {
+                    "county": {"type": "string", "pattern": "^[A-Z]{1,2}$"},
+                    "name": {"type": "string"},
+                    "reason": {"enum": ["numaratorul-e-incomplet", "prea-putine-vanzari-raportate"]},
+                    "detail": {"type": "string"}
+                }
+            }
+        },
+        "summary": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "year",
+                "counties",
+                "countiesDropped",
+                "medianPricePerSaleRonAtOnePercent",
+                "dearest",
+                "cheapest"
+            ],
+            "properties": {
+                "year": {
+                    "type": "integer"
+                },
+                "counties": {
+                    "type": "integer",
+                    "minimum": 35
+                },
+                "countiesDropped": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "medianPricePerSaleRonAtOnePercent": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "dearest": {
+                    "$ref": "#/$defs/extreme"
+                },
+                "cheapest": {
+                    "$ref": "#/$defs/extreme"
+                }
+            }
+        },
+        "counties": {
+            "type": "array",
+            "minItems": 35,
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                    "county",
+                    "name",
+                    "localTaxRon",
+                    "monthsReported",
+                    "salesReported",
+                    "salesAnnualised",
+                    "bareLandShare",
+                    "salesPer1000",
+                    "declaredValueRon",
+                    "pricePerSaleRon"
+                ],
+                "properties": {
+                    "county": {
+                        "type": "string",
+                        "pattern": "^[A-Z]{1,2}$"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "localTaxRon": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "description": "The county's communes' half of the tax, summed. Doubling it recovers the whole under art. 111 (7)."
+                    },
+                    "monthsReported": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 12
+                    },
+                    "salesReported": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "description": "As ANCPI filed it, over `monthsReported` months."
+                    },
+                    "salesAnnualised": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                        "description": "Scaled to twelve months, which assumes sales spread evenly through the year. They do not."
+                    },
+                    "bareLandShare": {
+                        "type": [
+                            "number",
+                            "null"
+                        ],
+                        "minimum": 0,
+                        "maximum": 1,
+                        "description": "Sales with no building, over all sales counted. The composition indicator: a county selling field parcels and one selling flats are not comparable on price per transaction."
+                    },
+                    "salesPer1000": {
+                        "type": ["number", "null"],
+                        "description": "Registered sales per thousand inhabitants. The filing-completeness indicator that decides whether the denominator is a market."
+                    },
+                    "declaredValueRon": {
+                        "$ref": "#/$defs/band"
+                    },
+                    "pricePerSaleRon": {
+                        "$ref": "#/$defs/band"
+                    }
+                }
+            }
+        },
+        "limitations": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "$ref": "provenance.schema.json#/$defs/limitation"
+            }
+        }
+    },
+    "$defs": {
+        "band": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "low",
+                "high"
+            ],
+            "description": "Both ends, never a point. `low` is computed at the 3% rate and `high` at 1% — the lower rate implies more value behind the same receipt.",
+            "properties": {
+                "low": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                },
+                "high": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                }
+            }
+        },
+        "extreme": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "county",
+                "ron"
+            ],
+            "properties": {
+                "county": {
+                    "type": "string",
+                    "pattern": "^[A-Z]{1,2}$"
+                },
+                "ron": {
+                    "type": "number"
+                }
+            }
+        }
+    }
+}

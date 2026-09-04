@@ -1,0 +1,4216 @@
+{
+  "$schema": "../schema/vanzari-imobile.schema.json",
+  "id": "vanzari-imobile-2024",
+  "title": "Numărul vânzărilor de imobile înregistrate, pe județe, 2016–2024",
+  "publisher": "ANCPI",
+  "period": "2016-2024",
+  "currency": "RON",
+  "provenance": {
+    "source": "ancpi-dinamica-vanzarilor-de-imobile",
+    "locator": "data.gov.ro, seturile „Dinamica vânzărilor de imobile\" ale ANCPI, 73 fișiere lunare CSV și XLSX, coloanele JUDET, LUNA_RAPORTATA, TIP_PROPRIETATE, VANZARI",
+    "confidence": "verbatim",
+    "note": "Numerele sunt cele raportate de ANCPI, însumate pe an în acest import. Nu se calculează nimic altceva: nu există valori și nici suprafețe în sursă, doar câte vânzări s-au înregistrat."
+  },
+  "assumptions": {
+    "monthsByYear": {
+      "2016": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "2017": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        11,
+        12
+      ],
+      "2018": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "2019": [
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "2020": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "2022": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ],
+      "2023": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        10,
+        11,
+        12
+      ],
+      "2024": [
+        1
+      ]
+    },
+    "types": {
+      "-": "unspecified",
+      "cu constructii": "withBuildings",
+      "fara constructii": "withoutBuildings",
+      "agricol": "agricultural",
+      "neagricol": "nonAgricultural",
+      "apartamente": "apartments"
+    },
+    "fullestYear": 2023,
+    "note": "Anii nu sunt completi și doi lipsesc de tot. Însumarea lunilor existente nu dă un an; „monthsReported” spune peste câte luni s-a adunat fiecare rând, iar o comparație între ani trebuie să împartă mai întâi."
+  },
+  "summary": {
+    "counties": 42,
+    "files": 73,
+    "years": 8,
+    "fullestYear": 2023,
+    "salesInFullestYear": {
+      "agricultural": 124758,
+      "apartments": 29,
+      "nonAgricultural": 5110,
+      "unspecified": 1532,
+      "withBuildings": 157290,
+      "withoutBuildings": 429061
+    },
+    "agriculturalPlusNonAgriculturalOverWithoutBuildings": 0.4083,
+    "crawl": "0 live requests, 88 from cache, 0 rate-limit answers, budget 400"
+  },
+  "counties": [
+    {
+      "county": "AB",
+      "name": "Alba",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1556,
+            "apartments": 1574,
+            "nonAgricultural": 77,
+            "unspecified": 2186,
+            "withBuildings": 2348,
+            "withoutBuildings": 2088
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1525,
+            "apartments": 1320,
+            "nonAgricultural": 88,
+            "unspecified": 1912,
+            "withBuildings": 2508,
+            "withoutBuildings": 3410
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1070,
+            "nonAgricultural": 49,
+            "unspecified": 14,
+            "withBuildings": 1713,
+            "withoutBuildings": 4327
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 439,
+            "nonAgricultural": 43,
+            "unspecified": 9,
+            "withBuildings": 785,
+            "withoutBuildings": 1856
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 636,
+            "apartments": 3,
+            "nonAgricultural": 56,
+            "unspecified": 15,
+            "withBuildings": 1029,
+            "withoutBuildings": 2985
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1192,
+            "apartments": 1,
+            "nonAgricultural": 103,
+            "unspecified": 26,
+            "withBuildings": 1510,
+            "withoutBuildings": 3626
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2180,
+            "nonAgricultural": 99,
+            "unspecified": 50,
+            "withBuildings": 1879,
+            "withoutBuildings": 5002
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 47,
+            "nonAgricultural": 2,
+            "withBuildings": 87,
+            "withoutBuildings": 179
+          }
+        }
+      ]
+    },
+    {
+      "county": "AR",
+      "name": "Arad",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 8509,
+            "apartments": 2639,
+            "nonAgricultural": 95,
+            "unspecified": 3097,
+            "withBuildings": 3831,
+            "withoutBuildings": 1806
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 6572,
+            "apartments": 2025,
+            "nonAgricultural": 84,
+            "unspecified": 2291,
+            "withBuildings": 3451,
+            "withoutBuildings": 3160
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 6355,
+            "nonAgricultural": 76,
+            "unspecified": 28,
+            "withBuildings": 3216,
+            "withoutBuildings": 7122
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 2334,
+            "nonAgricultural": 23,
+            "unspecified": 4,
+            "withBuildings": 2091,
+            "withoutBuildings": 4615
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 2290,
+            "nonAgricultural": 44,
+            "unspecified": 3,
+            "withBuildings": 1455,
+            "withoutBuildings": 2950
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 5810,
+            "nonAgricultural": 127,
+            "unspecified": 8,
+            "withBuildings": 3772,
+            "withoutBuildings": 8131
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 5636,
+            "nonAgricultural": 65,
+            "unspecified": 12,
+            "withBuildings": 3320,
+            "withoutBuildings": 7422
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 104,
+            "nonAgricultural": 2,
+            "unspecified": 4,
+            "withBuildings": 135,
+            "withoutBuildings": 387
+          }
+        }
+      ]
+    },
+    {
+      "county": "AG",
+      "name": "Argeș",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2353,
+            "apartments": 2453,
+            "nonAgricultural": 234,
+            "unspecified": 3304,
+            "withBuildings": 2280,
+            "withoutBuildings": 2714
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2593,
+            "apartments": 2355,
+            "nonAgricultural": 281,
+            "unspecified": 3359,
+            "withBuildings": 3018,
+            "withoutBuildings": 5750
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1967,
+            "apartments": 2,
+            "nonAgricultural": 238,
+            "unspecified": 40,
+            "withBuildings": 2549,
+            "withoutBuildings": 9114
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 1124,
+            "apartments": 2,
+            "nonAgricultural": 182,
+            "unspecified": 39,
+            "withBuildings": 2100,
+            "withoutBuildings": 6753
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 1012,
+            "nonAgricultural": 143,
+            "unspecified": 63,
+            "withBuildings": 1597,
+            "withoutBuildings": 5288
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2232,
+            "apartments": 1,
+            "nonAgricultural": 229,
+            "unspecified": 27,
+            "withBuildings": 2248,
+            "withoutBuildings": 7053
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2271,
+            "apartments": 2,
+            "nonAgricultural": 358,
+            "unspecified": 49,
+            "withBuildings": 2325,
+            "withoutBuildings": 7914
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 117,
+            "apartments": 1,
+            "nonAgricultural": 10,
+            "withBuildings": 91,
+            "withoutBuildings": 329
+          }
+        }
+      ]
+    },
+    {
+      "county": "BC",
+      "name": "Bacău",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1917,
+            "apartments": 3009,
+            "nonAgricultural": 93,
+            "unspecified": 5074,
+            "withBuildings": 3080,
+            "withoutBuildings": 2760
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1725,
+            "apartments": 2461,
+            "nonAgricultural": 66,
+            "unspecified": 3830,
+            "withBuildings": 2970,
+            "withoutBuildings": 4729
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1510,
+            "nonAgricultural": 73,
+            "unspecified": 58,
+            "withBuildings": 2499,
+            "withoutBuildings": 9696
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 617,
+            "nonAgricultural": 55,
+            "unspecified": 41,
+            "withBuildings": 1224,
+            "withoutBuildings": 4361
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 641,
+            "nonAgricultural": 49,
+            "unspecified": 186,
+            "withBuildings": 1025,
+            "withoutBuildings": 4621
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2213,
+            "nonAgricultural": 275,
+            "unspecified": 345,
+            "withBuildings": 3560,
+            "withoutBuildings": 12368
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2026,
+            "apartments": 1,
+            "nonAgricultural": 289,
+            "unspecified": 227,
+            "withBuildings": 3055,
+            "withoutBuildings": 10295
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 117,
+            "nonAgricultural": 7,
+            "unspecified": 9,
+            "withBuildings": 214,
+            "withoutBuildings": 774
+          }
+        }
+      ]
+    },
+    {
+      "county": "BH",
+      "name": "Bihor",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 4429,
+            "apartments": 2858,
+            "nonAgricultural": 203,
+            "unspecified": 4142,
+            "withBuildings": 4306,
+            "withoutBuildings": 4313
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 3466,
+            "apartments": 2142,
+            "nonAgricultural": 164,
+            "unspecified": 2830,
+            "withBuildings": 3950,
+            "withoutBuildings": 5141
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 3592,
+            "nonAgricultural": 158,
+            "unspecified": 26,
+            "withBuildings": 3605,
+            "withoutBuildings": 9189
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 2567,
+            "nonAgricultural": 153,
+            "unspecified": 26,
+            "withBuildings": 2446,
+            "withoutBuildings": 6681
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 2114,
+            "nonAgricultural": 176,
+            "unspecified": 16,
+            "withBuildings": 2002,
+            "withoutBuildings": 6097
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 5087,
+            "apartments": 3,
+            "nonAgricultural": 273,
+            "unspecified": 26,
+            "withBuildings": 5793,
+            "withoutBuildings": 14134
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 4711,
+            "apartments": 2,
+            "nonAgricultural": 310,
+            "unspecified": 46,
+            "withBuildings": 4956,
+            "withoutBuildings": 11732
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 420,
+            "nonAgricultural": 15,
+            "unspecified": 8,
+            "withBuildings": 311,
+            "withoutBuildings": 744
+          }
+        }
+      ]
+    },
+    {
+      "county": "BN",
+      "name": "Bistrița-Năsăud",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 577,
+            "apartments": 1342,
+            "nonAgricultural": 40,
+            "unspecified": 1173,
+            "withBuildings": 2171,
+            "withoutBuildings": 1881
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 751,
+            "apartments": 1156,
+            "nonAgricultural": 52,
+            "unspecified": 1104,
+            "withBuildings": 2384,
+            "withoutBuildings": 3188
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 881,
+            "nonAgricultural": 58,
+            "unspecified": 49,
+            "withBuildings": 2407,
+            "withoutBuildings": 5641
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 481,
+            "apartments": 3,
+            "nonAgricultural": 39,
+            "unspecified": 43,
+            "withBuildings": 1744,
+            "withoutBuildings": 3425
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 450,
+            "nonAgricultural": 22,
+            "unspecified": 28,
+            "withBuildings": 1022,
+            "withoutBuildings": 2492
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 878,
+            "apartments": 1,
+            "nonAgricultural": 44,
+            "unspecified": 80,
+            "withBuildings": 2220,
+            "withoutBuildings": 5080
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 921,
+            "nonAgricultural": 52,
+            "unspecified": 74,
+            "withBuildings": 1967,
+            "withoutBuildings": 4853
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 58,
+            "nonAgricultural": 3,
+            "unspecified": 3,
+            "withBuildings": 122,
+            "withoutBuildings": 343
+          }
+        }
+      ]
+    },
+    {
+      "county": "BT",
+      "name": "Botoșani",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 5197,
+            "apartments": 1128,
+            "nonAgricultural": 89,
+            "unspecified": 2571,
+            "withBuildings": 1550,
+            "withoutBuildings": 1605
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 4828,
+            "apartments": 1049,
+            "nonAgricultural": 97,
+            "unspecified": 2399,
+            "withBuildings": 1814,
+            "withoutBuildings": 2812
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 4222,
+            "nonAgricultural": 55,
+            "unspecified": 20,
+            "withBuildings": 1630,
+            "withoutBuildings": 5544
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 2344,
+            "nonAgricultural": 54,
+            "unspecified": 19,
+            "withBuildings": 1361,
+            "withoutBuildings": 4132
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 2244,
+            "apartments": 1,
+            "nonAgricultural": 50,
+            "unspecified": 19,
+            "withBuildings": 957,
+            "withoutBuildings": 3350
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 4678,
+            "nonAgricultural": 120,
+            "unspecified": 11,
+            "withBuildings": 2573,
+            "withoutBuildings": 7530
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 4383,
+            "nonAgricultural": 109,
+            "unspecified": 16,
+            "withBuildings": 1957,
+            "withoutBuildings": 6318
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 469,
+            "nonAgricultural": 11,
+            "withBuildings": 109,
+            "withoutBuildings": 338
+          }
+        }
+      ]
+    },
+    {
+      "county": "BV",
+      "name": "Brașov",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1036,
+            "apartments": 5584,
+            "nonAgricultural": 32,
+            "unspecified": 2250,
+            "withBuildings": 6646,
+            "withoutBuildings": 5699
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1422,
+            "apartments": 4908,
+            "nonAgricultural": 21,
+            "unspecified": 1928,
+            "withBuildings": 7460,
+            "withoutBuildings": 11896
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1382,
+            "nonAgricultural": 23,
+            "unspecified": 13,
+            "withBuildings": 7834,
+            "withoutBuildings": 18405
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 981,
+            "nonAgricultural": 19,
+            "unspecified": 2,
+            "withBuildings": 5545,
+            "withoutBuildings": 13868
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 1040,
+            "nonAgricultural": 47,
+            "unspecified": 1,
+            "withBuildings": 4676,
+            "withoutBuildings": 12178
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1882,
+            "nonAgricultural": 19,
+            "unspecified": 15,
+            "withBuildings": 11256,
+            "withoutBuildings": 23877
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2190,
+            "nonAgricultural": 14,
+            "unspecified": 9,
+            "withBuildings": 10443,
+            "withoutBuildings": 22210
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 113,
+            "withBuildings": 660,
+            "withoutBuildings": 1400
+          }
+        }
+      ]
+    },
+    {
+      "county": "BR",
+      "name": "Brăila",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 6190,
+            "apartments": 1501,
+            "nonAgricultural": 26,
+            "unspecified": 3320,
+            "withBuildings": 1531,
+            "withoutBuildings": 527
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 5322,
+            "apartments": 982,
+            "nonAgricultural": 24,
+            "unspecified": 2058,
+            "withBuildings": 1065,
+            "withoutBuildings": 1043
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 5026,
+            "apartments": 1,
+            "nonAgricultural": 23,
+            "unspecified": 339,
+            "withBuildings": 1155,
+            "withoutBuildings": 3802
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 2785,
+            "apartments": 1,
+            "nonAgricultural": 11,
+            "unspecified": 28,
+            "withBuildings": 825,
+            "withoutBuildings": 2616
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 2609,
+            "apartments": 1,
+            "nonAgricultural": 21,
+            "unspecified": 38,
+            "withBuildings": 756,
+            "withoutBuildings": 2471
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 6064,
+            "apartments": 3,
+            "nonAgricultural": 32,
+            "unspecified": 12,
+            "withBuildings": 1464,
+            "withoutBuildings": 4769
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 5463,
+            "apartments": 1,
+            "nonAgricultural": 17,
+            "unspecified": 5,
+            "withBuildings": 1227,
+            "withoutBuildings": 3987
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 253,
+            "apartments": 1,
+            "unspecified": 1,
+            "withBuildings": 89,
+            "withoutBuildings": 285
+          }
+        }
+      ]
+    },
+    {
+      "county": "B",
+      "name": "București",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "apartments": 32272,
+            "unspecified": 4006,
+            "withBuildings": 13660,
+            "withoutBuildings": 11077
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "apartments": 28247,
+            "unspecified": 3611,
+            "withBuildings": 18897,
+            "withoutBuildings": 27415
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "withBuildings": 19636,
+            "withoutBuildings": 60798
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 1,
+            "withBuildings": 17569,
+            "withoutBuildings": 46220
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "nonAgricultural": 2,
+            "withBuildings": 17691,
+            "withoutBuildings": 46935
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "withBuildings": 36024,
+            "withoutBuildings": 100230
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2,
+            "nonAgricultural": 1,
+            "withBuildings": 28890,
+            "withoutBuildings": 79723
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "withBuildings": 2120,
+            "withoutBuildings": 4840
+          }
+        }
+      ]
+    },
+    {
+      "county": "BZ",
+      "name": "Buzău",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 5379,
+            "apartments": 1206,
+            "nonAgricultural": 162,
+            "unspecified": 3466,
+            "withBuildings": 2790,
+            "withoutBuildings": 1201
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 4280,
+            "apartments": 1295,
+            "nonAgricultural": 130,
+            "unspecified": 3243,
+            "withBuildings": 3342,
+            "withoutBuildings": 2411
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 3808,
+            "nonAgricultural": 120,
+            "unspecified": 80,
+            "withBuildings": 2574,
+            "withoutBuildings": 5602
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 1918,
+            "nonAgricultural": 38,
+            "unspecified": 12,
+            "withBuildings": 1254,
+            "withoutBuildings": 3077
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 1672,
+            "nonAgricultural": 56,
+            "unspecified": 19,
+            "withBuildings": 1150,
+            "withoutBuildings": 2630
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 8178,
+            "nonAgricultural": 114,
+            "unspecified": 72,
+            "withBuildings": 3529,
+            "withoutBuildings": 8125
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 6563,
+            "apartments": 3,
+            "nonAgricultural": 129,
+            "unspecified": 84,
+            "withBuildings": 3038,
+            "withoutBuildings": 7166
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 413,
+            "nonAgricultural": 1,
+            "unspecified": 11,
+            "withBuildings": 219,
+            "withoutBuildings": 493
+          }
+        }
+      ]
+    },
+    {
+      "county": "CS",
+      "name": "Caraș-Severin",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1965,
+            "apartments": 978,
+            "nonAgricultural": 101,
+            "unspecified": 982,
+            "withBuildings": 1002,
+            "withoutBuildings": 922
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1096,
+            "apartments": 484,
+            "nonAgricultural": 48,
+            "unspecified": 537,
+            "withBuildings": 668,
+            "withoutBuildings": 1101
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2020,
+            "nonAgricultural": 111,
+            "unspecified": 4,
+            "withBuildings": 976,
+            "withoutBuildings": 2603
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 1408,
+            "nonAgricultural": 37,
+            "unspecified": 25,
+            "withBuildings": 663,
+            "withoutBuildings": 1675
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 1013,
+            "nonAgricultural": 49,
+            "unspecified": 27,
+            "withBuildings": 507,
+            "withoutBuildings": 1425
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1216,
+            "nonAgricultural": 33,
+            "unspecified": 39,
+            "withBuildings": 1207,
+            "withoutBuildings": 3393
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1285,
+            "nonAgricultural": 64,
+            "unspecified": 30,
+            "withBuildings": 970,
+            "withoutBuildings": 2790
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 63,
+            "nonAgricultural": 2,
+            "unspecified": 4,
+            "withBuildings": 76,
+            "withoutBuildings": 197
+          }
+        }
+      ]
+    },
+    {
+      "county": "CJ",
+      "name": "Cluj",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1891,
+            "apartments": 9783,
+            "nonAgricultural": 85,
+            "unspecified": 3943,
+            "withBuildings": 9346,
+            "withoutBuildings": 9597
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2520,
+            "apartments": 9350,
+            "nonAgricultural": 140,
+            "unspecified": 3660,
+            "withBuildings": 11136,
+            "withoutBuildings": 17237
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2332,
+            "nonAgricultural": 96,
+            "unspecified": 90,
+            "withBuildings": 9053,
+            "withoutBuildings": 21554
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 1702,
+            "nonAgricultural": 61,
+            "unspecified": 28,
+            "withBuildings": 5605,
+            "withoutBuildings": 13381
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 2054,
+            "nonAgricultural": 96,
+            "unspecified": 56,
+            "withBuildings": 5843,
+            "withoutBuildings": 15139
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 3075,
+            "nonAgricultural": 144,
+            "unspecified": 50,
+            "withBuildings": 9860,
+            "withoutBuildings": 21103
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 3230,
+            "nonAgricultural": 194,
+            "unspecified": 86,
+            "withBuildings": 8921,
+            "withoutBuildings": 17973
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 178,
+            "nonAgricultural": 3,
+            "unspecified": 1,
+            "withBuildings": 516,
+            "withoutBuildings": 1002
+          }
+        }
+      ]
+    },
+    {
+      "county": "CT",
+      "name": "Constanța",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 6381,
+            "apartments": 7335,
+            "nonAgricultural": 96,
+            "unspecified": 5054,
+            "withBuildings": 7093,
+            "withoutBuildings": 4490
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 5091,
+            "apartments": 5601,
+            "nonAgricultural": 93,
+            "unspecified": 4023,
+            "withBuildings": 8463,
+            "withoutBuildings": 6679
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 4977,
+            "nonAgricultural": 136,
+            "unspecified": 10,
+            "withBuildings": 6910,
+            "withoutBuildings": 13120
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 2037,
+            "nonAgricultural": 42,
+            "unspecified": 4,
+            "withBuildings": 3862,
+            "withoutBuildings": 6669
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 1816,
+            "nonAgricultural": 29,
+            "unspecified": 9,
+            "withBuildings": 5452,
+            "withoutBuildings": 7262
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 4869,
+            "nonAgricultural": 74,
+            "unspecified": 34,
+            "withBuildings": 8041,
+            "withoutBuildings": 19855
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 4842,
+            "nonAgricultural": 46,
+            "unspecified": 77,
+            "withBuildings": 7510,
+            "withoutBuildings": 17322
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 215,
+            "withBuildings": 500,
+            "withoutBuildings": 1381
+          }
+        }
+      ]
+    },
+    {
+      "county": "CV",
+      "name": "Covasna",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 895,
+            "apartments": 919,
+            "nonAgricultural": 194,
+            "unspecified": 1515,
+            "withBuildings": 1015,
+            "withoutBuildings": 913
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 786,
+            "apartments": 745,
+            "nonAgricultural": 154,
+            "unspecified": 1315,
+            "withBuildings": 1041,
+            "withoutBuildings": 1626
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 995,
+            "nonAgricultural": 168,
+            "withBuildings": 996,
+            "withoutBuildings": 3326
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 521,
+            "nonAgricultural": 170,
+            "unspecified": 22,
+            "withBuildings": 594,
+            "withoutBuildings": 2017
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 547,
+            "nonAgricultural": 58,
+            "unspecified": 1,
+            "withBuildings": 538,
+            "withoutBuildings": 1961
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 827,
+            "nonAgricultural": 138,
+            "withBuildings": 1100,
+            "withoutBuildings": 3623
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 952,
+            "nonAgricultural": 156,
+            "unspecified": 6,
+            "withBuildings": 934,
+            "withoutBuildings": 3014
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 75,
+            "nonAgricultural": 14,
+            "withBuildings": 75,
+            "withoutBuildings": 223
+          }
+        }
+      ]
+    },
+    {
+      "county": "CL",
+      "name": "Călărași",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 4935,
+            "apartments": 440,
+            "nonAgricultural": 11,
+            "unspecified": 2798,
+            "withBuildings": 2027,
+            "withoutBuildings": 565
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 4015,
+            "apartments": 439,
+            "nonAgricultural": 20,
+            "unspecified": 1488,
+            "withBuildings": 1596,
+            "withoutBuildings": 1093
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 3750,
+            "nonAgricultural": 35,
+            "withBuildings": 1533,
+            "withoutBuildings": 3049
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 1531,
+            "nonAgricultural": 10,
+            "withBuildings": 785,
+            "withoutBuildings": 1444
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 1864,
+            "nonAgricultural": 13,
+            "unspecified": 1,
+            "withBuildings": 820,
+            "withoutBuildings": 3672
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1686,
+            "nonAgricultural": 4,
+            "unspecified": 1,
+            "withBuildings": 912,
+            "withoutBuildings": 1890
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2656,
+            "nonAgricultural": 8,
+            "unspecified": 3,
+            "withBuildings": 1353,
+            "withoutBuildings": 3087
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 78,
+            "withBuildings": 113,
+            "withoutBuildings": 185
+          }
+        }
+      ]
+    },
+    {
+      "county": "DJ",
+      "name": "Dolj",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 3960,
+            "apartments": 1853,
+            "nonAgricultural": 63,
+            "unspecified": 2208,
+            "withBuildings": 1522,
+            "withoutBuildings": 1662
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 6731,
+            "apartments": 1752,
+            "nonAgricultural": 79,
+            "unspecified": 2483,
+            "withBuildings": 2350,
+            "withoutBuildings": 3871
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 6526,
+            "apartments": 7,
+            "nonAgricultural": 107,
+            "unspecified": 40,
+            "withBuildings": 2585,
+            "withoutBuildings": 8195
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 3878,
+            "apartments": 5,
+            "nonAgricultural": 87,
+            "unspecified": 13,
+            "withBuildings": 1736,
+            "withoutBuildings": 5639
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 3689,
+            "apartments": 6,
+            "nonAgricultural": 84,
+            "unspecified": 9,
+            "withBuildings": 1950,
+            "withoutBuildings": 5604
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 8431,
+            "apartments": 1,
+            "nonAgricultural": 159,
+            "unspecified": 31,
+            "withBuildings": 3198,
+            "withoutBuildings": 9806
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 7919,
+            "apartments": 8,
+            "nonAgricultural": 154,
+            "unspecified": 14,
+            "withBuildings": 2931,
+            "withoutBuildings": 8970
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 464,
+            "nonAgricultural": 51,
+            "unspecified": 1,
+            "withBuildings": 210,
+            "withoutBuildings": 578
+          }
+        }
+      ]
+    },
+    {
+      "county": "DB",
+      "name": "Dâmbovița",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2674,
+            "apartments": 1183,
+            "nonAgricultural": 131,
+            "unspecified": 3722,
+            "withBuildings": 3215,
+            "withoutBuildings": 2464
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 3280,
+            "apartments": 977,
+            "nonAgricultural": 225,
+            "unspecified": 2982,
+            "withBuildings": 3266,
+            "withoutBuildings": 4425
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 3530,
+            "nonAgricultural": 213,
+            "withBuildings": 3559,
+            "withoutBuildings": 8912
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 1493,
+            "nonAgricultural": 136,
+            "unspecified": 9,
+            "withBuildings": 2416,
+            "withoutBuildings": 5983
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 1436,
+            "nonAgricultural": 73,
+            "unspecified": 5,
+            "withBuildings": 2165,
+            "withoutBuildings": 5914
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 3307,
+            "nonAgricultural": 161,
+            "unspecified": 8,
+            "withBuildings": 4203,
+            "withoutBuildings": 11240
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 3862,
+            "nonAgricultural": 270,
+            "unspecified": 8,
+            "withBuildings": 3625,
+            "withoutBuildings": 10252
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 220,
+            "nonAgricultural": 6,
+            "unspecified": 1,
+            "withBuildings": 208,
+            "withoutBuildings": 611
+          }
+        }
+      ]
+    },
+    {
+      "county": "GL",
+      "name": "Galați",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 5065,
+            "apartments": 2917,
+            "nonAgricultural": 107,
+            "unspecified": 3416,
+            "withBuildings": 1824,
+            "withoutBuildings": 1495
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 5279,
+            "apartments": 2315,
+            "nonAgricultural": 102,
+            "unspecified": 2719,
+            "withBuildings": 1887,
+            "withoutBuildings": 2888
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 5045,
+            "nonAgricultural": 113,
+            "unspecified": 34,
+            "withBuildings": 1947,
+            "withoutBuildings": 7943
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 2547,
+            "nonAgricultural": 44,
+            "unspecified": 9,
+            "withBuildings": 1115,
+            "withoutBuildings": 4012
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 2760,
+            "nonAgricultural": 95,
+            "unspecified": 30,
+            "withBuildings": 1254,
+            "withoutBuildings": 4213
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 6302,
+            "nonAgricultural": 200,
+            "unspecified": 29,
+            "withBuildings": 2845,
+            "withoutBuildings": 9759
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 5006,
+            "nonAgricultural": 180,
+            "unspecified": 35,
+            "withBuildings": 2391,
+            "withoutBuildings": 8020
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 200,
+            "nonAgricultural": 10,
+            "unspecified": 2,
+            "withBuildings": 143,
+            "withoutBuildings": 487
+          }
+        }
+      ]
+    },
+    {
+      "county": "GR",
+      "name": "Giurgiu",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1719,
+            "apartments": 331,
+            "nonAgricultural": 15,
+            "unspecified": 1364,
+            "withBuildings": 991,
+            "withoutBuildings": 1167
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2138,
+            "apartments": 310,
+            "nonAgricultural": 41,
+            "unspecified": 1443,
+            "withBuildings": 1904,
+            "withoutBuildings": 2833
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2546,
+            "nonAgricultural": 63,
+            "unspecified": 15,
+            "withBuildings": 1252,
+            "withoutBuildings": 3899
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 1045,
+            "nonAgricultural": 52,
+            "unspecified": 3,
+            "withBuildings": 818,
+            "withoutBuildings": 2712
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 894,
+            "nonAgricultural": 32,
+            "unspecified": 51,
+            "withBuildings": 787,
+            "withoutBuildings": 2765
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2295,
+            "nonAgricultural": 35,
+            "unspecified": 48,
+            "withBuildings": 1528,
+            "withoutBuildings": 5026
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2495,
+            "nonAgricultural": 15,
+            "unspecified": 46,
+            "withBuildings": 1432,
+            "withoutBuildings": 4572
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 139,
+            "withBuildings": 60,
+            "withoutBuildings": 242
+          }
+        }
+      ]
+    },
+    {
+      "county": "GJ",
+      "name": "Gorj",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 741,
+            "apartments": 755,
+            "nonAgricultural": 65,
+            "unspecified": 1484,
+            "withBuildings": 831,
+            "withoutBuildings": 601
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 902,
+            "apartments": 817,
+            "nonAgricultural": 94,
+            "unspecified": 1809,
+            "withBuildings": 1209,
+            "withoutBuildings": 1555
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 686,
+            "nonAgricultural": 67,
+            "unspecified": 3,
+            "withBuildings": 826,
+            "withoutBuildings": 2636
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 503,
+            "nonAgricultural": 83,
+            "unspecified": 7,
+            "withBuildings": 820,
+            "withoutBuildings": 2660
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 629,
+            "nonAgricultural": 70,
+            "withBuildings": 1026,
+            "withoutBuildings": 3246
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1727,
+            "nonAgricultural": 195,
+            "unspecified": 10,
+            "withBuildings": 1892,
+            "withoutBuildings": 5896
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1639,
+            "nonAgricultural": 241,
+            "unspecified": 2,
+            "withBuildings": 1336,
+            "withoutBuildings": 4797
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 91,
+            "nonAgricultural": 17,
+            "withBuildings": 99,
+            "withoutBuildings": 339
+          }
+        }
+      ]
+    },
+    {
+      "county": "HR",
+      "name": "Harghita",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 833,
+            "apartments": 1185,
+            "nonAgricultural": 133,
+            "unspecified": 4290,
+            "withBuildings": 2275,
+            "withoutBuildings": 1835
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1030,
+            "apartments": 992,
+            "nonAgricultural": 180,
+            "unspecified": 3420,
+            "withBuildings": 2451,
+            "withoutBuildings": 2841
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1211,
+            "apartments": 1,
+            "nonAgricultural": 244,
+            "unspecified": 25,
+            "withBuildings": 2601,
+            "withoutBuildings": 7798
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 794,
+            "apartments": 3,
+            "nonAgricultural": 125,
+            "unspecified": 15,
+            "withBuildings": 1859,
+            "withoutBuildings": 6148
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 677,
+            "apartments": 1,
+            "nonAgricultural": 121,
+            "unspecified": 24,
+            "withBuildings": 1496,
+            "withoutBuildings": 4976
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1666,
+            "nonAgricultural": 209,
+            "unspecified": 44,
+            "withBuildings": 2993,
+            "withoutBuildings": 9732
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1984,
+            "nonAgricultural": 201,
+            "unspecified": 68,
+            "withBuildings": 2569,
+            "withoutBuildings": 8512
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 80,
+            "nonAgricultural": 3,
+            "unspecified": 3,
+            "withBuildings": 91,
+            "withoutBuildings": 321
+          }
+        }
+      ]
+    },
+    {
+      "county": "HD",
+      "name": "Hunedoara",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1639,
+            "apartments": 2970,
+            "nonAgricultural": 110,
+            "unspecified": 2458,
+            "withBuildings": 1447,
+            "withoutBuildings": 936
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1710,
+            "apartments": 2604,
+            "nonAgricultural": 134,
+            "unspecified": 2217,
+            "withBuildings": 1568,
+            "withoutBuildings": 2309
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1552,
+            "nonAgricultural": 139,
+            "unspecified": 14,
+            "withBuildings": 1435,
+            "withoutBuildings": 6293
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 956,
+            "nonAgricultural": 62,
+            "unspecified": 9,
+            "withBuildings": 884,
+            "withoutBuildings": 3989
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 943,
+            "apartments": 1,
+            "nonAgricultural": 48,
+            "unspecified": 10,
+            "withBuildings": 757,
+            "withoutBuildings": 3485
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2224,
+            "nonAgricultural": 202,
+            "unspecified": 16,
+            "withBuildings": 1944,
+            "withoutBuildings": 8174
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2124,
+            "nonAgricultural": 206,
+            "unspecified": 26,
+            "withBuildings": 1643,
+            "withoutBuildings": 6894
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 82,
+            "nonAgricultural": 3,
+            "withBuildings": 83,
+            "withoutBuildings": 342
+          }
+        }
+      ]
+    },
+    {
+      "county": "IL",
+      "name": "Ialomița",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2560,
+            "apartments": 371,
+            "nonAgricultural": 13,
+            "unspecified": 1522,
+            "withBuildings": 944,
+            "withoutBuildings": 277
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 4029,
+            "apartments": 397,
+            "nonAgricultural": 19,
+            "unspecified": 1594,
+            "withBuildings": 1221,
+            "withoutBuildings": 1140
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 3039,
+            "nonAgricultural": 36,
+            "unspecified": 26,
+            "withBuildings": 1273,
+            "withoutBuildings": 2961
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 1825,
+            "apartments": 1,
+            "nonAgricultural": 6,
+            "unspecified": 1,
+            "withBuildings": 805,
+            "withoutBuildings": 1997
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 2078,
+            "nonAgricultural": 17,
+            "unspecified": 63,
+            "withBuildings": 659,
+            "withoutBuildings": 1604
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 4270,
+            "nonAgricultural": 15,
+            "unspecified": 39,
+            "withBuildings": 1612,
+            "withoutBuildings": 3756
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 3717,
+            "nonAgricultural": 29,
+            "unspecified": 46,
+            "withBuildings": 933,
+            "withoutBuildings": 2221
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 104,
+            "withBuildings": 55,
+            "withoutBuildings": 114
+          }
+        }
+      ]
+    },
+    {
+      "county": "IS",
+      "name": "Iași",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1884,
+            "apartments": 6619,
+            "nonAgricultural": 82,
+            "unspecified": 3526,
+            "withBuildings": 5905,
+            "withoutBuildings": 8291
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2597,
+            "apartments": 6386,
+            "nonAgricultural": 161,
+            "unspecified": 2903,
+            "withBuildings": 6309,
+            "withoutBuildings": 13725
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1790,
+            "apartments": 3,
+            "nonAgricultural": 112,
+            "unspecified": 29,
+            "withBuildings": 5419,
+            "withoutBuildings": 18358
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 714,
+            "apartments": 11,
+            "nonAgricultural": 76,
+            "unspecified": 16,
+            "withBuildings": 2825,
+            "withoutBuildings": 9884
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 800,
+            "apartments": 3,
+            "nonAgricultural": 48,
+            "unspecified": 5,
+            "withBuildings": 2302,
+            "withoutBuildings": 7775
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2169,
+            "apartments": 5,
+            "nonAgricultural": 86,
+            "unspecified": 40,
+            "withBuildings": 6102,
+            "withoutBuildings": 19224
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2174,
+            "apartments": 2,
+            "nonAgricultural": 89,
+            "unspecified": 34,
+            "withBuildings": 5405,
+            "withoutBuildings": 18557
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 160,
+            "nonAgricultural": 5,
+            "withBuildings": 453,
+            "withoutBuildings": 1634
+          }
+        }
+      ]
+    },
+    {
+      "county": "IF",
+      "name": "Ilfov",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 939,
+            "apartments": 5991,
+            "nonAgricultural": 234,
+            "unspecified": 3224,
+            "withBuildings": 8625,
+            "withoutBuildings": 10578
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1069,
+            "apartments": 3716,
+            "nonAgricultural": 185,
+            "unspecified": 2464,
+            "withBuildings": 8271,
+            "withoutBuildings": 25640
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1276,
+            "nonAgricultural": 237,
+            "unspecified": 2,
+            "withBuildings": 8797,
+            "withoutBuildings": 31475
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 1016,
+            "nonAgricultural": 90,
+            "unspecified": 3,
+            "withBuildings": 7036,
+            "withoutBuildings": 24513
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 615,
+            "nonAgricultural": 67,
+            "withBuildings": 7094,
+            "withoutBuildings": 28040
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1001,
+            "nonAgricultural": 136,
+            "unspecified": 20,
+            "withBuildings": 10292,
+            "withoutBuildings": 32309
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1227,
+            "nonAgricultural": 98,
+            "unspecified": 3,
+            "withBuildings": 9889,
+            "withoutBuildings": 30519
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 84,
+            "nonAgricultural": 24,
+            "unspecified": 1,
+            "withBuildings": 720,
+            "withoutBuildings": 2243
+          }
+        }
+      ]
+    },
+    {
+      "county": "MM",
+      "name": "Maramureș",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 417,
+            "apartments": 1520,
+            "nonAgricultural": 77,
+            "unspecified": 1497,
+            "withBuildings": 1962,
+            "withoutBuildings": 1608
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 715,
+            "apartments": 1676,
+            "nonAgricultural": 185,
+            "unspecified": 1714,
+            "withBuildings": 2615,
+            "withoutBuildings": 3226
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 895,
+            "apartments": 1,
+            "nonAgricultural": 176,
+            "unspecified": 39,
+            "withBuildings": 2976,
+            "withoutBuildings": 7415
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 486,
+            "nonAgricultural": 77,
+            "unspecified": 15,
+            "withBuildings": 2229,
+            "withoutBuildings": 5357
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 493,
+            "nonAgricultural": 92,
+            "unspecified": 22,
+            "withBuildings": 1840,
+            "withoutBuildings": 4557
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 653,
+            "nonAgricultural": 100,
+            "unspecified": 20,
+            "withBuildings": 1948,
+            "withoutBuildings": 6311
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 730,
+            "nonAgricultural": 170,
+            "unspecified": 14,
+            "withBuildings": 2003,
+            "withoutBuildings": 6820
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 48,
+            "nonAgricultural": 3,
+            "unspecified": 7,
+            "withBuildings": 111,
+            "withoutBuildings": 400
+          }
+        }
+      ]
+    },
+    {
+      "county": "MH",
+      "name": "Mehedinți",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2128,
+            "apartments": 895,
+            "nonAgricultural": 34,
+            "unspecified": 2045,
+            "withBuildings": 1057,
+            "withoutBuildings": 718
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2254,
+            "apartments": 825,
+            "nonAgricultural": 70,
+            "unspecified": 1747,
+            "withBuildings": 1098,
+            "withoutBuildings": 1470
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1871,
+            "nonAgricultural": 79,
+            "unspecified": 25,
+            "withBuildings": 1009,
+            "withoutBuildings": 3689
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 1334,
+            "nonAgricultural": 111,
+            "unspecified": 7,
+            "withBuildings": 645,
+            "withoutBuildings": 2121
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 970,
+            "nonAgricultural": 52,
+            "unspecified": 33,
+            "withBuildings": 574,
+            "withoutBuildings": 2124
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 3938,
+            "nonAgricultural": 120,
+            "unspecified": 24,
+            "withBuildings": 1607,
+            "withoutBuildings": 5799
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 4427,
+            "nonAgricultural": 99,
+            "unspecified": 19,
+            "withBuildings": 1695,
+            "withoutBuildings": 5828
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 182,
+            "nonAgricultural": 11,
+            "unspecified": 3,
+            "withBuildings": 130,
+            "withoutBuildings": 422
+          }
+        }
+      ]
+    },
+    {
+      "county": "MS",
+      "name": "Mureș",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1533,
+            "apartments": 2318,
+            "nonAgricultural": 57,
+            "unspecified": 3292,
+            "withBuildings": 2641,
+            "withoutBuildings": 1821
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1579,
+            "apartments": 1814,
+            "nonAgricultural": 87,
+            "unspecified": 2442,
+            "withBuildings": 2628,
+            "withoutBuildings": 3228
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1596,
+            "apartments": 1,
+            "nonAgricultural": 74,
+            "unspecified": 73,
+            "withBuildings": 2758,
+            "withoutBuildings": 8079
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 1071,
+            "nonAgricultural": 41,
+            "unspecified": 22,
+            "withBuildings": 2034,
+            "withoutBuildings": 5838
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 1383,
+            "apartments": 9,
+            "nonAgricultural": 93,
+            "unspecified": 38,
+            "withBuildings": 2327,
+            "withoutBuildings": 6714
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2484,
+            "nonAgricultural": 130,
+            "unspecified": 54,
+            "withBuildings": 3706,
+            "withoutBuildings": 8925
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2058,
+            "nonAgricultural": 94,
+            "unspecified": 40,
+            "withBuildings": 3910,
+            "withoutBuildings": 9539
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 94,
+            "nonAgricultural": 6,
+            "unspecified": 4,
+            "withBuildings": 156,
+            "withoutBuildings": 406
+          }
+        }
+      ]
+    },
+    {
+      "county": "NT",
+      "name": "Neamț",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2250,
+            "apartments": 1872,
+            "nonAgricultural": 113,
+            "unspecified": 4243,
+            "withBuildings": 2533,
+            "withoutBuildings": 2860
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2064,
+            "apartments": 1735,
+            "nonAgricultural": 145,
+            "unspecified": 3410,
+            "withBuildings": 2745,
+            "withoutBuildings": 4236
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2203,
+            "nonAgricultural": 103,
+            "unspecified": 39,
+            "withBuildings": 2458,
+            "withoutBuildings": 8193
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 941,
+            "nonAgricultural": 108,
+            "unspecified": 26,
+            "withBuildings": 1419,
+            "withoutBuildings": 4590
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 940,
+            "nonAgricultural": 55,
+            "unspecified": 18,
+            "withBuildings": 1356,
+            "withoutBuildings": 4475
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2466,
+            "nonAgricultural": 118,
+            "unspecified": 28,
+            "withBuildings": 3023,
+            "withoutBuildings": 10339
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2055,
+            "nonAgricultural": 97,
+            "unspecified": 10,
+            "withBuildings": 2564,
+            "withoutBuildings": 8855
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 95,
+            "nonAgricultural": 6,
+            "withBuildings": 104,
+            "withoutBuildings": 454
+          }
+        }
+      ]
+    },
+    {
+      "county": "OT",
+      "name": "Olt",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 3266,
+            "apartments": 969,
+            "nonAgricultural": 78,
+            "unspecified": 2458,
+            "withBuildings": 1301,
+            "withoutBuildings": 707
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2783,
+            "apartments": 887,
+            "nonAgricultural": 64,
+            "unspecified": 2169,
+            "withBuildings": 1409,
+            "withoutBuildings": 1520
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1414,
+            "nonAgricultural": 50,
+            "unspecified": 18,
+            "withBuildings": 649,
+            "withoutBuildings": 2134
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 408,
+            "nonAgricultural": 10,
+            "unspecified": 39,
+            "withBuildings": 201,
+            "withoutBuildings": 655
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 745,
+            "nonAgricultural": 41,
+            "unspecified": 11,
+            "withBuildings": 239,
+            "withoutBuildings": 1010
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2112,
+            "nonAgricultural": 58,
+            "unspecified": 6,
+            "withBuildings": 713,
+            "withoutBuildings": 2339
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1045,
+            "nonAgricultural": 22,
+            "unspecified": 28,
+            "withBuildings": 371,
+            "withoutBuildings": 1177
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 199,
+            "nonAgricultural": 7,
+            "withBuildings": 64,
+            "withoutBuildings": 213
+          }
+        }
+      ]
+    },
+    {
+      "county": "PH",
+      "name": "Prahova",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2109,
+            "apartments": 3104,
+            "nonAgricultural": 40,
+            "unspecified": 4582,
+            "withBuildings": 4873,
+            "withoutBuildings": 3226
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1816,
+            "apartments": 2796,
+            "nonAgricultural": 40,
+            "unspecified": 4178,
+            "withBuildings": 5683,
+            "withoutBuildings": 5456
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1602,
+            "nonAgricultural": 84,
+            "withBuildings": 5385,
+            "withoutBuildings": 11798
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 733,
+            "nonAgricultural": 23,
+            "unspecified": 7,
+            "withBuildings": 3109,
+            "withoutBuildings": 6698
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 871,
+            "nonAgricultural": 38,
+            "unspecified": 2,
+            "withBuildings": 2705,
+            "withoutBuildings": 6392
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2780,
+            "nonAgricultural": 54,
+            "unspecified": 20,
+            "withBuildings": 5501,
+            "withoutBuildings": 12268
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2503,
+            "nonAgricultural": 80,
+            "unspecified": 39,
+            "withBuildings": 5893,
+            "withoutBuildings": 12921
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 86,
+            "nonAgricultural": 4,
+            "unspecified": 1,
+            "withBuildings": 298,
+            "withoutBuildings": 663
+          }
+        }
+      ]
+    },
+    {
+      "county": "SM",
+      "name": "Satu Mare",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 3241,
+            "apartments": 1589,
+            "nonAgricultural": 97,
+            "unspecified": 2462,
+            "withBuildings": 2175,
+            "withoutBuildings": 1940
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 3463,
+            "apartments": 1361,
+            "nonAgricultural": 116,
+            "unspecified": 2348,
+            "withBuildings": 2433,
+            "withoutBuildings": 3102
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 3584,
+            "apartments": 1,
+            "nonAgricultural": 137,
+            "unspecified": 55,
+            "withBuildings": 2681,
+            "withoutBuildings": 7267
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 2523,
+            "nonAgricultural": 123,
+            "unspecified": 11,
+            "withBuildings": 1593,
+            "withoutBuildings": 4262
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 2238,
+            "nonAgricultural": 106,
+            "unspecified": 25,
+            "withBuildings": 1355,
+            "withoutBuildings": 4366
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 4621,
+            "nonAgricultural": 178,
+            "unspecified": 89,
+            "withBuildings": 2635,
+            "withoutBuildings": 6783
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 3877,
+            "apartments": 1,
+            "nonAgricultural": 147,
+            "unspecified": 36,
+            "withBuildings": 2294,
+            "withoutBuildings": 5914
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 185,
+            "unspecified": 1,
+            "withBuildings": 147,
+            "withoutBuildings": 354
+          }
+        }
+      ]
+    },
+    {
+      "county": "SB",
+      "name": "Sibiu",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1978,
+            "apartments": 2679,
+            "nonAgricultural": 107,
+            "unspecified": 1764,
+            "withBuildings": 3059,
+            "withoutBuildings": 1917
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1719,
+            "apartments": 1725,
+            "nonAgricultural": 66,
+            "unspecified": 1087,
+            "withBuildings": 2747,
+            "withoutBuildings": 3113
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2030,
+            "nonAgricultural": 75,
+            "unspecified": 4,
+            "withBuildings": 2526,
+            "withoutBuildings": 5188
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 1102,
+            "nonAgricultural": 22,
+            "unspecified": 3,
+            "withBuildings": 1367,
+            "withoutBuildings": 2880
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 1082,
+            "nonAgricultural": 46,
+            "unspecified": 3,
+            "withBuildings": 1734,
+            "withoutBuildings": 3647
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2393,
+            "apartments": 1,
+            "nonAgricultural": 40,
+            "unspecified": 14,
+            "withBuildings": 3070,
+            "withoutBuildings": 7621
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2009,
+            "apartments": 1,
+            "nonAgricultural": 20,
+            "unspecified": 3,
+            "withBuildings": 2592,
+            "withoutBuildings": 6429
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 39,
+            "nonAgricultural": 1,
+            "withBuildings": 237,
+            "withoutBuildings": 495
+          }
+        }
+      ]
+    },
+    {
+      "county": "SV",
+      "name": "Suceava",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 3032,
+            "apartments": 2340,
+            "nonAgricultural": 196,
+            "unspecified": 7002,
+            "withBuildings": 3626,
+            "withoutBuildings": 5040
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2827,
+            "apartments": 2065,
+            "nonAgricultural": 181,
+            "unspecified": 6190,
+            "withBuildings": 4216,
+            "withoutBuildings": 8166
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2782,
+            "nonAgricultural": 228,
+            "unspecified": 85,
+            "withBuildings": 4058,
+            "withoutBuildings": 15219
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 1574,
+            "nonAgricultural": 124,
+            "unspecified": 41,
+            "withBuildings": 2251,
+            "withoutBuildings": 8365
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 1323,
+            "nonAgricultural": 147,
+            "unspecified": 44,
+            "withBuildings": 2137,
+            "withoutBuildings": 7941
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 3635,
+            "nonAgricultural": 262,
+            "unspecified": 102,
+            "withBuildings": 4467,
+            "withoutBuildings": 16558
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 3652,
+            "nonAgricultural": 239,
+            "unspecified": 117,
+            "withBuildings": 4362,
+            "withoutBuildings": 15640
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 263,
+            "nonAgricultural": 14,
+            "unspecified": 12,
+            "withBuildings": 430,
+            "withoutBuildings": 1463
+          }
+        }
+      ]
+    },
+    {
+      "county": "SJ",
+      "name": "Sălaj",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 757,
+            "apartments": 799,
+            "nonAgricultural": 108,
+            "unspecified": 1653,
+            "withBuildings": 1025,
+            "withoutBuildings": 979
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 746,
+            "apartments": 609,
+            "nonAgricultural": 71,
+            "unspecified": 1206,
+            "withBuildings": 916,
+            "withoutBuildings": 1444
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1005,
+            "apartments": 1,
+            "nonAgricultural": 107,
+            "unspecified": 11,
+            "withBuildings": 993,
+            "withoutBuildings": 3429
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 325,
+            "nonAgricultural": 29,
+            "unspecified": 10,
+            "withBuildings": 597,
+            "withoutBuildings": 2047
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 370,
+            "nonAgricultural": 29,
+            "unspecified": 15,
+            "withBuildings": 596,
+            "withoutBuildings": 2032
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 946,
+            "apartments": 2,
+            "nonAgricultural": 66,
+            "unspecified": 13,
+            "withBuildings": 1368,
+            "withoutBuildings": 4380
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1048,
+            "apartments": 1,
+            "nonAgricultural": 89,
+            "unspecified": 7,
+            "withBuildings": 1411,
+            "withoutBuildings": 4409
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 127,
+            "nonAgricultural": 14,
+            "unspecified": 1,
+            "withBuildings": 80,
+            "withoutBuildings": 267
+          }
+        }
+      ]
+    },
+    {
+      "county": "TR",
+      "name": "Teleorman",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1639,
+            "apartments": 342,
+            "nonAgricultural": 7,
+            "unspecified": 1737,
+            "withBuildings": 809,
+            "withoutBuildings": 149
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2328,
+            "apartments": 434,
+            "nonAgricultural": 14,
+            "unspecified": 1580,
+            "withBuildings": 990,
+            "withoutBuildings": 748
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 3590,
+            "nonAgricultural": 19,
+            "unspecified": 64,
+            "withBuildings": 1155,
+            "withoutBuildings": 3116
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 2330,
+            "nonAgricultural": 20,
+            "withBuildings": 846,
+            "withoutBuildings": 2441
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 1889,
+            "nonAgricultural": 44,
+            "unspecified": 25,
+            "withBuildings": 569,
+            "withoutBuildings": 1532
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2708,
+            "nonAgricultural": 36,
+            "withBuildings": 831,
+            "withoutBuildings": 2407
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1930,
+            "nonAgricultural": 8,
+            "unspecified": 1,
+            "withBuildings": 398,
+            "withoutBuildings": 1130
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 85,
+            "withBuildings": 14,
+            "withoutBuildings": 39
+          }
+        }
+      ]
+    },
+    {
+      "county": "TM",
+      "name": "Timiș",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 8359,
+            "apartments": 7756,
+            "nonAgricultural": 199,
+            "unspecified": 4630,
+            "withBuildings": 6934,
+            "withoutBuildings": 4751
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 8105,
+            "apartments": 6693,
+            "nonAgricultural": 179,
+            "unspecified": 3849,
+            "withBuildings": 7595,
+            "withoutBuildings": 9742
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 8840,
+            "apartments": 2,
+            "nonAgricultural": 193,
+            "unspecified": 77,
+            "withBuildings": 7394,
+            "withoutBuildings": 20395
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 4707,
+            "apartments": 2,
+            "nonAgricultural": 84,
+            "unspecified": 95,
+            "withBuildings": 4237,
+            "withoutBuildings": 13557
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 3914,
+            "apartments": 4,
+            "nonAgricultural": 72,
+            "unspecified": 30,
+            "withBuildings": 4279,
+            "withoutBuildings": 9420
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 5211,
+            "apartments": 3,
+            "nonAgricultural": 211,
+            "unspecified": 27,
+            "withBuildings": 9818,
+            "withoutBuildings": 19356
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 5666,
+            "apartments": 3,
+            "nonAgricultural": 177,
+            "unspecified": 40,
+            "withBuildings": 8209,
+            "withoutBuildings": 16535
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 242,
+            "nonAgricultural": 4,
+            "unspecified": 7,
+            "withBuildings": 617,
+            "withoutBuildings": 1064
+          }
+        }
+      ]
+    },
+    {
+      "county": "TL",
+      "name": "Tulcea",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2722,
+            "apartments": 549,
+            "nonAgricultural": 16,
+            "unspecified": 1272,
+            "withBuildings": 726,
+            "withoutBuildings": 461
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 3048,
+            "apartments": 521,
+            "nonAgricultural": 18,
+            "unspecified": 1323,
+            "withBuildings": 908,
+            "withoutBuildings": 838
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2364,
+            "nonAgricultural": 4,
+            "unspecified": 8,
+            "withBuildings": 587,
+            "withoutBuildings": 1969
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 1604,
+            "nonAgricultural": 6,
+            "withBuildings": 618,
+            "withoutBuildings": 1548
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 2312,
+            "nonAgricultural": 5,
+            "unspecified": 6,
+            "withBuildings": 647,
+            "withoutBuildings": 1956
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 4012,
+            "nonAgricultural": 13,
+            "unspecified": 13,
+            "withBuildings": 1226,
+            "withoutBuildings": 3560
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 4013,
+            "nonAgricultural": 10,
+            "unspecified": 7,
+            "withBuildings": 1177,
+            "withoutBuildings": 3501
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 187,
+            "nonAgricultural": 1,
+            "withBuildings": 64,
+            "withoutBuildings": 206
+          }
+        }
+      ]
+    },
+    {
+      "county": "VS",
+      "name": "Vaslui",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2136,
+            "apartments": 1089,
+            "nonAgricultural": 60,
+            "unspecified": 2418,
+            "withBuildings": 1848,
+            "withoutBuildings": 956
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2255,
+            "apartments": 925,
+            "nonAgricultural": 61,
+            "unspecified": 2075,
+            "withBuildings": 1977,
+            "withoutBuildings": 1899
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1959,
+            "nonAgricultural": 57,
+            "unspecified": 44,
+            "withBuildings": 1542,
+            "withoutBuildings": 3865
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 885,
+            "nonAgricultural": 25,
+            "unspecified": 17,
+            "withBuildings": 773,
+            "withoutBuildings": 1834
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 786,
+            "nonAgricultural": 19,
+            "unspecified": 12,
+            "withBuildings": 629,
+            "withoutBuildings": 1585
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 3848,
+            "apartments": 2,
+            "nonAgricultural": 90,
+            "unspecified": 75,
+            "withBuildings": 2449,
+            "withoutBuildings": 6094
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2739,
+            "apartments": 2,
+            "nonAgricultural": 94,
+            "unspecified": 25,
+            "withBuildings": 1982,
+            "withoutBuildings": 4917
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 172,
+            "nonAgricultural": 8,
+            "withBuildings": 148,
+            "withoutBuildings": 397
+          }
+        }
+      ]
+    },
+    {
+      "county": "VN",
+      "name": "Vrancea",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 3823,
+            "apartments": 880,
+            "nonAgricultural": 156,
+            "unspecified": 2784,
+            "withBuildings": 1616,
+            "withoutBuildings": 1557
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 4098,
+            "apartments": 873,
+            "nonAgricultural": 210,
+            "unspecified": 2185,
+            "withBuildings": 1563,
+            "withoutBuildings": 2389
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 2997,
+            "nonAgricultural": 203,
+            "unspecified": 22,
+            "withBuildings": 1073,
+            "withoutBuildings": 3541
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 2019,
+            "apartments": 2,
+            "nonAgricultural": 127,
+            "unspecified": 19,
+            "withBuildings": 972,
+            "withoutBuildings": 3304
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 1963,
+            "nonAgricultural": 81,
+            "unspecified": 36,
+            "withBuildings": 919,
+            "withoutBuildings": 2824
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 4716,
+            "nonAgricultural": 195,
+            "unspecified": 78,
+            "withBuildings": 1883,
+            "withoutBuildings": 5935
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 4439,
+            "apartments": 2,
+            "nonAgricultural": 208,
+            "unspecified": 45,
+            "withBuildings": 1589,
+            "withoutBuildings": 4981
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 330,
+            "nonAgricultural": 7,
+            "unspecified": 4,
+            "withBuildings": 115,
+            "withoutBuildings": 369
+          }
+        }
+      ]
+    },
+    {
+      "county": "VL",
+      "name": "Vâlcea",
+      "series": [
+        {
+          "year": 2016,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 657,
+            "apartments": 1401,
+            "nonAgricultural": 106,
+            "unspecified": 2131,
+            "withBuildings": 1424,
+            "withoutBuildings": 2116
+          }
+        },
+        {
+          "year": 2017,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 726,
+            "apartments": 1264,
+            "nonAgricultural": 102,
+            "unspecified": 2209,
+            "withBuildings": 1641,
+            "withoutBuildings": 2336
+          }
+        },
+        {
+          "year": 2018,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 687,
+            "nonAgricultural": 77,
+            "unspecified": 20,
+            "withBuildings": 1884,
+            "withoutBuildings": 5853
+          }
+        },
+        {
+          "year": 2019,
+          "monthsReported": 7,
+          "sales": {
+            "agricultural": 393,
+            "nonAgricultural": 52,
+            "unspecified": 4,
+            "withBuildings": 937,
+            "withoutBuildings": 3362
+          }
+        },
+        {
+          "year": 2020,
+          "monthsReported": 8,
+          "sales": {
+            "agricultural": 434,
+            "nonAgricultural": 72,
+            "unspecified": 6,
+            "withBuildings": 856,
+            "withoutBuildings": 2724
+          }
+        },
+        {
+          "year": 2022,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1347,
+            "nonAgricultural": 192,
+            "unspecified": 20,
+            "withBuildings": 1907,
+            "withoutBuildings": 7013
+          }
+        },
+        {
+          "year": 2023,
+          "monthsReported": 11,
+          "sales": {
+            "agricultural": 1109,
+            "nonAgricultural": 162,
+            "unspecified": 45,
+            "withBuildings": 1941,
+            "withoutBuildings": 6343
+          }
+        },
+        {
+          "year": 2024,
+          "monthsReported": 1,
+          "sales": {
+            "agricultural": 103,
+            "nonAgricultural": 14,
+            "withBuildings": 122,
+            "withoutBuildings": 469
+          }
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    {
+      "id": "categoriile-nu-se-aduna",
+      "severity": "blocking",
+      "text": "Cele șase categorii nu sunt o împărțire a aceluiași total și nu se pot aduna. Măsurat pe toate lunile în care apar toate trei, „agricol” plus „neagricol” face 40.8% din „fără construcții”, nu 100%. Sunt două axe de clasificare diferite, publicate una lângă alta; ANCPI nu documentează relația dintre ele.",
+      "affects": [
+        "vanzari-imobile",
+        "transfer-imobiliar"
+      ]
+    },
+    {
+      "id": "lunile-nu-fac-un-an",
+      "severity": "blocking",
+      "text": "Nu există niciun fișier pentru 2015 și niciunul pentru vreo lună din 2021; 2019 are șapte luni, 2020 opt, 2024 una, iar anii cei mai plini au unsprezece. Suma lunilor existente nu este un an. Fiecare rând poartă „monthsReported”, iar „monthsByYear” spune exact ce luni stau în spate.",
+      "affects": [
+        "vanzari-imobile"
+      ]
+    },
+    {
+      "id": "clasificarea-s-a-schimbat-in-2018",
+      "severity": "blocking",
+      "text": "În 2018 ANCPI a schimbat modul de clasificare, iar seria nu este continuă peste acel an. „Apartamente” cade de la 111 028 de vânzări în 2017 la 20 în 2018, „-” de la 103 334 la 1 543, în timp ce „fără construcții” aproape se dublează, de la 212 831 la 392 512. Aceleași dosare, altă etichetă. Suma „cu construcții” plus „fără construcții” acoperă deci aproape tot după 2018 și îi lipsesc vreo 230 000 de vânzări pe an înainte — un preț mediu calculat pe anii 2016 sau 2017 iese cu vreo 40% prea mare. Anii de dinainte de 2018 nu se compară cu cei de după.",
+      "affects": [
+        "vanzari-imobile",
+        "pret-tranzactie"
+      ]
+    },
+    {
+      "id": "numere-nu-valori",
+      "severity": "material",
+      "text": "Sursa numără vânzări, nu bani și nu hectare. Un preț mediu iese doar împărțind valoarea declarată din impozitul pe transfer la numărul de aici, iar cele două nu acoperă exact aceleași tranzacții: impozitul nu se datorează la moșteniri, donații între rude și reconstituiri de proprietate, care totuși se înregistrează în cartea funciară.",
+      "affects": [
+        "vanzari-imobile",
+        "transfer-imobiliar"
+      ]
+    },
+    {
+      "id": "categoria-fara-nume",
+      "severity": "material",
+      "text": "O cincime din rânduri sunt depuse sub tipul „-”, pe care ANCPI nu îl explică. Nu este un total: în februarie 2016 Alba a depus 184 sub „-” și 213 sub „cu construcții”. Este păstrat ca „unspecified”, cu numele care nu pretinde nimic.",
+      "affects": [
+        "vanzari-imobile"
+      ]
+    },
+    {
+      "id": "judetul-scris-in-cinci-feluri",
+      "severity": "note",
+      "text": "Numele județului apare în cinci ortografii peste nouă ani — cu cratimă, cu linie de dialog, cu diacritice pierdute și cu spațiu neîntrerupt. Sunt reduse la litere înainte de potrivire, iar un nume care nu se potrivește oprește importul în loc să devină al patruzeci și treilea județ.",
+      "affects": [
+        "vanzari-imobile"
+      ]
+    }
+  ]
+}

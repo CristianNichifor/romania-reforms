@@ -1,0 +1,805 @@
+{
+  "$schema": "../schema/pret-tranzactie.schema.json",
+  "id": "pret-tranzactie-2023",
+  "title": "Prețul mediu declarat pe tranzacție imobiliară, pe județe, 2023",
+  "publisher": "romania-reforms",
+  "period": "2023",
+  "currency": "RON",
+  "provenance": {
+    "source": "transfer-imobiliar-si-vanzari-imobile",
+    "locator": "impozitul art. 111 din execuția bugetară 2023 pe UAT-uri (https://api.transparenta.eu/graphql, cod funcțional 03.18.00), agregat pe județ; numărul vânzărilor din vanzari-imobile-2024, ANCPI",
+    "confidence": "derived",
+    "note": "Impozitul este preluat ca atare; împărțirea la partaj, la cotă și la numărul de vânzări se face aici. Numărul vânzărilor este ridicat la douăsprezece luni înainte de împărțire, pentru că execuția bugetară este pe an întreg iar ANCPI publică mai puține luni."
+  },
+  "assumptions": {
+    "localShare": 0.5,
+    "rateMinPercent": 1.0,
+    "rateMaxPercent": 3.0,
+    "minMonths": 9,
+    "minYear": 2018,
+    "minSalesPer1000": 4.0,
+    "salesCounted": "withBuildings + withoutBuildings",
+    "note": "Se numără vânzările cu și fără construcții, nu și apartamentele — care sunt o a doua axă de clasificare a acelorași dosare, nu o categorie în plus. „agricol” și „neagricol” sunt lăsate deoparte din același motiv."
+  },
+  "excluded": [
+    {
+      "siruta": "179187",
+      "name": "SECTORUL 5 AL MUNICIPIULUI BUCURESTI",
+      "reportedLocalTaxRon": 631742249.25,
+      "perInhabitantRon": 2636.58,
+      "timesMedian": 342.1
+    }
+  ],
+  "droppedCounties": [
+    {
+      "county": "B",
+      "name": "București",
+      "reason": "numaratorul-e-incomplet",
+      "detail": "o primărie din județ a fost pusă în carantină, deci impozitul județului nu este întreg"
+    },
+    {
+      "county": "OT",
+      "name": "Olt",
+      "reason": "prea-putine-vanzari-raportate",
+      "detail": "2.2 vânzări la mia de locuitori, sub pragul de 4.0; numitorul nu descrie piața județului"
+    },
+    {
+      "county": "TR",
+      "name": "Teleorman",
+      "reason": "prea-putine-vanzari-raportate",
+      "detail": "2.6 vânzări la mia de locuitori, sub pragul de 4.0; numitorul nu descrie piața județului"
+    }
+  ],
+  "summary": {
+    "year": 2023,
+    "counties": 39,
+    "countiesDropped": 3,
+    "medianPricePerSaleRonAtOnePercent": 106365.38,
+    "dearest": {
+      "county": "TM",
+      "ron": 219770.7
+    },
+    "cheapest": {
+      "county": "MM",
+      "ron": 44858.97
+    }
+  },
+  "counties": [
+    {
+      "county": "AB",
+      "name": "Alba",
+      "localTaxRon": 5811576.59,
+      "monthsReported": 11,
+      "salesReported": 6881,
+      "salesAnnualised": 7507,
+      "bareLandShare": 0.7269,
+      "salesPer1000": 11.52,
+      "declaredValueRon": {
+        "low": 387438439.33,
+        "high": 1162315318.0
+      },
+      "pricePerSaleRon": {
+        "low": 51613.41,
+        "high": 154840.24
+      }
+    },
+    {
+      "county": "AR",
+      "name": "Arad",
+      "localTaxRon": 10329105.97,
+      "monthsReported": 11,
+      "salesReported": 10742,
+      "salesAnnualised": 11719,
+      "bareLandShare": 0.6909,
+      "salesPer1000": 14.29,
+      "declaredValueRon": {
+        "low": 688607064.67,
+        "high": 2065821194.0
+      },
+      "pricePerSaleRon": {
+        "low": 58762.16,
+        "high": 176286.49
+      }
+    },
+    {
+      "county": "AG",
+      "name": "Argeș",
+      "localTaxRon": 6181835.28,
+      "monthsReported": 11,
+      "salesReported": 10239,
+      "salesAnnualised": 11170,
+      "bareLandShare": 0.7729,
+      "salesPer1000": 9.8,
+      "declaredValueRon": {
+        "low": 412122352.0,
+        "high": 1236367056.0
+      },
+      "pricePerSaleRon": {
+        "low": 36896.07,
+        "high": 110688.2
+      }
+    },
+    {
+      "county": "BC",
+      "name": "Bacău",
+      "localTaxRon": 6533200.17,
+      "monthsReported": 11,
+      "salesReported": 13350,
+      "salesAnnualised": 14564,
+      "bareLandShare": 0.7712,
+      "salesPer1000": 12.11,
+      "declaredValueRon": {
+        "low": 435546678.0,
+        "high": 1306640034.0
+      },
+      "pricePerSaleRon": {
+        "low": 29906.45,
+        "high": 89719.35
+      }
+    },
+    {
+      "county": "BH",
+      "name": "Bihor",
+      "localTaxRon": 12558262.35,
+      "monthsReported": 11,
+      "salesReported": 16688,
+      "salesAnnualised": 18205,
+      "bareLandShare": 0.703,
+      "salesPer1000": 16.51,
+      "declaredValueRon": {
+        "low": 837217490.0,
+        "high": 2511652470.0
+      },
+      "pricePerSaleRon": {
+        "low": 45988.1,
+        "high": 137964.29
+      }
+    },
+    {
+      "county": "BN",
+      "name": "Bistrița-Năsăud",
+      "localTaxRon": 3927442.0,
+      "monthsReported": 11,
+      "salesReported": 6820,
+      "salesAnnualised": 7440,
+      "bareLandShare": 0.7116,
+      "salesPer1000": 12.57,
+      "declaredValueRon": {
+        "low": 261829466.67,
+        "high": 785488400.0
+      },
+      "pricePerSaleRon": {
+        "low": 35192.13,
+        "high": 105576.4
+      }
+    },
+    {
+      "county": "BT",
+      "name": "Botoșani",
+      "localTaxRon": 2706083.33,
+      "monthsReported": 11,
+      "salesReported": 8275,
+      "salesAnnualised": 9027,
+      "bareLandShare": 0.7635,
+      "salesPer1000": 11.49,
+      "declaredValueRon": {
+        "low": 180405555.33,
+        "high": 541216666.0
+      },
+      "pricePerSaleRon": {
+        "low": 19984.5,
+        "high": 59953.51
+      }
+    },
+    {
+      "county": "BV",
+      "name": "Brașov",
+      "localTaxRon": 18944448.12,
+      "monthsReported": 11,
+      "salesReported": 32653,
+      "salesAnnualised": 35621,
+      "bareLandShare": 0.6802,
+      "salesPer1000": 32.58,
+      "declaredValueRon": {
+        "low": 1262963208.0,
+        "high": 3788889624.0
+      },
+      "pricePerSaleRon": {
+        "low": 35455.13,
+        "high": 106365.38
+      }
+    },
+    {
+      "county": "BR",
+      "name": "Brăila",
+      "localTaxRon": 3594202.0,
+      "monthsReported": 11,
+      "salesReported": 5214,
+      "salesAnnualised": 5688,
+      "bareLandShare": 0.7647,
+      "salesPer1000": 10.1,
+      "declaredValueRon": {
+        "low": 239613466.67,
+        "high": 718840400.0
+      },
+      "pricePerSaleRon": {
+        "low": 42126.14,
+        "high": 126378.41
+      }
+    },
+    {
+      "county": "BZ",
+      "name": "Buzău",
+      "localTaxRon": 4954629.37,
+      "monthsReported": 11,
+      "salesReported": 10204,
+      "salesAnnualised": 11132,
+      "bareLandShare": 0.7023,
+      "salesPer1000": 13.74,
+      "declaredValueRon": {
+        "low": 330308624.67,
+        "high": 990925874.0
+      },
+      "pricePerSaleRon": {
+        "low": 29672.96,
+        "high": 89018.89
+      }
+    },
+    {
+      "county": "CS",
+      "name": "Caraș-Severin",
+      "localTaxRon": 2654263.0,
+      "monthsReported": 11,
+      "salesReported": 3760,
+      "salesAnnualised": 4102,
+      "bareLandShare": 0.742,
+      "salesPer1000": 8.32,
+      "declaredValueRon": {
+        "low": 176950866.67,
+        "high": 530852600.0
+      },
+      "pricePerSaleRon": {
+        "low": 43139.62,
+        "high": 129418.85
+      }
+    },
+    {
+      "county": "CJ",
+      "name": "Cluj",
+      "localTaxRon": 31458594.05,
+      "monthsReported": 11,
+      "salesReported": 26894,
+      "salesAnnualised": 29339,
+      "bareLandShare": 0.6683,
+      "salesPer1000": 21.6,
+      "declaredValueRon": {
+        "low": 2097239603.33,
+        "high": 6291718810.0
+      },
+      "pricePerSaleRon": {
+        "low": 71483.22,
+        "high": 214449.65
+      }
+    },
+    {
+      "county": "CT",
+      "name": "Constanța",
+      "localTaxRon": 19317189.64,
+      "monthsReported": 11,
+      "salesReported": 24832,
+      "salesAnnualised": 27089,
+      "bareLandShare": 0.6976,
+      "salesPer1000": 20.65,
+      "declaredValueRon": {
+        "low": 1287812642.67,
+        "high": 3863437928.0
+      },
+      "pricePerSaleRon": {
+        "low": 47539.26,
+        "high": 142617.78
+      }
+    },
+    {
+      "county": "CV",
+      "name": "Covasna",
+      "localTaxRon": 2434339.28,
+      "monthsReported": 11,
+      "salesReported": 3948,
+      "salesAnnualised": 4307,
+      "bareLandShare": 0.7634,
+      "salesPer1000": 10.77,
+      "declaredValueRon": {
+        "low": 162289285.33,
+        "high": 486867856.0
+      },
+      "pricePerSaleRon": {
+        "low": 37681.15,
+        "high": 113043.45
+      }
+    },
+    {
+      "county": "CL",
+      "name": "Călărași",
+      "localTaxRon": 3175455.44,
+      "monthsReported": 11,
+      "salesReported": 4440,
+      "salesAnnualised": 4844,
+      "bareLandShare": 0.6953,
+      "salesPer1000": 8.54,
+      "declaredValueRon": {
+        "low": 211697029.33,
+        "high": 635091088.0
+      },
+      "pricePerSaleRon": {
+        "low": 43706.22,
+        "high": 131118.66
+      }
+    },
+    {
+      "county": "DJ",
+      "name": "Dolj",
+      "localTaxRon": 14034431.81,
+      "monthsReported": 11,
+      "salesReported": 11901,
+      "salesAnnualised": 12983,
+      "bareLandShare": 0.7537,
+      "salesPer1000": 10.83,
+      "declaredValueRon": {
+        "low": 935628787.33,
+        "high": 2806886362.0
+      },
+      "pricePerSaleRon": {
+        "low": 72066.19,
+        "high": 216198.57
+      }
+    },
+    {
+      "county": "DB",
+      "name": "Dâmbovița",
+      "localTaxRon": 4300083.67,
+      "monthsReported": 11,
+      "salesReported": 13877,
+      "salesAnnualised": 15139,
+      "bareLandShare": 0.7388,
+      "salesPer1000": 15.79,
+      "declaredValueRon": {
+        "low": 286672244.67,
+        "high": 860016734.0
+      },
+      "pricePerSaleRon": {
+        "low": 18936.58,
+        "high": 56809.73
+      }
+    },
+    {
+      "county": "GL",
+      "name": "Galați",
+      "localTaxRon": 7830626.5,
+      "monthsReported": 11,
+      "salesReported": 10411,
+      "salesAnnualised": 11357,
+      "bareLandShare": 0.7703,
+      "salesPer1000": 11.43,
+      "declaredValueRon": {
+        "low": 522041766.67,
+        "high": 1566125300.0
+      },
+      "pricePerSaleRon": {
+        "low": 45964.68,
+        "high": 137894.04
+      }
+    },
+    {
+      "county": "GR",
+      "name": "Giurgiu",
+      "localTaxRon": 2208387.96,
+      "monthsReported": 11,
+      "salesReported": 6004,
+      "salesAnnualised": 6550,
+      "bareLandShare": 0.7615,
+      "salesPer1000": 12.5,
+      "declaredValueRon": {
+        "low": 147225864.0,
+        "high": 441677592.0
+      },
+      "pricePerSaleRon": {
+        "low": 22477.86,
+        "high": 67433.57
+      }
+    },
+    {
+      "county": "GJ",
+      "name": "Gorj",
+      "localTaxRon": 2892243.5,
+      "monthsReported": 11,
+      "salesReported": 6133,
+      "salesAnnualised": 6691,
+      "bareLandShare": 0.7822,
+      "salesPer1000": 10.63,
+      "declaredValueRon": {
+        "low": 192816233.33,
+        "high": 578448700.0
+      },
+      "pricePerSaleRon": {
+        "low": 28819.21,
+        "high": 86457.63
+      }
+    },
+    {
+      "county": "HR",
+      "name": "Harghita",
+      "localTaxRon": 4736934.88,
+      "monthsReported": 11,
+      "salesReported": 11081,
+      "salesAnnualised": 12088,
+      "bareLandShare": 0.7682,
+      "salesPer1000": 20.7,
+      "declaredValueRon": {
+        "low": 315795658.67,
+        "high": 947386976.0
+      },
+      "pricePerSaleRon": {
+        "low": 26123.94,
+        "high": 78371.81
+      }
+    },
+    {
+      "county": "HD",
+      "name": "Hunedoara",
+      "localTaxRon": 4701590.92,
+      "monthsReported": 11,
+      "salesReported": 8537,
+      "salesAnnualised": 9313,
+      "bareLandShare": 0.8075,
+      "salesPer1000": 12.88,
+      "declaredValueRon": {
+        "low": 313439394.67,
+        "high": 940318184.0
+      },
+      "pricePerSaleRon": {
+        "low": 33655.79,
+        "high": 100967.36
+      }
+    },
+    {
+      "county": "IL",
+      "name": "Ialomița",
+      "localTaxRon": 3110290.82,
+      "monthsReported": 11,
+      "salesReported": 3154,
+      "salesAnnualised": 3441,
+      "bareLandShare": 0.7042,
+      "salesPer1000": 6.86,
+      "declaredValueRon": {
+        "low": 207352721.33,
+        "high": 622058164.0
+      },
+      "pricePerSaleRon": {
+        "low": 60264.21,
+        "high": 180792.64
+      }
+    },
+    {
+      "county": "IS",
+      "name": "Iași",
+      "localTaxRon": 14375840.3,
+      "monthsReported": 11,
+      "salesReported": 23962,
+      "salesAnnualised": 26140,
+      "bareLandShare": 0.7744,
+      "salesPer1000": 17.18,
+      "declaredValueRon": {
+        "low": 958389353.33,
+        "high": 2875168060.0
+      },
+      "pricePerSaleRon": {
+        "low": 36663.2,
+        "high": 109989.6
+      }
+    },
+    {
+      "county": "IF",
+      "name": "Ilfov",
+      "localTaxRon": 18436304.84,
+      "monthsReported": 11,
+      "salesReported": 40408,
+      "salesAnnualised": 44081,
+      "bareLandShare": 0.7553,
+      "salesPer1000": 40.61,
+      "declaredValueRon": {
+        "low": 1229086989.33,
+        "high": 3687260968.0
+      },
+      "pricePerSaleRon": {
+        "low": 27882.18,
+        "high": 83646.54
+      }
+    },
+    {
+      "county": "MM",
+      "name": "Maramureș",
+      "localTaxRon": 2158858.5,
+      "monthsReported": 11,
+      "salesReported": 8823,
+      "salesAnnualised": 9625,
+      "bareLandShare": 0.773,
+      "salesPer1000": 10.64,
+      "declaredValueRon": {
+        "low": 143923900.0,
+        "high": 431771700.0
+      },
+      "pricePerSaleRon": {
+        "low": 14952.99,
+        "high": 44858.97
+      }
+    },
+    {
+      "county": "MH",
+      "name": "Mehedinți",
+      "localTaxRon": 2248417.0,
+      "monthsReported": 11,
+      "salesReported": 7523,
+      "salesAnnualised": 8207,
+      "bareLandShare": 0.7747,
+      "salesPer1000": 17.51,
+      "declaredValueRon": {
+        "low": 149894466.67,
+        "high": 449683400.0
+      },
+      "pricePerSaleRon": {
+        "low": 18264.42,
+        "high": 54793.27
+      }
+    },
+    {
+      "county": "MS",
+      "name": "Mureș",
+      "localTaxRon": 11608343.5,
+      "monthsReported": 11,
+      "salesReported": 13449,
+      "salesAnnualised": 14672,
+      "bareLandShare": 0.7093,
+      "salesPer1000": 14.16,
+      "declaredValueRon": {
+        "low": 773889566.67,
+        "high": 2321668700.0
+      },
+      "pricePerSaleRon": {
+        "low": 52747.32,
+        "high": 158241.97
+      }
+    },
+    {
+      "county": "NT",
+      "name": "Neamț",
+      "localTaxRon": 5574803.5,
+      "monthsReported": 11,
+      "salesReported": 11419,
+      "salesAnnualised": 12457,
+      "bareLandShare": 0.7755,
+      "salesPer1000": 13.71,
+      "declaredValueRon": {
+        "low": 371653566.67,
+        "high": 1114960700.0
+      },
+      "pricePerSaleRon": {
+        "low": 29834.7,
+        "high": 89504.1
+      }
+    },
+    {
+      "county": "PH",
+      "name": "Prahova",
+      "localTaxRon": 10043689.53,
+      "monthsReported": 11,
+      "salesReported": 18814,
+      "salesAnnualised": 20524,
+      "bareLandShare": 0.6868,
+      "salesPer1000": 14.76,
+      "declaredValueRon": {
+        "low": 669579302.0,
+        "high": 2008737906.0
+      },
+      "pricePerSaleRon": {
+        "low": 32623.63,
+        "high": 97870.9
+      }
+    },
+    {
+      "county": "SM",
+      "name": "Satu Mare",
+      "localTaxRon": 6331054.08,
+      "monthsReported": 11,
+      "salesReported": 8208,
+      "salesAnnualised": 8954,
+      "bareLandShare": 0.7205,
+      "salesPer1000": 13.54,
+      "declaredValueRon": {
+        "low": 422070272.0,
+        "high": 1266210816.0
+      },
+      "pricePerSaleRon": {
+        "low": 47136.67,
+        "high": 141410.0
+      }
+    },
+    {
+      "county": "SB",
+      "name": "Sibiu",
+      "localTaxRon": 9740345.5,
+      "monthsReported": 11,
+      "salesReported": 9021,
+      "salesAnnualised": 9841,
+      "bareLandShare": 0.7127,
+      "salesPer1000": 12.67,
+      "declaredValueRon": {
+        "low": 649356366.67,
+        "high": 1948069100.0
+      },
+      "pricePerSaleRon": {
+        "low": 65984.19,
+        "high": 197952.56
+      }
+    },
+    {
+      "county": "SV",
+      "name": "Suceava",
+      "localTaxRon": 4954688.26,
+      "monthsReported": 11,
+      "salesReported": 20002,
+      "salesAnnualised": 21820,
+      "bareLandShare": 0.7819,
+      "salesPer1000": 16.98,
+      "declaredValueRon": {
+        "low": 330312550.67,
+        "high": 990937652.0
+      },
+      "pricePerSaleRon": {
+        "low": 15137.81,
+        "high": 45413.43
+      }
+    },
+    {
+      "county": "SJ",
+      "name": "Sălaj",
+      "localTaxRon": 2882268.5,
+      "monthsReported": 11,
+      "salesReported": 5820,
+      "salesAnnualised": 6349,
+      "bareLandShare": 0.7576,
+      "salesPer1000": 14.96,
+      "declaredValueRon": {
+        "low": 192151233.33,
+        "high": 576453700.0
+      },
+      "pricePerSaleRon": {
+        "low": 30264.37,
+        "high": 90793.11
+      }
+    },
+    {
+      "county": "TM",
+      "name": "Timiș",
+      "localTaxRon": 29661851.36,
+      "monthsReported": 11,
+      "salesReported": 24744,
+      "salesAnnualised": 26993,
+      "bareLandShare": 0.6682,
+      "salesPer1000": 20.75,
+      "declaredValueRon": {
+        "low": 1977456757.33,
+        "high": 5932370272.0
+      },
+      "pricePerSaleRon": {
+        "low": 73256.9,
+        "high": 219770.7
+      }
+    },
+    {
+      "county": "TL",
+      "name": "Tulcea",
+      "localTaxRon": 3314378.25,
+      "monthsReported": 11,
+      "salesReported": 4678,
+      "salesAnnualised": 5103,
+      "bareLandShare": 0.7484,
+      "salesPer1000": 13.2,
+      "declaredValueRon": {
+        "low": 220958550.0,
+        "high": 662875650.0
+      },
+      "pricePerSaleRon": {
+        "low": 43297.42,
+        "high": 129892.26
+      }
+    },
+    {
+      "county": "VS",
+      "name": "Vaslui",
+      "localTaxRon": 3015991.04,
+      "monthsReported": 11,
+      "salesReported": 6899,
+      "salesAnnualised": 7526,
+      "bareLandShare": 0.7127,
+      "salesPer1000": 10.04,
+      "declaredValueRon": {
+        "low": 201066069.33,
+        "high": 603198208.0
+      },
+      "pricePerSaleRon": {
+        "low": 26715.55,
+        "high": 80146.64
+      }
+    },
+    {
+      "county": "VN",
+      "name": "Vrancea",
+      "localTaxRon": 3730103.75,
+      "monthsReported": 11,
+      "salesReported": 6570,
+      "salesAnnualised": 7167,
+      "bareLandShare": 0.7581,
+      "salesPer1000": 10.69,
+      "declaredValueRon": {
+        "low": 248673583.33,
+        "high": 746020750.0
+      },
+      "pricePerSaleRon": {
+        "low": 34695.71,
+        "high": 104087.12
+      }
+    },
+    {
+      "county": "VL",
+      "name": "Vâlcea",
+      "localTaxRon": 3579588.59,
+      "monthsReported": 11,
+      "salesReported": 8284,
+      "salesAnnualised": 9037,
+      "bareLandShare": 0.7657,
+      "salesPer1000": 13.22,
+      "declaredValueRon": {
+        "low": 238639239.33,
+        "high": 715917718.0
+      },
+      "pricePerSaleRon": {
+        "low": 26406.64,
+        "high": 79219.93
+      }
+    }
+  ],
+  "limitations": [
+    {
+      "id": "numaratoarea-e-mai-larga-decat-impozitul",
+      "severity": "blocking",
+      "text": "ANCPI numără toate vânzările înregistrate, iar impozitul nu se datorează la moșteniri, donații între rude până la gradul al III-lea și reconstituiri de proprietate (art. 111 alin. (2)). Numitorul este deci mai mare decât populația impozitată, iar prețul mediu de aici iese prea mic. Direcția se cunoaște, mărimea nu.",
+      "affects": [
+        "pret-tranzactie"
+      ]
+    },
+    {
+      "id": "cota-efectiva-nu-se-publica",
+      "severity": "blocking",
+      "text": "Cota este 1% peste trei ani de deținere și 3% sub, iar amestecul nu se publică. Fiecare preț este deci un interval de la simplu la triplu, nu o cifră. Capătul „high” este cel la 1%, adică cel probabil mai apropiat de adevăr acolo unde predomină revânzările.",
+      "affects": [
+        "pret-tranzactie"
+      ]
+    },
+    {
+      "id": "lunile-ridicate-la-douasprezece",
+      "severity": "material",
+      "text": "Numărul vânzărilor este înmulțit cu 12 împărțit la lunile raportate, ceea ce presupune că vânzările se împart egal peste an. Nu se împart: primăvara și toamna sunt mai grele. „salesReported” și „monthsReported” sunt publicate alături, pentru cine vrea să refacă altfel.",
+      "affects": [
+        "pret-tranzactie"
+      ]
+    },
+    {
+      "id": "pe-tranzactie-nu-pe-metru",
+      "severity": "material",
+      "text": "Este un preț pe tranzacție, nu pe metru pătrat: niciuna dintre cele două surse nu are suprafețe. Un județ care vinde apartamente și unul care vinde tarlale ies diferit pentru motive care nu au legătură cu prețul pământului. Cota vânzărilor fără construcții însoțește fiecare rând tocmai ca diferența să se vadă.",
+      "affects": [
+        "pret-tranzactie"
+      ]
+    }
+  ]
+}
