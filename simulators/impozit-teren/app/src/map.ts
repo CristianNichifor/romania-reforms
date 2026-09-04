@@ -30,7 +30,12 @@
  * resolution and nowhere finer; painting it commune by commune would dress one coefficient up
  * as local knowledge. The mosaic and the flat shape are the difference in evidence, drawn.
  */
-import { Map as MapLibre, setWorkerUrl, type ExpressionSpecification } from 'maplibre-gl';
+import {
+  Map as MapLibre,
+  Popup,
+  setWorkerUrl,
+  type ExpressionSpecification,
+} from 'maplibre-gl';
 // maplibre 6 does its geometry work off the main thread, and it finds that worker by resolving
 // `./maplibre-gl-worker.mjs` against its own `import.meta.url`. After bundling that resolves to
 // a file next to our own bundle, which nobody ever put there — so the worker 404s, no source
@@ -135,6 +140,22 @@ export class ValueMap {
   private metric: Metric = 'perHa';
   /** What each commune spent last year, by SIRUTA. Empty until the execution file lands. */
   private spending = new Map<string, number>();
+  /**
+   * What to say about a commune when the pointer is over it.
+   *
+   * The colours have always known these numbers — they are the feature state the fill reads —
+   * but a reader could only see the scale, not the place. Which meant the map could show that
+   * somewhere is dark green and never say where, or how much, or out of what.
+   */
+  private detail = new Map<number, {
+    name: string;
+    county: string;
+    perHa: number;
+    total: number;
+    lvt: number;
+    selfFunding?: number;
+  }>();
+  private hover: Popup | null = null;
 
   constructor(container: string, base: string) {
     this.map = new MapLibre({
@@ -228,6 +249,40 @@ export class ValueMap {
         source: 'counties',
         paint: { 'line-color': '#8a949e', 'line-width': 0.8 },
       });
+      this.hover = new Popup({
+        closeButton: false,
+        closeOnClick: false,
+        className: 'uat-tip',
+        maxWidth: '260px',
+      });
+      this.map.on('mousemove', 'uat-fill', (event) => {
+        const feature = event.features?.[0];
+        const found = feature === undefined ? undefined : this.detail.get(Number(feature.id));
+        if (!found) {
+          this.map.getCanvas().style.cursor = '';
+          this.hover?.remove();
+          return;
+        }
+        this.map.getCanvas().style.cursor = 'pointer';
+        this.hover
+          ?.setLngLat(event.lngLat)
+          .setHTML(
+            `<strong>${found.name}</strong><span class="tip-county">${found.county}</span>` +
+              `<dl>` +
+              `<dt>lei / ha</dt><dd>${money(found.perHa)}</dd>` +
+              `<dt>valoarea terenului</dt><dd>${money(found.total)} lei</dd>` +
+              `<dt>impozit pe valoare</dt><dd>${money(found.lvt)} lei</dd>` +
+              (found.selfFunding === undefined
+                ? '<dt>din buget</dt><dd>—</dd>'
+                : `<dt>din buget</dt><dd>${(100 * found.selfFunding).toFixed(1)}%</dd>`) +
+              `</dl>`,
+          )
+          .addTo(this.map);
+      });
+      this.map.on('mouseleave', 'uat-fill', () => {
+        this.map.getCanvas().style.cursor = '';
+        this.hover?.remove();
+      });
       this.ready = true;
       this.paintEstimates();
       this.repaint();
@@ -320,7 +375,7 @@ export class ValueMap {
   private repaint(): void {
     if (!this.current) return;
     const { settings, code } = this.current;
-    for (const [, data] of this.counties) {
+    for (const [county, data] of this.counties) {
       // Each county at its own rate and its own measured yields. They differ — the farmland
       // yield is regional and the exchange rate is stamped per build — and borrowing the
       // selected county's would be an error invisible on a map.
@@ -354,10 +409,44 @@ export class ValueMap {
             ...(selfFunding === undefined ? {} : { autofinantare: selfFunding }),
           },
         );
+        // The same numbers the colour is computed from, kept addressable by feature id so the
+        // tooltip cannot drift from the fill. Recomputed on every repaint, which means it
+        // follows the rate slider rather than freezing at whatever it was on load.
+        this.detail.set(Number(row.siruta), {
+          name: row.name,
+          county: COUNTY_LABEL[county] ?? county.toUpperCase(),
+          perHa: row.landValueRon / hectares,
+          total: row.landValueRon,
+          lvt: row.lvtRon,
+          ...(selfFunding === undefined ? {} : { selfFunding }),
+        });
       }
     }
   }
 }
+
+/** Compact lei, matching the page's own formatting rather than inventing a second one. */
+function money(value: number): string {
+  const format = new Intl.NumberFormat('ro-RO', { maximumFractionDigits: 0 });
+  const two = new Intl.NumberFormat('ro-RO', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+  if (Math.abs(value) >= 1e9) return `${two.format(value / 1e9)} mld`;
+  if (Math.abs(value) >= 1e6) return `${two.format(value / 1e6)} mil`;
+  return format.format(value);
+}
+
+const COUNTY_LABEL: Record<string, string> = {
+  ab: 'Alba', ag: 'Argeș', ar: 'Arad', b: 'București', bc: 'Bacău', bh: 'Bihor',
+  bn: 'Bistrița-Năsăud', br: 'Brăila', bt: 'Botoșani', bv: 'Brașov', bz: 'Buzău',
+  cj: 'Cluj', cl: 'Călărași', cs: 'Caraș-Severin', ct: 'Constanța', cv: 'Covasna',
+  db: 'Dâmbovița', dj: 'Dolj', gj: 'Gorj', gl: 'Galați', gr: 'Giurgiu', hd: 'Hunedoara',
+  hr: 'Harghita', if: 'Ilfov', il: 'Ialomița', is: 'Iași', mh: 'Mehedinți', mm: 'Maramureș',
+  ms: 'Mureș', nt: 'Neamț', ot: 'Olt', ph: 'Prahova', sb: 'Sibiu', sj: 'Sălaj',
+  sm: 'Satu Mare', sv: 'Suceava', tl: 'Tulcea', tm: 'Timiș', tr: 'Teleorman',
+  vl: 'Vâlcea', vn: 'Vrancea', vs: 'Vaslui',
+};
 
 function totalHa(localities: Locality[], siruta: string): number {
   const found = localities.find((l) => l.siruta === siruta);

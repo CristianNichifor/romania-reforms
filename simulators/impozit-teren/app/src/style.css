@@ -547,3 +547,100 @@ footer {
   line-height: 1.5;
 }
 .bias em { color: var(--muted); font-style: normal; font-size: 0.76rem; }
+
+/* The county band inside the national table. Sticky, because a reader who has scrolled into
+   Suceava's ninety communes should still be able to see that they are in Suceava. */
+#rows tr.county-head th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: color-mix(in srgb, var(--accent) 12%, #0f1418);
+  border-top: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  border-bottom: 1px solid var(--line);
+  color: var(--fg);
+  font-weight: 600;
+  text-align: left;
+  padding: 0.4rem 0.5rem;
+}
+
+#rows tr.county-head th.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  margin: 0.9rem 0 0.2rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.pager button {
+  padding: 0.35rem 0.7rem;
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid var(--line);
+  border-radius: 0.4rem;
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.pager button:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.pager button:disabled {
+  color: var(--muted);
+  cursor: default;
+  opacity: 0.45;
+}
+
+/* The commune tooltip. maplibre's default popup is a white box with a light arrow, which on
+   this map reads as a hole punched in the country. */
+.uat-tip .maplibregl-popup-content {
+  background: #0f1418;
+  border: 1px solid var(--line);
+  border-radius: 0.45rem;
+  padding: 0.55rem 0.7rem;
+  box-shadow: 0 6px 24px rgb(0 0 0 / 45%);
+  color: var(--fg);
+  font-size: 0.78rem;
+}
+
+.uat-tip .maplibregl-popup-tip {
+  border-top-color: var(--line);
+  border-bottom-color: var(--line);
+}
+
+.uat-tip strong {
+  display: block;
+  font-size: 0.86rem;
+}
+
+.uat-tip .tip-county {
+  display: block;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+}
+
+.uat-tip dl {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.1rem 0.8rem;
+  margin: 0;
+}
+
+.uat-tip dt {
+  color: var(--muted);
+}
+
+.uat-tip dd {
+  margin: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
