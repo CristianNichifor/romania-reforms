@@ -1,0 +1,188 @@
+name: Portal snapshot
+
+# A daily snapshot of every case visible on portal.just.ro, kept as a Release asset.
+#
+# This workflow exists because the source is perishable. The portal holds cases that are still
+# live plus those recently closed, and drops them as courts archive them — measured at Tribunalul
+# Timiş, March 2019 has nine cases left and March 2024 has more than a thousand. Nothing recovers
+# a day that was not crawled, so the value of this file is entirely in it running tomorrow as
+# well as today. That is also why it is scheduled rather than triggered by pushes.
+#
+# It runs on GitHub's free tier and is expected to keep doing so: Actions minutes are unmetered
+# for public repositories, and Release assets do not count against the repository size that
+# scripts/check_repo_size.py caps. The parquet is therefore never committed — the same rule
+# data-assets.json already applies to every other derived payload here.
+
+on:
+  schedule:
+    # 03:20 UTC. ECRIS replicates to the portal overnight and the terms put that lag at under
+    # 24 hours, so an early-morning read gets yesterday complete. Deliberately not on the hour:
+    # GitHub queues scheduled jobs from the whole planet at :00 and the delay can run to tens of
+    # minutes, which matters when the window being crawled is defined relative to now.
+    - cron: '20 3 * * *'
+  workflow_dispatch:
+    inputs:
+      since:
+        description: 'Registration-date floor, YYYY-MM-DD (backfill runs set this)'
+        required: false
+        type: string
+
+concurrency:
+  group: portal-snapshot
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330  # under the 6h job ceiling, with room to fail rather than be killed
+    strategy:
+      fail-fast: false
+      # Twelve shards of the 246-court enum, round-robin so each gets a similar mix of sizes.
+      #
+      # Held deliberately low. The concern is not runner minutes, which are free, but that this
+      # is one state-run ASP.NET service with no second endpoint and no published rate limit;
+      # twelve concurrent crawlers plus the script's own half-second delay is roughly six
+      # requests a second nationally, which is a fraction of what the portal's own web UI
+      # generates. Raising this to shorten a backfill is the change most likely to get the
+      # crawler blocked, and a blocked crawler loses every future day, not just this one.
+      max-parallel: 12
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      # A default of two months back rather than one day. The crawl filters on registration
+      # date, but a case's termene and solutions change long after it is registered, so a
+      # one-day window would only ever see newly-filed cases and would never observe an
+      # outcome. Two months of overlap is re-fetched daily and deduplicated downstream; the
+      # cost is bandwidth, and the alternative is a series that records filings and nothing else.
+      - name: Crawl
+        env:
+          PORTAL_HASH_SALT: ${{ secrets.PORTAL_HASH_SALT }}
+        run: |
+          if [ -z "$PORTAL_HASH_SALT" ]; then
+            echo "PORTAL_HASH_SALT secret is not set; refusing to run." >&2
+            echo "Natural-person names are hashed with it. Without it the crawl would either" >&2
+            echo "publish names or mint identifiers that change every night." >&2
+            exit 1
+          fi
+          since="${{ inputs.since }}"
+          if [ -z "$since" ]; then
+            since=$(date -u -d '2 months ago' +%Y-%m-%d)
+          fi
+          echo "Crawling from $since, shard ${{ matrix.shard }} of 12"
+          # The importer exits 1 when any court came back with a failed or irreducibly truncated
+          # window, and still writes its parquet. That is a partial snapshot, which is worth
+          # keeping — so the exit code is captured for the summary rather than failing the step
+          # and discarding the upload. The coverage JSON beside the data says what is missing.
+          # --no-summaries is not optional for anything published.
+          #
+          # The structured fields are anonymised by construction: a party is either a legal
+          # person kept under its own name or a natural person reduced to a hash. solutieSumar
+          # is not, because it is prose a clerk typed, and the prose names people. Measured over
+          # 1,480 non-criminal summaries from one month of three courts, 3.6% contain a
+          # name-shaped string that the party classifier reads as a natural person — "POPA
+          # COSMIN", "VOIE JEAN EMANUEL". Dropping the criminal cases does not fix this; those
+          # were already excluded from the count.
+          #
+          # So the daily public artefact carries solutie (the disposition type, a controlled
+          # vocabulary) and not solutieSumar. Everything the workload statistics need survives:
+          # the dates, the panel, the outcome type, the appeal. Running without this flag is for
+          # local analysis on a machine that does not publish, and it is why the flag exists
+          # rather than the field simply being deleted.
+          set +e
+          uv run --with pyarrow python simulators/justitie/scripts/import_portal.py \
+            --all --since "$since" --no-summaries \
+            --shard ${{ matrix.shard }} --shards 12 \
+            --out out/
+          echo "IMPORT_EXIT=$?" >> "$GITHUB_ENV"
+          set -e
+
+      - name: Report coverage
+        run: |
+          {
+            echo "### Shard ${{ matrix.shard }}"
+            if [ "${IMPORT_EXIT:-0}" != "0" ]; then
+              echo ':warning: **Incomplete** — some windows failed or stayed truncated.'
+            fi
+            echo '```json'
+            cat out/coverage-*.json
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: portal-shard-${{ matrix.shard }}
+          path: out/
+          retention-days: 7
+
+  publish:
+    needs: crawl
+    # `always()` because a shard that came back incomplete still produced data worth keeping,
+    # and because losing a day to one court's outage is exactly the loss this cannot undo.
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: portal-shard-*
+          merge-multiple: true
+          path: out/
+
+      - name: Summarise the day
+        id: day
+        run: |
+          stamp=$(date -u +%Y-%m-%d)
+          echo "stamp=$stamp" >> "$GITHUB_OUTPUT"
+          shards=$(ls out/coverage-*.json 2>/dev/null | wc -l)
+          echo "Collected $shards of 12 shards"
+          if [ "$shards" -eq 0 ]; then
+            echo "No shard produced output; nothing to publish." >&2
+            exit 1
+          fi
+          # One combined report so a reader does not have to open twelve files to learn whether
+          # the day is usable. Written before the upload so it ships with the data it describes.
+          python3 - "$shards" <<'PY' > out/coverage.json
+          import glob, json, sys
+          parts = [json.load(open(p, encoding='utf-8')) for p in sorted(glob.glob('out/coverage-*.json'))]
+          courts = {}
+          for part in parts:
+              courts.update(part['courts'])
+          print(json.dumps({
+              'crawledAt': max(p['crawledAt'] for p in parts),
+              'shardsCollected': int(sys.argv[1]),
+              'shardsExpected': 12,
+              'complete': int(sys.argv[1]) == 12 and all(p.get('complete') for p in parts),
+              'courtsCrawled': len(courts),
+              'dosare': sum(p['totals']['dosare'] for p in parts),
+              'calls': sum(p['totals']['calls'] for p in parts),
+              'incompleteCourts': [
+                  name for name, entry in courts.items()
+                  if entry.get('failedWindows') or entry.get('irreducibleTruncations')
+              ],
+              'note': parts[0]['note'],
+          }, indent=2, ensure_ascii=False))
+          PY
+          cat out/coverage.json
+
+      # A dated release per day, so the series is addressable and a bad day can be pointed at
+      # rather than silently overwritten. Release assets are free and do not touch the
+      # repository size cap, which is the whole reason the parquet is not committed.
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="portal-${{ steps.day.outputs.stamp }}"
+          gh release create "$tag" \
+            --title "Portal snapshot ${{ steps.day.outputs.stamp }}" \
+            --notes-file out/coverage.json \
+            out/*.parquet out/coverage.json \
+          || gh release upload "$tag" out/*.parquet out/coverage.json --clobber

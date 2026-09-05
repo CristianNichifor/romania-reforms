@@ -55,3 +55,9 @@ simulators/impozit-teren/cache/
 # The Romanian language pack for tesseract, fetched by hand for ocr_cache.py.
 # 2.3 MB of model weights that belong to the tesseract project, not to this repository.
 simulators/impozit-teren/tessdata/
+
+# The daily portal snapshots. Never committed: the tracked tree is capped at 60 MB with under
+# 6 MB spare, and one national crawl is ~250 MB of parquet that grows by a file every night.
+# They are published as Release assets by .github/workflows/portal-snapshot.yml, which is the
+# same rule data-assets.json applies to every other derived payload here.
+simulators/justitie/data/portal/
