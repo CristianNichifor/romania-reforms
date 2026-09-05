@@ -2,7 +2,7 @@
 
     uv run python simulators/justitie/scripts/import_instante.py
 
-Writes simulators/justitie/data/instante-2023.json.
+Writes simulators/justitie/data/instante-<year>.json, one per CSM edition.
 
 The reform paper proposes turning 176 judecatorii and 42 tribunale into 42 consolidated
 tribunale and 15 regional courts of appeal. That is a claim about *sizes*: it says the
@@ -61,6 +61,13 @@ class Edition:
     # without the output looking wrong.
     printed_averages: dict[str, dict[str, int]]
 
+    # Occupied posts across the whole grade, which the report prints in a different chapter from
+    # the annex. Per edition, because it is a fact about one year: hardcoding 2025's figure into
+    # the shared limitation text put "4.319 posturi la 31 decembrie 2025" inside the 2022, 2023
+    # and 2024 files, each of which then cited a headcount from a year it does not describe.
+    # None where it has not been read, and the sentence is then left out rather than guessed.
+    filled_posts: int | None = None
+
     @property
     def source(self) -> str:
         return f"csm-starea-justitiei-{self.period}"
@@ -78,13 +85,38 @@ class Edition:
         return f"https://www.csm1909.ro/files/{self.guid}?download=1"
 
 
+# Every edition the CSM publishes at https://www.csm1909.ro/pagedetails.aspx?pageid=267 —
+# twenty of them, 2005 to 2025, with no 2021. Four are here. The rest are not yet, for reasons
+# worth recording rather than rediscovering: the 2019 link serves a ZIP archive rather than a
+# PDF, and the 2020 annex breaks its rows differently enough that the parser returns names
+# without their numbers. Both are fixable and neither is fixed.
+#
+# Four consecutive years is what makes this a series rather than a snapshot, and the point of a
+# series is that a court which looks small in one year may not be in the next — which is exactly
+# what the `un-singur-an` limitation says a single edition cannot tell you.
 EDITIONS = {
+    "2022": Edition(
+        period="2022",
+        guid="cf25c30d-36b2-470d-841e-c47fec969300",
+        printed_averages={
+            "curte-de-apel": {"perJudge": 667, "perPost": 588},
+            "judecatorie": {"perJudge": 1159, "perPost": 893},
+        },
+    ),
     "2023": Edition(
         period="2023",
         guid="ab8ae9f9-cb62-4a9c-8b56-9932fa016648",
         printed_averages={
             "curte-de-apel": {"perJudge": 651, "perPost": 574},
             "judecatorie": {"perJudge": 1455, "perPost": 998},
+        },
+    ),
+    "2024": Edition(
+        period="2024",
+        guid="f73ab5c2-3ced-4f25-8e2a-7b398a04728b",
+        printed_averages={
+            "curte-de-apel": {"perJudge": 606, "perPost": 559},
+            "judecatorie": {"perJudge": 1515, "perPost": 1167},
         },
     ),
     "2025": Edition(
@@ -94,6 +126,7 @@ EDITIONS = {
             "curte-de-apel": {"perJudge": 606, "perPost": 560},
             "judecatorie": {"perJudge": 1479, "perPost": 1180},
         },
+        filled_posts=4319,
     ),
 }
 LATEST = "2025"
@@ -117,13 +150,18 @@ LATEST = "2025"
 # three digits, which stops a digit inside a name being read as the first column.
 ROW = re.compile(
     r"^\s*(\d{1,3})\s+"
-    r"((?:Judec[ăa]toria|Tribunalul|Curtea de Apel)\s+.+?)\s+"
+    r"((?:Judec[ăa]t?oria|Tribunalul|Curtea de Apel)\s+.+?)\s+"
     r"(\d[\d\s]{2,8})\s+(\d[\d\s]{2,8})\s+"
     r"([\d.,]+)\s+([\d.,]+)"
     r"(?:\s+\D.*)?\s*$"
 )
 
+# "Judecăoria" is the 2024 report's own spelling of row 165, Turnu Măgurele. Listed here as well
+# as in the row patterns because the tier is resolved by exact prefix: without it the row parses,
+# finds no tier, and disappears — which the row-numbering check turns into a refusal to write the
+# whole judecătorie table.
 TIERS = {"Judecatoria": "judecatorie", "Judecătoria": "judecatorie",
+         "Judecăoria": "judecatorie",
          "Tribunalul": "tribunal", "Curtea de Apel": "curte-de-apel"}
 
 def download(edition: Edition) -> Path:
@@ -139,7 +177,12 @@ def download(edition: Edition) -> Path:
 
 
 # A row the PDF broke across lines still starts the same way: rank, then the court type.
-ROW_START = re.compile(r"^\s*\d{1,3}\s+(?:Judec[ăa]toria|Tribunalul|Curtea de Apel)\b")
+# The optional "t" is not tolerance for sloppiness, it is a typo in the source. The 2024 report
+# prints row 165 as "Judecăoria TURNU MĂGURELE", and a pattern that insists on the correct
+# spelling drops that court — which the row-numbering check then catches and turns into a
+# refusal to write the whole tier. Better to read what the report says than to lose a court to
+# its proofreading.
+ROW_START = re.compile(r"^\s*\d{1,3}\s+(?:Judec[ăa]t?oria|Tribunalul|Curtea de Apel)\b")
 
 # How many following lines a row may be stitched from. Three covers the worst case seen —
 # "36 Judecatoria CÂMPULUNG" / "MOLDOVENESC 4612" / "3628" / the two ratios — and bounds the
@@ -335,15 +378,23 @@ def main(argv: list[str] | None = None) -> None:
         print(f"  {tier:14} {len(rows):>4} instante  {volume:>9,} dosare  "
               f"{judges:>7,.0f} judecatori{flag}".replace(",", " "))
 
+    headcount = ""
+    if edition.filled_posts:
+        headcount = (
+            f"; totalul pe grad îl tipărește însă, în alt capitol — "
+            f"{edition.filled_posts:,} posturi ocupate la 31 decembrie {edition.period} "
+            f"(vezi personal-{edition.period})".replace(",", ".")
+        )
+
     document = {
         "$schema": "../schema/courts.schema.json",
-        "id": "instante-2023",
-        "title": "Harta instanțelor și volumul lor de activitate, 2023",
+        "id": f"instante-{edition.period}",
+        "title": f"Harta instanțelor și volumul lor de activitate, {edition.period}",
         "publisher": "Consiliul Superior al Magistraturii",
         "period": edition.period,
         "provenance": {
             "source": edition.source,
-            "locator": "Raport privind starea justiției în anul 2023, Anexa 1",
+            "locator": f"Raport privind starea justiției în anul {edition.period}, Anexa 1",
             "confidence": "verbatim",
         },
         "nationalAverages": {"byTier": averages},
@@ -353,9 +404,8 @@ def main(argv: list[str] | None = None) -> None:
                 "id": "judecatori-derivati",
                 "text": (
                     "Raportul nu tipărește numărul de judecători *pe instanță*, ci "
-                    "încărcătura pe judecător și pe schemă; totalul pe grad îl tipărește însă, "
-                    "în alt capitol — 4.319 posturi ocupate la 31 decembrie 2025 (vezi "
-                    "personal-2025). Numerele pe instanță de aici sunt reconstituite împărțind "
+                    "încărcătura pe judecător și pe schemă" + headcount + ". "
+                    "Numerele pe instanță de aici sunt reconstituite împărțind "
                     "volumul la acele rapoarte. Ce iese e un efectiv *mediu pe an*, nu un cap de om la o "
                     "dată anume: judecătorii vin, pleacă și stau o parte din an, iar CSM "
                     "împarte la o medie. De aceea aproape niciun rezultat nu e număr întreg, "
@@ -371,7 +421,8 @@ def main(argv: list[str] | None = None) -> None:
             {
                 "id": "un-singur-an",
                 "text": (
-                    "Cifrele descriu anul 2023. Volumul unei instanțe variază de la an la an, "
+                    f"Cifrele descriu anul {edition.period}. Volumul unei instanțe variază "
+                    "de la an la an, "
                     "iar o instanță mică într-un an poate fi peste prag în următorul. O "
                     "propunere de comasare construită pe un singur an e mai fragilă decât una "
                     "construită pe o medie multianuală."

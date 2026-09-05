@@ -1,0 +1,183 @@
+/* The statistics page. Separate from style.css, which is written around a full-bleed map and a
+   floating panel; this is a document, and a document reads better in a column. */
+
+:root {
+  --ink: #16181d;
+  --dim: #5c6370;
+  --line: #e2e5ea;
+  --paper: #fbfbfc;
+  --card: #fff;
+  --fill: #3d6ea8;
+  --fill-soft: #b9cde3;
+  --warn: #8a5a00;
+  --warn-bg: #fdf6e6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #e7e9ee;
+    --dim: #9aa3b1;
+    --line: #2b2f37;
+    --paper: #14161a;
+    --card: #191c21;
+    --fill: #6f9fd8;
+    --fill-soft: #33475f;
+    --warn: #e8c37a;
+    --warn-bg: #2a2415;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 16px/1.55 ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+#app {
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem 4rem;
+}
+
+.up {
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  color: var(--dim);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+.up:hover { color: var(--ink); }
+
+.lede h1 { font-size: 2rem; line-height: 1.15; margin: 0 0 0.6rem; }
+.lede p { color: var(--dim); max-width: 46rem; margin: 0 0 0.8rem; }
+
+h2 { font-size: 1.2rem; margin: 0 0 0.35rem; }
+h3 { font-size: 0.95rem; margin: 1.2rem 0 0.5rem; color: var(--dim); font-weight: 600; }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 1.1rem 1.2rem 1.3rem;
+  margin: 1.1rem 0;
+}
+
+.note { color: var(--dim); font-size: 0.88rem; margin: 0 0 0.9rem; max-width: 48rem; }
+
+.warn {
+  background: var(--warn-bg);
+  color: var(--warn);
+  border-left: 3px solid currentColor;
+  padding: 0.55rem 0.8rem;
+  font-size: 0.88rem;
+  border-radius: 0 6px 6px 0;
+  margin: 0.8rem 0 0;
+}
+
+.facts { display: flex; flex-wrap: wrap; gap: 1.6rem; margin-top: 0.6rem; }
+.facts b { display: block; font-size: 1.3rem; font-variant-numeric: tabular-nums; }
+.facts span { color: var(--dim); font-size: 0.82rem; }
+
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 1.6rem; }
+@media (max-width: 42rem) { .two { grid-template-columns: 1fr; } }
+
+/* Bars ------------------------------------------------------------------ */
+
+.bar, .quart {
+  display: grid;
+  grid-template-columns: 12rem 1fr 5rem;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.22rem 0;
+  font-size: 0.87rem;
+}
+.bar .bar-note, .quart .bar-note {
+  grid-column: 2 / -1;
+  color: var(--dim);
+  font-size: 0.78rem;
+  margin-top: -0.15rem;
+}
+.bar.muted { opacity: 0.55; }
+
+.bar-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bar-track { background: var(--line); border-radius: 3px; height: 0.7rem; overflow: hidden; }
+.bar-fill { display: block; height: 100%; background: var(--fill); border-radius: 3px; }
+.bar-value { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Quartile strips -------------------------------------------------------- */
+
+.quart-track { position: relative; height: 0.7rem; background: var(--line); border-radius: 3px; }
+.quart-box {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: var(--fill-soft);
+  border-radius: 3px;
+}
+.quart-mid { position: absolute; top: -2px; width: 2px; height: calc(100% + 4px); background: var(--fill); }
+.quart-none { color: var(--dim); font-size: 0.8rem; }
+
+/* Survival --------------------------------------------------------------- */
+
+.survival { border-top: 1px solid var(--line); padding: 0.75rem 0; }
+.survival:first-of-type { border-top: 0; }
+.survival-head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
+.survival-n { color: var(--dim); font-size: 0.8rem; }
+.survival-body { display: flex; align-items: flex-end; gap: 1.6rem; margin-top: 0.5rem; flex-wrap: wrap; }
+
+.median-value { font-size: 1.35rem; font-variant-numeric: tabular-nums; }
+.median-label { display: block; color: var(--dim); font-size: 0.75rem; }
+
+.marks { display: flex; gap: 0.7rem; align-items: flex-end; }
+.mark { display: flex; flex-direction: column; align-items: center; width: 2.6rem; }
+.mark-bar {
+  width: 100%;
+  height: 2.4rem;
+  background: var(--line);
+  border-radius: 3px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+.mark-bar span { display: block; width: 100%; background: var(--fill); }
+/* "Not observed that long" must not look like "nothing resolved" — an outline, not a full bar. */
+.mark.unknown .mark-value { color: var(--dim); }
+.mark.unknown::before {
+  content: '';
+  width: 100%;
+  height: 2.4rem;
+  border: 1px dashed var(--line);
+  border-radius: 3px;
+}
+.mark-day, .mark-value { font-size: 0.72rem; color: var(--dim); }
+.mark-value { font-variant-numeric: tabular-nums; }
+.followup { color: var(--dim); font-size: 0.78rem; }
+
+/* Limitations ------------------------------------------------------------ */
+
+.limitations details { border-top: 1px solid var(--line); padding: 0.45rem 0; }
+.limitations summary { cursor: pointer; font-size: 0.9rem; }
+.limitations p { color: var(--dim); font-size: 0.86rem; margin: 0.4rem 0 0.2rem; max-width: 48rem; }
+.sev {
+  display: inline-block;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.05rem 0.35rem;
+  border-radius: 3px;
+  margin-right: 0.4rem;
+  background: var(--line);
+  color: var(--dim);
+}
+.lim.blocking .sev { background: #b4342a; color: #fff; }
+.lim.material .sev { background: var(--warn-bg); color: var(--warn); }
+
+footer { color: var(--dim); font-size: 0.8rem; margin-top: 2rem; }
+code { background: var(--line); padding: 0.05rem 0.3rem; border-radius: 3px; font-size: 0.85em; }

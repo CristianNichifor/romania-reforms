@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ro">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <title>Cum lucrează instanțele — reforma justiției</title>
+    <meta
+      name="description"
+      content="Volumul, tipurile de cauze, termenele și durata, măsurate din dosarele pe care instanțele le publică pe portal.just.ro."
+    />
+    <link rel="stylesheet" href="/src/statistici.css" />
+  </head>
+  <body>
+    <main id="app">
+      <a class="up" href="./">← Harta instanțelor</a>
+
+      <header class="lede">
+        <h1>Cum lucrează instanțele</h1>
+        <p>
+          Măsurat din dosarele pe care instanțele le publică ele însele, prin serviciul web al
+          portalului. Unitatea este dosarul, nu media anuală pe instanță — așa că se pot pune
+          întrebări la care rapoartele agregate nu răspund: câte zile trec între două termene,
+          cât se așteaptă până la primul, ce anume judecă de fapt instanțele penale.
+        </p>
+        <p class="warn" id="cohort-note"></p>
+      </header>
+
+      <section id="acoperire" class="card"></section>
+
+      <section class="card">
+        <h2>Volumul, an de an</h2>
+        <p class="note">
+          Din rapoartele anuale ale CSM, nu din portal. Portalul scoate dosarele pe măsură ce
+          instanțele le arhivează, deci anii lui vechi sunt un eșantion de supraviețuire și nu pot
+          arăta o tendință. Rapoartele numără toate dosarele anului, la momentul lui.
+        </p>
+        <div id="trend"></div>
+      </section>
+
+      <section class="card">
+        <h2>Ce judecă instanțele</h2>
+        <div id="tipuri"></div>
+      </section>
+
+      <section class="card">
+        <h2>Cât durează</h2>
+        <p class="note" id="durata-note"></p>
+        <div id="durata"></div>
+      </section>
+
+      <section class="card">
+        <h2>Termenele</h2>
+        <div class="two">
+          <div>
+            <h3>Până la primul termen</h3>
+            <div id="primul"></div>
+          </div>
+          <div>
+            <h3>Între două termene</h3>
+            <div id="intervale"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Ce se întâmplă la termen</h2>
+        <p class="note">
+          Trei lucruri diferite, pe care o singură cifră le-ar amesteca. Amânarea cauzei înseamnă
+          că nu s-a ajuns la ea; amânarea pronunțării înseamnă că instanța a judecat și scrie
+          hotărârea; preschimbarea mută data, adesea înainte ca cineva să se așeze.
+        </p>
+        <div id="amanari"></div>
+      </section>
+
+      <section class="card">
+        <h2>Penal: procedură sau infracțiune</h2>
+        <p class="note" id="penal-note"></p>
+        <div class="two">
+          <div>
+            <h3>Infracțiuni (Codul penal)</h3>
+            <div id="infractiuni"></div>
+          </div>
+          <div>
+            <h3>Pași de procedură</h3>
+            <div id="proceduri"></div>
+          </div>
+        </div>
+        <h3>Legi speciale</h3>
+        <div id="legi"></div>
+      </section>
+
+      <section class="card">
+        <h2>Cine aduce munca</h2>
+        <p class="note">
+          Nu este o listă a celor care folosesc des instanțele, și nu poate fi. Hashul
+          identifică un nume normalizat, nu o persoană — toți cei cu același nume primesc
+          același identificator, fiindcă nu există CNP care să îi despartă. Clasificatorul de
+          părți greșește în siguranță, așa că cele mai mari identități „fizice” sunt de fapt
+          firme pe care nu le-a putut numi. Și a apărea des nu înseamnă a face ceva: pârâții și
+          părțile vătămate apar la fel de des ca reclamanții. Ce rămâne — și rezistă tuturor
+          celor trei obiecții — este forma: cine depune cererile.
+        </p>
+        <div id="concentrare"></div>
+        <div class="two">
+          <div>
+            <h3>Dispute per identitate</h3>
+            <div id="distributie"></div>
+          </div>
+          <div>
+            <h3>Cum stau în dosar</h3>
+            <div id="calitati"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Vechimea dosarelor de pe rol</h2>
+        <div id="vechime"></div>
+      </section>
+
+      <section class="card">
+        <h2>De ce nu se poate citi o tendință din portal</h2>
+        <p class="note">
+          Mediana naivă a duratei, pe anul înregistrării, calculată din dosarele încă vizibile.
+          Urcă abrupt spre trecut. Nicio instanță nu a încetinit atât — este forma a ceea ce s-a
+          arhivat între timp. Este și singura dovadă publică despre ritmul arhivării.
+        </p>
+        <div id="gradient"></div>
+      </section>
+
+      <section class="card limitations">
+        <h2>Ce nu susțin datele</h2>
+        <div id="limitari"></div>
+      </section>
+
+      <footer>
+        <p id="sursa"></p>
+      </footer>
+    </main>
+    <script type="module" src="/src/statistici.ts"></script>
+  </body>
+</html>

@@ -36,10 +36,15 @@ any day not yet crawled is gone for good.
 
 **The service truncates silently at 1000 rows.** The Ministry documents the cap ("lista rezultată
 la o interogare va conţine maxim 1000 dosare") but the response carries no total and no
-continuation token, so a full page is indistinguishable from a coincidentally-exact one. This
-script treats any response of exactly 1000 as truncated and bisects the time window until every
-window comes back short, then records in the report how deep it had to go. A crawl that silently
-lost rows would understate exactly the busiest courts, which are the ones the reform is about.
+continuation token, so a full page is indistinguishable from a coincidentally-exact one, and a
+capped response has to be thrown away rather than partially kept. Any response of exactly 1000 is
+therefore treated as truncated. A crawl that silently lost rows would understate exactly the
+busiest courts, which are the ones the reform is about.
+
+Because a capped fetch is wasted work, the crawler sizes each window from the density of the one
+before it rather than bisecting blindly — see `crawl_court`. Courts differ by three orders of
+magnitude between a Bucharest tribunal and a rural judecătorie, and by a similar factor between
+2024 and 2018 at the same court, so no fixed window is right for long.
 
 One caveat on the query itself. The Ministry's documentation states that at least one of
 `numarDosar`, `obiectDosar` or `numeParte` must be supplied. The service does not enforce this —
@@ -110,6 +115,28 @@ TIMEOUT_SECONDS = 240
 # 1000 cases in one day is still resolvable. Below this the window is treated as irreducible and
 # the truncation is reported instead of silently kept.
 MIN_WINDOW = timedelta(minutes=1)
+
+# What each call aims to return. Below RESULT_CAP with enough margin that a court whose filing
+# rate jumps — the Monday after a holiday, a bulk registration — does not overshoot and cost a
+# discarded fetch. Raising it toward 1000 saves calls until it doesn't, and a capped response is
+# worth two ordinary ones because the rows are thrown away.
+TARGET_ROWS = 600
+
+# Where a court starts before anything is known about it, and the widest window the walker will
+# ask for.
+#
+# Narrow, and this is the whole trick. The two ways of being wrong do not cost the same: a window
+# that is too small returns rows and wastes a little time, while a window that is too big caps and
+# every row it fetched is discarded. Starting at a year and shrinking cost ten capped fetches on
+# one Bucharest month — 30 calls where blind bisection took 22. Starting at three days and growing
+# pays a handful of cheap probes instead, and a quiet court reaches the ceiling in three steps
+# because empty windows grow eightfold.
+#
+# The ceiling stops a court with three surviving cases from asking for a whole decade in one call
+# and losing the ability to report which part of it failed.
+INITIAL_WINDOW = timedelta(days=3)
+EMPTY_GROWTH = 8
+MAX_WINDOW = timedelta(days=366 * 4)
 
 
 # --------------------------------------------------------------------------------------------
@@ -342,6 +369,7 @@ def extract(dosar, salt: str, tables: Tables, keep_summaries: bool) -> None:
     anonymisation is a flag that will eventually be set.
     """
     numar = _text(dosar, "numar")
+    institutie = _text(dosar, "institutie")
     categorie = _text(dosar, "categorieCaz")
     is_penal = any(marker in categorie.casefold() for marker in PENAL_CATEGORIES)
 
@@ -351,7 +379,7 @@ def extract(dosar, salt: str, tables: Tables, keep_summaries: bool) -> None:
             "numar": numar,
             "numar_vechi": _text(dosar, "numarVechi"),
             "data": _text(dosar, "data"),
-            "institutie": _text(dosar, "institutie"),
+            "institutie": institutie,
             "departament": _text(dosar, "departament"),
             "categorie_caz": categorie,
             "stadiu_procesual": _text(dosar, "stadiuProcesual"),
@@ -371,6 +399,7 @@ def extract(dosar, salt: str, tables: Tables, keep_summaries: bool) -> None:
         tables.parti.append(
             {
                 "dosar_numar": numar,
+                "institutie": institutie,
                 "tip": tip,
                 # Kept only for legal persons outside criminal cases. Everyone else is a hash.
                 "nume": nume if publishable else None,
@@ -392,6 +421,7 @@ def extract(dosar, salt: str, tables: Tables, keep_summaries: bool) -> None:
         tables.sedinte.append(
             {
                 "dosar_numar": numar,
+                "institutie": institutie,
                 "complet": _text(sedinta, "complet"),
                 "data": _text(sedinta, "data"),
                 "ora": _text(sedinta, "ora"),
@@ -413,6 +443,7 @@ def extract(dosar, salt: str, tables: Tables, keep_summaries: bool) -> None:
         tables.cai_atac.append(
             {
                 "dosar_numar": numar,
+                "institutie": institutie,
                 "parte_tip": tip,
                 "parte_nume": declaratoare if publishable else None,
                 "parte_hash": (
@@ -435,78 +466,89 @@ class CrawlStats:
     dosare: int = 0
     truncated_windows: list = field(default_factory=list)
     failed_windows: list = field(default_factory=list)
-    max_depth: int = 0
+    caps_hit: int = 0
 
 
-def crawl_window(
+def next_window(rows: int, span: timedelta) -> timedelta:
+    """Choose the next window from what the last one returned.
+
+    The service gives no total and no cursor, so the only signal about how busy a court is is how
+    many rows the previous window produced. Rows per day from that window, projected at
+    TARGET_ROWS, is the width that should land just under the cap next time.
+    """
+    days = max(span.total_seconds() / 86400, 1 / 24)
+    if not rows:
+        # Nothing here. Reach further rather than stepping through empty years one at a time —
+        # this is most of the pre-2023 range, where a court has single-digit surviving cases.
+        return min(span * EMPTY_GROWTH, MAX_WINDOW)
+    density = rows / days
+    wanted = timedelta(days=TARGET_ROWS / density)
+    # Growth is damped to twice the current width. Filing rates are not smooth — a window
+    # covering a weekend returns almost nothing, which projects to a window several times too
+    # wide, which caps and throws its rows away. Undamped, a busy court oscillates between
+    # windows that are too small and fetches that are discarded. Shrinking is left undamped
+    # because shrinking too far only costs an extra cheap call.
+    return max(MIN_WINDOW, min(wanted, span * 2, MAX_WINDOW))
+
+
+def crawl_court(
     institutie: str,
-    start: datetime,
-    stop: datetime,
+    since: datetime,
+    until: datetime,
     salt: str,
     tables: Tables,
     stats: CrawlStats,
     keep_summaries: bool,
     seen: set,
-    depth: int = 0,
 ) -> None:
-    """Fetch one window, bisecting on time whenever the response hits the service cap.
+    """Walk one court's registrations, sizing each window from the density of the last.
 
-    A response of exactly RESULT_CAP rows is assumed truncated. It might genuinely be a window
-    holding exactly 1000 cases, in which case the bisection costs two extra calls and returns the
-    same rows; `seen` makes the duplication harmless. The reverse assumption silently drops rows
-    from precisely the busiest courts, so the cheap error is the one to prefer.
+    This replaces a fixed month window with blind bisection, which was correct but wasteful in
+    both directions. On a busy court a capped month was split in half, both halves refetched,
+    and often split again — 22 calls for one Bucharest month, every capped response thrown away
+    because a truncated result cannot be told apart from a complete one row by row. On the quiet
+    pre-2023 years it walked month by month through courts holding eight surviving cases a year.
+
+    Sizing from observed density fixes both: after any successful window the crawler knows this
+    court's rows per day and picks a width that should land near TARGET_ROWS, so a busy court
+    gets short windows and a quiet one gets long ones without either being discovered by trial
+    and error. Bisection survives only as the recovery path when a window still caps.
     """
-    stats.calls += 1
-    stats.max_depth = max(stats.max_depth, depth)
-    found = search_dosare(institutie, start, stop)
-    time.sleep(DELAY_SECONDS)
-
-    if len(found) >= RESULT_CAP:
-        span = stop - start
-        if span > MIN_WINDOW:
-            middle = start + span / 2
-            crawl_window(
-                institutie, start, middle, salt, tables, stats, keep_summaries, seen, depth + 1
-            )
-            crawl_window(
-                institutie,
-                middle + timedelta(seconds=1),
-                stop,
-                salt,
-                tables,
-                stats,
-                keep_summaries,
-                seen,
-                depth + 1,
-            )
-            return
-        # Irreducible: more than RESULT_CAP cases share a timestamp range of one minute. Recorded
-        # rather than swallowed, so the coverage report can say which court lost how much.
-        stats.truncated_windows.append(
-            {"institutie": institutie, "start": start.isoformat(), "stop": stop.isoformat()}
-        )
-
-    for dosar in found:
-        numar = _text(dosar, "numar")
-        key = (institutie, numar)
-        if key in seen:
-            continue
-        seen.add(key)
-        stats.dosare += 1
-        extract(dosar, salt, tables, keep_summaries)
-
-
-def month_windows(since: datetime, until: datetime):
-    """Yield calendar-month windows. The month is the base unit because a small judecătorie fits
-    in one call, and bisection handles the courts that do not."""
-    cursor = since.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    cursor = since
+    window = INITIAL_WINDOW
     while cursor < until:
-        if cursor.month == 12:
-            nxt = cursor.replace(year=cursor.year + 1, month=1)
-        else:
-            nxt = cursor.replace(month=cursor.month + 1)
-        yield cursor, min(nxt - timedelta(seconds=1), until)
-        cursor = nxt
+        stop = min(cursor + window, until)
+        stats.calls += 1
+        found = search_dosare(institutie, cursor, stop)
+        time.sleep(DELAY_SECONDS)
+        span = stop - cursor
+
+        if len(found) >= RESULT_CAP:
+            stats.caps_hit += 1
+            if span > MIN_WINDOW:
+                # Discard and retry the same start narrower. A quarter rather than a half: the
+                # overshoot is at least 1000 against a target of 600, so halving would often cap
+                # again and cost a second wasted fetch.
+                window = max(span / 4, MIN_WINDOW)
+                continue
+            # Irreducible: more than RESULT_CAP cases share the smallest window we will ask for.
+            # The rows we did get are kept — a partial window beats a hole — and the loss is
+            # recorded so the coverage report can name the court and the interval.
+            stats.truncated_windows.append(
+                {"institutie": institutie, "start": cursor.isoformat(), "stop": stop.isoformat()}
+            )
+
+        for dosar in found:
+            numar = _text(dosar, "numar")
+            key = (institutie, numar)
+            if key in seen:
+                continue
+            seen.add(key)
+            stats.dosare += 1
+            extract(dosar, salt, tables, keep_summaries)
+
+        window = next_window(len(found), span)
+        cursor = stop + timedelta(seconds=1)
 
 
 def load_courts() -> list:
@@ -618,26 +660,25 @@ def main() -> int:
     for index, court in enumerate(courts, start=1):
         stats = CrawlStats()
         seen: set = set()
-        for start, stop in month_windows(since, until):
-            try:
-                crawl_window(court, start, stop, salt, tables, stats, not args.no_summaries, seen)
-            except PortalError as exc:
-                # Recorded, not merely printed. A window that failed is a hole in the snapshot,
-                # and a coverage report that omits it describes a crawl that did not happen.
-                stats.failed_windows.append(
-                    {"start": start.isoformat(), "stop": stop.isoformat(), "error": str(exc)}
-                )
-                print(f"  ! {court} {start:%Y-%m}: {exc}", file=sys.stderr)
+        try:
+            crawl_court(court, since, until, salt, tables, stats, not args.no_summaries, seen)
+        except PortalError as exc:
+            # Recorded, not merely printed. A window that failed is a hole in the snapshot, and a
+            # coverage report that omits it describes a crawl that did not happen.
+            stats.failed_windows.append(
+                {"start": since.isoformat(), "stop": until.isoformat(), "error": str(exc)}
+            )
+            print(f"  ! {court}: {exc}", file=sys.stderr)
         report["courts"][court] = {
             "calls": stats.calls,
             "dosare": stats.dosare,
-            "maxBisectDepth": stats.max_depth,
+            "capsHit": stats.caps_hit,
             "irreducibleTruncations": stats.truncated_windows,
             "failedWindows": stats.failed_windows,
         }
         print(
             f"[{index}/{len(courts)}] {court}: {stats.dosare} dosare, "
-            f"{stats.calls} calls, depth {stats.max_depth}"
+            f"{stats.calls} calls, {stats.caps_hit} caps"
             + (f", {len(stats.truncated_windows)} TRUNCATED" if stats.truncated_windows else "")
             + (f", {len(stats.failed_windows)} FAILED" if stats.failed_windows else "")
         )

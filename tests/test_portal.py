@@ -197,12 +197,36 @@ def test_no_summaries_flag_drops_free_text_in_non_criminal_cases() -> None:
     assert tables.sedinte[0]["solutie_sumar"] is None
 
 
-def test_month_windows_tile_the_period_without_gaps_or_overlaps() -> None:
-    from datetime import datetime
+def test_window_shrinks_for_a_busy_court_and_grows_for_a_quiet_one() -> None:
+    """The sizing rule, which is what replaced blind bisection.
 
-    windows = list(portal.month_windows(datetime(2026, 1, 15), datetime(2026, 4, 10, 12, 0, 0)))
-    assert windows[0][0] == datetime(2026, 1, 1)
-    assert windows[-1][1] == datetime(2026, 4, 10, 12, 0, 0)
-    for (_, earlier_stop), (later_start, _) in zip(windows, windows[1:], strict=False):
-        # One second apart: contiguous, and never covering the same instant twice.
-        assert (later_start - earlier_stop).total_seconds() == 1
+    A month that returned 3,000 rows should ask for roughly a fifth of that next time; a year
+    that returned 40 should reach much further. Both are projections of the same rows-per-day.
+    """
+    from datetime import timedelta
+
+    busy = portal.next_window(3000, timedelta(days=30))
+    assert timedelta(days=5) < busy < timedelta(days=7)  # 600/100 per day
+
+    quiet = portal.next_window(40, timedelta(days=365))
+    assert quiet > timedelta(days=365)
+
+
+def test_an_empty_window_reaches_further_instead_of_stepping() -> None:
+    """Most of a deep backfill is empty years at small courts. Stepping through them one window
+    at a time is the cost the old month walker paid; reaching further is the point."""
+    from datetime import timedelta
+
+    assert portal.next_window(0, timedelta(days=365)) == min(
+        timedelta(days=365) * portal.EMPTY_GROWTH, portal.MAX_WINDOW
+    )
+
+
+def test_the_window_never_leaves_its_bounds() -> None:
+    """A court with one case in a decade must not ask for the decade in a single call — the
+    coverage report would then be unable to say which part of it failed. A court that returned
+    the whole cap in an hour must not be given a window below the floor either."""
+    from datetime import timedelta
+
+    assert portal.next_window(1, timedelta(days=365)) <= portal.MAX_WINDOW
+    assert portal.next_window(100000, timedelta(days=1)) >= portal.MIN_WINDOW
