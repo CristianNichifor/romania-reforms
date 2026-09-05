@@ -229,21 +229,46 @@ def main() -> int:
     labels = {code: label for label, code in TO_CODE.items()}
     if args.all:
         failed = []
+        unreachable = 0
         for code in sorted(labels):
             # Retried, for the same reason the land register is: forty-two requests to TEMPO
             # in a row is more than it reliably answers, and which one it drops is arbitrary.
             # A county that fails all three attempts still fails the build — the predictor has
             # to exist for every county or the national estimate silently omits one.
+            status = "ok"
             for retry in range(3):
                 try:
                     if build(code, labels[code], meta) == 0:
                         break
+                except retea.TempoUnavailable as error:
+                    # Not retried. `retea.read` has already spent three attempts and
+                    # twenty-five seconds on this county establishing that the host is
+                    # refusing connections, and it will refuse them again in two more. Forty-two
+                    # counties retried three times each is what turned an outage into a
+                    # sixty-three-minute CI step.
+                    print(f"{code}: {error}", file=sys.stderr)
+                    status = "unreachable"
+                    break
                 except Exception as error:  # noqa: BLE001
                     print(f"{code}, încercarea {retry + 1}: {error}", file=sys.stderr)
                 time.sleep(2 * (retry + 1))
             else:
+                status = "failed"
+            if status != "ok":
                 failed.append(code)
+                unreachable += status == "unreachable"
         if failed:
+            # Same claim, and the same narrowness, as `import_fond_funciar.outcome`: every
+            # county failed, and every one of them failed because the host was not there.
+            # Anything less than all of them is still a failure, because a national estimate
+            # fitted on forty-one counties is not the one this repository publishes.
+            if len(failed) == len(labels) and unreachable == len(failed):
+                print(
+                    f"\nTEMPO nu a răspuns pentru niciunul dintre cele {len(labels)} de "
+                    "județe. Nimic nu a fost importat și nimic nu a fost scris.",
+                    file=sys.stderr,
+                )
+                return retea.UNREACHABLE
             print(f"\nFATAL: {len(failed)} counties failed: {failed}", file=sys.stderr)
             return 1
         print(f"\n{len(labels)} counties written")
