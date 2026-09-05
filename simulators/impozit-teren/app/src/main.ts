@@ -547,6 +547,45 @@ async function main() {
     };
   }
 
+  /**
+   * Put the scenario into the controls. Everything here reads `state` and nothing reads data.
+   *
+   * Separated from `render` because it has to run *before* the counties arrive. Waiting for
+   * them fixed a headline that showed a confident zero, and left the panel showing the
+   * markup's own defaults for the whole of that wait — the slider parked at its hardcoded
+   * `value="100"`, the rate box empty, the yield and collection at whatever the HTML said.
+   * So a link that says 2% opened on a panel that said 1%, for as long as forty-two files
+   * took, which is a worse lie than the one it replaced: a number that is wrong and looks
+   * settled, rather than a number that is missing and says so.
+   */
+  function syncControls(): void {
+    // The slider stops at 5% and the box does not, so above it the slider sits at its end and
+    // the box carries the answer.
+    const RATE_SLIDER_MAX = 500;
+    ($('rate') as HTMLInputElement).value = String(
+      Math.min(RATE_SLIDER_MAX, Math.round(state.rate * 100)),
+    );
+    ($('share') as HTMLInputElement).value = String(Math.round(state.share * 100));
+    ($('yield') as HTMLInputElement).value = String(Math.round(state.landYield * 100));
+    ($('collection') as HTMLInputElement).value = String(Math.round(state.collection * 100));
+    $('yield-value').textContent = `${percent.format(state.landYield)}%`;
+    $('collection-value').textContent = `${percent.format(100 * state.collection)}%`;
+    $('share-value').textContent = `×${percent.format(state.share)}`;
+    // The selector is built before this ever runs, so it can be set here too and the panel
+    // agrees with the hash from the first paint rather than from the first render.
+    const counties = $('county') as HTMLSelectElement | null;
+    if (counties) counties.value = state.county;
+    // Written back only when it disagrees with the state, so a half-typed "1." is not rewritten
+    // to "1" under the cursor. A number input carries a dot; `percent` carries a comma, and
+    // putting a Romanian decimal into `value` empties the box. An empty box is written back
+    // too, or a rate of 0 renders as a blank one: `Number('')` is 0, so "already correct" and
+    // "nothing there" look the same to a bare comparison.
+    const rateBox = $('rate-value') as HTMLInputElement;
+    if (rateBox.value.trim() === '' || Number(rateBox.value) !== state.rate) {
+      rateBox.value = String(state.rate);
+    }
+  }
+
   function render() {
     const all = state.county === ALL;
     const settings = settingsFor(loaded);
@@ -591,25 +630,7 @@ async function main() {
     // The slider runs to 5% and the box has no ceiling, so above 5% the slider sits at its end
     // and the box carries the answer. That is the honest arrangement: the slider is for the
     // range worth dragging through, and the ceiling is the reader's to decide, not this file's.
-    const RATE_SLIDER_MAX = 500;
-    ($('rate') as HTMLInputElement).value = String(
-      Math.min(RATE_SLIDER_MAX, Math.round(state.rate * 100)),
-    );
-    ($('share') as HTMLInputElement).value = String(Math.round(state.share * 100));
-    ($('yield') as HTMLInputElement).value = String(Math.round(state.landYield * 100));
-    ($('collection') as HTMLInputElement).value = String(Math.round(state.collection * 100));
-    $('yield-value').textContent = `${percent.format(state.landYield)}%`;
-    $('collection-value').textContent = `${percent.format(100 * state.collection)}%`;
-    // Written back only when it disagrees with the state, so a half-typed "1." is not rewritten
-    // to "1" under the cursor. A number input carries a dot; `percent` carries a comma, and
-    // putting a Romanian decimal into `value` empties the box.
-    // An empty box is written back too, or a rate of 0 renders as a blank one: `Number('')`
-    // is 0, so "already correct" and "nothing there" look the same to a bare comparison.
-    const rateBox = $('rate-value') as HTMLInputElement;
-    if (rateBox.value.trim() === '' || Number(rateBox.value) !== state.rate) {
-      rateBox.value = String(state.rate);
-    }
-    $('share-value').textContent = `×${percent.format(state.share)}`;
+    syncControls();
 
     // What the chosen rate means against the flow the land produces. The full-rent rate is the
     // textbook ceiling for a land value tax — above it the tax is charging more than the land
@@ -982,6 +1003,9 @@ async function main() {
   // concluded the control had fixed something. Zeros that are about to be replaced are worse
   // than a sentence saying so.
   if (state.county === ALL) {
+    // The panel first, then the wait. The controls are the scenario and the scenario is known
+    // the moment the hash is read — only the arithmetic needs the counties.
+    syncControls();
     $('table-title').textContent = 'se încarcă toate județele…';
     $('headline').innerHTML = '<p class="note">se încarcă cele 42 de județe…</p>';
     await everything;
