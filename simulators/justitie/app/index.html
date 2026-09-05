@@ -38,7 +38,6 @@
         <p class="sub" id="sub"></p>
       </header>
 
-      <section id="authorship" hidden></section>
 
       <section id="staffing" hidden>
         <label class="slider-label" for="target">
@@ -53,7 +52,6 @@
         </p>
       </section>
 
-      <section id="acces-note" hidden></section>
 
       <section id="ceiling" hidden>
         <label class="slider-label" for="ceiling-input">
@@ -88,10 +86,14 @@
       <button type="button" id="reader-open" class="reader-open">
         <span>Ce propune lucrarea</span>
         <span class="reader-open-hint">și ce verifică pagina</span>
+        <!-- Blocking caveats used to sit open in the panel, because they are the ones that change
+             how a number should be read. Moved inside the dialog they could be missed entirely,
+             so their count comes back out here — the reader is told there is something that
+             cannot be answered, and where to find it. -->
+        <span class="reader-badge" id="reader-badge" hidden></span>
       </button>
 
 
-      <footer id="blocking"></footer>
 
       <section id="detail" class="detail">
         <p class="hint">Treci cu mouse-ul peste o instanță.</p>
@@ -104,6 +106,13 @@
         <button type="button" id="reader-close" aria-label="Închide">✕</button>
       </div>
       <div class="reader-body">
+        <!-- Prose that used to be loose in the panel: who wrote the proposal, what the current
+             view does not answer, and the caveats that block an answer outright. -->
+        <section id="reader-intro">
+          <section id="authorship" hidden></section>
+          <section id="acces-note" hidden></section>
+          <footer id="blocking"></footer>
+        </section>
         <section class="fold">
           <details id="lucrarea-fold" open>
           <summary><span>Ce propune lucrarea</span><span class="chev" id="lucrarea-chev"></span></summary>

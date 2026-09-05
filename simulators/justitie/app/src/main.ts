@@ -2627,6 +2627,15 @@ async function main(): Promise<void> {
   el('#blocking').innerHTML = blocking
     .map((l) => `<p class="limit blocking"><strong>Nu putem răspunde:</strong> ${l.text}</p>`)
     .join('');
+  // The blocking caveats now live inside the dialog, so their count is surfaced on the button
+  // that opens it. Hiding "we cannot answer this" behind a click is acceptable; hiding the fact
+  // that it exists is not.
+  const readerBadge = document.getElementById('reader-badge');
+  if (readerBadge) {
+    const noun = blocking.length === 1 ? 'întrebare fără răspuns' : 'întrebări fără răspuns';
+    readerBadge.textContent = blocking.length ? `${blocking.length} ${noun}` : '';
+    readerBadge.hidden = blocking.length === 0;
+  }
   el('#limits').innerHTML = rest.map((l) => `<p class="limit">${l.text}</p>`).join('');
   el('#limits-count').textContent = `${rest.length} rezerve`;
 }
