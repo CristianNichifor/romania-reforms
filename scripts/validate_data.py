@@ -36,8 +36,11 @@ def main() -> int:
         document = json.loads(data_file.read_text(encoding="utf-8"))
         ref = document.get("$schema", "")
         schema_path = (data_file.parent / ref).resolve()
-        if not schema_path.exists():
-            errors.append(f"{data_file.name}: $schema points at {ref}, which does not exist")
+        # `is_file`, not `exists`: a document with no $schema resolves the empty reference to its
+        # own data directory, which exists, and the gate then tried to read a directory and died
+        # on the traceback instead of naming the file that was missing its schema.
+        if not ref or not schema_path.is_file():
+            errors.append(f"{data_file.name}: $schema points at {ref!r}, which is not a schema file")
             continue
 
         schema = json.loads(schema_path.read_text(encoding="utf-8"))
