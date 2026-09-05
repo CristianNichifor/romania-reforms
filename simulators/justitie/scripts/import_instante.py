@@ -380,10 +380,14 @@ def main(argv: list[str] | None = None) -> None:
 
     headcount = ""
     if edition.filled_posts:
+        # The separator swap applies to the number alone. Applied to the whole sentence it also
+        # turned "însă, în alt capitol" into "însă. în alt capitol", because str.replace does not
+        # know which commas are thousands and which are punctuation.
+        posts = f"{edition.filled_posts:,}".replace(",", ".")
         headcount = (
             f"; totalul pe grad îl tipărește însă, în alt capitol — "
-            f"{edition.filled_posts:,} posturi ocupate la 31 decembrie {edition.period} "
-            f"(vezi personal-{edition.period})".replace(",", ".")
+            f"{posts} posturi ocupate la 31 decembrie {edition.period} "
+            f"(vezi personal-{edition.period})"
         )
 
     document = {
