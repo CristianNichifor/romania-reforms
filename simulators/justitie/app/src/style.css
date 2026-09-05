@@ -696,3 +696,149 @@ dd {
 .chapter-text p {
   margin: 0 0 0.45rem;
 }
+
+/* ---------------------------------------------------------------------------------------------
+ * The reading apparatus, as a dialog
+ *
+ * Fourteen folds in four groups used to sit in the sidebar under "Ce propune lucrarea". Beside a
+ * map in 22rem they pushed the legend and the hover detail out of sight and turned a control
+ * panel into a document. Same content and same ids, opened over the map instead.
+ * ------------------------------------------------------------------------------------------ */
+
+.reader-open {
+  display: block;
+  width: 100%;
+  margin: 0.9rem 0 1rem;
+  padding: 0.6rem 0.8rem;
+  text-align: left;
+  font: inherit;
+  color: var(--fg);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line));
+  border-radius: 8px;
+  cursor: pointer;
+}
+.reader-open:hover {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+.reader-open:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.reader-open > span:first-child {
+  display: block;
+  font-weight: 600;
+}
+.reader-open-hint {
+  display: block;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+#reader {
+  width: min(52rem, 94vw);
+  max-height: 86vh;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  color: var(--fg);
+  overflow: hidden;
+  /* The dialog is a flex column so the head stays put and only the body scrolls. Without it the
+   * whole dialog scrolls and the close button leaves the screen — the one control a reader
+   * needs at every scroll position. */
+  display: flex;
+  flex-direction: column;
+}
+#reader:not([open]) {
+  display: none;
+}
+#reader::backdrop {
+  background: rgb(0 0 0 / 0.55);
+  backdrop-filter: blur(3px);
+}
+
+.reader-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1.1rem;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel);
+}
+.reader-head h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+#reader-close {
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  font: inherit;
+  line-height: 1;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  cursor: pointer;
+}
+#reader-close:hover {
+  color: var(--fg);
+  border-color: var(--accent);
+}
+
+.reader-body {
+  overflow-y: auto;
+  padding: 0.4rem 1.1rem 1.2rem;
+}
+/* The folds were written for a narrow column. Given room, the four groups sit side by side —
+ * `columns` rather than a grid because the groups are of very different heights and a grid would
+ * leave one column short while another runs long. */
+@media (min-width: 46rem) {
+  .reader-body .fold {
+    columns: 2;
+    column-gap: 1.6rem;
+  }
+  .reader-body .fold-set,
+  .reader-body > .fold > details {
+    break-inside: avoid;
+  }
+}
+
+/* ---------------------------------------------------------------------------------------------
+ * Scrollbars
+ *
+ * Styled rather than hidden. A scrollbar is the only cue that a panel has more below it, and on
+ * a dark surface the platform default is either an invisible grey or a bright white slab. Both
+ * properties are set: `scrollbar-width`/`scrollbar-color` are the standard ones Firefox honours,
+ * the ::-webkit- rules cover Chromium and Safari, which still ignore them.
+ * ------------------------------------------------------------------------------------------ */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--muted) 45%, transparent) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--muted) 38%, transparent);
+  border-radius: 6px;
+  /* Inset with a transparent border so the thumb reads as a slim bar with breathing room rather
+   * than filling the gutter edge to edge. */
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--accent) 55%, transparent);
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
