@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/intrate-portal.schema.json",
+  "title": "Cases filed per court, measured from the published case files",
+  "description": "CSM's Anexa 1 prints Volum and Cauze soluţionate for each court. Volum is the volume of activity — stock carried in plus everything filed during the year — so neither column is the count of new cases, and that count is published nowhere. It is what the case files give directly, because every dosar carries a registration date. This document holds it, beside CSM's volume for context. What the schema is built to prevent is the reading that the ratio between them audits the published figure: filings are a component of volume, not a rival estimate of it, so the ratio is a lower bound on how much of a court's year is new work and never a verdict on CSM's arithmetic.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "period",
+    "provenance",
+    "an",
+    "acoperire",
+    "tiers",
+    "courts",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "const": "intrate-portal" },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "period": { "type": "string" },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+    "an": {
+      "type": "integer",
+      "minimum": 2000,
+      "description": "Calendar year of registration being counted, and the CSM edition it is set against."
+    },
+
+    "acoperire": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Which courts joined and which did not. Reported rather than dropped: a court missing from one side is a fact about the two vocabularies, and silently excluding it would make the national totals quietly wrong.",
+      "required": [
+        "instanteCsm",
+        "instanteCrawlate",
+        "acoperireDinRaport",
+        "instantePereche",
+        "intrateTotal",
+        "volumCsmTotal",
+        "doarInCsm",
+        "doarInPortal"
+      ],
+      "properties": {
+        "instanteCsm": { "type": "integer", "minimum": 0 },
+        "instanteCrawlate": { "type": "integer", "minimum": 0 },
+        "acoperireDinRaport": {
+          "type": "boolean",
+          "description": "True when the crawled set came from the coverage report, which lists every court visited. False when it was inferred from the parquet, which cannot show a court that returned nothing — so the crawled set is then short by exactly the silent courts."
+        },
+        "instantePereche": { "type": "integer", "minimum": 0 },
+        "intrateTotal": { "type": "integer", "minimum": 0 },
+        "volumCsmTotal": { "type": "integer", "minimum": 0 },
+        "doarInCsm": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Expected members are the Înalta Curte, which is not on the portal, and the military courts the annex carries but the enum does not."
+        },
+        "doarInPortal": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Expected members are the suspended judecătorii, which exist in law and in the enum but not in the annex."
+        }
+      }
+    },
+
+    "tiers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["tier", "instante", "intrate", "volumCsm", "intratePerVolum"],
+        "properties": {
+          "tier": { "type": "string" },
+          "instante": { "type": "integer", "minimum": 0 },
+          "intrate": { "type": "integer", "minimum": 0 },
+          "volumCsm": { "type": "integer", "minimum": 0 },
+          "intratePerVolum": { "type": ["number", "null"], "minimum": 0 }
+        }
+      }
+    },
+
+    "courts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "tier",
+          "intrate",
+          "volumCsm",
+          "solutionateCsm",
+          "intratePerVolum",
+          "cotaIntrate",
+          "cotaVolum",
+          "divergentaCota"
+        ],
+        "properties": {
+          "name": { "type": "string" },
+          "tier": { "type": "string" },
+          "intrate": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Cases registered at this court in the compared year, counted from the case files. A floor: cases already archived are no longer visible."
+          },
+          "volumCsm": { "type": "integer", "minimum": 0 },
+          "solutionateCsm": { "type": "integer", "minimum": 0 },
+          "intratePerVolum": {
+            "type": ["number", "null"],
+            "minimum": 0,
+            "description": "Lower bound on the share of the court's year that is new work rather than inherited stock. Not a check on CSM's figure."
+          },
+          "cotaIntrate": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+          "cotaVolum": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+          "divergentaCota": {
+            "type": ["number", "null"],
+            "minimum": -1,
+            "maximum": 1,
+            "description": "cotaIntrate minus cotaVolum. Positive means the court files a larger share of the national total than its share of published volume. More robust than the levels either side of it, because a survivorship factor that applies broadly cancels in a ratio of shares."
+          }
+        }
+      }
+    },
+
+    "limitations": {
+      "type": "array",
+      "minItems": 5,
+      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+    }
+  }
+}

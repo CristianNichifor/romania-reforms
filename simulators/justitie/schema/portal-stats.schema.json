@@ -1,0 +1,980 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/portal-stats.schema.json",
+  "title": "Workload, case types and termene from the courts' own case files",
+  "description": "Aggregated from the individual dosare that portal.just.ro publishes, so the unit is a case rather than a court-year. What the schema enforces beyond shape is the discipline the source demands: the portal drops cases as courts archive them, so any statistic resembling a duration is a survival sample. There is deliberately no property for average case duration, time to resolution, or clearance rate — those need the case that finished quickly to still be in the data, and it is not. Interval statistics carry the registration cohort they were computed over, so a reader can see how much archiving could have touched them.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "period",
+    "provenance",
+    "snapshot",
+    "levels",
+    "courts",
+    "caseTypes",
+    "termene",
+    "stadii",
+    "caleDeAtacDeclarata",
+    "vechimeDosarePeRol",
+    "litiganti",
+    "solutii",
+    "limitations",
+    "durata",
+    "primulTermen",
+    "amanari",
+    "gradientArhivare",
+    "penal",
+    "concentrare"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "id": {
+      "const": "portal-stats"
+    },
+    "title": {
+      "type": "string"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "period": {
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "provenance.schema.json#/$defs/provenance"
+    },
+    "snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "What was in the crawl this document was built from.",
+      "required": [
+        "crawledAt",
+        "instante",
+        "dosare",
+        "sedinte",
+        "parti",
+        "caiAtac",
+        "registeredFrom",
+        "registeredTo",
+        "coverageComplete",
+        "institutieDinFisier"
+      ],
+      "properties": {
+        "crawledAt": {
+          "type": "string"
+        },
+        "instante": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "dosare": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sedinte": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "parti": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "caiAtac": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "registeredFrom": {
+          "type": "string"
+        },
+        "registeredTo": {
+          "type": "string"
+        },
+        "coverageComplete": {
+          "type": [
+            "boolean",
+            "null"
+          ],
+          "description": "False when any court had a failed or irreducibly truncated window. Null when no coverage report accompanied the parquet."
+        },
+        "institutieDinFisier": {
+          "type": "boolean",
+          "description": "True when hearings carry their own court, so the per-level split is exact. False for parquet crawled before the importer wrote `institutie` on the child tables, where hearings are attributed via the case number — ambiguous for the cases that exist at two courts at once."
+        }
+      }
+    },
+    "levels": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "level",
+          "instante",
+          "dosare",
+          "completuri",
+          "dosarePerComplet"
+        ],
+        "properties": {
+          "level": {
+            "type": "string"
+          },
+          "instante": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "dosare": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "completuri": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "dosarePerComplet": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "description": "Null where no panel was observed sitting, rather than a division by zero."
+          }
+        }
+      }
+    },
+    "courts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "institutie",
+          "level",
+          "dosare",
+          "sectii",
+          "completuri",
+          "dosarePerComplet"
+        ],
+        "properties": {
+          "institutie": {
+            "type": "string"
+          },
+          "level": {
+            "type": "string"
+          },
+          "dosare": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "sectii": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "completuri": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "dosarePerComplet": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "caseTypes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "categorie",
+          "dosare",
+          "share",
+          "byLevel"
+        ],
+        "properties": {
+          "categorie": {
+            "type": "string"
+          },
+          "dosare": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "share": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "byLevel": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      }
+    },
+    "termene": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Intervals between consecutive hearings, over a recent registration cohort only. The cohort is the whole point: unrestricted, the distribution is dominated by cases old enough to still be visible, which is to say by slow ones.",
+      "required": [
+        "cohortMonths",
+        "cohortFrom",
+        "dosareInCohort",
+        "dosareCuTermene",
+        "intervalZileByLevel",
+        "termenePerDosar"
+      ],
+      "properties": {
+        "cohortMonths": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "cohortFrom": {
+          "type": "string"
+        },
+        "dosareInCohort": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "dosareCuTermene": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "intervalZileByLevel": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "level",
+              "intervale"
+            ],
+            "properties": {
+              "level": {
+                "type": "string"
+              },
+              "intervale": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "p25": {
+                "type": "number"
+              },
+              "p50": {
+                "type": "number"
+              },
+              "p75": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "termenePerDosar": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "p25": {
+              "type": "number"
+            },
+            "p50": {
+              "type": "number"
+            },
+            "p75": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "stadii": {
+      "type": "array",
+      "description": "Procedural stage from stadiuProcesual, where the field means what its name says — unlike caiAtac, which describes the appeal that brought a case in.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "level",
+          "dosare",
+          "stadii"
+        ],
+        "properties": {
+          "level": {
+            "type": "string"
+          },
+          "dosare": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "stadii": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      }
+    },
+    "caleDeAtacDeclarata": {
+      "type": "array",
+      "description": "First-instance cases whose number reappears at a higher court. A floor, not a rate: both stages must be inside the crawl window and both must still be visible.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "level",
+          "dosareFond",
+          "reganiteLaOInstantaSuperioara",
+          "shareMinima"
+        ],
+        "properties": {
+          "level": {
+            "type": "string"
+          },
+          "dosareFond": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "reganiteLaOInstantaSuperioara": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "shareMinima": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 1
+          }
+        }
+      }
+    },
+    "vechimeDosarePeRol": {
+      "type": "array",
+      "description": "Age of cases carrying no disposition on any termen. Bucket edges at 365 and 547 days match CSM's E02 indicator, so the shape can be argued against the measure courts are already held to.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "from",
+          "to",
+          "dosare",
+          "share"
+        ],
+        "properties": {
+          "from": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "to": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "dosare": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "share": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 1
+          }
+        }
+      }
+    },
+    "litiganti": {
+      "type": "array",
+      "description": "Legal persons only. Natural persons never carry a name out of the importer, and criminal cases carry no name at all, so this list cannot contain an individual.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "nume",
+          "numeFold",
+          "aparitii",
+          "dosare",
+          "calitati"
+        ],
+        "properties": {
+          "nume": {
+            "type": "string"
+          },
+          "numeFold": {
+            "type": "string"
+          },
+          "aparitii": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "dosare": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "calitati": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      }
+    },
+    "solutii": {
+      "type": "array",
+      "description": "Disposition vocabulary, folded on case and whitespace only. Mapping 'Amana cauza' and 'Termen preschimbat' onto a common scheme is a judgement about procedure and is deliberately not made here.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "solutie",
+          "key",
+          "termene"
+        ],
+        "properties": {
+          "solutie": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          },
+          "termene": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 7,
+      "description": "At least seven, because this source has at least seven ways of being misread and the count is a floor worth enforcing.",
+      "items": {
+        "$ref": "provenance.schema.json#/$defs/limitation"
+      }
+    },
+    "durata": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Kaplan-Meier resolution curves over a recent registration cohort. Restricted because the naive alternative is badly biased — see gradientArhivare, which publishes the size of that bias. Resolution means the last pronouncement actually delivered during this court's handling: at or after registration here, at or before the crawl. A future dataPronuntare is a deferral schedule, not a delivery.",
+      "required": [
+        "cohortMonths",
+        "cohortFrom",
+        "byLevel",
+        "byCategorie"
+      ],
+      "properties": {
+        "cohortMonths": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "cohortFrom": {
+          "type": "string"
+        },
+        "byLevel": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "level",
+              "dosare",
+              "solutionate",
+              "inCurs",
+              "urmarireZile",
+              "medianaZile",
+              "rezolvatePana"
+            ],
+            "properties": {
+              "dosare": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "solutionate": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "inCurs": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "urmarireZile": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Longest observation in the cohort. The curve says nothing past it, so marks beyond it are null rather than extrapolated."
+              },
+              "medianaZile": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "description": "First day the resolution curve reaches one half. Null when it never does, which is the honest answer for a cohort still mostly running."
+              },
+              "rezolvatePana": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "level": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "byCategorie": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "categorie",
+              "dosare",
+              "solutionate",
+              "inCurs",
+              "urmarireZile",
+              "medianaZile",
+              "rezolvatePana"
+            ],
+            "properties": {
+              "dosare": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "solutionate": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "inCurs": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "urmarireZile": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Longest observation in the cohort. The curve says nothing past it, so marks beyond it are null rather than extrapolated."
+              },
+              "medianaZile": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "description": "First day the resolution curve reaches one half. Null when it never does, which is the honest answer for a cohort still mostly running."
+              },
+              "rezolvatePana": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "categorie": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "primulTermen": {
+      "type": "array",
+      "description": "Days from registration to the first hearing, over the same cohort.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "level",
+          "dosare"
+        ],
+        "properties": {
+          "level": {
+            "type": "string"
+          },
+          "dosare": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "p25": {
+            "type": "number"
+          },
+          "p50": {
+            "type": "number"
+          },
+          "p75": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "amanari": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Dispositions that move a case to another date, split by which act they are. Adjourning the hearing, deferring the judgment after hearing the case, and rescheduling the date are different things, and a single combined figure cannot be quoted about workload. A property of hearings rather than durations, so the survival sample distorts it far less than anything time-based.",
+      "required": [
+        "termeneCuSolutie",
+        "amanareCauza",
+        "amanarePronuntare",
+        "termenPreschimbat",
+        "cotaAmanareCauza",
+        "cotaFaraProgres"
+      ],
+      "properties": {
+        "termeneCuSolutie": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "amanareCauza": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The case was put over to another date."
+        },
+        "amanarePronuntare": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The case was heard and judgment deferred — not a failure to reach it."
+        },
+        "termenPreschimbat": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "The date itself was moved, often before anyone sat."
+        },
+        "cotaAmanareCauza": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "cotaFaraProgres": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Union of the three."
+        }
+      }
+    },
+    "gradientArhivare": {
+      "type": "array",
+      "description": "The bias exhibit, published rather than hidden. Naive median duration of visible resolved cases by registration year. It rises steeply into the past — no court changed that much — because archiving has removed the fast cases from older cohorts. It is also the only public evidence of archiving practice.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "anInregistrare",
+          "dosareVizibileSolutionate",
+          "medianaNaivaZile"
+        ],
+        "properties": {
+          "anInregistrare": {
+            "type": "integer"
+          },
+          "dosareVizibileSolutionate": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "medianaNaivaZile": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "penal": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "What criminal courts handle, read off the statutory reference the charge text carries. The NCP/NCPP split is the point: NCP is the penal code and an offence someone is accused of, NCPP is criminal procedure and a step in the machinery. Counted together, the leading 'charges' are confirmations of a prosecutor's discontinuance and reviews of preventive detention — which is not what a reader takes a top-charges chart to mean. Sentences are deliberately absent: they live only in solutieSumar, which is stripped for every criminal case under GDPR Art. 10.",
+      "required": [
+        "dosarePenale",
+        "cuArticol",
+        "peCod",
+        "cotaProcedurala",
+        "infractiuni",
+        "proceduri",
+        "legiSpeciale",
+        "legiCunoscute"
+      ],
+      "properties": {
+        "dosarePenale": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cuArticol": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Dossiers whose obiect yielded a code and article. The remainder carry a charge written without a statutory reference."
+        },
+        "peCod": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "cotaProcedurala": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Share of the criminal docket that is an NCPP procedural step rather than an offence."
+        },
+        "infractiuni": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "cod",
+              "articol",
+              "dosare",
+              "denumire"
+            ],
+            "properties": {
+              "cod": {
+                "type": "string",
+                "description": "NCP, NCPP, or L<number>/<year> for a special statute."
+              },
+              "articol": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "description": "Null where a law is cited without an article."
+              },
+              "dosare": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "denumire": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "proceduri": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "cod",
+              "articol",
+              "dosare",
+              "denumire"
+            ],
+            "properties": {
+              "cod": {
+                "type": "string",
+                "description": "NCP, NCPP, or L<number>/<year> for a special statute."
+              },
+              "articol": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "description": "Null where a law is cited without an article."
+              },
+              "dosare": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "denumire": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "legiSpeciale": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "cod",
+              "articol",
+              "dosare",
+              "denumire"
+            ],
+            "properties": {
+              "cod": {
+                "type": "string",
+                "description": "NCP, NCPP, or L<number>/<year> for a special statute."
+              },
+              "articol": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "description": "Null where a law is cited without an article."
+              },
+              "dosare": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "denumire": {
+                "type": "string"
+              }
+            }
+          },
+          "description": "Special statutes, kept as one bucket rather than split into offence and procedure. Some carry crimes (143/2000 drugs, 217/2003 protection orders) and some carry procedure (302/2004 foreign judgments, 254/2013 sentence execution); deciding which is a reading of each statute, not something the parser assumes."
+        },
+        "legiCunoscute": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "description": "The special statutes whose character has actually been checked, as number/year to a plain description. Short on purpose: an entry is a claim about what a statute is for."
+        }
+      }
+    },
+    "concentrare": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "How concentrated the filing of cases is. Explicitly NOT a measure of who uses the courts most: the hash identifies a folded name rather than a person, so every Popescu Ion merges and a repeat count is an upper bound; the party classifier fails closed, so companies it could not confidently name are counted here as natural persons; and appearing often is not doing anything, since respondents and injured parties appear as often as claimants. What survives all three is the shape of who brings the work. Nothing per-identity is published — only counts of identities, with the tail bucketed.",
+      "required": [
+        "identitati",
+        "dosareAncilare",
+        "distributie",
+        "peGrupDeCalitate",
+        "cotaTopFilerilor",
+        "comportamentInstitutional"
+      ],
+      "properties": {
+        "identitati": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Distinct salted-hash identities. An upper bound on people, because names pool."
+        },
+        "dosareAncilare": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Party rows whose case number is an incidental file (/aN) of a parent case. Merged into the parent before counting, because an ancillary file is not another dispute."
+        },
+        "distributie": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "disputeDeLaPanaLa",
+              "identitati",
+              "cota"
+            ],
+            "properties": {
+              "disputeDeLaPanaLa": {
+                "type": "string"
+              },
+              "identitati": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "cota": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            }
+          }
+        },
+        "peGrupDeCalitate": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "description": "Identities by how they stand in the case: initiaza, raspunde, vatamat, acuzat, altul. Kept apart because 124 appearances as respondent and 56 as injured party mean the opposite of litigiousness."
+        },
+        "cotaTopFilerilor": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "top1la_suta": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "maximum": 1
+            },
+            "top5la_suta": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        },
+        "comportamentInstitutional": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Filing identities whose behaviour is institutional regardless of what their name folded to: many disputes, overwhelmingly debt recovery. Counts and shares only — a behavioural flag on an identity is still a statement about an identity.",
+          "required": [
+            "identitati",
+            "dispute",
+            "cotaDinCereri",
+            "pragDisputa",
+            "pragRecuperare"
+          ],
+          "properties": {
+            "identitati": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "dispute": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "cotaDinCereri": {
+              "type": [
+                "number",
+                "null"
+              ],
+              "minimum": 0,
+              "maximum": 1
+            },
+            "pragDisputa": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "pragRecuperare": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -181,8 +181,13 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           tag="portal-${{ steps.day.outputs.stamp }}"
+          # The per-shard coverage files ship too, not just the merged one. They are the only
+          # place the per-court record lives — calls made, bisect depth, and which windows
+          # failed or stayed truncated — and a consumer that cannot see which courts came up
+          # short has to treat the whole snapshot as suspect or, worse, as complete. They are a
+          # few kilobytes each. The merged file keeps the summary for a reader who wants one.
           gh release create "$tag" \
             --title "Portal snapshot ${{ steps.day.outputs.stamp }}" \
             --notes-file out/coverage.json \
-            out/*.parquet out/coverage.json \
-          || gh release upload "$tag" out/*.parquet out/coverage.json --clobber
+            out/*.parquet out/coverage*.json \
+          || gh release upload "$tag" out/*.parquet out/coverage*.json --clobber
