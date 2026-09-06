@@ -1,14 +1,19 @@
-:root {
-  --bg: #0b0d10;
-  --panel: #12161b;
-  --line: #232a31;
-  --fg: #e8eaed;
-  --muted: #9aa3ad;
-  --accent: #7fb3ff;
-}
+@import './tokens.css';
 
-* {
-  box-sizing: border-box;
+/* The map's six colour names, kept as aliases onto the shared tokens.
+ *
+ * The values did not change — the dark half of `tokens.css` was set to exactly these, so the map
+ * looks the same to the pixel — but they are no longer defined twice. The names stay because
+ * eight hundred lines below refer to them and because `--panel` says something here that
+ * `--surface-1` does not: this is *the* panel, the one fixed thing on a page that is otherwise a
+ * map. The page pins `data-theme="dark"` in the markup; a choropleth ramp designed against a
+ * dark ground has no light counterpart, so the reader's system preference is not consulted. */
+:root {
+  --bg: var(--surface-0);
+  --panel: var(--surface-1);
+  --line: var(--border);
+  --fg: var(--ink);
+  --muted: var(--ink-dim);
 }
 
 html,
@@ -96,13 +101,6 @@ h1 {
   margin-bottom: 0.35rem;
 }
 
-/* `hidden` loses to any rule that sets `display`, so the ramp stayed on screen in the access
-   view underneath a legend describing a different scale. Stated once, for every element the
-   panel hides. */
-[hidden] {
-  display: none !important;
-}
-
 .ramp {
   display: flex;
   height: 8px;
@@ -114,19 +112,19 @@ h1 {
   flex: 1;
 }
 .ramp span:nth-child(1) {
-  background: #2f7d4f;
+  background: var(--ramp-1);
 }
 .ramp span:nth-child(2) {
-  background: #7fa86a;
+  background: var(--ramp-2);
 }
 .ramp span:nth-child(3) {
-  background: #d9c05a;
+  background: var(--ramp-3);
 }
 .ramp span:nth-child(4) {
-  background: #d98040;
+  background: var(--ramp-4);
 }
 .ramp span:nth-child(5) {
-  background: #c2453a;
+  background: var(--ramp-5);
 }
 
 .ramp-ends {
@@ -219,7 +217,7 @@ dd {
 }
 
 .limit.blocking {
-  color: #e8c98a;
+  color: var(--warn);
 }
 
 .maplibregl-ctrl-group {
@@ -233,10 +231,10 @@ dd {
 #authorship {
   margin-bottom: 1rem;
   padding: 0.7rem 0.8rem;
-  border: 1px solid #6b5a2a;
+  border: 1px solid var(--warn-border);
   border-radius: 8px;
-  background: color-mix(in srgb, #e8c98a 10%, transparent);
-  color: #e8c98a;
+  background: color-mix(in srgb, var(--warn) 10%, transparent);
+  color: var(--warn);
   font-size: 0.8rem;
   line-height: 1.5;
 }
@@ -407,7 +405,7 @@ dd {
 }
 
 .pens-low {
-  color: #e8c98a;
+  color: var(--warn);
 }
 
 .disagree {
@@ -452,7 +450,7 @@ dd {
 .ch-simulat .ch-mark { color: var(--accent, #7fb3ff); }
 .ch-citat .ch-mark { opacity: 0.5; }
 .ch-negacoperit { opacity: 0.62; }
-.ch-negacoperit .ch-mark { color: #e5484d; opacity: 0.8; }
+.ch-negacoperit .ch-mark { color: var(--danger); opacity: 0.8; }
 
 /* Which chapter a section answers to, and whether it is the paper speaking or the model. */
 .ch-badge {
@@ -804,43 +802,6 @@ dd {
   .reader-body > .fold > details {
     break-inside: avoid;
   }
-}
-
-/* ---------------------------------------------------------------------------------------------
- * Scrollbars
- *
- * Styled rather than hidden. A scrollbar is the only cue that a panel has more below it, and on
- * a dark surface the platform default is either an invisible grey or a bright white slab. Both
- * properties are set: `scrollbar-width`/`scrollbar-color` are the standard ones Firefox honours,
- * the ::-webkit- rules cover Chromium and Safari, which still ignore them.
- * ------------------------------------------------------------------------------------------ */
-
-* {
-  scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--muted) 45%, transparent) transparent;
-}
-
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--muted) 38%, transparent);
-  border-radius: 6px;
-  /* Inset with a transparent border so the thumb reads as a slim bar with breathing room rather
-   * than filling the gutter edge to edge. */
-  border: 2px solid transparent;
-  background-clip: padding-box;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: color-mix(in srgb, var(--accent) 55%, transparent);
-  background-clip: padding-box;
-}
-::-webkit-scrollbar-corner {
-  background: transparent;
 }
 
 .reader-badge {

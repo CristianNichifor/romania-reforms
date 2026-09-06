@@ -1,183 +1,504 @@
-/* The statistics page. Separate from style.css, which is written around a full-bleed map and a
-   floating panel; this is a document, and a document reads better in a column. */
+/* The statistics page. A document, so it reads in a column; the map's stylesheet is written
+   around a full-bleed canvas and a floating panel and shares only the tokens. */
 
-:root {
-  --ink: #16181d;
-  --dim: #5c6370;
-  --line: #e2e5ea;
-  --paper: #fbfbfc;
-  --card: #fff;
-  --fill: #3d6ea8;
-  --fill-soft: #b9cde3;
-  --warn: #8a5a00;
-  --warn-bg: #fdf6e6;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --ink: #e7e9ee;
-    --dim: #9aa3b1;
-    --line: #2b2f37;
-    --paper: #14161a;
-    --card: #191c21;
-    --fill: #6f9fd8;
-    --fill-soft: #33475f;
-    --warn: #e8c37a;
-    --warn-bg: #2a2415;
-  }
-}
-
-* { box-sizing: border-box; }
+@import './tokens.css';
 
 body {
   margin: 0;
-  background: var(--paper);
+  background: var(--surface-0);
   color: var(--ink);
-  font: 16px/1.55 ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font:
+    var(--text-base) / var(--leading-normal) ui-sans-serif,
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  /* The gridlines drawn inside every bar track. Declared once, on the page, because the value
+     differs between the two themes and the chart code has no business knowing which is on. */
+  --grid: color-mix(in srgb, var(--ink) 9%, transparent);
 }
 
 #app {
-  max-width: 60rem;
+  max-width: 64rem;
   margin: 0 auto;
-  padding: 1.5rem 1.25rem 4rem;
+  padding: var(--space-4) var(--space-4) var(--space-6);
 }
 
 .up {
   display: inline-block;
-  margin-bottom: 1.5rem;
-  color: var(--dim);
+  margin-bottom: var(--space-4);
+  color: var(--ink-dim);
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: var(--text-sm);
 }
-.up:hover { color: var(--ink); }
 
-.lede h1 { font-size: 2rem; line-height: 1.15; margin: 0 0 0.6rem; }
-.lede p { color: var(--dim); max-width: 46rem; margin: 0 0 0.8rem; }
+.up:hover {
+  color: var(--ink);
+}
 
-h2 { font-size: 1.2rem; margin: 0 0 0.35rem; }
-h3 { font-size: 0.95rem; margin: 1.2rem 0 0.5rem; color: var(--dim); font-weight: 600; }
+/* Headings ---------------------------------------------------------------- */
+
+.lede h1 {
+  font-size: var(--text-2xl);
+  line-height: var(--leading-tight);
+  letter-spacing: -0.015em;
+  margin: 0 0 var(--space-3);
+}
+
+.lede p {
+  color: var(--ink-dim);
+  max-width: 46rem;
+  margin: 0 0 var(--space-3);
+}
+
+h2 {
+  font-size: var(--text-lg);
+  line-height: var(--leading-tight);
+  letter-spacing: -0.01em;
+  margin: 0 0 var(--space-1);
+}
+
+h3 {
+  font-size: var(--text-sm);
+  margin: var(--space-4) 0 var(--space-2);
+  color: var(--ink-dim);
+  font-weight: 600;
+}
 
 .card {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 1.1rem 1.2rem 1.3rem;
-  margin: 1.1rem 0;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-1);
+  padding: var(--space-4) var(--space-4) var(--space-5);
+  margin: var(--space-4) 0;
 }
 
-.note { color: var(--dim); font-size: 0.88rem; margin: 0 0 0.9rem; max-width: 48rem; }
+.note {
+  color: var(--ink-dim);
+  font-size: var(--text-sm);
+  margin: 0 0 var(--space-3);
+  max-width: 48rem;
+}
+
+.empty {
+  color: var(--ink-faint);
+  font-size: var(--text-sm);
+  margin: var(--space-2) 0;
+}
 
 .warn {
-  background: var(--warn-bg);
+  background: var(--warn-surface);
   color: var(--warn);
-  border-left: 3px solid currentColor;
-  padding: 0.55rem 0.8rem;
-  font-size: 0.88rem;
-  border-radius: 0 6px 6px 0;
-  margin: 0.8rem 0 0;
+  border: 1px solid var(--warn-border);
+  border-left-width: 3px;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  margin: var(--space-3) 0 0;
 }
 
-.facts { display: flex; flex-wrap: wrap; gap: 1.6rem; margin-top: 0.6rem; }
-.facts b { display: block; font-size: 1.3rem; font-variant-numeric: tabular-nums; }
-.facts span { color: var(--dim); font-size: 0.82rem; }
+/* Headline figures -------------------------------------------------------- */
 
-.two { display: grid; grid-template-columns: 1fr 1fr; gap: 1.6rem; }
-@media (max-width: 42rem) { .two { grid-template-columns: 1fr; } }
-
-/* Bars ------------------------------------------------------------------ */
-
-.bar, .quart {
+.facts {
   display: grid;
-  grid-template-columns: 12rem 1fr 5rem;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: var(--space-3) var(--space-4);
+  margin-top: var(--space-3);
+}
+
+.facts > div {
+  border-left: 2px solid var(--border);
+  padding-left: var(--space-3);
+}
+
+.facts b {
+  display: block;
+  font-size: var(--text-xl);
+  line-height: var(--leading-tight);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* A date range is four times as long as a count and does not need to shout as loudly; left at
+   the headline size it wraps to two lines and pushes its own caption out of alignment. */
+.facts b.span {
+  font-size: var(--text-base);
+  letter-spacing: 0;
+}
+
+.facts span {
+  color: var(--ink-dim);
+  font-size: var(--text-xs);
+}
+
+.two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5);
+}
+
+@media (max-width: 46rem) {
+  .two {
+    grid-template-columns: 1fr;
+  }
+
+  #app {
+    --label-w: 8.5rem;
+    --value-w: 4.5rem;
+  }
+}
+
+/* Charts ------------------------------------------------------------------ */
+
+.chart {
+  margin: var(--space-2) 0 0;
+}
+
+.bar,
+.quart,
+.chart-axis {
+  display: grid;
+  grid-template-columns: var(--label-w) 1fr var(--value-w);
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.22rem 0;
-  font-size: 0.87rem;
+  gap: var(--space-1) var(--space-3);
+  font-size: var(--text-sm);
 }
-.bar .bar-note, .quart .bar-note {
-  grid-column: 2 / -1;
-  color: var(--dim);
-  font-size: 0.78rem;
-  margin-top: -0.15rem;
+
+.bar,
+.quart {
+  padding: 0.3rem var(--space-2);
+  margin: 0 calc(var(--space-2) * -1);
+  border-radius: var(--radius-sm);
 }
-.bar.muted { opacity: 0.55; }
+
+/* Hovering a row is how a reader asks what it is; the highlight is what says the question was
+   heard, and the tooltip is the answer. Focus gets the same treatment, from the shared ring. */
+.bar[data-tip]:hover,
+.quart[data-tip]:hover,
+.bar[data-tipped],
+.quart[data-tipped] {
+  background: var(--surface-2);
+  cursor: default;
+}
+
+.bar.muted {
+  opacity: 0.55;
+}
 
 .bar-label {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.bar-track { background: var(--line); border-radius: 3px; height: 0.7rem; overflow: hidden; }
-.bar-fill { display: block; height: 100%; background: var(--fill); border-radius: 3px; }
-.bar-value { text-align: right; font-variant-numeric: tabular-nums; }
 
-/* Quartile strips -------------------------------------------------------- */
+.bar-note {
+  grid-column: 2 / -1;
+  color: var(--ink-dim);
+  font-size: var(--text-2xs);
+  margin-top: -0.1rem;
+}
 
-.quart-track { position: relative; height: 0.7rem; background: var(--line); border-radius: 3px; }
+.bar-value {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.bar-track {
+  position: relative;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  height: 0.85rem;
+  overflow: hidden;
+}
+
+.bar-fill {
+  display: block;
+  height: 100%;
+  min-width: 1px;
+  background: var(--accent);
+  border-radius: calc(var(--radius-sm) - 1px);
+}
+
+/* The axis. Ticks are absolutely placed against the same track width the bars use, so a
+   gridline and its label are the same x by construction. */
+.chart-axis {
+  margin-top: var(--space-1);
+  color: var(--ink-faint);
+  font-size: var(--text-2xs);
+}
+
+.axis-track {
+  position: relative;
+  height: 1.1em;
+}
+
+.axis-track span {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.axis-track span:first-child {
+  transform: none;
+}
+
+.axis-track span:last-child {
+  transform: translateX(-100%);
+}
+
+/* Quartile strips --------------------------------------------------------- */
+
+.quart-track {
+  position: relative;
+  height: 0.85rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
 .quart-box {
   position: absolute;
   top: 0;
   height: 100%;
-  background: var(--fill-soft);
-  border-radius: 3px;
+  background: var(--accent-soft);
+  border-radius: var(--radius-sm);
 }
-.quart-mid { position: absolute; top: -2px; width: 2px; height: calc(100% + 4px); background: var(--fill); }
-.quart-none { color: var(--dim); font-size: 0.8rem; }
 
-/* Survival --------------------------------------------------------------- */
+.quart-mid {
+  position: absolute;
+  top: -2px;
+  width: 2px;
+  height: calc(100% + 4px);
+  background: var(--accent);
+  border-radius: 1px;
+}
 
-.survival { border-top: 1px solid var(--line); padding: 0.75rem 0; }
-.survival:first-of-type { border-top: 0; }
-.survival-head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
-.survival-n { color: var(--dim); font-size: 0.8rem; }
-.survival-body { display: flex; align-items: flex-end; gap: 1.6rem; margin-top: 0.5rem; flex-wrap: wrap; }
+/* Survival ---------------------------------------------------------------- */
 
-.median-value { font-size: 1.35rem; font-variant-numeric: tabular-nums; }
-.median-label { display: block; color: var(--dim); font-size: 0.75rem; }
+.survival {
+  border-top: 1px solid var(--border);
+  padding: var(--space-3) var(--space-2);
+  margin: 0 calc(var(--space-2) * -1);
+  border-radius: var(--radius-sm);
+}
 
-.marks { display: flex; gap: 0.7rem; align-items: flex-end; }
-.mark { display: flex; flex-direction: column; align-items: center; width: 2.6rem; }
+.survival:first-of-type {
+  border-top: 0;
+}
+
+.survival[data-tipped],
+.survival:hover {
+  background: var(--surface-2);
+}
+
+.survival-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.survival-n {
+  color: var(--ink-dim);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.survival-body {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-5);
+  margin-top: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.median-value {
+  font-size: var(--text-xl);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.median-label {
+  display: block;
+  color: var(--ink-dim);
+  font-size: var(--text-2xs);
+}
+
+.marks {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-end;
+}
+
+.mark {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 2.8rem;
+  border-radius: var(--radius-sm);
+  padding: 0 0.1rem;
+}
+
+.mark[data-tipped],
+.mark:hover {
+  background: var(--surface-1);
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+
 .mark-bar {
   width: 100%;
-  height: 2.4rem;
-  background: var(--line);
-  border-radius: 3px;
+  height: 2.6rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: flex-end;
   overflow: hidden;
 }
-.mark-bar span { display: block; width: 100%; background: var(--fill); }
-/* "Not observed that long" must not look like "nothing resolved" — an outline, not a full bar. */
-.mark.unknown .mark-value { color: var(--dim); }
-.mark.unknown::before {
-  content: '';
+
+.mark-bar span {
+  display: block;
   width: 100%;
-  height: 2.4rem;
-  border: 1px dashed var(--line);
-  border-radius: 3px;
+  background: var(--accent);
 }
-.mark-day, .mark-value { font-size: 0.72rem; color: var(--dim); }
-.mark-value { font-variant-numeric: tabular-nums; }
-.followup { color: var(--dim); font-size: 0.78rem; }
 
-/* Limitations ------------------------------------------------------------ */
+/* "Not observed that long" must not look like "nothing resolved" — an outline, not a full bar. */
+.mark.unknown .mark-value {
+  color: var(--ink-faint);
+}
 
-.limitations details { border-top: 1px solid var(--line); padding: 0.45rem 0; }
-.limitations summary { cursor: pointer; font-size: 0.9rem; }
-.limitations p { color: var(--dim); font-size: 0.86rem; margin: 0.4rem 0 0.2rem; max-width: 48rem; }
+.mark-bar.unobserved {
+  background: transparent;
+  border-style: dashed;
+  border-color: var(--border-strong);
+}
+
+.mark-day,
+.mark-value {
+  font-size: var(--text-2xs);
+  color: var(--ink-dim);
+}
+
+.mark-value {
+  font-variant-numeric: tabular-nums;
+}
+
+.followup {
+  color: var(--ink-dim);
+  font-size: var(--text-xs);
+}
+
+/* Tooltip ----------------------------------------------------------------- */
+
+.tip {
+  position: fixed;
+  z-index: 40;
+  max-width: 22rem;
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-1);
+  color: var(--ink);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-2);
+  font-size: var(--text-xs);
+  line-height: 1.45;
+  pointer-events: none;
+}
+
+.tip strong {
+  display: block;
+  margin-bottom: var(--space-1);
+  font-size: var(--text-sm);
+}
+
+.tip dl {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 0.1rem var(--space-3);
+  margin: 0;
+}
+
+.tip dt {
+  color: var(--ink-dim);
+}
+
+.tip dd {
+  margin: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* A tooltip line with no term is a full-width note rather than half an empty row. */
+.tip dt:empty {
+  display: none;
+}
+
+.tip dt:empty + dd {
+  grid-column: 1 / -1;
+  text-align: left;
+  color: var(--ink-dim);
+}
+
+/* Limitations ------------------------------------------------------------- */
+
+.limitations details {
+  border-top: 1px solid var(--border);
+  padding: var(--space-2) 0;
+}
+
+.limitations summary {
+  cursor: pointer;
+  font-size: var(--text-sm);
+}
+
+.limitations p {
+  color: var(--ink-dim);
+  font-size: var(--text-sm);
+  margin: var(--space-2) 0 var(--space-1);
+  max-width: 48rem;
+}
+
 .sev {
   display: inline-block;
-  font-size: 0.68rem;
+  font-size: var(--text-2xs);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   padding: 0.05rem 0.35rem;
-  border-radius: 3px;
-  margin-right: 0.4rem;
-  background: var(--line);
-  color: var(--dim);
+  border-radius: var(--radius-sm);
+  margin-right: var(--space-1);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--ink-dim);
 }
-.lim.blocking .sev { background: #b4342a; color: #fff; }
-.lim.material .sev { background: var(--warn-bg); color: var(--warn); }
 
-footer { color: var(--dim); font-size: 0.8rem; margin-top: 2rem; }
-code { background: var(--line); padding: 0.05rem 0.3rem; border-radius: 3px; font-size: 0.85em; }
+.lim.blocking .sev {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: var(--danger-ink);
+}
+
+.lim.material .sev {
+  background: var(--warn-surface);
+  border-color: var(--warn-border);
+  color: var(--warn);
+}
+
+footer {
+  color: var(--ink-dim);
+  font-size: var(--text-xs);
+  margin-top: var(--space-5);
+}
+
+code {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  padding: 0.05rem 0.3rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.85em;
+}
