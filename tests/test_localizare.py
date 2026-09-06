@@ -139,15 +139,36 @@ def test_the_location_is_never_claimed_as_verbatim():
     assert document["provenance"]["confidence"] == "derived"
 
 
-def test_the_access_limitation_is_still_blocking():
-    """Knowing where a court is, is not knowing what it serves.
+def test_the_access_limitation_may_only_relax_against_a_file_that_answers_it():
+    """This guard used to require `fara-geografie` to stay blocking, and it was right to.
 
-    The arondare is set by law rather than by this report, so the cost of closing a
-    courthouse — how much further someone then travels — remains unanswerable. A map that
-    quietly dropped this limitation because it now has coordinates would be claiming to
-    answer it.
+    Its reasoning was that knowing where a court is, is not knowing what it serves: the arondare
+    is set by law rather than by the CSM report, so the cost of closing a courthouse stayed
+    unanswerable and a map that dropped the limitation merely because it had coordinates would
+    be claiming to answer it.
+
+    Both halves have since been supplied. HG 1217/2023 is imported as `arondare-2023`, and
+    `populatie-arondata` joins it to the SIRUTA registry to give each court the population it
+    serves. So the limitation is `material` — still true of the CSM document, no longer blocking
+    the question.
+
+    The guard therefore changes shape rather than going away. The severity may relax only while
+    the file that earned the relaxation is present and actually covers the country; if
+    `populatie-arondata` disappears or stops matching its courts, this fails and the limitation
+    has to go back to blocking. A caveat is allowed to be retired by work, never by a rewrite.
     """
     document = json.loads(LOCATED.read_text(encoding="utf-8"))
-    blocking = [x for x in document["limitations"] if x["id"] == "fara-geografie"]
-    assert blocking and blocking[0]["severity"] == "blocking"
-    assert "access" in blocking[0]["affects"]
+    found = [x for x in document["limitations"] if x["id"] == "fara-geografie"]
+    assert found, "the limitation must survive in some form: it is true of the CSM report"
+    limitation = found[0]
+    assert "access" in limitation["affects"]
+
+    if limitation["severity"] == "blocking":
+        return
+
+    served = ROOT / "simulators/justitie/data/populatie-arondata.json"
+    assert served.is_file(), "downgraded with nothing to point at"
+    body = json.loads(served.read_text(encoding="utf-8"))
+    assert body["summary"]["cotaArondata"] > 0.99
+    assert body["summary"]["judecatoriiNepotrivite"] == []
+    assert "populatie-arondata" in limitation["text"]

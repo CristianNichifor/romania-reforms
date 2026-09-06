@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/populatie-arondata.schema.json",
+  "title": "The population each court serves",
+  "description": "Every CSM edition here carries a limitation saying the report contains neither the location of the courts nor the population they serve. The first half stopped being true when locate_instante placed all 241 courts; this document answers the second, which is the half a consolidation argument needs — moving a courthouse is a cost paid by a number of people, and that number existed nowhere. It is the join of HG 1217/2023, which says which communes belong to which judecătorie, with the SIRUTA registry, which says how many people live in each. What the schema is built to prevent is a reader summing the wrong subset: the tiers do not all mean the same thing by 'population', so every row must say which of five bases its figure rests on, and two of those five are nulls with a reason rather than numbers.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "period",
+    "provenance",
+    "summary",
+    "comuneNearondate",
+    "localitatiFaraPopulatie",
+    "instante",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "const": "populatie-arondata" },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "period": { "type": "string" },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "judecatorii",
+        "tribunale",
+        "populatieNationala",
+        "populatieArondata",
+        "cotaArondata",
+        "comuneNearondate",
+        "judecatoriiSuspendate",
+        "judecatoriiNepotrivite"
+      ],
+      "properties": {
+        "judecatorii": { "type": "integer", "minimum": 1 },
+        "tribunale": { "type": "integer", "minimum": 1 },
+        "populatieNationala": { "type": "integer", "minimum": 1 },
+        "populatieArondata": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "People living in a commune the decision arondates to some judecătorie. Summing the 42 county tribunals must give the same figure — every commune belongs to one judecătorie and every judecătorie to one county — and a disagreement between the two means the join lost a court."
+        },
+        "cotaArondata": { "type": "number", "minimum": 0, "maximum": 1 },
+        "comuneNearondate": { "type": "integer", "minimum": 0 },
+        "judecatoriiSuspendate": {
+          "type": "array",
+          "description": "In the decision but not sitting. Named so that 'absent' cannot be read as 'unmatched'.",
+          "items": { "type": "string" }
+        },
+        "judecatoriiNepotrivite": {
+          "type": "array",
+          "description": "Courts in the decision that did not meet the register. Must be empty — the builder exits non-zero otherwise, because an unmatched court silently drops its whole population.",
+          "maxItems": 0,
+          "items": { "type": "string" }
+        }
+      }
+    },
+
+    "comuneNearondate": {
+      "type": "array",
+      "description": "Communes belonging to no judecătorie, by name. Two, both founded after the decision was adopted. Named rather than counted: a bare number reads as rounding, and this is a fact about the decision.",
+      "items": { "type": "string" }
+    },
+
+    "localitatiFaraPopulatie": {
+      "type": "array",
+      "description": "Courts whose commune list contains SIRUTA codes the registry does not know, and how many. Each one is population silently missing from that court's figure.",
+      "items": { "type": "string" }
+    },
+
+    "instante": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "nume",
+          "grad",
+          "judet",
+          "populatie",
+          "bazaPopulatiei",
+          "localitati",
+          "localitatiFaraPopulatie",
+          "volumCsm",
+          "dosarePerMieDeLocuitori"
+        ],
+        "properties": {
+          "nume": { "type": "string" },
+          "grad": { "type": "string" },
+          "judet": { "type": ["string", "null"] },
+          "populatie": { "type": ["integer", "null"], "minimum": 0 },
+
+          "bazaPopulatiei": {
+            "type": "string",
+            "enum": [
+              "comune-arondate",
+              "judet",
+              "judet-partajat",
+              "jurisdictie-personala",
+              "circumscriptie-nepublicata",
+              "national"
+            ],
+            "description": "Where the figure comes from, because the tiers do not mean the same thing by it. `comune-arondate` is a sum over the decision's list. `judet` is the county, which is a reading of the court structure rather than a lookup. `judet-partajat` is a specialised tribunal sharing its county with the ordinary one — a real population that must not be added to a national total, or the county is counted twice. `jurisdictie-personala` is a military tribunal, whose jurisdiction is over service members rather than a territory, so the figure is null. `circumscriptie-nepublicata` is an appeal court, null because no readable source says which counties it holds."
+          },
+
+          "localitati": { "type": "integer", "minimum": 0 },
+          "localitatiFaraPopulatie": { "type": "integer", "minimum": 0 },
+          "volumCsm": { "type": "integer", "minimum": 0 },
+
+          "dosarePerMieDeLocuitori": {
+            "type": ["number", "null"],
+            "minimum": 0,
+            "description": "CSM's volume of activity over the served population. Not a litigation rate — the volume includes the stock inherited from previous years, not only the year's filings — but defined identically for every court, so it compares between them. It is the figure that distinguishes a large court from a litigious one, and it had no denominator until this file."
+          }
+        }
+      }
+    },
+
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+    }
+  }
+}

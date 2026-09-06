@@ -4155,8 +4155,8 @@
     },
     {
       "id": "fara-geografie",
-      "text": "Documentul nu conține localizarea instanțelor și nici populația arondată. Comasarea are un cost de acces — distanța pe care o are de făcut un cetățean — care nu poate fi evaluat din datele astea singure.",
-      "severity": "blocking",
+      "text": "Documentul nu conține localizarea instanțelor și nici populația arondată, deci costul de acces al unei comasări — distanța pe care o are de făcut un cetățean — nu se poate evalua din el singur. Amândouă se calculează acum în altă parte a depozitului: `instante-localizate-*` pune fiecare instanță pe hartă prin registrul SIRUTA, iar `populatie-arondata` îi dă populația, adunând comunele pe care HG 1217/2023 i le arondează. Limitarea rămâne pentru că este adevărată despre acest document; a fost coborâtă de la „blocking” pentru că nu mai blochează întrebarea.",
+      "severity": "material",
       "affects": [
         "access",
         "consolidation"
