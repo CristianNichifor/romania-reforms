@@ -40,7 +40,11 @@ jobs:
     timeout-minutes: 330  # under the 6h job ceiling, with room to fail rather than be killed
     strategy:
       fail-fast: false
-      # Twelve shards of the 246-court enum, round-robin so each gets a similar mix of sizes.
+      # Twelve shards of the 246-court enum, split by weight rather than by position so each
+      # carries a similar amount of work. `shard_courts` explains why the previous round-robin
+      # did the opposite of what it intended, and what it cost: the two heaviest shards hit the
+      # ceiling below and returned nothing, twice, taking forty-one courts out of a published
+      # snapshot without failing anything.
       #
       # Held deliberately low. The concern is not runner minutes, which are free, but that this
       # is one state-run ASP.NET service with no second endpoint and no published rate limit;
