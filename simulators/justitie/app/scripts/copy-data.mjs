@@ -83,6 +83,10 @@ const sources = [
   // What the case files say, aggregated: workload, termene, duration, charges. Built by
   // scripts/build_portal_stats.py from the daily portal snapshots.
   [resolve(here, '../../data/portal-stats.json'), 'portal-stats.json'],
+  // The same measurements per court, and only in forms that add up — counts and histograms,
+  // never a percentile. It is what lets the statistics page answer for a county, an appeal
+  // circumscription or one of the proposed courts rather than only for the country.
+  [resolve(here, '../../data/portal-instante.json'), 'portal-instante.json'],
   // Cases filed per court, which no published source states.
   [resolve(here, '../../data/intrate-portal.json'), 'intrate-portal.json'],
   // Four consecutive CSM editions. The portal cannot show how the system changed — its old
@@ -112,7 +116,7 @@ if (existsSync(roads)) {
 // a crawl that takes hours and are not committed while they hold a placeholder sample. A
 // checkout without them legitimately lacks them, and the statistics page says so on its own
 // rather than the whole build failing and taking the map down with it.
-const optional = new Set(['portal-stats.json', 'intrate-portal.json']);
+const optional = new Set(['portal-stats.json', 'portal-instante.json', 'intrate-portal.json']);
 
 for (const [from, name] of sources) {
   if (!existsSync(from) && optional.has(name)) {

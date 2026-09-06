@@ -1,0 +1,244 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/portal-instante.schema.json",
+  "title": "Each court's own figures, in a shape that can be added back up",
+  "description": "The national file answers how the system works; this one answers how it works here, for any set of courts a reader can name — a county, an appeal circumscription, or one of the courts the reform proposes, which has never had a statistic of its own. The constraint that shapes the whole document is that a median does not add: two courts whose median case runs 120 days do not make a county whose median case runs 120 days, and no weighting fixes it. So this file publishes no percentile. Every field is a count or a histogram, both of which add, and the quantile is taken from the summed histogram — the quantile of the pooled distribution rather than an average of quantiles. The schema enforces that: there is no p50 anywhere in it, and any future one would be a field that cannot be aggregated sitting in a file whose only purpose is aggregation.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "period",
+    "provenance",
+    "snapshot",
+    "praguriZile",
+    "judete",
+    "instante",
+    "faraPotrivireDeNume",
+    "instanteTrunchiate",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "const": "portal-instante" },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "period": { "type": "string" },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+
+    "snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "crawledAt",
+        "instante",
+        "dosare",
+        "institutieDinFisier",
+        "cohortMonths",
+        "cohortFrom",
+        "faraJudet"
+      ],
+      "properties": {
+        "crawledAt": { "type": "string" },
+        "instante": { "type": "integer", "minimum": 1 },
+        "dosare": { "type": "integer", "minimum": 0 },
+        "institutieDinFisier": {
+          "type": "boolean",
+          "description": "True when the hearing rows carry their own court. False means it was recovered from which court had the file on the day of the hearing — the most recent registration at or before it. That route is exact for the 88,8% of cases that live at one court and a dated inference for the rest; either way each hearing belongs to exactly one court, which is what makes these figures summable."
+        },
+        "cohortMonths": { "type": "integer", "minimum": 1 },
+        "cohortFrom": {
+          "type": "string",
+          "description": "Registration date from which durations and intervals are measured. Older than this the portal has archived the fast cases, so any duration would measure slowness twice."
+        },
+        "faraJudet": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many courts matched no published name and therefore carry a null county."
+        },
+        "instanteTrunchiate": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many courts the crawl did not finish. Their rows are kept and flagged; deleting them would make a county total a sum over fewer courts than it names."
+        },
+        "pragTrunchiere": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Ratio of portal cases to CSM's published annual volume below which a court is treated as unmeasured. Sits in a two-order-of-magnitude gap in the observed distribution rather than at a chosen round number."
+        }
+      }
+    },
+
+    "praguriZile": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "The bin edges, in days, that every histogram below is counted against. Published because they are the grain of every quantile a reader can derive: a median that lands on 28 days landed on a bin edge, not on a day.",
+      "required": ["termene", "durata", "peRol"],
+      "properties": {
+        "termene": { "$ref": "#/$defs/edges" },
+        "durata": { "$ref": "#/$defs/edges" },
+        "peRol": { "$ref": "#/$defs/edges" }
+      }
+    },
+
+    "judete": {
+      "type": "object",
+      "description": "County code to printed name, so the page can label a filter without loading the administrative registry.",
+      "additionalProperties": { "type": "string" }
+    },
+
+    "instante": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/instanta" }
+    },
+
+    "faraPotrivireDeNume": {
+      "type": "array",
+      "description": "Courts on the portal whose name is not in the CSM annex. Named rather than dropped: four judecătorii are absent because they are suspended, and losing them would make every county share quietly wrong.",
+      "items": { "type": "string" }
+    },
+
+    "instanteTrunchiate": {
+      "type": "array",
+      "description": "Courts the crawl did not finish, named so a reader can see which figures are fragments without walking the whole array.",
+      "items": { "type": "string" }
+    },
+
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+    }
+  },
+
+  "$defs": {
+    "edges": {
+      "type": "array",
+      "minItems": 2,
+      "description": "Ascending day thresholds. The last bin is open-ended: a value past the final edge falls in it, and no upper bound is invented for a tail nobody measured.",
+      "items": { "type": "integer", "minimum": 0 }
+    },
+
+    "histogram": {
+      "type": "array",
+      "description": "One count per bin of the matching edge list, same length and same order, so two courts' histograms are summed element by element.",
+      "items": { "type": "integer", "minimum": 0 }
+    },
+
+    "instanta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "institutie",
+        "nume",
+        "level",
+        "judet",
+        "siruta",
+        "acoperire",
+        "dosare",
+        "dosarePenale",
+        "sectii",
+        "completuri",
+        "peCategorie",
+        "amanari",
+        "peRol",
+        "primulTermen",
+        "intervalTermene",
+        "durata"
+      ],
+      "properties": {
+        "institutie": {
+          "type": "string",
+          "description": "The portal's own enum member. This is the key, kept verbatim, because it is what the crawler and every downstream join agree on."
+        },
+        "nume": {
+          "type": ["string", "null"],
+          "description": "The name CSM prints, or null where the two vocabularies did not meet."
+        },
+        "level": { "type": "string" },
+        "judet": { "type": ["string", "null"] },
+        "siruta": { "type": ["string", "null"] },
+
+        "acoperire": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Whether this court was actually crawled, set against the one external figure available per court. A truncated court's row is kept and flagged rather than removed, because a county total built over a shortened list would be wrong without anything showing it.",
+          "required": ["volumCsm", "raportFataDeVolum", "trunchiat"],
+          "properties": {
+            "volumCsm": { "type": ["integer", "null"] },
+            "raportFataDeVolum": {
+              "type": ["number", "null"],
+              "minimum": 0,
+              "description": "Portal cases over CSM's published annual volume. Above one for a working crawl — the snapshot spans more than three years — and around 0,005 for a court whose shard died."
+            },
+            "trunchiat": {
+              "type": "boolean",
+              "description": "True means every figure in this row is a fragment of the court rather than a measurement of it."
+            }
+          }
+        },
+
+        "dosare": { "type": "integer", "minimum": 0 },
+        "dosarePenale": { "type": "integer", "minimum": 0 },
+        "sectii": { "type": "integer", "minimum": 0 },
+        "completuri": { "type": "integer", "minimum": 0 },
+
+        "peCategorie": {
+          "type": "object",
+          "description": "Cases per ECRIS category. The key is the enum member with its spaces dropped, kept raw because it is a join key; expanding it is the page's job.",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        },
+
+        "amanari": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Three different acts, never summed here. Only amanareCauza is an adjournment in the sense a workload argument means; a court that defers many judgments is a court that has heard the cases.",
+          "required": [
+            "termeneCuSolutie",
+            "amanareCauza",
+            "amanarePronuntare",
+            "termenPreschimbat"
+          ],
+          "properties": {
+            "termeneCuSolutie": { "type": "integer", "minimum": 0 },
+            "amanareCauza": { "type": "integer", "minimum": 0 },
+            "amanarePronuntare": { "type": "integer", "minimum": 0 },
+            "termenPreschimbat": { "type": "integer", "minimum": 0 }
+          }
+        },
+
+        "peRol": {
+          "allOf": [{ "$ref": "#/$defs/histogram" }],
+          "description": "Pending cases by age, against praguriZile.peRol. Pending means no disposition on any hearing in the portal, which is the portal's view and not the court's register."
+        },
+        "primulTermen": {
+          "allOf": [{ "$ref": "#/$defs/histogram" }],
+          "description": "Days from registration to the first hearing, against praguriZile.termene, over the cohort only."
+        },
+        "intervalTermene": {
+          "allOf": [{ "$ref": "#/$defs/histogram" }],
+          "description": "Days between consecutive hearings of the same case, against praguriZile.termene, over the cohort only."
+        },
+
+        "durata": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "A life table rather than a duration. Per bin: how many cases were resolved in it and how many were still running when the crawl ended. That is what the actuarial estimator consumes, and it is the only form of a survival curve that survives being added to another court's.",
+          "required": ["dosare", "urmarireZile", "evenimente", "cenzurate"],
+          "properties": {
+            "dosare": { "type": "integer", "minimum": 0 },
+            "urmarireZile": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "The longest any case in this cohort has been watched. A survival curve drawn past it stops being a measurement and becomes a projection."
+            },
+            "evenimente": { "$ref": "#/$defs/histogram" },
+            "cenzurate": { "$ref": "#/$defs/histogram" }
+          }
+        }
+      }
+    }
+  }
+}
