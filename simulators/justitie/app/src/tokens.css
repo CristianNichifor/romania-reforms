@@ -1,0 +1,207 @@
+/**
+ * The one place the simulator decides what things look like.
+ *
+ * There were two palettes before this file: the map's, dark-only, six custom properties named
+ * after what they paint (`--bg`, `--panel`, `--line`); and the statistics page's, light and dark,
+ * eight named the same way but set to different values. The two pages link to each other, so a
+ * reader crossed between two greys that were nearly but not quite the same, and any change to
+ * one had to be remembered twice.
+ *
+ * They are unified here, and the unification is deliberately asymmetric. The map is dark and
+ * stays dark — a choropleth over a basemap is read against a dark ground, and offering it in
+ * light would mean a second colour ramp with a second set of contrast checks. So the map pins
+ * `data-theme="dark"` on the document, while the statistics page, which is a document rather
+ * than a picture, follows the reader's system setting. Both draw from this file.
+ *
+ * The dark values are the map's existing ones to the digit. That is not laziness: they were
+ * already tuned against MapLibre's rendering, and adopting them means the statistics page moves
+ * to meet the map rather than the other way round, so nothing on the map changes appearance.
+ *
+ * Names say role, not appearance. `--surface-2` is where a card sits; it is not "light grey",
+ * because in dark it is not grey and not light. The rule that keeps this honest: if a token's
+ * name would be wrong after a theme switch, it is the wrong name.
+ */
+
+:root {
+  color-scheme: light dark;
+
+  /* Type. A fourth-based scale, rounded to values that land on whole pixels at 16px root. */
+  --text-2xs: 0.7rem;
+  --text-xs: 0.78rem;
+  --text-sm: 0.86rem;
+  --text-base: 1rem;
+  --text-lg: 1.15rem;
+  --text-xl: 1.45rem;
+  --text-2xl: 2rem;
+  --leading-tight: 1.2;
+  --leading-normal: 1.55;
+
+  /* Space. Six steps; anything between them is a decision that wants a reason. */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1.1rem;
+  --space-5: 1.6rem;
+  --space-6: 2.4rem;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* The width of a chart's label column, shared so that every chart on a page lines up its bars
+     at the same x even when the charts are in different cards and rendered by different calls. */
+  --label-w: 13rem;
+  --value-w: 5.5rem;
+
+  /* Light. */
+  --surface-0: #f7f8fa;
+  --surface-1: #ffffff;
+  --surface-2: #f1f3f6;
+  --border: #e2e5ea;
+  --border-strong: #c9cfd8;
+  --ink: #16181d;
+  --ink-dim: #5c6370;
+  --ink-faint: #868d99;
+  --accent: #2f6099;
+  --accent-ink: #ffffff;
+  --accent-soft: #b9cde3;
+  --accent-wash: color-mix(in srgb, var(--accent) 10%, transparent);
+  --warn: #8a5a00;
+  --warn-surface: #fdf6e6;
+  --warn-border: #e6d3a3;
+  --danger: #b4342a;
+  --danger-ink: #ffffff;
+  --focus: #2f6099;
+  --shadow-1: 0 1px 2px rgb(16 24 40 / 6%);
+  --shadow-2: 0 8px 24px -12px rgb(16 24 40 / 25%);
+
+  /* The sequential ramp, five stops, green through red. Used by the map's choropleth and by any
+     chart that grades a value rather than merely measuring it. */
+  --ramp-1: #2f7d4f;
+  --ramp-2: #7fa86a;
+  --ramp-3: #d9c05a;
+  --ramp-4: #d98040;
+  --ramp-5: #c2453a;
+}
+
+/* Dark, from the system. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --surface-0: #0b0d10;
+    --surface-1: #12161b;
+    --surface-2: #171c22;
+    --border: #232a31;
+    --border-strong: #333d46;
+    --ink: #e8eaed;
+    --ink-dim: #9aa3ad;
+    --ink-faint: #767f8a;
+    --accent: #7fb3ff;
+    --accent-ink: #0b0d10;
+    --accent-soft: #33475f;
+    --warn: #e8c98a;
+    --warn-surface: #241f14;
+    --warn-border: #6b5a2a;
+    --danger: #e5484d;
+    --danger-ink: #0b0d10;
+    --focus: #7fb3ff;
+    --shadow-1: 0 1px 2px rgb(0 0 0 / 40%);
+    --shadow-2: 0 10px 28px -14px #000;
+  }
+}
+
+/* Dark, pinned. The map sets this because its ramp is only designed against a dark ground; the
+   selector is duplicated rather than combined with the media query above because a comma-joined
+   selector list is dropped whole by any browser that fails to parse one of its parts. */
+:root[data-theme='dark'] {
+  --surface-0: #0b0d10;
+  --surface-1: #12161b;
+  --surface-2: #171c22;
+  --border: #232a31;
+  --border-strong: #333d46;
+  --ink: #e8eaed;
+  --ink-dim: #9aa3ad;
+  --ink-faint: #767f8a;
+  --accent: #7fb3ff;
+  --accent-ink: #0b0d10;
+  --accent-soft: #33475f;
+  --warn: #e8c98a;
+  --warn-surface: #241f14;
+  --warn-border: #6b5a2a;
+  --danger: #e5484d;
+  --danger-ink: #0b0d10;
+  --focus: #7fb3ff;
+  --shadow-1: 0 1px 2px rgb(0 0 0 / 40%);
+  --shadow-2: 0 10px 28px -14px #000;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* `hidden` loses to any rule that sets `display`, so an element the code had hidden stayed on
+   screen underneath one describing something else. Stated once, for both pages. */
+[hidden] {
+  display: none !important;
+}
+
+/* One focus ring, visible on both grounds, never removed. A keyboard reader on the statistics
+   page has to be able to see which chart row is being described by the tooltip. */
+:where(a, button, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Every figure in this project is meant to be compared down a column. */
+.num,
+[data-num] {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Scrollbars.
+ *
+ * Styled rather than hidden. A scrollbar is the only cue that a panel has more below it, and on
+ * a dark surface the platform default is either an invisible grey or a bright white slab. Both
+ * properties are set: `scrollbar-width`/`scrollbar-color` are the standard ones Firefox honours,
+ * the ::-webkit- rules cover Chromium and Safari, which still ignore them. Setting only one of
+ * the two leaves half the browsers on the default. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--ink-dim) 45%, transparent) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--ink-dim) 38%, transparent);
+  border-radius: 6px;
+  /* Inset with a transparent border so the thumb reads as a slim bar with breathing room rather
+   * than filling the gutter edge to edge. */
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--accent) 55%, transparent);
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}

@@ -16,10 +16,12 @@
  *   * Adjournments are three different acts and are never summed into one headline.
  *
  * No chart library, and no SVG either: every bar is a div with a width, every quartile strip is
- * three absolutely positioned spans. The page builds to about 7 kB of script over a 130 kB
- * document, and a plotting dependency to draw horizontal rectangles would cost more than it
- * explains.
+ * three absolutely positioned spans. The drawing itself lives in `charts.ts`, which is where the
+ * axis, the hover states and the tooltip are; this file decides what to plot and what to say
+ * about it. A plotting dependency to draw horizontal rectangles would cost more than it explains.
  */
+
+import { bars, count, esc, quartiles, share, wireTooltips } from './charts';
 
 const BASE = import.meta.env.BASE_URL;
 
@@ -115,8 +117,29 @@ interface Edition {
 }
 
 const el = (id: string) => document.getElementById(id) as HTMLElement;
-const ro = new Intl.NumberFormat('ro-RO');
-const pct = (value: number) => `${(value * 100).toFixed(1).replace('.', ',')}%`;
+const pct = share;
+
+/**
+ * The ECRIS case-type enum, spelled the way a reader says it.
+ *
+ * The values arrive as `Contenciosadministrativsifiscal` — the enum member with its spaces
+ * dropped — and the data files keep them exactly so, because they are the join key between the
+ * portal and everything downstream. Expanding them is a presentation decision and lives here.
+ * An unknown value falls through unchanged rather than being guessed at: a new ECRIS category
+ * should look raw and unhandled, not plausibly renamed.
+ */
+const CATEGORIES: Record<string, string> = {
+  Litigiicuprofesionistii: 'Litigii cu profesioniștii',
+  Contenciosadministrativsifiscal: 'Contencios administrativ și fiscal',
+  Minorisifamilie: 'Minori și familie',
+  Asigurarisociale: 'Asigurări sociale',
+  Litigiidemunca: 'Litigii de muncă',
+  Insolventapersoaneifizice: 'Insolvența persoanei fizice',
+  ProprietateIntelectuala: 'Proprietate intelectuală',
+  Dreptmaritimsifluvial: 'Drept maritim și fluvial',
+};
+
+const categoryName = (raw: string): string => CATEGORIES[raw] ?? raw;
 
 /** Days as a reader says them, because "547 de zile" is a number and "un an și jumătate" is a fact. */
 function days(value: number | null): string {
@@ -127,23 +150,13 @@ function days(value: number | null): string {
   return `${(value / 365).toFixed(1).replace('.', ',')} ani`;
 }
 
-function bars(
-  into: HTMLElement,
-  rows: { label: string; value: number; note?: string; muted?: boolean }[],
-  format: (value: number) => string = (value) => ro.format(value),
-): void {
-  const top = Math.max(...rows.map((row) => row.value), 1);
-  into.innerHTML = rows
-    .map(
-      (row) => `
-      <div class="bar${row.muted ? ' muted' : ''}">
-        <span class="bar-label" title="${row.label}">${row.label}</span>
-        <span class="bar-track"><span class="bar-fill" style="width:${(row.value / top) * 100}%"></span></span>
-        <span class="bar-value">${format(row.value)}</span>
-        ${row.note ? `<span class="bar-note">${row.note}</span>` : ''}
-      </div>`,
-    )
+/** A tooltip payload: the attribute the delegated listener in `charts.ts` reads. */
+function tip(title: string, lines: [string, string][]): string {
+  const body = lines
+    .filter(([, value]) => value !== '')
+    .map(([term, value]) => `<dt>${esc(term)}</dt><dd>${esc(value)}</dd>`)
     .join('');
+  return `tabindex="0" data-tip="${esc(`<strong>${esc(title)}</strong><dl>${body}</dl>`)}"`;
 }
 
 /**
@@ -151,28 +164,55 @@ function bars(
  *
  * The marks are the shares resolved by 90, 180 and 365 days. A null mark means the cohort has
  * not been followed that long, and the bar is drawn as an open outline rather than as zero —
- * "not yet known" and "none resolved" are opposite claims and must not look alike.
+ * "not yet known" and "none resolved" are opposite claims and must not look alike. The tooltip
+ * says which of the two it is in words, because an outline is a convention a reader has to be
+ * taught and a sentence is not.
  */
 function survivalRow(row: Survival): string {
-  const name = row.level ?? row.categorie ?? '';
+  const name = row.level ?? (row.categorie ? categoryName(row.categorie) : '');
   const marks = [90, 180, 365]
     .map((day) => {
-      const share = row.rezolvatePana[`zi${day}`];
-      if (share === null || share === undefined) {
-        return `<span class="mark unknown" title="Cohorta nu a fost urmărită ${day} de zile">
-          <span class="mark-day">${day}z</span><span class="mark-value">?</span></span>`;
+      const resolved = row.rezolvatePana[`zi${day}`];
+      if (resolved === null || resolved === undefined) {
+        const why: [string, string][] = [
+          ['', `Cohorta a fost urmărită ${days(row.urmarireZile)}, mai puțin de ${day} de zile.`],
+          ['', 'Nu se poate spune ce parte s-a soluționat până aici, iar o cifră ar fi o extrapolare.'],
+        ];
+        // Same three elements in the same order as an observed mark, so the day labels of all
+        // three marks sit on one line. An `::before` box would push this one's label down and
+        // the row would read as a different kind of thing rather than as a missing value.
+        return `<span class="mark unknown" ${tip(`${name} — la ${day} de zile`, why)}>
+          <span class="mark-day">${day}z</span>
+          <span class="mark-bar unobserved"></span>
+          <span class="mark-value">?</span></span>`;
       }
-      return `<span class="mark" title="${pct(share)} soluționate în ${day} de zile">
+      const lines: [string, string][] = [
+        ['soluționate', pct(resolved)],
+        ['din', `${count(row.dosare)} dosare`],
+        ['încă în curs sau ulterior', pct(1 - resolved)],
+      ];
+      return `<span class="mark" ${tip(`${name} — la ${day} de zile`, lines)}>
         <span class="mark-day">${day}z</span>
-        <span class="mark-bar"><span style="height:${Math.max(share * 100, 2)}%"></span></span>
-        <span class="mark-value">${Math.round(share * 100)}%</span></span>`;
+        <span class="mark-bar"><span style="height:${Math.max(resolved * 100, 2)}%"></span></span>
+        <span class="mark-value">${Math.round(resolved * 100)}%</span></span>`;
     })
     .join('');
+  const summary: [string, string][] = [
+    ['dosare în cohortă', count(row.dosare)],
+    ['soluționate', count(row.solutionate)],
+    ['încă în curs', count(row.inCurs)],
+    ['mediana', days(row.medianaZile)],
+    ['urmărire', days(row.urmarireZile)],
+    [
+      '',
+      'Mediana este estimată Kaplan-Meier: dosarele încă nesoluționate contribuie cu „cel puțin atât”.',
+    ],
+  ];
   return `
-    <div class="survival">
+    <div class="survival" ${tip(name, summary)}>
       <div class="survival-head">
-        <strong>${name}</strong>
-        <span class="survival-n">${ro.format(row.dosare)} dosare · ${ro.format(row.solutionate)} soluționate · ${ro.format(row.inCurs)} în curs</span>
+        <strong>${esc(name)}</strong>
+        <span class="survival-n">${count(row.dosare)} dosare · ${count(row.solutionate)} soluționate · ${count(row.inCurs)} în curs</span>
       </div>
       <div class="survival-body">
         <div class="median">
@@ -185,33 +225,17 @@ function survivalRow(row: Survival): string {
     </div>`;
 }
 
-function quartiles(
-  into: HTMLElement,
+/** Percentile rows as `charts.ts` wants them: a label, a denominator, three days. */
+function strips(
   rows: { level: string; dosare?: number; intervale?: number; p25?: number; p50?: number; p75?: number }[],
-): void {
-  const top = Math.max(...rows.map((row) => row.p75 ?? 0), 1);
-  into.innerHTML = rows
-    .map((row) => {
-      const n = row.dosare ?? row.intervale ?? 0;
-      if (row.p50 === undefined) {
-        return `<div class="quart"><span class="bar-label">${row.level}</span>
-          <span class="quart-none">prea puține observații</span></div>`;
-      }
-      const left = ((row.p25 ?? 0) / top) * 100;
-      const width = Math.max((((row.p75 ?? 0) - (row.p25 ?? 0)) / top) * 100, 0.6);
-      const mid = ((row.p50 ?? 0) / top) * 100;
-      return `
-        <div class="quart">
-          <span class="bar-label" title="${row.level}">${row.level}</span>
-          <span class="quart-track">
-            <span class="quart-box" style="left:${left}%;width:${width}%"></span>
-            <span class="quart-mid" style="left:${mid}%"></span>
-          </span>
-          <span class="bar-value">${days(row.p50 ?? null)}</span>
-          <span class="bar-note">${ro.format(n)} obs.</span>
-        </div>`;
-    })
-    .join('');
+): { label: string; n: number; p25?: number | undefined; p50?: number | undefined; p75?: number | undefined }[] {
+  return rows.map((row) => ({
+    label: row.level,
+    n: row.dosare ?? row.intervale ?? 0,
+    p25: row.p25,
+    p50: row.p50,
+    p75: row.p75,
+  }));
 }
 
 async function load<T>(name: string): Promise<T> {
@@ -241,10 +265,10 @@ async function main(): Promise<void> {
   el('acoperire').innerHTML = `
     <h2>Ce s-a măsurat</h2>
     <div class="facts">
-      <div><b>${ro.format(snap.dosare)}</b><span>dosare</span></div>
-      <div><b>${ro.format(snap.instante)}</b><span>instanțe</span></div>
-      <div><b>${ro.format(snap.sedinte)}</b><span>termene</span></div>
-      <div><b>${snap.registeredFrom} — ${snap.registeredTo}</b><span>înregistrate</span></div>
+      <div><b>${count(snap.dosare)}</b><span>dosare</span></div>
+      <div><b>${count(snap.instante)}</b><span>instanțe</span></div>
+      <div><b>${count(snap.sedinte)}</b><span>termene</span></div>
+      <div><b class="span">${snap.registeredFrom} — ${snap.registeredTo}</b><span>înregistrate</span></div>
     </div>
     ${
       incomplete
@@ -279,16 +303,20 @@ async function main(): Promise<void> {
         oldest && newest && row.label === newest.label && oldest.value > 0
           ? `+${pct(newest.value / oldest.value - 1)} față de ${oldest.label}`
           : '',
+      detail: [['sursa', `Starea justiției ${row.label}, Anexa 1`]],
     })),
+    { unit: 'volum de activitate, judecătorii' },
   );
 
   bars(
     el('tipuri'),
     stats.caseTypes.slice(0, 10).map((row) => ({
-      label: row.categorie,
+      label: categoryName(row.categorie),
       value: row.dosare,
       note: pct(row.share),
+      detail: [['din toate dosarele', pct(row.share)]],
     })),
+    { unit: 'dosare' },
   );
 
   el('durata-note').textContent =
@@ -301,22 +329,50 @@ async function main(): Promise<void> {
       ? `<h3>Pe categorie</h3>${stats.durata.byCategorie.slice(0, 6).map(survivalRow).join('')}`
       : '');
 
-  quartiles(el('primul'), stats.primulTermen);
-  quartiles(el('intervale'), stats.termene.intervalZileByLevel);
+  const inDays = (value: number) => days(Math.round(value));
+  // Two ticks, not four: these two charts sit side by side, so each track is half as wide and
+  // five labels reading "3,3 luni" run into one another.
+  quartiles(el('primul'), strips(stats.primulTermen), {
+    format: inDays,
+    unit: 'dosare',
+    targetTicks: 2,
+  });
+  quartiles(el('intervale'), strips(stats.termene.intervalZileByLevel), {
+    format: inDays,
+    unit: 'intervale',
+    targetTicks: 2,
+  });
 
   const a = stats.amanari;
+  const ofTerms: [string, string][] = [['din', `${count(a.termeneCuSolutie)} termene cu soluție`]];
   bars(
     el('amanari'),
     [
-      { label: 'Amână cauza', value: a.amanareCauza, note: pct(a.amanareCauza / a.termeneCuSolutie) },
-      { label: 'Amână pronunțarea', value: a.amanarePronuntare, note: pct(a.amanarePronuntare / a.termeneCuSolutie) },
-      { label: 'Termen preschimbat', value: a.termenPreschimbat, note: pct(a.termenPreschimbat / a.termeneCuSolutie) },
+      {
+        label: 'Amână cauza',
+        value: a.amanareCauza,
+        note: pct(a.amanareCauza / a.termeneCuSolutie),
+        detail: [...ofTerms, ['', 'Nu s-a ajuns la cauză: se fixează alt termen.']],
+      },
+      {
+        label: 'Amână pronunțarea',
+        value: a.amanarePronuntare,
+        note: pct(a.amanarePronuntare / a.termeneCuSolutie),
+        detail: [...ofTerms, ['', 'Instanța a judecat și își scrie hotărârea. Este progres, nu întârziere.']],
+      },
+      {
+        label: 'Termen preschimbat',
+        value: a.termenPreschimbat,
+        note: pct(a.termenPreschimbat / a.termeneCuSolutie),
+        detail: [...ofTerms, ['', 'Data a fost mutată, adesea înainte ca ședința să înceapă.']],
+      },
     ],
+    { unit: 'termene' },
   );
 
   const p = stats.penal;
   el('penal-note').textContent =
-    `Din ${ro.format(p.dosarePenale)} dosare penale, ${ro.format(p.cuArticol)} poartă o trimitere ` +
+    `Din ${count(p.dosarePenale)} dosare penale, ${count(p.cuArticol)} poartă o trimitere ` +
     `la un text de lege. ${p.cotaProcedurala === null ? '' : pct(p.cotaProcedurala)} din ele sunt pași ` +
     'de procedură — confirmarea unei renunțări la urmărire, verificarea măsurilor preventive, ' +
     'liberarea condiționată — nu acuzații. O listă a „celor mai frecvente infracțiuni" care le ' +
@@ -325,19 +381,34 @@ async function main(): Promise<void> {
     label: row.denumire.replace(/\s*\([^)]*\)\s*$/, '') || row.cod,
     value: row.dosare,
     note: row.articol ? `art. ${row.articol}` : row.cod,
+    detail: [
+      ['text de lege', row.articol ? `art. ${row.articol} ${row.cod.replace(/^L?/, '')}` : row.cod],
+      ['din dosarele penale', pct(row.dosare / p.dosarePenale)],
+    ] as [string, string][],
   });
-  bars(el('infractiuni'), p.infractiuni.slice(0, 10).map(chargeRow));
-  bars(el('proceduri'), p.proceduri.slice(0, 8).map(chargeRow));
+  bars(el('infractiuni'), p.infractiuni.slice(0, 10).map(chargeRow), { unit: 'dosare' });
+  bars(el('proceduri'), p.proceduri.slice(0, 8).map(chargeRow), { unit: 'dosare' });
   bars(
     el('legi'),
-    p.legiSpeciale.slice(0, 8).map((row) => ({
-      label: row.denumire.replace(/\s*\([^)]*\)\s*$/, '') || row.cod,
-      value: row.dosare,
-      note: p.legiCunoscute[row.cod.slice(1)] ?? row.cod,
-      // Statutes whose character has not been checked are drawn muted: the file does not claim
-      // to know whether they carry offences or procedure.
-      muted: !(row.cod.slice(1) in p.legiCunoscute),
-    })),
+    p.legiSpeciale.slice(0, 8).map((row) => {
+      const known = row.cod.slice(1) in p.legiCunoscute;
+      return {
+        label: row.denumire.replace(/\s*\([^)]*\)\s*$/, '') || row.cod,
+        value: row.dosare,
+        note: p.legiCunoscute[row.cod.slice(1)] ?? row.cod,
+        detail: [
+          ['lege', row.cod.slice(1)],
+          ['din dosarele penale', pct(row.dosare / p.dosarePenale)],
+          ...(known
+            ? []
+            : ([['', 'Nu s-a verificat dacă legea poartă infracțiuni sau doar procedură, deci rândul este desenat estompat.']] as [string, string][])),
+        ] as [string, string][],
+        // Statutes whose character has not been checked are drawn muted: the file does not claim
+        // to know whether they carry offences or procedure.
+        muted: !known,
+      };
+    }),
+    { unit: 'dosare' },
   );
 
   const c = stats.concentrare;
@@ -351,9 +422,9 @@ async function main(): Promise<void> {
   };
   el('concentrare').innerHTML = `
     <div class="facts">
-      <div><b>${ro.format(c.identitati)}</b><span>identități distincte</span></div>
+      <div><b>${count(c.identitati)}</b><span>identități distincte</span></div>
       <div><b>${c.cotaTopFilerilor.top1la_suta === null ? '—' : pct(c.cotaTopFilerilor.top1la_suta)}</b><span>din cereri, de la primul 1% dintre depunători</span></div>
-      <div><b>${inst.cotaDinCereri === null ? '—' : pct(inst.cotaDinCereri)}</b><span>de la ${ro.format(inst.identitati)} identități cu tipar instituțional</span></div>
+      <div><b>${inst.cotaDinCereri === null ? '—' : pct(inst.cotaDinCereri)}</b><span>de la ${count(inst.identitati)} identități cu tipar instituțional</span></div>
     </div>
     <p class="note">
       Tipar instituțional înseamnă cel puțin ${inst.pragDisputa} de dispute, dintre care peste
@@ -368,23 +439,37 @@ async function main(): Promise<void> {
       label: `${row.disputeDeLaPanaLa} ${row.disputeDeLaPanaLa === '1' ? 'dispută' : 'dispute'}`,
       value: row.identitati,
       note: pct(row.cota),
+      detail: [['din toate identitățile', pct(row.cota)]] as [string, string][],
     })),
+    { unit: 'identități' },
   );
 
+  const roles = Object.entries(c.peGrupDeCalitate).sort((a, b) => b[1] - a[1]);
+  const roleTotal = roles.reduce((sum, [, n]) => sum + n, 0) || 1;
   bars(
     el('calitati'),
-    Object.entries(c.peGrupDeCalitate)
-      .sort((a, b) => b[1] - a[1])
-      .map(([group, count]) => ({ label: GROUPS[group] ?? group, value: count })),
+    roles.map(([group, n]) => ({
+      label: GROUPS[group] ?? group,
+      value: n,
+      note: pct(n / roleTotal),
+      detail: [['din toate calitățile', pct(n / roleTotal)]] as [string, string][],
+    })),
+    { unit: 'identități' },
   );
 
+  const onRoll = stats.vechimeDosarePeRol.reduce((sum, row) => sum + row.dosare, 0);
   bars(
     el('vechime'),
     stats.vechimeDosarePeRol.map((row) => ({
       label: row.to === null ? `peste ${row.from} de zile` : `${row.from}–${row.to} de zile`,
       value: row.dosare,
       note: row.share === null ? '' : pct(row.share),
+      detail: [
+        ['din dosarele pe rol', row.share === null ? '' : pct(row.share)],
+        ['dosare pe rol, total', count(onRoll)],
+      ] as [string, string][],
     })),
+    { unit: 'dosare' },
   );
 
   bars(
@@ -392,22 +477,30 @@ async function main(): Promise<void> {
     stats.gradientArhivare.map((row) => ({
       label: String(row.anInregistrare),
       value: row.medianaNaivaZile,
-      note: `${ro.format(row.dosareVizibileSolutionate)} dosare vizibile`,
+      note: `${count(row.dosareVizibileSolutionate)} dosare vizibile`,
+      detail: [
+        ['dosare încă vizibile', count(row.dosareVizibileSolutionate)],
+        [
+          '',
+          'Nu este durata reală a anului: este durata celor care se mai văd. Cu cât anul e mai vechi, cu atât ce a rămas e mai lent.',
+        ],
+      ] as [string, string][],
     })),
-    (value) => days(Math.round(value)),
+    { format: inDays, unit: 'mediana naivă' },
   );
 
   el('limitari').innerHTML = stats.limitations
     .map(
       (limitation) => `
       <details class="lim ${limitation.severity}">
-        <summary><span class="sev">${limitation.severity}</span> ${limitation.id.replace(/-/g, ' ')}</summary>
-        <p>${limitation.text}</p>
+        <summary><span class="sev">${limitation.severity}</span> ${esc(limitation.id.replace(/-/g, ' '))}</summary>
+        <p>${esc(limitation.text)}</p>
       </details>`,
     )
     .join('');
 
   el('sursa').textContent = `${stats.publisher} · ${stats.provenance.locator}`;
+  wireTooltips();
 }
 
 main().catch((error) => {
