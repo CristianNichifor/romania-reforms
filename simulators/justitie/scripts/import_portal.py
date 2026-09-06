@@ -561,6 +561,80 @@ def load_courts() -> list:
     return re.findall(r'value="([^"]+)"', block.group(1))
 
 
+def court_weights() -> dict:
+    """How much work each court is, for splitting the crawl evenly.
+
+    CSM's published volume of activity, which is the only per-court measure of size available
+    before the crawl that is about to measure it. It does not have to be accurate — it has to
+    rank courts, and a court with ten times the volume takes roughly ten times the calls.
+
+    Absent rather than fatal: this file is in the repository, but a crawl that can reach the
+    portal and not its own checkout should still run, one shard at a time if it must.
+    """
+    path = ROOT / "data" / "instante-localizate-2025.json"
+    if not path.is_file():
+        return {}
+    document = json.loads(path.read_text(encoding="utf-8"))
+    return {
+        _shard_key(court["name"]): court.get("volume") or 0 for court in document.get("courts", [])
+    }
+
+
+def _shard_key(name: str) -> str:
+    """Fold a court name to compare the CSM register against the portal's enum."""
+    folded = name.translate(str.maketrans("ăâîșşțţĂÂÎȘŞȚŢ", "aaissttAAISSTT"))
+    folded = unicodedata.normalize("NFKD", folded)
+    folded = "".join(character for character in folded if not unicodedata.combining(character))
+    return re.sub(r"[^A-Za-z0-9]", "", folded).upper()
+
+
+def shard_courts(courts: list, shard: int, shards: int, weights: dict | None = None) -> list:
+    """Split the court list into `shards` parts of similar total size, and return one.
+
+    The previous rule was round-robin, on the stated ground that the enum runs roughly from
+    largest court to smallest and contiguous slices would put every Bucureşti tribunal on one
+    runner. The premise is right; the remedy does not follow from it. Round-robin over a *sorted*
+    list hands shard 0 the largest court of every group of twelve and shard 11 the smallest, so
+    the imbalance it was meant to prevent is reproduced in miniature, twenty times over.
+
+    Measured on the 2026-09-05 snapshot, the twelve shards carried between 237.400 and 428.061 of
+    CSM volume — a spread of 1,80× — and the two heaviest were the two that hit the six-hour
+    ceiling and returned nothing, twice, on the two longest backfills attempted. That is what
+    lost forty-one courts from the published snapshot.
+
+    So the split is by weight: courts are placed largest first into whichever part is currently
+    lightest, which is the standard greedy bound and brings the spread to within a few percent.
+    Same number of runners and the same load on the portal — only the tail gets shorter.
+
+    A court the register does not name takes the median weight rather than zero. Zero would treat
+    every unmatched court as free, which is how a newly-added court would quietly rebuild the
+    imbalance this exists to remove.
+    """
+    if shards <= 1:
+        return list(courts)
+
+    weights = weights if weights is not None else court_weights()
+    known = sorted(value for value in weights.values() if value > 0)
+    default = known[len(known) // 2] if known else 1
+
+    def weigh(court: str) -> int:
+        return weights.get(_shard_key(court), default)
+
+    # Sorted by weight descending, then by name, so every runner computes the same assignment
+    # from the same inputs without communicating.
+    ordered = sorted(courts, key=lambda court: (-weigh(court), court))
+    parts: list[list] = [[] for _ in range(shards)]
+    totals = [0] * shards
+    for court in ordered:
+        lightest = min(range(shards), key=lambda index: (totals[index], index))
+        parts[lightest].append(court)
+        totals[lightest] += weigh(court)
+    # Restored to enum order within the part: the crawl's own progress output reads better, and
+    # nothing downstream depends on the order.
+    position = {court: index for index, court in enumerate(courts)}
+    return sorted(parts[shard], key=lambda court: position[court])
+
+
 # --------------------------------------------------------------------------------------------
 # Output
 # --------------------------------------------------------------------------------------------
@@ -628,11 +702,10 @@ def main() -> int:
         # One large, one mid, one small — enough to size a national crawl from.
         courts = ["TribunalulBUCURESTI", "TribunalulTIMIS", "JudecatoriaJIBOU"]
 
-    # Round-robin rather than contiguous slices. The enum is ordered roughly by court size, so
-    # contiguous shards would put every Bucureşti tribunal in one runner and every rural
-    # judecătorie in another — one shard timing out while another finishes in minutes.
+    # Split by weight rather than by position — see `shard_courts` for why round-robin over a
+    # size-ordered enum reproduced the imbalance it was meant to prevent, and what that cost.
     if args.shards > 1:
-        courts = courts[args.shard :: args.shards]
+        courts = shard_courts(courts, args.shard, args.shards)
         if not courts:
             print(f"shard {args.shard}/{args.shards} is empty", file=sys.stderr)
             return 0
