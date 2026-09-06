@@ -26,10 +26,26 @@
         <p class="warn" id="cohort-note"></p>
       </header>
 
+      <!-- The filter is a form rather than a row of buttons because the court list is 240 long,
+           and a native select is the one control that is searchable by typing on every platform
+           without a line of script. -->
+      <form class="filters card" id="filtre" hidden>
+        <label>
+          <span>Unde</span>
+          <select id="scope" name="scope"></select>
+        </label>
+        <label>
+          <span>Ce grad</span>
+          <select id="tier" name="tier"></select>
+        </label>
+        <p class="filter-state" id="filter-state"></p>
+      </form>
+
       <section id="acoperire" class="card"></section>
 
       <section class="card">
         <h2>Volumul, an de an</h2>
+        <p class="scope-note" data-national="trend" hidden></p>
         <p class="note">
           Din rapoartele anuale ale CSM, nu din portal. Portalul scoate dosarele pe măsură ce
           instanțele le arhivează, deci anii lui vechi sunt un eșantion de supraviețuire și nu pot
@@ -75,6 +91,7 @@
 
       <section class="card">
         <h2>Penal: procedură sau infracțiune</h2>
+        <p class="scope-note" data-national="penal" hidden></p>
         <p class="note" id="penal-note"></p>
         <div class="two">
           <div>
@@ -92,6 +109,7 @@
 
       <section class="card">
         <h2>Cine aduce munca</h2>
+        <p class="scope-note" data-national="concentrare" hidden></p>
         <p class="note">
           Nu este o listă a celor care folosesc des instanțele, și nu poate fi. Hashul
           identifică un nume normalizat, nu o persoană — toți cei cu același nume primesc
@@ -121,6 +139,7 @@
 
       <section class="card">
         <h2>De ce nu se poate citi o tendință din portal</h2>
+        <p class="scope-note" data-national="gradient" hidden></p>
         <p class="note">
           Mediana naivă a duratei, pe anul înregistrării, calculată din dosarele încă vizibile.
           Urcă abrupt spre trecut. Nicio instanță nu a încetinit atât — este forma a ceea ce s-a
