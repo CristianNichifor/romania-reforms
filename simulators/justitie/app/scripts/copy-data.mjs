@@ -87,6 +87,10 @@ const sources = [
   // never a percentile. It is what lets the statistics page answer for a county, an appeal
   // circumscription or one of the proposed courts rather than only for the country.
   [resolve(here, '../../data/portal-instante.json'), 'portal-instante.json'],
+  // Which communes each court serves, resolved to the portal's enum and addressed as UAT
+  // indices. It is what lets the statistics page route today's caseload onto the proposed
+  // courts as the reader moves the administrative sliders.
+  [resolve(here, '../../data/arondare-instante.json'), 'arondare-instante.json'],
   // Cases filed per court, which no published source states.
   [resolve(here, '../../data/intrate-portal.json'), 'intrate-portal.json'],
   // Four consecutive CSM editions. The portal cannot show how the system changed — its old
@@ -116,7 +120,12 @@ if (existsSync(roads)) {
 // a crawl that takes hours and are not committed while they hold a placeholder sample. A
 // checkout without them legitimately lacks them, and the statistics page says so on its own
 // rather than the whole build failing and taking the map down with it.
-const optional = new Set(['portal-stats.json', 'portal-instante.json', 'intrate-portal.json']);
+const optional = new Set([
+  'portal-stats.json',
+  'portal-instante.json',
+  'intrate-portal.json',
+  'arondare-instante.json',
+]);
 
 for (const [from, name] of sources) {
   if (!existsSync(from) && optional.has(name)) {

@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/arondare-instante.schema.json",
+  "title": "Which communes each court serves, addressed as UAT indices",
+  "description": "The statistics page routes today's caseload onto the reform's proposed courts as the reader moves the administrative sliders, so the routing runs in the browser and the browser needs court-to-commune. The obvious way to supply it is wrong: HG 1217/2023 names courts one way and the portal enum another, and they disagree systematically. Two Python builders already share one normaliser and one alias table for that; a second in TypeScript would be a second set of near-misses nothing compares against. So the join is done once and published resolved, keyed on the portal enum. Communes are array indices rather than SIRUTA codes, the same choice the administrative app makes when it puts a pinned seat in a link, and uatCount sits beside them so a payload rebuilt underneath this file fails loudly instead of silently addressing other communes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "title", "publisher", "period", "provenance", "summary", "instante", "limitations"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "const": "arondare-instante" },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "period": { "type": "string" },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["uatCount", "instante", "judecatorii", "tribunale", "comuneArondate", "judeteAcoperite", "judecatoriiSuspendate", "nepotrivite"],
+      "properties": {
+        "uatCount": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Size of the administrative model's UAT array these indices address. A consumer must compare it against the payload it loaded before using any index."
+        },
+        "instante": { "type": "integer", "minimum": 1 },
+        "judecatorii": { "type": "integer", "minimum": 1 },
+        "tribunale": { "type": "integer", "minimum": 1 },
+        "comuneArondate": { "type": "integer", "minimum": 1 },
+        "judeteAcoperite": { "type": "integer", "minimum": 1 },
+        "judecatoriiSuspendate": { "type": "array", "items": { "type": "string" } },
+        "nepotrivite": {
+          "type": "array",
+          "maxItems": 0,
+          "description": "Must be empty: an unresolved court would take its whole caseload out of the routing without anything showing it. The builder exits non-zero.",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "instante": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["institutie", "grad", "judet", "uat"],
+        "properties": {
+          "institutie": { "type": "string", "description": "The portal's enum member — the key every downstream join uses." },
+          "grad": { "type": "string", "enum": ["judecatorie", "tribunal"] },
+          "judet": { "type": ["string", "null"] },
+          "uat": {
+            "type": "array",
+            "minItems": 1,
+            "description": "Ascending indices into the administrative model's UAT array.",
+            "items": { "type": "integer", "minimum": 0 }
+          }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+    }
+  }
+}

@@ -160,6 +160,77 @@ export function pool(courts: Court[], edges: Edges): Pooled {
   return out;
 }
 
+/** An empty accumulator, for blending fractions of courts into a court that does not exist yet. */
+export function emptyPool(edges: Edges): Pooled {
+  return {
+    instante: 0,
+    trunchiate: 0,
+    dosare: 0,
+    dosarePenale: 0,
+    completuri: 0,
+    peCategorie: {},
+    amanari: {
+      termeneCuSolutie: 0,
+      amanareCauza: 0,
+      amanarePronuntare: 0,
+      termenPreschimbat: 0,
+    },
+    peRol: zeros(edges.peRol.length),
+    primulTermen: zeros(edges.termene.length),
+    intervalTermene: zeros(edges.termene.length),
+    durata: {
+      dosare: 0,
+      urmarireZile: 0,
+      evenimente: zeros(edges.durata.length),
+      cenzurate: zeros(edges.durata.length),
+    },
+  };
+}
+
+/**
+ * Add a fraction of one court into an accumulator.
+ *
+ * The proposed courts do not exist, so their caseload has to be assembled out of pieces of the
+ * ones that do: where a judecătorie's communes are split between two new seats, each seat takes
+ * a share. The share is by population, because how many cases a commune generates is not
+ * published — the same assumption `build_incarcatura.py` makes, and the same one it measures the
+ * weight of rather than hiding.
+ *
+ * Counts become fractional and are left that way until they are displayed. Rounding each
+ * addition would accumulate a drift across 175 courts, and every figure derived from these is a
+ * ratio or a quantile, neither of which needs an integer.
+ */
+export function blend(target: Pooled, court: Court, weight: number): void {
+  if (weight <= 0) return;
+  target.instante += weight;
+  target.dosare += court.dosare * weight;
+  target.dosarePenale += court.dosarePenale * weight;
+  target.completuri += court.completuri * weight;
+  for (const [categorie, value] of Object.entries(court.peCategorie)) {
+    target.peCategorie[categorie] = (target.peCategorie[categorie] ?? 0) + value * weight;
+  }
+  target.amanari.termeneCuSolutie += court.amanari.termeneCuSolutie * weight;
+  target.amanari.amanareCauza += court.amanari.amanareCauza * weight;
+  target.amanari.amanarePronuntare += court.amanari.amanarePronuntare * weight;
+  target.amanari.termenPreschimbat += court.amanari.termenPreschimbat * weight;
+
+  const into = (destination: number[], source: number[]) => {
+    for (let index = 0; index < destination.length; index += 1) {
+      destination[index] = (destination[index] ?? 0) + (source[index] ?? 0) * weight;
+    }
+  };
+  into(target.peRol, court.peRol);
+  into(target.primulTermen, court.primulTermen);
+  into(target.intervalTermene, court.intervalTermene);
+  target.durata.dosare += court.durata.dosare * weight;
+  // Follow-up is not a quantity to be blended: it is how long the *longest-watched* case in the
+  // pool has been watched, and a weighted average of follow-ups would let the curve be drawn
+  // past where anything was observed.
+  target.durata.urmarireZile = Math.max(target.durata.urmarireZile, court.durata.urmarireZile);
+  into(target.durata.evenimente, court.durata.evenimente);
+  into(target.durata.cenzurate, court.durata.cenzurate);
+}
+
 export interface Quantile {
   /** Days. Null when the selection has no observations at all. */
   zile: number | null;

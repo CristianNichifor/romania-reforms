@@ -29,7 +29,10 @@ import {
   type Court,
   type CourtsFile,
   type Edges,
+  type Pooled,
 } from './aggregate';
+import { assign, changedParams, loadCoupling, readScenario } from './arondare';
+import { proposedCourts, type ArondareInstante, type Proposal } from './propuse';
 
 const BASE = import.meta.env.BASE_URL;
 
@@ -349,6 +352,44 @@ function viewFromCourts(courts: Court[], edges: Edges): View {
 let AGE_EDGES: number[] = [];
 
 /**
+ * A view over figures that are already pooled.
+ *
+ * Used for the proposed courts, which is why there is no split by level: a merged court holds
+ * first-instance and tribunal work in one building, and splitting it back apart would describe
+ * the thing the reform proposes to stop doing.
+ */
+function viewFromPooled(summed: Pooled, edges: Edges, label: string): View {
+  return {
+    dosare: Math.round(summed.dosare),
+    instante: null,
+    termene: Math.round(summed.amanari.termeneCuSolutie),
+    caseTypes: Object.entries(summed.peCategorie)
+      .map(([categorie, dosare]) => ({ categorie, dosare: Math.round(dosare) }))
+      .sort((a, b) => b.dosare - a.dosare),
+    durataByLevel: summed.durata.dosare
+      ? [{ level: label, ...survival(summed.durata, edges.durata) }]
+      : [],
+    durataByCategorie: [],
+    primul: [{ label, ...strip(summed.primulTermen, edges.termene) }],
+    intervale: [{ label, ...strip(summed.intervalTermene, edges.termene) }],
+    amanari: {
+      termeneCuSolutie: Math.round(summed.amanari.termeneCuSolutie),
+      amanareCauza: Math.round(summed.amanari.amanareCauza),
+      amanarePronuntare: Math.round(summed.amanari.amanarePronuntare),
+      termenPreschimbat: Math.round(summed.amanari.termenPreschimbat),
+      cotaAmanareCauza: null,
+      cotaFaraProgres: null,
+    },
+    vechime: AGE_EDGES.map((from, index) => ({
+      from,
+      to: AGE_EDGES[index + 1] ?? null,
+      dosare: Math.round(summed.peRol[index] ?? 0),
+    })),
+    trunchiate: 0,
+  };
+}
+
+/**
  * Caveats about the snapshot as a whole, not about the selection.
  *
  * They belong under "Ce s-a măsurat", which is rebuilt on every filter change, so they are held
@@ -357,7 +398,7 @@ let AGE_EDGES: number[] = [];
 let snapshotNotes = '';
 
 /** Every section whose numbers follow the filter. */
-function renderScope(view: View, scopeLabel: string): void {
+function renderScope(view: View, scopeLabel: string, extra = ''): void {
   const total = view.dosare || 1;
   el('acoperire').innerHTML = `
     <h2>Ce s-a măsurat${scopeLabel ? ` — ${esc(scopeLabel)}` : ''}</h2>
@@ -365,6 +406,7 @@ function renderScope(view: View, scopeLabel: string): void {
       <div><b>${count(view.dosare)}</b><span>dosare</span></div>
       ${view.instante === null ? '' : `<div><b>${count(view.instante)}</b><span>instanțe</span></div>`}
       <div><b>${count(view.termene)}</b><span>termene cu soluție</span></div>
+      ${extra}
     </div>
     ${snapshotNotes}
     ${
@@ -681,8 +723,69 @@ function wireFilter(stats: Stats, file: CourtsFile): void {
   );
   tier.innerHTML = option('toate', 'Toate gradele') + levels.map((l) => option(l, l)).join('');
 
-  function apply(): void {
+  // The proposed courts are added only once the administrative model has been fetched, which
+  // happens the first time a reader asks for one. It is 1,6 MB and every other view on this page
+  // works without it; making the default load pay for a section most readers will not open is
+  // the wrong trade on a page whose whole point is that it is a document.
+  let proposal: Proposal | null = null;
+  async function ensureProposal(): Promise<Proposal | null> {
+    if (proposal) return proposal;
+    state.textContent = 'Se încarcă modelul administrativ (1,6 MB) și se rulează comasarea…';
+    try {
+      const [coupled, communes] = await Promise.all([
+        loadCoupling(BASE),
+        load<ArondareInstante>('arondare-instante.json'),
+      ]);
+      const scenario = readScenario(location.hash);
+      const arondare = assign(coupled, scenario.params, scenario.pins);
+      proposal = proposedCourts(arondare, coupled, communes, file, file.praguriZile);
+      scope.insertAdjacentHTML(
+        'beforeend',
+        `<optgroup label="Instanțe propuse — ${
+          changedParams(scenario.params).length ? 'la parametrii din link' : 'la parametrii impliciți'
+        }">${proposal.courts
+          .map((court) => option(`p:${court.seat}`, `${court.nume} (${court.judet})`))
+          .join('')}</optgroup>`,
+      );
+      return proposal;
+    } catch (error) {
+      state.textContent = `Comasarea nu a putut fi calculată: ${String(error)}`;
+      return null;
+    }
+  }
+
+  async function apply(): Promise<void> {
     const value = scope.value;
+
+    // A proposed court is a set of fractions of existing ones, so it does not go through the
+    // court-list path at all.
+    if (value.startsWith('p:')) {
+      const ready = await ensureProposal();
+      const found = ready?.courts.find((court) => `p:${court.seat}` === value);
+      if (!found) {
+        state.textContent = 'Instanța propusă nu a putut fi calculată.';
+        return;
+      }
+      tier.disabled = true;
+      const perThousand = found.populatie
+        ? Math.round((found.pooled.dosare / found.populatie) * 1000)
+        : null;
+      renderScope(
+        viewFromPooled(found.pooled, file.praguriZile, found.nume),
+        `${found.nume} (propusă)`,
+        `<div><b>${count(found.populatie)}</b><span>locuitori</span></div>` +
+          (perThousand === null
+            ? ''
+            : `<div><b>${count(perThousand)}</b><span>dosare la mia de locuitori</span></div>`),
+      );
+      markNationalSections(true, 'o instanță propusă');
+      state.textContent =
+        `${count(found.unitati)} unități consolidate · ${pct(found.cotaInvarianta)} din dosarele ` +
+        'acestui sediu vin de la instanțe pe care harta nu le împarte, deci nu depind de ' +
+        `repartiția pe populație (${pct(ready!.cotaInvariantaNationala)} pe toată țara).`;
+      return;
+    }
+
     const single = value.startsWith('i:');
     tier.disabled = single;
 
@@ -754,17 +857,47 @@ function wireFilter(stats: Stats, file: CourtsFile): void {
 
   const onChange = () => {
     writeHash();
-    apply();
+    void apply();
   };
   scope.addEventListener('change', onChange);
   tier.addEventListener('change', onChange);
   window.addEventListener('hashchange', () => {
     readHash();
-    apply();
+    void apply();
   });
 
-  readHash();
-  apply();
+  // A link straight to a proposed court has to load the model before the option it names
+  // exists, so the hash is read twice: once to see what was asked for, and again after the
+  // options it may refer to have been added.
+  // Reaching the proposed courts costs 1,6 MB, so it is a button rather than something the page
+  // does on the reader's behalf. It disappears once the option group exists.
+  const addProposal = el('load-proposal') as HTMLButtonElement;
+  addProposal.addEventListener('click', () => {
+    addProposal.disabled = true;
+    void ensureProposal().then((ready) => {
+      addProposal.hidden = Boolean(ready);
+      addProposal.disabled = false;
+      if (ready) {
+        state.textContent =
+          `${count(ready.courts.length)} instanțe propuse, calculate din harta administrativă. ` +
+          `${pct(ready.cotaInvariantaNationala)} din dosare ajung întregi la un sediu. ` +
+          (ready.trunchiate
+            ? `${count(ready.trunchiate)} instanțe necolectate au fost scoase din rutare.`
+            : '');
+      }
+    });
+  });
+
+  const wanted = new URLSearchParams(location.hash.replace(/^#/, '')).get(LOCATION);
+  const start = wanted?.startsWith('p:')
+    ? ensureProposal().then((ready) => {
+        addProposal.hidden = Boolean(ready);
+      })
+    : Promise.resolve();
+  void start.then(() => {
+    readHash();
+    return apply();
+  });
 }
 
 /** The caveats and the source line, from both files, once. */
