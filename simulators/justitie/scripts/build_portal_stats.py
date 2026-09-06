@@ -222,6 +222,73 @@ def role_group(calitate: str) -> str:
     return "altul"
 
 
+def hearing_court(dosare, sedinte):
+    """Which court held each hearing.
+
+    The importer writes `institutie` onto the child tables now, and where it is present this is
+    a column lookup. Where it is not — anything crawled before that — the court has to be
+    recovered from the case, and the obvious way to do it is wrong at a scale worth naming:
+    **11,2% of visible cases exist at more than one court**, 468.792 of 4.173.750, because a case
+    keeps its number when it goes up. Mapping a number to "its" court then means mapping it to
+    whichever court happened to be last in the file.
+
+    So the hearing is assigned by date instead. A case is registered afresh at each court that
+    takes it, and a hearing held on a given day belongs to the court that had the file that day —
+    the one whose registration is the most recent at or before it. A hearing that predates every
+    registration falls back to the earliest court, which is the only defensible reading of a date
+    that should not exist.
+
+    The consequence is that every hearing belongs to exactly one court, so per-court figures sum
+    to the national total. The earlier reading — every hearing of every case a court ever touched
+    — counted an escalated case's whole history at both courts, and two courts' panel counts
+    could not be added.
+    """
+    import pandas as pd  # noqa: PLC0415
+
+    if "institutie" in sedinte.columns:
+        return sedinte.institutie
+
+    # Only the ambiguous cases need the dated merge, and they are the minority. A case at one
+    # court has one answer, and asking `merge_asof` for it means sorting eleven million hearings
+    # and grouping four million case numbers to rediscover what a dictionary already knows.
+    # Splitting the two costs one `value_counts` and takes the merge down to a ninth of its
+    # input. It does not move the process peak, which is the four parquet tables held in memory
+    # at once — 28 million rows of mostly strings — and that is the number to attack if this ever
+    # has to run somewhere smaller than a workstation.
+    per_case = dosare.numar.value_counts()
+    settled = dosare[dosare.numar.map(per_case) == 1]
+    single = dict(zip(settled.numar, settled.institutie, strict=False))
+    resolved = sedinte.dosar_numar.map(single)
+
+    ambiguous = sedinte.index[resolved.isna()]
+    if not len(ambiguous):
+        return resolved
+
+    contested = set(sedinte.loc[ambiguous, "dosar_numar"])
+    stages = (
+        dosare[dosare.numar.isin(contested)][["numar", "institutie", "registered"]]
+        .dropna(subset=["registered"])
+        .rename(columns={"numar": "dosar_numar", "institutie": "court"})
+        .sort_values("registered")
+    )
+    left = sedinte.loc[ambiguous, ["dosar_numar", "when"]].reset_index().sort_values("when")
+    # `merge_asof` refuses keys whose two sides differ in dtype, and both keys differ here for
+    # reasons that have nothing to do with the data: parquet hands back StringDtype where a
+    # constructed frame hands back object, and `to_datetime` picks a second or a microsecond
+    # resolution depending on which strings it was given. Both sides are strings and both are
+    # timestamps; saying so is cheaper than a MergeError that only fires on one of the inputs.
+    stages["dosar_numar"] = stages.dosar_numar.astype("string")
+    left["dosar_numar"] = left.dosar_numar.astype("string")
+    stages["registered"] = stages.registered.astype("datetime64[ns]")
+    left["when"] = left["when"].astype("datetime64[ns]")
+    merged = pd.merge_asof(
+        left, stages, left_on="when", right_on="registered", by="dosar_numar", direction="backward"
+    )
+    earliest = stages.groupby("dosar_numar", sort=False).court.first()
+    merged["court"] = merged.court.fillna(merged.dosar_numar.map(earliest))
+    return resolved.fillna(merged.set_index("index").court)
+
+
 def percentiles(series, points=(0.25, 0.5, 0.75)) -> dict:
     if series.empty:
         return {}
@@ -351,19 +418,14 @@ def build(dosare, sedinte, parti, cai_atac, cohort_months: int, crawled_at: str)
     sedinte["when"] = pd.to_datetime(sedinte.data, errors="coerce")
     sedinte = sedinte.dropna(subset=["when"])
 
-    case_level = dosare.set_index("numar").level
-
-    # The court a hearing belongs to, preferring the column the importer now writes. Older
-    # parquet — anything crawled before `institutie` was added to the child tables — has to fall
-    # back to the case number, which is ambiguous for the small share of cases that exist at two
-    # courts at once. `institutieDinFisier` in the output says which of the two was used, so a
-    # reader can tell whether the per-level split is exact or approximate.
+    # The court a hearing belongs to. See `hearing_court`: where the child table does not carry
+    # it, it is recovered from which court had the file on the day, not from the case number —
+    # 11,2% of cases sit at more than one court, and a number-to-court map picks one of them at
+    # random. `institutieDinFisier` in the output says which of the two routes was taken.
     hearings_carry_court = "institutie" in sedinte.columns
-    if hearings_carry_court:
-        sedinte_level = sedinte.institutie.map(level_of)
-    else:
-        sedinte_level = sedinte.dosar_numar.map(case_level.to_dict())
-    sedinte = sedinte.assign(level=sedinte_level)
+    sedinte = sedinte.assign(court=hearing_court(dosare, sedinte))
+    sedinte = sedinte.dropna(subset=["court"])
+    sedinte = sedinte.assign(level=sedinte.court.map(level_of))
 
     # ---- stock per court -------------------------------------------------------------------
     panels_by_level = (
@@ -373,13 +435,16 @@ def build(dosare, sedinte, parti, cai_atac, cohort_months: int, crawled_at: str)
         .complet.nunique()
     )
 
+    panels_by_court = (
+        sedinte.assign(complet=sedinte.complet.replace("", pd.NA))
+        .dropna(subset=["complet"])
+        .groupby("court")
+        .complet.nunique()
+    )
+
     courts = []
     for institutie, group in dosare.groupby("institutie"):
-        if hearings_carry_court:
-            mine = sedinte[sedinte.institutie == institutie]
-        else:
-            mine = sedinte[sedinte.dosar_numar.isin(set(group.numar))]
-        panels = mine.complet.replace("", pd.NA).dropna().nunique()
+        panels = int(panels_by_court.get(institutie, 0))
         courts.append(
             {
                 "institutie": institutie,
