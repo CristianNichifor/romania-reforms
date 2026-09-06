@@ -2627,9 +2627,48 @@ async function main(): Promise<void> {
   el('#blocking').innerHTML = blocking
     .map((l) => `<p class="limit blocking"><strong>Nu putem răspunde:</strong> ${l.text}</p>`)
     .join('');
+  // The blocking caveats now live inside the dialog, so their count is surfaced on the button
+  // that opens it. Hiding "we cannot answer this" behind a click is acceptable; hiding the fact
+  // that it exists is not.
+  const readerBadge = document.getElementById('reader-badge');
+  if (readerBadge) {
+    const noun = blocking.length === 1 ? 'întrebare fără răspuns' : 'întrebări fără răspuns';
+    readerBadge.textContent = blocking.length ? `${blocking.length} ${noun}` : '';
+    readerBadge.hidden = blocking.length === 0;
+  }
   el('#limits').innerHTML = rest.map((l) => `<p class="limit">${l.text}</p>`).join('');
   el('#limits-count').textContent = `${rest.length} rezerve`;
 }
+
+/**
+ * The reading apparatus, as a dialog rather than a column in the sidebar.
+ *
+ * Native `<dialog>` and `showModal()` rather than a div with a z-index: it brings the focus
+ * trap, the inert background, Escape-to-close and the ::backdrop pseudo-element for free, all
+ * of which a hand-rolled modal has to reimplement and usually only partly does.
+ *
+ * The content is moved, not duplicated. Every fold body is still written by id, so the code
+ * that fills them did not have to know this happened.
+ */
+function wireReader(): void {
+  const dialog = document.getElementById('reader') as HTMLDialogElement | null;
+  const open = document.getElementById('reader-open');
+  const close = document.getElementById('reader-close');
+  if (!dialog || !open || !close) return;
+
+  open.addEventListener('click', () => dialog.showModal());
+  close.addEventListener('click', () => dialog.close());
+
+  // Clicking the backdrop closes. The dialog's own box is the only child, so a click whose
+  // target is the dialog element itself landed outside it — which is what a reader means by
+  // clicking away. Comparing coordinates against getBoundingClientRect is the usual version of
+  // this and gets the padding wrong.
+  dialog.addEventListener('click', (event) => {
+    if (event.target === dialog) dialog.close();
+  });
+}
+
+wireReader();
 
 main().catch((error: unknown) => {
   el('#detail').innerHTML = `<p class="hint">Harta nu s-a putut încărca: ${String(error)}</p>`;
