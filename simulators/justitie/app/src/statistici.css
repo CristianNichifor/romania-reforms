@@ -188,6 +188,26 @@ h3 {
   opacity: 0.5;
 }
 
+.filters button {
+  font: inherit;
+  font-size: var(--text-sm);
+  color: var(--accent);
+  background: var(--accent-wash, transparent);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-md);
+  padding: 0.35rem var(--space-3);
+  cursor: pointer;
+}
+
+.filters button:hover {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.filters button:disabled {
+  opacity: 0.5;
+  cursor: progress;
+}
+
 .filter-state {
   margin: 0;
   flex: 1 1 14rem;
