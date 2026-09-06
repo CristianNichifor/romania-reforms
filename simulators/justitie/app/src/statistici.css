@@ -150,6 +150,63 @@ h3 {
   }
 }
 
+/* Filter ------------------------------------------------------------------ */
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-3) var(--space-4);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  /* Sticky because the sections it governs run several screens down, and a reader who has
+     scrolled to the duration curves has no way back to the control that produced them. */
+  background: color-mix(in srgb, var(--surface-1) 94%, transparent);
+  backdrop-filter: blur(6px);
+}
+
+.filters label {
+  display: grid;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+  color: var(--ink-dim);
+}
+
+.filters select {
+  font: inherit;
+  font-size: var(--text-sm);
+  color: var(--ink);
+  background: var(--surface-1);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 0.35rem var(--space-2);
+  max-width: min(24rem, 70vw);
+}
+
+.filters select:disabled {
+  opacity: 0.5;
+}
+
+.filter-state {
+  margin: 0;
+  flex: 1 1 14rem;
+  color: var(--ink-dim);
+  font-size: var(--text-xs);
+}
+
+/* Said out loud on every section the filter does not reach. Silence there would present a
+   national figure under a county heading, which is the misreading a filter invites. */
+.scope-note {
+  margin: 0 0 var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border-left: 3px solid var(--border-strong);
+  background: var(--surface-2);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  color: var(--ink-dim);
+  font-size: var(--text-xs);
+}
+
 /* Charts ------------------------------------------------------------------ */
 
 .chart {

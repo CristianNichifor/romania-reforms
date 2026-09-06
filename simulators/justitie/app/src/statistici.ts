@@ -21,7 +21,15 @@
  * about it. A plotting dependency to draw horizontal rectangles would cost more than it explains.
  */
 
-import { bars, count, esc, quartiles, share, wireTooltips } from './charts';
+import { bars, count, esc, quartiles, share, wireTooltips, type QuartileRow } from './charts';
+import {
+  pool,
+  strip,
+  survival,
+  type Court,
+  type CourtsFile,
+  type Edges,
+} from './aggregate';
 
 const BASE = import.meta.env.BASE_URL;
 
@@ -244,6 +252,219 @@ async function load<T>(name: string): Promise<T> {
   return (await response.json()) as T;
 }
 
+/**
+ * One shape for the figures a selection can produce, however the selection was made.
+ *
+ * The page has two sources for the same statistics: the national file, which is authoritative
+ * and needs no arithmetic, and the per-court file, which has to be pooled. Rendering them
+ * through two code paths would mean two chances to disagree, and a disagreement between the
+ * national view and the "all courts" view would be invisible — both are plausible numbers.
+ *
+ * So both are adapted into this, and there is one renderer.
+ */
+interface View {
+  dosare: number;
+  instante: number | null;
+  termene: number;
+  caseTypes: { categorie: string; dosare: number }[];
+  durataByLevel: Survival[];
+  durataByCategorie: Survival[];
+  primul: QuartileRow[];
+  intervale: QuartileRow[];
+  amanari: Stats['amanari'];
+  vechime: { from: number; to: number | null; dosare: number }[];
+  /** Courts left out for being unmeasured, and the note that says so. */
+  trunchiate: number;
+}
+
+const LEVEL_ORDER = ['judecătorie', 'tribunal', 'curte de apel', 'tribunal specializat'];
+
+function viewFromStats(stats: Stats): View {
+  return {
+    dosare: stats.snapshot.dosare,
+    instante: stats.snapshot.instante,
+    termene: stats.amanari.termeneCuSolutie,
+    caseTypes: stats.caseTypes,
+    durataByLevel: stats.durata.byLevel,
+    durataByCategorie: stats.durata.byCategorie,
+    primul: strips(stats.primulTermen),
+    intervale: strips(stats.termene.intervalZileByLevel),
+    amanari: stats.amanari,
+    vechime: stats.vechimeDosarePeRol,
+    trunchiate: 0,
+  };
+}
+
+/**
+ * The same view, pooled from a selection of courts.
+ *
+ * Durations and percentiles are computed per level rather than over the whole selection, because
+ * a county's judecătorie and its tribunal are not the same kind of court and one median across
+ * both would describe neither. Case categories are not available per court beyond their counts,
+ * so `durataByCategorie` is empty here and the section says so rather than showing the national
+ * figures under a county heading.
+ */
+function viewFromCourts(courts: Court[], edges: Edges): View {
+  const all = pool(courts, edges);
+  const levels = LEVEL_ORDER.filter((level) => courts.some((court) => court.level === level));
+
+  const byLevel = levels.map((level) => {
+    const summed = pool(courts.filter((court) => court.level === level), edges);
+    return { level, ...survival(summed.durata, edges.durata) };
+  });
+
+  const stripsFor = (pick: (summed: ReturnType<typeof pool>) => number[]) =>
+    levels.map((level) => {
+      const summed = pool(courts.filter((court) => court.level === level), edges);
+      return { label: level, ...strip(pick(summed), edges.termene) };
+    });
+
+  return {
+    dosare: all.dosare,
+    instante: all.instante,
+    termene: all.amanari.termeneCuSolutie,
+    caseTypes: Object.entries(all.peCategorie)
+      .map(([categorie, dosare]) => ({ categorie, dosare }))
+      .sort((a, b) => b.dosare - a.dosare),
+    durataByLevel: byLevel.filter((row) => row.dosare > 0),
+    durataByCategorie: [],
+    primul: stripsFor((summed) => summed.primulTermen),
+    intervale: stripsFor((summed) => summed.intervalTermene),
+    amanari: {
+      ...all.amanari,
+      cotaAmanareCauza: all.amanari.termeneCuSolutie
+        ? all.amanari.amanareCauza / all.amanari.termeneCuSolutie
+        : null,
+      cotaFaraProgres: null,
+    },
+    vechime: AGE_EDGES.map((from, index) => ({
+      from,
+      to: AGE_EDGES[index + 1] ?? null,
+      dosare: all.peRol[index] ?? 0,
+    })),
+    trunchiate: all.trunchiate,
+  };
+}
+
+let AGE_EDGES: number[] = [];
+
+/**
+ * Caveats about the snapshot as a whole, not about the selection.
+ *
+ * They belong under "Ce s-a măsurat", which is rebuilt on every filter change, so they are held
+ * here rather than written into the DOM once and lost on the first redraw.
+ */
+let snapshotNotes = '';
+
+/** Every section whose numbers follow the filter. */
+function renderScope(view: View, scopeLabel: string): void {
+  const total = view.dosare || 1;
+  el('acoperire').innerHTML = `
+    <h2>Ce s-a măsurat${scopeLabel ? ` — ${esc(scopeLabel)}` : ''}</h2>
+    <div class="facts">
+      <div><b>${count(view.dosare)}</b><span>dosare</span></div>
+      ${view.instante === null ? '' : `<div><b>${count(view.instante)}</b><span>instanțe</span></div>`}
+      <div><b>${count(view.termene)}</b><span>termene cu soluție</span></div>
+    </div>
+    ${snapshotNotes}
+    ${
+      view.trunchiate
+        ? `<p class="warn">${
+            view.trunchiate === 1
+              ? 'O instanță a rămas necolectată și este scoasă'
+              : `${count(view.trunchiate)} instanțe au rămas necolectate și sunt scoase`
+          } din toate cifrele de aici, fiindcă a colecta câteva zeci de dosare dintr-o instanță nu este a o măsura. Vezi limitarea „instantele trunchiate sunt marcate nu sterse”.</p>`
+        : ''
+    }`;
+
+  bars(
+    el('tipuri'),
+    view.caseTypes.slice(0, 10).map((row) => ({
+      label: categoryName(row.categorie),
+      value: row.dosare,
+      note: pct(row.dosare / total),
+      detail: [['din dosarele selecției', pct(row.dosare / total)]] as [string, string][],
+    })),
+    { unit: 'dosare' },
+  );
+
+  el('durata').innerHTML =
+    (view.durataByLevel.length
+      ? view.durataByLevel.map(survivalRow).join('')
+      : '<p class="empty">Nicio cauză din cohortă pentru această selecție.</p>') +
+    (view.durataByCategorie.length
+      ? `<h3>Pe categorie</h3>${view.durataByCategorie.slice(0, 6).map(survivalRow).join('')}`
+      : '');
+
+  const inDays = (value: number) => days(Math.round(value));
+  quartiles(el('primul'), view.primul, { format: inDays, unit: 'dosare', targetTicks: 2 });
+  quartiles(el('intervale'), view.intervale, {
+    format: inDays,
+    unit: 'intervale',
+    targetTicks: 2,
+  });
+
+  const a = view.amanari;
+  const ofTerms: [string, string][] = [['din', `${count(a.termeneCuSolutie)} termene cu soluție`]];
+  const shareOf = (value: number) => (a.termeneCuSolutie ? pct(value / a.termeneCuSolutie) : '—');
+  bars(
+    el('amanari'),
+    [
+      {
+        label: 'Amână cauza',
+        value: a.amanareCauza,
+        note: shareOf(a.amanareCauza),
+        detail: [...ofTerms, ['', 'Nu s-a ajuns la cauză: se fixează alt termen.']],
+      },
+      {
+        label: 'Amână pronunțarea',
+        value: a.amanarePronuntare,
+        note: shareOf(a.amanarePronuntare),
+        detail: [...ofTerms, ['', 'Instanța a judecat și își scrie hotărârea. Este progres, nu întârziere.']],
+      },
+      {
+        label: 'Termen preschimbat',
+        value: a.termenPreschimbat,
+        note: shareOf(a.termenPreschimbat),
+        detail: [...ofTerms, ['', 'Data a fost mutată, adesea înainte ca ședința să înceapă.']],
+      },
+    ],
+    { unit: 'termene' },
+  );
+
+  const onRoll = view.vechime.reduce((sum, row) => sum + row.dosare, 0) || 1;
+  bars(
+    el('vechime'),
+    view.vechime.map((row) => ({
+      label: row.to === null ? `peste ${row.from} de zile` : `${row.from}–${row.to} de zile`,
+      value: row.dosare,
+      note: pct(row.dosare / onRoll),
+      detail: [
+        ['din dosarele pe rol', pct(row.dosare / onRoll)],
+        ['dosare pe rol, total', count(onRoll)],
+      ] as [string, string][],
+    })),
+    { unit: 'dosare' },
+  );
+}
+
+/**
+ * Say plainly which sections did not follow the filter.
+ *
+ * This is the part that makes the filter honest. Charges, litigants and the archiving gradient
+ * exist only nationally, and leaving them silent under a heading that reads "Timiș" would
+ * present national figures as county ones — which is exactly the misreading a filter invites and
+ * the reader has no way to detect.
+ */
+function markNationalSections(active: boolean, scopeLabel: string): void {
+  for (const node of document.querySelectorAll<HTMLElement>('[data-national]')) {
+    node.hidden = !active;
+    node.textContent = active
+      ? `Această secțiune rămâne pe toată țara: cifrele ei nu se pot descompune pe ${scopeLabel}.`
+      : '';
+  }
+}
+
 async function main(): Promise<void> {
   const [stats, ...editions] = await Promise.all([
     load<Stats>('portal-stats.json'),
@@ -253,35 +474,39 @@ async function main(): Promise<void> {
     load<Edition>('instante-2025.json'),
   ]);
 
+  // Optional, like the rest of the portal payload: a checkout that has not run the builder still
+  // gets the national page rather than an error, and simply has no filter.
+  const courts = await load<CourtsFile>('portal-instante.json').catch(() => null);
+
   const snap = stats.snapshot;
+  snapshotNotes =
+    (snap.coverageComplete === false
+      ? '<p class="warn">Colectarea a raportat lipsuri: unele instanțe au ferestre eșuate sau trunchiate. Cifrele pe instanță sunt praguri de jos.</p>'
+      : '') +
+    (snap.institutieDinFisier
+      ? ''
+      : '<p class="warn">Termenele sunt legate de instanță prin instanța care avea dosarul în ziua ședinței, nu prin numărul dosarului. Pentru cele 11,2% dintre cauze care stau la două instanțe deodată, împărțirea este dedusă din datele de înregistrare.</p>');
   el('cohort-note').textContent =
     `Cifrele de durată și de termene privesc dosarele înregistrate după ${stats.durata.cohortFrom}. ` +
     'Mai vechi de atât, portalul a arhivat deja cauzele rapide, iar orice medie ar măsura de două ' +
     'ori încetineala — vezi ultima secțiune.';
 
-  // Coverage first, because a reader is entitled to know what the numbers were counted over
-  // before being shown any of them.
-  const incomplete = snap.coverageComplete === false;
-  el('acoperire').innerHTML = `
-    <h2>Ce s-a măsurat</h2>
-    <div class="facts">
-      <div><b>${count(snap.dosare)}</b><span>dosare</span></div>
-      <div><b>${count(snap.instante)}</b><span>instanțe</span></div>
-      <div><b>${count(snap.sedinte)}</b><span>termene</span></div>
-      <div><b class="span">${snap.registeredFrom} — ${snap.registeredTo}</b><span>înregistrate</span></div>
-    </div>
-    ${
-      incomplete
-        ? '<p class="warn">Colectarea a raportat lipsuri: unele instanțe au ferestre eșuate sau trunchiate. Cifrele pe instanță sunt praguri de jos.</p>'
-        : ''
-    }
-    ${
-      snap.institutieDinFisier
-        ? ''
-        : '<p class="warn">Termenele sunt legate de instanță prin numărul dosarului, care se păstrează când cauza urcă. Pentru cauzele aflate la două instanțe deodată, împărțirea pe grade este aproximativă.</p>'
-    }`;
+  renderNational(stats, editions);
 
-  // The trend, from the CSM editions rather than from the portal.
+  if (!courts) {
+    renderScope(viewFromStats(stats), '');
+    markNationalSections(false, '');
+    finish(stats, null);
+    return;
+  }
+
+  AGE_EDGES = courts.praguriZile.peRol;
+  wireFilter(stats, courts);
+  finish(stats, courts);
+}
+
+/** The sections that exist only nationally, and always show the whole country. */
+function renderNational(stats: Stats, editions: Edition[]): void {
   const trend = editions
     .map((edition) => ({
       label: edition.period,
@@ -303,71 +528,9 @@ async function main(): Promise<void> {
         oldest && newest && row.label === newest.label && oldest.value > 0
           ? `+${pct(newest.value / oldest.value - 1)} față de ${oldest.label}`
           : '',
-      detail: [['sursa', `Starea justiției ${row.label}, Anexa 1`]],
+      detail: [['sursa', `Starea justiției ${row.label}, Anexa 1`]] as [string, string][],
     })),
     { unit: 'volum de activitate, judecătorii' },
-  );
-
-  bars(
-    el('tipuri'),
-    stats.caseTypes.slice(0, 10).map((row) => ({
-      label: categoryName(row.categorie),
-      value: row.dosare,
-      note: pct(row.share),
-      detail: [['din toate dosarele', pct(row.share)]],
-    })),
-    { unit: 'dosare' },
-  );
-
-  el('durata-note').textContent =
-    `Estimare Kaplan-Meier peste dosarele înregistrate după ${stats.durata.cohortFrom}: cauzele ` +
-    'încă nesoluționate contribuie cu „cel puțin atât", nu sunt aruncate. Un prag fără cifră ' +
-    'înseamnă că nu s-a urmărit destul timp ca să se poată spune.';
-  el('durata').innerHTML =
-    stats.durata.byLevel.map(survivalRow).join('') +
-    (stats.durata.byCategorie.length
-      ? `<h3>Pe categorie</h3>${stats.durata.byCategorie.slice(0, 6).map(survivalRow).join('')}`
-      : '');
-
-  const inDays = (value: number) => days(Math.round(value));
-  // Two ticks, not four: these two charts sit side by side, so each track is half as wide and
-  // five labels reading "3,3 luni" run into one another.
-  quartiles(el('primul'), strips(stats.primulTermen), {
-    format: inDays,
-    unit: 'dosare',
-    targetTicks: 2,
-  });
-  quartiles(el('intervale'), strips(stats.termene.intervalZileByLevel), {
-    format: inDays,
-    unit: 'intervale',
-    targetTicks: 2,
-  });
-
-  const a = stats.amanari;
-  const ofTerms: [string, string][] = [['din', `${count(a.termeneCuSolutie)} termene cu soluție`]];
-  bars(
-    el('amanari'),
-    [
-      {
-        label: 'Amână cauza',
-        value: a.amanareCauza,
-        note: pct(a.amanareCauza / a.termeneCuSolutie),
-        detail: [...ofTerms, ['', 'Nu s-a ajuns la cauză: se fixează alt termen.']],
-      },
-      {
-        label: 'Amână pronunțarea',
-        value: a.amanarePronuntare,
-        note: pct(a.amanarePronuntare / a.termeneCuSolutie),
-        detail: [...ofTerms, ['', 'Instanța a judecat și își scrie hotărârea. Este progres, nu întârziere.']],
-      },
-      {
-        label: 'Termen preschimbat',
-        value: a.termenPreschimbat,
-        note: pct(a.termenPreschimbat / a.termeneCuSolutie),
-        detail: [...ofTerms, ['', 'Data a fost mutată, adesea înainte ca ședința să înceapă.']],
-      },
-    ],
-    { unit: 'termene' },
   );
 
   const p = stats.penal;
@@ -457,21 +620,6 @@ async function main(): Promise<void> {
     { unit: 'identități' },
   );
 
-  const onRoll = stats.vechimeDosarePeRol.reduce((sum, row) => sum + row.dosare, 0);
-  bars(
-    el('vechime'),
-    stats.vechimeDosarePeRol.map((row) => ({
-      label: row.to === null ? `peste ${row.from} de zile` : `${row.from}–${row.to} de zile`,
-      value: row.dosare,
-      note: row.share === null ? '' : pct(row.share),
-      detail: [
-        ['din dosarele pe rol', row.share === null ? '' : pct(row.share)],
-        ['dosare pe rol, total', count(onRoll)],
-      ] as [string, string][],
-    })),
-    { unit: 'dosare' },
-  );
-
   bars(
     el('gradient'),
     stats.gradientArhivare.map((row) => ({
@@ -486,10 +634,143 @@ async function main(): Promise<void> {
         ],
       ] as [string, string][],
     })),
-    { format: inDays, unit: 'mediana naivă' },
+    { format: (value) => days(Math.round(value)), unit: 'mediana naivă' },
   );
+}
 
-  el('limitari').innerHTML = stats.limitations
+/**
+ * Build the two selects and re-render on every change.
+ *
+ * A native `<select>` rather than a list of buttons because there are 240 courts, and a select is
+ * the one control every platform makes searchable by typing without a line of script.
+ */
+function wireFilter(stats: Stats, file: CourtsFile): void {
+  const form = el('filtre') as HTMLFormElement;
+  const scope = el('scope') as HTMLSelectElement;
+  const tier = el('tier') as HTMLSelectElement;
+  const state = el('filter-state');
+  form.hidden = false;
+
+  const counties = new Map<string, Court[]>();
+  for (const court of file.instante) {
+    if (!court.judet) continue;
+    const list = counties.get(court.judet);
+    if (list) list.push(court);
+    else counties.set(court.judet, [court]);
+  }
+  const countyName = (code: string) => file.judete[code] ?? code;
+
+  const option = (value: string, label: string) =>
+    `<option value="${esc(value)}">${esc(label)}</option>`;
+
+  scope.innerHTML =
+    option('tara', 'Toată țara') +
+    `<optgroup label="Județe">${[...counties.keys()]
+      .sort((a, b) => countyName(a).localeCompare(countyName(b), 'ro'))
+      .map((code) =>
+        option(`j:${code}`, `${countyName(code)} — ${counties.get(code)!.length} instanțe`),
+      )
+      .join('')}</optgroup>` +
+    `<optgroup label="Instanțe">${[...file.instante]
+      .sort((a, b) => (a.nume ?? a.institutie).localeCompare(b.nume ?? b.institutie, 'ro'))
+      .map((court) => option(`i:${court.institutie}`, court.nume ?? court.institutie))
+      .join('')}</optgroup>`;
+
+  const levels = LEVEL_ORDER.filter((level) =>
+    file.instante.some((court) => court.level === level),
+  );
+  tier.innerHTML = option('toate', 'Toate gradele') + levels.map((l) => option(l, l)).join('');
+
+  function apply(): void {
+    const value = scope.value;
+    const single = value.startsWith('i:');
+    tier.disabled = single;
+
+    let selected = file.instante;
+    let label = '';
+    if (value.startsWith('j:')) {
+      const code = value.slice(2);
+      selected = counties.get(code) ?? [];
+      label = countyName(code);
+    } else if (single) {
+      const wanted = value.slice(2);
+      selected = file.instante.filter((court) => court.institutie === wanted);
+      label = selected[0]?.nume ?? wanted;
+    }
+    if (!single && tier.value !== 'toate') {
+      selected = selected.filter((court) => court.level === tier.value);
+      label = label ? `${label}, ${tier.value}` : tier.value;
+    }
+
+    const national = value === 'tara' && tier.value === 'toate';
+    // At national scope the authoritative file is used rather than the sum of the courts. They
+    // agree — the per-court file is built to sum to it — but if they ever stop agreeing, the
+    // page should show the figure the national document states and the tests should catch the
+    // divergence, rather than the page quietly preferring its own arithmetic.
+    renderScope(national ? viewFromStats(stats) : viewFromCourts(selected, file.praguriZile), label);
+    markNationalSections(!national, label || 'această selecție');
+
+    state.textContent = national
+      ? `Toate cele ${count(file.instante.length)} de instanțe colectate.`
+      : `${count(selected.length)} ${selected.length === 1 ? 'instanță' : 'instanțe'} · ` +
+        'durata și termenele se calculează pe cohortă, din histogramele însumate.';
+  }
+
+  // The selection lives in the URL, for the reason the map next door already puts its scenario
+  // there: a figure nobody can link to is a figure nobody can dispute. Someone who finds that
+  // their county's median interval is three weeks needs to be able to send that, not a
+  // description of which two dropdowns to move.
+  //
+  // The hash is `URLSearchParams`, which is the administrative app's format rather than a
+  // second one invented here. That matters for what comes next: the reform's proposed courts
+  // are a function of the sliders on that map, so a link has to be able to carry a scenario and
+  // a selection at once. Sharing the format means the two sets of keys sit side by side, and
+  // each side ignores what it does not recognise.
+  const LOCATION = 'loc';
+  const TIER = 'grad';
+
+  function readHash(): void {
+    const params = new URLSearchParams(location.hash.replace(/^#/, ''));
+    const wanted = params.get(LOCATION);
+    const level = params.get(TIER);
+    if (wanted && [...scope.options].some((o) => o.value === wanted)) scope.value = wanted;
+    if (level && [...tier.options].some((o) => o.value === level)) tier.value = level;
+  }
+
+  function writeHash(): void {
+    // Preserve every key this page did not write. A reader who arrived from the map carries a
+    // scenario in the hash, and dropping it on the first dropdown change would silently return
+    // them to the default country.
+    const params = new URLSearchParams(location.hash.replace(/^#/, ''));
+    params.delete(LOCATION);
+    params.delete(TIER);
+    if (scope.value !== 'tara') params.set(LOCATION, scope.value);
+    if (tier.value !== 'toate' && !scope.value.startsWith('i:')) params.set(TIER, tier.value);
+    const query = params.toString();
+    // replaceState, not a hash assignment: moving the filter is a change of view rather than a
+    // navigation, and stacking a history entry per dropdown change makes Back unusable.
+    history.replaceState(null, '', query ? `#${query}` : location.pathname);
+  }
+
+  const onChange = () => {
+    writeHash();
+    apply();
+  };
+  scope.addEventListener('change', onChange);
+  tier.addEventListener('change', onChange);
+  window.addEventListener('hashchange', () => {
+    readHash();
+    apply();
+  });
+
+  readHash();
+  apply();
+}
+
+/** The caveats and the source line, from both files, once. */
+function finish(stats: Stats, courts: CourtsFile | null): void {
+  const limitations = [...stats.limitations, ...(courts?.limitations ?? [])];
+  el('limitari').innerHTML = limitations
     .map(
       (limitation) => `
       <details class="lim ${limitation.severity}">
