@@ -140,7 +140,26 @@ jobs:
       - name: Summarise the day
         id: day
         run: |
+          # A backfill is not the day's snapshot, and giving it the day's tag is how one release
+          # came to hold two different crawls.
+          #
+          # What happened on 2026-09-05: the scheduled run finished at 18:02 and published twelve
+          # shards of its two-month window. A backfill started at 18:07 with `--since 2023-01-01`,
+          # ten shards succeeded and two were cancelled, and `publish` — which runs on `always()`
+          # so a partial day is not lost — uploaded with `--clobber`. `--clobber` replaces the
+          # assets this run produced. The two shards that produced nothing left the *earlier*
+          # run's assets sitting in the release. The result validated, summed and rendered: ten
+          # shards covering 2023-01-03 to 2026-09-05 beside two covering 2026-09-01 to 09-05.
+          # Forty-one courts appeared to have heard a few dozen cases in three and a half years.
+          #
+          # Two changes, because either alone still leaves a hole. A backfill now takes its own
+          # tag, so it cannot land on the daily series at all; and whatever the tag, the previous
+          # contents are cleared before upload, so a partial re-run of the same kind cannot stitch
+          # itself onto an earlier one either.
           stamp=$(date -u +%Y-%m-%d)
+          if [ -n "${{ inputs.since }}" ]; then
+            stamp="$stamp-backfill-${{ github.run_id }}"
+          fi
           echo "stamp=$stamp" >> "$GITHUB_OUTPUT"
           shards=$(ls out/coverage-*.json 2>/dev/null | wc -l)
           echo "Collected $shards of 12 shards"
@@ -150,27 +169,14 @@ jobs:
           fi
           # One combined report so a reader does not have to open twelve files to learn whether
           # the day is usable. Written before the upload so it ships with the data it describes.
-          python3 - "$shards" <<'PY' > out/coverage.json
-          import glob, json, sys
-          parts = [json.load(open(p, encoding='utf-8')) for p in sorted(glob.glob('out/coverage-*.json'))]
-          courts = {}
-          for part in parts:
-              courts.update(part['courts'])
-          print(json.dumps({
-              'crawledAt': max(p['crawledAt'] for p in parts),
-              'shardsCollected': int(sys.argv[1]),
-              'shardsExpected': 12,
-              'complete': int(sys.argv[1]) == 12 and all(p.get('complete') for p in parts),
-              'courtsCrawled': len(courts),
-              'dosare': sum(p['totals']['dosare'] for p in parts),
-              'calls': sum(p['totals']['calls'] for p in parts),
-              'incompleteCourts': [
-                  name for name, entry in courts.items()
-                  if entry.get('failedWindows') or entry.get('irreducibleTruncations')
-              ],
-              'note': parts[0]['note'],
-          }, indent=2, ensure_ascii=False))
-          PY
+          #
+          # A script rather than a heredoc because of the one check inside it that has to be
+          # right: it refuses to merge shards that read different windows. That is the condition
+          # no consumer can detect afterwards — every court looks plausible on its own, and only
+          # a comparison against an outside figure shows which are fragments — so it is tested in
+          # tests/test_merge_coverage.py rather than trusted because CI has not complained.
+          python3 simulators/justitie/scripts/merge_coverage.py out/ --shards "$shards" \
+            > out/coverage.json
           cat out/coverage.json
 
       # A dated release per day, so the series is addressable and a bad day can be pointed at
@@ -181,6 +187,15 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           tag="portal-${{ steps.day.outputs.stamp }}"
+          # Clear the tag before uploading. `--clobber` only replaces what this run produced, so
+          # a shard that failed leaves its predecessor's asset in place and the release becomes a
+          # mixture. Deleting first means a release always holds exactly one crawl: if this run
+          # collected ten shards, the release has ten, and `shardsCollected` finally describes
+          # the files beside it.
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release view "$tag" --json assets --jq '.assets[].name' \
+              | xargs -r -I{} gh release delete-asset "$tag" {} --yes
+          fi
           # The per-shard coverage files ship too, not just the merged one. They are the only
           # place the per-court record lives — calls made, bisect depth, and which windows
           # failed or stayed truncated — and a consumer that cannot see which courts came up
