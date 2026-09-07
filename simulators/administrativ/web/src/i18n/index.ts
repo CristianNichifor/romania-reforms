@@ -773,10 +773,21 @@ const en: Strings = {
 
 export const STRINGS: Record<Lang, Strings> = { ro, en };
 
+/**
+ * Romanian unless the URL says otherwise.
+ *
+ * This was `navigator.language`, which sounds neutral and is not: a great many Romanians run
+ * an English-locale system, so the browser's preference is a poor proxy for what a reader of
+ * a Romanian administrative-reform map wants to read. It also contradicted the document,
+ * which has declared `<html lang="ro">` all along.
+ *
+ * So the default is the subject's language, and English is a click or a `lang=en` away. A
+ * shared link always carries its own `lang`, so nobody's link changes meaning here.
+ */
 export function detectLang(): Lang {
   const fromHash = new URLSearchParams(location.hash.slice(1)).get('lang');
   if (fromHash === 'ro' || fromHash === 'en') return fromHash;
-  return navigator.language.toLowerCase().startsWith('ro') ? 'ro' : 'en';
+  return 'ro';
 }
 
 export function formatNumber(value: number, lang: Lang): string {
