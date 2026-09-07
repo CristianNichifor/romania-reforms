@@ -16,6 +16,7 @@ const base = {
   mode: 'regions' as const,
   selected: null,
   pins: [],
+  forced: [],
 };
 
 describe('pins in the URL', () => {
@@ -55,5 +56,40 @@ describe('pins in the URL', () => {
     expect(back.mode).toBe('cost');
     expect(back.selected).toBe(42);
     expect(back.pins).toEqual([{ uat: 1, seat: 2 }]);
+  });
+});
+
+describe('forced centres in the URL', () => {
+  it('survives a round trip', () => {
+    const scenario = { ...base, forced: [12, 340] };
+    expect(decode(`#${encode(scenario)}`, 'ro').forced).toEqual([12, 340]);
+  });
+
+  it('writes nothing when nothing is forced', () => {
+    expect(encode(base)).not.toContain('force=');
+    expect(decode(`#${encode(base)}`, 'ro').forced).toEqual([]);
+  });
+
+  it('gives the same link whatever order they were clicked in', () => {
+    // Two readers who forced the same three centres should be able to compare links, not
+    // discover they have three different strings for one map.
+    const a = encode({ ...base, forced: [340, 12, 7] });
+    const b = encode({ ...base, forced: [7, 340, 12] });
+    expect(a).toBe(b);
+  });
+
+  it('de-duplicates rather than forcing the same commune twice', () => {
+    expect(decode('#force=12,12,340', 'ro').forced).toEqual([12, 340]);
+  });
+
+  it('drops malformed entries instead of throwing', () => {
+    expect(decode('#force=12,rubbish,,-4,3.5,340', 'ro').forced).toEqual([12, 340]);
+  });
+
+  it('is independent of pins, which are a different kind of override', () => {
+    const scenario = { ...base, pins: [{ uat: 1, seat: 2 }], forced: [9] };
+    const back = decode(`#${encode(scenario)}`, 'ro');
+    expect(back.pins).toEqual([{ uat: 1, seat: 2 }]);
+    expect(back.forced).toEqual([9]);
   });
 });

@@ -1286,3 +1286,24 @@ button.link:hover {
   opacity: 1;
   text-decoration: underline;
 }
+
+/* --- forced centres ------------------------------------------------------------------ */
+
+/* Deliberately not styled like the pin control beside it. A pin moves one commune after the
+   rules have run; forcing a centre changes what the rules were given, and a reader who reads
+   the two as the same control will misread the map. */
+.force-control {
+  margin: 10px 0 6px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+}
+
+.force-control .help {
+  margin: 6px 0 0;
+}
+
+#forced .pin-list li.stale .pin-uat {
+  text-decoration: line-through;
+}

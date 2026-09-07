@@ -23,6 +23,7 @@ import {
   TIER_PROMOTED,
   PROMOTION_POPULATION_BAND,
   REASON,
+  type ForcedRejection,
   type ModelData,
   type ModelResult,
   type Params,
@@ -365,12 +366,19 @@ function reach(data: ModelData, params: Params, seed: number, tier: number): num
  * `seatDistances`: expensive answers are computed when asked for, not shipped with every
  * result.
  */
-function selectSeeds(data: ModelData, params: Params, collectCandidacy = false): {
+function selectSeeds(
+  data: ModelData,
+  params: Params,
+  collectCandidacy = false,
+  forced: readonly number[] = [],
+): {
   tierOf: Int8Array;
   underSeeded: string[];
   held: Set<number>;
   reservedFor: Map<number, number>;
   candidacyOf: Uint8Array;
+  forcedApplied: number[];
+  forcedRejected: ForcedRejection[];
 } {
   const tierOf = new Int8Array(data.uatCount).fill(-1);
   // Observation only. Written alongside the decisions as they are made, because afterwards
@@ -399,6 +407,31 @@ function selectSeeds(data: ModelData, params: Params, collectCandidacy = false):
     }
   }
 
+  // The reader's own centres, before anything is stood down.
+  //
+  // Placed here so they are centres for every rule that follows: the capital stand-down sees
+  // them, the promotion loop counts them towards the county minimum, and growth treats them
+  // exactly as it treats a promoted town. Given TIER_PROMOTED rather than a tier of their own
+  // because that is precisely what they are — a centre the county would have promoted if the
+  // rules had reached them — and inventing a fifth tier would change the ordering of every
+  // contest in the model to say nothing new.
+  const forcedApplied: number[] = [];
+  const forcedRejected: ForcedRejection[] = [];
+  const forcedSet = new Set<number>();
+  for (const uat of [...new Set(forced)].sort((a, b) => a - b)) {
+    if (uat < 0 || uat >= data.uatCount) continue;
+    if (data.countyOf[uat] === data.bucharestCounty) {
+      forcedRejected.push({ uat, why: 'bucharest' });
+      continue;
+    }
+    if (tierOf[uat] !== -1) {
+      forcedRejected.push({ uat, why: 'already-a-centre' });
+      continue;
+    }
+    tierOf[uat] = TIER_PROMOTED;
+    forcedSet.add(uat);
+  }
+
   // A centre inside its capital's reach is stood down, and the capital takes it.
   //
   // This is what builds a metropolitan area rather than a ring of small rivals: Cumpana is
@@ -415,6 +448,10 @@ function selectSeeds(data: ModelData, params: Params, collectCandidacy = false):
   const held = new Set<number>();
   for (let i = 0; i < data.uatCount; i += 1) {
     if (tierOf[i] === -1 || tierOf[i] === TIER_NATIONAL_CAPITAL) continue;
+    // A forced centre is not stood down. Standing down is the model's judgement that a town
+    // inside a capital's reach is really part of that city, and overriding that judgement is
+    // exactly what forcing one is for. The ring below is a different matter and still binds.
+    if (forcedSet.has(i)) continue;
     for (const [capital, core] of cores) {
       if (capital === i || !core.has(i) || !mayAbsorb(data, capital, i)) continue;
       // A county capital is normally untouchable. The exception is Bucharest, which stands
@@ -462,6 +499,24 @@ function selectSeeds(data: ModelData, params: Params, collectCandidacy = false):
     if (tierOf[capital] === -1 || !isCapitalSeat(data, capital)) continue;
     for (const u of capitalRing(data, params, capital)) capitalRings.add(u);
   }
+
+  // The one rule a forced centre does not get to break.
+  //
+  // A capital holds its ring by right, and a second town hall inside it describes the same
+  // built-up area twice — which is the duplication this whole exercise exists to remove. The
+  // reader is overriding the model's judgement about thresholds and spacing, not its account
+  // of where a city is. Refused out loud, with the reason, rather than silently dropped.
+  for (const uat of [...forcedSet].sort((a, b) => a - b)) {
+    if (capitalRings.has(uat)) {
+      tierOf[uat] = -1;
+      forcedSet.delete(uat);
+      forcedRejected.push({ uat, why: 'capital-ring' });
+    } else {
+      forcedApplied.push(uat);
+      candidacyOf[uat] = CANDIDACY.FORCED;
+    }
+  }
+  forcedRejected.sort((a, b) => a.uat - b.uat);
 
   const reservedFor = new Map<number, number>();
   for (const uat of [...held].sort((a, b) => a - b)) {
@@ -646,7 +701,7 @@ function selectSeeds(data: ModelData, params: Params, collectCandidacy = false):
     }
   }
 
-  return { tierOf, underSeeded, held, reservedFor, candidacyOf };
+  return { tierOf, underSeeded, held, reservedFor, candidacyOf, forcedApplied, forcedRejected };
 }
 
 /**
@@ -660,8 +715,12 @@ function selectSeeds(data: ModelData, params: Params, collectCandidacy = false):
  * it observes the same deterministic selection the map was built from rather than a second,
  * possibly divergent one.
  */
-export function candidacyReport(data: ModelData, params: Params): Uint8Array {
-  return selectSeeds(data, params, true).candidacyOf;
+export function candidacyReport(
+  data: ModelData,
+  params: Params,
+  forced: readonly number[] = [],
+): Uint8Array {
+  return selectSeeds(data, params, true, forced).candidacyOf;
 }
 
 /**
@@ -1120,6 +1179,7 @@ function absorbStranded(
   orphanSeats: Set<number>,
   reasonOf: Uint8Array,
   tierOf: Int8Array,
+  forcedSeats: ReadonlySet<number>,
 ): void {
   const members = new Map<number, number[]>();
   for (let i = 0; i < data.uatCount; i += 1) {
@@ -1161,6 +1221,12 @@ function absorbStranded(
       if (!members.has(absorber)) continue;
       // Only leftovers, not every small unit the cap has stranded.
       if (populationOf(absorber) >= params.pStranded) continue;
+      // A centre the reader forced is not a leftover. This pass exists to dissolve units the
+      // ordinary rules could not place, and forcing a centre is the reader saying that this
+      // one should exist anyway — dissolving it here would make the override do nothing in
+      // precisely the cases anyone would use it. Its members still move under every other
+      // rule; the unit itself stays.
+      if (forcedSeats.has(absorber)) continue;
 
       const county = data.countyOf[absorber]!;
       if (county === data.bucharestCounty) continue;
@@ -2079,11 +2145,24 @@ function rebalance(data: ModelData, params: Params, regionOf: Uint16Array): numb
   return movedTotal;
 }
 
-export function runModel(data: ModelData, params: Params, pins: Pin[] = []): ModelResult {
+export function runModel(
+  data: ModelData,
+  params: Params,
+  pins: Pin[] = [],
+  /** Centres the reader insisted on. Part of the model's input, unlike pins. */
+  forced: readonly number[] = [],
+): ModelResult {
   const regionOf = new Uint16Array(data.uatCount).fill(NO_REGION);
   const reasonOf = new Uint8Array(data.uatCount).fill(REASON.UNCHANGED);
   const overlapOf = new Uint8Array(data.uatCount);
-  const { tierOf, underSeeded, held, reservedFor } = selectSeeds(data, params);
+  const { tierOf, underSeeded, held, reservedFor, forcedApplied, forcedRejected } = selectSeeds(
+    data,
+    params,
+    false,
+    forced,
+  );
+  // What selection actually accepted, for the passes downstream that must respect it.
+  const forcedSeats = new Set<number>(forcedApplied);
 
   const members = new Map<number, number[]>();
   accrete(data, params, tierOf, regionOf, reasonOf, overlapOf, members, held, reservedFor);
@@ -2133,7 +2212,7 @@ export function runModel(data: ModelData, params: Params, pins: Pin[] = []): Mod
 
   // Last of all, and only on what the ordinary rules could not place. Running it earlier
   // would let a cap-breaking merge stand where a later re-seating made a legal one possible.
-  absorbStranded(data, params, regionOf, orphanSeats, reasonOf, tierOf);
+  absorbStranded(data, params, regionOf, orphanSeats, reasonOf, tierOf, forcedSeats);
   reseatUnits(data, params, regionOf, tierOf, orphanSeats);
   // A last-resort merge changes membership like any other, so the map is rebalanced against
   // it. Skipping this left Vernesti in Oras Pogoanele 48.7 km away while Municipiul Buzau sat
@@ -2199,6 +2278,8 @@ export function runModel(data: ModelData, params: Params, pins: Pin[] = []): Mod
     savingsAdminRon,
     savingsOperatingRon,
     underSeededCounties: underSeeded,
+    forcedApplied,
+    forcedRejected,
     pinsApplied,
     pinsRejected,
     splitUnits,

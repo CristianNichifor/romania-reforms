@@ -9,7 +9,7 @@
 import { decode } from './load';
 import { assignUnitColours } from './colour';
 import { candidacyReport, countyRoadDistances, mergeBlocker, runModel } from './model';
-import type { Attributes, Manifest, ModelData, Params, Pin } from './types';
+import type { Attributes, ForcedRejection, Manifest, ModelData, Params, Pin } from './types';
 
 export interface InitMessage {
   type: 'init';
@@ -20,6 +20,8 @@ export interface ComputeMessage {
   type: 'compute';
   /** Manual overrides applied after the rules run. Absent or empty means none. */
   pins?: Pin[];
+  /** Centres the reader insisted on. Part of the model's input, unlike pins. */
+  forced?: number[];
   params: Params;
   /** Echoed back so the UI can discard results that a later drag has superseded. */
   token: number;
@@ -59,6 +61,7 @@ export interface SeatDistanceMessage {
 export interface CandidacyMessage {
   type: 'candidacy';
   params: Params;
+  forced?: number[];
 }
 
 export type Incoming =
@@ -132,6 +135,8 @@ export interface ResultMessage {
   savingsAdminRon: number;
   savingsOperatingRon: number;
   underSeededCounties: string[];
+  forcedApplied: number[];
+  forcedRejected: ForcedRejection[];
   pinsApplied: Pin[];
   pinsRejected: { pin: Pin; why: 'not-a-seat' | 'county' | 'already-there' }[];
   splitUnits: number[];
@@ -247,7 +252,7 @@ self.onmessage = async (event: MessageEvent<Incoming>) => {
 
     if (message.type === 'candidacy') {
       if (!data) return;
-      const candidacyOf = candidacyReport(data, message.params);
+      const candidacyOf = candidacyReport(data, message.params, message.forced ?? []);
       self.postMessage({ type: 'candidacy-result', candidacyOf } satisfies CandidacyResultMessage, [
         candidacyOf.buffer,
       ]);
@@ -274,7 +279,7 @@ self.onmessage = async (event: MessageEvent<Incoming>) => {
     if (message.type === 'compute') {
       if (!data) throw new Error('compute before init');
       const started = performance.now();
-      const result = runModel(data, message.params, message.pins ?? []);
+      const result = runModel(data, message.params, message.pins ?? [], message.forced ?? []);
       // Kept because the assignment below is transferred, not copied, and `explain` needs
       // to know what the current map actually is.
       lastRegionOf = result.regionOf.slice();
@@ -305,6 +310,8 @@ self.onmessage = async (event: MessageEvent<Incoming>) => {
         savingsAdminRon: result.savingsAdminRon,
         savingsOperatingRon: result.savingsOperatingRon,
         underSeededCounties: result.underSeededCounties,
+        forcedApplied: result.forcedApplied,
+        forcedRejected: result.forcedRejected,
         pinsApplied: result.pinsApplied,
         pinsRejected: result.pinsRejected,
         splitUnits: result.splitUnits,

@@ -219,6 +219,7 @@ async function boot(): Promise<void> {
     renderLayers();
     renderSummary();
     renderDetail();
+    renderForced();
     renderPins();
     renderCandidates();
     renderAudit();
@@ -526,6 +527,67 @@ async function boot(): Promise<void> {
     schedule();
   };
 
+  const setForced = (uat: number, on: boolean): void => {
+    scenario.forced = on
+      ? [...new Set([...scenario.forced, uat])].sort((a, b) => a - b)
+      : scenario.forced.filter((i) => i !== uat);
+    schedule();
+  };
+
+  /**
+   * The centres the reader put on the map themselves.
+   *
+   * Kept apart from the pins block because they are a different kind of override and the
+   * difference matters: a pin moves one commune after the rules have run, and a forced centre
+   * changes what the rules were given. A reader who confuses the two will misread the map.
+   */
+  const renderForced = (): void => {
+    const box = el<HTMLElement>('#forced');
+    if (!ready || !latest) { box.hidden = true; return; }
+    box.hidden = false;
+
+    if (scenario.forced.length === 0) {
+      box.innerHTML = `<h4>${strings.forceHeading}</h4><p class="muted">${strings.forceNone}</p>`;
+      return;
+    }
+
+    const refusalOf = new Map(latest.forcedRejected.map((r) => [r.uat, r.why]));
+    const refusalText: Record<string, string> = {
+      'capital-ring': strings.forceRefusedRing,
+      bucharest: strings.forceRefusedBucharest,
+      'already-a-centre': strings.forceRefusedAlready,
+    };
+
+    box.innerHTML = `
+      <h4>${strings.forceHeading} <span class="count">${formatNumber(
+        scenario.forced.length,
+        scenario.lang,
+      )}</span></h4>
+      <p class="muted">${strings.forceNote}</p>
+      <ul class="pin-list">
+        ${scenario.forced
+          .map((uat) => {
+            const why = refusalOf.get(uat);
+            return `<li${why ? ' class="stale"' : ''}>
+              <span class="pin-uat">${ready!.attributes.name[uat]}</span>
+              <span>${ready!.attributes.county[uat]}</span>
+              ${why ? `<em class="pin-note">${refusalText[why] ?? why}</em>` : ''}
+              <button data-unforce="${uat}" title="${strings.forceRemove}">×</button>
+            </li>`;
+          })
+          .join('')}
+      </ul>
+      <button class="link" data-clear-forced>${strings.forceClearAll}</button>`;
+
+    box.querySelectorAll<HTMLButtonElement>('[data-unforce]').forEach((button) => {
+      button.addEventListener('click', () => setForced(Number(button.dataset.unforce), false));
+    });
+    box.querySelector<HTMLButtonElement>('[data-clear-forced]')?.addEventListener('click', () => {
+      scenario.forced = [];
+      schedule();
+    });
+  };
+
   const renderPins = (): void => {
     const box = el<HTMLElement>('#pins');
     if (!ready || !latest) { box.hidden = true; return; }
@@ -581,7 +643,7 @@ async function boot(): Promise<void> {
 
   const requestCandidacy = (): void => {
     if (!candidacyOpen) return;
-    worker.postMessage({ type: 'candidacy', params: scenario.params });
+    worker.postMessage({ type: 'candidacy', params: scenario.params, forced: scenario.forced });
   };
 
   const CANDIDACY_LABEL: Record<number, keyof Strings> = {
@@ -799,6 +861,7 @@ async function boot(): Promise<void> {
     members.sort((a, b) => ready!.population[b]! - ready!.population[a]!);
 
     const currentPin = scenario.pins.find((p) => p.uat === index)?.seat ?? null;
+    const isForced = scenario.forced.includes(index);
     const orphan = isOrphanRegion[region] === 1;
     const sum = (series: Float32Array): number =>
       members.reduce((total, i) => total + series[i]!, 0);
@@ -878,6 +941,19 @@ async function boot(): Promise<void> {
         <p class="county-rule">${strings.whyCountyRule.replace('{county}', ready.attributes.county[region]!)}</p>
       </div>
       ${latest.splitUnits.includes(region) ? `<p class="pin-warning">${strings.pinSplit}</p>` : ''}
+      ${
+        // Offered on the commune in view, not on the unit it belongs to: forcing a centre is
+        // a claim about this locality, and on a unit's own seat it would be a no-op the model
+        // reports back as "already a centre".
+        isForced || latest.forcedApplied.includes(index) || index !== region
+          ? `<div class="force-control">
+               <button class="ghost small wide" data-force="${index}">${
+                 isForced ? strings.forceUndo : strings.forceMake
+               }</button>
+               <p class="help">${strings.forceNote}</p>
+             </div>`
+          : ''
+      }
       <div class="pin-control">
         <label for="pin-select">${strings.pinMoveTo}</label>
         <select id="pin-select">
@@ -910,6 +986,10 @@ async function boot(): Promise<void> {
           .join('')}
       </ul>`;
 
+    body.querySelector<HTMLButtonElement>('[data-force]')?.addEventListener('click', () => {
+      setForced(index, !isForced);
+    });
+
     body.querySelector<HTMLSelectElement>('#pin-select')?.addEventListener('change', (event) => {
       const value = (event.target as HTMLSelectElement).value;
       setPin(index, value === '' ? null : Number(value));
@@ -927,7 +1007,13 @@ async function boot(): Promise<void> {
     requestAnimationFrame(() => {
       pending = false;
       token += 1;
-      worker.postMessage({ type: 'compute', params: scenario.params, pins: scenario.pins, token });
+      worker.postMessage({
+        type: 'compute',
+        params: scenario.params,
+        pins: scenario.pins,
+        forced: scenario.forced,
+        token,
+      });
     });
   };
 
@@ -1009,6 +1095,7 @@ async function boot(): Promise<void> {
     paint();
     renderSummary();
     renderDetail();
+    renderForced();
     renderPins();
     // Stale the instant the parameters change, so it is dropped and re-asked rather than
     // left on screen describing a selection that is no longer the one on the map.

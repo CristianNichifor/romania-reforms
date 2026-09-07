@@ -24,6 +24,10 @@ const dataDir = resolve(here, '../public/data');
 const fixturePath = resolve(here, '../../tests/fixtures/parity_cases.json');
 
 interface FixtureCase {
+  /** SIRUTA codes the reader forced to be centres, mapped to indices below. */
+  forced?: string[];
+  forcedApplied?: string[];
+  forcedRejected?: [string, string][];
   params: {
     x: number;
     r_national_m: number;
@@ -81,6 +85,21 @@ function toParams(p: FixtureCase['params']): Params {
     rTieM: p.r_tie_m ?? DEFAULT_PARAMS.rTieM,
     pStranded: p.p_stranded ?? DEFAULT_PARAMS.pStranded,
   };
+}
+
+/**
+ * Forced centres arrive as SIRUTA because that is what the Python speaks. The model speaks
+ * indices, and `uatOrder` is the same canonical order both are built on, so this is a lookup
+ * rather than a conversion — and a code missing from the payload is a fixture that does not
+ * match this build, which should fail loudly rather than quietly force nothing.
+ */
+function forcedIndices(fixture: Fixture, codes: string[] | undefined): number[] {
+  if (!codes || codes.length === 0) return [];
+  return codes.map((code) => {
+    const index = fixture.uatOrder.indexOf(code);
+    if (index < 0) throw new Error(`fixture forces unknown SIRUTA ${code}`);
+    return index;
+  });
 }
 
 function assignmentHash(regionOf: Uint16Array): string {
@@ -157,7 +176,18 @@ describe('parity with the Python reference', () => {
       resolve(dirname(fileURLToPath(import.meta.url)), '../../tests/fixtures/parity_cases.json'),
     ).cases.map((c, i) => [i, c] as const),
   )('case %i produces an identical assignment', (_index, expected) => {
-    const result = runModel(data, toParams(expected.params));
+    const result = runModel(data, toParams(expected.params), [], forcedIndices(fixture, expected.forced));
+
+    // Which forced centres each implementation accepted, and which it refused and why. The
+    // assignment hash below would catch a disagreement about the map, but not one about the
+    // reason — and "refused because it sits in a capital's ring" is the part a reader is
+    // being asked to accept, so it is checked in its own right.
+    expect(result.forcedApplied.map((i) => data.attributes.siruta[i])).toEqual(
+      expected.forcedApplied ?? [],
+    );
+    expect(
+      result.forcedRejected.map((r) => [data.attributes.siruta[r.uat], r.why]),
+    ).toEqual(expected.forcedRejected ?? []);
 
     expect(result.regions).toBe(expected.regions);
     expect(result.seeds).toBe(expected.seeds);
