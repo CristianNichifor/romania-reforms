@@ -45,11 +45,11 @@
       "asset": "edge-paths.tar.gz",
       "destination": "simulators/administrativ/web/public/data/edge-paths.tar.gz",
       "extractTo": "simulators/administrativ/web/public/data/edge-paths",
-      "bytes": 1336402,
-      "sha256": "c4b2e64865c1b6223a8fb65d29564d9a2d3e196ee224c75ef3cea28128cc50bd",
+      "bytes": 1338653,
+      "sha256": "c545214b4855807b5e984cc48ec7e7c8887dcb79027e3293d8545ee18d4518ee",
       "producedBy": "simulators/administrativ/pipeline/build_edge_paths.py",
       "needs": "simulators/administrativ/data/raw/romania-latest.osm.pbf (313 MB, not committed) plus data/processed/road_distance.parquet",
-      "what": "The routed geometry behind each adjacency edge's distance, one GeoJSON per county — 7 860 of 7 932 intra-county edges, mean 31 KB a county. Sharded so hovering a commune fetches its county and nothing else. The first asset here that is a directory, hence extractTo.",
+      "what": "The routed geometry behind each adjacency edge's distance, one GeoJSON per county — 7 874 of 7 932 intra-county edges, the remaining 58 being water borders no road crosses. Built from the same OSM extract as road_distance.parquet, so every reconstructed route reproduces the distance the model measured. Sharded so hovering a commune fetches its county and nothing else. The first asset here that is a directory, hence extractTo.",
       "withoutIt": "The administrative map still draws the route a commune was absorbed along, but every leg is schematic: a dashed straight line between seats, carrying the real distance and captioned to say the line is not the road. Nothing fails."
     }
   ]
