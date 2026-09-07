@@ -963,6 +963,16 @@ button {
     flex: none;
   }
 
+  /* The peek bar already names the panel, so the heading underneath it is the same word
+     twice. The reset button keeps its row. */
+  .controls-head h2 {
+    display: none;
+  }
+
+  .controls-head {
+    justify-content: flex-end;
+  }
+
   .panel-title {
     display: block;
     font-size: 12px;
