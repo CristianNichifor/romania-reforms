@@ -31,6 +31,8 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import shutil
+import tarfile
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -57,6 +59,26 @@ def load_manifest(path: Path = MANIFEST) -> list[dict]:
     return json.loads(path.read_text(encoding="utf-8"))["assets"]
 
 
+def unpack(entry: dict, archive: Path) -> str:
+    """Extract an archive payload, for the assets that are a directory rather than a file.
+
+    The archive itself stays the `destination`, so the checksum machinery above is untouched:
+    what is verified is still exactly the bytes that were published. This only unpacks them.
+
+    `filter="data"` is not optional. A tar can name paths outside the directory it is
+    extracted into, and this one arrives over the network — the filter is what stops a
+    malicious or corrupt archive writing wherever it likes in the tree.
+    """
+    target = ROOT / entry["extractTo"]
+    if target.exists():
+        shutil.rmtree(target)
+    target.mkdir(parents=True, exist_ok=True)
+    with tarfile.open(archive, "r:gz") as tar:
+        tar.extractall(target, filter="data")  # noqa: S202
+    count = sum(1 for _ in target.rglob("*") if _.is_file())
+    return f" and unpacked {count} files into {entry['extractTo']}"
+
+
 def fetch(entry: dict, repo: str = REPO) -> tuple[bool, str]:
     """Return (ok, message). `ok` False only for a fault worth failing the build over."""
     destination = ROOT / entry["destination"]
@@ -67,7 +89,8 @@ def fetch(entry: dict, repo: str = REPO) -> tuple[bool, str]:
             return True, f"{entry['id']}: present, manifest carries no checksum yet"
         found = digest(destination)
         if found == expected:
-            return True, f"{entry['id']}: present and matches the manifest"
+            extra = unpack(entry, destination) if entry.get("extractTo") else ""
+            return True, f"{entry['id']}: present and matches the manifest{extra}"
         # Present but wrong. Do not overwrite silently: locally this is almost always a
         # freshly rebuilt payload that the manifest has not caught up with, and clobbering
         # someone's rebuild with an older release would be the rudest possible behaviour.
@@ -101,7 +124,8 @@ def fetch(entry: dict, repo: str = REPO) -> tuple[bool, str]:
             )
     temporary.replace(destination)
     size_mb = destination.stat().st_size / 1_048_576
-    return True, f"{entry['id']}: fetched {size_mb:.1f} MB from {entry['tag']}"
+    extra = unpack(entry, destination) if entry.get("extractTo") else ""
+    return True, f"{entry['id']}: fetched {size_mb:.1f} MB from {entry['tag']}{extra}"
 
 
 def main(argv: list[str] | None = None) -> int:
