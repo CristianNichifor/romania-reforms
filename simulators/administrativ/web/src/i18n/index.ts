@@ -184,6 +184,16 @@ export interface Strings {
   exportPngBusy: string;
   printSheet: string;
 
+  repHeading: string;
+  repNow: string;
+  repAfter: string;
+  repMayors: string;
+  repViceMayors: string;
+  repCouncillors: string;
+  repDanish: string;
+  repSource: string;
+  repBucharest: string;
+
   budgetLink: string;
   budgetLinkTitle: string;
   panelResize: string;
@@ -388,6 +398,20 @@ const ro: Strings = {
   exportPngBusy: 'Se pregătește…',
   printSheet: 'Tipărește',
 
+  repHeading: 'Reprezentare',
+  repNow: 'Azi',
+  repAfter: 'După fuziune',
+  repMayors: 'Primari',
+  repViceMayors: 'Viceprimari',
+  repCouncillors: 'Consilieri locali',
+  repDanish:
+    'În Danemarca o unitate de această mărime își alege singură câți consilieri are, între {min} și {max}. ' +
+    'Legea daneză fixează un interval, nu o formulă — este o comparație, nu o propunere.',
+  repSource: 'Art. 112 și art. 148 din Codul administrativ (OUG 57/2019)',
+  repBucharest:
+    'Consiliul General al Municipiului București are 55 de consilieri prin lege, nu pe intervale de populație. ' +
+    'Numărul viceprimarilor Capitalei nu este stabilit de art. 148, deci nu este afișat aici.',
+
   budgetLink: 'Bugetul pe transparenta.eu',
   budgetLinkTitle: 'Execuția bugetară a acestui UAT pe transparenta.eu',
   panelResize: 'Redimensionează panoul',
@@ -591,6 +615,20 @@ const en: Strings = {
   exportPng: 'Save image (PNG)',
   exportPngBusy: 'Preparing\u2026',
   printSheet: 'Print',
+
+  repHeading: 'Representation',
+  repNow: 'Today',
+  repAfter: 'After merging',
+  repMayors: 'Mayors',
+  repViceMayors: 'Vice-mayors',
+  repCouncillors: 'Local councillors',
+  repDanish:
+    'In Denmark a unit this size chooses its own council size, between {min} and {max}. Danish law fixes ' +
+    'a range rather than a formula \u2014 this is a comparison, not a proposal.',
+  repSource: 'Art. 112 and art. 148, Codul administrativ (OUG 57/2019)',
+  repBucharest:
+    'Bucharest\u2019s Consiliul General has 55 members by statute rather than by population band. Art. 148 does ' +
+    'not set the number of the capital\u2019s vice-mayors, so it is not shown here.',
 
   budgetLink: 'Budget on transparenta.eu',
   budgetLinkTitle: "This UAT's budget execution on transparenta.eu",
