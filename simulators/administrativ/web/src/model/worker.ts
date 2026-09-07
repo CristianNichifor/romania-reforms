@@ -101,13 +101,13 @@ export interface ChainResultMessage {
   type: 'chain-result';
   uat: number;
   /** Centre-ward, starting at the commune asked about. Empty where none was measured. */
-  legs: { from: number; to: number; metres: number }[];
+  legs: { from: number; to: number; metres: number; seconds: number }[];
 }
 
 export interface UnitChainsResultMessage {
   type: 'unit-chains-result';
   seat: number;
-  legs: { from: number; to: number; metres: number }[];
+  legs: { from: number; to: number; metres: number; seconds: number }[];
 }
 
 export interface CandidacyResultMessage {
@@ -215,6 +215,13 @@ async function load(baseUrl: string): Promise<ModelData> {
     return response;
   };
 
+  // edge-time.bin is optional: it comes from the transport simulator, and a build without it
+  // loses the minutes beside each leg and nothing else. Fetched with the rest so a hover never
+  // waits for it.
+  const edgeTime = await fetch(`${baseUrl}edge-time.bin`)
+    .then((r) => (r.ok ? r.arrayBuffer() : undefined))
+    .catch(() => undefined);
+
   const [manifest, attributes, attributesBin, adjacencyBin, candidacyBin] = await Promise.all([
     get('manifest.json').then((r) => r.json() as Promise<Manifest>),
     get('attributes.json').then((r) => r.json() as Promise<Attributes>),
@@ -223,7 +230,7 @@ async function load(baseUrl: string): Promise<ModelData> {
     get('candidacy.bin').then((r) => r.arrayBuffer()),
   ]);
 
-  return decode({ manifest, attributes, attributesBin, adjacencyBin, candidacyBin });
+  return decode({ manifest, attributes, attributesBin, adjacencyBin, candidacyBin, edgeTimeBin: edgeTime });
 }
 
 self.onmessage = async (event: MessageEvent<Incoming>) => {
@@ -304,10 +311,15 @@ self.onmessage = async (event: MessageEvent<Incoming>) => {
         if (seen.has(parent)) break;
         seen.add(parent);
         let metres = Infinity;
+        let seconds = 0;
         for (let e = data.neighbourStart[node]!; e < data.neighbourStart[node + 1]!; e += 1) {
-          if (data.neighbours[e] === parent) { metres = data.neighbourRoadM[e]!; break; }
+          if (data.neighbours[e] === parent) {
+            metres = data.neighbourRoadM[e]!;
+            seconds = data.neighbourSeconds[e]!;
+            break;
+          }
         }
-        legs.push({ from: node, to: parent, metres });
+        legs.push({ from: node, to: parent, metres, seconds });
         node = parent;
       }
       self.postMessage({ type: 'chain-result', uat: message.uat, legs } satisfies ChainResultMessage);
@@ -330,10 +342,15 @@ self.onmessage = async (event: MessageEvent<Incoming>) => {
           if (!seen.has(key)) {
             seen.add(key);
             let metres = Infinity;
+            let seconds = 0;
             for (let e = data.neighbourStart[node]!; e < data.neighbourStart[node + 1]!; e += 1) {
-              if (data.neighbours[e] === parent) { metres = data.neighbourRoadM[e]!; break; }
+              if (data.neighbours[e] === parent) {
+                metres = data.neighbourRoadM[e]!;
+                seconds = data.neighbourSeconds[e]!;
+                break;
+              }
             }
-            legs.push({ from: node, to: parent, metres });
+            legs.push({ from: node, to: parent, metres, seconds });
           }
           node = parent;
         }

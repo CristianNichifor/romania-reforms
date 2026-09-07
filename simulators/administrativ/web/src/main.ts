@@ -815,7 +815,10 @@ async function boot(): Promise<void> {
   let chainFor: number | null = null;
 
   /** Draw the route, and say in the card which legs are real roads and which are stand-ins. */
-  const drawChain = (uat: number, legs: { from: number; to: number; metres: number }[]): void => {
+  const drawChain = (
+    uat: number,
+    legs: { from: number; to: number; metres: number; seconds: number }[],
+  ): void => {
     if (!ready || chainFor !== uat) return;
     const county = ready.attributes.county[uat] ?? '';
     const shard = shards.get(county);
@@ -840,6 +843,19 @@ async function boot(): Promise<void> {
       const slot = hovercard.querySelector<HTMLElement>('.chain');
       if (!slot || slot.dataset.uat !== String(uat)) return;
       const anySchematic = drawn.some((leg) => !leg.real);
+      // Minutes as well as kilometres. The distance cap is the least legible rule in the
+      // model — "21.5 km against a 50 km cap" asks a reader to hold a distance in their head
+      // and judge it, and a time does not. Absent where the build has no edge-time payload,
+      // and where no drivable route exists.
+      const secondsOf = new Map(legs.map((leg) => [`${leg.from}:${leg.to}`, leg.seconds]));
+      const minutes = (secs: number | undefined): string =>
+        secs === undefined || secs <= 0 || secs >= 65_535
+          ? ''
+          : ` · ${Math.round(secs / 60)} ${strings.chainMinutes}`;
+      const totalSeconds = legs.reduce(
+        (sum, leg) => (leg.seconds > 0 && leg.seconds < 65_535 ? sum + leg.seconds : sum),
+        0,
+      );
       slot.innerHTML =
         `<div class="sd-title">${strings.chainTitle}</div>` +
         drawn
@@ -847,11 +863,13 @@ async function boot(): Promise<void> {
             (leg) =>
               `<div class="line${leg.real ? '' : ' schematic'}">` +
               `<span>${ready!.attributes.name[leg.to]}</span>` +
-              `<span>${(leg.metres / 1000).toFixed(1)} km</span></div>`,
+              `<span>${(leg.metres / 1000).toFixed(1)} km${minutes(
+                secondsOf.get(`${leg.from}:${leg.to}`),
+              )}</span></div>`,
           )
           .join('') +
         `<div class="line total"><span>${strings.chainTotal}</span>` +
-        `<span>${(totalMetres / 1000).toFixed(1)} km</span></div>` +
+        `<span>${(totalMetres / 1000).toFixed(1)} km${minutes(totalSeconds)}</span></div>` +
         (shard === undefined ? `<div class="chain-note">${strings.chainLoading}</div>` : '') +
         (anySchematic && shard !== undefined
           ? `<div class="chain-note">${strings.chainSchematic}</div>`
@@ -1410,6 +1428,57 @@ async function boot(): Promise<void> {
   };
 
   /**
+   * Which courts a merged unit would straddle.
+   *
+   * The Government's own circumscriptions, not nearest-court-by-road: the legal assignment is
+   * a fact and the nearest court is a guess that happens to be right most of the time.
+   *
+   * Judecătorii rather than tribunale. There is one tribunal per county and no unit may cross
+   * a county line, so no merger could ever span two — the level where a merger actually
+   * straddles a boundary is the judecătorie, and 55% of the default map's units do.
+   */
+  interface CourtsPayload {
+    period?: string;
+    courts: string[];
+    courtOf: number[];
+  }
+  let courts: CourtsPayload | null = null;
+  let courtsLoad: Promise<void> | null = null;
+
+  const loadCourts = (): Promise<void> => {
+    courtsLoad ??= fetch(`${DATA_BASE}courts.json`)
+      .then((response) => (response.ok ? response.json() : null))
+      .then((raw: CourtsPayload | null) => {
+        courts = raw;
+      })
+      .catch(() => {
+        courts = null;
+      });
+    return courtsLoad;
+  };
+
+  const courtsHtml = (members: number[]): string => {
+    const payload = courts;
+    if (!payload) return '';
+    // -1 marks a commune the 2023 decision predates; it drops out rather than reading as a court.
+    const here = [...new Set(members.map((i) => payload.courtOf[i] ?? -1).filter((c) => c >= 0))];
+    if (here.length === 0) return '';
+    const listed = here
+      .map((c) => payload.courts[c] ?? '')
+      .sort((a, b) => a.localeCompare(b, scenario.lang));
+    return `
+      <div class="courts">
+        <h4>${strings.courtHeading}</h4>
+        <p class="court-count">${
+          here.length === 1 ? strings.courtOne : strings.courtMany.replace('{n}', String(here.length))
+        }</p>
+        <p class="muted court-list">${listed.join(' · ')}</p>
+        ${here.length > 1 ? `<p class="muted">${strings.courtSplitNote}</p>` : ''}
+        <p class="muted rep-source">${strings.courtSource}</p>
+      </div>`;
+  };
+
+  /**
    * What a merger does to the political layer.
    *
    * Statutory on both sides — Art. 112 sets the council by population band, Art. 148 the
@@ -1506,6 +1575,7 @@ async function boot(): Promise<void> {
 
     // The party table needs the votes; the rest of the panel does not wait for them.
     if (!votes) void loadVotes().then(() => { if (scenario.selected === index) renderDetail(); });
+    if (!courts) void loadCourts().then(() => { if (scenario.selected === index) renderDetail(); });
     detailPanel.setTitle(unitName(ready, region));
     el<HTMLElement>('#detail-kicker').innerHTML =
       `${strings.region}${orphan ? ` · <span class="badge orphan">${strings.legendOrphan}</span>` : ''}`;
@@ -1540,6 +1610,8 @@ async function boot(): Promise<void> {
       </div>
 
       ${representationHtml(members, region, totalPop)}
+
+      ${courtsHtml(members)}
 
       <div class="savings">
         <h4>${strings.savingsHeading}</h4>

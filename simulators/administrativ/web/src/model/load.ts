@@ -17,6 +17,8 @@ export interface RawPayload {
   manifest: Manifest;
   attributes: Attributes;
   attributesBin: ArrayBuffer;
+  /** Optional: drive time per edge, from the transport simulator. */
+  edgeTimeBin?: ArrayBuffer;
   adjacencyBin: ArrayBuffer;
   candidacyBin: ArrayBuffer;
 }
@@ -119,15 +121,22 @@ export function decode(raw: RawPayload): ModelData {
   const cursor = neighbourStart.slice(0, n);
   const neighbours = new Uint16Array(edges * 2);
   const neighbourRoadM = new Float32Array(edges * 2);
+  // Drive time, where the build has it. Optional: edge-time.bin comes from the transport
+  // simulator, so a build without it loses the minutes beside each leg and nothing else.
+  const edgeSeconds = raw.edgeTimeBin ? new Uint16Array(raw.edgeTimeBin, 0, edges) : null;
+  const neighbourSeconds = new Uint16Array(edges * 2);
   for (let e = 0; e < edges; e += 1) {
     const a = edgeA[e]!;
     const b = edgeB[e]!;
     const metres = edgeRoad[e]!;
+    const seconds = edgeSeconds ? edgeSeconds[e]! : 0;
     neighbours[cursor[a]!] = b;
     neighbourRoadM[cursor[a]!] = metres;
+    neighbourSeconds[cursor[a]!] = seconds;
     cursor[a] = cursor[a]! + 1;
     neighbours[cursor[b]!] = a;
     neighbourRoadM[cursor[b]!] = metres;
+    neighbourSeconds[cursor[b]!] = seconds;
     cursor[b] = cursor[b]! + 1;
   }
   // The Python reference iterates neighbours in SIRUTA order, which is index order here.
@@ -137,11 +146,14 @@ export function decode(raw: RawPayload): ModelData {
     const from = neighbourStart[i]!;
     const to = neighbourStart[i + 1]!;
     const pairs = [];
-    for (let e = from; e < to; e += 1) pairs.push([neighbours[e]!, neighbourRoadM[e]!] as const);
+    for (let e = from; e < to; e += 1) {
+      pairs.push([neighbours[e]!, neighbourRoadM[e]!, neighbourSeconds[e]!] as const);
+    }
     pairs.sort((x, y) => x[0] - y[0]);
     for (let k = 0; k < pairs.length; k += 1) {
       neighbours[from + k] = pairs[k]![0];
       neighbourRoadM[from + k] = pairs[k]![1];
+      neighbourSeconds[from + k] = pairs[k]![2];
     }
   }
 
@@ -239,6 +251,7 @@ export function decode(raw: RawPayload): ModelData {
     ilfovCounty,
     neighbours,
     neighbourRoadM,
+    neighbourSeconds,
     touching,
     touchStart,
     touchingSharedKm,

@@ -96,6 +96,7 @@ export interface Strings {
   hoverSeatDistances: string;
   chainTitle: string;
   chainTotal: string;
+  chainMinutes: string;
   chainLoading: string;
   chainSchematic: string;
 
@@ -215,6 +216,11 @@ export interface Strings {
   repLoses: string;
   repCaveat: string;
   repMandate: string;
+  courtHeading: string;
+  courtOne: string;
+  courtMany: string;
+  courtSplitNote: string;
+  courtSource: string;
 
   budgetLink: string;
   budgetLinkTitle: string;
@@ -328,6 +334,7 @@ const ro: Strings = {
   hoverSeatDistances: 'Distanța pe drum până la reședințele din jur',
   chainTitle: 'Drumul pe care a fost absorbită',
   chainTotal: 'Total',
+  chainMinutes: 'min',
   chainLoading: 'Se descarcă geometria drumurilor…',
   chainSchematic:
     'Segmentele punctate sunt schematice: distanța este reală, linia nu este drumul.',
@@ -461,6 +468,13 @@ const ro: Strings = {
     '(coeficient electoral, prag de 5%, cele mai mari resturi). Este o socoteală, nu o predicție: ' +
     'oamenii nu ar vota la fel pentru alți candidați, într-o altă unitate.',
   repMandate: 'Alegeri locale 2020 (mandatul 2020–2024), AEP via data.gov.ro',
+  courtHeading: 'Justiție',
+  courtOne: 'O singură judecătorie',
+  courtMany: '{n} judecătorii',
+  courtSplitNote:
+    'Unitatea rezultată ar traversa circumscripții judecătorești. Fuziunea administrativă ar cere ' +
+    'și o rearondare judiciară, altfel granița administrativă și cea judiciară nu mai coincid.',
+  courtSource: 'Arondarea judecătoriilor, 2023 — Guvernul României',
 
   budgetLink: 'Bugetul pe transparenta.eu',
   budgetLinkTitle: 'Execuția bugetară a acestui UAT pe transparenta.eu',
@@ -574,6 +588,7 @@ const en: Strings = {
   hoverSeatDistances: 'Road distance to the seats around it',
   chainTitle: 'The road it was absorbed along',
   chainTotal: 'Total',
+  chainMinutes: 'min',
   chainLoading: 'Downloading road geometry\u2026',
   chainSchematic:
     'Dashed legs are schematic: the distance is real, the line is not the road.',
@@ -707,6 +722,13 @@ const en: Strings = {
     'coefficient, 5% threshold, largest remainders. It is arithmetic, not a prediction: people would not ' +
     'vote the same way for a different set of candidates in a different unit.',
   repMandate: 'Local elections 2020 (the 2020\u20132024 mandate), AEP via data.gov.ro',
+  courtHeading: 'Courts',
+  courtOne: 'One court',
+  courtMany: '{n} courts',
+  courtSplitNote:
+    'The resulting unit would straddle judicial circumscriptions. Merging administratively would ' +
+    'require redrawing the judicial map too, or the two boundaries stop agreeing.',
+  courtSource: 'Judecătorie circumscriptions, 2023 — Government of Romania',
 
   budgetLink: 'Budget on transparenta.eu',
   budgetLinkTitle: "This UAT's budget execution on transparenta.eu",
