@@ -247,7 +247,9 @@ button {
 }
 
 .slider {
-  margin-bottom: 14px;
+  /* Each slider is a label, a value, a track and a sentence of help. Packed at 14 px they ran
+     together and the help of one read as the label of the next. */
+  margin-bottom: 20px;
 }
 
 .slider-head {
@@ -270,38 +272,49 @@ button {
 
 .slider input[type='range'] {
   width: 100%;
-  margin: 6px 0 0;
+  margin: 8px 0 0;
   accent-color: var(--accent);
 }
 
 .slider .help {
-  margin: 3px 0 0;
+  margin: 7px 0 0;
   font-size: 11px;
-  line-height: 1.4;
+  line-height: 1.5;
   color: var(--muted);
 }
 
 .layers-block {
-  margin-top: 6px;
-  padding-top: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
   border-top: 1px solid var(--border);
 }
 
 .layers-block h2 {
-  margin: 0 0 8px;
+  margin: 0 0 10px;
   font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--muted);
 }
 
+/* A checkbox, a swatch, a label and sometimes a note. On one line at 3 px of padding the
+   note wrapped under the checkbox and the rows lost their edges; the note now sits on its own
+   line, indented past the controls, and each row has room around it. */
 .layer-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto auto 1fr;
   align-items: center;
-  gap: 8px;
-  padding: 3px 0;
+  gap: 4px 9px;
+  padding: 6px 0;
   font-size: 12.5px;
+  line-height: 1.45;
   cursor: pointer;
+}
+
+.layer-row .note {
+  grid-column: 3;
+  display: block;
+  margin-top: 2px;
 }
 
 .layer-row input {
@@ -325,6 +338,7 @@ button {
 .layer-row .note {
   color: var(--muted);
   font-size: 10.5px;
+  line-height: 1.4;
 }
 
 .why {
@@ -398,10 +412,10 @@ button {
 }
 
 .detail dl {
-  margin: 0 0 12px;
+  margin: 0 0 16px;
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 6px 12px;
+  gap: 9px 14px;
 }
 
 .detail dt {
@@ -798,11 +812,34 @@ button {
   display: none;
 }
 
+/* A header row, not a floating button.
+   The close control used to be absolutely positioned over the panel body, which put it on
+   top of the first line of content and forced a padding-right hack on everything below it.
+   Given its own row it collides with nothing and the body gets its full width back. */
+.detail-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex: none;
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.detail-head .kicker {
+  margin: 0;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .panel-close {
-  position: absolute;
-  top: 8px;
-  right: 10px;
-  z-index: 2;
+  flex: none;
   width: 26px;
   height: 26px;
   padding: 0;
@@ -825,10 +862,7 @@ button {
   overflow-y: auto;
 }
 
-/* The detail panel's own content must not run under the close button. */
-.detail .panel-body {
-  padding-right: 26px;
-}
+
 
 /* The candidate list is behind a disclosure because opening it is what triggers the work.
    Its heading has to sit beside the marker rather than below it: an h4 is block-level, so
@@ -1006,9 +1040,6 @@ button {
     right: 12px;
   }
 
-  .detail .panel-body {
-    padding-right: 0;
-  }
 
   .legend {
     display: none;
@@ -1309,6 +1340,13 @@ button.link:hover {
 }
 
 /* --- the published map, and saved versions -------------------------------------------- */
+
+/* `display` here outranks the user agent's `[hidden] { display: none }`, so without the rule
+   below an unpublished reference left an empty pill sitting in the topbar. Same trap as
+   `.detail[hidden]`; worth stating twice because it is invisible until someone looks. */
+.version-badge[hidden] {
+  display: none;
+}
 
 .version-badge {
   display: inline-flex;
