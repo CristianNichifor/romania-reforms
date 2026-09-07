@@ -158,6 +158,15 @@ export interface ModelData {
   neighbours: Uint16Array;
   /** Road distance in metres to each neighbour, aligned with `neighbours`. */
   neighbourRoadM: Float32Array;
+  /**
+   * Drive time in seconds to each neighbour, aligned with `neighbours`.
+   *
+   * From the transport simulator, which measured it over the same borders. Zero where the
+   * build has no `edge-time.bin`, and 65,535 where no drivable route exists — the model never
+   * reads this, it only makes the distance cap legible to a reader who does not think in
+   * kilometres.
+   */
+  neighbourSeconds: Uint16Array;
   neighbourStart: Uint32Array;
   /**
    * Every shared border, including those no road crosses. Colouring only.

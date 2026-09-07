@@ -6,8 +6,10 @@ web/public/data/edge-paths.tar.gz
 
 # Raw downloads and build artefacts are reproducible from the pipeline.
 # Only web/public/data/ is committed (see README size budget).
-data/raw/
-data/processed/
+# No trailing slash: these are sometimes symlinks into another checkout, and a trailing
+# slash matches only real directories, which let one get committed.
+data/raw
+data/processed
 
 # --- Python ---
 __pycache__/
