@@ -66,6 +66,16 @@ export const CAPITAL_COLOUR = '#ffd166';
  * with both switched on.
  */
 export const ROAD_COLOUR = '#ffffff';
+
+/**
+ * The route a commune was absorbed along.
+ *
+ * Every hue in the palette is spoken for and the road layers already separate by brightness,
+ * so the chain takes the one warm colour nothing else uses. It has to be legible over eleven
+ * saturated fills and on top of the road layers when those are switched on, hence the dark
+ * casing and a width that does not thin out at national zoom.
+ */
+export const CHAIN_COLOUR = '#ff8c42';
 export const ROAD_COUNTY_COLOUR = '#9fc6ef';
 export const ROAD_CASING_COLOUR = '#0a0d11';
 
@@ -128,6 +138,19 @@ const BLANK_STYLE: StyleSpecification = {
   // `undefined`. Nothing here renders text, so there is no font to point at.
 };
 
+/**
+ * One leg of a route back to a centre.
+ *
+ * `kind` is what the reader is being shown: `road` is the geometry the distance was actually
+ * measured along, `schematic` is a straight line standing in for it while the county's
+ * geometry loads or where none could be reconstructed. They are drawn differently on purpose.
+ */
+export interface ChainFeature {
+  type: 'Feature';
+  properties: { kind: 'road' | 'schematic' };
+  geometry: { type: 'LineString'; coordinates: [number, number][] };
+}
+
 export interface LabelPoint {
   index: number;
   x: number;
@@ -173,6 +196,10 @@ export interface MapHandle {
    * without a return value a reader would tick "roads" and simply get nothing.
    */
   setOverlay: (overlay: Overlay, visible: boolean) => Promise<boolean>;
+  /** Draw a route, or clear it with an empty array. */
+  setChain: (features: ChainFeature[]) => void;
+  /** Seat coordinates by UAT index, for drawing a schematic route before geometry arrives. */
+  seatPoints: () => Promise<Map<number, [number, number]>>;
   /**
    * Mark the seat of every resulting unit.
    *
@@ -410,6 +437,34 @@ export async function createMap(container: HTMLElement, dataBase: string): Promi
       'circle-stroke-opacity': [
         'case', ['>=', ['coalesce', ['feature-state', 'kind'], -1], 0], 1, 0,
       ],
+    },
+  });
+
+  // The chain the reader is being shown, if any. Its own source so it can be replaced on
+  // every hover without touching the geometry underneath it.
+  map.addSource('chain', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+  map.addLayer({
+    id: 'chain-casing',
+    type: 'line',
+    source: 'chain',
+    layout: { 'line-cap': 'round', 'line-join': 'round' },
+    paint: {
+      'line-color': ROAD_CASING_COLOUR,
+      'line-opacity': 0.85,
+      'line-width': ['interpolate', ['linear'], ['zoom'], 6, 6, 11, 11],
+    },
+  });
+  map.addLayer({
+    id: 'chain-line',
+    type: 'line',
+    source: 'chain',
+    layout: { 'line-cap': 'round', 'line-join': 'round' },
+    paint: {
+      'line-color': CHAIN_COLOUR,
+      'line-width': ['interpolate', ['linear'], ['zoom'], 6, 2.6, 11, 6],
+      // Schematic segments are dashed, so a straight line between two seats can never be
+      // mistaken for the road it stands in for while the real geometry is still loading.
+      'line-dasharray': ['case', ['==', ['get', 'kind'], 'schematic'], ['literal', [2, 2]], ['literal', [1, 0]]],
     },
   });
 
@@ -694,9 +749,26 @@ export async function createMap(container: HTMLElement, dataBase: string): Promi
     return out;
   };
 
+  const setChain = (features: ChainFeature[]): void => {
+    const source = map.getSource('chain');
+    if (source && 'setData' in source) {
+      (source as { setData: (data: unknown) => void }).setData({
+        type: 'FeatureCollection',
+        features,
+      });
+    }
+  };
+
+  const seatPoints = async (): Promise<Map<number, [number, number]>> => {
+    await loadSeats();
+    return seatLngLat ?? new Map();
+  };
+
   return {
     map,
     applyAssignment,
+    setChain,
+    seatPoints,
     setSelected,
     setCountyFocus,
     flyTo,

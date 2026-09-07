@@ -1521,3 +1521,32 @@ button.link:hover {
   font-size: 10.5px;
   opacity: 0.8;
 }
+
+/* --- the route a commune was absorbed along ------------------------------------------- */
+
+.hovercard .chain {
+  margin-top: 5px;
+  padding-top: 5px;
+  border-top: 1px solid var(--border);
+}
+
+.hovercard .chain .line.schematic span:first-child::after {
+  /* Marked in the list as well as on the map: a reader looking at the numbers rather than
+     the lines still needs to know which legs are stand-ins. */
+  content: ' ⋯';
+  color: var(--muted);
+}
+
+.hovercard .chain .line.total {
+  margin-top: 3px;
+  padding-top: 3px;
+  border-top: 1px solid var(--border);
+  font-weight: 600;
+}
+
+.hovercard .chain-note {
+  margin-top: 4px;
+  font-size: 10.5px;
+  line-height: 1.35;
+  color: var(--muted);
+}

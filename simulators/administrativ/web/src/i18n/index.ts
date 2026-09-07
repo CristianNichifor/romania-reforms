@@ -94,6 +94,10 @@ export interface Strings {
   hoverProposed: string;
   hoverCommunes: string;
   hoverSeatDistances: string;
+  chainTitle: string;
+  chainTotal: string;
+  chainLoading: string;
+  chainSchematic: string;
   selectPrompt: string;
   region: string;
   centre: string;
@@ -304,6 +308,11 @@ const ro: Strings = {
   hoverProposed: 'Unitate propusă',
   hoverCommunes: 'comune',
   hoverSeatDistances: 'Distanța pe drum până la reședințele din jur',
+  chainTitle: 'Drumul pe care a fost absorbită',
+  chainTotal: 'Total',
+  chainLoading: 'Se descarcă geometria drumurilor…',
+  chainSchematic:
+    'Segmentele punctate sunt schematice: distanța este reală, linia nu este drumul.',
   selectPrompt: 'Selectează o unitate pe hartă.',
   region: 'Unitate rezultată',
   centre: 'Centru',
@@ -522,6 +531,11 @@ const en: Strings = {
   hoverProposed: 'Proposed unit',
   hoverCommunes: 'communes',
   hoverSeatDistances: 'Road distance to the seats around it',
+  chainTitle: 'The road it was absorbed along',
+  chainTotal: 'Total',
+  chainLoading: 'Downloading road geometry\u2026',
+  chainSchematic:
+    'Dashed legs are schematic: the distance is real, the line is not the road.',
   selectPrompt: 'Select a unit on the map.',
   region: 'Resulting unit',
   centre: 'Centre',

@@ -64,12 +64,32 @@ export interface CandidacyMessage {
   forced?: number[];
 }
 
+/**
+ * The route a commune was absorbed along, with the distance of each leg.
+ *
+ * The worker owns the adjacency graph, so it answers this rather than the main thread
+ * carrying another 9,000-edge array it would use on hover and nowhere else. Same reasoning as
+ * `seatDistances` beside it.
+ */
+export interface ChainMessage {
+  type: 'chain';
+  uat: number;
+}
+
 export type Incoming =
   | InitMessage
   | ComputeMessage
   | ExplainMessage
   | SeatDistanceMessage
-  | CandidacyMessage;
+  | CandidacyMessage
+  | ChainMessage;
+
+export interface ChainResultMessage {
+  type: 'chain-result';
+  uat: number;
+  /** Centre-ward, starting at the commune asked about. Empty where none was measured. */
+  legs: { from: number; to: number; metres: number }[];
+}
 
 export interface CandidacyResultMessage {
   type: 'candidacy-result';
@@ -128,6 +148,8 @@ export interface ResultMessage {
   reasonOf: Uint8Array;
   overlapOf: Uint8Array;
   tierOf: Int8Array;
+  /** The commune each UAT was reached through during accretion, or -1. */
+  parentOf: Int16Array;
   regions: number;
   seeds: number;
   orphanRegions: number;
@@ -154,7 +176,8 @@ export type Outgoing =
   | ErrorMessage
   | ExplainResultMessage
   | SeatDistanceResultMessage
-  | CandidacyResultMessage;
+  | CandidacyResultMessage
+  | ChainResultMessage;
 
 // `self` in a module worker is a DedicatedWorkerGlobalScope, whose postMessage takes a
 // transfer list. The DOM lib types it as Window, which has a different signature.
@@ -162,6 +185,7 @@ declare const self: DedicatedWorkerGlobalScope;
 
 let data: ModelData | null = null;
 let lastRegionOf: Uint16Array | null = null;
+let lastParentOf: Int16Array | null = null;
 let lastParams: Params | null = null;
 
 async function load(baseUrl: string): Promise<ModelData> {
@@ -250,6 +274,26 @@ self.onmessage = async (event: MessageEvent<Incoming>) => {
       return;
     }
 
+    if (message.type === 'chain') {
+      if (!data || !lastParentOf) return;
+      const legs: ChainResultMessage['legs'] = [];
+      const seen = new Set<number>([message.uat]);
+      let node = message.uat;
+      while (lastParentOf[node]! >= 0) {
+        const parent = lastParentOf[node]!;
+        if (seen.has(parent)) break;
+        seen.add(parent);
+        let metres = Infinity;
+        for (let e = data.neighbourStart[node]!; e < data.neighbourStart[node + 1]!; e += 1) {
+          if (data.neighbours[e] === parent) { metres = data.neighbourRoadM[e]!; break; }
+        }
+        legs.push({ from: node, to: parent, metres });
+        node = parent;
+      }
+      self.postMessage({ type: 'chain-result', uat: message.uat, legs } satisfies ChainResultMessage);
+      return;
+    }
+
     if (message.type === 'candidacy') {
       if (!data) return;
       const candidacyOf = candidacyReport(data, message.params, message.forced ?? []);
@@ -283,6 +327,7 @@ self.onmessage = async (event: MessageEvent<Incoming>) => {
       // Kept because the assignment below is transferred, not copied, and `explain` needs
       // to know what the current map actually is.
       lastRegionOf = result.regionOf.slice();
+      lastParentOf = result.parentOf.slice();
       lastParams = message.params;
 
       // A unit is orphan-tier when its seat is not a centre: absorbed units are always
@@ -303,6 +348,7 @@ self.onmessage = async (event: MessageEvent<Incoming>) => {
         reasonOf: result.reasonOf,
         overlapOf: result.overlapOf,
         tierOf: result.tierOf,
+        parentOf: result.parentOf,
         regions: result.regions,
         seeds: result.seeds,
         orphanRegions: result.orphanRegions,
@@ -325,6 +371,7 @@ self.onmessage = async (event: MessageEvent<Incoming>) => {
         payload.reasonOf.buffer,
         payload.overlapOf.buffer,
         payload.tierOf.buffer,
+        payload.parentOf.buffer,
       ]);
     }
   } catch (error) {

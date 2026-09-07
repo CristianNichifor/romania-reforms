@@ -289,6 +289,15 @@ export interface ModelResult {
   regionOf: Uint16Array;
   /** Tier per seed index, or -1 where the UAT is not a seed. */
   tierOf: Int8Array;
+  /**
+   * The commune each UAT was reached through, or -1.
+   *
+   * Following it repeatedly walks back to the centre, which is the route the accumulated road
+   * distance was measured along. Only accretion sets it: a commune placed by the leftover
+   * pass, the orphan tier, consolidation, rebalancing or a pin was not reached along a chain,
+   * and -1 says so rather than inventing one.
+   */
+  parentOf: Int16Array;
   regions: number;
   seeds: number;
   orphanRegions: number;

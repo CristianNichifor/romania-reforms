@@ -8,6 +8,7 @@
 
 import './style.css';
 
+import { buildChain, edgeKey, indexShard } from './app/chain';
 import { budgetUrlFor } from './app/links';
 import { createPanel } from './app/panels';
 import { REFERENCE, sameMap } from './app/reference';
@@ -742,6 +743,101 @@ async function boot(): Promise<void> {
     }
   };
 
+  // --- the route a commune was absorbed along -------------------------------------------
+
+  /**
+   * County shards of routed geometry, fetched the first time a route in that county is shown.
+   *
+   * 31 KB each, so a hover pays for one county and nothing else. `null` records a county
+   * whose shard is not in this build — the geometry is published as a release asset like the
+   * road layers, so its absence is a normal state and must cost the route its shape, not its
+   * existence.
+   */
+  const shards = new Map<string, Map<string, [number, number][]> | null>();
+  const shardLoads = new Map<string, Promise<void>>();
+
+  const loadShard = (county: string): Promise<void> => {
+    let pending = shardLoads.get(county);
+    if (!pending) {
+      pending = fetch(`${DATA_BASE}edge-paths/${county}.geojson`)
+        .then((response) => (response.ok ? response.json() : null))
+        .then((raw) => {
+          shards.set(county, raw === null ? null : indexShard(raw));
+        })
+        .catch(() => {
+          shards.set(county, null);
+        });
+      shardLoads.set(county, pending);
+    }
+    return pending;
+  };
+
+  let chainFor: number | null = null;
+
+  /** Draw the route, and say in the card which legs are real roads and which are stand-ins. */
+  const drawChain = (uat: number, legs: { from: number; to: number; metres: number }[]): void => {
+    if (!ready || chainFor !== uat) return;
+    const county = ready.attributes.county[uat] ?? '';
+    const shard = shards.get(county);
+    const siruta = ready.attributes.siruta;
+
+    void mapHandle.seatPoints().then((seats) => {
+      if (chainFor !== uat) return;
+      const route = [uat, ...legs.map((leg) => leg.to)];
+      const metresOf = (a: number, b: number): number =>
+        legs.find((leg) => leg.from === a && leg.to === b)?.metres ?? Infinity;
+      const geometryFor = (a: number, b: number): [number, number][] | null =>
+        shard?.get(edgeKey(siruta[a] ?? '', siruta[b] ?? '')) ?? null;
+
+      const { features, legs: drawn, totalMetres } = buildChain(
+        route,
+        metresOf,
+        geometryFor,
+        (i) => seats.get(i),
+      );
+      mapHandle.setChain(features);
+
+      const slot = hovercard.querySelector<HTMLElement>('.chain');
+      if (!slot || slot.dataset.uat !== String(uat)) return;
+      const anySchematic = drawn.some((leg) => !leg.real);
+      slot.innerHTML =
+        `<div class="sd-title">${strings.chainTitle}</div>` +
+        drawn
+          .map(
+            (leg) =>
+              `<div class="line${leg.real ? '' : ' schematic'}">` +
+              `<span>${ready!.attributes.name[leg.to]}</span>` +
+              `<span>${(leg.metres / 1000).toFixed(1)} km</span></div>`,
+          )
+          .join('') +
+        `<div class="line total"><span>${strings.chainTotal}</span>` +
+        `<span>${(totalMetres / 1000).toFixed(1)} km</span></div>` +
+        (shard === undefined ? `<div class="chain-note">${strings.chainLoading}</div>` : '') +
+        (anySchematic && shard !== undefined
+          ? `<div class="chain-note">${strings.chainSchematic}</div>`
+          : '');
+    });
+  };
+
+  /** Ask for a route, and fetch the county's geometry alongside so the two arrive together. */
+  const requestChain = (uat: number | null): void => {
+    if (uat === null || !ready || !latest) {
+      chainFor = null;
+      mapHandle.setChain([]);
+      return;
+    }
+    // No route was measured for this one; the panel says which rule placed it instead.
+    if (latest.parentOf[uat]! < 0) {
+      chainFor = null;
+      mapHandle.setChain([]);
+      return;
+    }
+    chainFor = uat;
+    const county = ready.attributes.county[uat] ?? '';
+    if (!shards.has(county)) void loadShard(county).then(() => worker.postMessage({ type: 'chain', uat }));
+    worker.postMessage({ type: 'chain', uat });
+  };
+
   const setForced = (uat: number, on: boolean): void => {
     scenario.forced = on
       ? [...new Set([...scenario.forced, uat])].sort((a, b) => a - b)
@@ -1342,6 +1438,11 @@ async function boot(): Promise<void> {
       return;
     }
 
+    if (message.type === 'chain-result') {
+      drawChain(message.uat, message.legs);
+      return;
+    }
+
     if (message.type === 'candidacy-result') {
       candidacyOf = message.candidacyOf;
       renderCandidates();
@@ -1431,6 +1532,7 @@ async function boot(): Promise<void> {
     }
     if (index === null || !ready || !latest) {
       hovercard.hidden = true;
+      requestChain(null);
       // Fall back to the selected commune's county, so the outline does not flicker off
       // every time the pointer crosses a gap.
       mapHandle.setCountyFocus(
@@ -1482,10 +1584,13 @@ async function boot(): Promise<void> {
               )} ${strings.hoverCommunes}</div>`
         }
       </div>
-      <div class="seat-distances" data-uat="${index}"></div>`;
+      <div class="seat-distances" data-uat="${index}"></div>
+      <div class="chain" data-uat="${index}"></div>`;
     // Filled in when the worker answers. This is the question the map itself cannot show:
     // why is this commune under Topolog rather than Isaccea?
     worker.postMessage({ type: 'seatDistances', uat: index });
+    // The roads the distance was measured over, drawn on the map beneath the card.
+    requestChain(index);
     hovercard.hidden = false;
     // Kept inside the viewport: near the right or bottom edge the card flips to the other
     // side of the cursor rather than being clipped.
