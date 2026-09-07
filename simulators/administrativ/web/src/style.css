@@ -1307,3 +1307,151 @@ button.link:hover {
 #forced .pin-list li.stale .pin-uat {
   text-decoration: line-through;
 }
+
+/* --- the published map, and saved versions -------------------------------------------- */
+
+.version-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+
+.version-badge[data-state='reference'] {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* "Your version" is deliberately quieter than the reference badge: it reports a state the
+   reader created themselves and already knows about. */
+.version-badge[data-state='yours'] {
+  color: var(--muted);
+}
+
+.version-list {
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.version-list li {
+  padding: 5px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.version-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: baseline;
+  font-size: 12.5px;
+}
+
+.version-row span {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.version-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10.5px;
+  color: var(--muted);
+}
+
+.version-meta button {
+  background: none;
+  border: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1;
+  padding: 0 2px;
+}
+
+.version-meta button:hover {
+  color: var(--text);
+}
+
+.version-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+/* --- print ----------------------------------------------------------------------------- */
+
+/* A printed map without its parameters cannot be cited, so the sheet carries both. Controls
+   that only make sense on screen are dropped; the legend and the parameter values are not. */
+@media print {
+  html,
+  body {
+    overflow: visible;
+    background: #fff;
+    color: #000;
+  }
+
+  .topbar-actions,
+  .controls .panel-handle,
+  .detail .panel-handle,
+  .panel-close,
+  .version-actions,
+  #save-version,
+  #copy-link,
+  #methodology-btn,
+  .maplibregl-control-container,
+  .hovercard,
+  #loading {
+    display: none !important;
+  }
+
+  #map {
+    position: relative;
+    height: 60vh;
+    break-inside: avoid;
+  }
+
+  .controls,
+  .detail,
+  .summary {
+    position: static;
+    width: auto;
+    max-width: none;
+    max-height: none;
+    transform: none;
+    background: #fff;
+    border-color: #999;
+    backdrop-filter: none;
+    display: block;
+    overflow: visible;
+  }
+
+  .controls .panel-body,
+  .detail .panel-body {
+    overflow: visible;
+  }
+
+  .disclaimer {
+    position: static;
+    background: #fff;
+    border-color: #999;
+  }
+
+  /* Sliders print as their readouts: the track says nothing on paper, the number is the
+     whole point of printing the parameters at all. */
+  .slider input[type='range'] {
+    display: none;
+  }
+
+  .slider {
+    margin-bottom: 4px;
+  }
+
+  .slider .help {
+    display: none;
+  }
+}

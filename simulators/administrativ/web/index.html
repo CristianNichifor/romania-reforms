@@ -20,6 +20,7 @@
         <p data-i18n="subtitle"></p>
       </div>
       <div class="topbar-actions">
+        <span class="version-badge" id="version-badge" hidden></span>
         <div class="modes" id="modes" role="group" aria-label="View"></div>
         <button id="methodology-btn" class="ghost" data-i18n="methodology"></button>
         <div class="lang" role="group" aria-label="Language">
@@ -49,6 +50,7 @@
           <h2 data-i18n="layers"></h2>
           <div id="layers"></div>
         </div>
+        <div class="layers-block" id="versions"></div>
         <div class="layers-block" id="forced" hidden></div>
         <div class="layers-block" id="pins" hidden></div>
         <div class="layers-block" id="candidates" hidden></div>
@@ -76,6 +78,8 @@
     <div class="labels" id="labels" aria-hidden="true"></div>
 
     <div class="hovercard" id="hovercard" hidden aria-hidden="true"></div>
+
+    <input type="file" id="versions-file" accept="application/json,.json" hidden />
 
     <div class="loading" id="loading"><span data-i18n="loading"></span></div>
 
