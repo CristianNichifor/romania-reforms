@@ -862,6 +862,56 @@ button {
   overflow-y: auto;
 }
 
+/* Scrollbars that do not eat the panel.
+   The default on a Linux desktop is a ~15 px classic scrollbar that takes real layout width,
+   which narrows the content and is what pushes labels into wrapping and truncating. Headless
+   Chromium uses overlay scrollbars and reports 0 px, so this is not reproducible in a
+   screenshot — it is fixed by declaring it rather than by measuring it. */
+.panel-body,
+.summary,
+.modal,
+.audit-list,
+.version-list,
+.pin-list {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.panel-body::-webkit-scrollbar,
+.summary::-webkit-scrollbar,
+.modal::-webkit-scrollbar,
+.audit-list::-webkit-scrollbar,
+.version-list::-webkit-scrollbar,
+.pin-list::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.panel-body::-webkit-scrollbar-track,
+.summary::-webkit-scrollbar-track,
+.modal::-webkit-scrollbar-track,
+.audit-list::-webkit-scrollbar-track,
+.version-list::-webkit-scrollbar-track,
+.pin-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.panel-body::-webkit-scrollbar-thumb,
+.summary::-webkit-scrollbar-thumb,
+.modal::-webkit-scrollbar-thumb,
+.audit-list::-webkit-scrollbar-thumb,
+.version-list::-webkit-scrollbar-thumb,
+.pin-list::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+.panel-body::-webkit-scrollbar-thumb:hover,
+.summary::-webkit-scrollbar-thumb:hover,
+.modal::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
+}
+
 
 
 /* The candidate list is behind a disclosure because opening it is what triggers the work.
@@ -1586,5 +1636,53 @@ button.link:hover {
   margin-top: 4px;
   font-size: 10.5px;
   line-height: 1.35;
+  color: var(--muted);
+}
+
+/* --- hover options --------------------------------------------------------------------- */
+
+.hover-label {
+  margin: 0 0 5px;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+/* Chips rather than a row of buttons: five options do not fit a sidebar on one line, and a
+   select would hide the current choice behind a click. */
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 12px;
+}
+
+.chip-row button {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 11.5px;
+  color: var(--muted);
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.chip-row button:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.chip-row button[aria-pressed='true'] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #08151b;
+  font-weight: 600;
+}
+
+#hover-options .help {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.5;
   color: var(--muted);
 }

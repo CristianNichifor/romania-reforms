@@ -52,6 +52,17 @@ export const SEAT_KIND = { CAPITAL: 0, CENTRE: 1, ORPHAN: 2, UNCHANGED: 3 } as c
 export const COUNTY_LINE_COLOUR = '#f2f4f7';
 /** Brighter than the plain county line, so the focused border reads over any unit colour. */
 export const COUNTY_FOCUS_COLOUR = '#ffd166';
+/** The development region under the pointer. Cooler than the county line so the two read apart. */
+export const REGION_FOCUS_COLOUR = '#b39ddb';
+/**
+ * The merged unit under the pointer.
+ *
+ * Deliberately *not* the warm tone the routes use. They were the same colour to begin with and
+ * the boundary read as another road: with the whole unit's network drawn inside its own
+ * outline, the two have to separate at a glance. Cyan is the one bright hue neither the
+ * palette, the roads, the county line nor the region line has taken.
+ */
+export const UNIT_FOCUS_COLOUR = '#5ce1e6';
 export const REGION_LINE_COLOUR = '#7cc4de';
 export const SEAT_COLOUR = '#e6e9ee';
 export const CAPITAL_COLOUR = '#ffd166';
@@ -171,6 +182,10 @@ export interface MapHandle {
   setSelected: (index: number | null) => void;
   /** Outline one county's border, by two-letter code, or clear it with null. */
   setCountyFocus: (code: string | null) => void;
+  /** Outline one development region, by the name regions.geojson uses, or clear it. */
+  setRegionFocus: (name: string | null) => void;
+  /** Outline the communes making up one merged unit, or clear with an empty array. */
+  setUnitFocus: (members: readonly number[]) => void;
   /** Centre the map on a UAT's seat, wherever it is. */
   flyTo: (index: number) => void;
   onSelect: (handler: (index: number | null) => void) => void;
@@ -349,6 +364,36 @@ export async function createMap(container: HTMLElement, dataBase: string): Promi
       'line-width': 2.2,
       'line-opacity': 0.8,
       'line-dasharray': [3, 2],
+    },
+  });
+
+  // The development region under the pointer, drawn like the county focus. Independent of the
+  // regions overlay for the same reason: this answers "which region is this", not "where are
+  // all the regions".
+  map.addLayer({
+    id: 'region-focus-line',
+    type: 'line',
+    source: 'regions',
+    filter: ['==', ['literal', ''], 'x'],
+    paint: {
+      'line-color': REGION_FOCUS_COLOUR,
+      'line-width': ['interpolate', ['linear'], ['zoom'], 6, 2.4, 10, 3.8],
+      'line-opacity': 0.9,
+      'line-blur': 0.4,
+    },
+  });
+
+  // The merged unit under the pointer. Driven by feature state so it follows the scenario
+  // without re-uploading geometry, and drawn over the hairline so member borders read as one
+  // shape rather than a set of communes that happen to be adjacent.
+  map.addLayer({
+    id: 'unit-focus-line',
+    type: 'line',
+    source: SOURCE_ID,
+    paint: {
+      'line-color': UNIT_FOCUS_COLOUR,
+      'line-width': ['case', ['boolean', ['feature-state', 'inUnit'], false], 2.0, 0],
+      'line-opacity': ['case', ['boolean', ['feature-state', 'inUnit'], false], 0.95, 0],
     },
   });
 
@@ -614,6 +659,25 @@ export async function createMap(container: HTMLElement, dataBase: string): Promi
     );
   };
 
+  const setRegionFocus = (name: string | null): void => {
+    map.setFilter(
+      'region-focus-line',
+      name === null
+        ? ['==', ['literal', ''], 'x']
+        : ['any', ['==', ['get', 'leftregion'], name], ['==', ['get', 'rightregion'], name]],
+    );
+  };
+
+  // Only the previous selection is cleared, not all 3,186: clearing every feature on every
+  // pointer move is 3,186 setFeatureState calls a frame, which is the kind of thing that
+  // turns a hover into a stutter.
+  let unitFocus: readonly number[] = [];
+  const setUnitFocus = (members: readonly number[]): void => {
+    for (const i of unitFocus) map.setFeatureState({ source: SOURCE_ID, id: i }, { inUnit: false });
+    unitFocus = members;
+    for (const i of members) map.setFeatureState({ source: SOURCE_ID, id: i }, { inUnit: true });
+  };
+
   const setCentres = (kindOf: Int8Array): void => {
     for (let i = 0; i < kindOf.length; i += 1) {
       map.setFeatureState({ source: 'seats', id: i }, { kind: kindOf[i] });
@@ -771,6 +835,8 @@ export async function createMap(container: HTMLElement, dataBase: string): Promi
     seatPoints,
     setSelected,
     setCountyFocus,
+    setRegionFocus,
+    setUnitFocus,
     flyTo,
     onSelect: (handler) => selectHandlers.push(handler),
     onHover: (handler) => hoverHandlers.push(handler),

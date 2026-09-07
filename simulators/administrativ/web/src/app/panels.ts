@@ -15,7 +15,10 @@
 export const SHEET_BREAKPOINT_PX = 900;
 
 export const MIN_WIDTH_PX = 260;
-export const MAX_WIDTH_PX = 560;
+/* Raised from 560. The panels carry more than they did — a candidate list, forced centres,
+   saved versions, the representation table — and a reader who wants them wide should not be
+   stopped at a width chosen when the detail panel held six rows. */
+export const MAX_WIDTH_PX = 720;
 
 /** Arrow-key step. A drag-only control cannot be used without a mouse. */
 const KEY_STEP_PX = 16;

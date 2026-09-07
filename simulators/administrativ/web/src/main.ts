@@ -38,9 +38,11 @@ import {
   SEAT_KIND,
   UNCHANGED_SEAT_COLOUR,
   UNCHANGED_COLOUR,
+  type ChainFeature,
   type Overlay,
 } from './map/map';
 import { PALETTE } from './model/colour';
+import { regionOfCounty } from './model/regions';
 import {
   BUCHAREST_COUNCIL,
   danishBandFor,
@@ -180,14 +182,14 @@ async function boot(): Promise<void> {
     element: el('#controls'),
     handle: el('#controls-handle'),
     storageKey: 'administrativ:width:controls',
-    defaultWidth: 292,
+    defaultWidth: 340,
     edge: 'right',
   });
   const detailPanel = createPanel({
     element: el('#detail'),
     handle: el('#detail-handle'),
     storageKey: 'administrativ:width:detail',
-    defaultWidth: 320,
+    defaultWidth: 360,
     edge: 'left',
   });
 
@@ -248,6 +250,7 @@ async function boot(): Promise<void> {
     renderLayers();
     renderSummary();
     renderDetail();
+    renderHoverOptions();
     renderBadge();
     renderVersions();
     renderForced();
@@ -854,6 +857,17 @@ async function boot(): Promise<void> {
     });
   };
 
+  /** Every member's route to the centre, drawn as one set of legs. */
+  const requestUnitChains = (seat: number): void => {
+    if (!ready) return;
+    chainFor = seat;
+    const county = ready.attributes.county[seat] ?? '';
+    if (!shards.has(county)) {
+      void loadShard(county).then(() => worker.postMessage({ type: 'unitChains', seat }));
+    }
+    worker.postMessage({ type: 'unitChains', seat });
+  };
+
   /** Ask for a route, and fetch the county's geometry alongside so the two arrive together. */
   const requestChain = (uat: number | null): void => {
     if (uat === null || !ready || !latest) {
@@ -871,6 +885,112 @@ async function boot(): Promise<void> {
     const county = ready.attributes.county[uat] ?? '';
     if (!shards.has(county)) void loadShard(county).then(() => worker.postMessage({ type: 'chain', uat }));
     worker.postMessage({ type: 'chain', uat });
+  };
+
+  // --- what the pointer emphasises -------------------------------------------------------
+
+  /**
+   * Hover behaviour is a reading preference, not part of the scenario.
+   *
+   * Deliberately not in the URL hash: a shared link is an argument about a map, and two people
+   * comparing the same scenario should not find they disagree because one of them had a
+   * different highlight switched on.
+   */
+  type HoverBounds = 'none' | 'county' | 'region' | 'unit' | 'all';
+  type HoverRoads = 'none' | 'chain' | 'unit';
+  let hoverBounds: HoverBounds = 'county';
+  let hoverRoads: HoverRoads = 'chain';
+
+  const renderHoverOptions = (): void => {
+    const bounds: [HoverBounds, string][] = [
+      ['none', strings.hoverNone],
+      ['county', strings.hoverCounty],
+      ['region', strings.hoverRegion],
+      ['unit', strings.hoverUnit],
+      ['all', strings.hoverAll],
+    ];
+    const roads: [HoverRoads, string][] = [
+      ['none', strings.hoverNone],
+      ['chain', strings.hoverRoadsChain],
+      ['unit', strings.hoverRoadsUnit],
+    ];
+    el('#hover-options').innerHTML = `
+      <p class="hover-label">${strings.hoverBoundsHeading}</p>
+      <div class="chip-row" id="hover-bounds">
+        ${bounds
+          .map(
+            ([key, text]) =>
+              `<button data-bounds="${key}" aria-pressed="${key === hoverBounds}">${text}</button>`,
+          )
+          .join('')}
+      </div>
+      <p class="hover-label">${strings.hoverRoadsHeading}</p>
+      <div class="chip-row" id="hover-roads">
+        ${roads
+          .map(
+            ([key, text]) =>
+              `<button data-roads="${key}" aria-pressed="${key === hoverRoads}">${text}</button>`,
+          )
+          .join('')}
+      </div>
+      <p class="help">${strings.hoverHelp}</p>`;
+
+    for (const button of document.querySelectorAll<HTMLButtonElement>('#hover-bounds button')) {
+      button.addEventListener('click', () => {
+        hoverBounds = button.dataset.bounds as HoverBounds;
+        renderHoverOptions();
+        applyHover(lastHovered);
+      });
+    }
+    for (const button of document.querySelectorAll<HTMLButtonElement>('#hover-roads button')) {
+      button.addEventListener('click', () => {
+        hoverRoads = button.dataset.roads as HoverRoads;
+        renderHoverOptions();
+        applyHover(lastHovered);
+      });
+    }
+  };
+
+  /** The commune the pointer is over, so a change of option redraws without waiting for a move. */
+  let lastHovered: number | null = null;
+
+  const applyHover = (index: number | null): void => {
+    lastHovered = index;
+    if (!ready || !latest || index === null) {
+      mapHandle.setCountyFocus(null);
+      mapHandle.setRegionFocus(null);
+      mapHandle.setUnitFocus([]);
+      requestChain(null);
+      return;
+    }
+
+    const county = ready.attributes.county[index] ?? null;
+    const wantCounty = hoverBounds === 'county' || hoverBounds === 'all';
+    const wantRegion = hoverBounds === 'region' || hoverBounds === 'all';
+    const wantUnit = hoverBounds === 'unit' || hoverBounds === 'all';
+
+    mapHandle.setCountyFocus(wantCounty ? county : null);
+    mapHandle.setRegionFocus(wantRegion ? regionOfCounty(county ?? undefined) : null);
+
+    const seat = latest.regionOf[index]!;
+    if (wantUnit) {
+      const members: number[] = [];
+      for (let i = 0; i < latest.regionOf.length; i += 1) {
+        if (latest.regionOf[i] === seat) members.push(i);
+      }
+      mapHandle.setUnitFocus(members);
+    } else {
+      mapHandle.setUnitFocus([]);
+    }
+
+    if (hoverRoads === 'none') {
+      chainFor = null;
+      mapHandle.setChain([]);
+    } else if (hoverRoads === 'unit') {
+      requestUnitChains(seat);
+    } else {
+      requestChain(index);
+    }
   };
 
   const setForced = (uat: number, on: boolean): void => {
@@ -1474,6 +1594,38 @@ async function boot(): Promise<void> {
       return;
     }
 
+    if (message.type === 'unit-chains-result') {
+      if (!ready || chainFor !== message.seat) return;
+      const county = ready.attributes.county[message.seat] ?? '';
+      const shard = shards.get(county);
+      const siruta = ready.attributes.siruta;
+      void mapHandle.seatPoints().then((seats) => {
+        if (chainFor !== message.seat) return;
+        const features: ChainFeature[] = [];
+        for (const leg of message.legs) {
+          const routed = shard?.get(edgeKey(siruta[leg.from] ?? '', siruta[leg.to] ?? '')) ?? null;
+          if (routed && routed.length > 1) {
+            features.push({
+              type: 'Feature',
+              properties: { kind: 'road' },
+              geometry: { type: 'LineString', coordinates: routed },
+            });
+            continue;
+          }
+          const a = seats.get(leg.from);
+          const b = seats.get(leg.to);
+          if (!a || !b) continue;
+          features.push({
+            type: 'Feature',
+            properties: { kind: 'schematic' },
+            geometry: { type: 'LineString', coordinates: [a, b] },
+          });
+        }
+        mapHandle.setChain(features);
+      });
+      return;
+    }
+
     if (message.type === 'chain-result') {
       drawChain(message.uat, message.legs);
       return;
@@ -1500,6 +1652,7 @@ async function boot(): Promise<void> {
     paint();
     renderSummary();
     renderDetail();
+    renderHoverOptions();
     renderBadge();
     renderVersions();
     renderForced();
@@ -1561,24 +1714,17 @@ async function boot(): Promise<void> {
     // county outline still follows, because that is drawn on the map and not in a popup.
     if (coarsePointer.matches) {
       hovercard.hidden = true;
-      mapHandle.setCountyFocus(
-        index !== null && ready ? (ready.attributes.county[index] ?? null) : null,
-      );
+      applyHover(index);
       return;
     }
     if (index === null || !ready || !latest) {
       hovercard.hidden = true;
-      requestChain(null);
-      // Fall back to the selected commune's county, so the outline does not flicker off
-      // every time the pointer crosses a gap.
-      mapHandle.setCountyFocus(
-        scenario.selected !== null && ready
-          ? (ready.attributes.county[scenario.selected] ?? null)
-          : null,
-      );
+      // Fall back to the selected commune, so the outline does not flicker off every time the
+      // pointer crosses a gap between two polygons.
+      applyHover(scenario.selected);
       return;
     }
-    mapHandle.setCountyFocus(ready.attributes.county[index] ?? null);
+    applyHover(index);
     const unit = latest.regionOf[index]!;
     let unitPop = 0;
     let unitMembers = 0;
@@ -1625,8 +1771,6 @@ async function boot(): Promise<void> {
     // Filled in when the worker answers. This is the question the map itself cannot show:
     // why is this commune under Topolog rather than Isaccea?
     worker.postMessage({ type: 'seatDistances', uat: index });
-    // The roads the distance was measured over, drawn on the map beneath the card.
-    requestChain(index);
     hovercard.hidden = false;
     // Kept inside the viewport: near the right or bottom edge the card flips to the other
     // side of the cursor rather than being clipped.
