@@ -40,6 +40,12 @@ import {
   type Overlay,
 } from './map/map';
 import { PALETTE } from './model/colour';
+import {
+  BUCHAREST_COUNCIL,
+  danishBandFor,
+  representationAfter,
+  representationBefore,
+} from './model/representation';
 import { CANDIDACY, DEFAULT_PARAMS, REASON, type Params, type ViewMode } from './model/types';
 import type { Outgoing, ReadyMessage, ResultMessage } from './model/worker';
 
@@ -1052,6 +1058,57 @@ async function boot(): Promise<void> {
               title="${strings.budgetLinkTitle}">${label}</a>`;
   };
 
+  /**
+   * What a merger does to the political layer.
+   *
+   * Statutory on both sides — Art. 112 sets the council by population band, Art. 148 the
+   * mayors and vice-mayors — so this is the one consequence of consolidation that needs no
+   * counterfactual and no modelling. Bucharest is carved out rather than banded, because the
+   * Consiliul General is fixed at 55 by the same article and applying the top band to it
+   * would report 31 and be quietly wrong.
+   */
+  const representationHtml = (members: number[], region: number, totalPop: number): string => {
+    if (!ready) return '';
+    const bucharest = ready.attributes.county[region] === 'B';
+    const row = (label: string, now: string, after: string): string =>
+      `<div class="rep-row"><span>${label}</span><span>${now}</span><span>${after}</span></div>`;
+
+    if (bucharest) {
+      return `
+        <div class="representation">
+          <h4>${strings.repHeading}</h4>
+          ${row(strings.repCouncillors, '—', formatNumber(BUCHAREST_COUNCIL, scenario.lang))}
+          <p class="muted">${strings.repBucharest}</p>
+          <p class="muted rep-source">${strings.repSource}</p>
+        </div>`;
+    }
+
+    const before = representationBefore(
+      members.map((i) => ({
+        population: ready!.population[i]!,
+        isCountyCapital: ready!.attributes.isCapital[i] === true,
+      })),
+    );
+    const after = representationAfter(totalPop, ready.attributes.isCapital[region] === true);
+    const band = danishBandFor(totalPop);
+    const n = (value: number): string => formatNumber(value, scenario.lang);
+
+    return `
+      <div class="representation">
+        <h4>${strings.repHeading}</h4>
+        <div class="rep-row rep-head">
+          <span></span><span>${strings.repNow}</span><span>${strings.repAfter}</span>
+        </div>
+        ${row(strings.repMayors, n(before.mayors), n(after.mayors))}
+        ${row(strings.repViceMayors, n(before.viceMayors), n(after.viceMayors))}
+        ${row(strings.repCouncillors, n(before.councillors), n(after.councillors))}
+        <p class="muted">${strings.repDanish
+          .replace('{min}', String(band.min))
+          .replace('{max}', String(band.max))}</p>
+        <p class="muted rep-source">${strings.repSource}</p>
+      </div>`;
+  };
+
   const renderDetail = (): void => {
     const panel = el<HTMLElement>('#detail');
     const body = el<HTMLElement>('#detail-body');
@@ -1126,6 +1183,8 @@ async function boot(): Promise<void> {
           <span>${formatMoney(Math.abs(balance), scenario.lang)}</span>
         </div>
       </div>
+
+      ${representationHtml(members, region, totalPop)}
 
       <div class="savings">
         <h4>${strings.savingsHeading}</h4>

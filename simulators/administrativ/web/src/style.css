@@ -1455,3 +1455,69 @@ button.link:hover {
     display: none;
   }
 }
+
+/* --- representation -------------------------------------------------------------------- */
+
+.representation {
+  margin: 12px 0;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.representation h4 {
+  margin: 0 0 8px;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.rep-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 10px;
+  padding: 3px 0;
+  font-size: 12.5px;
+}
+
+.rep-row span:not(:first-child) {
+  min-width: 42px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Today is the state being left behind; the merged figure is the one being proposed. */
+.rep-row span:nth-child(2) {
+  color: var(--muted);
+}
+
+.rep-row span:nth-child(3) {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.rep-row.rep-head {
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 3px;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.rep-row.rep-head span {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.representation .muted {
+  margin: 8px 0 0;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.representation .rep-source {
+  font-size: 10.5px;
+  opacity: 0.8;
+}
