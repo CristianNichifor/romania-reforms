@@ -1126,6 +1126,43 @@ async function boot(): Promise<void> {
    */
   let candidacyOf: Uint8Array | null = null;
   let candidacyOpen = false;
+  let candidateQuery = '';
+  let candidateCounty = '';
+  /**
+   * The counties seen in the last completed report.
+   *
+   * Held across recomputes so the filter bar survives them. Promoting from the list starts a
+   * recompute, which drops `candidacyOf` — rebuilding the controls from scratch each time
+   * would blink the search box away and take the caret with it.
+   */
+  let candidateCounties: string[] = [];
+
+  /**
+   * Which states the reader may promote from, measured rather than assumed.
+   *
+   * Forcing waives the population threshold and the separation floor — the two rules that are
+   * matters of judgement — so a candidate passed over for either can be promoted. Two states
+   * cannot, and each is refused for its own reason:
+   *
+   *  - `IN_CAPITAL_RING` is refused `capital-ring`. A capital holds its ring by right, and
+   *    that is a matter of geography rather than judgement.
+   *  - `STOOD_DOWN` is refused `already-a-centre`. It was a centre when the override was
+   *    considered, and the capital absorbs it immediately afterwards.
+   *
+   * Offering a button that the model would refuse is worse than offering none, so these two
+   * carry the reason instead. See tests/candidate-promotion.test.ts, which holds the model to
+   * exactly this list.
+   */
+  const FORCEABLE: ReadonlySet<number> = new Set<number>([
+    CANDIDACY.ELIGIBLE_UNUSED,
+    CANDIDACY.REFUSED_SEPARATION,
+  ]);
+
+  /** The reason a state carries instead of a button. */
+  const BARRED_REASON: Record<number, keyof Strings> = {
+    [CANDIDACY.IN_CAPITAL_RING]: 'candBarred',
+    [CANDIDACY.STOOD_DOWN]: 'candBarredStoodDown',
+  };
 
   const requestCandidacy = (): void => {
     if (!candidacyOpen) return;
@@ -1158,47 +1195,106 @@ async function boot(): Promise<void> {
     if (!ready || !latest) { box.hidden = true; return; }
     box.hidden = false;
 
+    // Rebuilding the panel replaces the search box, which would drop the caret mid-word on
+    // every keystroke. Noted before the rebuild and restored after it.
+    const active = document.activeElement as HTMLInputElement | null;
+    const hadFocus = active?.id === 'candidate-search';
+    const caret = hadFocus ? active.selectionStart : null;
+
     const grouped = new Map<number, number[]>();
+    const counties = new Set<string>();
+    let total = 0;
+    let shown = 0;
+
     if (candidacyOf) {
+      const needle = candidateQuery.trim().toLocaleLowerCase(scenario.lang);
       for (let i = 0; i < candidacyOf.length; i += 1) {
         const state = candidacyOf[i]!;
         if (state === CANDIDACY.NONE) continue;
+        total += 1;
+        counties.add(ready.attributes.county[i]!);
+        if (candidateCounty && ready.attributes.county[i] !== candidateCounty) continue;
+        if (needle && !ready.attributes.name[i]!.toLocaleLowerCase(scenario.lang).includes(needle)) {
+          continue;
+        }
+        shown += 1;
         let list = grouped.get(state);
         if (!list) { list = []; grouped.set(state, list); }
         list.push(i);
       }
     }
 
-    const body = !candidacyOf
-      ? `<p class="muted">${strings.candidatesLoading}</p>`
-      : CANDIDACY_ORDER.filter((state) => (grouped.get(state)?.length ?? 0) > 0)
-          .map((state) => {
-            const list = grouped.get(state)!;
-            return `
-        <details>
+    if (candidacyOf) candidateCounties = [...counties].sort((a, b) => a.localeCompare(b, scenario.lang));
+    const filtered = candidateQuery.trim() !== '' || candidateCounty !== '';
+
+    const row = (i: number): string => {
+      const state = candidacyOf![i]!;
+      const isForced = scenario.forced.includes(i);
+      const canForce = FORCEABLE.has(state) || isForced;
+      const barred = BARRED_REASON[state];
+      const action = canForce
+        ? `<button class="ghost tiny" data-promote="${i}" data-on="${isForced ? '0' : '1'}">${
+            isForced ? strings.candDemote : strings.candPromote
+          }</button>`
+        : barred
+          ? `<span class="barred" title="${strings[barred]}">—</span>`
+          : '';
+      return `<li>
+        <div class="audit-row candidate-row">
+          <button class="candidate-name" data-goto-candidate="${i}">${ready!.attributes.name[i]}</button>
+          <span class="candidate-meta">${ready!.attributes.county[i]} · ${formatNumber(
+            ready!.population[i]!,
+            scenario.lang,
+          )}</span>
+          ${action}
+        </div>
+      </li>`;
+    };
+
+    const groups = CANDIDACY_ORDER.filter((state) => (grouped.get(state)?.length ?? 0) > 0)
+      .map((state) => {
+        const list = grouped.get(state)!;
+        return `
+        <details${filtered ? ' open' : ''}>
           <summary>${strings[CANDIDACY_LABEL[state]!]}
             <span class="count">${formatNumber(list.length, scenario.lang)}</span></summary>
           <ul class="audit-list">
             ${list
               .slice()
               .sort((a, b) => ready!.population[b]! - ready!.population[a]!)
-              .map(
-                (i) =>
-                  `<li>
-                     <div class="audit-row">
-                       <button data-goto-candidate="${i}">${ready!.attributes.name[i]}</button>
-                       <span>${ready!.attributes.county[i]} · ${formatNumber(
-                         ready!.population[i]!,
-                         scenario.lang,
-                       )}</span>
-                     </div>
-                   </li>`,
-              )
+              .map(row)
               .join('')}
           </ul>
         </details>`;
-          })
-          .join('');
+      })
+      .join('');
+
+    const filterBar = `
+        <div class="candidate-filters">
+          <input id="candidate-search" type="search" placeholder="${strings.candSearch}"
+                 aria-label="${strings.candSearch}" value="${candidateQuery.replace(/"/g, '&quot;')}">
+          <select id="candidate-county" aria-label="${strings.candCounty}">
+            <option value="">${strings.candAllCounties}</option>
+            ${candidateCounties
+              .map(
+                (c) =>
+                  `<option value="${c}"${c === candidateCounty ? ' selected' : ''}>${c}</option>`,
+              )
+              .join('')}
+          </select>
+        </div>`;
+
+    const listing = `
+        <p class="muted candidate-showing">${strings.candShowing
+          .replace('{shown}', formatNumber(shown, scenario.lang))
+          .replace('{total}', formatNumber(total, scenario.lang))}</p>
+        ${groups || `<p class="muted">${strings.candNoMatch}</p>`}`;
+
+    // The filter bar outlives the report: promoting starts a recompute that drops it, and
+    // taking the controls away for those 150 ms loses whatever was being typed.
+    const body = candidacyOf
+      ? `${filterBar}${listing}`
+      : `${candidateCounties.length > 0 ? filterBar : ''}<p class="muted">${strings.candidatesLoading}</p>`;
 
     box.innerHTML = `
       <details id="candidates-details"${candidacyOpen ? ' open' : ''}>
@@ -1212,6 +1308,16 @@ async function boot(): Promise<void> {
       if (candidacyOpen && !candidacyOf) requestCandidacy();
     });
 
+    box.querySelector<HTMLInputElement>('#candidate-search')?.addEventListener('input', (event) => {
+      candidateQuery = (event.target as HTMLInputElement).value;
+      renderCandidates();
+    });
+
+    box.querySelector<HTMLSelectElement>('#candidate-county')?.addEventListener('change', (event) => {
+      candidateCounty = (event.target as HTMLSelectElement).value;
+      renderCandidates();
+    });
+
     box.querySelectorAll<HTMLButtonElement>('[data-goto-candidate]').forEach((button) => {
       button.addEventListener('click', () => {
         const index = Number(button.dataset.gotoCandidate);
@@ -1222,6 +1328,20 @@ async function boot(): Promise<void> {
         renderDetail();
       });
     });
+
+    // Promoting from the list rather than from the map: the reader is comparing candidates
+    // against each other here, and sending them to the map to act on one loses the comparison.
+    box.querySelectorAll<HTMLButtonElement>('[data-promote]').forEach((button) => {
+      button.addEventListener('click', () => {
+        setForced(Number(button.dataset.promote), button.dataset.on === '1');
+      });
+    });
+
+    if (hadFocus) {
+      const input = box.querySelector<HTMLInputElement>('#candidate-search');
+      input?.focus();
+      if (caret !== null) input?.setSelectionRange(caret, caret);
+    }
   };
 
   const renderAudit = (): void => {

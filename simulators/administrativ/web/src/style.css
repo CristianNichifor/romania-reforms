@@ -930,6 +930,78 @@ button {
   padding: 2px 0;
 }
 
+/* --- filtering the candidate list, and promoting from it ------------------------------ */
+
+.candidate-filters {
+  display: flex;
+  gap: 6px;
+  margin: 8px 0 6px;
+}
+
+.candidate-filters input,
+.candidate-filters select {
+  min-width: 0;
+  padding: 4px 6px;
+  font: inherit;
+  font-size: 11.5px;
+  color: var(--text);
+  background: var(--panel-input, rgba(255, 255, 255, 0.06));
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+/* The search takes the slack; the county select stays at its content width. */
+.candidate-filters input {
+  flex: 1 1 auto;
+}
+
+.candidate-filters select {
+  flex: 0 0 auto;
+  max-width: 45%;
+}
+
+.candidate-showing {
+  margin: 0 0 6px;
+  font-size: 11px;
+}
+
+/* Three columns, and only the name may be squeezed: the population must stay readable and
+   the button must stay clickable, so both hold their width and the name ellipsises. */
+.candidate-row {
+  gap: 6px;
+}
+
+.candidate-row .candidate-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.candidate-row .candidate-meta {
+  flex: 0 0 auto;
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.candidate-row .tiny {
+  flex: 0 0 auto;
+  padding: 2px 6px;
+  font-size: 10.5px;
+  line-height: 1.4;
+}
+
+/* Not a button, because forcing this one would be refused. The title carries the rule. */
+.candidate-row .barred {
+  flex: 0 0 auto;
+  padding: 0 4px;
+  color: var(--muted);
+  cursor: help;
+}
+
 .budget-row {
   margin: 0 0 10px;
   font-size: 12px;
