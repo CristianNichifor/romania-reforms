@@ -180,9 +180,11 @@ button {
   backdrop-filter: blur(6px);
   z-index: 4;
   white-space: nowrap;
-  /* Clears the controls tray on the left; the detail panel now sits below this bar
-     rather than beside it, so it no longer has to make room for that too. */
-  max-width: calc(100vw - 360px);
+  /* Both panels start below this bar — the controls tray's top edge is a constant 154 px and
+     the detail panel's is 176 px — so nothing here has to make room for them sideways.
+     Reserving their width only starved the bar and clipped the last statistic off it, which
+     is what the old fixed 360 px reservation was doing once the panels became resizable. */
+  max-width: calc(100vw - 32px);
   overflow-x: auto;
 }
 
@@ -216,7 +218,11 @@ button {
   bottom: 76px;
   width: 292px;
   max-height: calc(100vh - 230px);
-  overflow-y: auto;
+  /* The panel itself does not scroll; its body does. The resize handle is pinned to the
+     panel's inner edge, and a handle inside a scrolling box scrolls away with the content. */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   padding: 14px;
   background: var(--panel);
   border: 1px solid var(--border);
@@ -360,13 +366,22 @@ button {
   top: 176px;
   width: 320px;
   max-height: calc(100vh - 268px);
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   padding: 16px;
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 10px;
   backdrop-filter: blur(6px);
   z-index: 4;
+}
+
+/* `display: flex` above outranks the user agent's `[hidden] { display: none }`, so without
+   this the panel's empty shell — and its close button — sits on the map before anything has
+   been selected. */
+.detail[hidden] {
+  display: none;
 }
 
 .detail h3 {
@@ -744,32 +759,229 @@ button {
   font-variant-numeric: tabular-nums;
 }
 
+/* --- panel chrome: the resize handle and the sheet grab bar --------------------------- */
+
+/* One element does both jobs. On a wide viewport it is a 6 px strip on the panel's inner
+   edge that drags the width; on a narrow one it is the sheet's peek bar, and tapping it
+   opens the sheet. The two never coexist, so giving each its own element would mean keeping
+   two things in sync for no gain. */
+.panel-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  cursor: col-resize;
+  touch-action: none;
+  border-radius: 10px;
+  z-index: 2;
+}
+
+.controls .panel-handle {
+  right: 0;
+}
+
+.detail .panel-handle {
+  left: 0;
+}
+
+.panel-handle:hover,
+.panel-handle:focus-visible,
+[data-dragging='true'] .panel-handle {
+  background: var(--accent);
+  opacity: 0.55;
+  outline: none;
+}
+
+/* The grip and the title belong to the sheet form only. */
+.panel-grip,
+.panel-title {
+  display: none;
+}
+
+.panel-close {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  z-index: 2;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel-solid);
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.panel-close:hover {
+  color: var(--text);
+}
+
+.panel-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* The detail panel's own content must not run under the close button. */
+.detail .panel-body {
+  padding-right: 26px;
+}
+
+.budget-row {
+  margin: 0 0 10px;
+  font-size: 12px;
+}
+
+.budget-link {
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px dotted currentcolor;
+}
+
+.budget-link:hover {
+  text-decoration: none;
+  border-bottom-style: solid;
+}
+
 @media (max-width: 900px) {
+  /* The header is a row of a title and four control groups, which at 390 px overlapped each
+     other. Stacked, and the subtitle dropped: it is the one line here that repeats what the
+     title already says. */
+  .topbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .brand h1 {
+    font-size: 14px;
+  }
+
+  .brand p {
+    display: none;
+  }
+
+  .topbar-actions {
+    flex-wrap: wrap;
+  }
+
+  /* Everything below stacks up from the bottom edge: the disclaimer, then the two peek bars,
+     then the summary above them. `--disclaimer-h` is measured in main.ts because the
+     disclaimer wraps to a different number of lines per language and width. */
   .summary {
     top: auto;
-    bottom: 40px;
+    bottom: calc(var(--disclaimer-h, 40px) + 96px);
     gap: 14px;
     padding: 8px 12px;
     overflow-x: auto;
     max-width: calc(100vw - 32px);
   }
 
+  /* Sheets, not columns.
+
+     The old rule stacked both panels over the map, which left a phone with two panels and
+     no map. Collapsed to a peek bar the map keeps the whole viewport, and a panel is opened
+     deliberately rather than by default. */
   .controls,
   .detail {
-    position: absolute;
-    left: 8px;
-    right: 8px;
+    position: fixed;
+    left: 0;
+    right: 0;
     width: auto;
+    max-width: none;
+    border-radius: 12px 12px 0 0;
+    border-bottom: none;
+    padding: 0 12px 12px;
+    transition: max-height 0.22s ease;
+    /* Above the disclaimer, which is z-index 6. A sheet that opens underneath the footer is
+       a sheet that appears not to open at all. */
+    z-index: 8;
   }
 
   .controls {
-    bottom: 110px;
-    max-height: 40vh;
+    top: auto;
+    bottom: var(--disclaimer-h, 40px);
+    max-height: 44px;
+    overflow: hidden;
   }
 
   .detail {
-    top: 58px;
-    max-height: 36vh;
+    top: auto;
+    bottom: calc(var(--disclaimer-h, 40px) + 44px);
+    max-height: 44px;
+    overflow: hidden;
+  }
+
+  .controls[data-open='true'],
+  .detail[data-open='true'] {
+    max-height: 68vh;
+  }
+
+  /* Collapsed, the body is not merely clipped — it is out of the tab order too, so a
+     keyboard does not walk into a panel the reader cannot see. */
+  .controls[data-open='false'] .panel-body,
+  .detail[data-open='false'] .panel-body {
+    display: none;
+  }
+
+  /* The handle stops being an edge strip and becomes the bar the reader taps. */
+  .controls .panel-handle,
+  .detail .panel-handle {
+    position: sticky;
+    top: 0;
+    left: auto;
+    right: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: auto;
+    height: 44px;
+    padding: 0 2px;
+    margin: 0 -12px;
+    padding-left: 14px;
+    cursor: pointer;
+    background: var(--panel-solid);
+    border-radius: 12px 12px 0 0;
+  }
+
+  .panel-handle:hover,
+  .panel-handle:focus-visible {
+    background: var(--panel-solid);
+    opacity: 1;
+  }
+
+  .panel-grip {
+    display: block;
+    width: 26px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    flex: none;
+  }
+
+  .panel-title {
+    display: block;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* A sheet spans the viewport, so there is nothing to drag wider. */
+  .panel-close {
+    top: 9px;
+    right: 12px;
+  }
+
+  .detail .panel-body {
+    padding-right: 0;
   }
 
   .legend {

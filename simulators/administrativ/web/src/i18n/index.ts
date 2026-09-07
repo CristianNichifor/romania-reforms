@@ -140,6 +140,13 @@ export interface Strings {
   copyLink: string;
   linkCopied: string;
 
+  budgetLink: string;
+  budgetLinkTitle: string;
+  panelResize: string;
+  panelResizeHelp: string;
+  panelClose: string;
+  panelExpand: string;
+
   computing: string;
   loading: string;
   recomputeTime: string;
@@ -289,6 +296,13 @@ const ro: Strings = {
   copyLink: 'Copiază link scenariu',
   linkCopied: 'Link copiat',
 
+  budgetLink: 'Bugetul pe transparenta.eu',
+  budgetLinkTitle: 'Execuția bugetară a acestui UAT pe transparenta.eu',
+  panelResize: 'Redimensionează panoul',
+  panelResizeHelp: 'Trage pentru a lăți; dublu-clic revine la lățimea inițială',
+  panelClose: 'Închide panoul',
+  panelExpand: 'Deschide panoul',
+
   computing: 'Se recalculează…',
   loading: 'Se încarcă datele…',
   recomputeTime: 'recalculat în',
@@ -437,6 +451,13 @@ const en: Strings = {
   county: 'County',
   copyLink: 'Copy scenario link',
   linkCopied: 'Link copied',
+
+  budgetLink: 'Budget on transparenta.eu',
+  budgetLinkTitle: "This UAT's budget execution on transparenta.eu",
+  panelResize: 'Resize panel',
+  panelResizeHelp: 'Drag to widen; double-click restores the original width',
+  panelClose: 'Close panel',
+  panelExpand: 'Open panel',
 
   computing: 'Recomputing…',
   loading: 'Loading data…',

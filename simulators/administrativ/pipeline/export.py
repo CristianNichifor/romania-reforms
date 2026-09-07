@@ -36,7 +36,7 @@ import geopandas as gpd
 import numpy as np
 import pandas as pd
 
-from pipeline.build_geometry import Check, Report, write_report
+from pipeline.build_geometry import Check, Report, normalise_siruta, write_report
 from pipeline.constants import (
     CRS_STEREO70,
     CRS_WGS84,
@@ -133,6 +133,42 @@ def main(argv: list[str] | None = None) -> int:
     area_km2 = (uats.geometry.area / 1_000_000).to_numpy(dtype=np.float32)
     perimeter_km = (uats.geometry.length / 1_000).to_numpy(dtype=np.float32)
 
+    # Transparenta.eu's own id for each town hall, so the panel can link a commune straight
+    # to its budget filings rather than sending a reader to search for it.
+    #
+    # This is `uat_code` from the same GraphQL query the attributes come from, and it is the
+    # id their site uses in `/entities/<id>` — Municipiul Sibiu is `uat_code` 4270740 and
+    # transparenta.eu/entities/4270740. Read from the raw fetch rather than carried through
+    # the GeoPackage: it is a link, not a property of the geometry, and the join is by the
+    # same SIRUTA the rest of this file is indexed on.
+    attributes_path = RAW_DIR / "uat_attributes.json"
+    if not attributes_path.exists():
+        raise SystemExit(f"Missing {attributes_path} — run pipeline.fetch")
+    raw_attributes = [
+        row
+        for row in json.loads(attributes_path.read_text(encoding="utf-8"))
+        if row.get("uat_code")
+    ]
+    entity_id_of = dict(
+        zip(
+            normalise_siruta(pd.Series([r["siruta_code"] for r in raw_attributes])),
+            (str(r["uat_code"]) for r in raw_attributes),
+            strict=True,
+        )
+    )
+    # Empty string rather than a missing entry: the browser tests for it and renders plain
+    # text, and a hole in a positional array would silently shift every link after it.
+    uat_codes = [entity_id_of.get(s, "") for s in order]
+    report.add(
+        Check(
+            "entity_links",
+            sum(1 for c in uat_codes if c) > len(order) * 0.95,
+            f"{sum(1 for c in uat_codes if c):,} of {len(order):,} UATs carry a "
+            "transparenta.eu entity id",
+            fatal=False,
+        )
+    )
+
     WEB_DATA_DIR.mkdir(parents=True, exist_ok=True)
     (WEB_DATA_DIR / "attributes.bin").write_bytes(
         population.tobytes()
@@ -154,6 +190,9 @@ def main(argv: list[str] | None = None) -> int:
                 "siruta": order,
                 "name": list(uats["name_uat"]),
                 "county": list(uats["county_code"]),
+                # Transparenta.eu's entity id, for the per-UAT budget link. Empty where the
+                # source has none.
+                "uatCode": uat_codes,
                 # Tier-0 membership is a rule, not a property of the data, so it ships
                 # resolved rather than being re-derived in two languages.
                 # Administrative standing, which decides which member of a unit gives it
