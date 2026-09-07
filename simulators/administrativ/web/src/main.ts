@@ -1249,8 +1249,9 @@ async function boot(): Promise<void> {
       </div>`;
 
     detailPanel.setTitle(unitName(ready, region));
+    el<HTMLElement>('#detail-kicker').innerHTML =
+      `${strings.region}${orphan ? ` · <span class="badge orphan">${strings.legendOrphan}</span>` : ''}`;
     body.innerHTML = `
-      <p class="kicker">${strings.region}${orphan ? ` · <span class="badge orphan">${strings.legendOrphan}</span>` : ''}</p>
       <h3>${unitName(ready, region)}</h3>
       ${
         budgetUrl(region)
