@@ -98,6 +98,14 @@ export interface Attributes {
   siruta: string[];
   name: string[];
   county: string[];
+  /**
+   * Transparenta.eu's entity id, for the per-UAT budget link.
+   *
+   * Optional, and empty per entry where the source has none: a payload built before this
+   * field existed is still a valid payload, and the panel renders plain text rather than a
+   * dead link wherever the id is missing.
+   */
+  uatCode?: string[];
   isCapital: boolean[];
   /** Administrative standing, smaller is more significant: sector 0 … comuna 4. */
   adminRank: number[];

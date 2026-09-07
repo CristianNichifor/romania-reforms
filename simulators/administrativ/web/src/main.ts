@@ -8,6 +8,8 @@
 
 import './style.css';
 
+import { budgetUrlFor } from './app/links';
+import { createPanel } from './app/panels';
 import { decode as decodeScenario, writeHash, type Scenario } from './app/scenario';
 import { STRINGS, detectLang, formatMoney, formatNumber, type Lang, type Strings } from './i18n';
 import {
@@ -145,6 +147,51 @@ async function boot(): Promise<void> {
   const worker = new Worker(new URL('./model/worker.ts', import.meta.url), { type: 'module' });
   const mapHandle = await createMap(el('#map'), DATA_BASE);
 
+  const controlsPanel = createPanel({
+    element: el('#controls'),
+    handle: el('#controls-handle'),
+    storageKey: 'administrativ:width:controls',
+    defaultWidth: 292,
+    edge: 'right',
+  });
+  const detailPanel = createPanel({
+    element: el('#detail'),
+    handle: el('#detail-handle'),
+    storageKey: 'administrativ:width:detail',
+    defaultWidth: 320,
+    edge: 'left',
+  });
+
+  /**
+   * How tall the disclaimer is, published to CSS.
+   *
+   * On a phone the sheets stack up from the bottom of the screen and the disclaimer is
+   * already there — and it is the one piece of text on this page that must not be covered,
+   * since it is what stops the map being read as an official proposal. Its height is not a
+   * constant to hard-code: it wraps to two lines in Romanian and three in English on a
+   * narrow screen. Measured, so the sheets sit on top of it rather than under it.
+   */
+  const disclaimer = el<HTMLElement>('.disclaimer');
+  const publishDisclaimerHeight = (): void => {
+    document.documentElement.style.setProperty(
+      '--disclaimer-h',
+      `${Math.round(disclaimer.getBoundingClientRect().height)}px`,
+    );
+  };
+  new ResizeObserver(publishDisclaimerHeight).observe(disclaimer);
+  publishDisclaimerHeight();
+
+  /**
+   * Whether this is a touchscreen.
+   *
+   * The hovercard has no dismiss control because a pointer leaving is its dismiss. A finger
+   * never leaves, so on a touchscreen the card strands over the map with no way to shift it.
+   * Rather than bolt a close button onto it — which would make it a dialog, and there would
+   * then be two dialogs saying overlapping things — the card is suppressed here and a tap
+   * opens the detail panel instead, which is a real panel with a real close control.
+   */
+  const coarsePointer = window.matchMedia('(pointer: coarse)');
+
   // --- rendering ---------------------------------------------------------------------
 
   const applyStaticText = (): void => {
@@ -162,6 +209,10 @@ async function boot(): Promise<void> {
       'ANCPI · INS (Recensământ 2021) · Ministerul Finanțelor · OpenStreetMap · ' +
       '<a href="https://www.transparenta.eu" target="_blank" rel="noopener">Transparenta.eu</a> · ' +
       '<a href="https://geo-spatial.org" target="_blank" rel="noopener">geo-spatial.org</a>';
+    controlsPanel.setLabels(strings.panelResize, strings.panelResizeHelp);
+    detailPanel.setLabels(strings.panelResize, strings.panelResizeHelp);
+    el('#detail-close').setAttribute('aria-label', strings.panelClose);
+    el('#detail-close').setAttribute('title', strings.panelClose);
     renderModes();
     renderLegend();
     renderSliders();
@@ -605,8 +656,25 @@ async function boot(): Promise<void> {
     });
   };
 
+  /**
+   * A commune's page on transparenta.eu, or null where the payload has no id for it.
+   *
+   * A payload built before `uatCode` existed has no such array at all, so an older build
+   * loses the link rather than the panel.
+   */
+  const budgetUrl = (index: number): string | null =>
+    budgetUrlFor(ready?.attributes.uatCode?.[index]);
+
+  const budgetLink = (index: number, label: string): string => {
+    const url = budgetUrl(index);
+    if (!url) return label;
+    return `<a class="budget-link" href="${url}" target="_blank" rel="noopener"
+              title="${strings.budgetLinkTitle}">${label}</a>`;
+  };
+
   const renderDetail = (): void => {
     const panel = el<HTMLElement>('#detail');
+    const body = el<HTMLElement>('#detail-body');
     const index = scenario.selected;
     if (index === null || !ready || !latest) {
       panel.hidden = true;
@@ -646,9 +714,15 @@ async function boot(): Promise<void> {
         <div class="bar"><i style="width:${Math.min(100, (value / scale) * 100).toFixed(1)}%;background:${colour}"></i></div>
       </div>`;
 
-    panel.innerHTML = `
+    detailPanel.setTitle(unitName(ready, region));
+    body.innerHTML = `
       <p class="kicker">${strings.region}${orphan ? ` · <span class="badge orphan">${strings.legendOrphan}</span>` : ''}</p>
       <h3>${unitName(ready, region)}</h3>
+      ${
+        budgetUrl(region)
+          ? `<p class="budget-row">${budgetLink(region, strings.budgetLink)}</p>`
+          : ''
+      }
       <dl>
         <dt>${strings.county}</dt><dd>${ready.attributes.county[region]}</dd>
         <dt>${strings.members}</dt><dd>${formatNumber(members.length, scenario.lang)}</dd>
@@ -716,7 +790,7 @@ async function boot(): Promise<void> {
               `<li class="${i === region ? 'is-centre' : ''}${
                  scenario.pins.some((p) => p.uat === i) ? ' is-pinned' : ''
                }">
-                 <span>${ready!.attributes.name[i]}${
+                 <span>${budgetLink(i, ready!.attributes.name[i]!)}${
                    scenario.pins.some((p) => p.uat === i)
                      ? ` <em class="pin-badge">${strings.pinBadge}</em>`
                      : ''
@@ -727,7 +801,7 @@ async function boot(): Promise<void> {
           .join('')}
       </ul>`;
 
-    panel.querySelector<HTMLSelectElement>('#pin-select')?.addEventListener('change', (event) => {
+    body.querySelector<HTMLSelectElement>('#pin-select')?.addEventListener('change', (event) => {
       const value = (event.target as HTMLSelectElement).value;
       setPin(index, value === '' ? null : Number(value));
     });
@@ -869,6 +943,15 @@ async function boot(): Promise<void> {
   // answering it should not require a click.
   const hovercard = el<HTMLElement>('#hovercard');
   mapHandle.onHover((index, x, y) => {
+    // On a touchscreen the card would strand: there is no leave event to dismiss it. The
+    // county outline still follows, because that is drawn on the map and not in a popup.
+    if (coarsePointer.matches) {
+      hovercard.hidden = true;
+      mapHandle.setCountyFocus(
+        index !== null && ready ? (ready.attributes.county[index] ?? null) : null,
+      );
+      return;
+    }
     if (index === null || !ready || !latest) {
       hovercard.hidden = true;
       // Fall back to the selected commune's county, so the outline does not flicker off
@@ -940,6 +1023,18 @@ async function boot(): Promise<void> {
     scenario.selected = index;
     mapHandle.setCountyFocus(index === null ? null : (ready?.attributes.county[index] ?? null));
     mapHandle.setSelected(index);
+    writeHash(scenario);
+    renderDetail();
+    // On a phone the panel is a collapsed sheet, so selecting a commune has to open it —
+    // otherwise a tap appears to do nothing but move the outline.
+    if (index !== null && detailPanel.isSheet()) detailPanel.setOpen(true);
+  });
+
+  el('#detail-close').addEventListener('click', () => {
+    scenario.selected = null;
+    mapHandle.setSelected(null);
+    mapHandle.setCountyFocus(null);
+    detailPanel.setOpen(false);
     writeHash(scenario);
     renderDetail();
   });
