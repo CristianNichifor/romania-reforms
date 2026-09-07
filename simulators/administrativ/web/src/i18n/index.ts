@@ -140,6 +140,17 @@ export interface Strings {
   copyLink: string;
   linkCopied: string;
 
+  candidatesHeading: string;
+  candidatesIntro: string;
+  candidatesLoading: string;
+  candCapital: string;
+  candThreshold: string;
+  candPromoted: string;
+  candStoodDown: string;
+  candEligibleUnused: string;
+  candRefusedSeparation: string;
+  candInCapitalRing: string;
+
   budgetLink: string;
   budgetLinkTitle: string;
   panelResize: string;
@@ -296,6 +307,19 @@ const ro: Strings = {
   copyLink: 'Copiază link scenariu',
   linkCopied: 'Link copiat',
 
+  candidatesHeading: 'Candidați la statutul de centru',
+  candidatesIntro:
+    'Fiecare localitate pe care modelul a luat-o în calcul ca centru, și ce s-a ales de ea. ' +
+    'Nu toate au devenit centre — motivul este scris în dreptul fiecăreia.',
+  candidatesLoading: 'Se calculează…',
+  candCapital: 'Reședință de județ',
+  candThreshold: 'Peste pragul de populație',
+  candPromoted: 'Promovată, județul avea prea puține centre',
+  candStoodDown: 'Retrasă, intră în raza reședinței de județ',
+  candEligibleUnused: 'Eligibilă, dar județul nu a avut nevoie de ea',
+  candRefusedSeparation: 'Respinsă: prea aproape de un centru existent',
+  candInCapitalRing: 'Blocată: în inelul reședinței de județ',
+
   budgetLink: 'Bugetul pe transparenta.eu',
   budgetLinkTitle: 'Execuția bugetară a acestui UAT pe transparenta.eu',
   panelResize: 'Redimensionează panoul',
@@ -451,6 +475,19 @@ const en: Strings = {
   county: 'County',
   copyLink: 'Copy scenario link',
   linkCopied: 'Link copied',
+
+  candidatesHeading: 'Candidates to be a centre',
+  candidatesIntro:
+    'Every locality the model considered as a centre, and what became of it. Not all of them ' +
+    'became one; the reason stands beside each.',
+  candidatesLoading: 'Working it out…',
+  candCapital: 'County capital',
+  candThreshold: 'Above the population threshold',
+  candPromoted: 'Promoted; the county had too few centres',
+  candStoodDown: 'Stood down, inside the county capital\u2019s reach',
+  candEligibleUnused: 'Eligible, but the county did not need it',
+  candRefusedSeparation: 'Passed over: too close to an existing centre',
+  candInCapitalRing: 'Barred: inside the county capital\u2019s ring',
 
   budgetLink: 'Budget on transparenta.eu',
   budgetLinkTitle: "This UAT's budget execution on transparenta.eu",

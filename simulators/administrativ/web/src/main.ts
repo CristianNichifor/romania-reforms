@@ -27,7 +27,7 @@ import {
   type Overlay,
 } from './map/map';
 import { PALETTE } from './model/colour';
-import { DEFAULT_PARAMS, REASON, type Params, type ViewMode } from './model/types';
+import { CANDIDACY, DEFAULT_PARAMS, REASON, type Params, type ViewMode } from './model/types';
 import type { Outgoing, ReadyMessage, ResultMessage } from './model/worker';
 
 const DATA_BASE = `${import.meta.env.BASE_URL}data/`;
@@ -220,6 +220,7 @@ async function boot(): Promise<void> {
     renderSummary();
     renderDetail();
     renderPins();
+    renderCandidates();
     renderAudit();
   };
 
@@ -567,6 +568,114 @@ async function boot(): Promise<void> {
    * It exists so the odd cases can be found deliberately instead of stumbled on while
    * panning the map, which is how every one of them has been found so far.
    */
+  /**
+   * Who could have been a centre, and what became of them.
+   *
+   * The list is the rules chart: the map already shows which towns became centres, and the
+   * argument is about the ones that did not. Fetched from the worker when the section is
+   * opened and refreshed while it stays open, because it is a function of the parameters and
+   * goes stale the moment a slider moves.
+   */
+  let candidacyOf: Uint8Array | null = null;
+  let candidacyOpen = false;
+
+  const requestCandidacy = (): void => {
+    if (!candidacyOpen) return;
+    worker.postMessage({ type: 'candidacy', params: scenario.params });
+  };
+
+  const CANDIDACY_LABEL: Record<number, keyof Strings> = {
+    [CANDIDACY.CAPITAL]: 'candCapital',
+    [CANDIDACY.THRESHOLD]: 'candThreshold',
+    [CANDIDACY.PROMOTED]: 'candPromoted',
+    [CANDIDACY.STOOD_DOWN]: 'candStoodDown',
+    [CANDIDACY.ELIGIBLE_UNUSED]: 'candEligibleUnused',
+    [CANDIDACY.REFUSED_SEPARATION]: 'candRefusedSeparation',
+    [CANDIDACY.IN_CAPITAL_RING]: 'candInCapitalRing',
+  };
+
+  /** Centres first, then the near misses, then the merely eligible. */
+  const CANDIDACY_ORDER = [
+    CANDIDACY.CAPITAL,
+    CANDIDACY.THRESHOLD,
+    CANDIDACY.PROMOTED,
+    CANDIDACY.STOOD_DOWN,
+    CANDIDACY.IN_CAPITAL_RING,
+    CANDIDACY.REFUSED_SEPARATION,
+    CANDIDACY.ELIGIBLE_UNUSED,
+  ] as const;
+
+  const renderCandidates = (): void => {
+    const box = el<HTMLElement>('#candidates');
+    if (!ready || !latest) { box.hidden = true; return; }
+    box.hidden = false;
+
+    const grouped = new Map<number, number[]>();
+    if (candidacyOf) {
+      for (let i = 0; i < candidacyOf.length; i += 1) {
+        const state = candidacyOf[i]!;
+        if (state === CANDIDACY.NONE) continue;
+        let list = grouped.get(state);
+        if (!list) { list = []; grouped.set(state, list); }
+        list.push(i);
+      }
+    }
+
+    const body = !candidacyOf
+      ? `<p class="muted">${strings.candidatesLoading}</p>`
+      : CANDIDACY_ORDER.filter((state) => (grouped.get(state)?.length ?? 0) > 0)
+          .map((state) => {
+            const list = grouped.get(state)!;
+            return `
+        <details>
+          <summary>${strings[CANDIDACY_LABEL[state]!]}
+            <span class="count">${formatNumber(list.length, scenario.lang)}</span></summary>
+          <ul class="audit-list">
+            ${list
+              .slice()
+              .sort((a, b) => ready!.population[b]! - ready!.population[a]!)
+              .map(
+                (i) =>
+                  `<li>
+                     <div class="audit-row">
+                       <button data-goto-candidate="${i}">${ready!.attributes.name[i]}</button>
+                       <span>${ready!.attributes.county[i]} · ${formatNumber(
+                         ready!.population[i]!,
+                         scenario.lang,
+                       )}</span>
+                     </div>
+                   </li>`,
+              )
+              .join('')}
+          </ul>
+        </details>`;
+          })
+          .join('');
+
+    box.innerHTML = `
+      <details id="candidates-details"${candidacyOpen ? ' open' : ''}>
+        <summary><h4>${strings.candidatesHeading}</h4></summary>
+        <p class="muted">${strings.candidatesIntro}</p>
+        ${body}
+      </details>`;
+
+    el<HTMLDetailsElement>('#candidates-details').addEventListener('toggle', (event) => {
+      candidacyOpen = (event.target as HTMLDetailsElement).open;
+      if (candidacyOpen && !candidacyOf) requestCandidacy();
+    });
+
+    box.querySelectorAll<HTMLButtonElement>('[data-goto-candidate]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const index = Number(button.dataset.gotoCandidate);
+        scenario.selected = index;
+        writeHash(scenario);
+        mapHandle.setSelected(index);
+        mapHandle.flyTo(index);
+        renderDetail();
+      });
+    });
+  };
+
   const renderAudit = (): void => {
     const box = el<HTMLElement>('#audit');
     if (!ready || !latest) { box.hidden = true; return; }
@@ -879,6 +988,12 @@ async function boot(): Promise<void> {
       return;
     }
 
+    if (message.type === 'candidacy-result') {
+      candidacyOf = message.candidacyOf;
+      renderCandidates();
+      return;
+    }
+
     // Discard anything a later drag has already superseded.
     if (message.token !== token) return;
 
@@ -895,6 +1010,11 @@ async function boot(): Promise<void> {
     renderSummary();
     renderDetail();
     renderPins();
+    // Stale the instant the parameters change, so it is dropped and re-asked rather than
+    // left on screen describing a selection that is no longer the one on the map.
+    candidacyOf = null;
+    renderCandidates();
+    requestCandidacy();
     renderAudit();
     el<HTMLElement>('#loading').hidden = true;
   };

@@ -14,6 +14,7 @@
  */
 
 import {
+  CANDIDACY,
   R_SEP_RELAXATION_FACTOR,
   R_SEP_RELAXATION_FLOOR_M,
   TIER_COUNTY_CAPITAL,
@@ -354,27 +355,47 @@ function reach(data: ModelData, params: Params, seed: number, tier: number): num
   return out;
 }
 
-function selectSeeds(data: ModelData, params: Params): {
+/**
+ * `collectCandidacy` asks for the losers as well as the winners.
+ *
+ * Off by default, and off on every slider frame. Classifying who a county passed over needs
+ * a Dijkstra per county that actually promoted, which cost 42 ms on top of a 122 ms
+ * recompute and put the whole thing over its 150 ms budget. The candidate list is opened
+ * occasionally and the sliders move continuously, so this follows `explain` and
+ * `seatDistances`: expensive answers are computed when asked for, not shipped with every
+ * result.
+ */
+function selectSeeds(data: ModelData, params: Params, collectCandidacy = false): {
   tierOf: Int8Array;
   underSeeded: string[];
   held: Set<number>;
   reservedFor: Map<number, number>;
+  candidacyOf: Uint8Array;
 } {
   const tierOf = new Int8Array(data.uatCount).fill(-1);
+  // Observation only. Written alongside the decisions as they are made, because afterwards
+  // the information is gone: `tierOf` records who won and says nothing about who was in the
+  // running.
+  const candidacyOf = new Uint8Array(data.uatCount);
 
   // Bucharest is one centre, not six. Its sectors never compete: six parallel
   // administrations over one continuous city is the duplication this exercise is about, so
   // they merge rather than being modelled as rivals. The lowest-index sector stands for the
   // city, since no "Municipiul Bucuresti" row exists in the UAT set.
-  if (data.bucharestIndex >= 0) tierOf[data.bucharestIndex] = TIER_NATIONAL_CAPITAL;
+  if (data.bucharestIndex >= 0) {
+    tierOf[data.bucharestIndex] = TIER_NATIONAL_CAPITAL;
+    candidacyOf[data.bucharestIndex] = CANDIDACY.CAPITAL;
+  }
 
   for (let k = 0; k < data.absorbers.length; k += 1) {
     const i = data.absorbers[k]!;
     if (data.countyOf[i] === data.bucharestCounty) continue;
     if (data.attributes.isCapital[i]) {
       tierOf[i] = TIER_COUNTY_CAPITAL;
+      candidacyOf[i] = CANDIDACY.CAPITAL;
     } else if (data.population[i]! >= params.x) {
       tierOf[i] = TIER_POPULATION;
+      candidacyOf[i] = CANDIDACY.THRESHOLD;
     }
   }
 
@@ -419,7 +440,10 @@ function selectSeeds(data: ModelData, params: Params): {
   // a capital demoted earlier in the loop is still a key in `cores` but reads as tier -1,
   // which sorts ahead of the national capital — Buftea, demoted first, captured Otopeni and
   // Chiajna from Bucharest that way.
-  for (const uat of held) tierOf[uat] = -1;
+  for (const uat of held) {
+    tierOf[uat] = -1;
+    candidacyOf[uat] = CANDIDACY.STOOD_DOWN;
+  }
 
   // Built after the demotion, not before: a capital that has itself been stood down is no
   // longer one, and its reach must not go on blocking promotions. Buftea's did, which kept
@@ -469,6 +493,28 @@ function selectSeeds(data: ModelData, params: Params): {
     data.countyCodes[a]! < data.countyCodes[b]! ? -1 : 1,
   );
 
+  // Towns join the pool whatever their population. The threshold decides who is
+  // *automatically* a centre; promotion exists to fill a county that came up short, and
+  // there a town with a town hall is a better answer than a large commune.
+  // Ilfov is the county this exists for: a ring around Bucharest, so the centres it could
+  // promote are largely communes the city borders. Barred from those it needs the wider
+  // pool to reach five, and the widening below gives it one without touching the ring.
+  //
+  // Lifted out of the county loop so a county that never promotes can still be asked who its
+  // candidates *were*. That question has an answer whether or not the county needed one, and
+  // it is most of what the candidate list exists to show.
+  const candidatesIn = (uats: number[], allowDisplaced: boolean): number[] =>
+    uats.filter(
+      (i) =>
+        (isAbsorber[i] === 1 || data.attributes.adminRank[i]! <= ADMIN_RANK_ORAS) &&
+        tierOf[i] === -1 &&
+        // Never a capital's ring, however short the county is. Promotion took
+        // Popesti-Leordeni and Voluntari off Bucharest to bring Ilfov to five; the ring is
+        // the stronger rule, so the county finds its centres elsewhere.
+        !capitalRings.has(i) &&
+        (allowDisplaced || (!held.has(i) && !capitalReach.has(i))),
+    );
+
   for (const county of countyOrder) {
     // Bucharest is one city, not a county needing a spread of centres. Promotion here made
     // four of its six sectors centres in their own right — the duplication the merge exists
@@ -476,25 +522,18 @@ function selectSeeds(data: ModelData, params: Params): {
     if (county === data.bucharestCounty) continue;
     const uats = byCounty.get(county)!;
     const seedsHere = uats.filter((i) => tierOf[i] !== -1);
-    if (seedsHere.length >= params.nMin) continue;
+    if (seedsHere.length >= params.nMin) {
+      // The county had enough centres already, so separation was never consulted here and
+      // "too close to another centre" would be a reason this county never gave.
+      if (collectCandidacy) {
+        for (const i of candidatesIn(uats, true)) {
+          if (candidacyOf[i] === CANDIDACY.NONE) candidacyOf[i] = CANDIDACY.ELIGIBLE_UNUSED;
+        }
+      }
+      continue;
+    }
 
-    // Towns join the pool whatever their population. The threshold decides who is
-    // *automatically* a centre; promotion exists to fill a county that came up short, and
-    // there a town with a town hall is a better answer than a large commune.
-    // Ilfov is the county this exists for: a ring around Bucharest, so the centres it could
-    // promote are largely communes the city borders. Barred from those it needs the wider
-    // pool to reach five, and the widening below gives it one without touching the ring.
-    const candidates = (allowDisplaced: boolean): number[] =>
-      uats.filter(
-        (i) =>
-          (isAbsorber[i] === 1 || data.attributes.adminRank[i]! <= ADMIN_RANK_ORAS) &&
-          tierOf[i] === -1 &&
-          // Never a capital's ring, however short the county is. Promotion took
-          // Popesti-Leordeni and Voluntari off Bucharest to bring Ilfov to five; the ring is
-          // the stronger rule, so the county finds its centres elsewhere.
-          !capitalRings.has(i) &&
-          (allowDisplaced || (!held.has(i) && !capitalReach.has(i))),
-      );
+    const candidates = (allowDisplaced: boolean): number[] => candidatesIn(uats, allowDisplaced);
 
     let pool = candidates(false);
     let widened = false;
@@ -562,13 +601,67 @@ function selectSeeds(data: ModelData, params: Params): {
       }
 
       tierOf[bestIndex] = TIER_PROMOTED;
+      candidacyOf[bestIndex] = CANDIDACY.PROMOTED;
       seedsHere.push(bestIndex);
       pool.splice(pool.indexOf(bestIndex), 1);
       for (const u of reach(data, params, bestIndex, TIER_PROMOTED)) covered[u] = 1;
     }
+
+    // What became of everyone the county considered and did not take.
+    //
+    // Measured against the separation actually in force when promotion stopped, not the
+    // slider value: where the floor was relaxed to fill a short county, a town refused at
+    // 15 km may have been admissible at 11.25 km, and reporting it as refused by the slider
+    // would be describing a rule the run did not use.
+    const remaining = collectCandidacy
+      ? candidatesIn(uats, true).filter((i) => tierOf[i] === -1)
+      : [];
+    if (remaining.length > 0) {
+      const finalSeparation =
+        seedsHere.length > 0 && rSep > 0 ? countyRoadDistances(data, county, seedsHere) : null;
+      for (const i of remaining) {
+        if (candidacyOf[i] !== CANDIDACY.NONE) continue;
+        candidacyOf[i] =
+          finalSeparation && (finalSeparation.get(i) ?? Infinity) < rSep
+            ? CANDIDACY.REFUSED_SEPARATION
+            : CANDIDACY.ELIGIBLE_UNUSED;
+      }
+    }
   }
 
-  return { tierOf, underSeeded, held, reservedFor };
+  // Towns the capital's ring kept out of every pool.
+  //
+  // Done last, over what is left: the ring bars a town before promotion consults anything
+  // else, so anyone still unlabelled who would otherwise have been eligible was excluded by
+  // it. Ninety UATs at the default settings, and reporting them as "not a candidate under any
+  // rule" said the model had never looked at them when in fact it had and a rule had refused
+  // them.
+  if (collectCandidacy) {
+    for (let i = 0; i < data.uatCount; i += 1) {
+      if (candidacyOf[i] !== CANDIDACY.NONE || tierOf[i] !== -1) continue;
+      if (data.countyOf[i] === data.bucharestCounty || !capitalRings.has(i)) continue;
+      if (isAbsorber[i] === 1 || data.attributes.adminRank[i]! <= ADMIN_RANK_ORAS) {
+        candidacyOf[i] = CANDIDACY.IN_CAPITAL_RING;
+      }
+    }
+  }
+
+  return { tierOf, underSeeded, held, reservedFor, candidacyOf };
+}
+
+/**
+ * Who could have been a centre, and what became of them.
+ *
+ * Runs seed selection again with the bookkeeping switched on. That repeats the promotion
+ * pass — the cheap half of the model — rather than the growth, merging and rebalancing that
+ * follow it, and it happens when a reader opens the list rather than while they drag.
+ *
+ * The answer is a function of the parameters alone, which is what makes re-running it safe:
+ * it observes the same deterministic selection the map was built from rather than a second,
+ * possibly divergent one.
+ */
+export function candidacyReport(data: ModelData, params: Params): Uint8Array {
+  return selectSeeds(data, params, true).candidacyOf;
 }
 
 /**
