@@ -720,15 +720,19 @@ async function boot(): Promise<void> {
   });
 
   /**
-   * The map as a PNG.
+   * The map as a PNG, names included.
    *
    * Drawn from MapLibre's own canvas, which is why the map is created with
    * `preserveDrawingBuffer` — without it the browser is free to discard the buffer after
    * compositing and the read comes back blank. It costs a little memory on every frame,
    * which is the price of the export working at all.
    *
-   * The labels are HTML rather than a MapLibre symbol layer, so they are not on this canvas.
-   * Said plainly in the PR rather than papered over: this exports the map, not the labels.
+   * The names are the awkward part, and were simply missing before. They are HTML rather than
+   * a MapLibre symbol layer — which is what avoids depending on a font server or shipping
+   * glyph atlases — so they are not on that canvas at all, and an export of Romania with no
+   * place names on it is a picture of a colour scheme. They are composited on afterwards: the
+   * map bitmap first, then each label where its span already sits, with a stroke standing in
+   * for the CSS text-shadow that keeps it legible over the choropleth.
    */
   const exportPng = async (): Promise<void> => {
     const button = el<HTMLButtonElement>('#export-png');
@@ -736,8 +740,39 @@ async function boot(): Promise<void> {
     button.textContent = strings.exportPngBusy;
     try {
       await new Promise<void>((resolve) => mapHandle.map.once('idle', () => resolve()));
-      const url = mapHandle.map.getCanvas().toDataURL('image/png');
-      download(url, `administrativ-${new Date().toISOString().slice(0, 10)}.png`);
+      const source = mapHandle.map.getCanvas();
+      const out = document.createElement('canvas');
+      out.width = source.width;
+      out.height = source.height;
+      const ctx = out.getContext('2d');
+      if (!ctx) return;
+      ctx.drawImage(source, 0, 0);
+
+      // The canvas is in device pixels; the labels are positioned in CSS pixels.
+      const scale = source.width / Math.max(source.clientWidth, 1);
+      ctx.textAlign = 'center';
+      ctx.lineJoin = 'round';
+      for (const node of labels.children) {
+        const span = node as HTMLElement;
+        const text = span.textContent ?? '';
+        if (!text) continue;
+        const centre = span.classList.contains('centre');
+        const size = centre ? 12 : 11;
+        ctx.font = `600 ${size * scale}px ui-sans-serif, system-ui, sans-serif`;
+        // Mirrors the span's own transform: translate(-50%, -140%).
+        const x = parseFloat(span.style.left || '0') * scale;
+        const y = (parseFloat(span.style.top || '0') - size * 1.4) * scale;
+        ctx.strokeStyle = '#0f1216';
+        ctx.lineWidth = 3 * scale;
+        ctx.strokeText(text, x, y);
+        ctx.fillStyle = centre ? '#ffffff' : '#f2f4f7';
+        ctx.fillText(text, x, y);
+      }
+
+      download(
+        out.toDataURL('image/png'),
+        `administrativ-${new Date().toISOString().slice(0, 10)}.png`,
+      );
     } finally {
       button.textContent = label;
     }
