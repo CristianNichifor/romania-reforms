@@ -168,6 +168,15 @@ export interface Strings {
   candRefusedSeparation: string;
   candInCapitalRing: string;
   candForced: string;
+  candSearch: string;
+  candCounty: string;
+  candAllCounties: string;
+  candShowing: string;
+  candNoMatch: string;
+  candPromote: string;
+  candDemote: string;
+  candBarred: string;
+  candBarredStoodDown: string;
 
   forceHeading: string;
   forceNone: string;
@@ -411,6 +420,16 @@ const ro: Strings = {
   candRefusedSeparation: 'Respinsă: prea aproape de un centru existent',
   candInCapitalRing: 'Blocată: în inelul reședinței de județ',
   candForced: 'Impusă de tine ca centru',
+  candSearch: 'Caută după nume',
+  candCounty: 'Județ',
+  candAllCounties: 'Toate județele',
+  candShowing: '{shown} din {total}',
+  candNoMatch: 'Nicio localitate nu corespunde căutării.',
+  candPromote: 'Fă-o centru',
+  candDemote: 'Renunță',
+  candBarred: 'Nu poate fi impusă: reședința de județ îi ține inelul.',
+  candBarredStoodDown:
+    'Nu poate fi impusă: era deja centru când s-a aplicat opțiunea, iar reședința de județ a preluat-o imediat după.',
 
   forceHeading: 'Centre impuse',
   forceNone: 'Niciun centru impus. Harta este exact ce au produs regulile.',
@@ -665,6 +684,16 @@ const en: Strings = {
   candRefusedSeparation: 'Passed over: too close to an existing centre',
   candInCapitalRing: 'Barred: inside the county capital\u2019s ring',
   candForced: 'Forced by you to be a centre',
+  candSearch: 'Search by name',
+  candCounty: 'County',
+  candAllCounties: 'All counties',
+  candShowing: '{shown} of {total}',
+  candNoMatch: 'No locality matches that search.',
+  candPromote: 'Make it a centre',
+  candDemote: 'Undo',
+  candBarred: 'Cannot be forced: a county capital holds its ring.',
+  candBarredStoodDown:
+    'Cannot be forced: it was already a centre when the override was applied, and the county capital took it immediately after.',
 
   forceHeading: 'Forced centres',
   forceNone: 'Nothing forced. The map is exactly what the rules produced.',
