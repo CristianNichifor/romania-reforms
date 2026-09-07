@@ -743,6 +743,7 @@ export function candidacyReport(
 function accrete(
   data: ModelData,
   params: Params,
+  parentOf: Int16Array,
   tierOf: Int8Array,
   regionOf: Uint16Array,
   reasonOf: Uint8Array,
@@ -754,7 +755,7 @@ function accrete(
   const seeds: number[] = [];
   for (let i = 0; i < data.uatCount; i += 1) if (tierOf[i] !== -1) seeds.push(i);
 
-  grow(data, params, tierOf, regionOf, reasonOf, overlapOf, members, seeds, new Set(), reservedFor);
+  grow(data, params, parentOf, tierOf, regionOf, reasonOf, overlapOf, members, seeds, new Set(), reservedFor);
 
   // The tail of the stand-down rule: a centre whose capital never actually arrived over
   // contiguous territory. It keeps whatever it holds, and folds into the capital only where
@@ -785,6 +786,7 @@ function accrete(
 function grow(
   data: ModelData,
   params: Params,
+  parentOf: Int16Array,
   tierOf: Int8Array,
   regionOf: Uint16Array,
   reasonOf: Uint8Array,
@@ -796,6 +798,8 @@ function grow(
 ): void {
   const eligible = new Map<number, Map<number, number>>();
   const gathered = new Map<number, number>();
+  // uat -> absorber -> the member its winning bid came through.
+  const bidVia = new Map<number, Map<number, number>>();
   // Accumulated road distance from each absorber to each commune it holds.
   const reached = new Map<number, Map<number, number>>();
 
@@ -861,7 +865,18 @@ function grow(
             bids.set(nb, row);
           }
           const prev = row.get(absorber);
-          if (prev === undefined || reach < prev) row.set(absorber, reach);
+          if (prev === undefined || reach < prev) {
+            row.set(absorber, reach);
+            // Which commune of the absorber's the bid arrived through. The distance alone
+            // cannot be walked back into a route, and this is the only point at which the
+            // step is known: afterwards there is a number and no way to say what it crossed.
+            let viaRow = bidVia.get(nb);
+            if (!viaRow) {
+              viaRow = new Map();
+              bidVia.set(nb, viaRow);
+            }
+            viaRow.set(absorber, held);
+          }
         }
       }
     }
@@ -933,6 +948,9 @@ function grow(
       regionOf[uat] = absorber;
       members.set(absorber, [...(members.get(absorber) ?? []), uat]);
       reached.get(absorber)!.set(uat, row.get(absorber)!);
+      // The commune this one was reached through, so the chain back to the centre can be
+      // walked later. A seed reaches itself, and stays at -1.
+      parentOf[uat] = bidVia.get(uat)?.get(absorber) ?? -1;
       gathered.set(absorber, gathered.get(absorber)! + data.population[uat]!);
       const pct = eligible.get(absorber)!.get(uat) ?? 0;
       overlapOf[uat] = pct;
@@ -2155,6 +2173,9 @@ export function runModel(
   const regionOf = new Uint16Array(data.uatCount).fill(NO_REGION);
   const reasonOf = new Uint8Array(data.uatCount).fill(REASON.UNCHANGED);
   const overlapOf = new Uint8Array(data.uatCount);
+  // Int16 because -1 has to mean "not reached along a chain", which a Uint16 cannot say.
+  // 3,186 UATs fit with room to spare.
+  const parentOf = new Int16Array(data.uatCount).fill(-1);
   const { tierOf, underSeeded, held, reservedFor, forcedApplied, forcedRejected } = selectSeeds(
     data,
     params,
@@ -2165,7 +2186,7 @@ export function runModel(
   const forcedSeats = new Set<number>(forcedApplied);
 
   const members = new Map<number, number[]>();
-  accrete(data, params, tierOf, regionOf, reasonOf, overlapOf, members, held, reservedFor);
+  accrete(data, params, parentOf, tierOf, regionOf, reasonOf, overlapOf, members, held, reservedFor);
 
   // Before the cluster step: a commune nobody reached should join a neighbouring unit, not
   // start a unit of its own with the other communes nobody reached.
@@ -2270,6 +2291,7 @@ export function runModel(
     reasonOf,
     overlapOf,
     tierOf,
+    parentOf,
     regions: regionSeats.size,
     seeds,
     orphanRegions: orphanSeats.size,
