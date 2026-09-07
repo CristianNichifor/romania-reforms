@@ -43,8 +43,10 @@ import {
 } from './map/map';
 import { PALETTE } from './model/colour';
 import { regionOfCounty } from './model/regions';
+import { allocateSeats, representationShift, type VoteList } from './model/allocation';
 import {
   BUCHAREST_COUNCIL,
+  councillorsFor,
   danishBandFor,
   representationAfter,
   representationBefore,
@@ -1310,6 +1312,104 @@ async function boot(): Promise<void> {
   };
 
   /**
+   * The 2020 local-council votes, fetched the first time a unit's detail is opened.
+   *
+   * 153 KB, and only a reader who opens a unit ever needs it — the map itself does not. Absent
+   * or unreachable it costs the party table and nothing else, which is why the panel renders
+   * without waiting for it and fills the section in when it lands.
+   */
+  interface VotesPayload {
+    mandate: string;
+    parties: string[];
+    partyOf: number[][];
+    votesOf: number[][];
+  }
+  let votes: VotesPayload | null = null;
+  let votesLoad: Promise<void> | null = null;
+
+  const loadVotes = (): Promise<void> => {
+    votesLoad ??= fetch(`${DATA_BASE}votes.json`)
+      .then((response) => (response.ok ? response.json() : null))
+      .then((raw: VotesPayload | null) => {
+        votes = raw;
+      })
+      .catch(() => {
+        votes = null;
+      });
+    return votesLoad;
+  };
+
+  const listsOf = (index: number): VoteList[] => {
+    if (!votes) return [];
+    const parties = votes.partyOf[index] ?? [];
+    const counts = votes.votesOf[index] ?? [];
+    return parties.map((party, k) => ({ party, votes: counts[k] ?? 0 }));
+  };
+
+  /**
+   * Who would hold the seats, before and after.
+   *
+   * Both sides are computed the same way — the members' own votes under the same rules — so
+   * the difference is attributable to pooling rather than to methodology. Using the real
+   * elected roster for "today" and a computation for "after" would have mixed the two.
+   */
+  const partyTableHtml = (members: number[], totalPop: number): string => {
+    if (!ready || !votes) return '';
+    const perCommune = members
+      .map((i) => ({ i, lists: listsOf(i) }))
+      .filter((m) => m.lists.length > 0)
+      .map((m) => allocateSeats(m.lists, councillorsFor(ready!.population[m.i]!)));
+    if (perCommune.length === 0) return '';
+
+    const pooled = new Map<number, number>();
+    for (const i of members) {
+      for (const list of listsOf(i)) {
+        pooled.set(list.party, (pooled.get(list.party) ?? 0) + list.votes);
+      }
+    }
+    const merged = allocateSeats(
+      [...pooled].map(([party, v]) => ({ party, votes: v })),
+      councillorsFor(totalPop),
+    );
+
+    const shift = representationShift(perCommune, merged);
+    const lost = new Set(shift.losesAllSeats);
+    const rows = [...new Set([...shift.before.keys(), ...shift.after.keys()])]
+      .map((party) => ({
+        party,
+        before: shift.before.get(party) ?? 0,
+        after: shift.after.get(party) ?? 0,
+      }))
+      .sort((a, b) => b.after - a.after || b.before - a.before)
+      .slice(0, 10);
+
+    return `
+      <div class="party-table">
+        <div class="rep-row rep-head">
+          <span>${strings.repPartyHeading}</span>
+          <span>${strings.repPartyToday}</span>
+          <span>${strings.repPartyAfter}</span>
+        </div>
+        ${rows
+          .map(
+            (r) => `<div class="rep-row${lost.has(r.party) ? ' lost' : ''}">
+              <span title="${votes!.parties[r.party] ?? ''}">${votes!.parties[r.party] ?? ''}</span>
+              <span>${r.before}</span>
+              <span>${r.after || '—'}</span>
+            </div>`,
+          )
+          .join('')}
+        ${
+          shift.losesAllSeats.length > 0
+            ? `<p class="muted lost-note">${formatNumber(shift.losesAllSeats.length, scenario.lang)} ${strings.repLoses}</p>`
+            : ''
+        }
+        <p class="muted">${strings.repCaveat}</p>
+        <p class="muted rep-source">${strings.repMandate}</p>
+      </div>`;
+  };
+
+  /**
    * What a merger does to the political layer.
    *
    * Statutory on both sides — Art. 112 sets the council by population band, Art. 148 the
@@ -1357,6 +1457,7 @@ async function boot(): Promise<void> {
           .replace('{min}', String(band.min))
           .replace('{max}', String(band.max))}</p>
         <p class="muted rep-source">${strings.repSource}</p>
+        ${partyTableHtml(members, totalPop)}
       </div>`;
   };
 
@@ -1403,6 +1504,8 @@ async function boot(): Promise<void> {
         <div class="bar"><i style="width:${Math.min(100, (value / scale) * 100).toFixed(1)}%;background:${colour}"></i></div>
       </div>`;
 
+    // The party table needs the votes; the rest of the panel does not wait for them.
+    if (!votes) void loadVotes().then(() => { if (scenario.selected === index) renderDetail(); });
     detailPanel.setTitle(unitName(ready, region));
     el<HTMLElement>('#detail-kicker').innerHTML =
       `${strings.region}${orphan ? ` · <span class="badge orphan">${strings.legendOrphan}</span>` : ''}`;

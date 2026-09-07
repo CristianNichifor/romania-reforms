@@ -1686,3 +1686,34 @@ button.link:hover {
   line-height: 1.5;
   color: var(--muted);
 }
+
+/* --- who would hold the seats ---------------------------------------------------------- */
+
+.party-table {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.party-table .rep-row span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A list that held seats and now holds none. Struck through rather than coloured red: this is
+   an arithmetic consequence, not an alarm, and the panel says so underneath. */
+.party-table .rep-row.lost span:first-child {
+  text-decoration: line-through;
+  opacity: 0.75;
+}
+
+.party-table .rep-row.lost span:last-child {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.party-table .lost-note {
+  margin: 8px 0 0;
+  font-size: 11px;
+}

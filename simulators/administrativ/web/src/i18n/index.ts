@@ -209,6 +209,12 @@ export interface Strings {
   repDanish: string;
   repSource: string;
   repBucharest: string;
+  repPartyHeading: string;
+  repPartyToday: string;
+  repPartyAfter: string;
+  repLoses: string;
+  repCaveat: string;
+  repMandate: string;
 
   budgetLink: string;
   budgetLinkTitle: string;
@@ -446,6 +452,15 @@ const ro: Strings = {
   repBucharest:
     'Consiliul General al Municipiului București are 55 de consilieri prin lege, nu pe intervale de populație. ' +
     'Numărul viceprimarilor Capitalei nu este stabilit de art. 148, deci nu este afișat aici.',
+  repPartyHeading: 'Cine ar avea consilieri',
+  repPartyToday: 'Azi',
+  repPartyAfter: 'După',
+  repLoses: 'pierde toate mandatele',
+  repCaveat:
+    'Voturile din 2020 ale comunelor componente, adunate și redistribuite după aceleași reguli ' +
+    '(coeficient electoral, prag de 5%, cele mai mari resturi). Este o socoteală, nu o predicție: ' +
+    'oamenii nu ar vota la fel pentru alți candidați, într-o altă unitate.',
+  repMandate: 'Alegeri locale 2020 (mandatul 2020–2024), AEP via data.gov.ro',
 
   budgetLink: 'Bugetul pe transparenta.eu',
   budgetLinkTitle: 'Execuția bugetară a acestui UAT pe transparenta.eu',
@@ -683,6 +698,15 @@ const en: Strings = {
   repBucharest:
     'Bucharest\u2019s Consiliul General has 55 members by statute rather than by population band. Art. 148 does ' +
     'not set the number of the capital\u2019s vice-mayors, so it is not shown here.',
+  repPartyHeading: 'Who would hold the seats',
+  repPartyToday: 'Today',
+  repPartyAfter: 'After',
+  repLoses: 'loses every seat',
+  repCaveat:
+    'The member communes\u2019 2020 votes, pooled and redistributed under the same rules \u2014 electoral ' +
+    'coefficient, 5% threshold, largest remainders. It is arithmetic, not a prediction: people would not ' +
+    'vote the same way for a different set of candidates in a different unit.',
+  repMandate: 'Local elections 2020 (the 2020\u20132024 mandate), AEP via data.gov.ro',
 
   budgetLink: 'Budget on transparenta.eu',
   budgetLinkTitle: "This UAT's budget execution on transparenta.eu",
