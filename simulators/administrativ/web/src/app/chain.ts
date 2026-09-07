@@ -14,35 +14,12 @@
 import type { ChainFeature } from '../map/map';
 
 /**
- * Walk a commune back to the centre that absorbed it.
- *
- * Null where the commune was not placed by accretion at all — a leftover, an orphan cluster,
- * a consolidation or a pin. Those have no route because none was measured, and saying so is
- * better than drawing a plausible line.
- *
- * The visited set is a guard, not an expectation: a cycle would be a bug in the model, and
- * returning null keeps a bug from becoming an infinite loop in the render path.
+ * The walk itself lives in the model, because the worker needs it too. Re-exported here so
+ * the drawing code keeps importing its route from one place.
  */
-export function routeTo(parentOf: Int16Array, uat: number): number[] | null {
-  const route = [uat];
-  const seen = new Set<number>([uat]);
-  let node = uat;
-  while (parentOf[node]! >= 0) {
-    const parent = parentOf[node]!;
-    if (seen.has(parent)) return null;
-    seen.add(parent);
-    route.push(parent);
-    node = parent;
-  }
-  return route.length > 1 ? route : null;
-}
+import { hopsOf } from '../model/route';
 
-/** Consecutive pairs along a route: the legs actually travelled. */
-export function hopsOf(route: readonly number[]): [number, number][] {
-  const out: [number, number][] = [];
-  for (let i = 0; i < route.length - 1; i += 1) out.push([route[i]!, route[i + 1]!]);
-  return out;
-}
+export { hopsOf, routeTo } from '../model/route';
 
 /**
  * A key for one leg, independent of which end you name first.
