@@ -7,9 +7,25 @@
  */
 
 import { decode } from './load';
+import { hopsOf, routeTo } from './route';
 import { assignUnitColours } from './colour';
 import { candidacyReport, countyRoadDistances, mergeBlocker, runModel } from './model';
 import type { Attributes, ForcedRejection, Manifest, ModelData, Params, Pin } from './types';
+
+/** Road distance and drive time across one border, from the adjacency row. */
+function legFor(
+  data: ModelData,
+  from: number,
+  to: number,
+): { from: number; to: number; metres: number; seconds: number } {
+  for (let e = data.neighbourStart[from]!; e < data.neighbourStart[from + 1]!; e += 1) {
+    if (data.neighbours[e] === to) {
+      return { from, to, metres: data.neighbourRoadM[e]!, seconds: data.neighbourSeconds[e]! };
+    }
+  }
+  // Not adjacent: the model never grew along this pair, so there is no measured distance.
+  return { from, to, metres: Infinity, seconds: 0 };
+}
 
 export interface InitMessage {
   type: 'init';
@@ -302,26 +318,12 @@ self.onmessage = async (event: MessageEvent<Incoming>) => {
     }
 
     if (message.type === 'chain') {
-      if (!data || !lastParentOf) return;
-      const legs: ChainResultMessage['legs'] = [];
-      const seen = new Set<number>([message.uat]);
-      let node = message.uat;
-      while (lastParentOf[node]! >= 0) {
-        const parent = lastParentOf[node]!;
-        if (seen.has(parent)) break;
-        seen.add(parent);
-        let metres = Infinity;
-        let seconds = 0;
-        for (let e = data.neighbourStart[node]!; e < data.neighbourStart[node + 1]!; e += 1) {
-          if (data.neighbours[e] === parent) {
-            metres = data.neighbourRoadM[e]!;
-            seconds = data.neighbourSeconds[e]!;
-            break;
-          }
-        }
-        legs.push({ from: node, to: parent, metres, seconds });
-        node = parent;
-      }
+      if (!data || !lastParentOf || !lastRegionOf) return;
+      // `lastRegionOf` contains the walk: a commune moved after accretion keeps a route into
+      // the unit it used to be in, and drawing that highlights roads through a different
+      // merged UAT. Stopping at the boundary shows the part that is still true, or nothing.
+      const route = routeTo(lastParentOf, message.uat, lastRegionOf);
+      const legs = route ? hopsOf(route).map(([from, to]) => legFor(data!, from, to)) : [];
       self.postMessage({ type: 'chain-result', uat: message.uat, legs } satisfies ChainResultMessage);
       return;
     }
@@ -332,27 +334,15 @@ self.onmessage = async (event: MessageEvent<Incoming>) => {
       const legs: UnitChainsResultMessage['legs'] = [];
       for (let i = 0; i < data.uatCount; i += 1) {
         if (lastRegionOf[i] !== message.seat) continue;
-        let node = i;
-        const walked = new Set<number>([i]);
-        while (lastParentOf[node]! >= 0) {
-          const parent = lastParentOf[node]!;
-          if (walked.has(parent)) break;
-          walked.add(parent);
-          const key = node < parent ? `${node}:${parent}` : `${parent}:${node}`;
-          if (!seen.has(key)) {
-            seen.add(key);
-            let metres = Infinity;
-            let seconds = 0;
-            for (let e = data.neighbourStart[node]!; e < data.neighbourStart[node + 1]!; e += 1) {
-              if (data.neighbours[e] === parent) {
-                metres = data.neighbourRoadM[e]!;
-                seconds = data.neighbourSeconds[e]!;
-                break;
-              }
-            }
-            legs.push({ from: node, to: parent, metres, seconds });
-          }
-          node = parent;
+        const route = routeTo(lastParentOf, i, lastRegionOf);
+        if (!route) continue;
+        for (const [from, to] of hopsOf(route)) {
+          // Members share the legs nearest the centre, and drawing one twice is both more
+          // lines and a false picture of how much road carries the unit.
+          const key = from < to ? `${from}:${to}` : `${to}:${from}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          legs.push(legFor(data, from, to));
         }
       }
       self.postMessage({
