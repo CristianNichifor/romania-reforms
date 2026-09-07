@@ -8,7 +8,7 @@
 
 import { decode } from './load';
 import { assignUnitColours } from './colour';
-import { countyRoadDistances, mergeBlocker, runModel } from './model';
+import { candidacyReport, countyRoadDistances, mergeBlocker, runModel } from './model';
 import type { Attributes, Manifest, ModelData, Params, Pin } from './types';
 
 export interface InitMessage {
@@ -49,7 +49,30 @@ export interface SeatDistanceMessage {
   uat: number;
 }
 
-export type Incoming = InitMessage | ComputeMessage | ExplainMessage | SeatDistanceMessage;
+/**
+ * Ask which UATs could have been centres, and what became of each.
+ *
+ * On demand for the same reason as the two above: classifying who a county passed over needs
+ * a Dijkstra per county that promoted, which put the recompute over its 150 ms budget when
+ * it rode along with every result.
+ */
+export interface CandidacyMessage {
+  type: 'candidacy';
+  params: Params;
+}
+
+export type Incoming =
+  | InitMessage
+  | ComputeMessage
+  | ExplainMessage
+  | SeatDistanceMessage
+  | CandidacyMessage;
+
+export interface CandidacyResultMessage {
+  type: 'candidacy-result';
+  /** One `CANDIDACY` code per UAT. */
+  candidacyOf: Uint8Array;
+}
 
 export interface SeatDistanceResultMessage {
   type: 'seat-distances';
@@ -125,7 +148,8 @@ export type Outgoing =
   | ResultMessage
   | ErrorMessage
   | ExplainResultMessage
-  | SeatDistanceResultMessage;
+  | SeatDistanceResultMessage
+  | CandidacyResultMessage;
 
 // `self` in a module worker is a DedicatedWorkerGlobalScope, whose postMessage takes a
 // transfer list. The DOM lib types it as Window, which has a different signature.
@@ -218,6 +242,15 @@ self.onmessage = async (event: MessageEvent<Incoming>) => {
         uat,
         seats: rows.slice(0, 5),
       } satisfies SeatDistanceResultMessage);
+      return;
+    }
+
+    if (message.type === 'candidacy') {
+      if (!data) return;
+      const candidacyOf = candidacyReport(data, message.params);
+      self.postMessage({ type: 'candidacy-result', candidacyOf } satisfies CandidacyResultMessage, [
+        candidacyOf.buffer,
+      ]);
       return;
     }
 

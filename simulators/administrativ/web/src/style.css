@@ -830,6 +830,22 @@ button {
   padding-right: 26px;
 }
 
+/* The candidate list is behind a disclosure because opening it is what triggers the work.
+   Its heading has to sit beside the marker rather than below it: an h4 is block-level, so
+   inside a summary it pushes itself onto its own line and leaves the triangle stranded. */
+#candidates > details > summary h4 {
+  display: inline;
+  margin: 0;
+}
+
+#candidates > details > summary {
+  cursor: pointer;
+}
+
+#candidates .audit-list li {
+  padding: 2px 0;
+}
+
 .budget-row {
   margin: 0 0 10px;
   font-size: 12px;

@@ -178,6 +178,45 @@ export interface ModelData {
 }
 
 /**
+ * How each UAT fared as a candidate to be a centre.
+ *
+ * The seed selection already works all of this out and then throws it away, keeping only the
+ * winners in `tierOf`. Recording it costs nothing and is the difference between a map that
+ * states its choice and a map that can be argued with: the interesting question is not which
+ * towns became centres but which ones could have and did not, and why.
+ *
+ * Nothing here feeds back into the assignment. It is an observation of the run, so the parity
+ * fixtures are unaffected by its presence.
+ */
+export const CANDIDACY = {
+  /** Not a candidate under any rule: below the threshold and not a town. */
+  NONE: 0,
+  /** A county capital, or Bucharest. Automatic, and cannot be refused. */
+  CAPITAL: 1,
+  /** Population at or above the threshold. Automatic. */
+  THRESHOLD: 2,
+  /** Promoted to fill a county that came up short of its minimum. */
+  PROMOTED: 3,
+  /** Was a centre, then stood down inside a capital's reach. */
+  STOOD_DOWN: 4,
+  /** In its county's promotion pool, but the county never needed it. */
+  ELIGIBLE_UNUSED: 5,
+  /** In the pool and passed over: too close to a centre the county already had. */
+  REFUSED_SEPARATION: 6,
+  /**
+   * Barred from the pool: inside a capital's own ring.
+   *
+   * The strongest of the promotion rules and the least visible, because it excludes a town
+   * before any of the others are consulted. Cornetu and Ganeasa sit inside Bucharest's ring
+   * and can never be promoted however short Ilfov is; without this state they were reported
+   * as "not a candidate under any rule", which is a different and untrue claim.
+   */
+  IN_CAPITAL_RING: 7,
+} as const;
+
+export type Candidacy = (typeof CANDIDACY)[keyof typeof CANDIDACY];
+
+/**
  * Why each UAT ended up where it did.
  *
  * Recorded by the model as it runs, because that is the only place the information exists:
