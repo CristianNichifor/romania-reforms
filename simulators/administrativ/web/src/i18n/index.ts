@@ -165,6 +165,25 @@ export interface Strings {
   forceRefusedAlready: string;
   forceNote: string;
 
+  refBadge: string;
+  refYours: string;
+  refYoursUnsaved: string;
+  refRestore: string;
+  versionsHeading: string;
+  versionsNone: string;
+  versionsSave: string;
+  versionsNamePrompt: string;
+  versionsLoad: string;
+  versionsDelete: string;
+  versionsExport: string;
+  versionsImport: string;
+  versionsImportFailed: string;
+  versionsImported: string;
+  versionsUnits: string;
+  exportPng: string;
+  exportPngBusy: string;
+  printSheet: string;
+
   budgetLink: string;
   budgetLinkTitle: string;
   panelResize: string;
@@ -350,6 +369,25 @@ const ro: Strings = {
     'Un centru impus ignoră pragul de populație, distanța minimă între centre și fuziunea de ultimă instanță. ' +
     'Nu poate traversa limita de județ și nu poate sta în inelul unei reședințe de județ.',
 
+  refBadge: 'Harta de referință',
+  refYours: 'Versiunea ta',
+  refYoursUnsaved: 'nesalvată',
+  refRestore: 'Înapoi la harta de referință',
+  versionsHeading: 'Versiunile mele',
+  versionsNone: 'Nicio versiune salvată. Modifică harta și salveaz-o cu un nume.',
+  versionsSave: 'Salvează versiunea',
+  versionsNamePrompt: 'Cum se numește această versiune?',
+  versionsLoad: 'Deschide',
+  versionsDelete: 'Șterge',
+  versionsExport: 'Export .json',
+  versionsImport: 'Import .json',
+  versionsImportFailed: 'Fișierul nu este un export de versiuni al acestui simulator.',
+  versionsImported: 'Versiuni importate: {n}',
+  versionsUnits: 'UAT-uri',
+  exportPng: 'Salvează imaginea (PNG)',
+  exportPngBusy: 'Se pregătește…',
+  printSheet: 'Tipărește',
+
   budgetLink: 'Bugetul pe transparenta.eu',
   budgetLinkTitle: 'Execuția bugetară a acestui UAT pe transparenta.eu',
   panelResize: 'Redimensionează panoul',
@@ -534,6 +572,25 @@ const en: Strings = {
   forceNote:
     'A forced centre ignores the population threshold, the minimum spacing between centres and the ' +
     'last-resort merge. It cannot cross a county line, and cannot stand inside a county capital\u2019s ring.',
+
+  refBadge: 'Reference map',
+  refYours: 'Your version',
+  refYoursUnsaved: 'unsaved',
+  refRestore: 'Back to the reference map',
+  versionsHeading: 'My versions',
+  versionsNone: 'Nothing saved yet. Change the map, then save it under a name.',
+  versionsSave: 'Save this version',
+  versionsNamePrompt: 'What should this version be called?',
+  versionsLoad: 'Open',
+  versionsDelete: 'Delete',
+  versionsExport: 'Export .json',
+  versionsImport: 'Import .json',
+  versionsImportFailed: 'That file is not a versions export from this simulator.',
+  versionsImported: 'Imported {n} version(s)',
+  versionsUnits: 'units',
+  exportPng: 'Save image (PNG)',
+  exportPngBusy: 'Preparing\u2026',
+  printSheet: 'Print',
 
   budgetLink: 'Budget on transparenta.eu',
   budgetLinkTitle: "This UAT's budget execution on transparenta.eu",

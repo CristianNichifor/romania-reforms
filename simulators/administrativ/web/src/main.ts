@@ -10,7 +10,20 @@ import './style.css';
 
 import { budgetUrlFor } from './app/links';
 import { createPanel } from './app/panels';
-import { decode as decodeScenario, writeHash, type Scenario } from './app/scenario';
+import { REFERENCE, sameMap } from './app/reference';
+import { decode as decodeScenario, encode as encodeScenario, writeHash, type Scenario } from './app/scenario';
+import {
+  STORAGE_KEY,
+  exportFilename,
+  mergeImported,
+  parseImport,
+  parseVersions,
+  removeVersion,
+  serialiseVersions,
+  toExportFile,
+  upsertVersion,
+  type SavedVersion,
+} from './app/versions';
 import { STRINGS, detectLang, formatMoney, formatNumber, type Lang, type Strings } from './i18n';
 import {
   createMap,
@@ -133,7 +146,16 @@ function el<T extends HTMLElement>(selector: string): T {
 
 async function boot(): Promise<void> {
   const initialLang = detectLang();
-  const scenario: Scenario = decodeScenario(location.hash, initialLang);
+  // A bare URL gets the published map, where there is one. A URL carrying a scenario is the
+  // reader's own and is never overridden — including a link somebody shared with them.
+  const arrivedBare = location.hash.replace(/^#/, '').trim() === '';
+  const scenario: Scenario = decodeScenario(
+    arrivedBare && REFERENCE.published ? REFERENCE.hash : location.hash,
+    initialLang,
+  );
+  const referenceScenario = REFERENCE.published
+    ? decodeScenario(REFERENCE.hash, initialLang)
+    : null;
   let strings = STRINGS[scenario.lang];
 
   let ready: ReadyMessage | null = null;
@@ -219,6 +241,8 @@ async function boot(): Promise<void> {
     renderLayers();
     renderSummary();
     renderDetail();
+    renderBadge();
+    renderVersions();
     renderForced();
     renderPins();
     renderCandidates();
@@ -525,6 +549,191 @@ async function boot(): Promise<void> {
     scenario.pins = scenario.pins.filter((p) => p.uat !== uat);
     if (seat !== null) scenario.pins.push({ uat, seat });
     schedule();
+  };
+
+  // --- the published map, and the reader's own -----------------------------------------
+
+  /** Saved versions, read once and kept in step with storage from here on. */
+  let versions: SavedVersion[] = (() => {
+    try {
+      return parseVersions(window.localStorage.getItem(STORAGE_KEY));
+    } catch {
+      return [];
+    }
+  })();
+
+  const persistVersions = (): void => {
+    try {
+      window.localStorage.setItem(STORAGE_KEY, serialiseVersions(versions));
+    } catch {
+      // Private browsing or a full quota. The list still works for this session; it just
+      // does not survive the tab, which is better than refusing to save at all.
+    }
+  };
+
+  const onReference = (): boolean =>
+    referenceScenario !== null && sameMap(scenario, referenceScenario);
+
+  const renderBadge = (): void => {
+    const badge = el<HTMLElement>('#version-badge');
+    if (!REFERENCE.published) { badge.hidden = true; return; }
+    badge.hidden = false;
+    badge.dataset.state = onReference() ? 'reference' : 'yours';
+    badge.textContent = onReference()
+      ? `${strings.refBadge} · ${REFERENCE.version}${REFERENCE.date ? ` · ${REFERENCE.date}` : ''}`
+      : `${strings.refYours} · ${strings.refYoursUnsaved}`;
+  };
+
+  const loadHash = (hash: string): void => {
+    const next = decodeScenario(hash, scenario.lang);
+    scenario.params = next.params;
+    scenario.pins = next.pins;
+    scenario.forced = next.forced;
+    scenario.mode = next.mode;
+    scenario.selected = next.selected;
+    renderModes();
+    renderSliders();
+    mapHandle.setSelected(scenario.selected);
+    schedule();
+  };
+
+  const renderVersions = (): void => {
+    const box = el<HTMLElement>('#versions');
+    const rows = versions
+      .map(
+        (v) => `<li>
+          <div class="version-row">
+            <button class="link" data-open-version="${encodeURIComponent(v.name)}">${v.name}</button>
+            <span>${
+              v.units === null ? '' : `${formatNumber(v.units, scenario.lang)} ${strings.versionsUnits}`
+            }</span>
+          </div>
+          <div class="version-meta">
+            <span>${v.savedAt.slice(0, 10)}</span>
+            <button data-drop-version="${encodeURIComponent(v.name)}" title="${strings.versionsDelete}">×</button>
+          </div>
+        </li>`,
+      )
+      .join('');
+
+    box.innerHTML = `
+      <h2>${strings.versionsHeading}</h2>
+      ${
+        REFERENCE.published && !onReference()
+          ? `<button class="link" data-restore-reference>${strings.refRestore}</button>`
+          : ''
+      }
+      ${versions.length === 0 ? `<p class="muted">${strings.versionsNone}</p>` : `<ul class="version-list">${rows}</ul>`}
+      <button id="save-version" class="ghost small wide">${strings.versionsSave}</button>
+      <div class="version-actions">
+        <button class="link" id="export-versions">${strings.versionsExport}</button>
+        <button class="link" id="import-versions">${strings.versionsImport}</button>
+      </div>
+      <div class="version-actions">
+        <button class="link" id="export-png">${strings.exportPng}</button>
+        <button class="link" id="print-sheet">${strings.printSheet}</button>
+      </div>`;
+
+    box.querySelector<HTMLButtonElement>('[data-restore-reference]')?.addEventListener('click', () => {
+      loadHash(REFERENCE.hash);
+    });
+
+    box.querySelectorAll<HTMLButtonElement>('[data-open-version]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const name = decodeURIComponent(button.dataset.openVersion!);
+        const found = versions.find((v) => v.name === name);
+        if (found) loadHash(found.hash);
+      });
+    });
+
+    box.querySelectorAll<HTMLButtonElement>('[data-drop-version]').forEach((button) => {
+      button.addEventListener('click', () => {
+        versions = removeVersion(versions, decodeURIComponent(button.dataset.dropVersion!));
+        persistVersions();
+        renderVersions();
+      });
+    });
+
+    el<HTMLButtonElement>('#save-version').addEventListener('click', () => {
+      const name = window.prompt(strings.versionsNamePrompt, '')?.trim();
+      if (!name) return;
+      versions = upsertVersion(versions, {
+        name,
+        savedAt: new Date().toISOString(),
+        hash: encodeScenario(scenario),
+        units: latest?.regions ?? null,
+      });
+      persistVersions();
+      renderVersions();
+    });
+
+    el<HTMLButtonElement>('#export-versions').addEventListener('click', () => {
+      const now = new Date().toISOString();
+      const blob = new Blob([JSON.stringify(toExportFile(versions, now), null, 2)], {
+        type: 'application/json',
+      });
+      download(URL.createObjectURL(blob), exportFilename(now));
+    });
+
+    el<HTMLButtonElement>('#import-versions').addEventListener('click', () => {
+      el<HTMLInputElement>('#versions-file').click();
+    });
+
+    el<HTMLButtonElement>('#export-png').addEventListener('click', () => {
+      void exportPng();
+    });
+
+    el<HTMLButtonElement>('#print-sheet').addEventListener('click', () => window.print());
+  };
+
+  const download = (href: string, filename: string): void => {
+    const link = document.createElement('a');
+    link.href = href;
+    link.download = filename;
+    link.click();
+    // Revoking immediately can beat the download on some browsers; a frame is enough.
+    requestAnimationFrame(() => URL.revokeObjectURL(href));
+  };
+
+  el<HTMLInputElement>('#versions-file').addEventListener('change', async (event) => {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    const imported = parseImport(await file.text());
+    // Reset first, so choosing the same file twice fires a change event both times.
+    input.value = '';
+    if (imported === null) {
+      window.alert(strings.versionsImportFailed);
+      return;
+    }
+    versions = mergeImported(versions, imported);
+    persistVersions();
+    renderVersions();
+    window.alert(strings.versionsImported.replace('{n}', String(imported.length)));
+  });
+
+  /**
+   * The map as a PNG.
+   *
+   * Drawn from MapLibre's own canvas, which is why the map is created with
+   * `preserveDrawingBuffer` — without it the browser is free to discard the buffer after
+   * compositing and the read comes back blank. It costs a little memory on every frame,
+   * which is the price of the export working at all.
+   *
+   * The labels are HTML rather than a MapLibre symbol layer, so they are not on this canvas.
+   * Said plainly in the PR rather than papered over: this exports the map, not the labels.
+   */
+  const exportPng = async (): Promise<void> => {
+    const button = el<HTMLButtonElement>('#export-png');
+    const label = button.textContent;
+    button.textContent = strings.exportPngBusy;
+    try {
+      await new Promise<void>((resolve) => mapHandle.map.once('idle', () => resolve()));
+      const url = mapHandle.map.getCanvas().toDataURL('image/png');
+      download(url, `administrativ-${new Date().toISOString().slice(0, 10)}.png`);
+    } finally {
+      button.textContent = label;
+    }
   };
 
   const setForced = (uat: number, on: boolean): void => {
@@ -1095,6 +1304,8 @@ async function boot(): Promise<void> {
     paint();
     renderSummary();
     renderDetail();
+    renderBadge();
+    renderVersions();
     renderForced();
     renderPins();
     // Stale the instant the parameters change, so it is dropped and re-asked rather than

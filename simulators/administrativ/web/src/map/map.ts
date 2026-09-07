@@ -192,6 +192,15 @@ export async function createMap(container: HTMLElement, dataBase: string): Promi
     // camera, and locking it keeps the map readable as a data display.
     pitchWithRotate: false,
     dragRotate: false,
+    // Required for the PNG export: without it the browser may discard the drawing buffer
+    // after compositing, and reading the canvas returns a blank image. It costs a little
+    // memory on every frame, and the alternative — rebuilding the map on demand — would
+    // throw away the reader's viewport at the moment they asked to photograph it.
+    //
+    // Nested under canvasContextAttributes rather than passed at the top level: MapLibre 6
+    // moved the WebGL context options there, and the top-level spelling is silently ignored
+    // rather than rejected, which would have produced a blank PNG and no clue why.
+    canvasContextAttributes: { preserveDrawingBuffer: true },
   });
 
   // MapLibre reports failures as events rather than exceptions, so without this a broken
