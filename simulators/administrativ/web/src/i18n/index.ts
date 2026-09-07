@@ -150,6 +150,20 @@ export interface Strings {
   candEligibleUnused: string;
   candRefusedSeparation: string;
   candInCapitalRing: string;
+  candForced: string;
+
+  forceHeading: string;
+  forceNone: string;
+  forceMake: string;
+  forceUndo: string;
+  forceRemove: string;
+  forceClearAll: string;
+  forceBadge: string;
+  forceWhy: string;
+  forceRefusedRing: string;
+  forceRefusedBucharest: string;
+  forceRefusedAlready: string;
+  forceNote: string;
 
   budgetLink: string;
   budgetLinkTitle: string;
@@ -319,6 +333,22 @@ const ro: Strings = {
   candEligibleUnused: 'Eligibilă, dar județul nu a avut nevoie de ea',
   candRefusedSeparation: 'Respinsă: prea aproape de un centru existent',
   candInCapitalRing: 'Blocată: în inelul reședinței de județ',
+  candForced: 'Impusă de tine ca centru',
+
+  forceHeading: 'Centre impuse',
+  forceNone: 'Niciun centru impus. Harta este exact ce au produs regulile.',
+  forceMake: 'Fă din aceasta un centru',
+  forceUndo: 'Nu mai impune acest centru',
+  forceRemove: 'Elimină',
+  forceClearAll: 'Renunță la toate',
+  forceBadge: 'impus',
+  forceWhy: 'Această localitate este centru pentru că ai cerut-o tu, nu pentru că regulile ar fi ales-o.',
+  forceRefusedRing: 'refuzată — se află în inelul reședinței de județ',
+  forceRefusedBucharest: 'refuzată — Bucureștiul este un singur centru, nu șase',
+  forceRefusedAlready: 'era deja centru; nu se schimbă nimic',
+  forceNote:
+    'Un centru impus ignoră pragul de populație, distanța minimă între centre și fuziunea de ultimă instanță. ' +
+    'Nu poate traversa limita de județ și nu poate sta în inelul unei reședințe de județ.',
 
   budgetLink: 'Bugetul pe transparenta.eu',
   budgetLinkTitle: 'Execuția bugetară a acestui UAT pe transparenta.eu',
@@ -488,6 +518,22 @@ const en: Strings = {
   candEligibleUnused: 'Eligible, but the county did not need it',
   candRefusedSeparation: 'Passed over: too close to an existing centre',
   candInCapitalRing: 'Barred: inside the county capital\u2019s ring',
+  candForced: 'Forced by you to be a centre',
+
+  forceHeading: 'Forced centres',
+  forceNone: 'Nothing forced. The map is exactly what the rules produced.',
+  forceMake: 'Make this a centre',
+  forceUndo: 'Stop forcing this centre',
+  forceRemove: 'Remove',
+  forceClearAll: 'Clear all',
+  forceBadge: 'forced',
+  forceWhy: 'This locality is a centre because you asked for it, not because the rules chose it.',
+  forceRefusedRing: 'refused \u2014 it sits inside the county capital\u2019s ring',
+  forceRefusedBucharest: 'refused \u2014 Bucharest is one centre, not six',
+  forceRefusedAlready: 'was already a centre; nothing changes',
+  forceNote:
+    'A forced centre ignores the population threshold, the minimum spacing between centres and the ' +
+    'last-resort merge. It cannot cross a county line, and cannot stand inside a county capital\u2019s ring.',
 
   budgetLink: 'Budget on transparenta.eu',
   budgetLinkTitle: "This UAT's budget execution on transparenta.eu",

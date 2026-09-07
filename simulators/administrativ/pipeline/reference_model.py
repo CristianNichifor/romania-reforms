@@ -34,7 +34,7 @@ import heapq
 import math
 import sys
 from collections import defaultdict
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass, field
 
 import geopandas as gpd
@@ -161,6 +161,9 @@ class Result:
     equalised: int = 0
     # Units the cap had stranded, and the unit each was finally merged into.
     last_resort: dict[str, str] = field(default_factory=dict)
+    # Centres the reader insisted on, and those the model refused with the reason.
+    forced_applied: list[str] = field(default_factory=list)
+    forced_rejected: list[tuple[str, str]] = field(default_factory=list)
 
 
 def load_data() -> Data:
@@ -411,8 +414,14 @@ def _eligible(data: Data, params: Params, seed: str, tier: int) -> dict[str, flo
     return admitted
 
 
-def select_seeds(data: Data, params: Params, result: Result) -> None:
-    """Brief §2 step 1: tiers 0 and 1, then greedy max-coverage promotion per county."""
+def select_seeds(data: Data, params: Params, result: Result, forced: Sequence[str] = ()) -> None:
+    """Brief §2 step 1: tiers 0 and 1, then greedy max-coverage promotion per county.
+
+    `forced` names UATs the reader insists should be centres. They waive the population
+    threshold and the separation floor — the two rules that are matters of judgement — and
+    none of the rules that are matters of geography: a forced centre still cannot cross a
+    county line, and still cannot stand inside a county capital's ring.
+    """
     # Bucharest is one centre, not six. Its sectors are not candidates and never compete:
     # six parallel administrations over one continuous city is the duplication this whole
     # exercise is about, so they are merged rather than modelled as rivals. The lowest
@@ -430,6 +439,26 @@ def select_seeds(data: Data, params: Params, result: Result) -> None:
         elif data.population[siruta] >= params.x:
             result.seeds[siruta] = TIER_POPULATION
 
+    # The reader's own centres, before anything is stood down.
+    #
+    # Placed here so every rule that follows sees them: the stand-down, the county minimum and
+    # growth all treat them exactly as they treat a promoted town. TIER_PROMOTED rather than a
+    # tier of their own because that is what they are — a centre the county would have promoted
+    # had the rules reached them — and a fifth tier would reorder every contest in the model to
+    # say nothing new.
+    forced_set: set[str] = set()
+    for siruta in sorted(set(forced)):
+        if siruta not in data.population:
+            continue
+        if data.county[siruta] == BUCHAREST_COUNTY_CODE:
+            result.forced_rejected.append((siruta, "bucharest"))
+            continue
+        if siruta in result.seeds:
+            result.forced_rejected.append((siruta, "already-a-centre"))
+            continue
+        result.seeds[siruta] = TIER_PROMOTED
+        forced_set.add(siruta)
+
     # A centre bordering its own county capital is stood down, and the capital takes it.
     #
     # This is what builds a metropolitan area rather than a ring of small rivals: Cumpana
@@ -438,7 +467,7 @@ def select_seeds(data: Data, params: Params, result: Result) -> None:
     # disappear with it — the candidate is removed from the pool before promotion runs, so
     # the county fills its quota from a town further out, which is where a second centre is
     # actually useful.
-    absorbed_into_capital = _capital_shadow(data, params, result)
+    absorbed_into_capital = _capital_shadow(data, params, result) - forced_set
     for siruta in absorbed_into_capital:
         result.seeds.pop(siruta, None)
     result.held = dict.fromkeys(sorted(absorbed_into_capital), False)
@@ -465,6 +494,21 @@ def select_seeds(data: Data, params: Params, result: Result) -> None:
         if tier in (TIER_NATIONAL_CAPITAL, TIER_COUNTY_CAPITAL)
         for member in capital_ring(data, params, capital)
     }
+
+    # The one rule a forced centre does not get to break.
+    #
+    # A capital holds its ring by right, and a second town hall inside it describes the same
+    # built-up area twice — the duplication this exercise exists to remove. The reader is
+    # overriding the model's judgement about thresholds and spacing, not its account of where
+    # a city is. Refused out loud, with the reason, rather than silently dropped.
+    for siruta in sorted(forced_set):
+        if siruta in capital_rings:
+            del result.seeds[siruta]
+            forced_set.discard(siruta)
+            result.forced_rejected.append((siruta, "capital-ring"))
+        else:
+            result.forced_applied.append(siruta)
+    result.forced_rejected.sort()
 
     for county_code in sorted(data.by_county):
         # Bucharest is one city, not a county needing a spread of centres. Promotion here
@@ -1581,6 +1625,8 @@ def absorb_stranded(data: Data, params: Params, result: Result) -> None:
             unit,
         )
 
+    forced_seats = set(result.forced_applied)
+
     distance_cache: dict[str, dict[str, float]] = {}
 
     def reach_from(seat: str) -> dict[str, float]:
@@ -1600,6 +1646,13 @@ def absorb_stranded(data: Data, params: Params, result: Result) -> None:
                 continue
             # Only leftovers, not every small unit the cap has stranded.
             if region_population(absorber) >= params.p_stranded:
+                continue
+            # A centre the reader forced is not a leftover. This pass exists to dissolve
+            # units the ordinary rules could not place, and forcing a centre is the reader
+            # saying that this one should exist anyway — dissolving it here would make the
+            # override do nothing in precisely the cases anyone would use it. Its members
+            # still move under every other rule; the unit itself stays.
+            if absorber in forced_seats:
                 continue
 
             county = data.county[absorber]
@@ -2280,10 +2333,10 @@ def summarise(data: Data, params: Params, result: Result) -> dict:
     }
 
 
-def run(data: Data, params: Params) -> tuple[Result, dict]:
+def run(data: Data, params: Params, forced: Sequence[str] = ()) -> tuple[Result, dict]:
     params = params.snapped()
     result = Result()
-    select_seeds(data, params, result)
+    select_seeds(data, params, result, forced)
     accrete(data, params, result)
     # Before the cluster step: a commune nobody reached should join a neighbouring unit, not
     # start a unit of its own with the other communes nobody reached.

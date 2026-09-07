@@ -212,6 +212,8 @@ export const CANDIDACY = {
    * as "not a candidate under any rule", which is a different and untrue claim.
    */
   IN_CAPITAL_RING: 7,
+  /** Made a centre by the reader, over the rules that would not have chosen it. */
+  FORCED: 8,
 } as const;
 
 export type Candidacy = (typeof CANDIDACY)[keyof typeof CANDIDACY];
@@ -251,6 +253,33 @@ export interface Pin {
   seat: number;
 }
 
+/**
+ * A UAT the reader insists should be a centre.
+ *
+ * **Not a pin.** A pin is applied after the model has run and moves one commune, which is why
+ * pins leave the parity fixtures meaningful. Forcing a centre changes the model's *input*:
+ * the unit grows from a place the rules would not have chosen, and every neighbouring unit
+ * grows differently as a result. It therefore exists in the Python reference too, and the
+ * fixtures cover it — a forced run in one implementation must be the same map as a forced run
+ * in the other.
+ *
+ * It waives the two rules that are matters of judgement — the population threshold and the
+ * separation floor — and none of the rules that are matters of geography. A forced centre
+ * still cannot cross a county line, and still cannot stand inside a county capital's ring.
+ */
+export type ForcedRefusal =
+  /** Inside a county capital's ring, which nothing may override. */
+  | 'capital-ring'
+  /** A Bucharest sector. The city is one centre by construction, not six. */
+  | 'bucharest'
+  /** Already a centre under the rules, so forcing it changes nothing. */
+  | 'already-a-centre';
+
+export interface ForcedRejection {
+  uat: number;
+  why: ForcedRefusal;
+}
+
 export interface ModelResult {
   /** One `REASON` code per UAT. */
   reasonOf: Uint8Array;
@@ -269,6 +298,10 @@ export interface ModelResult {
   savingsAdminRon: number;
   savingsOperatingRon: number;
   underSeededCounties: string[];
+  /** Forced centres the model accepted, ascending. */
+  forcedApplied: number[];
+  /** Forced centres it refused, with the rule that refused them. */
+  forcedRejected: ForcedRejection[];
   /** Pins that were applied, in the order given. */
   pinsApplied: Pin[];
   /** Pins refused, with why — a stale target, or a county line the model forbids. */

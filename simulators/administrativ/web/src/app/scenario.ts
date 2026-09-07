@@ -16,6 +16,13 @@ export interface Scenario {
   selected: number | null;
   /** Manual overrides, in the order they were made. */
   pins: Pin[];
+  /**
+   * UATs the reader insists should be centres.
+   *
+   * Kept beside the pins in the hash but not beside them in the model: a pin moves one
+   * commune after the rules have run, a forced centre changes what the rules are given.
+   */
+  forced: number[];
 }
 
 const KEYS: Record<keyof Params, string> = {
@@ -51,6 +58,11 @@ export function encode(scenario: Scenario): string {
   if (scenario.pins.length > 0) {
     q.set('pin', scenario.pins.map((p) => `${p.uat}.${p.seat}`).join(','));
   }
+  // Ascending and de-duplicated, so the same set of forced centres always produces the same
+  // link whatever order the reader clicked them in.
+  if (scenario.forced.length > 0) {
+    q.set('force', [...new Set(scenario.forced)].sort((a, b) => a - b).join(','));
+  }
   return q.toString();
 }
 
@@ -74,6 +86,19 @@ function decodePins(raw: string | null): Pin[] {
     pins.push({ uat, seat });
   }
   return pins;
+}
+
+/** Anything malformed is dropped rather than throwing, exactly as pins are. */
+function decodeForced(raw: string | null): number[] {
+  if (!raw) return [];
+  const out = new Set<number>();
+  for (const part of raw.split(',')) {
+    if (part === '') continue;
+    const index = Number(part);
+    if (!Number.isInteger(index) || index < 0) continue;
+    out.add(index);
+  }
+  return [...out].sort((a, b) => a - b);
 }
 
 function num(value: string | null, fallback: number): number {
@@ -106,6 +131,7 @@ export function decode(hash: string, lang: Lang): Scenario {
     mode: q.get('mode') === 'cost' ? 'cost' : 'regions',
     selected: sel !== null && Number.isFinite(sel) ? sel : null,
     pins: decodePins(q.get('pin')),
+    forced: decodeForced(q.get('force')),
   };
 }
 

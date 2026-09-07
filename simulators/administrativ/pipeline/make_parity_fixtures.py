@@ -90,6 +90,28 @@ CASES: tuple[Params, ...] = (
     Params(x=5_000, p_target=25_000, n_min=10),
 )
 
+# Forced centres: the reader overriding selection, which changes the model's input rather
+# than its output and so has to agree across both implementations like everything else.
+#
+# Chosen to exercise each branch rather than to be numerous. Sarichioi is the case the road
+# work was written for — 5,226 people on the Razim lagoon, below any threshold, and its unit
+# survives only because forcing exempts it from the last-resort merge. Cornetu sits inside
+# Bucharest's ring and must be refused however hard it is forced. A county capital is already
+# a centre, and a Bucharest sector is not a candidate at all.
+FORCED_CASES: tuple[tuple[Params, tuple[str, ...]], ...] = (
+    (Params(), ("161179",)),
+    (Params(), ("161179", "160644")),
+    (Params(p_stranded=0), ("161179",)),
+    (Params(p_target=0), ("161179",)),
+    # Refused: inside a capital's ring, already a centre, a Bucharest sector.
+    (Params(), ("102213",)),
+    (Params(), ("159614",)),
+    (Params(), ("179141",)),
+    # Refusals and acceptances together, and against non-default parameters.
+    (Params(), ("161179", "102213", "159614", "179141")),
+    (Params(n_min=10, x=5_000), ("161179",)),
+)
+
 
 def canonical_assignment(order: list[str], region_of: dict[str, str]) -> list[int]:
     """Assignment as region-absorber indices, in canonical UAT order.
@@ -108,13 +130,18 @@ def main(argv: list[str] | None = None) -> int:
     order = sorted(data.population)
 
     cases = []
-    for params in CASES:
-        result, summary = run(data, params)
+    for params, forced in [(p, ()) for p in CASES] + list(FORCED_CASES):
+        result, summary = run(data, params, forced)
         assignment = canonical_assignment(order, result.region_of)
         digest = hashlib.sha256(",".join(map(str, assignment)).encode()).hexdigest()
         cases.append(
             {
                 "params": asdict(params.snapped()),
+                # SIRUTA rather than index: the fixture is written by the implementation
+                # that speaks SIRUTA, and the browser maps them through uatOrder.
+                "forced": list(forced),
+                "forcedApplied": list(result.forced_applied),
+                "forcedRejected": [list(row) for row in result.forced_rejected],
                 "regions": summary["regions"],
                 "seeds": summary["seeds"],
                 "orphanRegions": summary["orphan_regions"],
@@ -127,7 +154,8 @@ def main(argv: list[str] | None = None) -> int:
                 "assignmentSha256": digest,
             }
         )
-        print(f"  {digest[:12]}  regions={summary['regions']:5d}  {params}")
+        label = f" forced={list(forced)}" if forced else ""
+        print(f"  {digest[:12]}  regions={summary['regions']:5d}  {params}{label}")
 
     default_result, _ = run(data, Params())
     payload = {
