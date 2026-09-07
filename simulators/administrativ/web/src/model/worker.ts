@@ -76,18 +76,37 @@ export interface ChainMessage {
   uat: number;
 }
 
+/**
+ * Every route inside one unit, as a set of legs.
+ *
+ * The union rather than a list per commune: several members share the leg nearest the centre,
+ * and drawing it once is both fewer lines and an honest picture — that road carries the whole
+ * unit, not one commune's journey along it.
+ */
+export interface UnitChainsMessage {
+  type: 'unitChains';
+  seat: number;
+}
+
 export type Incoming =
   | InitMessage
   | ComputeMessage
   | ExplainMessage
   | SeatDistanceMessage
   | CandidacyMessage
-  | ChainMessage;
+  | ChainMessage
+  | UnitChainsMessage;
 
 export interface ChainResultMessage {
   type: 'chain-result';
   uat: number;
   /** Centre-ward, starting at the commune asked about. Empty where none was measured. */
+  legs: { from: number; to: number; metres: number }[];
+}
+
+export interface UnitChainsResultMessage {
+  type: 'unit-chains-result';
+  seat: number;
   legs: { from: number; to: number; metres: number }[];
 }
 
@@ -177,7 +196,8 @@ export type Outgoing =
   | ExplainResultMessage
   | SeatDistanceResultMessage
   | CandidacyResultMessage
-  | ChainResultMessage;
+  | ChainResultMessage
+  | UnitChainsResultMessage;
 
 // `self` in a module worker is a DedicatedWorkerGlobalScope, whose postMessage takes a
 // transfer list. The DOM lib types it as Window, which has a different signature.
@@ -291,6 +311,38 @@ self.onmessage = async (event: MessageEvent<Incoming>) => {
         node = parent;
       }
       self.postMessage({ type: 'chain-result', uat: message.uat, legs } satisfies ChainResultMessage);
+      return;
+    }
+
+    if (message.type === 'unitChains') {
+      if (!data || !lastParentOf || !lastRegionOf) return;
+      const seen = new Set<string>();
+      const legs: UnitChainsResultMessage['legs'] = [];
+      for (let i = 0; i < data.uatCount; i += 1) {
+        if (lastRegionOf[i] !== message.seat) continue;
+        let node = i;
+        const walked = new Set<number>([i]);
+        while (lastParentOf[node]! >= 0) {
+          const parent = lastParentOf[node]!;
+          if (walked.has(parent)) break;
+          walked.add(parent);
+          const key = node < parent ? `${node}:${parent}` : `${parent}:${node}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            let metres = Infinity;
+            for (let e = data.neighbourStart[node]!; e < data.neighbourStart[node + 1]!; e += 1) {
+              if (data.neighbours[e] === parent) { metres = data.neighbourRoadM[e]!; break; }
+            }
+            legs.push({ from: node, to: parent, metres });
+          }
+          node = parent;
+        }
+      }
+      self.postMessage({
+        type: 'unit-chains-result',
+        seat: message.seat,
+        legs,
+      } satisfies UnitChainsResultMessage);
       return;
     }
 

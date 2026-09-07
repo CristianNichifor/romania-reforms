@@ -98,6 +98,18 @@ export interface Strings {
   chainTotal: string;
   chainLoading: string;
   chainSchematic: string;
+
+  hoverHeading: string;
+  hoverBoundsHeading: string;
+  hoverRoadsHeading: string;
+  hoverNone: string;
+  hoverCounty: string;
+  hoverRegion: string;
+  hoverUnit: string;
+  hoverAll: string;
+  hoverRoadsChain: string;
+  hoverRoadsUnit: string;
+  hoverHelp: string;
   selectPrompt: string;
   region: string;
   centre: string;
@@ -313,6 +325,20 @@ const ro: Strings = {
   chainLoading: 'Se descarcă geometria drumurilor…',
   chainSchematic:
     'Segmentele punctate sunt schematice: distanța este reală, linia nu este drumul.',
+
+  hoverHeading: 'La trecerea cu mouse-ul',
+  hoverBoundsHeading: 'Evidențiază',
+  hoverRoadsHeading: 'Drumuri',
+  hoverNone: 'Nimic',
+  hoverCounty: 'Județul',
+  hoverRegion: 'Regiunea',
+  hoverUnit: 'Unitatea rezultată',
+  hoverAll: 'Toate',
+  hoverRoadsChain: 'Doar comuna',
+  hoverRoadsUnit: 'Toată unitatea',
+  hoverHelp:
+    'Ce se evidențiază când treci cu mouse-ul peste hartă. „Toată unitatea" desenează drumurile ' +
+    'pe care fiecare comună a fost absorbită către centrul ei, nu doar cea de sub cursor.',
   selectPrompt: 'Selectează o unitate pe hartă.',
   region: 'Unitate rezultată',
   centre: 'Centru',
@@ -536,6 +562,20 @@ const en: Strings = {
   chainLoading: 'Downloading road geometry\u2026',
   chainSchematic:
     'Dashed legs are schematic: the distance is real, the line is not the road.',
+
+  hoverHeading: 'On hover',
+  hoverBoundsHeading: 'Highlight',
+  hoverRoadsHeading: 'Roads',
+  hoverNone: 'Nothing',
+  hoverCounty: 'County',
+  hoverRegion: 'Region',
+  hoverUnit: 'Resulting unit',
+  hoverAll: 'All',
+  hoverRoadsChain: 'This commune',
+  hoverRoadsUnit: 'Whole unit',
+  hoverHelp:
+    'What is emphasised as the pointer crosses the map. \u201cWhole unit\u201d draws the road each ' +
+    'commune was absorbed along towards its centre, not only the one under the cursor.',
   selectPrompt: 'Select a unit on the map.',
   region: 'Resulting unit',
   centre: 'Centre',
