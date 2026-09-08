@@ -18,7 +18,10 @@ First slice:
 - done: import Transparenta UAT crosswalk
 - done: write a mismatch report for duplicate, missing and ambiguous CUIs
 - done: import official UAT population from the committed POP107D county extracts
-- next: move simulator-local SIRUTA assumptions to this registry
+- done: point the `impozit-teren` land-value map builder at the shared registry for
+  SIRUTA, county and sector-parent joins
+- next: move remaining simulator-local SIRUTA assumptions to this registry as each
+  shared dataset adopts it
 
 ## 2. Local finance mart
 
