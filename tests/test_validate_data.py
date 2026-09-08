@@ -43,6 +43,14 @@ def simulator(tmp_path: Path) -> Path:
     (tmp_path / "scripts" / "validate_data.py").write_text(
         GATE.read_text(encoding="utf-8"), encoding="utf-8"
     )
+    (tmp_path / "schema").mkdir()
+    (tmp_path / "schema" / "data-catalog.schema.json").write_text(
+        (ROOT / "schema" / "data-catalog.schema.json").read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
+    (tmp_path / "data-catalog.json").write_text(
+        (ROOT / "data-catalog.json").read_text(encoding="utf-8"), encoding="utf-8"
+    )
     # The shared vocabulary is resolved by bare filename from any simulator, so it has to be
     # where the gate expects it even when nothing under test references it.
     shared = tmp_path / "packages" / "provenance" / "schema"
@@ -104,3 +112,17 @@ def test_a_document_that_breaks_its_schema_fails_with_the_field_named(
     result = _run(tmp_path)
     assert result.returncode == 1
     assert "invalid.json" in result.stdout and "id" in result.stdout
+
+
+def test_a_catalog_that_breaks_its_schema_is_named(simulator: Path, tmp_path: Path):
+    (simulator / "data" / "bun.json").write_text(
+        json.dumps({"$schema": "../schema/proba.schema.json", "id": "bun"}), encoding="utf-8"
+    )
+    catalog = json.loads((tmp_path / "data-catalog.json").read_text(encoding="utf-8"))
+    del catalog["datasets"][0]["upstreamSources"][0]["url"]
+    (tmp_path / "data-catalog.json").write_text(json.dumps(catalog), encoding="utf-8")
+
+    result = _run(tmp_path)
+
+    assert result.returncode == 1
+    assert "data-catalog.json" in result.stdout and "url" in result.stdout

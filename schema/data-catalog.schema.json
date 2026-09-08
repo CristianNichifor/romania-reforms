@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/data-catalog.schema.json",
+  "title": "Shared data catalog",
+  "description": "Machine-readable backlog for datasets that should become shared inputs rather than simulator-local one-offs.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "updated", "principles", "datasets"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "const": "romania-reforms-shared-data-catalog" },
+    "updated": { "type": "string", "format": "date" },
+    "principles": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "datasets": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/dataset" }
+    }
+  },
+  "$defs": {
+    "dataset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "status",
+        "priority",
+        "owner",
+        "why",
+        "consumers",
+        "keys",
+        "upstreamSources",
+        "minimumFields",
+        "provenanceRequirements",
+        "validationPlan",
+        "storagePolicy",
+        "nextSlice"
+      ],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+        "title": { "type": "string", "minLength": 1 },
+        "status": { "enum": ["candidate", "planned", "active", "adopted", "deferred"] },
+        "priority": { "enum": ["p0", "p1", "p2"] },
+        "owner": { "type": "string", "minLength": 1 },
+        "why": { "type": "string", "minLength": 1 },
+        "consumers": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "keys": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "upstreamSources": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/source" }
+        },
+        "minimumFields": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "provenanceRequirements": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "validationPlan": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "storagePolicy": { "type": "string", "minLength": 1 },
+        "nextSlice": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["scope", "deliverable", "doneWhen"],
+          "properties": {
+            "scope": { "type": "string", "minLength": 1 },
+            "deliverable": { "type": "string", "minLength": 1 },
+            "doneWhen": { "type": "string", "minLength": 1 }
+          }
+        },
+        "notes": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "publisher", "url", "license", "role"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+        "name": { "type": "string", "minLength": 1 },
+        "publisher": { "type": "string", "minLength": 1 },
+        "url": { "type": "string", "format": "uri" },
+        "license": { "type": "string", "minLength": 1 },
+        "role": { "enum": ["source-of-truth", "crosswalk", "reference-implementation", "comparison", "fallback"] },
+        "notes": { "type": "string" }
+      }
+    }
+  }
+}

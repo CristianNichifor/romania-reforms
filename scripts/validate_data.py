@@ -16,6 +16,8 @@ from referencing import Registry, Resource
 
 ROOT = Path(__file__).resolve().parent.parent
 SHARED = ROOT / "packages/provenance/schema"
+DATA_CATALOG = ROOT / "data-catalog.json"
+DATA_CATALOG_SCHEMA = ROOT / "schema/data-catalog.schema.json"
 
 
 def registry() -> Registry:
@@ -30,6 +32,17 @@ def registry() -> Registry:
 def main() -> int:
     errors: list[str] = []
     checked = 0
+
+    catalog = json.loads(DATA_CATALOG.read_text(encoding="utf-8"))
+    catalog_schema = json.loads(DATA_CATALOG_SCHEMA.read_text(encoding="utf-8"))
+    catalog_validator = Draft202012Validator(catalog_schema, registry=registry())
+    catalog_errors = sorted(catalog_validator.iter_errors(catalog), key=lambda e: list(e.path))
+    checked += 1
+    if catalog_errors:
+        for error in catalog_errors[:10]:
+            errors.append(f"{DATA_CATALOG.name}: {'/'.join(map(str, error.path))}: {error.message}")
+    else:
+        print(f"  schema ok: {DATA_CATALOG.name} ({len(catalog['datasets'])} datasets)")
 
     for data_file in sorted(ROOT.glob("simulators/*/data/*.json")):
         simulator = data_file.parents[1]
