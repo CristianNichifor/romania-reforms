@@ -51,6 +51,18 @@
       "needs": "simulators/administrativ/data/raw/romania-latest.osm.pbf (313 MB, not committed) plus data/processed/road_distance.parquet",
       "what": "The routed geometry behind each adjacency edge's distance, one GeoJSON per county — 7 874 of 7 932 intra-county edges, the remaining 58 being water borders no road crosses. Built from the same OSM extract as road_distance.parquet, so every reconstructed route reproduces the distance the model measured. Sharded so hovering a commune fetches its county and nothing else. The first asset here that is a directory, hence extractTo.",
       "withoutIt": "The administrative map still draws the route a commune was absorbed along, but every leg is schematic: a dashed straight line between seats, carrying the real distance and captioned to say the line is not the road. Nothing fails."
+    },
+    {
+      "id": "salarizare-ro-draft-2026-08-20",
+      "tag": "data-v1",
+      "asset": "salarizare-ro-draft-2026-08-20.json",
+      "destination": "simulators/salarizare/data/regimes/ro-draft-2026-08-20.json",
+      "producedBy": "simulators/salarizare/scripts/import_coeficienti.py adapted to sources/Proiect-COEFICIENTI-1-8-20-august-2026.xlsx and data/frames/ro-draft-2026-08-20.frame.json",
+      "needs": "simulators/salarizare/sources/Proiect-COEFICIENTI-1-8-20-august-2026.xlsx plus data/frames/ro-draft-2026-08-20.frame.json",
+      "what": "The generated August 20, 2026 Romanian public pay draft regime: reference value 4,000 lei and 1,061 positions.",
+      "withoutIt": "The salary simulator cannot load the August draft; CI and deploy fetch it before validation and build.",
+      "bytes": 2316473,
+      "sha256": "6109ab45d55d6076db131a2ca446ee08198ad0fecb46580d6032a4b8b7d88b1c"
     }
   ]
 }

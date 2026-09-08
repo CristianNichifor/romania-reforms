@@ -14,6 +14,8 @@ jobs:
       - uses: astral-sh/setup-uv@v5
       - name: Repository size
         run: uv run python scripts/check_repo_size.py
+      - name: Fetch release data
+        run: uv run python scripts/fetch_release_data.py
       - name: Validate every simulator's data against its schema
         run: uv run --with referencing python scripts/validate_data.py
       - name: Pay grades and costs are reproducible
@@ -49,6 +51,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Fetch release data
+        run: uv run python ../../scripts/fetch_release_data.py
       - name: Validate every regime, crosswalk and fiscal series
         run: uv run --with jsonschema python scripts/validate_data.py
       - name: Importer tests
