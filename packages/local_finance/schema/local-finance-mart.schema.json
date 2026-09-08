@@ -1,0 +1,252 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/packages/local_finance/schema/local-finance-mart.schema.json",
+  "title": "Shared local finance mart",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "id",
+    "title",
+    "publisher",
+    "periodStart",
+    "periodEnd",
+    "currency",
+    "retrievedDate",
+    "provenance",
+    "sourceHashes",
+    "registry",
+    "assumptions",
+    "sample",
+    "summary",
+    "records",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "type": "string", "pattern": "^local-finance-mart-sample-[0-9]{4}-[0-9]{4}$" },
+    "title": { "type": "string", "minLength": 1 },
+    "publisher": { "const": "transparenta.eu" },
+    "periodStart": { "type": "string", "pattern": "^[0-9]{4}$" },
+    "periodEnd": { "type": "string", "pattern": "^[0-9]{4}$" },
+    "currency": { "const": "RON" },
+    "retrievedDate": { "type": "string", "format": "date" },
+    "provenance": {
+      "$ref": "https://cristiannichifor.github.io/romania-reforms/schema/provenance.schema.json#/$defs/provenance"
+    },
+    "sourceHashes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["transparentaResponsesSha256", "uatRegistrySha256"],
+      "properties": {
+        "transparentaResponsesSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "uatRegistrySha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "registry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "period"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^uat-registry-[0-9]{4}$" },
+        "period": { "type": "string", "pattern": "^[0-9]{4}$" }
+      }
+    },
+    "assumptions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reportType",
+        "transferPrefixes",
+        "personnelEconomicPrefixes",
+        "capitalEconomicPrefixes",
+        "developmentExpenseType",
+        "suspectMultipleOfMedian"
+      ],
+      "properties": {
+        "reportType": { "const": "PRINCIPAL_AGGREGATED" },
+        "transferPrefixes": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "pattern": "^[0-9]{2}\\.$" },
+          "uniqueItems": true
+        },
+        "personnelEconomicPrefixes": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "pattern": "^[0-9]{2}$" },
+          "uniqueItems": true
+        },
+        "capitalEconomicPrefixes": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "pattern": "^[0-9]{2}$" },
+          "uniqueItems": true
+        },
+        "developmentExpenseType": { "const": "dezvoltare" },
+        "suspectMultipleOfMedian": { "type": "number", "exclusiveMinimum": 1 }
+      }
+    },
+    "sample": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/sampleRow" }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "uats",
+        "years",
+        "records",
+        "registryMatchedUats",
+        "rowsWithPopulation",
+        "revenueRon",
+        "ownRevenueRon",
+        "spendingRon",
+        "personnelSpendingRon",
+        "capitalSpendingRon",
+        "developmentSpendingRon",
+        "byYear"
+      ],
+      "properties": {
+        "uats": { "type": "integer", "minimum": 1 },
+        "years": { "type": "integer", "minimum": 1 },
+        "records": { "type": "integer", "minimum": 1 },
+        "registryMatchedUats": { "type": "integer", "minimum": 0 },
+        "rowsWithPopulation": { "type": "integer", "minimum": 0 },
+        "revenueRon": { "type": "number", "minimum": 0 },
+        "ownRevenueRon": { "type": "number", "minimum": 0 },
+        "spendingRon": { "type": "number", "minimum": 0 },
+        "personnelSpendingRon": { "type": "number", "minimum": 0 },
+        "capitalSpendingRon": { "type": "number", "minimum": 0 },
+        "developmentSpendingRon": { "type": "number", "minimum": 0 },
+        "byYear": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/yearSummary" }
+        }
+      }
+    },
+    "records": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/financeRecord" }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "https://cristiannichifor.github.io/romania-reforms/schema/provenance.schema.json#/$defs/limitation"
+      }
+    }
+  },
+  "$defs": {
+    "sampleRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["siruta", "role"],
+      "properties": {
+        "siruta": { "type": "string", "pattern": "^[0-9]+$" },
+        "role": {
+          "enum": ["county-seat", "bucharest-sector", "rural-commune", "town"]
+        }
+      }
+    },
+    "yearSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "year",
+        "records",
+        "revenueRon",
+        "ownRevenueRon",
+        "spendingRon",
+        "personnelSpendingRon",
+        "capitalSpendingRon",
+        "developmentSpendingRon"
+      ],
+      "properties": {
+        "year": { "type": "integer", "minimum": 2000 },
+        "records": { "type": "integer", "minimum": 1 },
+        "revenueRon": { "type": "number", "minimum": 0 },
+        "ownRevenueRon": { "type": "number", "minimum": 0 },
+        "spendingRon": { "type": "number", "minimum": 0 },
+        "personnelSpendingRon": { "type": "number", "minimum": 0 },
+        "capitalSpendingRon": { "type": "number", "minimum": 0 },
+        "developmentSpendingRon": { "type": "number", "minimum": 0 }
+      }
+    },
+    "financeRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "year",
+        "siruta",
+        "cui",
+        "level",
+        "sampleRole",
+        "name",
+        "transparentaName",
+        "countyCode",
+        "population",
+        "populationSource",
+        "revenueRon",
+        "ownRevenueRon",
+        "transferRevenueRon",
+        "spendingRon",
+        "personnelSpendingRon",
+        "capitalSpendingRon",
+        "developmentSpendingRon",
+        "arrearsRon",
+        "ownRevenueShare",
+        "personnelSpendingShare",
+        "capitalSpendingShare",
+        "developmentSpendingShare",
+        "revenuePerInhabitantRon",
+        "ownRevenuePerInhabitantRon",
+        "spendingPerInhabitantRon",
+        "sourceLineCounts"
+      ],
+      "properties": {
+        "year": { "type": "integer", "minimum": 2000 },
+        "siruta": { "type": "string", "pattern": "^[0-9]+$" },
+        "cui": { "type": ["string", "null"], "pattern": "^[0-9]+$" },
+        "level": { "enum": ["municipality", "town", "commune", "sector", "county", "uat"] },
+        "sampleRole": {
+          "enum": ["county-seat", "bucharest-sector", "rural-commune", "town", "full-import"]
+        },
+        "name": { "type": "string", "minLength": 1 },
+        "transparentaName": { "type": "string", "minLength": 1 },
+        "countyCode": { "type": ["string", "null"], "pattern": "^[A-Z]{1,2}$" },
+        "population": { "type": ["integer", "null"], "minimum": 0 },
+        "populationSource": { "type": ["string", "null"], "minLength": 1 },
+        "revenueRon": { "type": "number", "minimum": 0 },
+        "ownRevenueRon": { "type": "number", "minimum": 0 },
+        "transferRevenueRon": { "type": "number", "minimum": 0 },
+        "spendingRon": { "type": "number", "minimum": 0 },
+        "personnelSpendingRon": { "type": "number", "minimum": 0 },
+        "capitalSpendingRon": { "type": "number", "minimum": 0 },
+        "developmentSpendingRon": { "type": "number", "minimum": 0 },
+        "arrearsRon": { "type": ["number", "null"], "minimum": 0 },
+        "ownRevenueShare": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "personnelSpendingShare": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "capitalSpendingShare": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "developmentSpendingShare": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "revenuePerInhabitantRon": { "type": ["number", "null"], "minimum": 0 },
+        "ownRevenuePerInhabitantRon": { "type": ["number", "null"], "minimum": 0 },
+        "spendingPerInhabitantRon": { "type": ["number", "null"], "minimum": 0 },
+        "sourceLineCounts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["revenue", "spending", "development"],
+          "properties": {
+            "revenue": { "type": "integer", "minimum": 0 },
+            "spending": { "type": "integer", "minimum": 0 },
+            "development": { "type": "integer", "minimum": 0 }
+          }
+        }
+      }
+    }
+  }
+}

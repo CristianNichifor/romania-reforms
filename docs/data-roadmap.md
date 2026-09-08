@@ -29,12 +29,14 @@ data; each imported snapshot still needs its own source, query, retrieval time a
 
 First slice:
 
-- extract ten UATs for 2023-2025
-- preserve the GraphQL query and report-type/account-category filters
-- compare totals against available `data.gov.ro` finance files
-- publish classification assumptions for own revenue, transfers, personnel and capital
+- done: extract ten UATs for 2023-2025
+- done: preserve the GraphQL query and report-type/account-category filters
+- done: compare 2024 national Transparenta totals against the available `data.gov.ro`
+  workbook and keep the scope mismatch as a warning
+- done: publish classification assumptions for own revenue, transfers, personnel and capital
   spending
-- prove the existing `buget-uat-2025` output can be regenerated through the shared mart
+- next: generate the full 2025 national mart and prove the existing `buget-uat-2025`
+  output can be regenerated through the shared package without changing published totals
 
 Useful first indicators:
 

@@ -1,0 +1,133 @@
+{
+  "$schema": "../schema/local-finance-validation-report.schema.json",
+  "id": "local-finance-validation-report-2023-2025",
+  "title": "Local finance mart validation report, 2023-2025",
+  "martId": "local-finance-mart-sample-2023-2025",
+  "periodStart": "2023",
+  "periodEnd": "2025",
+  "retrievedDate": "2026-09-08",
+  "summary": {
+    "checks": 5,
+    "passed": 3,
+    "warnings": 2,
+    "failed": 0,
+    "notRun": 0
+  },
+  "checks": [
+    {
+      "id": "sample-scope",
+      "status": "pass",
+      "text": "Sample covers ten UATs over three years, including a county seat, a Bucharest sector and rural communes from at least three counties.",
+      "metrics": {
+        "uats": 10,
+        "years": 3,
+        "ruralCommuneCounties": 4
+      }
+    },
+    {
+      "id": "registry-join",
+      "status": "pass",
+      "text": "Every sampled SIRUTA joins to the shared UAT registry and carries a CUI.",
+      "metrics": {
+        "registryMatchedUats": 10,
+        "sampleUats": 10
+      }
+    },
+    {
+      "id": "transparenta-line-items",
+      "status": "pass",
+      "text": "Every sampled UAT-year has at least one revenue or spending line item.",
+      "metrics": {
+        "records": 30,
+        "emptyRecords": 0
+      }
+    },
+    {
+      "id": "development-expense-type-coverage",
+      "status": "warning",
+      "text": "Transparenta returns no development-spending expense-type rows for at least one sampled year; the mart keeps those fields as source-missing zeros with a named limitation.",
+      "metrics": {
+        "missingYears": "2023"
+      }
+    },
+    {
+      "id": "data-gov-2024-national-comparison",
+      "status": "warning",
+      "text": "Transparenta and the data.gov.ro workbook do not reconcile at national level in this first slice; the report keeps the gap visible before treating either scope as canonical.",
+      "metrics": {
+        "transparentaRevenueRon": 165107291942.09,
+        "dataGovRevenueRon": 123087687954.0,
+        "revenueRelativeDifference": 0.3414,
+        "transparentaSpendingRon": 164693368043.7,
+        "dataGovSpendingRon": 123426088731.0,
+        "spendingRelativeDifference": 0.3343
+      }
+    }
+  ],
+  "dataGovComparison": {
+    "dataGov": {
+      "period": "2024",
+      "source": "data-gov-ro-local-revenue-expense-2024",
+      "locator": "https://data.gov.ro/dataset/c0d25ff7-27d5-4c31-9809-540f77b20180/resource/aac89795-56f0-41ee-a631-26695f73c5d6/download/situaia-veniturilor-i-cheltuielilor-2024.xlsx; workbook sheet 'total TARA', row TOTAL",
+      "sha256": "dc6d540e405d807bd1aabb2fdc40d804c71c8b3192032e40daa2acb71addacec",
+      "revenueRon": 123087687954.0,
+      "ownRevenueRon": 54857611611.0,
+      "spendingRon": 123426088731.0,
+      "personnelSpendingRon": 24457519451.0,
+      "capitalSpendingRon": 30089669484.0
+    },
+    "transparenta": {
+      "period": "2024",
+      "source": "transparenta-eu-graphql",
+      "revenueRows": 3228,
+      "spendingRows": 3228,
+      "revenueRon": 165107291942.09,
+      "spendingRon": 164693368043.7
+    }
+  },
+  "limitations": [
+    {
+      "id": "transparenta-data-license-snapshot",
+      "severity": "material",
+      "affects": [
+        "local-finance"
+      ],
+      "text": "Transparenta publishes the API and reference repositories openly, but this mart does not treat repository licenses as licenses for the underlying official budget data. Each snapshot keeps its own retrieval date and checksum."
+    },
+    {
+      "id": "own-revenue-classification-prefixes",
+      "severity": "material",
+      "affects": [
+        "ownRevenueRon",
+        "ownRevenueShare"
+      ],
+      "text": "Own revenue is derived by excluding functional-code prefixes for income-tax shares, VAT allocations, subsidies and EU funds. Moving a prefix changes the indicator, so the prefix list is published with the mart."
+    },
+    {
+      "id": "arrears-not-imported-yet",
+      "severity": "material",
+      "affects": [
+        "arrearsRon"
+      ],
+      "text": "The first slice does not import arrears. The field is present and null so downstream consumers can depend on the schema without mistaking missing arrears for zero arrears."
+    },
+    {
+      "id": "development-expense-type-missing-for-year",
+      "severity": "material",
+      "affects": [
+        "developmentSpendingRon",
+        "developmentSpendingShare"
+      ],
+      "text": "Transparenta returns no `expense_types: dezvoltare` line items for 2023. Development fields are therefore source-missing for those years, not evidence that development spending was zero."
+    },
+    {
+      "id": "bucharest-sector-population-fallback",
+      "severity": "material",
+      "affects": [
+        "population",
+        "perInhabitantIndicators"
+      ],
+      "text": "The shared UAT registry has no official POP107D population split for Bucharest sectors. Sector rows keep Transparenta roster population as a fallback and mark the source on each record."
+    }
+  ]
+}

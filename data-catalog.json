@@ -50,9 +50,9 @@
       ],
       "storagePolicy": "Small canonical JSON can be committed; larger historical snapshots should become release assets.",
       "nextSlice": {
-        "scope": "Simulator-local SIRUTA joins and local finance mart extraction",
-        "deliverable": "Point remaining SIRUTA consumers at packages/uat_registry and start packages/local_finance from the Transparenta budget importer.",
-        "doneWhen": "The land-value map and finance mart both read the shared registry instead of carrying their own SIRUTA assumptions."
+        "scope": "Remaining simulator-local SIRUTA joins and full local finance adoption",
+        "deliverable": "Point the land-value map at packages/uat_registry and publish the full 2025 national finance mart from packages/local_finance.",
+        "doneWhen": "The land-value map and full-year finance outputs both read shared packages instead of carrying simulator-local SIRUTA assumptions."
       }
     },
     {
@@ -123,9 +123,9 @@
       ],
       "storagePolicy": "Derived yearly marts should be release assets when they exceed the repository size budget; small summaries and schemas can be committed.",
       "nextSlice": {
-        "scope": "Ten UATs across 2023-2025, including one county seat, one Bucharest sector and rural communes from at least three counties.",
-        "deliverable": "A reusable finance mart schema plus a generated validation report comparing Transparenta execution totals to data.gov.ro where possible.",
-        "doneWhen": "The existing impozit-teren budget import can be re-run through the shared mart without changing its published 2025 totals."
+        "scope": "Full 2025 national mart, then 2023-2025 expansion if the repository size budget allows it.",
+        "deliverable": "Generate the national local-finance mart through packages/local_finance and make impozit-teren consume it or a compatibility export from it.",
+        "doneWhen": "The published impozit-teren 2025 budget totals are unchanged when regenerated from packages/local_finance."
       },
       "notes": [
         "Transparenta data is useful, but the catalog must not imply that the repository license covers the underlying official budget data."

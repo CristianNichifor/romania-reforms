@@ -80,6 +80,7 @@ def main() -> int:
                 or document.get("series")
                 or document.get("units")
                 or document.get("uats")
+                or document.get("records")
                 or []
             )
             print(f"  schema ok: {label} ({count} records)")
