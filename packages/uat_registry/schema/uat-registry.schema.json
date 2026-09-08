@@ -33,13 +33,18 @@
     "crosswalkProvenance": {
       "$ref": "https://cristiannichifor.github.io/romania-reforms/schema/provenance.schema.json#/$defs/provenance"
     },
+    "populationPeriod": { "type": "string", "pattern": "^[0-9]{4}$" },
+    "populationProvenance": {
+      "$ref": "https://cristiannichifor.github.io/romania-reforms/schema/provenance.schema.json#/$defs/provenance"
+    },
     "sourceHashes": {
       "type": "object",
       "additionalProperties": false,
       "required": ["sirutaSha256", "crosswalkSha256"],
       "properties": {
         "sirutaSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
-        "crosswalkSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        "crosswalkSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "populationExtractsSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
       }
     },
     "transform": {
@@ -61,6 +66,10 @@
         "withCui",
         "withoutCui",
         "withPopulation",
+        "populationSourcePeople",
+        "populationSourceRows",
+        "populationRowsWithoutPopulation",
+        "populationUnmatchedSourceRows",
         "crosswalkRows",
         "crosswalkMatched",
         "crosswalkUnmatched",
@@ -74,6 +83,10 @@
         "withCui": { "type": "integer", "minimum": 0 },
         "withoutCui": { "type": "integer", "minimum": 0 },
         "withPopulation": { "type": "integer", "minimum": 0 },
+        "populationSourcePeople": { "type": "integer", "minimum": 0 },
+        "populationSourceRows": { "type": "integer", "minimum": 0 },
+        "populationRowsWithoutPopulation": { "type": "integer", "minimum": 0 },
+        "populationUnmatchedSourceRows": { "type": "integer", "minimum": 0 },
         "crosswalkRows": { "type": "integer", "minimum": 0 },
         "crosswalkMatched": { "type": "integer", "minimum": 0 },
         "crosswalkUnmatched": { "type": "integer", "minimum": 0 },
@@ -123,6 +136,7 @@
         "lau",
         "nuts3",
         "population",
+        "populationSource",
         "cui",
         "cuiSource",
         "crosswalkKey"
@@ -143,6 +157,7 @@
         "lau": { "type": ["string", "null"] },
         "nuts3": { "type": ["string", "null"] },
         "population": { "type": ["integer", "null"], "minimum": 0 },
+        "populationSource": { "type": ["string", "null"], "minLength": 1 },
         "cui": { "type": ["string", "null"], "pattern": "^[0-9]+$" },
         "cuiSource": { "type": ["string", "null"] },
         "crosswalkKey": { "type": ["string", "null"], "minLength": 1 }

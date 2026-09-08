@@ -50,9 +50,9 @@
       ],
       "storagePolicy": "Small canonical JSON can be committed; larger historical snapshots should become release assets.",
       "nextSlice": {
-        "scope": "Official population per UAT, then simulator-local SIRUTA joins",
-        "deliverable": "Populate the registry population field and point finance/map importers at the shared package.",
-        "doneWhen": "The finance importer can validate every numeric SIRUTA against packages/uat_registry/data/uat-registry-2026.json."
+        "scope": "Simulator-local SIRUTA joins and local finance mart extraction",
+        "deliverable": "Point remaining SIRUTA consumers at packages/uat_registry and start packages/local_finance from the Transparenta budget importer.",
+        "doneWhen": "The land-value map and finance mart both read the shared registry instead of carrying their own SIRUTA assumptions."
       }
     },
     {

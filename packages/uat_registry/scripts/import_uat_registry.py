@@ -37,6 +37,9 @@ CROSSWALK_URL: Final[str] = (
     "https://raw.githubusercontent.com/ClaudiuBogdan/hack-for-facts-eb-client/main/"
     "src/assets/data/uat-cui-map.csv"
 )
+POPULATION_YEAR: Final[int] = 2024
+POPULATION_DIR: Final[Path] = REPO_ROOT / "simulators" / "impozit-teren" / "data"
+POPULATION_SOURCE: Final[str] = "ins-tempo-pop107d"
 
 SIRUTA_COLUMNS: Final[set[str]] = {
     "SIRUTA",
@@ -116,6 +119,16 @@ def read_source(location: str) -> bytes:
 
 def sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
+
+
+def sha256_files(paths: list[Path]) -> str:
+    digest = hashlib.sha256()
+    for path in sorted(paths):
+        digest.update(path.name.encode())
+        digest.update(b"\0")
+        digest.update(path.read_bytes())
+        digest.update(b"\0")
+    return digest.hexdigest()
 
 
 def read_csv(data: bytes, delimiter: str, required: set[str]) -> list[dict[str, str]]:
@@ -302,10 +315,169 @@ def unit_from_row(
         "lau": row["LAU"] or None,
         "nuts3": row["NUTS"] or None,
         "population": None,
+        "populationSource": None,
         "cui": cui,
         "cuiSource": cui_source,
         "crosswalkKey": crosswalk_key,
     }
+
+
+def read_population_documents(
+    directory: Path, year: int, *, require_complete: bool = True
+) -> tuple[list[tuple[Path, dict]], str]:
+    paths = sorted(directory.glob(f"populatie-*-{year}.json"))
+    if require_complete and len(paths) != 42:
+        raise SystemExit(f"expected 42 population extracts for {year}, found {len(paths)}")
+    documents = [(path, json.loads(path.read_text(encoding="utf-8"))) for path in paths]
+    county_codes = []
+    for path, document in documents:
+        if document.get("period") != str(year):
+            raise SystemExit(f"{path}: period is {document.get('period')!r}, expected {year}")
+        if document.get("provenance", {}).get("source") != POPULATION_SOURCE:
+            raise SystemExit(f"{path}: not an {POPULATION_SOURCE} population extract")
+        counties = document.get("counties") or []
+        if len(counties) != 1:
+            raise SystemExit(f"{path}: expected exactly one county code")
+        county_codes.append(counties[0])
+        source_sum = sum(int(locality["people"]) for locality in document["localities"])
+        if source_sum != int(document["summary"]["people"]):
+            raise SystemExit(f"{path}: locality sum does not match summary.people")
+    duplicate_counties = [code for code, count in Counter(county_codes).items() if count > 1]
+    if duplicate_counties:
+        raise SystemExit(f"duplicate population county extracts: {sorted(duplicate_counties)}")
+    return documents, sha256_files(paths)
+
+
+def analyse_population(
+    population_documents: list[tuple[Path, dict]],
+    units: list[dict],
+) -> dict:
+    registry_by_siruta = {unit["siruta"]: unit for unit in units}
+    source_rows: list[dict] = []
+    county_population: dict[str, int] = {}
+
+    for path, document in population_documents:
+        counties = document.get("counties") or []
+        if len(counties) != 1:
+            raise SystemExit(f"{path}: expected exactly one county code")
+        county = counties[0]
+        county_population[county] = int(document["summary"]["people"])
+        for locality in document["localities"]:
+            source_rows.append(
+                {
+                    "siruta": str(locality["siruta"]),
+                    "name": locality["name"],
+                    "county": county,
+                    "people": int(locality["people"]),
+                    "source": path.name,
+                }
+            )
+
+    counts = Counter(row["siruta"] for row in source_rows)
+    duplicate_sirutas = {siruta for siruta, count in counts.items() if count > 1}
+    duplicates = [
+        {
+            "siruta": siruta,
+            "sources": sorted({row["source"] for row in source_rows if row["siruta"] == siruta}),
+        }
+        for siruta in sorted(duplicate_sirutas, key=int)
+    ]
+    rows_not_in_registry = [
+        row
+        for row in source_rows
+        if row["siruta"] not in registry_by_siruta and row["siruta"] not in duplicate_sirutas
+    ]
+    population_by_siruta = {
+        row["siruta"]: row
+        for row in source_rows
+        if row["siruta"] in registry_by_siruta and row["siruta"] not in duplicate_sirutas
+    }
+
+    return {
+        "sourceRows": source_rows,
+        "sourceRowsNotInRegistry": sorted(rows_not_in_registry, key=lambda row: int(row["siruta"])),
+        "duplicateSourceSiruta": duplicates,
+        "populationBySiruta": population_by_siruta,
+        "countyPopulation": county_population,
+        "sourcePeople": sum(county_population.values()),
+    }
+
+
+def apply_population(units: list[dict], population: dict | None) -> list[dict]:
+    if not population:
+        return [
+            {
+                "siruta": unit["siruta"],
+                "name": unit["name"],
+                "level": unit["level"],
+                "countyCode": unit["countyCode"],
+                "reason": "population-not-imported",
+            }
+            for unit in units
+        ]
+
+    by_siruta = population["populationBySiruta"]
+    by_county = population["countyPopulation"]
+    missing = []
+    for unit in units:
+        if unit["level"] == "county":
+            value = by_county.get(unit["countyCode"])
+            source = f"{POPULATION_SOURCE}-county-sum" if value is not None else None
+        else:
+            row = by_siruta.get(unit["siruta"])
+            value = row["people"] if row else None
+            source = f"{POPULATION_SOURCE}-locality" if row else None
+        unit["population"] = value
+        unit["populationSource"] = source
+        if value is None:
+            missing.append(
+                {
+                    "siruta": unit["siruta"],
+                    "name": unit["name"],
+                    "level": unit["level"],
+                    "countyCode": unit["countyCode"],
+                    "reason": "no-pop107d-locality-row",
+                }
+            )
+    return missing
+
+
+def population_limitations(population: dict | None) -> list[dict]:
+    if not population:
+        return [
+            {
+                "id": "population-not-imported",
+                "severity": "material",
+                "affects": ["population"],
+                "text": (
+                    "The registry exposes the population field required by downstream joins, but "
+                    "this slice does not import an official population source yet. Values are null "
+                    "until an INS population import is added."
+                ),
+            }
+        ]
+    return [
+        {
+            "id": "domicile-not-resident-population",
+            "severity": "material",
+            "affects": ["population"],
+            "text": (
+                "Population comes from INS TEMPO POP107D, population by domicile. It counts where "
+                "people are registered, not where they actually live, and can overstate places "
+                "with high migration."
+            ),
+        },
+        {
+            "id": "bucharest-sectors-without-population",
+            "severity": "material",
+            "affects": ["population", "sector"],
+            "text": (
+                "The committed POP107D extracts contain Bucharest as one municipality row, not as "
+                "six sector rows. The registry keeps sector population null and records the gap in "
+                "the population report instead of allocating Bucharest's total by assumption."
+            ),
+        },
+    ]
 
 
 def build_documents(
@@ -319,7 +491,10 @@ def build_documents(
     siruta_sha256: str,
     crosswalk_sha256: str,
     require_complete_counties: bool = True,
-) -> tuple[dict, dict]:
+    population_documents: list[tuple[Path, dict]] | None = None,
+    population_year: int = POPULATION_YEAR,
+    population_sha256: str | None = None,
+) -> tuple[dict, dict, dict | None]:
     siruta_counts = Counter(row["SIRUTA"] for row in siruta_rows)
     duplicates = [siruta for siruta, count in siruta_counts.items() if count > 1]
     if duplicates:
@@ -345,6 +520,8 @@ def build_documents(
         for row in registry_source_rows
     ]
     units.sort(key=lambda unit: int(unit["siruta"]))
+    population = analyse_population(population_documents, units) if population_documents else None
+    rows_without_population = apply_population(units, population)
 
     rows_without_cui = [
         {
@@ -362,7 +539,7 @@ def build_documents(
     unmatched_rows = len(crosswalk["unmatchedCrosswalkRows"])
     registry_id = f"uat-registry-{year}"
 
-    limitations = [
+    cui_limitations = [
         {
             "id": "transparenta-cui-crosswalk-provenance",
             "severity": "material",
@@ -371,16 +548,6 @@ def build_documents(
                 "CUI values are copied from the Transparenta repository crosswalk. The repository "
                 "license covers code, but the underlying public-authority identifier provenance "
                 "still needs an official source before this becomes a legal identity register."
-            ),
-        },
-        {
-            "id": "population-not-imported",
-            "severity": "material",
-            "affects": ["population"],
-            "text": (
-                "The registry exposes the population field required by downstream joins, but this "
-                "slice does not import an official population source yet. Values are null until an "
-                "INS population import is added."
             ),
         },
         {
@@ -394,6 +561,15 @@ def build_documents(
             ),
         },
     ]
+    pop_limitations = population_limitations(population)
+    limitations = cui_limitations + pop_limitations
+
+    source_hashes = {
+        "sirutaSha256": siruta_sha256,
+        "crosswalkSha256": crosswalk_sha256,
+    }
+    if population_sha256:
+        source_hashes["populationExtractsSha256"] = population_sha256
 
     registry = {
         "$schema": "../schema/uat-registry.schema.json",
@@ -423,10 +599,7 @@ def build_documents(
                 "matched to countyCode and used for county council CUI rows."
             ),
         },
-        "sourceHashes": {
-            "sirutaSha256": siruta_sha256,
-            "crosswalkSha256": crosswalk_sha256,
-        },
+        "sourceHashes": source_hashes,
         "transform": {
             "script": "packages/uat_registry/scripts/import_uat_registry.py",
             "version": TRANSFORM_VERSION,
@@ -438,6 +611,12 @@ def build_documents(
             "withCui": sum(1 for unit in units if unit["cui"] is not None),
             "withoutCui": len(rows_without_cui),
             "withPopulation": sum(1 for unit in units if unit["population"] is not None),
+            "populationSourcePeople": population["sourcePeople"] if population else 0,
+            "populationSourceRows": len(population["sourceRows"]) if population else 0,
+            "populationRowsWithoutPopulation": len(rows_without_population),
+            "populationUnmatchedSourceRows": (
+                len(population["sourceRowsNotInRegistry"]) if population else 0
+            ),
             "crosswalkRows": len(crosswalk_rows),
             "crosswalkMatched": matched_rows,
             "crosswalkUnmatched": unmatched_rows,
@@ -447,6 +626,20 @@ def build_documents(
         "units": units,
         "limitations": limitations,
     }
+    if population:
+        registry["populationPeriod"] = str(population_year)
+        registry["populationProvenance"] = {
+            "source": POPULATION_SOURCE,
+            "locator": (
+                f"simulators/impozit-teren/data/populatie-*-{population_year}.json; "
+                "TEMPO POP107D, toate varstele, ambele sexe"
+            ),
+            "confidence": "derived",
+            "note": (
+                "Local-authority rows copy the committed county extracts. County rows use the "
+                "same extracts' county totals. Bucharest sector rows remain null."
+            ),
+        }
 
     report = {
         "$schema": "../schema/uat-registry-report.schema.json",
@@ -470,9 +663,33 @@ def build_documents(
         "duplicateSiruta": crosswalk["duplicateSiruta"],
         "duplicateCui": crosswalk["duplicateCui"],
         "registryRowsWithoutCui": rows_without_cui,
-        "limitations": limitations,
+        "limitations": cui_limitations,
     }
-    return registry, report
+    population_report = None
+    if population:
+        population_report = {
+            "$schema": "../schema/uat-registry-population-report.schema.json",
+            "id": f"uat-registry-population-report-{population_year}",
+            "title": f"Raport de potrivire SIRUTA/populatie, {population_year}",
+            "period": str(population_year),
+            "registryId": registry_id,
+            "registryPeriod": str(year),
+            "retrievedDate": retrieved_date,
+            "summary": {
+                "sourceFiles": len(population_documents or []),
+                "sourceRows": len(population["sourceRows"]),
+                "sourcePeople": population["sourcePeople"],
+                "populatedRegistryRows": registry["summary"]["withPopulation"],
+                "registryRowsWithoutPopulation": len(rows_without_population),
+                "sourceRowsNotInRegistry": len(population["sourceRowsNotInRegistry"]),
+                "duplicateSourceSiruta": len(population["duplicateSourceSiruta"]),
+            },
+            "sourceRowsNotInRegistry": population["sourceRowsNotInRegistry"],
+            "duplicateSourceSiruta": population["duplicateSourceSiruta"],
+            "registryRowsWithoutPopulation": rows_without_population,
+            "limitations": pop_limitations,
+        }
+    return registry, report, population_report
 
 
 def main() -> int:
@@ -482,6 +699,8 @@ def main() -> int:
     parser.add_argument("--crosswalk-source", default=CROSSWALK_URL)
     parser.add_argument("--siruta-locator", default=SIRUTA_URL)
     parser.add_argument("--crosswalk-locator", default=CROSSWALK_URL)
+    parser.add_argument("--population-dir", type=Path, default=POPULATION_DIR)
+    parser.add_argument("--population-year", type=int, default=POPULATION_YEAR)
     parser.add_argument("--retrieved-date", default=date.today().isoformat())
     parser.add_argument("--out-dir", type=Path, default=PACKAGE_ROOT / "data")
     args = parser.parse_args()
@@ -495,7 +714,10 @@ def main() -> int:
     crosswalk_bytes = read_source(args.crosswalk_source)
     siruta_rows = read_csv(siruta_bytes, ";", SIRUTA_COLUMNS)
     crosswalk_rows = read_csv(crosswalk_bytes, ",", CROSSWALK_COLUMNS)
-    registry, report = build_documents(
+    population_documents, population_sha256 = read_population_documents(
+        args.population_dir, args.population_year
+    )
+    registry, report, population_report = build_documents(
         siruta_rows,
         crosswalk_rows,
         year=args.year,
@@ -504,25 +726,38 @@ def main() -> int:
         crosswalk_locator=args.crosswalk_locator,
         siruta_sha256=sha256(siruta_bytes),
         crosswalk_sha256=sha256(crosswalk_bytes),
+        population_documents=population_documents,
+        population_year=args.population_year,
+        population_sha256=population_sha256,
     )
 
     args.out_dir.mkdir(parents=True, exist_ok=True)
     registry_path = args.out_dir / f"uat-registry-{args.year}.json"
     report_path = args.out_dir / f"uat-registry-mismatch-report-{args.year}.json"
+    population_report_path = (
+        args.out_dir / f"uat-registry-population-report-{args.population_year}.json"
+    )
     registry_path.write_text(
         json.dumps(registry, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
     report_path.write_text(
         json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
+    if population_report:
+        population_report_path.write_text(
+            json.dumps(population_report, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
 
     print(
         f"{registry['summary']['registryRows']} registry rows, "
         f"{registry['summary']['withCui']} with CUI, "
-        f"{report['summary']['registryRowsWithoutCui']} without CUI"
+        f"{registry['summary']['withPopulation']} with population"
     )
     print(f"Wrote {registry_path.relative_to(REPO_ROOT)}")
     print(f"Wrote {report_path.relative_to(REPO_ROOT)}")
+    if population_report:
+        print(f"Wrote {population_report_path.relative_to(REPO_ROOT)}")
     return 0
 
 

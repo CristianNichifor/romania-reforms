@@ -55,6 +55,22 @@ def test_transparenta_numeric_sirutas_are_checked_against_the_shared_registry():
     assert "AB" not in str(error.value)
 
 
+def test_registry_population_replaces_transparenta_population_for_numeric_siruta():
+    uats = [
+        {"siruta": "1017", "population": 1},
+        {"siruta": "AB", "population": 2},
+        {"siruta": "179141", "population": 3},
+    ]
+
+    import_buget_uat.prefer_registry_population(uats, {"1017": 74448})
+
+    assert uats == [
+        {"siruta": "1017", "population": 74448},
+        {"siruta": "AB", "population": 2},
+        {"siruta": "179141", "population": 3},
+    ]
+
+
 def test_local_spending_is_the_size_local_spending_is(budget):
     """Between 100 and 300 mld lei.
 

@@ -1,0 +1,83 @@
+{
+  "$schema": "../schema/uat-registry-population-report.schema.json",
+  "id": "uat-registry-population-report-2024",
+  "title": "Raport de potrivire SIRUTA/populatie, 2024",
+  "period": "2024",
+  "registryId": "uat-registry-2026",
+  "registryPeriod": "2026",
+  "retrievedDate": "2026-09-08",
+  "summary": {
+    "sourceFiles": 42,
+    "sourceRows": 3181,
+    "sourcePeople": 21849217,
+    "populatedRegistryRows": 3223,
+    "registryRowsWithoutPopulation": 6,
+    "sourceRowsNotInRegistry": 0,
+    "duplicateSourceSiruta": 0
+  },
+  "sourceRowsNotInRegistry": [],
+  "duplicateSourceSiruta": [],
+  "registryRowsWithoutPopulation": [
+    {
+      "siruta": "179141",
+      "name": "BUCUREŞTI SECTORUL 1",
+      "level": "sector",
+      "countyCode": "B",
+      "reason": "no-pop107d-locality-row"
+    },
+    {
+      "siruta": "179150",
+      "name": "BUCUREŞTI SECTORUL 2",
+      "level": "sector",
+      "countyCode": "B",
+      "reason": "no-pop107d-locality-row"
+    },
+    {
+      "siruta": "179169",
+      "name": "BUCUREŞTI SECTORUL 3",
+      "level": "sector",
+      "countyCode": "B",
+      "reason": "no-pop107d-locality-row"
+    },
+    {
+      "siruta": "179178",
+      "name": "BUCUREŞTI SECTORUL 4",
+      "level": "sector",
+      "countyCode": "B",
+      "reason": "no-pop107d-locality-row"
+    },
+    {
+      "siruta": "179187",
+      "name": "BUCUREŞTI SECTORUL 5",
+      "level": "sector",
+      "countyCode": "B",
+      "reason": "no-pop107d-locality-row"
+    },
+    {
+      "siruta": "179196",
+      "name": "BUCUREŞTI SECTORUL 6",
+      "level": "sector",
+      "countyCode": "B",
+      "reason": "no-pop107d-locality-row"
+    }
+  ],
+  "limitations": [
+    {
+      "id": "domicile-not-resident-population",
+      "severity": "material",
+      "affects": [
+        "population"
+      ],
+      "text": "Population comes from INS TEMPO POP107D, population by domicile. It counts where people are registered, not where they actually live, and can overstate places with high migration."
+    },
+    {
+      "id": "bucharest-sectors-without-population",
+      "severity": "material",
+      "affects": [
+        "population",
+        "sector"
+      ],
+      "text": "The committed POP107D extracts contain Bucharest as one municipality row, not as six sector rows. The registry keeps sector population null and records the gap in the population report instead of allocating Bucharest's total by assumption."
+    }
+  ]
+}
