@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/packages/local_finance/schema/local-finance-validation-report.schema.json",
+  "title": "Shared local finance mart validation report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "id",
+    "title",
+    "martId",
+    "periodStart",
+    "periodEnd",
+    "retrievedDate",
+    "summary",
+    "checks",
+    "dataGovComparison",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "type": "string", "pattern": "^local-finance-validation-report-[0-9]{4}-[0-9]{4}$" },
+    "title": { "type": "string", "minLength": 1 },
+    "martId": { "type": "string", "pattern": "^local-finance-mart-sample-[0-9]{4}-[0-9]{4}$" },
+    "periodStart": { "type": "string", "pattern": "^[0-9]{4}$" },
+    "periodEnd": { "type": "string", "pattern": "^[0-9]{4}$" },
+    "retrievedDate": { "type": "string", "format": "date" },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["checks", "passed", "warnings", "failed", "notRun"],
+      "properties": {
+        "checks": { "type": "integer", "minimum": 0 },
+        "passed": { "type": "integer", "minimum": 0 },
+        "warnings": { "type": "integer", "minimum": 0 },
+        "failed": { "type": "integer", "minimum": 0 },
+        "notRun": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "checks": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/check" }
+    },
+    "dataGovComparison": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["dataGov", "transparenta"],
+      "properties": {
+        "dataGov": { "$ref": "#/$defs/comparisonTotals" },
+        "transparenta": { "$ref": "#/$defs/comparisonTotals" }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "https://cristiannichifor.github.io/romania-reforms/schema/provenance.schema.json#/$defs/limitation"
+      }
+    }
+  },
+  "$defs": {
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "status", "text", "metrics"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "status": { "enum": ["pass", "warning", "fail", "not_run"] },
+        "text": { "type": "string", "minLength": 1 },
+        "metrics": {
+          "type": "object",
+          "additionalProperties": {
+            "type": ["number", "integer", "string", "null"]
+          }
+        }
+      }
+    },
+    "comparisonTotals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["period", "source", "revenueRon", "spendingRon"],
+      "properties": {
+        "period": { "type": "string", "pattern": "^[0-9]{4}$" },
+        "source": { "type": "string", "minLength": 1 },
+        "locator": { "type": "string", "minLength": 1 },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "revenueRows": { "type": "integer", "minimum": 0 },
+        "spendingRows": { "type": "integer", "minimum": 0 },
+        "revenueRon": { "type": "number", "minimum": 0 },
+        "ownRevenueRon": { "type": "number", "minimum": 0 },
+        "spendingRon": { "type": "number", "minimum": 0 },
+        "personnelSpendingRon": { "type": "number", "minimum": 0 },
+        "capitalSpendingRon": { "type": "number", "minimum": 0 }
+      }
+    }
+  }
+}
