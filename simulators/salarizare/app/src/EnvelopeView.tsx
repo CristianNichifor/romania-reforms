@@ -159,7 +159,7 @@ export default function EnvelopeView({
             />
           </label>
           <p className="src">
-            Art. 36 alin. (3) cere o reducere de cel puțin 1,5 puncte din PIB între 2024 și 2031.
+            Art. 38 alin. (5) cere o reducere de cel puțin 1,5 puncte din PIB între 2024 și 2031.
             De la {dec(result.shareOfGdp.before * 100)}% asta ar însemna{' '}
             {dec(result.shareOfGdp.before * 100 - 1.5)}% — adică{' '}
             {pctText(((result.shareOfGdp.before - 0.015) / result.shareOfGdp.before) - 1)} din
@@ -264,7 +264,7 @@ export default function EnvelopeView({
               bani și în natură plus contribuțiile angajatorului — raportată de ordonatorii
               principali de credite și împărțită pe capitole bugetare. E aceeași contabilitate în
               care e scrisă legea, nu o clasificare statistică suprapusă peste ea, și e și baza pe
-              care Art. 36 își măsoară ținta. PIB-ul nominal rămâne de la Eurostat, fiindcă execuția
+              care Art. 38 alin. (5) își măsoară ținta. PIB-ul nominal rămâne de la Eurostat, fiindcă execuția
               nu-l conține.{' '}
               {baseline.posts.toLocaleString('ro-RO')} posturi ocupate din raportarea Ministerului
               Finanțelor, iunie 2026. Media pe post iese{' '}

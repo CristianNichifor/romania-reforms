@@ -1,13 +1,13 @@
 {
   "id": "ro-dk-occupations",
   "title": "Grupe ocupaționale puse față în față",
-  "from": "ro-draft-2026-07-16",
+  "from": "ro-draft-2026-08-20",
   "dkSource": "dk-occupations",
   "provenance": {
     "source": "propunere-alternativa",
     "locator": "data/groups/ro-dk-occupations.json",
     "confidence": "derived",
-    "note": "Gruparea funcțiilor românești după ocupație, nu după anexă. Proiectul le împarte pe familii ocupaționale care urmează angajatorul și statutul juridic; grupele de aici urmează meseria — cum face și statistica daneză, și cum face piața muncii. Fiecare grupă spune ce funcții a prins și cu ce regulă, ca să poată fi contestată."
+    "note": "Gruparea funcțiilor românești după ocupație, nu după anexă. Proiectul le împarte pe familii ocupaționale care urmează angajatorul și statutul juridic; grupele de aici urmează meseria — cum face și statistica daneză, și cum face piața muncii. Fiecare grupă spune ce funcții a prins și cu ce regulă, ca să poată fi contestată. Regulile au fost extinse pentru pachetul public MMFTSS din 20.08.2026 cu domenii-cheie: educație, sănătate, justiție, ordine, apărare, administrație, cercetare și cultură."
   },
   "groups": [
     {
@@ -197,6 +197,224 @@
       "dkOccupations": ["Police officers"],
       "basis": "Anexa VI acoperă apărarea, ordinea publică și securitatea națională la un loc, deci grupa românească e mai largă decât cea daneză, care numără doar polițiștii.",
       "confidence": "assumed"
-    }
+    },
+{
+    "id": "cercetatori",
+    "sector": "Cercetare",
+    "label": "Cercetători",
+    "proposedName": "Cercetător științific",
+    "ro": {
+        "family": "I-invatamant",
+        "nameMatches": "cercet"
+    },
+    "dkOccupations": [
+        "Researchers",
+        "PhD fellows"
+    ],
+    "basis": "Cercetarea publică este în Anexa I lângă învățământ, dar este afișată separat fiindcă meseria are piață și comparație daneză proprie. Partea românească include atât execuția, cât și conducerea institutelor de cercetare.",
+    "confidence": "derived"
+},
+{
+    "id": "judecatori-procurori",
+    "sector": "Justiție",
+    "label": "Judecători și procurori",
+    "proposedName": "Magistrat",
+    "ro": {
+        "family": "V-justitie",
+        "kind": [
+            "execution"
+        ],
+        "nameMatches": "judecator|judecător|procuror"
+    },
+    "dkOccupations": [
+        "Law Administration and Regulatory Enforcement",
+        "Lawyers and economists"
+    ],
+    "basis": "Magistrații apar explicit în proiectul din 2026, dar comparatorul danez LONSOFF nu are o grupă separată pentru judecători și procurori. Folosim administrația legii plus juriști/economiști ca reper larg, deci comparația e doar orientativă.",
+    "confidence": "assumed",
+    "disputed": true
+},
+{
+    "id": "grefieri",
+    "sector": "Justiție",
+    "label": "Grefieri și personal auxiliar",
+    "proposedName": "Grefier",
+    "ro": {
+        "family": "V-justitie",
+        "kind": [
+            "execution"
+        ],
+        "nameMatches": "grefier"
+    },
+    "dkOccupations": [
+        "Legal and judicial clerks"
+    ],
+    "basis": "Personalul auxiliar care ține dosarul instanței: grefieri, registratori, arhivari și statisticieni, acolo unde sursa îi pune în același rând.",
+    "confidence": "derived"
+},
+{
+    "id": "probatiune",
+    "sector": "Justiție",
+    "label": "Probațiune",
+    "proposedName": "Consilier / inspector de probațiune",
+    "ro": {
+        "family": "V-justitie",
+        "nameMatches": "probatiune|probațiune"
+    },
+    "dkOccupations": [
+        "Social workers and mediators",
+        "Law Administration and Regulatory Enforcement"
+    ],
+    "basis": "Probațiunea stă între justiție și asistență socială. Comparatorul danez unește lucrul social cu administrarea legii ca să nu pretindă că există o grupă identică.",
+    "confidence": "assumed",
+    "disputed": true
+},
+{
+    "id": "control-reglementare",
+    "sector": "Administrație",
+    "label": "Control, audit și reglementare",
+    "proposedName": "Inspector / auditor public",
+    "ro": {
+        "family": "VIII-administratie",
+        "kind": [
+            "execution"
+        ],
+        "studyLevel": [
+            "S"
+        ],
+        "nameMatches": "auditor|inspector|control|securitate"
+    },
+    "dkOccupations": [
+        "Law Administration and Regulatory Enforcement",
+        "Employment officers / Job placement officers"
+    ],
+    "basis": "Funcții publice de control, inspecție, audit și aplicare administrativă a regulilor. Este o grupă de funcție publică, nu o meserie unică.",
+    "confidence": "assumed"
+},
+{
+    "id": "it-public",
+    "sector": "Administrație",
+    "label": "IT public",
+    "proposedName": "Specialist IT public",
+    "ro": {
+        "kind": [
+            "execution"
+        ],
+        "studyLevel": [
+            "S"
+        ],
+        "nameMatches": "specialist IT|informatic|programator|inginer de sistem|analist"
+    },
+    "dkOccupations": [
+        "IT staff"
+    ],
+    "basis": "Specialiști IT din administrație, justiție, cultură și celelalte familii unde sursa numește explicit funcția tehnică.",
+    "confidence": "derived"
+},
+{
+    "id": "armata",
+    "sector": "Apărare",
+    "label": "Armată",
+    "proposedName": "Personal militar",
+    "ro": {
+        "family": "VI-aparare-ordine-securitate",
+        "nameMatches": "militar|plutonier|sergent|caporal|fruntas|fruntaș|soldat|general|amiral|comandor|colonel|maior|capitan|căpitan|locotenent|sublocotenent|aspirant"
+    },
+    "dkOccupations": [
+        "Military officers",
+        "Other military personnel"
+    ],
+    "basis": "Anexa VI publică multe rânduri ca grade echivalente între armată, poliție și penitenciare. Grupa urmărește gradele militare și echivalentele lor daneze, cu suprapunerea declarată.",
+    "confidence": "assumed",
+    "disputed": true
+},
+{
+    "id": "penitenciare",
+    "sector": "Ordine publică",
+    "label": "Penitenciare",
+    "proposedName": "Poliție penitenciară",
+    "ro": {
+        "family": "VI-aparare-ordine-securitate",
+        "nameMatches": "penitenciar|penitenciare"
+    },
+    "dkOccupations": [
+        "Prison officers"
+    ],
+    "basis": "Rândurile românești fuzionează poliția penitenciară cu poliția și cu grade militare; Danemarca publică separat personalul penitenciar. Comparația e utilă, dar nu pură.",
+    "confidence": "assumed",
+    "disputed": true
+},
+{
+    "id": "interventii-urgenta",
+    "sector": "Intervenții de urgență",
+    "label": "Pompieri și intervenții de urgență",
+    "proposedName": "Pompier / intervenție de urgență",
+    "ro": {
+        "nameMatches": "pompier|paza/pompieri|pază/ pompieri|servant pompier|ambulant|ambulan"
+    },
+    "dkOccupations": [
+        "Paramedics",
+        "Technical service staff"
+    ],
+    "basis": "Sursa românească numește pompieri mai ales în administrația locală și nu separă curat ISU din gradele militare ale Anexei VI. Danemarca nu are o grupă LONSOFF numită pompieri; folosim paramedici și personal tehnic de servicii ca reper de intervenție, cu limitarea vizibilă.",
+    "confidence": "assumed",
+    "disputed": true
+},
+{
+    "id": "asistenti-sociali",
+    "sector": "Asistență socială",
+    "label": "Asistenți sociali și psihologi",
+    "proposedName": "Specialist social",
+    "ro": {
+        "family": "II-sanatate-asistenta-sociala",
+        "kind": [
+            "execution"
+        ],
+        "nameMatches": "asistent social|psiholog|logoped|mediator"
+    },
+    "dkOccupations": [
+        "Social workers and mediators",
+        "Psychologists"
+    ],
+    "basis": "Specialiștii care lucrează cu cazuri sociale, consiliere și sprijin psihologic. Îngrijirea directă rămâne în grupa separată de îngrijire.",
+    "confidence": "derived"
+},
+{
+    "id": "biblioteci-arhive",
+    "sector": "Cultură",
+    "label": "Biblioteci și arhive",
+    "proposedName": "Bibliotecar / arhivist",
+    "ro": {
+        "family": "III-cultura",
+        "kind": [
+            "execution"
+        ],
+        "nameMatches": "bibliotecar|arhivist|bibliograf|documentarist"
+    },
+    "dkOccupations": [
+        "Librarians"
+    ],
+    "basis": "Funcții de bibliotecă, arhivă și documentare din instituțiile de cultură. Posturile similare din școli nu sunt incluse aici, ca să nu amestece educația cu cultura.",
+    "confidence": "derived"
+},
+{
+    "id": "muzee-patrimoniu",
+    "sector": "Cultură",
+    "label": "Muzee și patrimoniu",
+    "proposedName": "Muzeograf / conservator / restaurator",
+    "ro": {
+        "family": "III-cultura",
+        "kind": [
+            "execution"
+        ],
+        "nameMatches": "muzeograf|conservator|restaurator|arheolog|curator|istoric|educator muzeal"
+    },
+    "dkOccupations": [
+        "Librarians"
+    ],
+    "basis": "Danmarks Statistik nu publică o grupă de muzeografi în LONSOFF. Bibliotecarii sunt folosiți doar ca reper cultural apropiat, deci row-ul trebuie citit ca semnal de domeniu, nu ca echivalare strictă.",
+    "confidence": "assumed",
+    "disputed": true
+}
   ]
 }

@@ -13,7 +13,7 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
-CROSSWALK = ROOT / "data/crosswalks/ro-153-2017--ro-draft-2026-07-16.json"
+CROSSWALK = ROOT / "data/crosswalks/ro-153-2017--ro-draft-2026-08-20.json"
 
 
 @pytest.fixture(scope="module")
@@ -27,7 +27,7 @@ def crosswalk() -> dict:
 def regimes() -> tuple[dict, dict]:
     return (
         json.loads((ROOT / "data/regimes/ro-153-2017.json").read_text(encoding="utf-8")),
-        json.loads((ROOT / "data/regimes/ro-draft-2026-07-16.json").read_text(encoding="utf-8")),
+        json.loads((ROOT / "data/regimes/ro-draft-2026-08-20.json").read_text(encoding="utf-8")),
     )
 
 

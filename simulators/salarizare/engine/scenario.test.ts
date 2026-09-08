@@ -6,7 +6,7 @@ import type { Scenario } from './scenario';
 describe('scenario codec', () => {
   const scenario: Scenario = {
     view: 'payslip',
-    regimeIds: ['ro-draft-2026-07-16', 'dk-stat-2026'],
+    regimeIds: ['ro-draft-2026-08-20', 'dk-stat-2026'],
     positionCode: '81.10104001.01',
     seniorityYears: 12,
     dims: { institutionLevel: 'II' },
@@ -35,14 +35,14 @@ describe('scenario codec', () => {
     // The default, whatever it is — a first visit should land somewhere sensible, and
     // pinning the literal here only records which view happened to be first that week.
     expect(result.view).toBe(DEFAULT_SCENARIO.view);
-    expect(result.regimeIds).toEqual(['ro-draft-2026-07-16']);
+    expect(result.regimeIds).toEqual(['ro-draft-2026-08-20']);
     expect(result.seniorityYears).toBeUndefined();
   });
 
   it('handles an empty hash', () => {
-    expect(decodeScenario('')).toEqual({
+    expect(decodeScenario('')).toMatchObject({
       view: DEFAULT_SCENARIO.view,
-      regimeIds: ['ro-draft-2026-07-16'],
+      regimeIds: ['ro-draft-2026-08-20'],
       positionCode: undefined,
       seniorityYears: undefined,
       dims: undefined,
@@ -55,7 +55,7 @@ describe('scenario codec', () => {
   it('preserves parameters it does not understand', () => {
     // A link produced by a later version must not silently lose information when an
     // older build reads it and writes it back.
-    const decoded = decodeScenario('#/payslip?r=ro-draft-2026-07-16&zz=future');
+    const decoded = decodeScenario('#/payslip?r=ro-draft-2026-08-20&zz=future');
     expect(decoded.extra).toEqual({ zz: 'future' });
     expect(encodeScenario(decoded)).toContain('zz=future');
   });

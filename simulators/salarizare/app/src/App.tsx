@@ -13,6 +13,7 @@ import type { Shares } from '../../engine/composition';
 import type { DkOccupation, GroupsDocument } from '../../engine/occupations';
 import type { Crosswalk, Regime } from '../../engine/types';
 import CompareView from './CompareView';
+import DomainsView from './DomainsView';
 import HomeView from './HomeView';
 import DistributionView from './DistributionView';
 import EnvelopeView from './EnvelopeView';
@@ -23,10 +24,13 @@ import PayslipView from './PayslipView';
 import ProposalView from './ProposalView';
 import StructureView from './StructureView';
 
-const AVAILABLE = ['ro-153-2017', 'ro-draft-2026-07-16', 'dk-stat-2026'];
+const ACTIVE_DRAFT_ID = 'ro-draft-2026-08-20';
+const LEGACY_DRAFT_ID = 'ro-draft-2026-07-16';
+const AVAILABLE = ['ro-153-2017', ACTIVE_DRAFT_ID, 'dk-stat-2026'];
+const LOADABLE = [...AVAILABLE, LEGACY_DRAFT_ID];
 const PROPOSAL_ID = 'propunere-v1';
-const CROSSWALK_ID = 'ro-draft-2026-07-16--dk-stat-2026';
-const ASSIMILATION_ID = 'ro-153-2017--ro-draft-2026-07-16';
+const CROSSWALK_ID = 'ro-draft-2026-08-20--dk-stat-2026';
+const ASSIMILATION_ID = 'ro-153-2017--ro-draft-2026-08-20';
 const FX_ID = 'ecb-fx';
 const BENCHMARKS_ID = 'benchmarks';
 const FISCAL_ID = 'eurostat-compensation-2026-08';
@@ -36,6 +40,25 @@ const DK_OCC_ID = 'dk-occupations';
 const EXEC_ID = 'executie-personal';
 const CAP_ID = 'plafon-sporuri';
 const INS_ID = 'ins-ocupatii';
+
+async function loadJson<T>(path: string): Promise<T> {
+  const primary = `${import.meta.env.BASE_URL}${path}`;
+  const response = await fetch(primary);
+  if (response.ok && response.headers.get('content-type')?.includes('json')) {
+    return response.json() as Promise<T>;
+  }
+
+  if (import.meta.env.DEV && path.startsWith('data/')) {
+    const fallback = `${import.meta.env.BASE_URL}public/${path}`;
+    const fallbackResponse = await fetch(fallback);
+    if (fallbackResponse.ok && fallbackResponse.headers.get('content-type')?.includes('json')) {
+      return fallbackResponse.json() as Promise<T>;
+    }
+  }
+
+  const contentType = response.headers.get('content-type') ?? 'unknown content-type';
+  throw new Error(`${path}: expected JSON, got ${response.status} ${contentType}`);
+}
 
 /**
  * Six views used to sit in one undifferentiated row, named after their mechanics —
@@ -56,6 +79,10 @@ const VIEW_META: Record<ViewId, { label: string; blurb: string }> = {
     label: 'Cine urcă, cine coboară',
     blurb: 'cum se mișcă fiecare post față de legea de azi',
   },
+  domenii: {
+    label: 'Domenii publice',
+    blurb: 'educație, sănătate, justiție, ordine, apărare, administrație',
+  },
   meserii: { label: 'Meserii, RO vs DK', blurb: 'cât ia aceeași meserie în fiecare țară' },
   payslip: { label: 'Un salariu, calculat', blurb: 'un om anume, sub fiecare regim' },
   echivalente: { label: 'Echivalențe de post', blurb: 'ce denumire daneză corespunde fiecărei funcții' },
@@ -73,7 +100,7 @@ const NAV_GROUPS: Array<{ title: string; ask: string; views: ViewId[] }> = [
   { title: 'Începe aici', ask: 'Ce e asta?', views: ['acasa'] },
   { title: 'Reforma', ask: 'Ce se schimbă?', views: ['compare', 'distributie', 'structure'] },
   { title: 'Alternativa', ask: 'Se poate altfel?', views: ['propunere'] },
-  { title: 'Oamenii', ask: 'Cine cât ia?', views: ['functii', 'meserii', 'payslip', 'echivalente'] },
+  { title: 'Oamenii', ask: 'Cine cât ia?', views: ['domenii', 'functii', 'meserii', 'payslip', 'echivalente'] },
   { title: 'Banii', ask: 'Ne permitem?', views: ['envelope'] },
 ];
 
@@ -130,46 +157,50 @@ export default function App() {
   // The draft walks its own grid from 2026/2027 to 2031, so "the ratio is 1:8" and "the
   // ratio is 1:7,39" are both true and differ only by the year meant. The years come out
   // of the regime rather than out of a constant here.
-  const ministryRegime = regimes['ro-draft-2026-07-16'] ?? null;
+  const ministryRegime = regimes[ACTIVE_DRAFT_ID] ?? null;
   const years = useMemo(() => (ministryRegime ? phaseYears(ministryRegime) : []), [ministryRegime]);
   const year = yearOfAsOf(scenario.asOf, years[0] ?? 2026);
   const period = ministryRegime ? periodForYear(ministryRegime, year) : null;
 
   useEffect(() => {
-    fetch(`${import.meta.env.BASE_URL}data/proposals/${PROPOSAL_ID}.json`)
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`proposal: ${r.status}`))))
+    loadJson<Proposal>(`data/proposals/${PROPOSAL_ID}.json`)
       .then(setProposal)
       .catch((e: Error) => setError(e.message));
   }, []);
 
   useEffect(() => {
-    const base = import.meta.env.BASE_URL;
-    fetch(`${base}data/crosswalks/${CROSSWALK_ID}.json`)
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`crosswalk: ${r.status}`))))
+    loadJson<Crosswalk>(`data/crosswalks/${CROSSWALK_ID}.json`)
       .then(setCrosswalk)
       .catch((e: Error) => setError(e.message));
 
-    fetch(`${base}data/crosswalks/${ASSIMILATION_ID}.json`)
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`assimilation: ${r.status}`))))
+    loadJson<Crosswalk>(`data/crosswalks/${ASSIMILATION_ID}.json`)
       .then(setAssimilation)
       .catch((e: Error) => setError(e.message));
 
     // The rate is read from the committed ECB document rather than hard-coded, so a
     // converted figure can always be traced to the day it was taken.
-    fetch(`${base}data/fiscal/${FX_ID}.json`)
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`fx: ${r.status}`))))
+    loadJson<{ retrieved: string; series: Array<{ id: string; observations: Array<{ value: number }> }> }>(
+      `data/fiscal/${FX_ID}.json`,
+    )
       .then((doc) => {
-        const rate = (id: string) =>
-          doc.series.find((s: { id: string }) => s.id === id)?.observations.at(-1)?.value;
+        const rate = (id: string) => {
+          const value = doc.series.find((s: { id: string }) => s.id === id)?.observations.at(-1)?.value;
+          if (value === undefined) throw new Error(`Missing exchange-rate series ${id}`);
+          return value;
+        };
         setFx({ dkkToRon: rate('dkk-ron'), eurToRon: rate('eur-ron'), date: doc.retrieved });
       })
       .catch((e: Error) => setError(e.message));
 
-    fetch(`${base}data/fiscal/${BENCHMARKS_ID}.json`)
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`benchmarks: ${r.status}`))))
+    loadJson<{ retrieved: string; series: Array<{ id: string; observations: Array<{ value: number }> }> }>(
+      `data/fiscal/${BENCHMARKS_ID}.json`,
+    )
       .then((doc) => {
-        const val = (id: string) =>
-          doc.series.find((s: { id: string }) => s.id === id)?.observations.at(-1)?.value;
+        const val = (id: string) => {
+          const value = doc.series.find((s: { id: string }) => s.id === id)?.observations.at(-1)?.value;
+          if (value === undefined) throw new Error(`Missing benchmark series ${id}`);
+          return value;
+        };
         setBenchmarks({
           avgRo: val('avg-gross-monthly-ro'),
           avgDk: val('avg-gross-monthly-dk'),
@@ -183,11 +214,15 @@ export default function App() {
       .catch((e: Error) => setError(e.message));
 
     Promise.all([
-      fetch(`${base}data/groups/${GROUPS_ID}.json`).then((r) => r.json()),
-      fetch(`${base}data/fiscal/${DK_OCC_ID}.json`).then((r) => r.json()),
-      fetch(`${base}data/fiscal/${EXEC_ID}.json`).then((r) => r.json()),
-      fetch(`${base}data/fiscal/${CAP_ID}.json`).then((r) => r.json()),
-      fetch(`${base}data/fiscal/${INS_ID}.json`).then((r) => r.json()),
+      loadJson<GroupsDocument>(`data/groups/${GROUPS_ID}.json`),
+      loadJson<{ series: Array<{ dims: Record<string, string>; observations: Array<{ period: string; value: number }> }> }>(
+        `data/fiscal/${DK_OCC_ID}.json`,
+      ),
+      loadJson<{ series: Array<{ dims: Record<string, string>; observations: Array<{ period: string; value: number }> }> }>(
+        `data/fiscal/${EXEC_ID}.json`,
+      ),
+      loadJson<{ series: CapSeries[] }>(`data/fiscal/${CAP_ID}.json`),
+      loadJson<{ series: MeasuredSeries[] }>(`data/fiscal/${INS_ID}.json`),
     ])
       .then(([groupsDoc, occDoc, execDoc, capDoc, insDoc]) => {
         setCapSeries(capDoc.series);
@@ -238,9 +273,13 @@ export default function App() {
     // accounting the ordonatori actually file, and they run to the current year. Eurostat
     // is still read, but only for nominal GDP — the one number the execution does not have.
     Promise.all([
-      fetch(`${base}data/fiscal/${FISCAL_ID}.json`).then((r) => r.json()),
-      fetch(`${base}data/headcount/${HEADCOUNT_ID}.json`).then((r) => r.json()),
-      fetch(`${base}data/fiscal/${EXEC_ID}.json`).then((r) => r.json()),
+      loadJson<{ series: Array<{ id: string; observations: Array<{ value: number }> }> }>(
+        `data/fiscal/${FISCAL_ID}.json`,
+      ),
+      loadJson<{ totalPosts: number }>(`data/headcount/${HEADCOUNT_ID}.json`),
+      loadJson<{ series: Array<{ dims: Record<string, string>; observations: Array<{ value: number }> }> }>(
+        `data/fiscal/${EXEC_ID}.json`,
+      ),
     ])
       .then(([fiscal, headcount, execDoc]) => {
         const cash = (id: string) =>
@@ -262,7 +301,7 @@ export default function App() {
 
         // The whole of title I, contributions included. The composition view excludes
         // employer contributions so it can be compared with Danish earnings; the envelope
-        // must not, because Art. 36 alin. (3) sets its target against personnel
+        // must not, because Art. 38 alin. (5) sets its target against personnel
         // expenditure as the budget defines it. Same source, two different questions.
         const byFamilyLei = new Map<string, number>();
         let nationalLei = 0;
@@ -307,15 +346,14 @@ export default function App() {
     // page renders a confident "0 au un corespondent" — which is a statement about the
     // fetch, not about the crosswalk.
     const NEEDS_ALL: ViewId[] = [
-      'compare', 'echivalente', 'payslip', 'distributie', 'acasa', 'functii',
+      'compare', 'domenii', 'echivalente', 'payslip', 'distributie', 'acasa', 'functii',
     ];
     const needed = NEEDS_ALL.includes(scenario.view) ? AVAILABLE : wanted;
-    const missing = needed.filter((id) => !regimes[id] && AVAILABLE.includes(id));
+    const missing = needed.filter((id) => !regimes[id] && LOADABLE.includes(id));
     if (missing.length === 0) return;
     Promise.all(
       missing.map((id) =>
-        fetch(`${import.meta.env.BASE_URL}data/regimes/${id}.json`)
-          .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`${id}: ${r.status}`))))
+        loadJson<Regime>(`data/regimes/${id}.json`)
           .then((doc: Regime) => [id, doc] as const),
       ),
     )
@@ -324,9 +362,9 @@ export default function App() {
   }, [wanted, regimes, scenario.view]);
 
   const loaded = wanted.map((id) => regimes[id]).filter(Boolean);
-  const ministry = regimes['ro-draft-2026-07-16'] ?? null;
+  const ministry = regimes[ACTIVE_DRAFT_ID] ?? null;
 
-  // The proposal is derived, never stored: applying five patches to the ministry's grid
+  // The proposal is derived, never stored: applying its patches to the ministry's grid
   // is cheap, and keeping it derived means it cannot drift from the data it edits.
   // Patches the reader switched off on the proposal page stay off everywhere else. A
   // scenario that showed one proposal on its own page and a different one on the
@@ -374,7 +412,7 @@ export default function App() {
 
   return (
     <div className="wrap">
-      <nav className="tabs">
+      <nav className="tabs" aria-label="Secțiunile instrumentului">
         {NAV_GROUPS.map((group) => (
           <div className="tabgroup" key={group.title}>
             <span className="tabgroup-title">{group.title}</span>
@@ -491,6 +529,25 @@ export default function App() {
           onScenario={setScenario}
         />
       )}
+      {scenario.view === 'domenii' && ministry && ours && occGroups && dkOcc && fx && benchmarks && (
+        <DomainsView
+          inForce={regimes['ro-153-2017'] ?? null}
+          draft={ministry}
+          proposal={ours.regime}
+          groups={occGroups}
+          danish={dkOcc}
+          rates={fx}
+          benchmarks={{
+            avgRo: benchmarks.avgRo,
+            avgDk: benchmarks.avgDk,
+            floorRo: benchmarks.floorRo,
+            floorDk: benchmarks.floorDk,
+            year: benchmarks.year,
+          }}
+          scenario={scenario}
+          onScenario={setScenario}
+        />
+      )}
       {scenario.view === 'meserii' && ministry && occGroups && dkOcc && occBench && fx && (
         <OccupationsView
           regime={ministry}
@@ -518,9 +575,9 @@ export default function App() {
             fx={fx}
             benchmarks={benchmarks}
           />
-        )}
+      )}
       {loaded.length > 0 && scenario.view === 'structure' && (
-        <StructureView regime={regimes['ro-draft-2026-07-16'] ?? loaded[0]} period={period} />
+        <StructureView regime={regimes[ACTIVE_DRAFT_ID] ?? loaded[0]} period={period} />
       )}
       {scenario.view === 'envelope' && fx && (
         <EnvelopeView
@@ -543,11 +600,12 @@ export default function App() {
       )}
 
       <footer>
-        Sursă: proiectul de lege MMFTSS din 16.07.2026 și anexele de coeficienți; pentru Danemarca,
-        tabelele IDA din 01.04.2026. Fiecare număr din <code>data/</code> poartă documentul și
-        articolul sau celula din care provine.{' '}
-        <a href="https://github.com/CristianNichifor/public-pay-simulator">Cod și date</a>. Licență
-        Apache-2.0.
+        Sursă: pachetul public MMFTSS din 20.08.2026 și anexele de coeficienți; pentru
+        Danemarca, tabelele IDA din 01.04.2026. Fiecare număr din <code>data/</code> poartă
+        documentul și articolul sau celula din care provine.{' '}
+        <a href="https://github.com/CristianNichifor/romania-reforms/tree/main/simulators/salarizare">
+          Cod și date
+        </a>. Licență Apache-2.0.
       </footer>
     </div>
   );

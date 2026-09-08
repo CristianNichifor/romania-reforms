@@ -83,7 +83,7 @@ export interface EnvelopeResult {
   increases: LedgerEntry[];
   reductions: ReductionEntry[];
   byFamily: Array<{ family: string; label: string; before: Money; after: Money; delta: Money }>;
-  /** The bill as a share of GDP, before and after, since Art. 36(3) is written that way. */
+  /** The bill as a share of GDP, before and after, since Art. 38(5) is written that way. */
   shareOfGdp: { before: number; after: number };
   perPost: { before: Money; after: Money };
   unnamed: string[];

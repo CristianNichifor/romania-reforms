@@ -2,9 +2,9 @@
   "$schema": "../../schema/proposal.schema.json",
   "id": "propunere-v1",
   "name": "Propunere alternativă v1 — grila reparată",
-  "base": "ro-draft-2026-07-16",
+  "base": "ro-draft-2026-08-20",
   "status": "proposal",
-  "summary": "Nouă modificări la proiectul MMFTSS: șapte reparații și două schimbări de politică, marcate ca atare. Reparațiile nu schimbă cine cât ia unul față de altul — fiecare repară un defect pe care instrumentul îl arată deja în datele publicate. Cele două schimbări de politică mută bani între oameni și își scriu temeiul.",
+  "summary": "Nouă modificări la proiectul MMFTSS din 20.08.2026: șapte reparații și două schimbări de politică, marcate ca atare. Reparațiile nu schimbă cine cât ia unul față de altul — fiecare repară un defect pe care instrumentul îl arată deja în datele publicate. Cele două schimbări de politică mută bani între oameni și își scriu temeiul.",
   "notPolicy": "Cele șapte reparații nu ridică și nu scad salarii în raport unele cu altele. Compresia grilei, nivelul valorii de referință și repartiția între familii ocupaționale rămân exact cele propuse de minister; ce se schimbă este dacă regulile scrise în lege pot fi de fapt aplicate. Două modificări fac altceva și sunt marcate „policyChange”: „Sporul pentru condiții se aduce la un nivel proporțional cu munca”, care mută sporuri legate de instituție în interiorul plafonului, și „Meseriile manuale se plătesc după ce fac, nu după anexa în care sunt trecute”, care ia din coeficient partea plătită pentru anexă și cere ca ea să fie declarată ca atribuție sau să dispară. Amândouă redistribuie, amândouă o spun, și niciuna nu se sprijină pe caietul ministerului pentru cuantum.",
   "provenance": {
     "source": "propunere-alternativa",
@@ -19,7 +19,7 @@
       "decimals": 2,
       "title": "Coeficienții se rotunjesc la două zecimale",
       "fixes": "coeficienti-retrocalculati",
-      "rationale": "1361 de coeficienți distincți, dintre care 61,9% au 14 sau mai multe zecimale și 582 au exact 16. Un coeficient ca 5,189610389610378 nu este o decizie de politică salarială, ci restul unei împărțiri: grila a fost dedusă din salariile existente, nu proiectată prin evaluarea funcțiilor pe care o descrie Art. 8. Rotunjirea nu schimbă ierarhia — schimbă doar faptul că valorile devin alegeri asumate, care pot fi dezbătute și modificate una câte una.",
+      "rationale": "1373 de coeficienți distincți, dintre care 37,2% au 14 sau mai multe zecimale și 61 au exact 16. Un coeficient ca 5,189610389610378 nu este o decizie de politică salarială, ci restul unei împărțiri: grila a fost dedusă din salariile existente, nu proiectată prin evaluarea funcțiilor pe care o descrie Art. 8. Rotunjirea nu schimbă ierarhia — schimbă doar faptul că valorile devin alegeri asumate, care pot fi dezbătute și modificate una câte una.",
       "expectedEffect": "Numărul de valori distincte scade abrupt; histograma de precizie se concentrează pe două zecimale. Salariile se mișcă cu cel mult câțiva lei."
     },
     {
@@ -27,8 +27,8 @@
       "op": "makeGradeBandsContiguous",
       "title": "Intervalele gradelor salariale devin continue",
       "fixes": "coeficienti-intre-grade",
-      "rationale": "Art. 9 alin. (2) scrie cele 12 intervale cu două zecimale — gradul 1 se termină la 1,19, gradul 2 începe la 1,20 — dar anexele livrează coeficienți cu 16 zecimale. 92 de variante cad în golurile de o sutime dintre intervale și nu aparțin niciunui grad salarial. Încadrarea în grad determină evaluarea, promovarea și orice măsură de compresie, deci un coeficient fără grad este un om fără regulă aplicabilă.",
-      "expectedEffect": "Cele 92 de variante primesc un grad. Niciun coeficient nu se schimbă."
+      "rationale": "Art. 9 alin. (2) scrie cele 12 intervale cu două zecimale — gradul 1 se termină la 1,19, gradul 2 începe la 1,20 — dar anexele livrează coeficienți cu multe zecimale. 88 de variante cad în golurile de o sutime dintre intervale și nu aparțin niciunui grad salarial. Încadrarea în grad determină evaluarea, promovarea și orice măsură de compresie, deci un coeficient fără grad este un om fără regulă aplicabilă.",
+      "expectedEffect": "Cele 88 de variante primesc un grad. Niciun coeficient nu se schimbă."
     },
     {
       "id": "institutia-nu-e-denumire",
@@ -44,8 +44,8 @@
       "policyChange": true,
       "title": "Meseriile manuale se plătesc după ce fac, nu după anexa în care sunt trecute",
       "fixes": "meseria-platita-dupa-anexa",
-      "rationale": "Este o schimbare de politică, nu o reparație — mută bani între oameni, și o spune. Un șofer conduce. Anexa spune ce minister îl angajează, nu ce face, iar grila plătește anexa: același permis valorează 1,1489 la o primărie mică și 1,5714 pe o autosanitară, cu 37% diferență și fără ca legea să numească vreo atribuție care să o justifice. Corectura numește meseria o singură dată, la cel mai mic coeficient din grilă, și cere ca tot ce plăteau anexele mai generoase să fie declarat ca atribuție sau să nu mai fie plătit. A conduce o ambulanță este o atribuție; a conduce pentru Ministerul Sănătății nu este. Atribuțiile și cuantumurile lor sunt scrise aici, nu deduse din caietul ministerului, pentru că sursa nu conține așa ceva: sunt marcate „assumed” și pot fi contestate una câte una. Reperul pentru cuantum este ce se plătește efectiv în Danemarca pentru condiții de muncă — 8,8% din câștig la personalul de îngrijire, 4,9% la polițiști, 0,2-0,3% la profesori și personal de birou — adică procente dintr-o cifră, nu treimi. Ce nu acoperă atribuțiile nu se ascunde într-un multiplicator: rămâne scris ca „rest neexplicat” pe fiecare funcție absorbită, iar acela este rezultatul.",
-      "expectedEffect": "Opt funcții de șofer din două anexe devin una singură, la coeficientul 1,15, cu trei atribuții numite. Rezultatul e că atribuția explică diferența acolo unde chiar există o atribuție și nu o explică unde nu există: la „Conducător autospecială” rămâne un rest de 1,1%, la „Șoferi I - ambulanțe veterinare” 30,6%, la șoferul de autosanitară între 14,6% și 28,5%. Restul acela e ce plătea anexa fără să spună pentru ce. Muncitorul calificat, muncitorul necalificat și îngrijitorul se unifică fără nicio atribuție, pentru că nu e niciuna de numit — resturile lor sunt mici (5,5%, 0%, 6,7%), ceea ce arată că acolo problema e denumirea, nu banii. Zece funcții dispar din nomenclator. Cine urcă și cine coboară se vede pe pagina de distribuție: nu e o corectură neutră și nu pretinde să fie.",
+      "rationale": "Este o schimbare de politică, nu o reparație — mută bani între oameni, și o spune. Un șofer conduce. Anexa spune ce minister îl angajează, nu ce face, iar grila plătește anexa: același permis valorează 1,21 la o primărie și 1,57 pe o autosanitară, cu aproape 30% diferență și fără ca legea să numească vreo atribuție care să o justifice. Corectura numește meseria o singură dată, la cel mai mic coeficient din grilă, și cere ca tot ce plăteau anexele mai generoase să fie declarat ca atribuție sau să nu mai fie plătit. A conduce o ambulanță este o atribuție; a conduce pentru Ministerul Sănătății nu este. Atribuțiile și cuantumurile lor sunt scrise aici, nu deduse din caietul ministerului, pentru că sursa nu conține așa ceva: sunt marcate „assumed” și pot fi contestate una câte una. Reperul pentru cuantum este ce se plătește efectiv în Danemarca pentru condiții de muncă — 8,8% din câștig la personalul de îngrijire, 4,9% la polițiști, 0,2-0,3% la profesori și personal de birou — adică procente dintr-o cifră, nu treimi. Ce nu acoperă atribuțiile nu se ascunde într-un multiplicator: rămâne scris ca „rest neexplicat” pe fiecare funcție absorbită, iar acela este rezultatul.",
+      "expectedEffect": "Șase funcții de șofer din două anexe devin una singură, la coeficientul 1,15, cu trei atribuții numite; cinci rânduri de șofer sunt absorbite în funcția păstrată. Rezultatul e că atribuția explică diferența acolo unde chiar există o atribuție și nu o explică unde nu există: la „Conducător autospecială” rămâne un rest de 1,1%, la „Șoferi I - ambulanțe veterinare” 30,6%, la „Șoferi II - ambulanțe veterinare” 24,6%, iar la șoferul de autosanitară 28,5%. Restul acela e ce plătea anexa fără să spună pentru ce. Muncitorul calificat, muncitorul necalificat și îngrijitorul se unifică fără nicio atribuție, pentru că nu e niciuna de numit. Treisprezece coduri sunt atinse, nouă poziții din nomenclator sunt rescrise. Cine urcă și cine coboară se vede pe pagina de distribuție: nu e o corectură neutră și nu pretinde să fie.",
       "trades": [
         {
           "id": "sofer",
@@ -111,7 +111,7 @@
       "keep": "first",
       "title": "Raportul de 1 la 8 se aplică de la intrarea în vigoare",
       "fixes": "raportul-1-8-esalonat",
-      "rationale": "Art. 5 spune că raportul este 1 la 8. În grilă, raportul efectiv în 2026/2027 este 1:7,39, iar 8,00 apare abia în coloana 2031 a Anexei IX. O lege care își declară propriul raport ar trebui să îl respecte în ziua în care intră în vigoare, nu la capătul unui eșalonament de cinci ani care poate fi oricând modificat de o altă lege. Varianta aleasă aici păstrează coeficientul din primul an și elimină eșalonarea, adică ține vârful jos, nu ridică baza.",
+      "rationale": "Art. 5 spune că raportul este 1 la 8. În grilă, raportul efectiv rămâne 1:7,39 în 2026/2027, 2028 și 2029, urcă la 1:7,62 în 2030, iar 8,00 apare abia în coloana 2031 a Anexei IX. O lege care își declară propriul raport ar trebui să îl respecte în ziua în care intră în vigoare, nu la capătul unui eșalonament de cinci ani care poate fi oricând modificat de o altă lege. Varianta aleasă aici păstrează coeficientul din primul an și elimină eșalonarea, adică ține vârful jos, nu ridică baza.",
       "expectedEffect": "Coeficienții demnitarilor rămân la nivelul 2026/2027. Raportul declarat și cel efectiv coincid."
     },
     {

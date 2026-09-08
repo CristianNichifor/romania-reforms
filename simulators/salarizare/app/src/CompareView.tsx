@@ -73,7 +73,7 @@ function columnsFor(proposal: Proposal): Array<{ key: Col; title: string; sub: s
   const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
   return [
     { key: 'inForce', title: 'Legea în vigoare', sub: '153/2017, grila pentru 2022' },
-    { key: 'ministry', title: 'Proiectul MMFTSS', sub: '16.07.2026' },
+    { key: 'ministry', title: 'Proiectul MMFTSS', sub: '20.08.2026' },
     {
       key: 'ours',
       title: 'Propunerea alternativă',

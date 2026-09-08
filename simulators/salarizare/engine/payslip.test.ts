@@ -12,7 +12,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const load = (id: string): Regime =>
   JSON.parse(readFileSync(resolve(here, `../data/regimes/${id}.json`), 'utf8'));
 
-const RO = load('ro-draft-2026-07-16');
+const RO = load('ro-draft-2026-08-20');
 const DK = load('dk-stat-2026');
 
 /** Minor units to a readable major-unit number, for assertions only. */
@@ -33,9 +33,9 @@ describe('payslip — Romania', () => {
   const auditor: Person = { positionCode: '81.10104001.01', seniorityYears: 0 };
 
   it('multiplies the coefficient by the reference value and rounds up', () => {
-    // 2,499 x 4100 = 10 245,90 -> 10 246 lei, rounded up in favour of the employee.
+    // 2,499 x 4000 = 9 996 lei, rounded up in favour of the employee.
     const slip = payslip(auditor, RO);
-    expect(major(slip.base)).toBe(10246);
+    expect(major(slip.base)).toBe(9996);
     expect(slip.period).toBe('month');
     expect(slip.currency).toBe('RON');
   });
@@ -83,8 +83,8 @@ describe('payslip — Romania', () => {
     );
     expect(secretarGeneral.seniority.bakedIn).toBe(true);
     expect(secretarGeneral.seniority.amount).toBe(0);
-    // 5,4 x 4100 = 22 140, with no uplift on top.
-    expect(major(secretarGeneral.base)).toBe(22140);
+    // 5,4 x 4000 = 21 600, with no uplift on top.
+    expect(major(secretarGeneral.base)).toBe(21600);
   });
 
   it('charges income tax after the contributions, not on gross', () => {
@@ -138,7 +138,7 @@ describe('payslip — Romania', () => {
       RO,
     );
     expect(low.supplements[0].amount).toBe(high.supplements[0].amount);
-    expect(major(low.supplements[0].amount)).toBe(615); // 15% of 4100
+    expect(major(low.supplements[0].amount)).toBe(600); // 15% of 4000
   });
 
   it('suppresses a supplement excluded by another that was claimed', () => {

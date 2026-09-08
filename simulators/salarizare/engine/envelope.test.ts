@@ -142,7 +142,7 @@ describe('what the result has to say out loud', () => {
     expect(envelope(baseline, []).diagnostics.map((d) => d.code)).toContain('familie-nu-functie');
   });
 
-  it('reports the bill as a share of GDP, the way Art. 36(3) is written', () => {
+  it('reports the bill as a share of GDP, the way Art. 38(5) is written', () => {
     const result = envelope(baseline, [move({ id: 'a', target: { kind: 'all' }, pct: -0.1 })]);
     expect(result.shareOfGdp.before).toBeCloseTo(0.1, 6);
     expect(result.shareOfGdp.after).toBeCloseTo(0.09, 6);

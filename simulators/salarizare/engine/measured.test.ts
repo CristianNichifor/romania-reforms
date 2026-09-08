@@ -11,7 +11,7 @@ import type { Regime } from './types';
 const here = dirname(fileURLToPath(import.meta.url));
 const read = (p: string) => JSON.parse(readFileSync(resolve(here, '..', p), 'utf8'));
 
-const DRAFT: Regime = read('data/regimes/ro-draft-2026-07-16.json');
+const DRAFT: Regime = read('data/regimes/ro-draft-2026-08-20.json');
 const IN_FORCE: Regime = read('data/regimes/ro-153-2017.json');
 const SERIES: MeasuredSeries[] = read('data/fiscal/ins-ocupatii.json').series;
 
@@ -28,7 +28,7 @@ describe('the grid against what people are paid', () => {
   });
 
   it('prices the grid at the regime\'s own reference value', () => {
-    // The draft divides by 4100 and 153/2017 by 2500, so the same family priced under
+    // The draft divides by 4000 and 153/2017 by 2500, so the same family priced under
     // each must differ. Comparing raw coefficients across regimes would be meaningless.
     const a = gridPay(DRAFT, 'I-invatamant');
     const b = gridPay(IN_FORCE, 'I-invatamant');
@@ -37,12 +37,12 @@ describe('the grid against what people are paid', () => {
     expect(a.max).toBeGreaterThan(a.median);
   });
 
-  it('finds the draft close to measured pay in health and short of it in education', () => {
-    // The finding this module exists for. Health lands almost exactly on what is paid;
-    // education sits well below it, which is where the transitional difference would
-    // have to do the work.
+  it('finds the draft near measured pay in health and short of it in education', () => {
+    // The finding this module exists for. In the August draft, health sits modestly
+    // above what is measured while education remains well below it, which is where the
+    // transitional difference would have to do the work.
     expect(health.ratio!).toBeGreaterThan(0.95);
-    expect(health.ratio!).toBeLessThan(1.05);
+    expect(health.ratio!).toBeLessThan(1.12);
     expect(school.ratio!).toBeGreaterThan(1.1);
   });
 

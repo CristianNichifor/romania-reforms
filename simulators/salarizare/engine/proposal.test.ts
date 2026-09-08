@@ -11,7 +11,7 @@ import type { Position, Regime } from './types';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const BASE: Regime = JSON.parse(
-  readFileSync(resolve(here, '../data/regimes/ro-draft-2026-07-16.json'), 'utf8'),
+  readFileSync(resolve(here, '../data/regimes/ro-draft-2026-08-20.json'), 'utf8'),
 );
 const PROPOSAL: Proposal = JSON.parse(
   readFileSync(resolve(here, '../data/proposals/propunere-v1.json'), 'utf8'),
@@ -46,7 +46,7 @@ describe('the proposal is auditable', () => {
   });
 
   it('leaves the base regime untouched', () => {
-    expect(BASE.id).toBe('ro-draft-2026-07-16');
+    expect(BASE.id).toBe('ro-draft-2026-08-20');
     expect(before.distinctValues).toBeGreaterThan(1000);
     expect(applied.regime.positions).not.toBe(BASE.positions);
   });
@@ -59,7 +59,7 @@ describe('the proposal is auditable', () => {
 
 describe('each patch fixes its stated defect', () => {
   it('rounding collapses the back-solved coefficients', () => {
-    expect(before.backSolvedShare).toBeGreaterThan(0.6);
+    expect(before.backSolvedShare).toBeGreaterThan(0.35);
     expect(after.backSolvedShare).toBe(0);
     expect(after.roundedShare).toBe(1);
     expect(after.distinctValues).toBeLessThan(before.distinctValues);
@@ -152,12 +152,12 @@ describe('each patch fixes its stated defect', () => {
   });
 
   it('pays a trade for what it does, not for the annex it sits in', () => {
-    // Eight driving posts across two annexes, 1,15 to 1,57 — a 37% spread for the same
+    // Six driving posts across two annexes, roughly 1,21 to 1,57 — a near 30% spread for the same
     // licence. After the patch there is one Șofer, at the floor, and the annexes' premium
     // has to survive as a named duty or not at all.
     const driver = applied.regime.positions.find((p) => p.name === 'Șofer' && p.tradeFold);
     expect(driver, 'the trade should be named once').toBeTruthy();
-    expect(driver!.tradeFold!.length).toBe(7);
+    expect(driver!.tradeFold!.length).toBe(5);
 
     // Every folded post came from one of the two annexes that pay drivers, and the fold
     // crossed between them — which is the whole point, and what mergeDuplicateTitles

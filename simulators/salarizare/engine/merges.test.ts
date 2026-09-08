@@ -20,9 +20,9 @@ import type { Crosswalk, Regime } from './types';
 const here = dirname(fileURLToPath(import.meta.url));
 const read = (path: string) => JSON.parse(readFileSync(resolve(here, '..', path), 'utf8'));
 
-const DRAFT: Regime = read('data/regimes/ro-draft-2026-07-16.json');
+const DRAFT: Regime = read('data/regimes/ro-draft-2026-08-20.json');
 const IN_FORCE: Regime = read('data/regimes/ro-153-2017.json');
-const CROSSWALK: Crosswalk = read('data/crosswalks/ro-153-2017--ro-draft-2026-07-16.json');
+const CROSSWALK: Crosswalk = read('data/crosswalks/ro-153-2017--ro-draft-2026-08-20.json');
 const GROUPS: GroupsDocument = read('data/groups/ro-dk-occupations.json');
 // The quartiles are published as three series per occupation. Folded here the way the app
 // folds them, because a test that reshaped the data its own way would be testing a shape

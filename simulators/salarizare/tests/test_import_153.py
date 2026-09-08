@@ -54,7 +54,7 @@ def test_the_draft_narrows_the_span_rather_than_widening_it(regime):
     span = max(values) / min(values)
     assert 10.3 < span < 10.7, "the in-force grid runs to the ICCJ judge's 10,5"
 
-    draft = json.loads((ROOT / "data/regimes/ro-draft-2026-07-16.json").read_text(encoding="utf-8"))
+    draft = json.loads((ROOT / "data/regimes/ro-draft-2026-08-20.json").read_text(encoding="utf-8"))
     draft_values = [
         v["value"]
         for p in draft["positions"]
@@ -111,6 +111,6 @@ def test_levies_are_verified_not_assumed(regime):
 
 def test_families_line_up_with_the_draft(regime):
     """Same annex numbering in both laws, which is what makes them comparable at all."""
-    draft = json.loads((ROOT / "data/regimes/ro-draft-2026-07-16.json").read_text(encoding="utf-8"))
+    draft = json.loads((ROOT / "data/regimes/ro-draft-2026-08-20.json").read_text(encoding="utf-8"))
     shared = {p["family"] for p in regime["positions"]} & {p["family"] for p in draft["positions"]}
     assert len(shared) >= 6

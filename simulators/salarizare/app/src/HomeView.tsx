@@ -46,6 +46,11 @@ const QUESTIONS: Array<{ ask: string; lead: string; entries: Entry[] }> = [
     lead: 'De la un post anume până la meseria întreagă, și cât înseamnă asta față de Danemarca.',
     entries: [
       {
+        view: 'domenii',
+        title: 'Domenii publice, pe aceeași scară',
+        body: 'Educație, sănătate, justiție, ordine, apărare, administrație, cercetare și cultură, normalizate la salariul mediu și la salariul minim.',
+      },
+      {
         view: 'meserii',
         title: 'Meserii, România vs Danemarca',
         body: 'Funcțiile regrupate după meserie, nu după anexă — și grila pusă lângă ce măsoară statistica oficială că se plătește.',
@@ -120,8 +125,8 @@ export default function HomeView({
         </a>
         <h1>Cum își plătește România angajații publici</h1>
         <p>
-          Un instrument pentru dezbaterea publică despre proiectul de lege al salarizării din 16
-          iulie 2026: ce schimbă față de legea care plătește oamenii azi, cine urcă și cine
+          Un instrument pentru dezbaterea publică despre proiectul de lege al salarizării din 20
+          august 2026: ce schimbă față de legea care plătește oamenii azi, cine urcă și cine
           coboară în ierarhie, cât costă și cum arată aceleași întrebări într-o țară care a
           rezolvat altfel problema.
         </p>
@@ -195,7 +200,7 @@ export default function HomeView({
         <div className="card home-sources">
           <ul>
             <li>
-              <b>Proiectul MMFTSS din 16.07.2026</b> — anexele de coeficienți, citite direct din
+              <b>Proiectul MMFTSS din 20.08.2026</b> — anexele de coeficienți, citite direct din
               caietul de lucru al ministerului
               {positions(ministry) !== null && <em> · {ro(positions(ministry)!)} funcții</em>}
             </li>

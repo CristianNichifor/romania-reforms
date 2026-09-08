@@ -7,7 +7,7 @@
  * scenario should be able to see what was assumed without running the app. That rules
  * out base64 of a JSON blob, which is shorter and opaque.
  *
- *   #/payslip?r=ro-draft-2026-07-16&p=81.10104001.01&y=12&s=cfp,fonduri-externe:0.4:0.85
+ *   #/payslip?r=ro-draft-2026-08-20&p=81.10104001.01&y=12&s=cfp,fonduri-externe:0.4:0.85
  *
  * Unknown keys survive a round trip untouched, so a link made by a later version does
  * not lose information when an older one reads it.
@@ -19,6 +19,7 @@ export type ViewId =
   | 'acasa'
   | 'compare'
   | 'propunere'
+  | 'domenii'
   | 'meserii'
   | 'echivalente'
   | 'payslip'
@@ -95,7 +96,7 @@ export const DEFAULT_SCENARIO: Scenario = {
   // A first visit lands on an explanation, not on a table of structural metrics. Links
   // already shared into #/compare keep working; only the bare URL changes.
   view: 'acasa',
-  regimeIds: ['ro-draft-2026-07-16'],
+  regimeIds: ['ro-draft-2026-08-20'],
 };
 
 /** `cfp` | `fonduri-externe:0.4` | `fonduri-externe:0.4:0.85` (rate, exempt share). */
@@ -156,6 +157,7 @@ export function decodeScenario(hash: string): Scenario {
     path === 'structure' ||
     path === 'compare' ||
     path === 'propunere' ||
+    path === 'domenii' ||
     path === 'meserii' ||
     path === 'echivalente' ||
     path === 'distributie' ||

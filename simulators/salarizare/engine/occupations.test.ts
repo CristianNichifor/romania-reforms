@@ -18,7 +18,7 @@ import type { Regime } from './types';
 const here = dirname(fileURLToPath(import.meta.url));
 const load = (p: string) => JSON.parse(readFileSync(resolve(here, '../data', p), 'utf8'));
 
-const REGIME: Regime = load('regimes/ro-draft-2026-07-16.json');
+const REGIME: Regime = load('regimes/ro-draft-2026-08-20.json');
 const GROUPS: GroupsDocument = load('groups/ro-dk-occupations.json');
 
 const DK: DkOccupation[] = (() => {

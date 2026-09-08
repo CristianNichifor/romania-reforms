@@ -82,13 +82,13 @@ export default function StructureView({
         <h1>Forma sistemului de salarizare</h1>
         <p>
           Structura grilei din proiectul de lege privind salarizarea personalului plătit din
-          fonduri publice, 16.07.2026. Nu cuantumuri, ci formă: câte valori distincte are grila,
+          fonduri publice, 20.08.2026. Nu cuantumuri, ci formă: câte valori distincte are grila,
           cât de precise sunt, cât de departe stau capetele, câtă informație despre ocupații
           se pierde prin comasare.
         </p>
         <p className="src">
           {ro(metrics.positions)} funcții · {ro(metrics.variants)} variante de coeficient · generate din{' '}
-          <code>Proiect-COEFICIENTI-1-8-MMFTSS-16.07.2026-1000.xlsx</code>, 48 de foi.
+          <code>Proiect-COEFICIENTI-1-8-20-august-2026.xlsx</code>, 49 de foi.
         </p>
       </header>
 

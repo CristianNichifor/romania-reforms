@@ -10,7 +10,7 @@ import type { Regime } from './types';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const BASE: Regime = JSON.parse(
-  readFileSync(resolve(here, '../data/regimes/ro-draft-2026-07-16.json'), 'utf8'),
+  readFileSync(resolve(here, '../data/regimes/ro-draft-2026-08-20.json'), 'utf8'),
 );
 
 describe('the years the draft phases itself over', () => {

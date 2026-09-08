@@ -30,8 +30,8 @@ export const TERMS: Record<string, GlossaryEntry> = {
   'valoare-de-referinta': {
     term: 'Valoarea de referință',
     short:
-      'Suma unică din care se calculează toate salariile de bază — 4.100 lei în proiect. Când se mișcă ea, se mișcă toată grila deodată; când se mișcă un coeficient, se mișcă un singur post față de restul.',
-    source: 'Art. 36 alin. (2)',
+      'Suma unică din care se calculează toate salariile de bază — 4.000 lei în proiect. Când se mișcă ea, se mișcă toată grila deodată; când se mișcă un coeficient, se mișcă un singur post față de restul.',
+    source: 'Art. 38 alin. (3)',
   },
   gradatie: {
     term: 'Gradație',
