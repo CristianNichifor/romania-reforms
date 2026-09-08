@@ -50,9 +50,9 @@
       ],
       "storagePolicy": "Small canonical JSON can be committed; larger historical snapshots should become release assets.",
       "nextSlice": {
-        "scope": "Full local finance adoption and remaining simulator-local SIRUTA joins",
-        "deliverable": "Publish the full 2025 national finance mart from packages/local_finance and keep consuming datasets joined through packages/uat_registry.",
-        "doneWhen": "Full-year finance outputs read shared packages instead of carrying simulator-local SIRUTA assumptions."
+        "scope": "Remaining simulator-local SIRUTA joins",
+        "deliverable": "Move the next consuming dataset's local SIRUTA assumptions into packages/uat_registry when that dataset is adopted by a shared package.",
+        "doneWhen": "A second shared dataset consumes packages/uat_registry without carrying its own SIRUTA/county/sector-parent join rules."
       }
     },
     {
@@ -123,9 +123,9 @@
       ],
       "storagePolicy": "Derived yearly marts should be release assets when they exceed the repository size budget; small summaries and schemas can be committed.",
       "nextSlice": {
-        "scope": "Full 2025 national mart, then 2023-2025 expansion if the repository size budget allows it.",
-        "deliverable": "Generate the national local-finance mart through packages/local_finance and make impozit-teren consume it or a compatibility export from it.",
-        "doneWhen": "The published impozit-teren 2025 budget totals are unchanged when regenerated from packages/local_finance."
+        "scope": "Arrears and historical finance expansion",
+        "deliverable": "Import arrears from data.gov.ro or publish the 2023-2025 national mart history as release assets if the committed size budget cannot hold it.",
+        "doneWhen": "The local finance mart can expose arrears per UAT-year, or the full 2023-2025 history is reproducible without increasing the tracked tree past its size gate."
       },
       "notes": [
         "Transparenta data is useful, but the catalog must not imply that the repository license covers the underlying official budget data."

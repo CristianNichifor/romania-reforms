@@ -1,0 +1,101 @@
+{
+  "$schema": "../schema/local-finance-validation-report.schema.json",
+  "id": "local-finance-validation-report-2025",
+  "title": "Local finance mart validation report, 2025",
+  "martId": "local-finance-mart-2025",
+  "periodStart": "2025",
+  "periodEnd": "2025",
+  "retrievedDate": "2026-09-08",
+  "summary": {
+    "checks": 5,
+    "passed": 4,
+    "warnings": 0,
+    "failed": 0,
+    "notRun": 1
+  },
+  "checks": [
+    {
+      "id": "full-national-scope",
+      "status": "pass",
+      "text": "Full mart covers the national Transparenta UAT roster, including county councils that file under county letter codes.",
+      "metrics": {
+        "uats": 3228,
+        "numericUats": 3187,
+        "countyCouncils": 41,
+        "years": 1,
+        "records": 3228,
+        "expectedRecords": 3228
+      }
+    },
+    {
+      "id": "registry-join",
+      "status": "pass",
+      "text": "Every numeric SIRUTA joins to the shared UAT registry and carries a CUI; county-council letter codes are kept outside that join.",
+      "metrics": {
+        "registryMatchedUats": 3187,
+        "numericUats": 3187,
+        "countyCouncils": 41
+      }
+    },
+    {
+      "id": "transparenta-line-items",
+      "status": "pass",
+      "text": "Every UAT-year has at least one revenue or spending line item.",
+      "metrics": {
+        "records": 3228,
+        "emptyRecords": 0
+      }
+    },
+    {
+      "id": "development-expense-type-coverage",
+      "status": "pass",
+      "text": "Transparenta development-spending expense-type rows are present for each requested year.",
+      "metrics": {
+        "missingYears": null
+      }
+    },
+    {
+      "id": "data-gov-2024-national-comparison",
+      "status": "not_run",
+      "text": "No data.gov.ro workbook was supplied, so the report records the comparison hook only.",
+      "metrics": {}
+    }
+  ],
+  "dataGovComparison": null,
+  "limitations": [
+    {
+      "id": "transparenta-data-license-snapshot",
+      "severity": "material",
+      "affects": [
+        "local-finance"
+      ],
+      "text": "Transparenta publishes the API and reference repositories openly, but this mart does not treat repository licenses as licenses for the underlying official budget data. Each snapshot keeps its own retrieval date and checksum."
+    },
+    {
+      "id": "own-revenue-classification-prefixes",
+      "severity": "material",
+      "affects": [
+        "ownRevenueRon",
+        "ownRevenueShare"
+      ],
+      "text": "Own revenue is derived by excluding functional-code prefixes for income-tax shares, VAT allocations, subsidies and EU funds. Moving a prefix changes the indicator, so the prefix list is published with the mart."
+    },
+    {
+      "id": "arrears-not-imported-yet",
+      "severity": "material",
+      "affects": [
+        "arrearsRon"
+      ],
+      "text": "The first slice does not import arrears. The field is present and null so downstream consumers can depend on the schema without mistaking missing arrears for zero arrears."
+    },
+    {
+      "id": "bucharest-sector-population-fallback",
+      "severity": "material",
+      "affects": [
+        "population",
+        "perInhabitantIndicators"
+      ],
+      "text": "The shared UAT registry has no official POP107D population split for Bucharest sectors. Sector rows keep Transparenta roster population as a fallback and mark the source on each record."
+    }
+  ]
+}

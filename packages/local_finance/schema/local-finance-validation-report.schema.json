@@ -19,9 +19,15 @@
   ],
   "properties": {
     "$schema": { "type": "string" },
-    "id": { "type": "string", "pattern": "^local-finance-validation-report-[0-9]{4}-[0-9]{4}$" },
+    "id": {
+      "type": "string",
+      "pattern": "^local-finance-validation-report-[0-9]{4}(-[0-9]{4})?$"
+    },
     "title": { "type": "string", "minLength": 1 },
-    "martId": { "type": "string", "pattern": "^local-finance-mart-sample-[0-9]{4}-[0-9]{4}$" },
+    "martId": {
+      "type": "string",
+      "pattern": "^local-finance-mart(-sample)?-[0-9]{4}(-[0-9]{4})?$"
+    },
     "periodStart": { "type": "string", "pattern": "^[0-9]{4}$" },
     "periodEnd": { "type": "string", "pattern": "^[0-9]{4}$" },
     "retrievedDate": { "type": "string", "format": "date" },

@@ -24,9 +24,13 @@
   ],
   "properties": {
     "$schema": { "type": "string" },
-    "id": { "type": "string", "pattern": "^local-finance-mart-sample-[0-9]{4}-[0-9]{4}$" },
+    "id": {
+      "type": "string",
+      "pattern": "^local-finance-mart(-sample)?-[0-9]{4}(-[0-9]{4})?$"
+    },
     "title": { "type": "string", "minLength": 1 },
     "publisher": { "const": "transparenta.eu" },
+    "scope": { "enum": ["sample", "full"] },
     "periodStart": { "type": "string", "pattern": "^[0-9]{4}$" },
     "periodEnd": { "type": "string", "pattern": "^[0-9]{4}$" },
     "currency": { "const": "RON" },
@@ -89,7 +93,6 @@
     },
     "sample": {
       "type": "array",
-      "minItems": 1,
       "items": { "$ref": "#/$defs/sampleRow" }
     },
     "summary": {
@@ -147,7 +150,7 @@
       "additionalProperties": false,
       "required": ["siruta", "role"],
       "properties": {
-        "siruta": { "type": "string", "pattern": "^[0-9]+$" },
+        "siruta": { "type": "string", "pattern": "^([0-9]+|[A-Z]{1,2})$" },
         "role": {
           "enum": ["county-seat", "bucharest-sector", "rural-commune", "town"]
         }
@@ -172,9 +175,9 @@
         "revenueRon": { "type": "number", "minimum": 0 },
         "ownRevenueRon": { "type": "number", "minimum": 0 },
         "spendingRon": { "type": "number", "minimum": 0 },
-        "personnelSpendingRon": { "type": "number", "minimum": 0 },
-        "capitalSpendingRon": { "type": "number", "minimum": 0 },
-        "developmentSpendingRon": { "type": "number", "minimum": 0 }
+        "personnelSpendingRon": { "type": "number" },
+        "capitalSpendingRon": { "type": "number" },
+        "developmentSpendingRon": { "type": "number" }
       }
     },
     "financeRecord": {
@@ -210,7 +213,7 @@
       ],
       "properties": {
         "year": { "type": "integer", "minimum": 2000 },
-        "siruta": { "type": "string", "pattern": "^[0-9]+$" },
+        "siruta": { "type": "string", "pattern": "^([0-9]+|[A-Z]{1,2})$" },
         "cui": { "type": ["string", "null"], "pattern": "^[0-9]+$" },
         "level": { "enum": ["municipality", "town", "commune", "sector", "county", "uat"] },
         "sampleRole": {
@@ -223,16 +226,16 @@
         "populationSource": { "type": ["string", "null"], "minLength": 1 },
         "revenueRon": { "type": "number", "minimum": 0 },
         "ownRevenueRon": { "type": "number", "minimum": 0 },
-        "transferRevenueRon": { "type": "number", "minimum": 0 },
+        "transferRevenueRon": { "type": "number" },
         "spendingRon": { "type": "number", "minimum": 0 },
-        "personnelSpendingRon": { "type": "number", "minimum": 0 },
-        "capitalSpendingRon": { "type": "number", "minimum": 0 },
-        "developmentSpendingRon": { "type": "number", "minimum": 0 },
+        "personnelSpendingRon": { "type": "number" },
+        "capitalSpendingRon": { "type": "number" },
+        "developmentSpendingRon": { "type": "number" },
         "arrearsRon": { "type": ["number", "null"], "minimum": 0 },
-        "ownRevenueShare": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
-        "personnelSpendingShare": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
-        "capitalSpendingShare": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
-        "developmentSpendingShare": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "ownRevenueShare": { "type": ["number", "null"] },
+        "personnelSpendingShare": { "type": ["number", "null"] },
+        "capitalSpendingShare": { "type": ["number", "null"] },
+        "developmentSpendingShare": { "type": ["number", "null"] },
         "revenuePerInhabitantRon": { "type": ["number", "null"], "minimum": 0 },
         "ownRevenuePerInhabitantRon": { "type": ["number", "null"], "minimum": 0 },
         "spendingPerInhabitantRon": { "type": ["number", "null"], "minimum": 0 },
