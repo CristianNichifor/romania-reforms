@@ -3,8 +3,8 @@
 Everything in this simulator is keyed by SIRUTA, and so is the boundary file another simulator
 in this repository already built and validated — `administrativ` joins 3 186 UAT polygons to
 their attributes on exactly that code and refuses to build if a single one fails to match. So
-the map is a join, not a project, and this file is deliberately thin: it emits geometry and the
-key, and nothing else.
+the map is a join, not a project. The shared UAT registry is the authority for which SIRUTA a
+shape paints as, which county it belongs to, and which parent absorbs sector-level shapes.
 
 **No values are baked in.** The page recomputes land value as the reader moves the intravilan
 share, the price band and the rest; a choropleth carrying pre-computed numbers would freeze at
@@ -36,28 +36,68 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 import geopandas as gpd
-import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 REPO = ROOT.parents[1]
 BOUNDARIES = REPO / "simulators" / "administrativ" / "data" / "processed" / "uat_geometry.gpkg"
 COUNTY_LINES = REPO / "dist" / "administrativ" / "data" / "counties.geojson"
+UAT_REGISTRY = REPO / "packages" / "uat_registry" / "data" / "uat-registry-2026.json"
 # About 100 m in degrees. A national choropleth resolves nothing finer, and the coastline and
 # the Danube keep their shape at this tolerance.
 TOLERANCE = 0.001
-# The municipality's own code in the land register and in SIRUTA; its six sectors are 179141
-# to 179196 and are not units this simulator prices.
-BUCHAREST_SIRUTA = "179132"
 # maplibre keys feature state on numbers, and a county code is a string. A fixed, alphabetical
 # list gives each county a stable integer id — stable being the load-bearing word, since the
 # ids are baked into the shipped file and looked up by the browser at paint time.
 ORDER = [
-    "AB", "AG", "AR", "B", "BC", "BH", "BN", "BR", "BT", "BV", "BZ", "CJ", "CL", "CS", "CT",
-    "CV", "DB", "DJ", "GJ", "GL", "GR", "HD", "HR", "IF", "IL", "IS", "MH", "MM", "MS", "NT",
-    "OT", "PH", "SB", "SJ", "SM", "SV", "TL", "TM", "TR", "VL", "VN", "VS",
+    "AB",
+    "AG",
+    "AR",
+    "B",
+    "BC",
+    "BH",
+    "BN",
+    "BR",
+    "BT",
+    "BV",
+    "BZ",
+    "CJ",
+    "CL",
+    "CS",
+    "CT",
+    "CV",
+    "DB",
+    "DJ",
+    "GJ",
+    "GL",
+    "GR",
+    "HD",
+    "HR",
+    "IF",
+    "IL",
+    "IS",
+    "MH",
+    "MM",
+    "MS",
+    "NT",
+    "OT",
+    "PH",
+    "SB",
+    "SJ",
+    "SM",
+    "SV",
+    "TL",
+    "TM",
+    "TR",
+    "VL",
+    "VN",
+    "VS",
 ]
+
+
+RegistryUnit = dict[str, Any]
 
 
 def round_coordinates(node):
@@ -87,6 +127,53 @@ def counties_with_values() -> set[str]:
     for path in (ROOT / "data").glob("valoare-teren-*.json"):
         found.update(json.loads(path.read_text(encoding="utf-8"))["counties"])
     return found
+
+
+def load_registry(path: Path = UAT_REGISTRY) -> dict[str, RegistryUnit]:
+    document = json.loads(path.read_text(encoding="utf-8"))
+    units = document["units"]
+    by_siruta = {str(unit["siruta"]): unit for unit in units}
+    if len(by_siruta) != len(units):
+        raise SystemExit(f"duplicate SIRUTA codes in {path}")
+    return by_siruta
+
+
+def paintable_registry_unit(siruta: str, registry: dict[str, RegistryUnit]) -> RegistryUnit:
+    """Return the registry unit this geometry should paint as.
+
+    Boundary geometry contains Bucharest sectors, but the land register and notary grid price
+    Bucharest as one municipality. The registry already carries that parent relation, so this
+    builder reads it there instead of carrying another local SIRUTA exception.
+    """
+    unit = registry.get(siruta)
+    if unit is None:
+        raise SystemExit(f"boundary SIRUTA {siruta} is absent from {UAT_REGISTRY}")
+    parent = unit.get("parentSiruta")
+    if unit.get("level") == "sector" and parent:
+        parent_unit = registry.get(str(parent))
+        if parent_unit is None:
+            raise SystemExit(f"sector SIRUTA {siruta} points to missing parent {parent}")
+        return parent_unit
+    return unit
+
+
+def join_registry_columns(
+    shapes: gpd.GeoDataFrame, registry: dict[str, RegistryUnit]
+) -> gpd.GeoDataFrame:
+    joined = shapes.copy()
+    source_sirutas = (
+        joined["siruta"]
+        .astype(str)
+        .str.strip()
+        .str.replace(r"\.0$", "", regex=True)
+        .str.lstrip("0")
+        .replace("", "0")
+    )
+    units = [paintable_registry_unit(siruta, registry) for siruta in source_sirutas]
+    joined["registry_siruta"] = [unit["siruta"] for unit in units]
+    joined["registry_name"] = [unit["name"] for unit in units]
+    joined["registry_county"] = [unit["countyCode"] for unit in units]
+    return joined
 
 
 def main() -> int:
@@ -121,41 +208,38 @@ def main() -> int:
     if not wanted:
         raise SystemExit("no valoare-teren-*.json; run build_valoare_teren.py first")
 
+    registry = load_registry()
+    unknown_value_counties = sorted(
+        wanted - {str(unit["countyCode"]) for unit in registry.values()}
+    )
+    if unknown_value_counties:
+        raise SystemExit(f"counties absent from shared UAT registry: {unknown_value_counties}")
+
     shapes = gpd.read_file(BOUNDARIES)
-    shapes = shapes[shapes["county_code"].isin(wanted)].copy()
+    shapes = join_registry_columns(shapes, registry)
+    shapes = shapes[shapes["registry_county"].isin(wanted)].copy()
     if shapes.empty:
         raise SystemExit(f"no boundaries matched {sorted(wanted)}")
-    # București is six sectors in the boundary file and one municipality everywhere else: the
-    # land register has a single row for it, SIRUTA 179132, and so does the notaries' study,
-    # which prices the city by cadastral zone rather than by sector. The sectors are dissolved
-    # into the municipality they compose — a real union, not a stand-in — or the capital is
-    # priced and then has no shape to paint, which is invisible on a map of Romania that still
-    # looks complete.
-    sectors = shapes["siruta"].astype(str).str.startswith("1791") & (
-        shapes["county_code"] == "B"
+
+    shapes = shapes.dissolve(
+        by="registry_siruta",
+        as_index=False,
+        aggfunc={"registry_name": "first", "registry_county": "first"},
     )
-    if sectors.any():
-        merged = shapes[sectors].dissolve(by="county_code").reset_index()
-        merged["siruta"] = BUCHAREST_SIRUTA
-        merged["name_uat"] = "MUNICIPIUL BUCUREȘTI"
-        shapes = gpd.GeoDataFrame(
-            pd.concat([shapes[~sectors], merged[shapes.columns]], ignore_index=True),
-            crs=shapes.crs,
-        )
     shapes = shapes.to_crs(4326)
     shapes["geometry"] = shapes.geometry.simplify(TOLERANCE, preserve_topology=True)
 
-    shapes = shapes[["siruta", "name_uat", "county_code", "geometry"]]
+    shapes = shapes[["registry_siruta", "registry_name", "registry_county", "geometry"]]
     features = json.loads(shapes.to_json())["features"]
     for feature in features:
         properties = feature["properties"]
         # The SIRUTA as an integer, because maplibre's feature state keys on numbers and
         # silently misses when a string id is looked up with a number.
-        feature["id"] = int(properties["siruta"])
+        feature["id"] = int(properties["registry_siruta"])
         feature["properties"] = {
-            "siruta": str(properties["siruta"]),
-            "name": properties["name_uat"],
-            "county": properties["county_code"],
+            "siruta": str(properties["registry_siruta"]),
+            "name": properties["registry_name"],
+            "county": properties["registry_county"],
         }
         feature["geometry"] = round_coordinates(feature["geometry"])
 
@@ -180,22 +264,20 @@ def main() -> int:
     # county commune by commune would dress a single regression coefficient up as local
     # knowledge. The visible difference between a mosaic and a flat shape is the point: it is
     # the difference in evidence, drawn.
-    whole = gpd.read_file(BOUNDARIES).to_crs(4326)
-    whole = whole.dissolve(by="county_code")[["geometry"]].reset_index()
+    whole = join_registry_columns(gpd.read_file(BOUNDARIES), registry).to_crs(4326)
+    whole = whole.dissolve(by="registry_county")[["geometry"]].reset_index()
     # Coarser than the communes, because a county outline is read at national zoom and its
     # detail is never the thing being looked at.
     whole["geometry"] = whole.geometry.simplify(TOLERANCE * 3, preserve_topology=True)
     county_features = json.loads(whole.to_json())["features"]
     for feature in county_features:
-        code = feature["properties"]["county_code"]
+        code = feature["properties"]["registry_county"]
         feature["id"] = ORDER.index(code) if code in ORDER else len(ORDER)
         feature["properties"] = {"county": code}
         feature["geometry"] = round_coordinates(feature["geometry"])
     shapes_out = ROOT / "data" / "harta-judete-poligon.geojson"
     shapes_out.write_text(
-        json.dumps(
-            {"type": "FeatureCollection", "features": county_features}, ensure_ascii=False
-        ),
+        json.dumps({"type": "FeatureCollection", "features": county_features}, ensure_ascii=False),
         encoding="utf-8",
     )
     print(

@@ -7,12 +7,16 @@ without knowing the country. So the join is asserted rather than trusted, in bot
 
 from __future__ import annotations
 
+import importlib.util
 import json
 from pathlib import Path
 
 import pytest
 
-DATA = Path(__file__).resolve().parents[1] / "simulators" / "impozit-teren" / "data"
+ROOT = Path(__file__).resolve().parents[1]
+DATA = ROOT / "simulators" / "impozit-teren" / "data"
+BUILD_HARTA = ROOT / "simulators" / "impozit-teren" / "scripts" / "build_harta.py"
+UAT_REGISTRY = ROOT / "packages" / "uat_registry" / "data" / "uat-registry-2026.json"
 
 
 @pytest.fixture(scope="module")
@@ -21,6 +25,12 @@ def shapes() -> dict:
     if not path.exists():
         pytest.skip("harta-uat.geojson is not built")
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+@pytest.fixture(scope="module")
+def registry_units() -> dict[str, dict]:
+    registry = json.loads(UAT_REGISTRY.read_text(encoding="utf-8"))
+    return {unit["siruta"]: unit for unit in registry["units"]}
 
 
 @pytest.fixture(scope="module")
@@ -52,6 +62,37 @@ def test_feature_ids_are_integers(shapes):
     for feature in shapes["features"]:
         assert isinstance(feature["id"], int)
         assert str(feature["id"]) == feature["properties"]["siruta"]
+
+
+def test_shipped_map_features_are_shared_registry_units(shapes, registry_units):
+    """A map feature outside the shared registry is another simulator-local SIRUTA table."""
+    missing = [
+        feature["properties"]["siruta"]
+        for feature in shapes["features"]
+        if feature["properties"]["siruta"] not in registry_units
+    ]
+    assert missing == []
+
+    wrong_county = [
+        feature["properties"]["siruta"]
+        for feature in shapes["features"]
+        if feature["properties"]["county"]
+        != registry_units[feature["properties"]["siruta"]]["countyCode"]
+    ]
+    assert wrong_county == []
+
+
+def test_bucharest_shape_is_the_registry_parent_not_sector_rows(shapes, registry_units):
+    """The land grid prices Bucharest once; sectors are geometry parts, not priced UATs."""
+    mapped = {feature["properties"]["siruta"] for feature in shapes["features"]}
+    sector_sirutas = {
+        unit["siruta"]
+        for unit in registry_units.values()
+        if unit["level"] == "sector" and unit["parentSiruta"] == "179132"
+    }
+
+    assert "179132" in mapped
+    assert mapped.isdisjoint(sector_sirutas)
 
 
 def test_the_unpainted_shapes_are_the_named_gaps(shapes, valued):
@@ -152,3 +193,31 @@ def test_the_county_polygons_stay_small(county_shapes):
     """Coarser than the communes on purpose: a county outline is read at national zoom."""
     size = (DATA / "harta-judete-poligon.geojson").stat().st_size
     assert size < 1_500_000, f"{size / 1e6:.1f} MB for 42 outlines is too much"
+
+
+def test_builder_reads_sector_parent_from_shared_registry():
+    """Pin the code path that replaced the old local Bucharest SIRUTA exception."""
+    pytest.importorskip("geopandas")
+    spec = importlib.util.spec_from_file_location("build_harta", BUILD_HARTA)
+    assert spec and spec.loader
+    build_harta = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(build_harta)
+
+    registry = {
+        "179132": {
+            "siruta": "179132",
+            "name": "MUNICIPIUL BUCURESTI",
+            "level": "municipality",
+            "countyCode": "B",
+            "parentSiruta": "403",
+        },
+        "179141": {
+            "siruta": "179141",
+            "name": "BUCURESTI SECTORUL 1",
+            "level": "sector",
+            "countyCode": "B",
+            "parentSiruta": "179132",
+        },
+    }
+
+    assert build_harta.paintable_registry_unit("179141", registry)["siruta"] == "179132"

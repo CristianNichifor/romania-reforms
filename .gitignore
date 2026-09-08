@@ -52,6 +52,10 @@ simulators/impozit-teren/sources/studies/
 simulators/impozit-teren/sources/unnpr-index.html
 simulators/impozit-teren/cache/
 
+# Generated map geometry published as a release asset. `build_harta.py` can rebuild it when
+# administrativ's processed geometry exists locally; CI and deploy fetch the pinned release copy.
+simulators/impozit-teren/data/harta-uat.geojson
+
 # The Romanian language pack for tesseract, fetched by hand for ocr_cache.py.
 # 2.3 MB of model weights that belong to the tesseract project, not to this repository.
 simulators/impozit-teren/tessdata/
