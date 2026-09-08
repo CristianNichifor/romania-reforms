@@ -1,8 +1,8 @@
-"""Validate every simulator's data against its schema.
+"""Validate every simulator and shared package data file against its schema.
 
-One gate for the whole repository. A simulator is free to define its own document types,
-but they all resolve `provenance.schema.json` from packages/provenance, so the vocabulary
-that makes these numbers arguable is defined once and cannot drift between simulators.
+One gate for the whole repository. A simulator or package is free to define its own document
+types, but they all resolve `provenance.schema.json` from packages/provenance, so the
+vocabulary that makes these numbers arguable is defined once and cannot drift between outputs.
 """
 
 from __future__ import annotations
@@ -25,8 +25,20 @@ def registry() -> Registry:
     resources = []
     for path in SHARED.glob("*.json"):
         contents = json.loads(path.read_text(encoding="utf-8"))
-        resources.append((path.name, Resource.from_contents(contents)))
+        resource = Resource.from_contents(contents)
+        resources.append((path.name, resource))
+        if contents.get("$id"):
+            resources.append((contents["$id"], resource))
     return Registry().with_resources(resources)
+
+
+def data_documents() -> list[tuple[str, Path]]:
+    documents: list[tuple[str, Path]] = []
+    for data_file in sorted(ROOT.glob("simulators/*/data/*.json")):
+        documents.append((f"{data_file.parents[1].name}/{data_file.name}", data_file))
+    for data_file in sorted(ROOT.glob("packages/*/data/*.json")):
+        documents.append((f"{data_file.parents[1].name}/{data_file.name}", data_file))
+    return documents
 
 
 def main() -> int:
@@ -44,8 +56,7 @@ def main() -> int:
     else:
         print(f"  schema ok: {DATA_CATALOG.name} ({len(catalog['datasets'])} datasets)")
 
-    for data_file in sorted(ROOT.glob("simulators/*/data/*.json")):
-        simulator = data_file.parents[1]
+    for label, data_file in data_documents():
         document = json.loads(data_file.read_text(encoding="utf-8"))
         ref = document.get("$schema", "")
         schema_path = (data_file.parent / ref).resolve()
@@ -53,7 +64,7 @@ def main() -> int:
         # own data directory, which exists, and the gate then tried to read a directory and died
         # on the traceback instead of naming the file that was missing its schema.
         if not ref or not schema_path.is_file():
-            errors.append(f"{data_file.name}: $schema points at {ref!r}, which is not a schema file")
+            errors.append(f"{label}: $schema points at {ref!r}, which is not a schema file")
             continue
 
         schema = json.loads(schema_path.read_text(encoding="utf-8"))
@@ -62,16 +73,22 @@ def main() -> int:
         checked += 1
         if found:
             for error in found[:10]:
-                errors.append(f"{data_file.name}: {'/'.join(map(str, error.path))}: {error.message}")
+                errors.append(f"{label}: {'/'.join(map(str, error.path))}: {error.message}")
         else:
-            count = len(document.get("courts") or document.get("series") or [])
-            print(f"  schema ok: {simulator.name}/{data_file.name} ({count} records)")
+            count = len(
+                document.get("courts")
+                or document.get("series")
+                or document.get("units")
+                or document.get("uats")
+                or []
+            )
+            print(f"  schema ok: {label} ({count} records)")
 
         # Provenance is the point of the repository, so it is checked as a rule rather
         # than left to each schema to remember.
         for record in document.get("courts") or []:
             if record.get("provenance", {}).get("confidence") == "assumed":
-                errors.append(f"{data_file.name}: {record.get('id')} carries assumed provenance")
+                errors.append(f"{label}: {record.get('id')} carries assumed provenance")
 
     if errors:
         print(f"\n{len(errors)} error(s):")
