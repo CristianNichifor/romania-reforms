@@ -63,6 +63,18 @@
       "withoutIt": "The salary simulator cannot load the August draft; CI and deploy fetch it before validation and build.",
       "bytes": 2316473,
       "sha256": "6109ab45d55d6076db131a2ca446ee08198ad0fecb46580d6032a4b8b7d88b1c"
+    },
+    {
+      "id": "impozit-teren-uat-map",
+      "tag": "data-v1",
+      "asset": "harta-uat.geojson",
+      "destination": "simulators/impozit-teren/data/harta-uat.geojson",
+      "bytes": 5358066,
+      "sha256": "a3d4094103b9a3e29c35c87f7cbe65baefd255183b69b55acd3a23a216364f16",
+      "producedBy": "simulators/impozit-teren/scripts/build_harta.py",
+      "needs": "simulators/administrativ/data/processed/uat_geometry.gpkg built by simulators/administrativ/pipeline/build_geometry.py",
+      "what": "Simplified UAT polygons for the land-value map, keyed by shared-registry SIRUTA and shipped as geometry only; the browser computes the values.",
+      "withoutIt": "The impozit-teren app cannot draw commune-level map polygons, but the source builders can reproduce the payload when administrativ geometry is available."
     }
   ]
 }
