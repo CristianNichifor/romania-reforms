@@ -1,0 +1,199 @@
+{
+  "$schema": "schema/data-catalog.schema.json",
+  "id": "romania-reforms-shared-data-catalog",
+  "updated": "2026-09-08",
+  "principles": [
+    "Shared datasets live here only when at least two simulators need the same source or key vocabulary.",
+    "Large derived payloads are published as release assets, not committed to git.",
+    "Every imported dataset must keep source URL, fetch date, checksum, transform version and limitations close to the numbers.",
+    "Third-party civic-tech repositories can supply schema and importer ideas, but official or explicitly licensed exports remain the source of truth."
+  ],
+  "datasets": [
+    {
+      "id": "siruta-uat-registry",
+      "title": "SIRUTA, UAT and CUI registry",
+      "status": "planned",
+      "priority": "p0",
+      "owner": "shared",
+      "why": "This is the join key for finance, health, administrative reform, land-value and transport datasets. A wrong locality join is worse than a missing one.",
+      "consumers": ["administrativ", "impozit-teren", "justitie", "transport", "salarizare"],
+      "keys": ["siruta", "cui", "countyCode", "natcode"],
+      "upstreamSources": [
+        {
+          "id": "data-gov-ro-siruta-2026",
+          "name": "SIRUTA_s1 2026",
+          "publisher": "Institutul National de Statistica",
+          "url": "https://data.gov.ro/dataset/721c9059-5f87-4c79-9854-a1d5c18f58d5/resource/dac903f0-32b5-489a-89e7-2c80d96cf68d/download/siruta_s1_2026.csv",
+          "license": "Creative Commons Attribution 4.0",
+          "role": "source-of-truth"
+        },
+        {
+          "id": "transparenta-uat-crosswalk",
+          "name": "Transparenta.eu UAT CUI/natcode map",
+          "publisher": "transparenta.eu",
+          "url": "https://github.com/ClaudiuBogdan/hack-for-facts-eb-client",
+          "license": "Apache-2.0 for repository code; underlying data provenance must be checked before reuse",
+          "role": "crosswalk",
+          "notes": "Use as a candidate crosswalk and diff against the INS registry before adoption."
+        }
+      ],
+      "minimumFields": ["siruta", "name", "level", "countyCode", "countyName", "population", "cui"],
+      "provenanceRequirements": [
+        "Record exact data.gov.ro resource URL and retrieval date.",
+        "Record whether CUI came from official source, Transparenta crosswalk or simulator-local resolution.",
+        "Carry one limitation for each unmatched or ambiguous UAT."
+      ],
+      "validationPlan": [
+        "Reject duplicate active SIRUTA codes.",
+        "Diff county assignment against the official SIRUTA county field.",
+        "Report unmatched CUIs instead of silently dropping them."
+      ],
+      "storagePolicy": "Small canonical JSON can be committed; larger historical snapshots should become release assets.",
+      "nextSlice": {
+        "scope": "2026 SIRUTA plus current Transparenta CUI crosswalk",
+        "deliverable": "A shared UAT registry fixture and a mismatch report.",
+        "doneWhen": "All simulator-local SIRUTA joins can read one registry and the mismatch report names every unresolved key."
+      }
+    },
+    {
+      "id": "local-finance-mart",
+      "title": "Local budget execution and fiscal stress",
+      "status": "active",
+      "priority": "p0",
+      "owner": "shared",
+      "why": "Administrative consolidation, land tax, public pay and procurement all need the same denominator: what each authority raises, receives, spends and owes.",
+      "consumers": ["administrativ", "impozit-teren", "salarizare", "achizitii-deschise"],
+      "keys": ["siruta", "cui", "year", "functionalCode", "economicCode", "fundingSource"],
+      "upstreamSources": [
+        {
+          "id": "transparenta-execution-graphql",
+          "name": "Transparenta.eu GraphQL budget execution API",
+          "publisher": "transparenta.eu",
+          "url": "https://api.transparenta.eu/graphql",
+          "license": "Public API/data license must be confirmed per imported snapshot",
+          "role": "source-of-truth",
+          "notes": "Already used by simulators/impozit-teren/scripts/import_buget_uat.py for buget-uat-2025."
+        },
+        {
+          "id": "transparenta-server-schema",
+          "name": "Transparenta.eu server schema and analytics model",
+          "publisher": "transparenta.eu",
+          "url": "https://github.com/ClaudiuBogdan/hack-for-facts-eb-server",
+          "license": "Apache-2.0 for repository code",
+          "role": "reference-implementation"
+        },
+        {
+          "id": "data-gov-ro-local-revenue-expense-2024",
+          "name": "Situatia veniturilor si cheltuielilor - 2024",
+          "publisher": "Ministerul Dezvoltarii Regionale si Administratiei Publice",
+          "url": "https://data.gov.ro/dataset/c0d25ff7-27d5-4c31-9809-540f77b20180/resource/aac89795-56f0-41ee-a631-26695f73c5d6/download/situaia-veniturilor-i-cheltuielilor-2024.xlsx",
+          "license": "Creative Commons Attribution 4.0",
+          "role": "comparison"
+        },
+        {
+          "id": "data-gov-ro-arierate",
+          "name": "Arierate",
+          "publisher": "Ministerul Finantelor Publice",
+          "url": "https://data.gov.ro/dataset/00138538-d1f2-4209-a14c-e4c12b6792f4",
+          "license": "OGL-ROU-1.0",
+          "role": "source-of-truth"
+        }
+      ],
+      "minimumFields": [
+        "siruta",
+        "cui",
+        "year",
+        "revenueRon",
+        "ownRevenueRon",
+        "spendingRon",
+        "personnelSpendingRon",
+        "capitalSpendingRon",
+        "developmentSpendingRon",
+        "arrearsRon"
+      ],
+      "provenanceRequirements": [
+        "Record GraphQL query, report type, account category, period and transformation version.",
+        "Record official comparison source and checksum for any totals used to validate Transparenta imports.",
+        "Publish classification-prefix assumptions for own revenue, transfers, personnel and capital spending."
+      ],
+      "validationPlan": [
+        "Compare national and county totals against an official data.gov.ro file when available.",
+        "Quarantine outliers by per-capita spending, as the existing buget-uat importer does.",
+        "Reject rows whose SIRUTA/CUI key is absent from the shared UAT registry."
+      ],
+      "storagePolicy": "Derived yearly marts should be release assets when they exceed the repository size budget; small summaries and schemas can be committed.",
+      "nextSlice": {
+        "scope": "Ten UATs across 2023-2025, including one county seat, one Bucharest sector and rural communes from at least three counties.",
+        "deliverable": "A reusable finance mart schema plus a generated validation report comparing Transparenta execution totals to data.gov.ro where possible.",
+        "doneWhen": "The existing impozit-teren budget import can be re-run through the shared mart without changing its published 2025 totals."
+      },
+      "notes": [
+        "Transparenta data is useful, but the catalog must not imply that the repository license covers the underlying official budget data."
+      ]
+    },
+    {
+      "id": "health-access-mart",
+      "title": "Health infrastructure and access",
+      "status": "planned",
+      "priority": "p0",
+      "owner": "shared",
+      "why": "Justice, administrative consolidation and transport reforms all need to know whether citizens lose or gain access to public services, not just administrative seats.",
+      "consumers": ["administrativ", "justitie", "transport"],
+      "keys": ["providerId", "name", "siruta", "countyCode", "specialty", "year"],
+      "upstreamSources": [
+        {
+          "id": "data-gov-ro-hospital-beds-2024",
+          "name": "Paturi in spitale",
+          "publisher": "Ministerul Sanatatii",
+          "url": "https://data.gov.ro/dataset/37aa4af3-4b99-4277-8193-236b8ccbaea1/resource/b4930a0f-b8e8-447f-ab02-778951b4a7ca/download/paturi-in-spitale-ministerul-sanatatii-academia-romana-elias-si-administratia-locala-la-31.xii.2.xls",
+          "license": "Creative Commons Attribution 4.0",
+          "role": "source-of-truth"
+        },
+        {
+          "id": "data-gov-ro-clinical-beds-2024",
+          "name": "Paturi clinice in spitale pe specialitati",
+          "publisher": "Ministerul Sanatatii",
+          "url": "https://data.gov.ro/dataset/c5619084-3ff8-4b9c-aa90-36e12a0fcf70/resource/6f28d169-e692-4079-8edd-caf46643673f/download/paturi-clinice-in-spitale-pe-specialitati-la-31.xii.2024.xls",
+          "license": "Creative Commons Attribution 4.0",
+          "role": "source-of-truth"
+        },
+        {
+          "id": "data-gov-ro-anmcs-2025",
+          "name": "Acreditarea unitatilor sanitare 2025",
+          "publisher": "Autoritatea Nationala de Managament al Calitatii in Sanatate",
+          "url": "https://data.gov.ro/dataset/9d218668-6a1d-4f3b-b889-cfb73d062f90/resource/5debc642-bdae-413e-93ff-9baf2d1e0c1d/download/anmcs-acreditare-unitati-sanitare-dec2025.xlsx",
+          "license": "Creative Commons Attribution 4.0",
+          "role": "source-of-truth"
+        }
+      ],
+      "minimumFields": [
+        "providerId",
+        "name",
+        "siruta",
+        "countyCode",
+        "ownerType",
+        "bedCount",
+        "specialty",
+        "accreditationCategory",
+        "latitude",
+        "longitude"
+      ],
+      "provenanceRequirements": [
+        "Record each workbook resource URL and checksum.",
+        "Mark geocoded locations as derived unless coordinates are directly published.",
+        "Carry one limitation for private/public ownership ambiguity and one for unmatched provider names."
+      ],
+      "validationPlan": [
+        "Reconcile total beds by county against the Ministry workbook totals.",
+        "Reject duplicate provider identifiers unless they represent different specialties in the same facility.",
+        "Report unlocated providers and prevent distance/access views from treating them as zero distance."
+      ],
+      "storagePolicy": "Provider summary JSON can be committed if small; geocoded/routing outputs should become release assets.",
+      "nextSlice": {
+        "scope": "2024 hospital bed/unit workbooks plus 2025 ANMCS accreditation for one validation county and Bucharest.",
+        "deliverable": "A health provider mart with provider identity, bed count, accreditation and location confidence.",
+        "doneWhen": "Access calculations can name which hospitals are reachable from each test UAT and which providers were excluded."
+      }
+    }
+  ]
+}
