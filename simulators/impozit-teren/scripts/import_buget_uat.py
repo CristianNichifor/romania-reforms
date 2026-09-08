@@ -126,6 +126,21 @@ def shared_registry_sirutas(path: Path = UAT_REGISTRY) -> set[str]:
     return {str(unit["siruta"]) for unit in document["units"]}
 
 
+def shared_registry_population(path: Path = UAT_REGISTRY) -> dict[str, int]:
+    document = json.loads(path.read_text(encoding="utf-8"))
+    return {
+        str(unit["siruta"]): unit["population"]
+        for unit in document["units"]
+        if unit["population"] is not None
+    }
+
+
+def prefer_registry_population(uats: list[dict], population_by_siruta: dict[str, int]) -> None:
+    for uat in uats:
+        if uat["siruta"].isdigit() and uat["siruta"] in population_by_siruta:
+            uat["population"] = population_by_siruta[uat["siruta"]]
+
+
 def validate_roster_against_registry(uats: list[dict], registry_sirutas: set[str]) -> None:
     missing = sorted(
         {
@@ -272,6 +287,7 @@ def main() -> int:
     if len(uats) < 3000:
         raise SystemExit(f"only {len(uats)} UATs came back; refusing to write a partial roster")
     validate_roster_against_registry(uats, shared_registry_sirutas())
+    prefer_registry_population(uats, shared_registry_population())
 
     revenue = fetch(uats, "vn", args.year)
     spending = fetch(uats, "ch", args.year)

@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/packages/uat_registry/schema/uat-registry-population-report.schema.json",
+  "title": "Shared UAT registry population report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "id",
+    "title",
+    "period",
+    "registryId",
+    "registryPeriod",
+    "retrievedDate",
+    "summary",
+    "sourceRowsNotInRegistry",
+    "duplicateSourceSiruta",
+    "registryRowsWithoutPopulation",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "type": "string", "pattern": "^uat-registry-population-report-[0-9]{4}$" },
+    "title": { "type": "string", "minLength": 1 },
+    "period": { "type": "string", "pattern": "^[0-9]{4}$" },
+    "registryId": { "type": "string", "pattern": "^uat-registry-[0-9]{4}$" },
+    "registryPeriod": { "type": "string", "pattern": "^[0-9]{4}$" },
+    "retrievedDate": { "type": "string", "format": "date" },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceFiles",
+        "sourceRows",
+        "sourcePeople",
+        "populatedRegistryRows",
+        "registryRowsWithoutPopulation",
+        "sourceRowsNotInRegistry",
+        "duplicateSourceSiruta"
+      ],
+      "properties": {
+        "sourceFiles": { "type": "integer", "minimum": 0 },
+        "sourceRows": { "type": "integer", "minimum": 0 },
+        "sourcePeople": { "type": "integer", "minimum": 0 },
+        "populatedRegistryRows": { "type": "integer", "minimum": 0 },
+        "registryRowsWithoutPopulation": { "type": "integer", "minimum": 0 },
+        "sourceRowsNotInRegistry": { "type": "integer", "minimum": 0 },
+        "duplicateSourceSiruta": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "sourceRowsNotInRegistry": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/sourceRow" }
+    },
+    "duplicateSourceSiruta": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/duplicateSourceSiruta" }
+    },
+    "registryRowsWithoutPopulation": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/registryRow" }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "$ref": "https://cristiannichifor.github.io/romania-reforms/schema/provenance.schema.json#/$defs/limitation"
+      }
+    }
+  },
+  "$defs": {
+    "sourceRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["siruta", "name", "county", "people", "source"],
+      "properties": {
+        "siruta": { "type": "string", "pattern": "^[0-9]+$" },
+        "name": { "type": "string", "minLength": 1 },
+        "county": { "type": "string", "pattern": "^[A-Z]{1,2}$" },
+        "people": { "type": "integer", "minimum": 0 },
+        "source": { "type": "string", "minLength": 1 }
+      }
+    },
+    "duplicateSourceSiruta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["siruta", "sources"],
+      "properties": {
+        "siruta": { "type": "string", "pattern": "^[0-9]+$" },
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
+      }
+    },
+    "registryRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["siruta", "name", "level", "countyCode", "reason"],
+      "properties": {
+        "siruta": { "type": "string", "pattern": "^[0-9]+$" },
+        "name": { "type": "string", "minLength": 1 },
+        "level": {
+          "enum": ["county", "municipality", "town", "commune", "sector"]
+        },
+        "countyCode": { "type": "string", "pattern": "^[A-Z]{1,2}$" },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

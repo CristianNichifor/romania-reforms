@@ -17,7 +17,8 @@ First slice:
 - done: import current SIRUTA
 - done: import Transparenta UAT crosswalk
 - done: write a mismatch report for duplicate, missing and ambiguous CUIs
-- next: import official UAT population and move simulator-local SIRUTA assumptions to this registry
+- done: import official UAT population from the committed POP107D county extracts
+- next: move simulator-local SIRUTA assumptions to this registry
 
 ## 2. Local finance mart
 
