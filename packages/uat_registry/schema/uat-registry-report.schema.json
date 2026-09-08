@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/packages/uat_registry/schema/uat-registry-report.schema.json",
+  "title": "Shared SIRUTA UAT registry mismatch report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "id",
+    "title",
+    "period",
+    "registryId",
+    "retrievedDate",
+    "summary",
+    "matchedCountyCodeRows",
+    "unmatchedCrosswalkRows",
+    "nonUatSirutaRows",
+    "duplicateSiruta",
+    "duplicateCui",
+    "registryRowsWithoutCui",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "type": "string", "pattern": "^uat-registry-mismatch-report-[0-9]{4}$" },
+    "title": { "type": "string", "minLength": 1 },
+    "period": { "type": "string", "pattern": "^[0-9]{4}$" },
+    "registryId": { "type": "string", "pattern": "^uat-registry-[0-9]{4}$" },
+    "retrievedDate": { "type": "string", "format": "date" },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "crosswalkRows",
+        "matchedRows",
+        "unmatchedRows",
+        "nonUatSirutaRows",
+        "duplicateSiruta",
+        "duplicateCui",
+        "registryRowsWithoutCui"
+      ],
+      "properties": {
+        "crosswalkRows": { "type": "integer", "minimum": 0 },
+        "matchedRows": { "type": "integer", "minimum": 0 },
+        "unmatchedRows": { "type": "integer", "minimum": 0 },
+        "nonUatSirutaRows": { "type": "integer", "minimum": 0 },
+        "duplicateSiruta": { "type": "integer", "minimum": 0 },
+        "duplicateCui": { "type": "integer", "minimum": 0 },
+        "registryRowsWithoutCui": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "matchedCountyCodeRows": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/countyCodeRow" }
+    },
+    "unmatchedCrosswalkRows": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/crosswalkRow" }
+    },
+    "nonUatSirutaRows": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/nonUatRow" }
+    },
+    "duplicateSiruta": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/duplicateSiruta" }
+    },
+    "duplicateCui": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/duplicateCui" }
+    },
+    "registryRowsWithoutCui": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/registryRow" }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "$ref": "https://cristiannichifor.github.io/romania-reforms/schema/provenance.schema.json#/$defs/limitation"
+      }
+    }
+  },
+  "$defs": {
+    "crosswalkRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cui", "natcode", "reason"],
+      "properties": {
+        "cui": { "type": "string", "minLength": 1 },
+        "natcode": { "type": "string", "minLength": 1 },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    },
+    "countyCodeRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["countyCode", "siruta", "name", "cui"],
+      "properties": {
+        "countyCode": { "type": "string", "pattern": "^[A-Z]{1,2}$" },
+        "siruta": { "type": "string", "pattern": "^[0-9]+$" },
+        "name": { "type": "string", "minLength": 1 },
+        "cui": { "type": "string", "pattern": "^[0-9]+$" }
+      }
+    },
+    "nonUatRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cui", "siruta", "name", "sirutaType", "sirutaLevel"],
+      "properties": {
+        "cui": { "type": "string", "pattern": "^[0-9]+$" },
+        "siruta": { "type": "string", "pattern": "^[0-9]+$" },
+        "name": { "type": "string", "minLength": 1 },
+        "sirutaType": { "type": "integer", "minimum": 1 },
+        "sirutaLevel": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "duplicateSiruta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["siruta", "cuis"],
+      "properties": {
+        "siruta": { "type": "string", "minLength": 1 },
+        "cuis": {
+          "type": "array",
+          "minItems": 2,
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
+      }
+    },
+    "duplicateCui": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cui", "natcodes"],
+      "properties": {
+        "cui": { "type": "string", "minLength": 1 },
+        "natcodes": {
+          "type": "array",
+          "minItems": 2,
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
+      }
+    },
+    "registryRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["siruta", "name", "level", "countyCode", "reason"],
+      "properties": {
+        "siruta": { "type": "string", "pattern": "^[0-9]+$" },
+        "name": { "type": "string", "minLength": 1 },
+        "level": {
+          "enum": ["county", "municipality", "town", "commune", "sector"]
+        },
+        "countyCode": { "type": "string", "pattern": "^[A-Z]{1,2}$" },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

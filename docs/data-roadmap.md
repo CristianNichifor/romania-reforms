@@ -14,10 +14,10 @@ Source of truth:
 
 First slice:
 
-- import current SIRUTA
-- import Transparenta UAT crosswalk
-- write a mismatch report for duplicate, missing and ambiguous CUIs
-- move simulator-local SIRUTA assumptions to this registry
+- done: import current SIRUTA
+- done: import Transparenta UAT crosswalk
+- done: write a mismatch report for duplicate, missing and ambiguous CUIs
+- next: import official UAT population and move simulator-local SIRUTA assumptions to this registry
 
 ## 2. Local finance mart
 

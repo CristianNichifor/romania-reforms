@@ -47,9 +47,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import retea  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 API = "https://api.transparenta.eu/graphql"
 UA = "romania-reforms/0.1 (+https://github.com/CristianNichifor/romania-reforms)"
 YEAR = 2025
+UAT_REGISTRY = REPO_ROOT / "packages" / "uat_registry" / "data" / "uat-registry-2026.json"
 
 # Revenue that arrives from above rather than being raised locally. Chapter prefixes of the
 # revenue classification: shares of income tax, sums broken out of VAT, subsidies from other
@@ -117,6 +119,28 @@ def roster() -> list[dict]:
             break
         print(f"  roster: {len(out)} of {page['pageInfo']['totalCount']}", file=sys.stderr)
     return out
+
+
+def shared_registry_sirutas(path: Path = UAT_REGISTRY) -> set[str]:
+    document = json.loads(path.read_text(encoding="utf-8"))
+    return {str(unit["siruta"]) for unit in document["units"]}
+
+
+def validate_roster_against_registry(uats: list[dict], registry_sirutas: set[str]) -> None:
+    missing = sorted(
+        {
+            uat["siruta"]
+            for uat in uats
+            if uat["siruta"].isdigit() and uat["siruta"] not in registry_sirutas
+        },
+        key=int,
+    )
+    if missing:
+        sample = ", ".join(missing[:10])
+        raise SystemExit(
+            f"transparenta.eu returned {len(missing)} numeric SIRUTA codes outside the "
+            f"shared UAT registry: {sample}"
+        )
 
 
 def batch_query(uat_ids: list[str], category: str, year: int, offset: int = 0) -> str:
@@ -247,6 +271,7 @@ def main() -> int:
     uats = roster()
     if len(uats) < 3000:
         raise SystemExit(f"only {len(uats)} UATs came back; refusing to write a partial roster")
+    validate_roster_against_registry(uats, shared_registry_sirutas())
 
     revenue = fetch(uats, "vn", args.year)
     spending = fetch(uats, "ch", args.year)

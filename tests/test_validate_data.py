@@ -114,6 +114,26 @@ def test_a_document_that_breaks_its_schema_fails_with_the_field_named(
     assert "invalid.json" in result.stdout and "id" in result.stdout
 
 
+def test_package_data_is_validated_by_the_same_gate(simulator: Path, tmp_path: Path):
+    (simulator / "data" / "bun.json").write_text(
+        json.dumps({"$schema": "../schema/proba.schema.json", "id": "bun"}), encoding="utf-8"
+    )
+    package = tmp_path / "packages" / "shared_demo"
+    (package / "data").mkdir(parents=True)
+    (package / "schema").mkdir()
+    (package / "schema" / "demo.schema.json").write_text(
+        json.dumps(SCHEMA), encoding="utf-8"
+    )
+    (package / "data" / "invalid-package.json").write_text(
+        json.dumps({"$schema": "../schema/demo.schema.json"}), encoding="utf-8"
+    )
+
+    result = _run(tmp_path)
+
+    assert result.returncode == 1
+    assert "shared_demo/invalid-package.json" in result.stdout and "id" in result.stdout
+
+
 def test_a_catalog_that_breaks_its_schema_is_named(simulator: Path, tmp_path: Path):
     (simulator / "data" / "bun.json").write_text(
         json.dumps({"$schema": "../schema/proba.schema.json", "id": "bun"}), encoding="utf-8"

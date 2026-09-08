@@ -12,7 +12,7 @@
     {
       "id": "siruta-uat-registry",
       "title": "SIRUTA, UAT and CUI registry",
-      "status": "planned",
+      "status": "active",
       "priority": "p0",
       "owner": "shared",
       "why": "This is the join key for finance, health, administrative reform, land-value and transport datasets. A wrong locality join is worse than a missing one.",
@@ -50,9 +50,9 @@
       ],
       "storagePolicy": "Small canonical JSON can be committed; larger historical snapshots should become release assets.",
       "nextSlice": {
-        "scope": "2026 SIRUTA plus current Transparenta CUI crosswalk",
-        "deliverable": "A shared UAT registry fixture and a mismatch report.",
-        "doneWhen": "All simulator-local SIRUTA joins can read one registry and the mismatch report names every unresolved key."
+        "scope": "Official population per UAT, then simulator-local SIRUTA joins",
+        "deliverable": "Populate the registry population field and point finance/map importers at the shared package.",
+        "doneWhen": "The finance importer can validate every numeric SIRUTA against packages/uat_registry/data/uat-registry-2026.json."
       }
     },
     {

@@ -14,11 +14,16 @@ stay visible: a filing set aside without being named is a number nobody can chec
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 import pytest
 
 DATA = Path(__file__).resolve().parents[1] / "simulators" / "impozit-teren" / "data"
+SCRIPTS = Path(__file__).resolve().parents[1] / "simulators" / "impozit-teren" / "scripts"
+sys.path.insert(0, str(SCRIPTS))
+
+import import_buget_uat  # noqa: E402
 
 
 @pytest.fixture(scope="module")
@@ -34,6 +39,20 @@ def test_the_country_is_covered(budget):
     assert budget["summary"]["uatsReporting"] > 3000
     sirutas = {row["siruta"] for row in budget["uats"]}
     assert len(sirutas) == len(budget["uats"]), "a SIRUTA code appears twice"
+
+
+def test_transparenta_numeric_sirutas_are_checked_against_the_shared_registry():
+    uats = [
+        {"siruta": "1017"},
+        {"siruta": "AB"},
+        {"siruta": "999999"},
+    ]
+
+    with pytest.raises(SystemExit) as error:
+        import_buget_uat.validate_roster_against_registry(uats, {"1017"})
+
+    assert "999999" in str(error.value)
+    assert "AB" not in str(error.value)
 
 
 def test_local_spending_is_the_size_local_spending_is(budget):
