@@ -51,14 +51,13 @@ model values, filter counts, options and hashes are retained. Historical
 snapshots are local artifacts; CI reruns the independent behavior assertions.
 The scoped tests are not whole-app accessibility certification.
 
-Known pre-existing detail-field limitation: after a pin becomes the locality's
-assigned region, `pinTargets` excludes that region from the offered options.
-The native select can therefore show its blank/default option even while the
-URL and manual-override list retain the pin. The regression checks verify that
-stored state and reset; this migration does not change target-selection rules.
-Reproduced in Chromium on unchanged `aab98ca`: open `#lang=en&sel=1`, choose the
-first nonblank target (230), and reload. The URL retains `pin=1.230` and the
-manual-override list still has UAT 1, but `#pin-select` has value `""`.
+The detail field displays a saved pin to its assigned region as a selected,
+disabled option. That region remains excluded from newly eligible targets;
+the extra option only represents current state. Browser regression checks cover
+the displayed value after reload, its disabled state, and reset across reload.
+The original blank-value bug was reproduced on `c3b593f` before the display fix:
+open `#lang=en&sel=1`, choose target 230, and reload. The URL/list retained the
+pin while the select showed `""`. Domain target eligibility is unchanged.
 
 Existing Vite/esbuild and legacy Vitest development-tool advisories remain a
 separate upgrade task. No audit rules are disabled by this adoption.

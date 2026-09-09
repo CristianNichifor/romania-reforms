@@ -3,7 +3,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import AxeBuilder from '@axe-core/playwright';
 import { checkMap } from './map-check';
 const baseline = process.env.NATIVE_UI_BASELINE;
-test('selected locality native pin field preserves URL and reset', async ({ page }) => {
+test('selected locality native pin field preserves URL and reset', async ({ page }, info) => {
   await page.goto('/#lang=en&sel=1');
   await expect(page.locator('#loading')).toBeHidden();
   const pin = page.locator('#pin-select');
@@ -13,12 +13,22 @@ test('selected locality native pin field preserves URL and reset', async ({ page
   expect(targets.length).toBeGreaterThan(0);
   await pin.selectOption(targets[0]!);
   await expect(page).toHaveURL(/pin=1\./);
+  await expect(pin).toHaveValue(targets[0]!);
+  await expect(pin.locator(`option[value="${targets[0]}"]`)).toBeDisabled();
   await page.reload();
   await expect(page.locator('#loading')).toBeHidden();
   await expect(page).toHaveURL(new RegExp(`pin=1\\.${targets[0]}`));
   await expect(page.locator('[data-unpin="1"]')).toBeVisible();
+  await expect(pin).toHaveValue(targets[0]!);
+  await expect(pin.locator(`option[value="${targets[0]}"]`)).toBeDisabled();
+  await pin.screenshot({ path: info.outputPath('assigned-pin.png') });
   await pin.selectOption('');
   await expect(page).not.toHaveURL(/pin=/);
+  await expect(pin).toHaveValue('');
+  await expect(page.locator('[data-unpin="1"]')).toHaveCount(0);
+  await page.reload();
+  await expect(page.locator('#loading')).toBeHidden();
+  await expect(pin).toHaveValue('');
   const violations = (await new AxeBuilder({ page }).include('.pin-control').withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()).violations;
   expect(violations.map(v => v.id)).toEqual([]);
 });

@@ -1782,6 +1782,7 @@ async function boot(): Promise<void> {
     members.sort((a, b) => ready!.population[b]! - ready!.population[a]!);
 
     const currentPin = scenario.pins.find((p) => p.uat === index)?.seat ?? null;
+    const targets = pinTargets(index);
     const isForced = scenario.forced.includes(index);
     const orphan = isOrphanRegion[region] === 1;
     const sum = (series: Float32Array): number =>
@@ -2040,7 +2041,13 @@ async function boot(): Promise<void> {
         <label for="pin-select">${strings.pinMoveTo}</label>
         <select id="pin-select" class="civic-select civic-select--native">
           <option value="">${strings.pinKeepRules}</option>
-          ${pinTargets(index)
+          ${
+            // The assigned region is not a new target, but must still display a saved pin.
+            currentPin === region && !targets.includes(currentPin)
+              ? `<option value="${currentPin}" selected disabled>${unitName(ready, currentPin)}</option>`
+              : ''
+          }
+          ${targets
             .map(
               (seat) =>
                 `<option value="${seat}"${
