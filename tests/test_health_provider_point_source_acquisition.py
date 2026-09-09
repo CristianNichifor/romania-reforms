@@ -171,25 +171,25 @@ def test_committed_source_acquisition_queue_covers_remaining_review_rows():
 
     assert acquisition_ids == review_ids == no_point_ids
     assert acquisition["summary"]["providerPoints"] == 592
-    assert acquisition["summary"]["pointAccessEligibleProviders"] == 223
-    assert acquisition["summary"]["pointAccessBlockedProviders"] == 369
-    assert acquisition["summary"]["reviewProviders"] == 101
-    assert acquisition["summary"]["acquisitionProviders"] == 101
+    assert acquisition["summary"]["pointAccessEligibleProviders"] == 252
+    assert acquisition["summary"]["pointAccessBlockedProviders"] == 340
+    assert acquisition["summary"]["reviewProviders"] == 72
+    assert acquisition["summary"]["acquisitionProviders"] == 72
     assert acquisition["summary"]["localityOnlyCandidateProviders"] == 0
-    assert acquisition["summary"]["noMinistryCandidateProviders"] == 101
+    assert acquisition["summary"]["noMinistryCandidateProviders"] == 72
     assert acquisition["summary"]["publicBedNoCandidateProviders"] == 0
     assert acquisition["summary"]["acquisitionStatus"] == {
-        "needs-new-source": 101,
+        "needs-new-source": 72,
     }
     assert acquisition["summary"]["acquisitionPriority"] == {
-        "p3-public-provider-no-ministry-candidate": 45,
+        "p3-public-provider-no-ministry-candidate": 16,
         "p4-private-or-unknown-provider-no-ministry-candidate": 56,
     }
     assert acquisition["summary"]["sourceSearchTypes"] == {
-        "cnas-or-official-contracting-list": 101,
-        "dsp-or-local-authority-list": 101,
-        "osm-named-feature-manual-review": 101,
-        "provider-official-website": 101,
+        "cnas-or-official-contracting-list": 72,
+        "dsp-or-local-authority-list": 72,
+        "osm-named-feature-manual-review": 72,
+        "provider-official-website": 72,
     }
 
     locality_candidate_ids = {
