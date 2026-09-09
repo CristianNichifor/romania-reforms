@@ -76,10 +76,12 @@ Source of truth:
 
 First slice:
 
-- next: one validation county plus Bucharest
-- provider identity, beds, specialty, owner type and accreditation
-- explicit location confidence for each provider
-- named exclusions for unmatched providers
+- done: one validation county plus Bucharest
+- done: provider identity, beds, specialty, owner type and accreditation
+- done: explicit location confidence for each provider
+- done: named exclusions for unmatched providers
+- next: expand beyond the Cluj and Bucharest sample and add address/geocoding evidence
+  before routing or service-access views rely on provider distance
 
 This should support service-access views in `administrativ`, `justitie` and `transport`
 without each simulator building its own hospital roster.

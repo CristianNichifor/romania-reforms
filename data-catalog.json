@@ -138,7 +138,7 @@
     {
       "id": "health-access-mart",
       "title": "Health infrastructure and access",
-      "status": "planned",
+      "status": "active",
       "priority": "p0",
       "owner": "shared",
       "why": "Justice, administrative consolidation and transport reforms all need to know whether citizens lose or gain access to public services, not just administrative seats.",
@@ -194,10 +194,13 @@
       ],
       "storagePolicy": "Provider summary JSON can be committed if small; geocoded/routing outputs should become release assets.",
       "nextSlice": {
-        "scope": "2024 hospital bed/unit workbooks plus 2025 ANMCS accreditation for one validation county and Bucharest.",
-        "deliverable": "A health provider mart with provider identity, bed count, accreditation and location confidence.",
-        "doneWhen": "Access calculations can name which hospitals are reachable from each test UAT and which providers were excluded."
-      }
+        "scope": "National health-provider expansion and address/location evidence.",
+        "deliverable": "Extend the sample beyond Cluj and Bucharest, then attach address or geocoded UAT confidence before producing access views.",
+        "doneWhen": "All counties have provider rows, unmatched providers are named, and access views use only providers with non-county-only location confidence."
+      },
+      "notes": [
+        "The first committed sample covers Cluj plus Bucharest from Ministry of Health and ANMCS workbooks. Clinical bed counts are attached only on confident ANMCS matches; county bed totals are kept separately."
+      ]
     }
   ]
 }
