@@ -21,11 +21,15 @@ from typing import Any, Final
 PACKAGE_ROOT = Path(__file__).resolve().parents[1]
 HEALTH_MART = PACKAGE_ROOT / "data/health-access-mart-2024-2025.json"
 ADDRESS_SOURCE = PACKAGE_ROOT / "sources/ms-unitati-sanitare-2026.json"
+ADDRESS_ALIASES = PACKAGE_ROOT / "sources/ms-unitati-sanitare-address-aliases-2026.json"
 POINT_VIEW_ID: Final[str] = "health-provider-points-2024-2026"
 OUT = PACKAGE_ROOT / f"data/{POINT_VIEW_ID}.json"
-TRANSFORM_VERSION: Final[int] = 3
+TRANSFORM_VERSION: Final[int] = 4
 ROMANIA_LATITUDE_RANGE: Final[tuple[float, float]] = (43.0, 49.0)
 ROMANIA_LONGITUDE_RANGE: Final[tuple[float, float]] = (20.0, 30.0)
+ADDRESS_ALIAS_SOURCE_ID: Final[str] = "ministerul-sanatatii-unitati-sanitare-address-aliases-2026"
+EXACT_ADDRESS_MATCH_METHOD: Final[str] = "exact-normalised-name-county"
+CURATED_ADDRESS_MATCH_METHOD: Final[str] = "curated-same-county-official-name-alias"
 
 
 def sha256_file(path: Path) -> str:
@@ -158,6 +162,14 @@ def provider_point(
         "locationConfidence": provider["locationConfidence"],
         "serviceAccessEligible": bool(provider["serviceAccessEligible"]),
         "address": source_record["address"] if source_record else None,
+        "addressSourceRecordId": source_record["sourceRecordId"] if source_record else None,
+        "addressMatchMethod": (
+            EXACT_ADDRESS_MATCH_METHOD
+            if address_match_status == "matched"
+            else CURATED_ADDRESS_MATCH_METHOD
+            if address_match_status == "alias"
+            else None
+        ),
         "addressEvidence": (
             address_evidence(address_source, source_record)
             if address_source and source_record
@@ -232,8 +244,7 @@ def routeable_point_providers(document: dict[str, Any]) -> list[dict[str, Any]]:
             continue
         if provider["latitude"] is None or provider["longitude"] is None:
             raise ValueError(
-                "pointAccessEligible provider has no coordinates: "
-                f"{provider['providerId']}"
+                f"pointAccessEligible provider has no coordinates: {provider['providerId']}"
             )
         routeable.append(provider)
     return routeable
@@ -313,15 +324,85 @@ def address_match_index(
     return index
 
 
+def address_records_by_id(address_source: dict[str, Any] | None) -> dict[str, dict[str, Any]]:
+    if not address_source:
+        return {}
+
+    rows: dict[str, dict[str, Any]] = {}
+    duplicates = []
+    for record in address_source["records"]:
+        source_record_id = record["sourceRecordId"]
+        if source_record_id in rows:
+            duplicates.append(source_record_id)
+        rows[source_record_id] = record
+    if duplicates:
+        listed = ", ".join(sorted(set(duplicates))[:10])
+        raise ValueError(f"address source has duplicate source record ids: {listed}")
+    return rows
+
+
+def address_alias_index(
+    address_aliases: dict[str, Any] | None,
+    source_records: dict[str, dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    if not address_aliases:
+        return {}
+    if address_aliases["id"] != ADDRESS_ALIAS_SOURCE_ID:
+        raise ValueError(f"expected {ADDRESS_ALIAS_SOURCE_ID}, got {address_aliases['id']}")
+
+    aliases: dict[str, dict[str, Any]] = {}
+    duplicate_providers = []
+    duplicate_source_records = []
+    used_source_records: set[str] = set()
+    for alias in address_aliases["aliases"]:
+        provider_id = alias["providerId"]
+        source_record_id = alias["sourceRecordId"]
+        if provider_id in aliases:
+            duplicate_providers.append(provider_id)
+        if source_record_id in used_source_records:
+            duplicate_source_records.append(source_record_id)
+        used_source_records.add(source_record_id)
+
+        source_record = source_records.get(source_record_id)
+        if source_record is None:
+            raise ValueError(f"address alias references missing source row: {source_record_id}")
+        if source_record.get("countyCode") != alias["countyCode"]:
+            raise ValueError(
+                f"address alias county differs from source row: {provider_id} -> {source_record_id}"
+            )
+        if not source_record.get("hasStreetAddress"):
+            raise ValueError(
+                f"address alias references source row without street address: {source_record_id}"
+            )
+        aliases[provider_id] = source_record
+
+    if duplicate_providers:
+        listed = ", ".join(sorted(set(duplicate_providers))[:10])
+        raise ValueError(f"address alias file has duplicate provider ids: {listed}")
+    if duplicate_source_records:
+        listed = ", ".join(sorted(set(duplicate_source_records))[:10])
+        raise ValueError(f"address alias file reuses source record ids: {listed}")
+    return aliases
+
+
 def match_address_record(
     provider: dict[str, Any],
     index: dict[tuple[str, str], list[dict[str, Any]]],
+    aliases: dict[str, dict[str, Any]] | None = None,
 ) -> tuple[dict[str, Any] | None, str | None]:
     matches = index.get((normalise_text(provider["name"]), provider["countyCode"]), [])
     if len(matches) == 1:
         return matches[0], "matched"
     if len(matches) > 1:
         return None, "ambiguous"
+    alias = (aliases or {}).get(provider["providerId"])
+    if alias is not None:
+        if alias.get("countyCode") != provider["countyCode"]:
+            raise ValueError(
+                "address alias county differs from provider row: "
+                f"{provider['providerId']} -> {alias['sourceRecordId']}"
+            )
+        return alias, "alias"
     return None, None
 
 
@@ -330,18 +411,40 @@ def build_document(
     source_hashes: dict[str, str],
     retrieved_date: str | None = None,
     address_source: dict[str, Any] | None = None,
+    address_aliases: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     records = health_mart["records"]
     assert_unique_provider_ids(records)
 
     address_index = address_match_index(address_source)
+    source_records = address_records_by_id(address_source)
+    address_aliases_by_provider = address_alias_index(address_aliases, source_records)
     address_match_status_by_provider: dict[str, str] = {}
+    address_source_record_by_provider: dict[str, str] = {}
     providers = []
     for record in records:
-        source_record, match_status = match_address_record(record, address_index)
+        source_record, match_status = match_address_record(
+            record,
+            address_index,
+            address_aliases_by_provider,
+        )
         if match_status:
             address_match_status_by_provider[record["providerId"]] = match_status
+        if source_record:
+            address_source_record_by_provider[record["providerId"]] = source_record[
+                "sourceRecordId"
+            ]
         providers.append(provider_point(record, address_source, source_record, match_status))
+
+    source_record_counts = Counter(address_source_record_by_provider.values())
+    duplicate_source_records = sorted(
+        source_record_id for source_record_id, count in source_record_counts.items() if count > 1
+    )
+    if duplicate_source_records:
+        raise ValueError(
+            "address source records matched multiple providers: "
+            + ", ".join(duplicate_source_records[:10])
+        )
 
     point_access_eligible = [provider for provider in providers if provider["pointAccessEligible"]]
     point_access_blocked = [
@@ -384,7 +487,15 @@ def build_document(
             else 0
         ),
         "addressMatchedProviders": sum(
+            1
+            for status in address_match_status_by_provider.values()
+            if status in {"matched", "alias"}
+        ),
+        "addressExactMatchedProviders": sum(
             1 for status in address_match_status_by_provider.values() if status == "matched"
+        ),
+        "addressAliasMatchedProviders": sum(
+            1 for status in address_match_status_by_provider.values() if status == "alias"
         ),
         "ambiguousAddressProviders": sum(
             1 for status in address_match_status_by_provider.values() if status == "ambiguous"
@@ -402,6 +513,9 @@ def build_document(
         "coordinateRejectedProviders": len(coordinate_rejected),
         "addressEvidence": count_by(
             [provider["addressEvidence"]["method"] for provider in providers]
+        ),
+        "addressMatchMethods": count_by(
+            [provider["addressMatchMethod"] or "none" for provider in providers]
         ),
         "pointConfidence": count_by([provider["pointConfidence"] for provider in providers]),
         "blockedReasons": count_by(
@@ -423,7 +537,11 @@ def build_document(
         "periodStart": "2024",
         "periodEnd": "2026",
         "retrievedDate": retrieved_date or health_mart["retrievedDate"],
-        "provenance": provider_point_provenance(health_mart, address_source),
+        "provenance": provider_point_provenance(
+            health_mart,
+            address_source,
+            address_aliases,
+        ),
         "registry": {
             "healthMart": {
                 "id": health_mart["id"],
@@ -440,6 +558,17 @@ def build_document(
                     }
                 }
                 if address_source
+                else {}
+            ),
+            **(
+                {
+                    "addressAliases": {
+                        "id": address_aliases["id"],
+                        "reviewedDate": address_aliases["reviewedDate"],
+                        "aliases": len(address_aliases["aliases"]),
+                    }
+                }
+                if address_aliases
                 else {}
             ),
         },
@@ -462,8 +591,8 @@ def build_document(
                 ["latitude", "longitude", "pointEvidence"],
                 (
                     "Accepted coordinates come from Ministry of Health map markers "
-                    "attached to exact normalised provider-name and county address "
-                    "matches."
+                    "attached to exact normalised provider-name and county matches, "
+                    "plus curated same-county source-record aliases."
                 ),
             ),
             limitation(
@@ -478,13 +607,16 @@ def build_document(
                 ),
             ),
             limitation(
-                "address-source-exact-name-only",
+                "address-source-exact-or-curated-id-only",
                 "material",
                 ["address", "addressEvidence"],
                 (
-                    "The Ministry address import accepts only exact normalised "
-                    "provider-name and county matches. Non-exact source candidates "
-                    "remain unfilled until manual or stricter automated review."
+                    "The Ministry address import accepts exact normalised "
+                    "provider-name and county matches, plus audited providerId to "
+                    "sourceRecordId aliases from "
+                    "ms-unitati-sanitare-address-aliases-2026. Other non-exact "
+                    "source candidates remain unfilled until manual or stricter "
+                    "automated review."
                 ),
             ),
             limitation(
@@ -514,6 +646,7 @@ def build_document(
 def provider_point_provenance(
     health_mart: dict[str, Any],
     address_source: dict[str, Any] | None,
+    address_aliases: dict[str, Any] | None = None,
 ) -> dict[str, str]:
     if not address_source:
         return {
@@ -531,17 +664,26 @@ def provider_point_provenance(
         }
 
     return {
-        "source": f"{health_mart['id']} + {address_source['id']}",
+        "source": (
+            f"{health_mart['id']} + {address_source['id']}"
+            + (f" + {address_aliases['id']}" if address_aliases else "")
+        ),
         "locator": (
             "provider rows from the shared health access mart joined to the "
             "Ministry of Health unitati sanitare map extract by exact normalised "
             "provider name and county"
+            + (
+                ", with additional curated same-county source-record aliases"
+                if address_aliases
+                else ""
+            )
         ),
         "confidence": "derived",
         "note": (
             "Official address and marker-coordinate evidence is attached where exact "
-            "name/county matches exist. Only non-county-only, service-eligible "
-            "providers with accepted coordinates are eligible for point routing."
+            "name/county matches or curated source-record aliases exist. Only "
+            "non-county-only, service-eligible providers with accepted coordinates "
+            "are eligible for point routing."
         ),
     }
 
@@ -549,22 +691,29 @@ def provider_point_provenance(
 def build_from_files(
     health_mart_path: Path,
     address_source_path: Path | None = ADDRESS_SOURCE,
+    address_aliases_path: Path | None = ADDRESS_ALIASES,
     retrieved_date: str | None = None,
 ) -> dict[str, Any]:
     health_mart = json.loads(health_mart_path.read_text(encoding="utf-8"))
     address_source = (
-        json.loads(address_source_path.read_text(encoding="utf-8"))
-        if address_source_path
+        json.loads(address_source_path.read_text(encoding="utf-8")) if address_source_path else None
+    )
+    address_aliases = (
+        json.loads(address_aliases_path.read_text(encoding="utf-8"))
+        if address_aliases_path
         else None
     )
     source_hashes = {"healthAccessMartSha256": sha256_file(health_mart_path)}
     if address_source_path:
         source_hashes["msUnitatiSanitareSha256"] = sha256_file(address_source_path)
+    if address_aliases_path:
+        source_hashes["msUnitatiSanitareAliasesSha256"] = sha256_file(address_aliases_path)
     return build_document(
         health_mart,
         source_hashes,
         retrieved_date,
         address_source,
+        address_aliases,
     )
 
 
@@ -572,13 +721,23 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--health-mart", type=Path, default=HEALTH_MART)
     parser.add_argument("--address-source", type=Path, default=ADDRESS_SOURCE)
+    parser.add_argument("--address-aliases", type=Path, default=ADDRESS_ALIASES)
     parser.add_argument("--no-address-source", action="store_true")
+    parser.add_argument("--no-address-aliases", action="store_true")
     parser.add_argument("--output", type=Path, default=OUT)
     parser.add_argument("--retrieved-date")
     args = parser.parse_args(argv)
 
     address_source = None if args.no_address_source else args.address_source
-    document = build_from_files(args.health_mart, address_source, args.retrieved_date)
+    address_aliases = None if args.no_address_aliases else args.address_aliases
+    if address_source is None:
+        address_aliases = None
+    document = build_from_files(
+        args.health_mart,
+        address_source,
+        address_aliases,
+        args.retrieved_date,
+    )
     args.output.write_text(
         json.dumps(document, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",

@@ -116,9 +116,14 @@ First slice:
   current straight-line point metric as a fallback/comparison rather than a routing claim;
   the committed run computes 3,136 routed-row road-proxy distances, with 28.7 km unweighted
   median and 19.6 km population-weighted median
-- next: treat the current health-access consumer adoption as complete; future health work
-  should improve source quality by adding more authoritative provider points or replacing the
-  current road-proxy limitation with a stronger point-to-road method
+- done: add 37 curated same-county Ministry source-record aliases for official names that do
+  not exactly match the ANMCS provider names, raising the point layer to 199 accepted provider
+  coordinates and 393 named exclusions without enabling generic fuzzy matching
+- done: refresh `transport` and `justitie` from the larger point set; the transport road-proxy
+  run now has 26.9 km unweighted median and 18.3 km population-weighted median
+- next: review the remaining 125 service-eligible no-point-evidence providers against new
+  official/licensed sources or stricter manual review, keeping any new acceptance pinned to
+  explicit source record ids
 
 This should support service-access views in `administrativ`, `justitie` and `transport`
 without each simulator building its own hospital roster.

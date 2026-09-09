@@ -41,13 +41,11 @@ def point_provider(
         "countyName": "Test",
         "siruta": "101" if point_access_eligible else None,
         "localityName": "MUNICIPIUL TEST" if point_access_eligible else None,
-        "locationConfidence": "name-derived-locality"
-        if point_access_eligible
-        else "county-only",
+        "locationConfidence": "name-derived-locality" if point_access_eligible else "county-only",
         "serviceAccessEligible": point_access_eligible,
-        "address": "Strada Sanatatii nr. 1, Municipiul Test"
-        if point_access_eligible
-        else None,
+        "address": "Strada Sanatatii nr. 1, Municipiul Test" if point_access_eligible else None,
+        "addressSourceRecordId": "ms-unitati-sanitare-001" if point_access_eligible else None,
+        "addressMatchMethod": "exact-normalised-name-county" if point_access_eligible else None,
         "addressEvidence": evidence("official-provider-address", "Strada Sanatatii nr. 1"),
         "latitude": latitude if point_access_eligible else None,
         "longitude": longitude if point_access_eligible else None,
@@ -193,26 +191,25 @@ def test_committed_health_point_access_uses_only_point_eligible_providers():
 
     assert point_access["id"] == "health-point-access-2024-2026"
     assert point_access["summary"]["providers"] == 592
-    assert point_access["summary"]["pointAccessProviders"] == 162
-    assert point_access["summary"]["pointAccessBlockedProviders"] == 430
-    assert point_access["summary"]["namedExclusions"] == 430
+    assert point_access["summary"]["pointAccessProviders"] == 199
+    assert point_access["summary"]["pointAccessBlockedProviders"] == 393
+    assert point_access["summary"]["namedExclusions"] == 393
     assert point_access["summary"]["distanceMethod"] == "not-computed"
     assert point_access["summary"]["supportedConsumerDistanceMethods"] == [
         "straight-line",
         "routed",
     ]
-    assert point_access["summary"]["pointConfidence"] == {"official-coordinate": 162}
-    assert point_access["summary"]["pointEvidence"] == {"published-coordinate": 162}
+    assert point_access["summary"]["pointConfidence"] == {"official-coordinate": 199}
+    assert point_access["summary"]["pointEvidence"] == {"published-coordinate": 199}
     assert point_access["summary"]["blockedReasons"] == {
         "county-only-location": 268,
-        "no-point-evidence": 162,
+        "no-point-evidence": 125,
     }
     assert view_point_ids == source_point_ids
     assert excluded_ids == source_blocked_ids
     assert view_point_ids.isdisjoint(excluded_ids)
     assert all(
-        point["accessUse"] == "eligible-for-point-level-access"
-        for point in point_access["points"]
+        point["accessUse"] == "eligible-for-point-level-access" for point in point_access["points"]
     )
     assert all(point["latitude"] is not None for point in point_access["points"])
     assert all(point["longitude"] is not None for point in point_access["points"])
