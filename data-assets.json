@@ -123,6 +123,18 @@
       "needs": "health-provider-point-source-acquisition-2024-2026 plus anmcs-capesaro-public-hospitals-2026",
       "what": "Non-evidence CAPeSaRo candidate report for 72 remaining acquisition rows: 24 providers with candidates, 28 candidate rows and 6 public providers with candidates.",
       "withoutIt": "Future health maintenance review must rebuild candidates before selecting supplemental-evidence provider/sourceCode pairs."
+    },
+    {
+      "id": "public-enterprise-administrative-footprint-2024-2026",
+      "tag": "data-v1",
+      "asset": "public-enterprise-administrative-footprint-2024-2026.json",
+      "destination": "packages/public_enterprise_governance/data/public-enterprise-administrative-footprint-2024-2026.json",
+      "producedBy": "packages/public_enterprise_governance/scripts/build_public_enterprise_administrative_footprint.py --retrieved-date 2026-09-10",
+      "needs": "companiidestat.ro reference endpoints plus packages/uat_registry/data/uat-registry-2026.json",
+      "what": "Public-enterprise administrative footprint aggregate: UAT, authority and county totals for local public-enterprise counts, employees, revenue, profit/loss, debt and subsidies. The browser consumes only the compact SIRUTA-aligned administrativ sidecar.",
+      "withoutIt": "Shared validation and public-enterprise package tests cannot verify the full aggregate contract until the payload is fetched or rebuilt.",
+      "bytes": 1269480,
+      "sha256": "a41b4283f48e9b919bb96ba4820927f97f53c9486ad228562f104a57ad4d4ade"
     }
   ]
 }
