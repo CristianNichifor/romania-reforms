@@ -94,8 +94,10 @@ First slice:
   routed UAT rows
 - done: add a provider-point evidence contract that carries every mart provider and blocks all
   rows from point routing until point evidence exists
-- next: import a first verified street-address source, preserving ambiguous/no-address rows as
-  named exclusions
+- done: import the Ministry of Health `Unitati sanitare` map as a compact source extract and
+  attach 174 exact name/county street-address matches without making any provider routeable
+- next: resolve coordinates from accepted address evidence under explicit county and UAT
+  consistency checks
 
 This should support service-access views in `administrativ`, `justitie` and `transport`
 without each simulator building its own hospital roster.

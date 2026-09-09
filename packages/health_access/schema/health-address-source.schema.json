@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/packages/health_access/schema/health-address-source.schema.json",
+  "title": "Health provider address source extract",
+  "description": "Compact extract from an official health-provider address source. Raw pages stay out of git; this file keeps the auditable fields used by the provider-point builder.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "id",
+    "title",
+    "publisher",
+    "sourceUrl",
+    "retrievedDate",
+    "transform",
+    "summary",
+    "records",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "const": "ministerul-sanatatii-unitati-sanitare-2026" },
+    "title": { "type": "string", "minLength": 1 },
+    "publisher": { "const": "Ministerul Sanatatii" },
+    "sourceUrl": { "type": "string", "format": "uri" },
+    "retrievedDate": { "type": "string", "format": "date" },
+    "transform": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["script", "version"],
+      "properties": {
+        "script": {
+          "const": "packages/health_access/scripts/import_ms_unitati_sanitare.py"
+        },
+        "version": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceRecords",
+        "sourceRecordsWithCounty",
+        "sourceRecordsWithStreetAddress",
+        "duplicateSourceNames",
+        "duplicateDetailUrls"
+      ],
+      "properties": {
+        "sourceRecords": { "type": "integer", "minimum": 1 },
+        "sourceRecordsWithCounty": { "type": "integer", "minimum": 0 },
+        "sourceRecordsWithStreetAddress": { "type": "integer", "minimum": 0 },
+        "duplicateSourceNames": { "type": "integer", "minimum": 0 },
+        "duplicateDetailUrls": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "records": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/sourceRecord" }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "https://cristiannichifor.github.io/romania-reforms/schema/provenance.schema.json#/$defs/limitation"
+      }
+    }
+  },
+  "$defs": {
+    "sourceRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceRecordId",
+        "sourceOrdinal",
+        "name",
+        "countyCode",
+        "address",
+        "hasStreetAddress",
+        "detailUrl"
+      ],
+      "properties": {
+        "sourceRecordId": {
+          "type": "string",
+          "pattern": "^ms-unitati-sanitare-[0-9]{3}$"
+        },
+        "sourceOrdinal": { "type": "integer", "minimum": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "countyCode": {
+          "type": ["string", "null"],
+          "pattern": "^[A-Z]{1,2}$"
+        },
+        "address": { "type": "string", "minLength": 1 },
+        "hasStreetAddress": { "type": "boolean" },
+        "detailUrl": { "type": "string", "format": "uri" }
+      }
+    }
+  }
+}

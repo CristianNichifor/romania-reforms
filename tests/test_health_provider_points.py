@@ -11,6 +11,7 @@ POINT_BUILDER = (
     ROOT / "packages" / "health_access" / "scripts" / "build_health_provider_points.py"
 )
 DATA = ROOT / "packages" / "health_access" / "data"
+SOURCES = ROOT / "packages" / "health_access" / "sources"
 
 spec = importlib.util.spec_from_file_location("build_health_provider_points", POINT_BUILDER)
 assert spec and spec.loader
@@ -51,6 +52,41 @@ def fixture_health_mart() -> dict:
             access_provider("anmcs-2025-001", "101", True),
             access_provider("anmcs-2025-002", None, False, "county-only"),
         ],
+    }
+
+
+def source_record(
+    source_record_id: str,
+    name: str,
+    address: str,
+    county_code: str | None = "TS",
+    has_street_address: bool = True,
+) -> dict:
+    return {
+        "sourceRecordId": source_record_id,
+        "sourceOrdinal": int(source_record_id.rsplit("-", 1)[1]),
+        "name": name,
+        "countyCode": county_code,
+        "address": address,
+        "hasStreetAddress": has_street_address,
+        "detailUrl": f"https://ms.ro/ro/unitati-sanitare/{source_record_id}/",
+    }
+
+
+def fixture_address_source(records: list[dict] | None = None) -> dict:
+    source_records = records or [
+        source_record(
+            "ms-unitati-sanitare-001",
+            "SPITALUL anmcs-2025-001",
+            "Strada Sanatatii nr. 1, Municipiul Test",
+        )
+    ]
+    return {
+        "id": "ministerul-sanatatii-unitati-sanitare-2026",
+        "publisher": "Ministerul Sanatatii",
+        "sourceUrl": "https://ms.ro/ro/unitati-sanitare/",
+        "retrievedDate": "2026-09-09",
+        "records": source_records,
     }
 
 
@@ -167,8 +203,18 @@ def test_committed_provider_points_cover_the_health_mart():
         == health_mart["summary"]["serviceAccessEligibleProviders"]
     )
     assert points["summary"]["serviceAccessBlockedProviders"] == 268
+    assert points["summary"]["addressSourceRecords"] == 301
+    assert points["summary"]["addressSourceRecordsWithStreetAddress"] == 290
+    assert points["summary"]["addressMatchedProviders"] == 174
+    assert points["summary"]["ambiguousAddressProviders"] == 0
     assert points["summary"]["pointAccessEligibleProviders"] == 0
     assert points["summary"]["pointAccessBlockedProviders"] == 592
+    assert points["summary"]["providersWithAddress"] == 174
+    assert points["summary"]["providersWithCoordinates"] == 0
+    assert points["summary"]["addressEvidence"] == {
+        "none": 418,
+        "official-provider-address": 174,
+    }
     assert (
         points["summary"]["blockedReasons"]["county-only-location"]
         == health_mart["summary"]["locationConfidence"]["county-only"]
@@ -180,14 +226,144 @@ def test_committed_provider_points_cover_the_health_mart():
     )
     assert all(not provider["pointAccessEligible"] for provider in points["providers"])
     assert all(
-        provider["addressEvidence"]["method"] == "none"
-        for provider in points["providers"]
-    )
-    assert all(
         provider["pointConfidence"] == "none" for provider in points["providers"]
     )
     assert len(points["exclusions"]) == 592
 
     limitation_ids = {limitation["id"] for limitation in points["limitations"]}
-    assert "point-evidence-not-yet-imported" in limitation_ids
+    assert "coordinate-evidence-not-yet-imported" in limitation_ids
+    assert "address-source-exact-name-only" in limitation_ids
     assert "county-only-not-promoted-to-points" in limitation_ids
+
+
+def test_build_document_attaches_exact_county_safe_address_evidence():
+    document = health_provider_points.build_document(
+        fixture_health_mart(),
+        {"healthAccessMartSha256": "a" * 64, "msUnitatiSanitareSha256": "b" * 64},
+        "2026-09-09",
+        fixture_address_source(),
+    )
+
+    by_id = {provider["providerId"]: provider for provider in document["providers"]}
+    provider = by_id["anmcs-2025-001"]
+
+    assert provider["address"] == "Strada Sanatatii nr. 1, Municipiul Test"
+    assert provider["addressEvidence"] == {
+        "method": "official-provider-address",
+        "source": "ministerul-sanatatii-unitati-sanitare-2026",
+        "sourceValue": "Strada Sanatatii nr. 1, Municipiul Test",
+        "retrievedDate": "2026-09-09",
+    }
+    assert provider["latitude"] is None
+    assert provider["longitude"] is None
+    assert provider["pointAccessEligible"] is False
+    assert provider["pointAccessBlockedReason"] == "no-point-evidence"
+
+    assert document["registry"]["addressSource"]["id"] == (
+        "ministerul-sanatatii-unitati-sanitare-2026"
+    )
+    assert document["summary"]["addressSourceRecords"] == 1
+    assert document["summary"]["addressSourceRecordsWithStreetAddress"] == 1
+    assert document["summary"]["addressMatchedProviders"] == 1
+    assert document["summary"]["providersWithAddress"] == 1
+    assert document["summary"]["addressEvidence"] == {
+        "none": 1,
+        "official-provider-address": 1,
+    }
+
+
+def test_build_document_ignores_non_street_address_source_rows():
+    document = health_provider_points.build_document(
+        fixture_health_mart(),
+        {"healthAccessMartSha256": "a" * 64, "msUnitatiSanitareSha256": "b" * 64},
+        "2026-09-09",
+        fixture_address_source(
+            [
+                source_record(
+                    "ms-unitati-sanitare-001",
+                    "SPITALUL anmcs-2025-001",
+                    "Comuna Test, judetul Test",
+                    has_street_address=False,
+                )
+            ]
+        ),
+    )
+
+    provider = document["providers"][0]
+
+    assert provider["address"] is None
+    assert provider["addressEvidence"]["method"] == "none"
+    assert document["summary"]["addressSourceRecords"] == 1
+    assert document["summary"]["addressSourceRecordsWithStreetAddress"] == 0
+    assert document["summary"]["addressMatchedProviders"] == 0
+    assert document["summary"]["providersWithAddress"] == 0
+
+
+def test_build_document_keeps_ambiguous_address_candidates_blocked():
+    duplicate_candidates = [
+        source_record(
+            "ms-unitati-sanitare-001",
+            "SPITALUL anmcs-2025-001",
+            "Strada Sanatatii nr. 1, Municipiul Test",
+        ),
+        source_record(
+            "ms-unitati-sanitare-002",
+            "SPITALUL anmcs-2025-001",
+            "Strada Sanatatii nr. 2, Municipiul Test",
+        ),
+    ]
+
+    document = health_provider_points.build_document(
+        fixture_health_mart(),
+        {"healthAccessMartSha256": "a" * 64, "msUnitatiSanitareSha256": "b" * 64},
+        "2026-09-09",
+        fixture_address_source(duplicate_candidates),
+    )
+
+    provider = document["providers"][0]
+    exclusion = next(
+        row for row in document["exclusions"] if row["providerId"] == provider["providerId"]
+    )
+
+    assert provider["address"] is None
+    assert provider["addressEvidence"]["method"] == "none"
+    assert provider["pointAccessBlockedReason"] == "ambiguous-address"
+    assert exclusion["pointAccessBlockedReason"] == "ambiguous-address"
+    assert document["summary"]["ambiguousAddressProviders"] == 1
+
+
+def test_build_document_does_not_use_fuzzy_address_matches():
+    mart = fixture_health_mart()
+    mart["records"][0]["name"] = "SPITALUL GENERAL C.F. PLOIESTI"
+    mart["records"][0]["countyCode"] = "PH"
+    mart["records"][0]["countyName"] = "Prahova"
+
+    document = health_provider_points.build_document(
+        mart,
+        {"healthAccessMartSha256": "a" * 64, "msUnitatiSanitareSha256": "b" * 64},
+        "2026-09-09",
+        fixture_address_source(
+            [
+                source_record(
+                    "ms-unitati-sanitare-001",
+                    "Spitalul Judeţean de Urgenţă Ploieşti",
+                    "Strada Gageni nr. 100, Ploiesti",
+                    county_code="PH",
+                )
+            ]
+        ),
+    )
+
+    assert document["providers"][0]["address"] is None
+    assert document["summary"]["addressMatchedProviders"] == 0
+
+
+def test_committed_ms_address_source_extract_is_available():
+    source = json.loads(
+        (SOURCES / "ms-unitati-sanitare-2026.json").read_text(encoding="utf-8")
+    )
+
+    assert source["id"] == "ministerul-sanatatii-unitati-sanitare-2026"
+    assert source["summary"]["sourceRecords"] == 301
+    assert source["summary"]["sourceRecordsWithStreetAddress"] > 250
+    assert source["summary"]["duplicateDetailUrls"] == 0

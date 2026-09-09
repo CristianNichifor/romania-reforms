@@ -168,6 +168,15 @@
           "url": "https://data.gov.ro/dataset/9d218668-6a1d-4f3b-b889-cfb73d062f90/resource/5debc642-bdae-413e-93ff-9baf2d1e0c1d/download/anmcs-acreditare-unitati-sanitare-dec2025.xlsx",
           "license": "Creative Commons Attribution 4.0",
           "role": "source-of-truth"
+        },
+        {
+          "id": "ministerul-sanatatii-unitati-sanitare-map",
+          "name": "Unitati sanitare",
+          "publisher": "Ministerul Sanatatii",
+          "url": "https://ms.ro/ro/unitati-sanitare/",
+          "license": "Official public webpage; reusable data license not published on the source page",
+          "role": "source-of-truth",
+          "notes": "The importer uses embedded hospital-map names, address strings and detail URLs. Embedded marker coordinates are kept out of the provider-point artifact until coordinate evidence rules are implemented."
         }
       ],
       "minimumFields": [
@@ -197,9 +206,9 @@
       ],
       "storagePolicy": "Provider summary JSON can be committed if small; geocoded/routing outputs should become release assets.",
       "nextSlice": {
-        "scope": "Health provider address source import.",
-        "deliverable": "Attach a first verified street-address source to health-provider-points-2024-2026 without making unverified providers point-access eligible.",
-        "doneWhen": "Address-bearing providers carry explicit addressEvidence, ambiguous rows are named exclusions, and pointAccessEligible remains false until coordinate evidence exists."
+        "scope": "Health provider coordinate resolution.",
+        "deliverable": "Convert verified provider addresses into auditable pointEvidence without accepting coordinates that fail county or UAT consistency checks.",
+        "doneWhen": "Only providers with accepted coordinates have pointAccessEligible true, rejected coordinates are named exclusions, and address-only providers stay blocked from routing."
       },
       "notes": [
         "The committed national mart covers 592 ANMCS providers and all 42 Ministry county bed totals. Clinical bed counts are attached only on confident ANMCS matches; county bed totals are kept separately.",
@@ -208,7 +217,7 @@
         "administrativ consumes the shared UAT-level service-access view as an aligned web payload for merged-unit local health-provider counts; Bucharest sectors stay unassigned because the shared source only places Bucharest providers at municipality level.",
         "transport consumes the shared UAT-level service-access view in data/access.json and the map hover payload. The committed access run has 3,136 routed UAT rows with health data, 178 have at least one local eligible provider, and 235 eligible local providers are counted on those routed rows; the browser payload aligns the same shared view to all polygons and leaves Bucharest sectors unassigned.",
         "The current ANMCS accreditation workbook, CNAS 31.03.2025 hospital contracts package and INSP UNITATI CU PATURI package do not expose national provider street-address or coordinate fields through data.gov.ro; point-level geocoding needs another source.",
-        "The health-provider-points-2024-2026 contract covers all 592 mart providers, but the first slice deliberately blocks all of them from point routing until address or coordinate evidence is imported."
+        "The health-provider-points-2024-2026 contract covers all 592 mart providers. The Ministry of Health unitati sanitare map extract contributes 174 exact name/county street-address matches; all providers remain blocked from point routing until coordinate evidence is accepted."
       ]
     }
   ]
