@@ -18,8 +18,26 @@ Remaining work is maintenance, not an active build queue:
 - Health access: pause point expansion; the remaining 72 no-point rows are a maintenance
   backlog and should stay named exclusions until explicit source evidence exists.
 
-New source families, such as AMEPIP/public-company data, should start as a separate
-reconnaissance PR and are not blockers for closing this wave.
+New source families should start as separate reconnaissance PRs and are not blockers for
+closing this wave. AMEPIP/public-company data is now tracked as the next candidate family in
+the catalog; the first slice is source/export reconnaissance, not simulator ingestion.
+
+## Candidate: AMEPIP public enterprises
+
+AMEPIP data could connect public-enterprise performance, board/director compensation,
+ownership and fiscal-risk context across pay, procurement and local-finance work. The source
+family is still a candidate because the public dashboard is an embedded Power BI report and
+the row-level export path, stable enterprise keys and reuse terms must be documented before
+importing simulator payloads.
+
+Reconnaissance note: [AMEPIP public enterprise data](amepip-public-enterprises.md).
+
+First slice:
+
+- inventory downloadable report/annex files from the KPI and compensation pages;
+- record file type, table/sheet names, row counts, identifiers and reuse limitations;
+- build a sample parser only if a source exposes row-level enterprise identity, preferably CUI;
+- decide whether the dataset moves from `candidate` to `planned`, or remains deferred.
 
 ## 1. SIRUTA, UAT and CUI registry
 
