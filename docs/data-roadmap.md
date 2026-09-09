@@ -19,25 +19,30 @@ Remaining work is maintenance, not an active build queue:
   backlog and should stay named exclusions until explicit source evidence exists.
 
 New source families should start as separate reconnaissance PRs and are not blockers for
-closing this wave. AMEPIP/public-company data is now tracked as the next candidate family in
-the catalog; the first slice is source/export reconnaissance, not simulator ingestion.
+closing this wave. AMEPIP/public-company data is now tracked as a planned family in the
+catalog after source inventory; the next slice is a compensation sample parser, not simulator
+ingestion.
 
-## Candidate: AMEPIP public enterprises
+## Planned: AMEPIP public enterprises
 
 AMEPIP data could connect public-enterprise performance, board/director compensation,
 ownership and fiscal-risk context across pay, procurement and local-finance work. The source
-family is still a candidate because the public dashboard is an embedded Power BI report and
-the row-level export path, stable enterprise keys and reuse terms must be documented before
-importing simulator payloads.
+family is planned because the source inventory found official PDFs with CUI-level rows. The
+public dashboard is still only context: the next build should use official report attachments,
+not opaque Power BI internals.
 
 Reconnaissance note: [AMEPIP public enterprise data](amepip-public-enterprises.md).
 
 First slice:
 
-- inventory downloadable report/annex files from the KPI and compensation pages;
-- record file type, table/sheet names, row counts, identifiers and reuse limitations;
-- build a sample parser only if a source exposes row-level enterprise identity, preferably CUI;
-- decide whether the dataset moves from `candidate` to `planned`, or remains deferred.
+- done: inventory 10 downloadable PDFs from the KPI/report and CA/CS compensation pages in
+  `packages/public_enterprise_governance/data/amepip-source-inventory-2025-2026.json`;
+- done: record file type, URLs, SHA-256 hashes, page counts, row estimates, identifiers and
+  reuse limitations;
+- done: move the dataset from `candidate` to `planned` because six inspected PDFs expose
+  CUI-level row data;
+- next: build a small August 2025 nominal compensation parser with CUI, APT, enterprise,
+  person, role and fixed/variable compensation fields.
 
 ## 1. SIRUTA, UAT and CUI registry
 

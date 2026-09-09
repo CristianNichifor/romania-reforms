@@ -1,0 +1,340 @@
+{
+  "$schema": "../schema/amepip-source-inventory.schema.json",
+  "id": "amepip-source-inventory-2025-2026",
+  "title": "AMEPIP public enterprise source inventory",
+  "publisher": "Agentia pentru Monitorizarea si Evaluarea Performantelor Intreprinderilor Publice",
+  "license": "Official public AMEPIP PDFs; reusable data/export license not published on the source pages.",
+  "retrievedDate": "2026-09-10",
+  "provenance": {
+    "source": "amepip-public-pages",
+    "locator": "https://amepip.gov.ro/raport-evaluare-kpi/; https://amepip.gov.ro/indemnizatii-ca-cs/",
+    "confidence": "derived",
+    "note": "Inventory derived from AMEPIP listing pages and local PDF/text inspection. Raw PDFs are not committed."
+  },
+  "summary": {
+    "sourceDocuments": 10,
+    "kpiDocuments": 8,
+    "compensationDocuments": 2,
+    "documentsWithCui": 6,
+    "documentsWithCompanyIndicatorRows": 3,
+    "preferredFirstParserTarget": "amepip-indemnizatii-ip-centrale-august-2025",
+    "decision": "planned"
+  },
+  "sources": [
+    {
+      "id": "amepip-raport-evaluare-intreprinderi-publice-2024",
+      "title": "Raport evaluare Intreprinderi Publice 2024",
+      "family": "kpi-report",
+      "sourcePageUrl": "https://amepip.gov.ro/raport-evaluare-kpi/",
+      "downloadUrl": "https://amepip.gov.ro/wp-content/uploads/2025/12/Raport-evaluare-Intreprinderi-Publice_2024-2.pdf",
+      "fileType": "PDF",
+      "sha256": "59a5d59a1e0fff0ccbe3017021754f5e1e6c7a7b9745acb3cd61e07e2e813bed",
+      "pageCount": 10,
+      "rowEstimate": {
+        "method": "narrative report; no row-level data table accepted for import",
+        "rows": 0
+      },
+      "identity": {
+        "hasCui": false,
+        "stableFields": []
+      },
+      "usefulFields": ["scope", "methodology", "aggregate-findings"],
+      "parserUse": "reference-only",
+      "notes": [
+        "Use as methodological context for KPI annex imports, not as a row source."
+      ]
+    },
+    {
+      "id": "amepip-addendum-raport-evaluare-kpi",
+      "title": "Addendum la Raport evaluare KPI",
+      "family": "kpi-report",
+      "sourcePageUrl": "https://amepip.gov.ro/raport-evaluare-kpi/",
+      "downloadUrl": "https://amepip.gov.ro/wp-content/uploads/2026/04/Addendum-la-Raport-evaluare-KPI.pdf",
+      "fileType": "PDF",
+      "sha256": "79e81999a0c8e74a1447482e61ea8b152d00b8ee4d39d4c424cbcc0d8e185120",
+      "pageCount": 5,
+      "rowEstimate": {
+        "method": "narrative addendum; no row-level data table accepted for import",
+        "rows": 0
+      },
+      "identity": {
+        "hasCui": false,
+        "stableFields": []
+      },
+      "usefulFields": ["methodology", "limitations"],
+      "parserUse": "reference-only",
+      "notes": [
+        "Use as context for KPI annex interpretation."
+      ]
+    },
+    {
+      "id": "amepip-anexa-1-financiari-ip-centrale",
+      "title": "Anexa 1 - indicatori financiari IP centrale",
+      "family": "kpi-annex",
+      "sourcePageUrl": "https://amepip.gov.ro/raport-evaluare-kpi/",
+      "downloadUrl": "https://amepip.gov.ro/wp-content/uploads/2026/05/anexa-1.pdf",
+      "fileType": "PDF",
+      "sha256": "5152b66f13bf733591e38fbb17a4c000df348cb2699b67aa8efb93fb2247f7da",
+      "pageCount": 170,
+      "rowEstimate": {
+        "method": "counted Companie Evaluata blocks in pdftotext output",
+        "rows": 170
+      },
+      "identity": {
+        "hasCui": true,
+        "stableFields": ["cui", "enterpriseName", "authorityName", "onrcNumber", "year"]
+      },
+      "usefulFields": [
+        "apt",
+        "tipApt",
+        "caen",
+        "profitLossStatus",
+        "indicatorCategory",
+        "indicatorName",
+        "historicalValues2021To2023",
+        "evaluatedValue2024",
+        "targetValue",
+        "targetEvaluation"
+      ],
+      "parserUse": "later-target",
+      "notes": [
+        "Strong source for central public-enterprise financial KPI rows after a dedicated table parser exists."
+      ]
+    },
+    {
+      "id": "amepip-anexa-2-nefinanciari-ip-centrale",
+      "title": "Anexa 2 - indicatori nefinanciari IP centrale",
+      "family": "kpi-annex",
+      "sourcePageUrl": "https://amepip.gov.ro/raport-evaluare-kpi/",
+      "downloadUrl": "https://amepip.gov.ro/wp-content/uploads/2026/05/Anexa-2.pdf",
+      "fileType": "PDF",
+      "sha256": "ecd8f2cd3e917c0949ba03dff2c663e6d1dceedaa6a16968b0c9fdb63c39b1d9",
+      "pageCount": 170,
+      "rowEstimate": {
+        "method": "counted Companie Evaluata blocks in pdftotext output",
+        "rows": 170
+      },
+      "identity": {
+        "hasCui": true,
+        "stableFields": ["cui", "enterpriseName", "authorityName", "onrcNumber", "year"]
+      },
+      "usefulFields": [
+        "apt",
+        "tipApt",
+        "caen",
+        "environmentIndicators",
+        "corporateGovernanceIndicators",
+        "innovationIndicators",
+        "employmentIndicators",
+        "genderEqualityIndicators",
+        "targetValue",
+        "targetEvaluation"
+      ],
+      "parserUse": "later-target",
+      "notes": [
+        "Useful for governance and ESG views, but many values in the visible sample are NETRANSMIS and need non-transmission handling."
+      ]
+    },
+    {
+      "id": "amepip-anexa-3-financiari-ip-locale",
+      "title": "Anexa 3 - indicatori financiari IP locale",
+      "family": "kpi-annex",
+      "sourcePageUrl": "https://amepip.gov.ro/raport-evaluare-kpi/",
+      "downloadUrl": "https://amepip.gov.ro/wp-content/uploads/2026/05/anexa-3.pdf",
+      "fileType": "PDF",
+      "sha256": "4603710d866b529134f4e44d39517a9f9e0b06ec838993bcc3d6dc27c2e326b4",
+      "pageCount": 1212,
+      "rowEstimate": {
+        "method": "counted Companie Evaluata blocks in pdftotext output",
+        "rows": 1212
+      },
+      "identity": {
+        "hasCui": true,
+        "stableFields": ["cui", "enterpriseName", "authorityName", "onrcNumber", "year"]
+      },
+      "usefulFields": [
+        "apt",
+        "tipApt",
+        "caen",
+        "profitLossStatus",
+        "indicatorCategory",
+        "indicatorName",
+        "historicalValues2021To2023",
+        "evaluatedValue2024",
+        "targetValue",
+        "targetEvaluation"
+      ],
+      "parserUse": "later-target",
+      "notes": [
+        "Most relevant source for local-finance spillover analysis because it covers local public enterprises with CUI."
+      ]
+    },
+    {
+      "id": "amepip-anexa-4-listare-criterii-minime",
+      "title": "Anexa 4 - intreprinderi publice care indeplinesc criteriile minime de listare",
+      "family": "kpi-annex",
+      "sourcePageUrl": "https://amepip.gov.ro/raport-evaluare-kpi/",
+      "downloadUrl": "https://amepip.gov.ro/wp-content/uploads/2025/12/Anexa-nr.4.-Lista-intreprinderilor-publice-care-indeplinesc-criteriile-minime-pentru-admiterea-pe-o-piata-reglementata.pdf",
+      "fileType": "PDF",
+      "sha256": "f2c0099f60fd1b41f2ad7279676bc691ff382b65fc46053bd757130344d85e90",
+      "pageCount": 3,
+      "rowEstimate": {
+        "method": "pdfplumber extracted table rows",
+        "rows": 208
+      },
+      "identity": {
+        "hasCui": true,
+        "stableFields": ["cui", "enterpriseName", "authorityName", "county", "caen"]
+      },
+      "usefulFields": [
+        "capitalEquityRon",
+        "incorporationDate",
+        "onrcNumber",
+        "county",
+        "caen"
+      ],
+      "parserUse": "later-target",
+      "notes": [
+        "Compact CUI-level source for listing-readiness flags."
+      ]
+    },
+    {
+      "id": "amepip-anexa-5-listare-criterii-financiare",
+      "title": "Anexa 5 - criterii financiare suplimentare privind listarea",
+      "family": "kpi-annex",
+      "sourcePageUrl": "https://amepip.gov.ro/raport-evaluare-kpi/",
+      "downloadUrl": "https://amepip.gov.ro/wp-content/uploads/2026/04/Anexa-nr.5-Lista-intreprinderilor-publice-care-indeplinesc-criterii-financiare-suplimentare-privind-listarea.pdf",
+      "fileType": "PDF",
+      "sha256": "03b96ffd0225c0e3b09e6503df47d02d588a4ecf7bd371cc5a573358a5b77cb3",
+      "pageCount": 12,
+      "rowEstimate": {
+        "method": "pdfplumber extracted table rows; wrapped cells make this an estimate",
+        "rows": 54
+      },
+      "identity": {
+        "hasCui": false,
+        "stableFields": ["enterpriseName", "authorityName", "caen"]
+      },
+      "usefulFields": [
+        "activitySector",
+        "financialEvaluationSummary",
+        "technicalRecommendation"
+      ],
+      "parserUse": "defer",
+      "notes": [
+        "The visible table is row-level by company name but lacks CUI, so it should be joined only after a CUI crosswalk from Annex 4 or another official source is available."
+      ]
+    },
+    {
+      "id": "amepip-anexa-6-recomandari-listare",
+      "title": "Anexa 6 - recomandari tehnice privind listarea",
+      "family": "kpi-annex",
+      "sourcePageUrl": "https://amepip.gov.ro/raport-evaluare-kpi/",
+      "downloadUrl": "https://amepip.gov.ro/wp-content/uploads/2026/04/Anexa-nr.6-Tabel-sintetic-al-recomandarilor-tehnice-privind-listarea-intreprinderilor-publice-adresate-autoritatilor-publice-tutelare.pdf",
+      "fileType": "PDF",
+      "sha256": "b3b06b6e35c2ed6a8bbda759953056c5de99442212aaa5e854b8d662c0708c9b",
+      "pageCount": 1,
+      "rowEstimate": {
+        "method": "numbered rows in pdftotext output",
+        "rows": 11
+      },
+      "identity": {
+        "hasCui": false,
+        "stableFields": ["enterpriseName", "authorityName", "county", "caen"]
+      },
+      "usefulFields": ["county", "activity", "technicalRecommendation"],
+      "parserUse": "defer",
+      "notes": [
+        "Useful as recommendation context, but not as a primary import source until CUI is attached from another AMEPIP annex."
+      ]
+    },
+    {
+      "id": "amepip-indemnizatii-ip-centrale-iulie-2025",
+      "title": "Situatia indemnizatiilor IP centrale - iulie 2025",
+      "family": "compensation",
+      "sourcePageUrl": "https://amepip.gov.ro/indemnizatii-ca-cs/",
+      "downloadUrl": "https://amepip.gov.ro/wp-content/uploads/2025/07/Situatia-indemnizatiilor-fixe-si-variabile-aflate-in-plata-ale-membrilor-CA-CS-si-directori-cu-mandat-raportate-de-APT-centrale-pentru-intreprinderile-publice-iulie-2025.pdf",
+      "fileType": "PDF",
+      "sha256": "51de46c68cdc8f46f84647bf53e6a05902be54e1eabfe4b74c054ee3ed0d71f6",
+      "pageCount": 8,
+      "rowEstimate": {
+        "method": "pdfplumber extracted table rows",
+        "rows": 139
+      },
+      "identity": {
+        "hasCui": true,
+        "stableFields": ["cui", "enterpriseName", "authorityName"]
+      },
+      "usefulFields": [
+        "legalForm",
+        "boardFixedMonthlyGrossRon",
+        "directorFixedMonthlyGrossRon",
+        "directorVariableContractRon",
+        "observations"
+      ],
+      "parserUse": "later-target",
+      "notes": [
+        "Enterprise-level compensation table with CUI. August is a better first parser target because it exposes nominal person rows."
+      ]
+    },
+    {
+      "id": "amepip-indemnizatii-ip-centrale-august-2025",
+      "title": "Situatia indemnizatiilor nominale IP centrale - august 2025",
+      "family": "compensation",
+      "sourcePageUrl": "https://amepip.gov.ro/indemnizatii-ca-cs/",
+      "downloadUrl": "https://amepip.gov.ro/wp-content/uploads/2025/08/Situatia-indemnizatiilor-nominale-IP-centrale-august-2025.pdf",
+      "fileType": "PDF",
+      "sha256": "89c618dcddf412cd48933624383707cec79b01e46b31e8f9dd8eb258e017dd39",
+      "pageCount": 47,
+      "rowEstimate": {
+        "method": "pdfplumber extracted table rows",
+        "rows": 787
+      },
+      "identity": {
+        "hasCui": true,
+        "stableFields": ["cui", "enterpriseName", "authorityName", "personName", "role"]
+      },
+      "usefulFields": [
+        "personName",
+        "role",
+        "monthlyFixedGrossRon",
+        "annualVariableGrossRon"
+      ],
+      "parserUse": "first-target",
+      "notes": [
+        "Best first parser target because it directly supports the salarizare/public-pay use case and has CUI plus person/role-level compensation rows."
+      ]
+    }
+  ],
+  "limitations": [
+    {
+      "id": "amepip-reuse-license-not-published",
+      "text": "The AMEPIP source pages publish official PDFs but do not publish explicit reusable data/export terms. Imported row-level payloads must carry this limitation until licensing is clarified.",
+      "severity": "material",
+      "affects": ["all-amepip-imports"]
+    },
+    {
+      "id": "amepip-pdf-layout-sensitive",
+      "text": "The inspected sources are PDFs. Row counts come from pdftotext/pdfplumber extraction and wrapped cells can split rows; a production importer must validate row counts and identifier coverage for each source file.",
+      "severity": "material",
+      "affects": ["parser", "row-counts"]
+    },
+    {
+      "id": "amepip-powerbi-not-import-source",
+      "text": "The public Power BI dashboard remains context only. It must not be scraped as source-of-truth data unless AMEPIP publishes an explicit export or API path with provenance and reuse terms.",
+      "severity": "blocking",
+      "affects": ["dashboard-data"]
+    },
+    {
+      "id": "amepip-listing-annexes-without-cui",
+      "text": "Annexes 5 and 6 expose useful listing recommendations but no visible CUI in the inspected table text. They require a CUI crosswalk from another official source before simulator use.",
+      "severity": "material",
+      "affects": ["listing-readiness"]
+    }
+  ],
+  "nextSlice": {
+    "scope": "Compensation sample parser",
+    "deliverable": "Build a small AMEPIP compensation parser around the August 2025 nominal central-enterprise PDF/text source, preserving CUI, APT, enterprise, person, role and fixed/variable compensation fields with source hashes.",
+    "doneWhen": "A compact sample output validates, reports CUI/person/role coverage and remains explicitly source-inventory-only until reuse terms and consumer needs justify publishing a full mart."
+  }
+}
