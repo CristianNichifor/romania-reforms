@@ -38,8 +38,10 @@ First slice:
   workbook and keep the scope mismatch as a warning
 - done: publish classification assumptions for own revenue, transfers, personnel and capital
   spending
-- next: generate the full 2025 national mart and prove the existing `buget-uat-2025`
+- done: generate the full 2025 national mart and prove the existing `buget-uat-2025`
   output can be regenerated through the shared package without changing published totals
+- next: add arrears or move a 2023-2025 national expansion to release assets; the committed
+  2025 mart fits the current size gate, but the full three-year history probably will not
 
 Useful first indicators:
 

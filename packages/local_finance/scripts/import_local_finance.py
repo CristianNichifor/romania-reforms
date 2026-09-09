@@ -1,12 +1,16 @@
 """Build the shared local finance mart from Transparenta budget execution.
 
-The first committed slice is deliberately small: ten UATs over 2023-2025, enough to lock
-down the data shape, classification choices and validation report before moving the full
-national budget file out of `simulators/impozit-teren`.
+The first committed slice was deliberately small: ten UATs over 2023-2025, enough to lock
+down the data shape, classification choices and validation report. The same importer can now
+also build the full 2025 mart that feeds `simulators/impozit-teren` through a compatibility
+export.
 
 Usage:
     uv run python packages/local_finance/scripts/import_local_finance.py \
         --data-gov-2024-workbook /tmp/local-finance/situatia-veniturilor-cheltuielilor-2024.xlsx
+    uv run python packages/local_finance/scripts/import_local_finance.py \
+        --scope full --years 2025 \
+        --legacy-budget-out simulators/impozit-teren/data/buget-uat-2025.json
 """
 
 from __future__ import annotations
@@ -28,6 +32,7 @@ API: Final[str] = "https://api.transparenta.eu/graphql"
 UA: Final[str] = "romania-reforms/0.1 (+https://github.com/CristianNichifor/romania-reforms)"
 YEAR: Final[int] = 2025
 DEFAULT_YEARS: Final[tuple[int, ...]] = (2023, 2024, 2025)
+SCOPES: Final[tuple[str, ...]] = ("sample", "full")
 UAT_REGISTRY: Final[Path] = (
     REPO_ROOT / "packages" / "uat_registry" / "data" / "uat-registry-2026.json"
 )
@@ -190,8 +195,8 @@ def batch_query(
         if not re.fullmatch(r"\d+", uat):
             raise SystemExit(f"uat id is not a number: {uat!r}")
         parts.append(
-            f'  u{uat}: aggregatedLineItems(filter: {{account_category: {category}, '
-            f"report_type: PRINCIPAL_AGGREGATED, {expense_filter}uat_ids: [\"{uat}\"], "
+            f"  u{uat}: aggregatedLineItems(filter: {{account_category: {category}, "
+            f'report_type: PRINCIPAL_AGGREGATED, {expense_filter}uat_ids: ["{uat}"], '
             f'report_period: {{type: YEAR, selection: {{interval: {{start: "{year}", '
             f'end: "{year}"}}}}}}}}, limit: 400, offset: {int(offset)}) '
             "{ nodes { functional_code economic_code amount } pageInfo { hasNextPage } }"
@@ -199,9 +204,7 @@ def batch_query(
     return "query Batch {\n" + "\n".join(parts) + "\n}"
 
 
-def all_rows(
-    uat_id: str, category: str, year: int, expense_type: str | None = None
-) -> list[dict]:
+def all_rows(uat_id: str, category: str, year: int, expense_type: str | None = None) -> list[dict]:
     rows: list[dict] = []
     offset = 0
     while True:
@@ -220,9 +223,7 @@ def fetch_line_items(
     label = f"{category}:{expense_type}" if expense_type else category
     for start in range(0, len(uats), BATCH):
         chunk = uats[start : start + BATCH]
-        query = batch_query(
-            [u["uatId"] for u in chunk], category, year, expense_type=expense_type
-        )
+        query = batch_query([u["uatId"] for u in chunk], category, year, expense_type=expense_type)
         data = post(query)
         for uat in chunk:
             found = data.get(f"u{uat['uatId']}")
@@ -257,10 +258,7 @@ def totals(rows: list[dict]) -> tuple[float, float]:
 
 
 def fetch(uats: list[dict], category: str, year: int) -> dict[str, tuple[float, float]]:
-    return {
-        siruta: totals(rows)
-        for siruta, rows in fetch_line_items(uats, category, year).items()
-    }
+    return {siruta: totals(rows) for siruta, rows in fetch_line_items(uats, category, year).items()}
 
 
 def code_matches_prefix(code: str, prefixes: tuple[str, ...]) -> bool:
@@ -302,6 +300,36 @@ def select_sample_uats(
             f"sample SIRUTA codes missing from Transparenta roster: {', '.join(missing)}"
         )
     return [by_siruta[siruta] | {"sampleRole": role} for siruta, role in sample]
+
+
+def select_uats_for_scope(uats: list[dict], scope: str) -> list[dict]:
+    if scope == "sample":
+        return select_sample_uats(uats)
+    if scope == "full":
+        return [uat | {"sampleRole": "full-import"} for uat in uats]
+    raise SystemExit(f"unknown local finance scope {scope!r}; expected one of {SCOPES}")
+
+
+def siruta_sort_key(value: str) -> tuple[int, int | str]:
+    return (0, int(value)) if value.isdigit() else (1, value)
+
+
+def period_slug(years: list[int]) -> str:
+    return str(min(years)) if min(years) == max(years) else f"{min(years)}-{max(years)}"
+
+
+def mart_id(scope: str, years: list[int]) -> str:
+    prefix = "local-finance-mart-sample" if scope == "sample" else "local-finance-mart"
+    return f"{prefix}-{period_slug(years)}"
+
+
+def mart_title(scope: str, years: list[int]) -> str:
+    label = "Local finance mart sample" if scope == "sample" else "Local finance mart"
+    return f"{label}, {period_slug(years)}"
+
+
+def default_mart_path(year: int, out_dir: Path = PACKAGE_ROOT / "data") -> Path:
+    return out_dir / f"{mart_id('full', [year])}.json"
 
 
 def record_from_lines(
@@ -397,7 +425,7 @@ def fetch_mart_records(
                     development.get(uat["siruta"], []),
                 )
             )
-    return sorted(records, key=lambda row: (row["year"], int(row["siruta"]))), raw
+    return sorted(records, key=lambda row: (row["year"], siruta_sort_key(row["siruta"]))), raw
 
 
 def build_year_summary(records: list[dict]) -> list[dict]:
@@ -502,6 +530,7 @@ def build_mart_document(
     registry_document: dict,
     registry_sha256: str,
     transparenta_sha256: str,
+    scope: str = "sample",
 ) -> dict:
     sample = [
         {"siruta": siruta, "role": role}
@@ -510,9 +539,10 @@ def build_mart_document(
     ]
     return {
         "$schema": "../schema/local-finance-mart.schema.json",
-        "id": f"local-finance-mart-sample-{min(years)}-{max(years)}",
-        "title": f"Local finance mart sample, {min(years)}-{max(years)}",
+        "id": mart_id(scope, years),
+        "title": mart_title(scope, years),
         "publisher": "transparenta.eu",
+        "scope": scope,
         "periodStart": str(min(years)),
         "periodEnd": str(max(years)),
         "currency": "RON",
@@ -637,8 +667,8 @@ def comparison_check(data_gov: dict | None, transparenta: dict | None) -> dict:
             "id": "data-gov-2024-national-comparison",
             "status": "not_run",
             "text": (
-                "No data.gov.ro workbook was supplied, so the first slice records the "
-                "comparison hook only."
+                "No data.gov.ro workbook was supplied, so the report records the comparison "
+                "hook only."
             ),
             "metrics": {},
         }
@@ -686,27 +716,29 @@ def build_validation_report(
     mart: dict, data_gov: dict | None = None, transparenta: dict | None = None
 ) -> dict:
     records = mart["records"]
+    scope = mart.get("scope", "sample" if "-sample-" in mart["id"] else "full")
     roles = {row["siruta"]: row["sampleRole"] for row in records}
     commune_counties = {
         row["countyCode"]
         for row in records
         if row["sampleRole"] == "rural-commune" and row["level"] == "commune"
     }
-    scope_ok = (
-        mart["summary"]["uats"] == 10
-        and "county-seat" in roles.values()
-        and "bucharest-sector" in roles.values()
-        and len(commune_counties) >= 3
-    )
-    all_have_finance = all(row["revenueRon"] > 0 or row["spendingRon"] > 0 for row in records)
-    all_registry_matched = mart["summary"]["registryMatchedUats"] == mart["summary"]["uats"]
-    development_missing_years = [
-        year["year"] for year in mart["summary"]["byYear"] if year["developmentSpendingRon"] == 0
-    ]
-    checks = [
-        {
+    unique_sirutas = {row["siruta"] for row in records}
+    numeric_sirutas = {siruta for siruta in unique_sirutas if siruta.isdigit()}
+    county_codes = {siruta for siruta in unique_sirutas if not siruta.isdigit()}
+    if scope == "sample":
+        scope_check = {
             "id": "sample-scope",
-            "status": "pass" if scope_ok else "fail",
+            "status": (
+                "pass"
+                if (
+                    mart["summary"]["uats"] == 10
+                    and "county-seat" in roles.values()
+                    and "bucharest-sector" in roles.values()
+                    and len(commune_counties) >= 3
+                )
+                else "fail"
+            ),
             "text": (
                 "Sample covers ten UATs over three years, including a county seat, a Bucharest "
                 "sector and rural communes from at least three counties."
@@ -716,20 +748,58 @@ def build_validation_report(
                 "years": mart["summary"]["years"],
                 "ruralCommuneCounties": len(commune_counties),
             },
-        },
+        }
+    else:
+        expected_records = len(unique_sirutas) * mart["summary"]["years"]
+        scope_check = {
+            "id": "full-national-scope",
+            "status": (
+                "pass"
+                if (
+                    len(unique_sirutas) > 3000
+                    and len(numeric_sirutas) > 3000
+                    and len(county_codes) >= 40
+                    and mart["summary"]["records"] == expected_records
+                )
+                else "fail"
+            ),
+            "text": (
+                "Full mart covers the national Transparenta UAT roster, including county "
+                "councils that file under county letter codes."
+            ),
+            "metrics": {
+                "uats": len(unique_sirutas),
+                "numericUats": len(numeric_sirutas),
+                "countyCouncils": len(county_codes),
+                "years": mart["summary"]["years"],
+                "records": mart["summary"]["records"],
+                "expectedRecords": expected_records,
+            },
+        }
+    all_have_finance = all(row["revenueRon"] > 0 or row["spendingRon"] > 0 for row in records)
+    all_registry_matched = mart["summary"]["registryMatchedUats"] == len(numeric_sirutas)
+    development_missing_years = [
+        year["year"] for year in mart["summary"]["byYear"] if year["developmentSpendingRon"] == 0
+    ]
+    checks = [
+        scope_check,
         {
             "id": "registry-join",
             "status": "pass" if all_registry_matched else "fail",
-            "text": "Every sampled SIRUTA joins to the shared UAT registry and carries a CUI.",
+            "text": (
+                "Every numeric SIRUTA joins to the shared UAT registry and carries a CUI; "
+                "county-council letter codes are kept outside that join."
+            ),
             "metrics": {
                 "registryMatchedUats": mart["summary"]["registryMatchedUats"],
-                "sampleUats": mart["summary"]["uats"],
+                "numericUats": len(numeric_sirutas),
+                "countyCouncils": len(county_codes),
             },
         },
         {
             "id": "transparenta-line-items",
             "status": "pass" if all_have_finance else "fail",
-            "text": "Every sampled UAT-year has at least one revenue or spending line item.",
+            "text": "Every UAT-year has at least one revenue or spending line item.",
             "metrics": {
                 "records": mart["summary"]["records"],
                 "emptyRecords": sum(
@@ -741,13 +811,13 @@ def build_validation_report(
             "id": "development-expense-type-coverage",
             "status": "warning" if development_missing_years else "pass",
             "text": (
-                "Transparenta development-spending expense-type rows are present for each sampled "
-                "year."
+                "Transparenta development-spending expense-type rows are present for each "
+                "requested year."
                 if not development_missing_years
                 else (
                     "Transparenta returns no development-spending expense-type rows for at least "
-                    "one sampled year; the mart keeps those fields as source-missing zeros with a "
-                    "named limitation."
+                    "one requested year; the mart keeps those fields as source-missing zeros "
+                    "with a named limitation."
                 )
             ),
             "metrics": {
@@ -759,10 +829,11 @@ def build_validation_report(
         comparison_check(data_gov, transparenta),
     ]
     counts = Counter(check["status"] for check in checks)
+    report_period = period_slug([int(mart["periodStart"]), int(mart["periodEnd"])])
     return {
         "$schema": "../schema/local-finance-validation-report.schema.json",
-        "id": f"local-finance-validation-report-{mart['periodStart']}-{mart['periodEnd']}",
-        "title": f"Local finance mart validation report, {mart['periodStart']}-{mart['periodEnd']}",
+        "id": f"local-finance-validation-report-{report_period}",
+        "title": f"Local finance mart validation report, {report_period}",
         "martId": mart["id"],
         "periodStart": mart["periodStart"],
         "periodEnd": mart["periodEnd"],
@@ -840,6 +911,41 @@ def build_legacy_budget_document(
             }
         )
 
+    return build_legacy_budget_document_from_rows(rows, year)
+
+
+def build_legacy_budget_document_from_records(records: list[dict], year: int) -> dict:
+    rows = []
+    for record in sorted(records, key=lambda row: row["siruta"]):
+        if record["year"] != year:
+            continue
+        if record["revenueRon"] == 0 and record["spendingRon"] == 0:
+            continue
+        rows.append(
+            {
+                "siruta": record["siruta"],
+                "level": "county" if not record["siruta"].isdigit() else "uat",
+                "name": record.get("transparentaName") or record["name"],
+                "county": record["countyCode"],
+                "population": record["population"],
+                "revenueRon": record["revenueRon"],
+                "ownRevenueRon": record["ownRevenueRon"],
+                "spendingRon": record["spendingRon"],
+                "ownShare": share(record["ownRevenueRon"], record["revenueRon"]),
+            }
+        )
+    return build_legacy_budget_document_from_rows(rows, year)
+
+
+def build_legacy_budget_document_from_mart(mart: dict, year: int | None = None) -> dict:
+    years = sorted({row["year"] for row in mart["records"]})
+    selected_year = year if year is not None else years[-1]
+    if selected_year not in years:
+        raise SystemExit(f"{mart['id']} has no records for {selected_year}")
+    return build_legacy_budget_document_from_records(mart["records"], selected_year)
+
+
+def build_legacy_budget_document_from_rows(rows: list[dict], year: int) -> dict:
     suspects = quarantine(rows)
     rows = [row for row in rows if not row.get("suspect")]
     reporting = len(rows)
@@ -935,6 +1041,39 @@ def build_legacy_budget_document(
     }
 
 
+def build_finance_documents(
+    scope: str,
+    years: list[int],
+    retrieved_date: str,
+    registry: Path,
+    data_gov_2024_workbook: Path | None = None,
+) -> tuple[dict, dict]:
+    registry_document = read_registry(registry)
+    uats = roster()
+    if len(uats) < 3000:
+        raise SystemExit(f"only {len(uats)} UATs came back; refusing to use a partial roster")
+    validate_roster_against_registry(uats, shared_registry_sirutas(registry))
+    prefer_registry_population(uats, shared_registry_population(registry))
+    selected = select_uats_for_scope(uats, scope)
+
+    requested_years = sorted(set(years))
+    records, raw = fetch_mart_records(selected, requested_years, registry_document)
+    mart = build_mart_document(
+        records,
+        requested_years,
+        retrieved_date,
+        registry_document,
+        sha256_file(registry),
+        sha256_json(raw),
+        scope=scope,
+    )
+
+    data_gov = data_gov_2024_totals(data_gov_2024_workbook) if data_gov_2024_workbook else None
+    transparenta = transparenta_national_totals(2024) if data_gov else None
+    report = build_validation_report(mart, data_gov=data_gov, transparenta=transparenta)
+    return mart, report
+
+
 def write_json(path: Path, document: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -942,47 +1081,44 @@ def write_json(path: Path, document: dict) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--scope", choices=SCOPES, default="sample")
     parser.add_argument("--years", type=int, nargs="+", default=list(DEFAULT_YEARS))
     parser.add_argument("--retrieved-date", default=date.today().isoformat())
     parser.add_argument("--registry", type=Path, default=UAT_REGISTRY)
     parser.add_argument("--out-dir", type=Path, default=PACKAGE_ROOT / "data")
     parser.add_argument("--data-gov-2024-workbook", type=Path)
+    parser.add_argument(
+        "--legacy-budget-out",
+        type=Path,
+        help="also write the impozit-teren buget-uat compatibility export",
+    )
     args = parser.parse_args()
 
-    registry_document = read_registry(args.registry)
-    uats = roster()
-    if len(uats) < 3000:
-        raise SystemExit(f"only {len(uats)} UATs came back; refusing to use a partial roster")
-    validate_roster_against_registry(uats, shared_registry_sirutas(args.registry))
-    prefer_registry_population(uats, shared_registry_population(args.registry))
-    selected = select_sample_uats(uats)
-
-    years = sorted(set(args.years))
-    records, raw = fetch_mart_records(selected, years, registry_document)
-    mart = build_mart_document(
-        records,
-        years,
+    mart, report = build_finance_documents(
+        args.scope,
+        args.years,
         args.retrieved_date,
-        registry_document,
-        sha256_file(args.registry),
-        sha256_json(raw),
+        args.registry,
+        data_gov_2024_workbook=args.data_gov_2024_workbook,
     )
-
-    data_gov = (
-        data_gov_2024_totals(args.data_gov_2024_workbook)
-        if args.data_gov_2024_workbook
-        else None
-    )
-    transparenta = transparenta_national_totals(2024) if data_gov else None
-    report = build_validation_report(mart, data_gov=data_gov, transparenta=transparenta)
 
     mart_path = args.out_dir / f"{mart['id']}.json"
     report_path = args.out_dir / f"{report['id']}.json"
     write_json(mart_path, mart)
     write_json(report_path, report)
+    if args.legacy_budget_out:
+        legacy_budget_out = (
+            args.legacy_budget_out
+            if args.legacy_budget_out.is_absolute()
+            else REPO_ROOT / args.legacy_budget_out
+        )
+        legacy = build_legacy_budget_document_from_mart(mart, max(args.years))
+        write_json(legacy_budget_out, legacy)
     print(f"{mart['summary']['records']} finance records, {mart['summary']['uats']} UATs")
     print(f"Wrote {mart_path.relative_to(REPO_ROOT)}")
     print(f"Wrote {report_path.relative_to(REPO_ROOT)}")
+    if args.legacy_budget_out:
+        print(f"Wrote {legacy_budget_out.relative_to(REPO_ROOT)}")
     return 0
 
 

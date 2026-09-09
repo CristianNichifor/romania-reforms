@@ -7,6 +7,7 @@ as the impozit-teren entry point and compatibility module for neighbouring scrip
 Usage:
     uv run python simulators/impozit-teren/scripts/import_buget_uat.py
     uv run python simulators/impozit-teren/scripts/import_buget_uat.py --year 2024
+    uv run python simulators/impozit-teren/scripts/import_buget_uat.py --refresh
 """
 
 from __future__ import annotations
@@ -14,6 +15,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from datetime import date
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -45,20 +47,34 @@ validate_roster_against_registry = finance.validate_roster_against_registry
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--year", type=int, default=YEAR)
+    parser.add_argument(
+        "--mart",
+        type=Path,
+        help="read an existing packages/local_finance mart instead of the default year file",
+    )
+    parser.add_argument(
+        "--refresh",
+        action="store_true",
+        help="fetch Transparenta again and rebuild the full shared mart before exporting",
+    )
     args = parser.parse_args()
 
-    uats = roster()
-    if len(uats) < 3000:
-        raise SystemExit(f"only {len(uats)} UATs came back; refusing to write a partial roster")
-    validate_roster_against_registry(uats, shared_registry_sirutas())
-    prefer_registry_population(uats, shared_registry_population())
+    mart_path = args.mart or finance.default_mart_path(args.year)
+    if mart_path.exists() and not args.refresh:
+        mart = json.loads(mart_path.read_text(encoding="utf-8"))
+    else:
+        mart, _ = finance.build_finance_documents(
+            "full",
+            [args.year],
+            date.today().isoformat(),
+            UAT_REGISTRY,
+        )
+        finance.write_json(mart_path, mart)
 
-    revenue = fetch(uats, "vn", args.year)
-    spending = fetch(uats, "ch", args.year)
-    document = finance.build_legacy_budget_document(uats, revenue, spending, args.year)
+    document = finance.build_legacy_budget_document_from_mart(mart, args.year)
 
     out = ROOT / "data" / f"buget-uat-{args.year}.json"
-    out.write_text(json.dumps(document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    finance.write_json(out, document)
     print(
         f"{document['summary']['uatsReporting']} UAT-uri, "
         f"{document['summary']['spendingRon'] / 1e9:.2f} mld lei cheltuiți"
