@@ -43,6 +43,12 @@ try {
     await page.waitForLoadState('networkidle');
   };
   const snapshot = async name => {
+    if (!before) {
+      const uncomposed = await page.locator('.civic-input, .civic-select').evaluateAll(els => els
+        .filter(el => !el.closest('.civic-field') || !el.closest('.civic-scope') || !el.labels?.length)
+        .map(el => el.outerHTML));
+      assert.deepEqual(uncomposed, [], 'Shared inputs/selects require scoped Field composition and a label');
+    }
     scenarios.push({ name, hash: new URL(page.url()).hash,
       // Preserve every rendered value and table row, including collapsed detail data.
       text: await page.locator('.wrap > :not(nav)').evaluateAll(els => els.map(el => {
@@ -61,8 +67,9 @@ try {
       for (const width of [320, 390, 1440]) {
         await page.setViewportSize({ width, height: 1000 });
         if (!before) {
-          const violations = (await new AxeBuilder({ page }).include(`${selector} .civic-choice, ${selector} .civic-field`).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()).violations;
-          assert.deepEqual(violations, []);
+          const scope = name.startsWith('proposal') ? selector : `${selector} .civic-choice, ${selector} .civic-field`;
+          const violations = (await new AxeBuilder({ page }).include(scope).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()).violations;
+          assert.deepEqual(violations.map(({ id, nodes }) => ({ id, nodes: nodes.map(({ target, failureSummary }) => ({ target, failureSummary })) })), []);
           const controls = page.locator(`${selector} input:not([type=range]), ${selector} select, ${selector} button`);
           for (const el of await controls.all()) {
             const box = await el.boundingBox();
@@ -77,6 +84,8 @@ try {
   const tableLayouts = async name => {
     if (before) return;
     await page.locator('details:has(table)').evaluateAll(els => els.forEach(el => { el.open = true; }));
+    const semantics = await new AxeBuilder({ page }).include('.civic-table-scroll').withTags(['wcag2a']).analyze();
+    assert.deepEqual(semantics.violations.map(({ id, nodes }) => ({ id, targets: nodes.map(node => node.target) })), [], 'Table accessibility semantics');
     for (const mode of ['light', 'dark']) {
       await page.emulateMedia({ colorScheme: mode });
       for (const width of [320, 390, 1440]) {
@@ -128,6 +137,9 @@ try {
   await page.getByRole('button', { name: 'pornește tot', exact: true }).click();
   await snapshot('proposal-reset');
   await layout('proposal', '.patches');
+  await page.getByRole('button', { name: 'stinge tot', exact: true }).click();
+  await page.locator('.patch details').evaluateAll(els => els.forEach(el => { el.open = true; }));
+  await layout('proposal-off-expanded', '.patches');
 
   await open('meserii');
   await snapshot('occupations-initial');
