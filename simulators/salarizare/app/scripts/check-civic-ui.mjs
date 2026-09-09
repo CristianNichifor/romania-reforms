@@ -41,6 +41,8 @@ try {
     for (const width of [320, 390, 1440]) {
       await page.setViewportSize({ width, height: 1000 });
       await page.goto(url);
+      // Reload a ready screen, not a document whose initial data requests are still starting.
+      await page.locator('.ratio-list > *').first().waitFor();
       await page.reload();
       await page.locator('.ratio-list > *').first().waitFor();
       await page.screenshot({ path: `${out}${mode}-${width}.png`, fullPage: true });

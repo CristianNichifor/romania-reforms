@@ -71,7 +71,7 @@ jobs:
         run: |
           npm ci --ignore-scripts
           npm run build
-          docker run --rm --ipc=host -v "$GITHUB_WORKSPACE:/work" -v /tmp:/tmp -w /work/simulators/salarizare/app mcr.microsoft.com/playwright:v1.63.0-noble npm run check:ui
+          docker run --rm --ipc=host --user "$(id -u):$(id -g)" -v "$GITHUB_WORKSPACE:/work" -v /tmp:/tmp -w /work/simulators/salarizare/app mcr.microsoft.com/playwright:v1.63.0-noble npm run check:ui
       - name: Upload pay browser evidence
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
