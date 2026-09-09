@@ -50,6 +50,11 @@
         "unitsFurtherFromCourt",
         "peopleFurtherFromCourt",
         "hospitalTowns",
+        "healthAccessView",
+        "healthProviderTowns",
+        "healthAccessEligibleProviders",
+        "healthAccessBlockedProviders",
+        "healthAccessNamedExclusions",
         "medianMetresToPoliceAtMost",
         "seatsThatArePoliceTowns",
         "policeTowns",
@@ -116,6 +121,25 @@
         "hospitalTowns": {
           "type": "integer",
           "exclusiveMinimum": 0
+        },
+        "healthAccessView": {
+          "const": "health-service-access-uat-2024-2026"
+        },
+        "healthProviderTowns": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "healthAccessEligibleProviders": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "healthAccessBlockedProviders": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "healthAccessNamedExclusions": {
+          "type": "integer",
+          "minimum": 0
         },
         "medianMetresToPoliceAtMost": {
           "type": "number",
@@ -224,6 +248,7 @@
           "population",
           "courtMetres",
           "hospitalMetresAtMost",
+          "localHealthProviderCount",
           "comparable",
           "policeMetresAtMost",
           "todayCourtMetres"
@@ -248,6 +273,10 @@
           },
           "hospitalMetresAtMost": {
             "type": "number",
+            "minimum": 0
+          },
+          "localHealthProviderCount": {
+            "type": "integer",
             "minimum": 0
           },
           "comparable": {

@@ -16,7 +16,7 @@ import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
 SERVICII = ROOT / "simulators/justitie/data/acces-servicii.json"
-SPITALE = ROOT / "simulators/justitie/data/spitale-2026.json"
+HEALTH_ACCESS = ROOT / "packages/health_access/data/health-service-access-uat-2024-2026.json"
 
 
 @pytest.fixture(scope="module")
@@ -26,18 +26,22 @@ def servicii() -> dict:
     return json.loads(SERVICII.read_text(encoding="utf-8"))
 
 
-def test_the_unmapped_counties_are_kept_and_excluded(servicii):
-    """A unit whose county has no plotted hospitals would read as far from care when its
-    hospital simply was not drawn. Kept in the file, out of every figure."""
-    if not SPITALE.exists():
-        pytest.skip("hospitals not imported")
-    missing = set(json.loads(SPITALE.read_text(encoding="utf-8"))["summary"]["countiesMissing"])
-    assert missing, "the map gap vanished; this exclusion would be silently pointless"
-    for unit in servicii["units"]:
-        assert unit["comparable"] == (unit["county"] not in missing), unit["siruta"]
-    comparable = [u for u in servicii["units"] if u["comparable"]]
-    assert servicii["summary"]["comparableUnits"] == len(comparable)
-    assert len(comparable) < len(servicii["units"]), "nothing was excluded"
+def test_the_shared_health_access_view_replaces_the_county_map_exclusion(servicii):
+    """The hospital comparison now consumes the shared health_access package.
+
+    The old Ministry map gap excluded whole counties. The shared view has UAT-level evidence
+    in every county and keeps county-only providers as named exclusions instead.
+    """
+    health = json.loads(HEALTH_ACCESS.read_text(encoding="utf-8"))
+    summary = servicii["summary"]
+    assert summary["healthAccessView"] == health["id"]
+    assert summary["healthAccessEligibleProviders"] == health["summary"]["eligibleProviders"]
+    assert summary["healthAccessBlockedProviders"] == health["summary"]["blockedProviders"]
+    assert summary["healthAccessNamedExclusions"] == health["summary"]["namedExclusions"]
+    assert summary["healthProviderTowns"] == health["summary"]["uatsWithLocalProvider"]
+    assert summary["hospitalTowns"] == summary["healthProviderTowns"]
+    assert all(unit["comparable"] for unit in servicii["units"])
+    assert summary["comparableUnits"] == len(servicii["units"])
 
 
 def test_the_summary_recomputes_from_its_own_rows(servicii):
@@ -66,7 +70,7 @@ def test_the_seat_coincidence_is_measured_on_one_set_of_seats(servicii):
     comparable = [u for u in servicii["units"] if u["comparable"]]
     summary = servicii["summary"]
     assert summary["seatsThatAreHospitalTowns"] == sum(
-        1 for u in comparable if u["hospitalMetresAtMost"] == 0
+        1 for u in comparable if u["localHealthProviderCount"] > 0
     )
     assert summary["seatsThatAreCourtTowns"] == sum(1 for u in comparable if u["courtMetres"] == 0)
     assert summary["seatsThatAreHospitalTowns"] > 2 * summary["seatsThatAreCourtTowns"]
@@ -94,7 +98,7 @@ def test_the_baseline_is_todays_real_court_network(servicii):
     assert summary["seatsThatAreTodayCourtTowns"] == sum(
         1 for u in servicii["units"] if u["todayCourtMetres"] == 0
     )
-    assert summary["seatsThatAreTodayCourtTowns"] > 4 * summary["seatsThatAreCourtTowns"]
+    assert summary["seatsThatAreTodayCourtTowns"] > 3 * summary["seatsThatAreCourtTowns"]
 
 
 def test_consolidation_can_only_lengthen_the_journey_to_a_first_level_court(servicii):
@@ -104,9 +108,7 @@ def test_consolidation_can_only_lengthen_the_journey_to_a_first_level_court(serv
     no unit can come out closer. If one did, the two networks would not be nested and the
     comparison would be measuring something else.
     """
-    closer = [
-        u["siruta"] for u in servicii["units"] if u["courtMetres"] < u["todayCourtMetres"]
-    ]
+    closer = [u["siruta"] for u in servicii["units"] if u["courtMetres"] < u["todayCourtMetres"]]
     assert closer == [], closer[:10]
 
 
@@ -168,8 +170,9 @@ def test_hospital_distances_are_upper_bounds_and_say_so(servicii):
     hospital shortens the true journey, so a court that looks nearer here really is."""
     ids = {x["id"] for x in servicii["limitations"]}
     assert "distanta-la-spital-e-o-limita-de-sus" in ids
-    assert "judetele-fara-spitale-marcate-sunt-excluse" in ids
+    assert "furnizorii-fara-uat-sunt-exclusi" in ids
     assert "media-e-trasa-in-jos-de-sedii" in ids
+    assert "sanatatea-vine-din-pachetul-shared" in ids
 
 
 def test_the_comparison_does_not_equate_a_trial_with_an_emergency(servicii):
@@ -188,3 +191,19 @@ def test_units_further_from_court_are_counted_from_the_rows(servicii):
     further = [u for u in comparable if u["courtMetres"] > u["hospitalMetresAtMost"]]
     assert servicii["summary"]["unitsFurtherFromCourt"] == len(further)
     assert servicii["summary"]["peopleFurtherFromCourt"] == sum(u["population"] for u in further)
+
+
+def test_local_health_provider_counts_come_from_the_shared_view(servicii):
+    health = json.loads(HEALTH_ACCESS.read_text(encoding="utf-8"))
+    health_by_siruta = {unit["siruta"]: unit for unit in health["units"]}
+
+    for unit in servicii["units"]:
+        shared = health_by_siruta.get(unit["siruta"])
+        if shared is None and unit["county"] == "B":
+            shared = health_by_siruta["179132"]
+        assert shared is not None, unit["siruta"]
+        assert unit["localHealthProviderCount"] == shared["localProviderCount"], unit["siruta"]
+
+    assert servicii["summary"]["seatsThatAreHospitalTowns"] == sum(
+        1 for unit in servicii["units"] if unit["localHealthProviderCount"] > 0
+    )

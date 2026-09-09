@@ -86,9 +86,10 @@ First slice:
   county-only rows cannot be used as if they had a provider location
 - done: build a UAT-level service-access view from eligible providers only, with named
   exclusions for county-only provider rows
-- next: wire the shared UAT service-access view into `administrativ`, `justitie` and
-  `transport`; then add street-address or coordinate evidence for point-level provider
-  locations
+- done: wire the shared UAT service-access view into `justitie`'s court/police/health access
+  comparison
+- next: wire the shared UAT service-access view into `administrativ` and `transport`; then
+  add street-address or coordinate evidence for point-level provider locations
 
 This should support service-access views in `administrativ`, `justitie` and `transport`
 without each simulator building its own hospital roster.
