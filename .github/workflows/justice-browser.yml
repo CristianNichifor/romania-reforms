@@ -1,0 +1,39 @@
+name: Justice browser baselines
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  browsers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Locate courts from committed public data
+        run: uv run python simulators/justitie/scripts/locate_instante.py --year 2025
+      - name: Build and model checks
+        working-directory: simulators/justitie/app
+        run: |
+          npm ci --ignore-scripts
+          npm test
+          npm run build
+      - name: Statistics and real map in three browsers
+        run: >-
+          docker run --rm --init --ipc=host -e CI=1 -e LIBGL_ALWAYS_SOFTWARE=1
+          -v "$PWD:/work" -w /work/simulators/justitie/app
+          -v "$RUNNER_TEMP/justitie-browser-baselines:/tmp/justitie-browser-baselines"
+          mcr.microsoft.com/playwright:v1.63.0-noble
+          xvfb-run -a npm run check:ui -- --reporter=list
+      - name: Browser evidence
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: justitie-browser-baselines
+          path: ${{ runner.temp }}/justitie-browser-baselines
+          if-no-files-found: ignore
+          retention-days: 7
