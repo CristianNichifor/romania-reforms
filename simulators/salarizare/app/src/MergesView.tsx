@@ -1,4 +1,7 @@
 import { useMemo } from 'react';
+import { Field, Input, NativeSelect } from '@cristiannichifor/civic-ui';
+import '@cristiannichifor/civic-ui/styles.css';
+import './civic-pilot.css';
 
 import { byFanIn, mergeCards } from '../../engine/merges';
 import type { MergeCard } from '../../engine/merges';
@@ -144,26 +147,33 @@ export default function MergesView({
       </div>
 
       <div className="merges-controls">
-        <label className="field">
-          <span>Caută o denumire</span>
-          <input
-            type="search"
-            value={query}
-            placeholder="asistent, referent, șofer…"
-            onChange={(e) => setExtra({ q: e.target.value })}
-          />
-        </label>
-        <label className="field">
-          <span>Familia ocupațională</span>
-          <select value={family} onChange={(e) => setExtra({ fam: e.target.value })}>
-            <option value="">toate ({all.length})</option>
-            {families.map((f) => (
-              <option key={f} value={f}>
-                {f}
-              </option>
-            ))}
-          </select>
-        </label>
+        <div className="merge-filter civic-scope civic-pay">
+          <Field id="merge-query" label="Caută o denumire">
+            {(attributes) => (
+              <Input
+                {...attributes}
+                type="search"
+                value={query}
+                placeholder="asistent, referent, șofer…"
+                onChange={(e) => setExtra({ q: e.target.value })}
+              />
+            )}
+          </Field>
+        </div>
+        <div className="merge-filter civic-scope civic-pay">
+          <Field id="merge-family" label="Familia ocupațională">
+            {(attributes) => (
+              <NativeSelect {...attributes} value={family} onChange={(e) => setExtra({ fam: e.target.value })}>
+                <option value="">toate ({all.length})</option>
+                {families.map((f) => (
+                  <option key={f} value={f}>
+                    {f}
+                  </option>
+                ))}
+              </NativeSelect>
+            )}
+          </Field>
+        </div>
         <label className="claim">
           <input
             type="checkbox"
