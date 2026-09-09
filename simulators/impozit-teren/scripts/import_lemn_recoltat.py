@@ -46,17 +46,51 @@ MATRIX = "AGR306A"
 # The counties as INS spells them here, to the codes the rest of the repository uses. Same
 # spellings as the land register's matrix, which is not a coincidence — one institution.
 COUNTY_CODES = {
-    "Alba": "AB", "Arad": "AR", "Arges": "AG", "Bacau": "BC", "Bihor": "BH",
-    "Bistrita-Nasaud": "BN", "Botosani": "BT", "Braila": "BR", "Brasov": "BV", "Buzau": "BZ",
-    "Caras-Severin": "CS", "Calarasi": "CL", "Cluj": "CJ", "Constanta": "CT", "Covasna": "CV",
-    "Dambovita": "DB", "Dolj": "DJ", "Galati": "GL", "Giurgiu": "GR", "Gorj": "GJ",
-    "Harghita": "HR", "Hunedoara": "HD", "Ialomita": "IL", "Iasi": "IS", "Ilfov": "IF",
-    "Maramures": "MM", "Mehedinti": "MH", "Mures": "MS", "Neamt": "NT", "Olt": "OT",
-    "Prahova": "PH", "Satu Mare": "SM", "Salaj": "SJ", "Sibiu": "SB", "Suceava": "SV",
-    "Teleorman": "TR", "Timis": "TM", "Tulcea": "TL", "Vaslui": "VS", "Valcea": "VL",
-    "Vrancea": "VN", "Municipiul Bucuresti": "B",
+    "Alba": "AB",
+    "Arad": "AR",
+    "Arges": "AG",
+    "Bacau": "BC",
+    "Bihor": "BH",
+    "Bistrita-Nasaud": "BN",
+    "Botosani": "BT",
+    "Braila": "BR",
+    "Brasov": "BV",
+    "Buzau": "BZ",
+    "Caras-Severin": "CS",
+    "Calarasi": "CL",
+    "Cluj": "CJ",
+    "Constanta": "CT",
+    "Covasna": "CV",
+    "Dambovita": "DB",
+    "Dolj": "DJ",
+    "Galati": "GL",
+    "Giurgiu": "GR",
+    "Gorj": "GJ",
+    "Harghita": "HR",
+    "Hunedoara": "HD",
+    "Ialomita": "IL",
+    "Iasi": "IS",
+    "Ilfov": "IF",
+    "Maramures": "MM",
+    "Mehedinti": "MH",
+    "Mures": "MS",
+    "Neamt": "NT",
+    "Olt": "OT",
+    "Prahova": "PH",
+    "Satu Mare": "SM",
+    "Salaj": "SJ",
+    "Sibiu": "SB",
+    "Suceava": "SV",
+    "Teleorman": "TR",
+    "Timis": "TM",
+    "Tulcea": "TL",
+    "Vaslui": "VS",
+    "Valcea": "VL",
+    "Vrancea": "VN",
+    "Municipiul Bucuresti": "B",
 }
 THOUSAND_M3 = 1_000
+BATCH_SIZE = 8
 ROW = re.compile(r"<tr>(.*?)</tr>", re.S)
 # The closing tag is tolerated with attributes on it because TEMPO emits
 # `<td align='right'>503,4</td align='right'>` — malformed, and the reason a strict
@@ -73,8 +107,16 @@ def latest_year(meta: dict) -> str:
     return max(years, key=lambda label: int(re.sub(r"\D", "", label) or 0))
 
 
-def query(meta: dict, year: str) -> str:
-    """Every county's total harvest for one year, as the HTML the endpoint answers with.
+def county_options(meta: dict) -> list[dict]:
+    return [
+        option
+        for option in meta["dimensionsMap"][1]["options"]
+        if option["label"].strip() in COUNTY_CODES
+    ]
+
+
+def query(meta: dict, year: str, counties: list[dict]) -> str:
+    """A county batch's total harvest for one year, as the HTML the endpoint answers with.
 
     Options are posted back as the objects the metadata gave, not as bare ids — the endpoint
     deserialises each into a typed object and rejects a number, which is why the metadata is
@@ -82,7 +124,6 @@ def query(meta: dict, year: str) -> str:
     """
     dims = meta["dimensionsMap"]
     categories = [o for o in dims[0]["options"] if o["label"].strip() == "Total"]
-    counties = [o for o in dims[1]["options"] if o["label"].strip() in COUNTY_CODES]
     years = [o for o in dims[2]["options"] if o["label"].strip() == year]
     arr = [categories, counties, years, dims[3]["options"]]
     for index, group in enumerate(arr):
@@ -111,11 +152,31 @@ def parse(table: str) -> dict[str, float]:
     return found
 
 
+def harvest_for_year(meta: dict, year: str, batch_size: int = BATCH_SIZE) -> dict[str, float]:
+    """Read harvest by county in small batches.
+
+    Asking all counties at once can make TEMPO return a syntactically valid response whose
+    table contains no county rows. Smaller batches stay under that edge while keeping the
+    existing failure contract: no useful table means source-unreachable; partial data still
+    fails below.
+    """
+    harvest: dict[str, float] = {}
+    options = county_options(meta)
+    for offset in range(0, len(options), batch_size):
+        batch = options[offset : offset + batch_size]
+        parsed = parse(query(meta, year, batch))
+        if not parsed:
+            labels = ", ".join(COUNTY_CODES[option["label"].strip()] for option in batch)
+            raise retea.TempoUnavailable(f"{MATRIX}: no counties came back for {labels}")
+        harvest.update(parsed)
+    return harvest
+
+
 def main() -> int:
     meta = metadata()
     year = latest_year(meta)
     period = re.sub(r"\D", "", year)
-    harvest = parse(query(meta, year))
+    harvest = harvest_for_year(meta, year)
     if len(harvest) < 35:
         raise SystemExit(f"{MATRIX}: only {len(harvest)} counties came back; refusing to write")
 
@@ -139,9 +200,7 @@ def main() -> int:
             }
         )
     measured = [r["m3PerHaPerYear"] for r in rows if r["m3PerHaPerYear"]]
-    national = sum(r["harvestM3"] for r in rows) / sum(
-        r["forestHa"] for r in rows if r["forestHa"]
-    )
+    national = sum(r["harvestM3"] for r in rows) / sum(r["forestHa"] for r in rows if r["forestHa"])
 
     document = {
         "$schema": "../schema/lemn-recoltat.schema.json",

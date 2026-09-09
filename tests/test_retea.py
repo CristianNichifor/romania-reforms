@@ -25,6 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "simulators" / "impozit-teren" / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 
+import import_lemn_recoltat  # noqa: E402
 import retea  # noqa: E402
 
 
@@ -35,7 +36,7 @@ class FakeResponse:
     def read(self) -> bytes:
         return self.body
 
-    def __enter__(self) -> "FakeResponse":
+    def __enter__(self) -> FakeResponse:
         return self
 
     def __exit__(self, *_: object) -> None:
@@ -115,6 +116,39 @@ def test_nothing_is_retried_when_nothing_failed(request_):
         log=lambda _: None,
     )
     assert waited == []
+
+
+def agr306a_meta() -> dict:
+    return {
+        "dimensionsMap": [
+            {"options": [{"label": "Total"}]},
+            {"options": [{"label": "Alba"}, {"label": "Arad"}]},
+            {"options": [{"label": "Anul 2025"}]},
+            {"options": [{"label": "Volum brut"}]},
+        ]
+    }
+
+
+def test_timber_harvest_is_queried_in_batches(monkeypatch):
+    batches: list[list[str]] = []
+
+    def query(meta: dict, year: str, counties: list[dict]) -> str:
+        batches.append([county["label"] for county in counties])
+        return "".join(f"<tr><th>{county['label']}</th><td>1,5</td></tr>" for county in counties)
+
+    monkeypatch.setattr(import_lemn_recoltat, "query", query)
+
+    harvest = import_lemn_recoltat.harvest_for_year(agr306a_meta(), "Anul 2025", batch_size=1)
+
+    assert batches == [["Alba"], ["Arad"]]
+    assert harvest == {"AB": 1500, "AR": 1500}
+
+
+def test_timber_harvest_empty_batch_is_source_unreachable(monkeypatch):
+    monkeypatch.setattr(import_lemn_recoltat, "query", lambda *_: "<table></table>")
+
+    with pytest.raises(retea.TempoUnavailable):
+        import_lemn_recoltat.harvest_for_year(agr306a_meta(), "Anul 2025", batch_size=1)
 
 
 def test_the_matrix_definitions_are_in_the_repository():
