@@ -122,6 +122,9 @@ export interface Strings {
   ownIncome: string;
   ownRevenue: string;
   ownRevenueShare: string;
+  fiscalTrend: string;
+  spendingGrowth2023To2025: string;
+  ownRevenueShareChange2023To2025: string;
   localFinanceSource: string;
   adminPersonnel: string;
   totalPersonnel: string;
@@ -375,6 +378,9 @@ const ro: Strings = {
   ownIncome: 'Venituri totale',
   ownRevenue: 'Venituri proprii',
   ownRevenueShare: 'Pondere venituri proprii',
+  fiscalTrend: 'Trend fiscal {years}',
+  spendingGrowth2023To2025: 'Creștere cheltuieli',
+  ownRevenueShareChange2023To2025: 'Schimbare pondere venituri proprii',
   localFinanceSource: 'Mart local-finance {year}, din Transparenta.eu / Ministerul Finanțelor',
   adminPersonnel: 'Personal administrativ',
   totalPersonnel: 'Personal total',
@@ -642,6 +648,9 @@ const en: Strings = {
   ownIncome: 'Total income',
   ownRevenue: 'Own revenue',
   ownRevenueShare: 'Own-revenue share',
+  fiscalTrend: 'Fiscal trend {years}',
+  spendingGrowth2023To2025: 'Spending growth',
+  ownRevenueShareChange2023To2025: 'Own-revenue share movement',
   localFinanceSource: 'Shared local-finance mart {year}, from Transparenta.eu / Ministry of Finance',
   adminPersonnel: 'Administrative staff',
   totalPersonnel: 'Total staff',
@@ -819,4 +828,10 @@ export function formatPercent(value: number, lang: Lang): string {
     style: 'percent',
     maximumFractionDigits: 1,
   }).format(value);
+}
+
+export function formatPercentagePoints(value: number, lang: Lang): string {
+  return `${new Intl.NumberFormat(lang === 'ro' ? 'ro-RO' : 'en-GB', {
+    maximumFractionDigits: 1,
+  }).format(value * 100)} pp`;
 }

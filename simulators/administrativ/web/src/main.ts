@@ -12,6 +12,7 @@ import { buildChain, edgeKey, indexShard } from './app/chain';
 import { budgetUrlFor } from './app/links';
 import {
   localFinancePayloadAligned,
+  localFinancePeriodLabel,
   localFinanceTotals,
   type LocalFinancePayload,
 } from './app/local-finance';
@@ -30,7 +31,16 @@ import {
   upsertVersion,
   type SavedVersion,
 } from './app/versions';
-import { STRINGS, detectLang, formatMoney, formatNumber, formatPercent, type Lang, type Strings } from './i18n';
+import {
+  STRINGS,
+  detectLang,
+  formatMoney,
+  formatNumber,
+  formatPercent,
+  formatPercentagePoints,
+  type Lang,
+  type Strings,
+} from './i18n';
 import {
   createMap,
   CAPITAL_COLOUR,
@@ -1454,6 +1464,15 @@ async function boot(): Promise<void> {
               title="${strings.budgetLinkTitle}">${label}</a>`;
   };
 
+  const signed = (
+    value: number | null,
+    formatter: (absValue: number) => string,
+  ): string => {
+    if (value === null) return '—';
+    const sign = value > 0 ? '+' : value < 0 ? '-' : '';
+    return `${sign}${formatter(Math.abs(value))}`;
+  };
+
   /**
    * Shared local-finance indicators, fetched only for the detail panel.
    *
@@ -1709,6 +1728,39 @@ async function boot(): Promise<void> {
     const totalAdminPersonnel = sum(ready.adminPersonnelRon);
     const totalIncome = sum(ready.incomeRon);
     const sharedFinance = localFinanceTotals(localFinance, members);
+    const sharedFinanceYears = localFinance ? localFinancePeriodLabel(localFinance) : '';
+    const financeTrendRows: Array<[string, string]> = [];
+    if (sharedFinance && sharedFinance.spendingGrowth2023To2025 !== null) {
+      financeTrendRows.push([
+        strings.spendingGrowth2023To2025,
+        signed(sharedFinance.spendingGrowth2023To2025, (value) =>
+          formatPercent(value, scenario.lang),
+        ),
+      ]);
+    }
+    if (sharedFinance && sharedFinance.ownRevenueShareChange2023To2025 !== null) {
+      financeTrendRows.push([
+        strings.ownRevenueShareChange2023To2025,
+        signed(sharedFinance.ownRevenueShareChange2023To2025, (value) =>
+          formatPercentagePoints(value, scenario.lang),
+        ),
+      ]);
+    }
+    const financeTrendHtml =
+      sharedFinanceYears && financeTrendRows.length > 0
+        ? `<div class="finance-trends">
+             <div class="finance-trend-title">${strings.fiscalTrend.replace(
+               '{years}',
+               sharedFinanceYears,
+             )}</div>
+             ${financeTrendRows
+               .map(
+                 ([label, value]) =>
+                   `<div class="finance-share"><span>${label}</span><span>${value}</span></div>`,
+               )
+               .join('')}
+           </div>`
+        : '';
 
     // The saving is the administration of everyone except the centre: the centre keeps its
     // own town hall, and the rest is what a merger removes.
@@ -1766,9 +1818,10 @@ async function boot(): Promise<void> {
                     : formatPercent(sharedFinance.ownRevenueShare, scenario.lang)
                 }</span>
               </div>
+              ${financeTrendHtml}
               <p class="muted rep-source">${strings.localFinanceSource.replace(
                 '{year}',
-                localFinance!.period,
+                sharedFinanceYears,
               )}</p>`
             : ''
         }

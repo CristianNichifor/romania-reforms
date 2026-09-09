@@ -2,8 +2,9 @@
 
 The administrativ model keeps its own 2024 finance payload because it carries
 administration-only spending, which the shared mart deliberately does not. This build step
-adds the reusable fiscal indicators that *are* shared: total revenue, own revenue and own
-revenue share, aligned to the same positional UAT index as `attributes.bin`.
+adds the reusable fiscal indicators that *are* shared: total revenue, own revenue, own
+revenue share and multi-year fiscal trend bases, aligned to the same positional UAT
+index as `attributes.bin`.
 
 Usage:
     uv run python -m pipeline.build_local_finance
@@ -25,6 +26,9 @@ PROJECT_ROOT = SIMULATOR_ROOT.parent.parent
 DEFAULT_MART = PROJECT_ROOT / "packages/local_finance/data/local-finance-mart-2023-2025.json"
 DEFAULT_ATTRIBUTES = WEB_DATA_DIR / "attributes.json"
 DEFAULT_OUT = WEB_DATA_DIR / f"local-finance-{FINANCE_YEAR}.json"
+SOURCE_YEARS = (2023, 2024, 2025)
+TREND_START_YEAR = 2023
+TREND_END_YEAR = 2025
 
 
 def normalise_siruta(value: object) -> str:
@@ -46,11 +50,69 @@ def read_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def display_path(path: Path) -> Path:
+    try:
+        return path.resolve().relative_to(PROJECT_ROOT)
+    except ValueError:
+        return path
+
+
 def money(row: dict[str, Any], field: str) -> float:
     value = row.get(field)
     if value is None:
         return 0.0
     return round(float(value), 2)
+
+
+def own_revenue_share(row: dict[str, Any] | None) -> float | None:
+    if row is None:
+        return None
+    total = money(row, "revenueRon")
+    if total <= 0:
+        return None
+    return round(money(row, "ownRevenueRon") / total, 4)
+
+
+def ratio_change(start: float | None, end: float | None) -> float | None:
+    if start is None or end is None or start <= 0:
+        return None
+    return round((end - start) / start, 4)
+
+
+def source_records_by_year(
+    mart: dict[str, Any],
+    years: list[int],
+) -> dict[int, dict[str, dict[str, Any]]]:
+    wanted_years = set(years)
+    records = {source_year: {} for source_year in years}
+    duplicates: dict[int, list[str]] = {source_year: [] for source_year in years}
+
+    for row in mart["records"]:
+        source_year = int(row["year"])
+        if source_year not in wanted_years:
+            continue
+        siruta = normalise_siruta(row["siruta"])
+        if siruta in records[source_year]:
+            duplicates[source_year].append(siruta)
+        records[source_year][siruta] = row
+
+    for source_year, duplicate_sirutas in duplicates.items():
+        if duplicate_sirutas:
+            listed = ", ".join(sorted(set(duplicate_sirutas))[:10])
+            raise ValueError(
+                f"shared local-finance mart has duplicate {source_year} SIRUTA rows: {listed}"
+            )
+
+    return records
+
+
+def optional_money(
+    records: dict[str, dict[str, Any]],
+    siruta: str,
+    field: str,
+) -> float | None:
+    row = records.get(siruta)
+    return money(row, field) if row is not None else None
 
 
 def build_payload(
@@ -63,19 +125,9 @@ def build_payload(
     if len(sirutas) != len(set(sirutas)):
         raise ValueError("attributes.json contains duplicate SIRUTA codes")
 
-    records: dict[str, dict[str, Any]] = {}
-    duplicates: list[str] = []
-    for row in mart["records"]:
-        if int(row["year"]) != year:
-            continue
-        siruta = normalise_siruta(row["siruta"])
-        if siruta in records:
-            duplicates.append(siruta)
-        records[siruta] = row
-
-    if duplicates:
-        listed = ", ".join(sorted(set(duplicates))[:10])
-        raise ValueError(f"shared local-finance mart has duplicate {year} SIRUTA rows: {listed}")
+    source_years = sorted(set([*SOURCE_YEARS, year]))
+    records_by_year = source_records_by_year(mart, source_years)
+    records = records_by_year[year]
 
     missing = [siruta for siruta in sirutas if siruta not in records]
     if missing:
@@ -88,17 +140,48 @@ def build_payload(
         round(own / total, 4) if total > 0 else None
         for own, total in zip(own_revenue, revenue, strict=True)
     ]
+    start_records = records_by_year[TREND_START_YEAR]
+    end_records = records_by_year[TREND_END_YEAR]
+    spending_start = [optional_money(start_records, siruta, "spendingRon") for siruta in sirutas]
+    spending_end = [optional_money(end_records, siruta, "spendingRon") for siruta in sirutas]
+    revenue_start = [optional_money(start_records, siruta, "revenueRon") for siruta in sirutas]
+    revenue_end = [optional_money(end_records, siruta, "revenueRon") for siruta in sirutas]
+    own_revenue_start = [
+        optional_money(start_records, siruta, "ownRevenueRon") for siruta in sirutas
+    ]
+    own_revenue_end = [optional_money(end_records, siruta, "ownRevenueRon") for siruta in sirutas]
+    spending_growth = [
+        ratio_change(start, end) for start, end in zip(spending_start, spending_end, strict=True)
+    ]
+    own_share_change = [
+        (
+            round(end_share - start_share, 4)
+            if (start_share := own_revenue_share(start_records.get(siruta))) is not None
+            and (end_share := own_revenue_share(end_records.get(siruta))) is not None
+            else None
+        )
+        for siruta in sirutas
+    ]
 
     return {
         "id": f"administrativ-local-finance-{year}",
         "sourceMartId": mart["id"],
         "sourceMartSha256": mart_sha256,
         "period": str(year),
+        "sourceYears": list(SOURCE_YEARS),
         "publisher": mart.get("publisher"),
         "siruta": sirutas,
         "revenueRon": revenue,
         "ownRevenueRon": own_revenue,
         "ownRevenueShare": own_share,
+        "spendingRon2023": spending_start,
+        "spendingRon2025": spending_end,
+        "revenueRon2023": revenue_start,
+        "revenueRon2025": revenue_end,
+        "ownRevenueRon2023": own_revenue_start,
+        "ownRevenueRon2025": own_revenue_end,
+        "spendingGrowth2023To2025": spending_growth,
+        "ownRevenueShareChange2023To2025": own_share_change,
         "summary": {
             "uats": len(sirutas),
             "sourceYearRecords": len(records),
@@ -139,7 +222,7 @@ def main(argv: list[str] | None = None) -> int:
     write_json(args.out, payload)
     print(
         f"{payload['summary']['uats']:,} UATs -> "
-        f"{args.out.relative_to(PROJECT_ROOT)} from {payload['sourceMartId']}"
+        f"{display_path(args.out)} from {payload['sourceMartId']}"
     )
     return 0
 

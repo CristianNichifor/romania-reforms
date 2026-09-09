@@ -123,15 +123,15 @@
       ],
       "storagePolicy": "Derived yearly marts should be release assets when they exceed the repository size budget; small summaries and schemas can be committed.",
       "nextSlice": {
-        "scope": "Multi-year fiscal-stress indicators",
-        "deliverable": "Expose at least one 2023-2025 trend or stress indicator from the shared mart in a consuming simulator, such as spending growth, own-revenue-share movement or personnel-spending pressure.",
-        "doneWhen": "A simulator consumes more than one year from the shared mart and the UI/test suite makes the trend explicit rather than reading only the latest-year compatibility view."
+        "scope": "Consumer-specific fiscal stress polish",
+        "deliverable": "Add another shared-mart stress dimension, such as personnel-spending pressure or per-inhabitant revenue/spending, only where a consuming simulator needs it.",
+        "doneWhen": "The consuming UI computes merged-unit indicators from shared mart bases without reintroducing simulator-local finance artifacts for fields the shared mart already supplies."
       },
       "notes": [
         "Transparenta data is useful, but the catalog must not imply that the repository license covers the underlying official budget data.",
         "The official data.gov.ro Arierate package currently indexes UAT XLS resources only through 2018-06-30, so it cannot populate the 2025 mart.",
         "The full 2023-2025 national mart is published as a `data-v1` release asset because the generated JSON is about 9.7 MB.",
-        "administrativ consumes the shared mart through a compact 2024 web payload for own revenue and own-revenue share; its merger-savings payload remains simulator-specific because it carries administration-only spending.",
+        "administrativ consumes the shared mart through a compact web payload for 2024 own revenue plus 2023-2025 spending growth and own-revenue-share movement; its merger-savings payload remains simulator-specific because it carries administration-only spending.",
         "impozit-teren exports its 2025 browser budget denominator from the fetched 2023-2025 shared mart at build time, so the old committed buget-uat-2025 simulator artifact and redundant one-year package mart are no longer needed."
       ]
     },

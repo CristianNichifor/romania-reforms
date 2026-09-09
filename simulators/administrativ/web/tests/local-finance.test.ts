@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   localFinancePayloadAligned,
+  localFinancePeriodLabel,
   localFinanceTotals,
   type LocalFinancePayload,
 } from '../src/app/local-finance';
@@ -18,10 +19,19 @@ const payload: LocalFinancePayload = {
   sourceMartId: 'local-finance-mart-2023-2025',
   sourceMartSha256: 'a'.repeat(64),
   period: '2024',
+  sourceYears: [2023, 2024, 2025],
   siruta: ['10', '20', '30'],
   revenueRon: [100, 0, 300],
   ownRevenueRon: [25, 0, 150],
   ownRevenueShare: [0.25, null, 0.5],
+  spendingRon2023: [100, null, 300],
+  spendingRon2025: [120, null, 270],
+  revenueRon2023: [200, null, 400],
+  revenueRon2025: [300, null, 600],
+  ownRevenueRon2023: [40, null, 200],
+  ownRevenueRon2025: [75, null, 270],
+  spendingGrowth2023To2025: [0.2, null, -0.1],
+  ownRevenueShareChange2023To2025: [0.05, null, -0.05],
 };
 
 describe('the generated local finance payload', () => {
@@ -36,6 +46,7 @@ describe('the generated local finance payload', () => {
     expect(generated.period).toBe('2024');
     expect(generated.sourceMartId).toBe('local-finance-mart-2023-2025');
     expect(generated.sourceMartSha256).toMatch(/^[a-f0-9]{64}$/);
+    if (generated.sourceYears) expect(generated.sourceYears).toEqual([2023, 2024, 2025]);
   });
 
   it('keeps finite values and recomputes own-revenue share from the denominators', () => {
@@ -48,6 +59,25 @@ describe('the generated local finance payload', () => {
         generated.ownRevenueRon[i]! / generated.revenueRon[i]!,
         4,
       );
+    }
+  });
+
+  it('keeps optional multi-year trend arrays aligned when they are present', () => {
+    for (const series of [
+      generated.spendingRon2023,
+      generated.spendingRon2025,
+      generated.revenueRon2023,
+      generated.revenueRon2025,
+      generated.ownRevenueRon2023,
+      generated.ownRevenueRon2025,
+      generated.spendingGrowth2023To2025,
+      generated.ownRevenueShareChange2023To2025,
+    ]) {
+      if (!series) continue;
+      expect(series).toHaveLength(attributes.siruta.length);
+      for (const value of series) {
+        expect(value === null || Number.isFinite(value)).toBe(true);
+      }
     }
   });
 });
@@ -63,18 +93,69 @@ describe('local finance payload alignment', () => {
     );
   });
 
+  it('rejects a payload whose optional trend arrays would shift the UAT index', () => {
+    expect(
+      localFinancePayloadAligned(
+        { ...payload, spendingGrowth2023To2025: [0.2, null] },
+        ['10', '20', '30'],
+      ),
+    ).toBe(false);
+  });
+
+  it('rejects a payload whose optional trend base arrays would shift the UAT index', () => {
+    expect(
+      localFinancePayloadAligned(
+        { ...payload, spendingRon2023: [100, null] },
+        ['10', '20', '30'],
+      ),
+    ).toBe(false);
+  });
+
+  it('accepts older payloads before the optional trend arrays existed', () => {
+    const legacy: LocalFinancePayload = { ...payload };
+    delete legacy.sourceYears;
+    delete legacy.spendingRon2023;
+    delete legacy.spendingRon2025;
+    delete legacy.revenueRon2023;
+    delete legacy.revenueRon2025;
+    delete legacy.ownRevenueRon2023;
+    delete legacy.ownRevenueRon2025;
+    delete legacy.spendingGrowth2023To2025;
+    delete legacy.ownRevenueShareChange2023To2025;
+    expect(localFinancePayloadAligned(legacy, ['10', '20', '30'])).toBe(true);
+  });
+
   it('rejects a payload in the wrong SIRUTA order', () => {
     expect(localFinancePayloadAligned(payload, ['20', '10', '30'])).toBe(false);
   });
 });
 
 describe('local finance totals', () => {
-  it('sums own revenue in the selected unit order and recomputes the share', () => {
-    expect(localFinanceTotals(payload, [0, 2])).toEqual({
+  it('sums own revenue in the selected unit order and recomputes merged trends from bases', () => {
+    const totals = localFinanceTotals(payload, [0, 2]);
+    expect(totals).toMatchObject({
       revenueRon: 400,
       ownRevenueRon: 175,
       ownRevenueShare: 0.4375,
+      sourceYears: [2023, 2024, 2025],
     });
+    expect(totals?.spendingGrowth2023To2025).toBeCloseTo(-0.025);
+    expect(totals?.ownRevenueShareChange2023To2025).toBeCloseTo(-0.0166667);
+  });
+
+  it('averages member trends for legacy trend-only payloads', () => {
+    const legacy: LocalFinancePayload = { ...payload };
+    delete legacy.spendingRon2023;
+    delete legacy.spendingRon2025;
+    delete legacy.revenueRon2023;
+    delete legacy.revenueRon2025;
+    delete legacy.ownRevenueRon2023;
+    delete legacy.ownRevenueRon2025;
+
+    const totals = localFinanceTotals(legacy, [0, 2]);
+
+    expect(totals?.spendingGrowth2023To2025).toBeCloseTo(0.05);
+    expect(totals?.ownRevenueShareChange2023To2025).toBeCloseTo(0);
   });
 
   it('has no share when the selected unit has no revenue denominator', () => {
@@ -82,10 +163,23 @@ describe('local finance totals', () => {
       revenueRon: 0,
       ownRevenueRon: 0,
       ownRevenueShare: null,
+      sourceYears: [2023, 2024, 2025],
+      spendingGrowth2023To2025: null,
+      ownRevenueShareChange2023To2025: null,
     });
   });
 
   it('stays absent until the lazy payload is loaded', () => {
     expect(localFinanceTotals(null, [0, 2])).toBeNull();
+  });
+});
+
+describe('local finance source period labels', () => {
+  it('uses the source year span when the payload carries one', () => {
+    expect(localFinancePeriodLabel(payload)).toBe('2023-2025');
+  });
+
+  it('falls back to the payload period for older payloads', () => {
+    expect(localFinancePeriodLabel({ ...payload, sourceYears: undefined })).toBe('2024');
   });
 });
