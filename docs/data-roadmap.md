@@ -99,8 +99,11 @@ First slice:
 - done: retain Ministry map marker coordinates and accept 162 exact name/county,
   service-eligible, non-county-only provider points after source/provider county and Romania
   bounds checks; UAT polygon containment still needs SIRUTA-keyed geometry
-- next: build a point-level health access view from pointAccessEligible providers, with
-  straight-line/routing method labels so consumers cannot treat blocked rows as local access
+- done: build `health-point-access-2024-2026` from pointAccessEligible providers only,
+  with 162 accepted provider coordinates, 430 named exclusions and an explicit
+  `distanceMethod: not-computed` contract for downstream consumers
+- next: wire the point-level health access view into the first consumer with an explicit
+  straight-line or routed distance method
 
 This should support service-access views in `administrativ`, `justitie` and `transport`
 without each simulator building its own hospital roster.

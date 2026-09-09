@@ -84,6 +84,7 @@ def main() -> int:
                 or document.get("uats")
                 or document.get("records")
                 or document.get("providers")
+                or document.get("points")
                 or []
             )
             print(f"  schema ok: {label} ({count} records)")
