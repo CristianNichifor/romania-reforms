@@ -219,6 +219,32 @@ def test_fetch_retries_a_transient_release_error(tmp_path):
     assert destination.read_bytes() == payload
 
 
+def test_july_salary_release_preserves_the_previously_tracked_payload(assets):
+    entry = next(a for a in assets if a["id"] == "salarizare-ro-draft-2026-07-16")
+    assert entry["tag"] == "data-v1"
+    assert entry["asset"] == "ro-draft-2026-07-16.json"
+    assert entry["destination"] == "simulators/salarizare/data/regimes/ro-draft-2026-07-16.json"
+    assert entry["bytes"] == 2273474
+    assert entry["sha256"] == "16d9755917822cb6c2a3c2177f7bef45e0ea51a23c80d147ede31c7c109c6539"
+
+
+def test_a_downloaded_checksum_mismatch_is_fatal(tmp_path):
+    destination = tmp_path / "payload.bin"
+    entry = {
+        "id": "sample",
+        "tag": "data-v1",
+        "asset": "payload.bin",
+        "destination": str(destination),
+        "sha256": hashlib.sha256(b"expected").hexdigest(),
+        "withoutIt": "the app cannot build",
+    }
+    ok, _ = fetch(entry, required=True, attempts=1,
+                  opener=lambda *args, **kwargs: AssetResponse(b"wrong payload"))
+    assert not ok
+    assert not destination.exists()
+    assert not destination.with_suffix(".bin.part").exists()
+
+
 def test_the_manifest_matches_what_is_on_disk(assets):
     """When a payload is present locally it must be the one the manifest promises — otherwise
     the site and this checkout are drawing different maps and nothing says so."""

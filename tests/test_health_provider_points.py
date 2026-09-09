@@ -16,6 +16,55 @@ assert spec and spec.loader
 health_provider_points = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(health_provider_points)
 
+ACCEPTED_CAPESARO_RECORDS = {
+    "anmcs-2025-004": "capesaro-2026-A7128",
+    "anmcs-2025-019": "capesaro-2026-A017",
+    "anmcs-2025-029": "capesaro-2026-B134",
+    "anmcs-2025-031": "capesaro-2026-A7000",
+    "anmcs-2025-037": "capesaro-2026-A50071",
+    "anmcs-2025-038": "capesaro-2026-A50085",
+    "anmcs-2025-041": "capesaro-2026-A1200",
+    "anmcs-2025-049": "capesaro-2026-A115",
+    "anmcs-2025-052": "capesaro-2026-A50062",
+    "anmcs-2025-054": "capesaro-2026-A076",
+    "anmcs-2025-067": "capesaro-2026-A055",
+    "anmcs-2025-081": "capesaro-2026-A10007",
+    "anmcs-2025-082": "capesaro-2026-A10013",
+    "anmcs-2025-085": "capesaro-2026-A078",
+    "anmcs-2025-086": "capesaro-2026-A50126",
+    "anmcs-2025-089": "capesaro-2026-A10026",
+    "anmcs-2025-097": "capesaro-2026-A111",
+    "anmcs-2025-100": "capesaro-2026-A126",
+    "anmcs-2025-101": "capesaro-2026-A10035",
+    "anmcs-2025-115": "capesaro-2026-A7003",
+    "anmcs-2025-126": "capesaro-2026-A003",
+    "anmcs-2025-132": "capesaro-2026-A50127",
+    "anmcs-2025-140": "capesaro-2026-A50131",
+    "anmcs-2025-146": "capesaro-2026-A50134",
+    "anmcs-2025-163": "capesaro-2026-B082",
+    "anmcs-2025-170": "capesaro-2026-A10018",
+    "anmcs-2025-186": "capesaro-2026-A50142",
+    "anmcs-2025-192": "capesaro-2026-A066",
+    "anmcs-2025-195": "capesaro-2026-A50152",
+    "anmcs-2025-199": "capesaro-2026-A006",
+    "anmcs-2025-212": "capesaro-2026-A50135",
+    "anmcs-2025-220": "capesaro-2026-A117",
+    "anmcs-2025-221": "capesaro-2026-A10019",
+    "anmcs-2025-238": "capesaro-2026-A50104",
+    "anmcs-2025-250": "capesaro-2026-A100",
+    "anmcs-2025-255": "capesaro-2026-A50168",
+    "anmcs-2025-340": "capesaro-2026-A50103",
+    "anmcs-2025-342": "capesaro-2026-B073",
+    "anmcs-2025-343": "capesaro-2026-B024",
+    "anmcs-2025-349": "capesaro-2026-A50102",
+    "anmcs-2025-375": "capesaro-2026-A7126",
+    "anmcs-2025-388": "capesaro-2026-A50155",
+    "anmcs-2025-400": "capesaro-2026-A047",
+    "anmcs-2025-406": "capesaro-2026-A124",
+    "anmcs-2025-438": "capesaro-2026-A10027",
+    "anmcs-2025-584": "capesaro-2026-B256",
+}
+
 
 def access_provider(
     provider_id: str,
@@ -296,32 +345,32 @@ def test_committed_provider_points_cover_the_health_mart():
     assert points["summary"]["addressSourceRecords"] == 301
     assert points["summary"]["addressSourceRecordsWithStreetAddress"] == 290
     assert points["summary"]["addressSourceRecordsWithCoordinates"] == 301
-    assert points["summary"]["supplementalEvidenceRecords"] == 17
-    assert points["summary"]["supplementalEvidenceProviders"] == 17
-    assert points["summary"]["addressMatchedProviders"] == 231
+    assert points["summary"]["supplementalEvidenceRecords"] == 46
+    assert points["summary"]["supplementalEvidenceProviders"] == 46
+    assert points["summary"]["addressMatchedProviders"] == 260
     assert points["summary"]["addressExactMatchedProviders"] == 174
     assert points["summary"]["addressAliasMatchedProviders"] == 40
     assert points["summary"]["ambiguousAddressProviders"] == 0
-    assert points["summary"]["pointAccessEligibleProviders"] == 223
-    assert points["summary"]["pointAccessBlockedProviders"] == 369
-    assert points["summary"]["providersWithAddress"] == 231
-    assert points["summary"]["providersWithCoordinates"] == 223
-    assert points["summary"]["coordinateMatchedProviders"] == 235
-    assert points["summary"]["coordinateAcceptedProviders"] == 223
+    assert points["summary"]["pointAccessEligibleProviders"] == 252
+    assert points["summary"]["pointAccessBlockedProviders"] == 340
+    assert points["summary"]["providersWithAddress"] == 260
+    assert points["summary"]["providersWithCoordinates"] == 252
+    assert points["summary"]["coordinateMatchedProviders"] == 264
+    assert points["summary"]["coordinateAcceptedProviders"] == 252
     assert points["summary"]["coordinateRejectedProviders"] == 12
     assert points["summary"]["addressEvidence"] == {
-        "none": 361,
-        "official-provider-address": 231,
+        "none": 332,
+        "official-provider-address": 260,
     }
     assert points["summary"]["addressMatchMethods"] == {
-        "capesaro-reviewed-provider-identity": 17,
+        "capesaro-reviewed-provider-identity": 46,
         "curated-same-county-official-name-alias": 40,
         "exact-normalised-name-county": 174,
-        "none": 361,
+        "none": 332,
     }
     assert points["summary"]["pointConfidence"] == {
-        "none": 369,
-        "official-coordinate": 223,
+        "none": 340,
+        "official-coordinate": 252,
     }
     assert points["registry"]["addressAliases"] == {
         "id": "ministerul-sanatatii-unitati-sanitare-address-aliases-2026",
@@ -336,7 +385,7 @@ def test_committed_provider_points_cover_the_health_mart():
     assert points["registry"]["supplementalEvidence"] == {
         "id": "anmcs-capesaro-provider-point-evidence-2026",
         "reviewedDate": "2026-09-09",
-        "records": 17,
+        "records": 46,
     }
     assert "msUnitatiSanitareAliasesSha256" in points["sourceHashes"]
     assert "msUnitatiSanitareCoordinateReviewsSha256" in points["sourceHashes"]
@@ -350,14 +399,14 @@ def test_committed_provider_points_cover_the_health_mart():
         for provider in points["providers"]
         if provider["locationConfidence"] == "county-only"
     )
-    assert points["summary"]["blockedReasons"]["no-point-evidence"] == 101
-    assert sum(1 for provider in points["providers"] if provider["pointAccessEligible"]) == 223
+    assert points["summary"]["blockedReasons"]["no-point-evidence"] == 72
+    assert sum(1 for provider in points["providers"] if provider["pointAccessEligible"]) == 252
     assert all(
         provider["pointConfidence"] == "official-coordinate"
         for provider in points["providers"]
         if provider["pointAccessEligible"]
     )
-    assert len(points["exclusions"]) == 369
+    assert len(points["exclusions"]) == 340
 
     accepted_review_aliases = {
         "anmcs-2025-230": "ms-unitati-sanitare-121",
@@ -387,26 +436,7 @@ def test_committed_provider_points_cover_the_health_mart():
         assert provider["pointEvidence"]["sourceValue"].startswith(f"{source_record_id}:")
         assert provider["pointAccessEligible"] is True
 
-    accepted_capesaro_records = {
-        "anmcs-2025-019": "capesaro-2026-A017",
-        "anmcs-2025-029": "capesaro-2026-B134",
-        "anmcs-2025-031": "capesaro-2026-A7000",
-        "anmcs-2025-037": "capesaro-2026-A50071",
-        "anmcs-2025-038": "capesaro-2026-A50085",
-        "anmcs-2025-041": "capesaro-2026-A1200",
-        "anmcs-2025-049": "capesaro-2026-A115",
-        "anmcs-2025-052": "capesaro-2026-A50062",
-        "anmcs-2025-054": "capesaro-2026-A076",
-        "anmcs-2025-067": "capesaro-2026-A055",
-        "anmcs-2025-115": "capesaro-2026-A7003",
-        "anmcs-2025-126": "capesaro-2026-A003",
-        "anmcs-2025-132": "capesaro-2026-A50127",
-        "anmcs-2025-140": "capesaro-2026-A50131",
-        "anmcs-2025-349": "capesaro-2026-A50102",
-        "anmcs-2025-400": "capesaro-2026-A047",
-        "anmcs-2025-584": "capesaro-2026-B256",
-    }
-    for provider_id, source_record_id in accepted_capesaro_records.items():
+    for provider_id, source_record_id in ACCEPTED_CAPESARO_RECORDS.items():
         provider = by_provider_id[provider_id]
         assert provider["addressSourceRecordId"] == source_record_id
         assert provider["addressMatchMethod"] == "capesaro-reviewed-provider-identity"
@@ -971,9 +1001,9 @@ def test_committed_capesaro_supplemental_source_is_audited_subset():
     assert source["source"]["sourcePageUrl"] == "https://capesaro.gov.ro/hospitals_public.php"
     assert source["source"]["sourceUrl"] == "https://capesaro.gov.ro/hospitals_public.php?ajax=1"
     assert source["source"]["license"] == "not-specified-public-government-dashboard"
-    assert len(source["records"]) == 17
-    assert len({record["providerId"] for record in source["records"]}) == 17
-    assert len({record["sourceRecordId"] for record in source["records"]}) == 17
+    assert len(source["records"]) == 46
+    assert len({record["providerId"] for record in source["records"]}) == 46
+    assert len({record["sourceRecordId"] for record in source["records"]}) == 46
     assert all(
         record["sourceRecordId"] == f"capesaro-2026-{record['sourceCode']}"
         for record in source["records"]
@@ -982,22 +1012,4 @@ def test_committed_capesaro_supplemental_source_is_audited_subset():
         record["matchMethod"] == "capesaro-reviewed-provider-identity"
         for record in source["records"]
     )
-    assert provider_source_pairs == {
-        ("anmcs-2025-019", "capesaro-2026-A017"),
-        ("anmcs-2025-029", "capesaro-2026-B134"),
-        ("anmcs-2025-031", "capesaro-2026-A7000"),
-        ("anmcs-2025-037", "capesaro-2026-A50071"),
-        ("anmcs-2025-038", "capesaro-2026-A50085"),
-        ("anmcs-2025-041", "capesaro-2026-A1200"),
-        ("anmcs-2025-049", "capesaro-2026-A115"),
-        ("anmcs-2025-052", "capesaro-2026-A50062"),
-        ("anmcs-2025-054", "capesaro-2026-A076"),
-        ("anmcs-2025-067", "capesaro-2026-A055"),
-        ("anmcs-2025-115", "capesaro-2026-A7003"),
-        ("anmcs-2025-126", "capesaro-2026-A003"),
-        ("anmcs-2025-132", "capesaro-2026-A50127"),
-        ("anmcs-2025-140", "capesaro-2026-A50131"),
-        ("anmcs-2025-349", "capesaro-2026-A50102"),
-        ("anmcs-2025-400", "capesaro-2026-A047"),
-        ("anmcs-2025-584", "capesaro-2026-B256"),
-    }
+    assert provider_source_pairs == set(ACCEPTED_CAPESARO_RECORDS.items())

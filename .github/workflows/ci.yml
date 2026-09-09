@@ -15,7 +15,7 @@ jobs:
       - name: Repository size
         run: uv run python scripts/check_repo_size.py
       - name: Fetch release data
-        run: uv run python scripts/fetch_release_data.py --require local-finance-mart-2023-2025
+        run: uv run python scripts/fetch_release_data.py --require local-finance-mart-2023-2025 --require salarizare-ro-draft-2026-07-16
       - name: Validate every simulator's data against its schema
         run: uv run --with referencing python scripts/validate_data.py
       - name: Pay grades and costs are reproducible
@@ -52,15 +52,16 @@ jobs:
         with:
           node-version: '22'
       - name: Fetch release data
-        run: uv run python ../../scripts/fetch_release_data.py
+        run: uv run python ../../scripts/fetch_release_data.py --require salarizare-ro-draft-2026-07-16
       - name: Validate every regime, crosswalk and fiscal series
         run: uv run --with jsonschema python scripts/validate_data.py
       - name: Importer tests
         run: uv run --with openpyxl --with pytest --with jsonschema pytest tests/ -q
       - name: Import is reproducible
         run: |
+          sha256sum data/regimes/ro-draft-2026-07-16.json > "$RUNNER_TEMP/salary-july.sha256"
           uv run --with openpyxl python scripts/import_coeficienti.py
-          git diff --exit-code data/regimes/ro-draft-2026-07-16.json
+          sha256sum --check "$RUNNER_TEMP/salary-july.sha256"
       - name: Engine
         run: |
           npm ci

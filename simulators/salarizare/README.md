@@ -8,6 +8,21 @@ by side. Everything runs in the browser; a scenario is a URL.
 > It computes what a law *says*, not what anyone is actually paid. No figure here is an
 > entitlement, and no scenario is a recommendation.
 
+## Local Data Setup
+
+From the repository root, fetch the checksum-pinned release payloads before validation,
+tests or an app build:
+
+```sh
+uv run python scripts/fetch_release_data.py --require salarizare-ro-draft-2026-07-16 --require salarizare-ro-draft-2026-08-20
+```
+
+The generated July and August regime JSON files are release assets, not tracked files.
+The July workbook, frame and importer remain in Git. CI regenerates July and checks its
+SHA-256 against the verified release copy; `git diff` cannot check an ignored payload.
+Existing matching local payloads are reused, while checksum mismatches fail without
+overwriting local work. Once the app is built, it does not fetch these releases at runtime.
+
 ## Status
 
 Built and live. The three views the brief asked for are there, both Romanian regimes and

@@ -53,6 +53,18 @@
       "withoutIt": "The administrative map still draws the route a commune was absorbed along, but every leg is schematic: a dashed straight line between seats, carrying the real distance and captioned to say the line is not the road. Nothing fails."
     },
     {
+      "id": "salarizare-ro-draft-2026-07-16",
+      "tag": "data-v1",
+      "asset": "ro-draft-2026-07-16.json",
+      "destination": "simulators/salarizare/data/regimes/ro-draft-2026-07-16.json",
+      "bytes": 2273474,
+      "sha256": "16d9755917822cb6c2a3c2177f7bef45e0ea51a23c80d147ede31c7c109c6539",
+      "producedBy": "simulators/salarizare/scripts/import_coeficienti.py",
+      "needs": "simulators/salarizare/sources/Proiect-COEFICIENTI-1-8-MMFTSS-16.07.2026-1000.xlsx plus data/frames/ro-draft-2026-07-16.frame.json",
+      "what": "The generated July 16, 2026 Romanian public pay draft regime, unchanged from the previously tracked JSON.",
+      "withoutIt": "The salary simulator cannot load the July draft; shared validation, salary CI and deploy require this payload before building."
+    },
+    {
       "id": "salarizare-ro-draft-2026-08-20",
       "tag": "data-v1",
       "asset": "ro-draft-2026-08-20.json",
@@ -105,12 +117,12 @@
       "tag": "data-v1",
       "asset": "health-provider-point-capesaro-candidates-2024-2026.json",
       "destination": "packages/health_access/data/health-provider-point-capesaro-candidates-2024-2026.json",
-      "bytes": 104731,
-      "sha256": "28a981962a78e10e8b60eb2d764dbfa442eb748fb9f11a5f7bfa44af2a63c42a",
+      "bytes": 67063,
+      "sha256": "4ea1fd933a8f8508a7a0836c589b6fb478914eacd7b96917004f4fdfa25777c4",
       "producedBy": "packages/health_access/scripts/build_health_provider_point_capesaro_candidates.py --retrieved-date 2026-09-09",
       "needs": "health-provider-point-source-acquisition-2024-2026 plus anmcs-capesaro-public-hospitals-2026",
-      "what": "Non-evidence CAPeSaRo candidate report for 101 remaining acquisition rows: 53 providers with candidates, 57 candidate rows and 35 public providers with candidates.",
-      "withoutIt": "The next audited CAPeSaRo review must rebuild candidates before selecting supplemental-evidence provider/sourceCode pairs."
+      "what": "Non-evidence CAPeSaRo candidate report for 72 remaining acquisition rows: 24 providers with candidates, 28 candidate rows and 6 public providers with candidates.",
+      "withoutIt": "Future health maintenance review must rebuild candidates before selecting supplemental-evidence provider/sourceCode pairs."
     }
   ]
 }

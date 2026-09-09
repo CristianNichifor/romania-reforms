@@ -187,14 +187,14 @@ def test_committed_review_covers_remaining_service_eligible_no_point_rows():
 
     assert report["id"] == "health-provider-point-evidence-review-2024-2026"
     assert report_ids == expected_ids
-    assert report["summary"]["reviewProviders"] == 101
+    assert report["summary"]["reviewProviders"] == 72
     assert report["summary"]["providersWithAnyCandidate"] == 0
     assert report["summary"]["candidateRows"] == 0
     assert report["summary"]["candidateStatus"] == {
-        "no-ministry-review-candidate": 101,
+        "no-ministry-review-candidate": 72,
     }
     assert report["summary"]["reviewSignal"] == {
-        "none": 101,
+        "none": 72,
     }
     assert report["summary"]["existingAddressAliases"] == 40
 
