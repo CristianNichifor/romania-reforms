@@ -12,7 +12,7 @@
     {
       "id": "siruta-uat-registry",
       "title": "SIRUTA, UAT and CUI registry",
-      "status": "active",
+      "status": "adopted",
       "priority": "p0",
       "owner": "shared",
       "why": "This is the join key for finance, health, administrative reform, land-value and transport datasets. A wrong locality join is worse than a missing one.",
@@ -50,15 +50,18 @@
       ],
       "storagePolicy": "Small canonical JSON can be committed; larger historical snapshots should become release assets.",
       "nextSlice": {
-        "scope": "Remaining simulator-local SIRUTA joins",
-        "deliverable": "Move the next consuming dataset's local SIRUTA assumptions into packages/uat_registry when that dataset is adopted by a shared package.",
-        "doneWhen": "A second shared dataset consumes packages/uat_registry without carrying its own SIRUTA/county/sector-parent join rules."
-      }
+        "scope": "Registry maintenance for future consumers",
+        "deliverable": "Keep current consumers on packages/uat_registry and extend the registry only when a new dataset exposes a real simulator-local SIRUTA, CUI, county or sector-parent assumption.",
+        "doneWhen": "New consumers either reuse the shared registry or explicitly document why a local key remains outside it."
+      },
+      "notes": [
+        "The first shared-data wave has adopted the registry as the key vocabulary for administrativ, impozit-teren, local finance, health service access, justitie and transport consumer payloads. Current shared consumers are covered by tests that reject unknown registry keys."
+      ]
     },
     {
       "id": "local-finance-mart",
       "title": "Local budget execution and fiscal stress",
-      "status": "active",
+      "status": "adopted",
       "priority": "p0",
       "owner": "shared",
       "why": "Administrative consolidation, land tax, public pay and procurement all need the same denominator: what each authority raises, receives, spends and owes.",
@@ -138,7 +141,7 @@
     {
       "id": "health-access-mart",
       "title": "Health infrastructure and access",
-      "status": "active",
+      "status": "adopted",
       "priority": "p0",
       "owner": "shared",
       "why": "Justice, administrative consolidation and transport reforms all need to know whether citizens lose or gain access to public services, not just administrative seats.",
