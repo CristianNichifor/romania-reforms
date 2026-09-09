@@ -47,11 +47,17 @@ historical text comparison; numerical values and existing text remain intact.
 
 Additional assertions exercise the final-regime guard, add/remove regime behavior
 and scenario-copy payload with a browser clipboard stub (not an operating-system
-clipboard test). Four control surfaces and seven table surfaces are checked at
-320/390/1440 widths in light/dark mode: 66 layouts per engine. Table checks verify
+clipboard test). Five control states and seven table surfaces are checked at
+320/390/1440 widths in light/dark mode: 72 layouts per engine. Table checks verify
 named keyboard-focusable regions, visible focus, keyboard horizontal scrolling,
-containment, no nested scrolling wrapper and right-aligned numeric cells. Axe checks target shared fields/choices,
-not the entire surrounding page.
+containment, no nested scrolling wrapper and right-aligned numeric cells. A WCAG A
+axe scan checks the rendered table regions' semantics. Contrast-inclusive WCAG AA
+scans cover shared fields/choices and full proposal cards, both enabled and
+switched off with their rationale expanded. They do not certify the entire page.
+
+The runner checks the manifest/lock against the reviewed Civic UI release URL,
+version and integrity before starting browsers. Scenario snapshots also reject
+shared inputs/selects missing a scoped Field or associated label.
 
 `CIVIC_CONTROLS_BASELINE=/path/to/results.json` compares all three engines against
 a pre-migration run. Without it, Firefox and WebKit compare with Chromium.
