@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/packages/health_access/schema/health-coordinate-reviews.schema.json",
+  "title": "Reviewed Ministry health coordinate-only acceptances",
+  "description": "Audited provider-to-source-record acceptances for Ministry of Health unitati sanitare map rows that publish coordinates but do not carry street-address evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "id",
+    "title",
+    "publisher",
+    "source",
+    "reviewedDate",
+    "provenance",
+    "acceptances",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "const": "ministerul-sanatatii-unitati-sanitare-coordinate-reviews-2026" },
+    "title": { "type": "string", "minLength": 1 },
+    "publisher": { "const": "Cristian Nichifor" },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "publisher", "sourceUrl", "retrievedDate"],
+      "properties": {
+        "id": { "const": "ministerul-sanatatii-unitati-sanitare-2026" },
+        "publisher": { "const": "Ministerul Sanatatii" },
+        "sourceUrl": { "type": "string", "format": "uri" },
+        "retrievedDate": { "type": "string", "format": "date" }
+      }
+    },
+    "reviewedDate": { "type": "string", "format": "date" },
+    "provenance": {
+      "$ref": "https://cristiannichifor.github.io/romania-reforms/schema/provenance.schema.json#/$defs/provenance"
+    },
+    "acceptances": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/acceptance" }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "https://cristiannichifor.github.io/romania-reforms/schema/provenance.schema.json#/$defs/limitation"
+      }
+    }
+  },
+  "$defs": {
+    "acceptance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["providerId", "sourceRecordId", "countyCode", "matchMethod", "reason"],
+      "properties": {
+        "providerId": { "type": "string", "pattern": "^anmcs-2025-[0-9]{3}$" },
+        "sourceRecordId": { "type": "string", "pattern": "^ms-unitati-sanitare-[0-9]{3}$" },
+        "countyCode": { "type": "string", "pattern": "^[A-Z]{1,2}$" },
+        "matchMethod": { "const": "reviewed-exact-name-county-coordinate-only" },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

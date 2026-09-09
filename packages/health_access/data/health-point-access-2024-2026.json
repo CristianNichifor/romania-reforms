@@ -35,7 +35,7 @@
     }
   },
   "sourceHashes": {
-    "providerPointsSha256": "a4a81193481c5087719abd8635cdab5ed72883b573783698f817b65a5cb22f5c",
+    "providerPointsSha256": "7af746199792197d4cf3600dd109f20a8ec10b8a63716e95a9262b23abae6a46",
     "healthAccessMartSha256": "afc7828921e86da5bebf4c59925f9da45a809fdc6db4838bdc13d0c593078ca2"
   },
   "transform": {
@@ -44,11 +44,11 @@
   },
   "summary": {
     "providers": 592,
-    "pointAccessProviders": 202,
-    "pointAccessBlockedProviders": 390,
+    "pointAccessProviders": 206,
+    "pointAccessBlockedProviders": 386,
     "providersWithClinicalBeds": 45,
     "providerLevelClinicalBeds": 13575.0,
-    "namedExclusions": 390,
+    "namedExclusions": 386,
     "distanceMethod": "not-computed",
     "consumerDistanceMethodRequired": true,
     "supportedConsumerDistanceMethods": [
@@ -56,14 +56,15 @@
       "routed"
     ],
     "pointConfidence": {
-      "official-coordinate": 202
+      "official-coordinate": 206
     },
     "pointEvidence": {
-      "published-coordinate": 202
+      "published-coordinate": 202,
+      "reviewed-published-coordinate": 4
     },
     "blockedReasons": {
       "county-only-location": 268,
-      "no-point-evidence": 122
+      "no-point-evidence": 118
     },
     "byCounty": [
       {
@@ -589,25 +590,25 @@
       {
         "countyCode": "VN",
         "countyName": "Vrancea",
-        "pointAccessProviders": 2,
-        "pointAccessBlockedProviders": 6,
+        "pointAccessProviders": 5,
+        "pointAccessBlockedProviders": 3,
         "providersWithClinicalBeds": 0,
         "providerLevelClinicalBeds": 0,
         "ownerTypes": {
-          "public": 2,
-          "private": 0,
+          "public": 4,
+          "private": 1,
           "unknown": 0
         }
       },
       {
         "countyCode": "B",
         "countyName": "Bucuresti",
-        "pointAccessProviders": 30,
-        "pointAccessBlockedProviders": 57,
+        "pointAccessProviders": 31,
+        "pointAccessBlockedProviders": 56,
         "providersWithClinicalBeds": 22,
         "providerLevelClinicalBeds": 7071.0,
         "ownerTypes": {
-          "public": 29,
+          "public": 30,
           "private": 0,
           "unknown": 1
         }
@@ -615,6 +616,37 @@
     ]
   },
   "points": [
+    {
+      "providerId": "anmcs-2025-001",
+      "name": "SPITALUL CLINIC DE URGENŢĂ BUCUREŞTI",
+      "countyCode": "B",
+      "countyName": "Bucuresti",
+      "siruta": "179132",
+      "localityName": "MUNICIPIUL BUCUREŞTI",
+      "locationConfidence": "municipality-from-county",
+      "serviceAccessEligible": true,
+      "address": null,
+      "latitude": 44.45401347778285,
+      "longitude": 26.101257654022074,
+      "ownerType": "public",
+      "bedCount": null,
+      "specialties": [],
+      "accreditationCategory": "IV - ACREDITAT CU ÎNCREDERE REDUSĂ",
+      "addressEvidence": {
+        "method": "none",
+        "source": null,
+        "sourceValue": null,
+        "retrievedDate": null
+      },
+      "pointConfidence": "official-coordinate",
+      "pointEvidence": {
+        "method": "reviewed-published-coordinate",
+        "source": "ministerul-sanatatii-unitati-sanitare-2026",
+        "sourceValue": "ms-unitati-sanitare-159:44.454013,26.101258",
+        "retrievedDate": "2026-09-09"
+      },
+      "accessUse": "eligible-for-point-level-access"
+    },
     {
       "providerId": "anmcs-2025-002",
       "name": "SPITALUL UNIVERSITAR DE URGENȚĂ ELIAS",
@@ -5176,6 +5208,37 @@
       "accessUse": "eligible-for-point-level-access"
     },
     {
+      "providerId": "anmcs-2025-236",
+      "name": "SPITALUL ORĂȘENESC PANCIU",
+      "countyCode": "VN",
+      "countyName": "Vrancea",
+      "siruta": "175055",
+      "localityName": "ORAŞ PANCIU",
+      "locationConfidence": "name-derived-locality",
+      "serviceAccessEligible": true,
+      "address": null,
+      "latitude": 45.909901974435044,
+      "longitude": 27.086510571167324,
+      "ownerType": "public",
+      "bedCount": null,
+      "specialties": [],
+      "accreditationCategory": "a III-a acreditat cu rezerve",
+      "addressEvidence": {
+        "method": "none",
+        "source": null,
+        "sourceValue": null,
+        "retrievedDate": null
+      },
+      "pointConfidence": "official-coordinate",
+      "pointEvidence": {
+        "method": "reviewed-published-coordinate",
+        "source": "ministerul-sanatatii-unitati-sanitare-2026",
+        "sourceValue": "ms-unitati-sanitare-065:45.909902,27.086511",
+        "retrievedDate": "2026-09-09"
+      },
+      "accessUse": "eligible-for-point-level-access"
+    },
+    {
       "providerId": "anmcs-2025-237",
       "name": "Spitalul Orășenesc ȚĂNDĂREI",
       "countyCode": "IL",
@@ -5574,6 +5637,37 @@
         "method": "published-coordinate",
         "source": "ministerul-sanatatii-unitati-sanitare-2026",
         "sourceValue": "45.525959,22.367729",
+        "retrievedDate": "2026-09-09"
+      },
+      "accessUse": "eligible-for-point-level-access"
+    },
+    {
+      "providerId": "anmcs-2025-256",
+      "name": "SPITALUL \"N.N. SAVEANU\" VIDRA",
+      "countyCode": "VN",
+      "countyName": "Vrancea",
+      "siruta": "178377",
+      "localityName": "VIDRA",
+      "locationConfidence": "name-derived-locality",
+      "serviceAccessEligible": true,
+      "address": null,
+      "latitude": 45.911479228817875,
+      "longitude": 26.90807712699147,
+      "ownerType": "private",
+      "bedCount": null,
+      "specialties": [],
+      "accreditationCategory": "IV- ACREDITAT CU ÎNCREDERE REDUSĂ",
+      "addressEvidence": {
+        "method": "none",
+        "source": null,
+        "sourceValue": null,
+        "retrievedDate": null
+      },
+      "pointConfidence": "official-coordinate",
+      "pointEvidence": {
+        "method": "reviewed-published-coordinate",
+        "source": "ministerul-sanatatii-unitati-sanitare-2026",
+        "sourceValue": "ms-unitati-sanitare-069:45.911479,26.908077",
         "retrievedDate": "2026-09-09"
       },
       "accessUse": "eligible-for-point-level-access"
@@ -6664,6 +6758,37 @@
       "accessUse": "eligible-for-point-level-access"
     },
     {
+      "providerId": "anmcs-2025-362",
+      "name": "SPITALUL DE PSIHIATRIE CRONICI DUMBRĂVENI",
+      "countyCode": "VN",
+      "countyName": "Vrancea",
+      "siruta": "175938",
+      "localityName": "DUMBRĂVENI",
+      "locationConfidence": "name-derived-locality",
+      "serviceAccessEligible": true,
+      "address": null,
+      "latitude": 45.55009349024915,
+      "longitude": 27.106425011641726,
+      "ownerType": "public",
+      "bedCount": null,
+      "specialties": [],
+      "accreditationCategory": "III - ACREDITAT CU REZERVE",
+      "addressEvidence": {
+        "method": "none",
+        "source": null,
+        "sourceValue": null,
+        "retrievedDate": null
+      },
+      "pointConfidence": "official-coordinate",
+      "pointEvidence": {
+        "method": "reviewed-published-coordinate",
+        "source": "ministerul-sanatatii-unitati-sanitare-2026",
+        "sourceValue": "ms-unitati-sanitare-066:45.550093,27.106425",
+        "retrievedDate": "2026-09-09"
+      },
+      "accessUse": "eligible-for-point-level-access"
+    },
+    {
       "providerId": "anmcs-2025-365",
       "name": "SPITALUL DE PNEUMOFTIZIOLOGIE AIUD",
       "countyCode": "AB",
@@ -7161,18 +7286,6 @@
     }
   ],
   "exclusions": [
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-provider-points-2024-2026",
-      "providerId": "anmcs-2025-001",
-      "name": "SPITALUL CLINIC DE URGENŢĂ BUCUREŞTI",
-      "countyCode": "B",
-      "serviceAccessEligible": true,
-      "locationConfidence": "municipality-from-county",
-      "hasAddress": false,
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider is blocked from point-level access because no accepted coordinate evidence is attached."
-    },
     {
       "kind": "provider-excluded-from-point-access",
       "source": "health-provider-points-2024-2026",
@@ -8328,18 +8441,6 @@
     {
       "kind": "provider-excluded-from-point-access",
       "source": "health-provider-points-2024-2026",
-      "providerId": "anmcs-2025-236",
-      "name": "SPITALUL ORĂȘENESC PANCIU",
-      "countyCode": "VN",
-      "serviceAccessEligible": true,
-      "locationConfidence": "name-derived-locality",
-      "hasAddress": false,
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider is blocked from point-level access because no accepted coordinate evidence is attached."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-provider-points-2024-2026",
       "providerId": "anmcs-2025-238",
       "name": "SPITALUL GENERAL C.F. GALAŢI",
       "countyCode": "GL",
@@ -8403,18 +8504,6 @@
       "providerId": "anmcs-2025-255",
       "name": "SPITALUL ORĂȘENESC FĂGET",
       "countyCode": "TM",
-      "serviceAccessEligible": true,
-      "locationConfidence": "name-derived-locality",
-      "hasAddress": false,
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider is blocked from point-level access because no accepted coordinate evidence is attached."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-provider-points-2024-2026",
-      "providerId": "anmcs-2025-256",
-      "name": "SPITALUL \"N.N. SAVEANU\" VIDRA",
-      "countyCode": "VN",
       "serviceAccessEligible": true,
       "locationConfidence": "name-derived-locality",
       "hasAddress": false,
@@ -9260,18 +9349,6 @@
       "hasAddress": false,
       "pointAccessBlockedReason": "county-only-location",
       "reason": "The provider is blocked from point-level access because the health mart has only county-level location evidence for this row."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-provider-points-2024-2026",
-      "providerId": "anmcs-2025-362",
-      "name": "SPITALUL DE PSIHIATRIE CRONICI DUMBRĂVENI",
-      "countyCode": "VN",
-      "serviceAccessEligible": true,
-      "locationConfidence": "name-derived-locality",
-      "hasAddress": false,
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider is blocked from point-level access because no accepted coordinate evidence is attached."
     },
     {
       "kind": "provider-excluded-from-point-access",

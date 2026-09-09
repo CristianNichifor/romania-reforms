@@ -132,10 +132,14 @@ First slice:
   queue has 122 providers: 4 exact/no-street rows, 4 locality-only Ministry overlaps and 114
   rows with no Ministry candidate; refreshed consumers report 26.7 km transport road-proxy
   median and 18.9 km justitie point-road median
-- next: resolve the four exact same-county Ministry rows that publish coordinates but no
-  street-address evidence, either by sourcing street-address evidence or by adding a separate
-  reviewed coordinate-only acceptance method; keep locality-only candidate overlaps out of the
-  alias source unless a stronger provider-specific source appears
+- done: add a reviewed coordinate-only acceptance source for the four exact same-county Ministry
+  rows that publish coordinates but no street-address evidence; the provider-point contract keeps
+  `addressEvidence.method: none` while accepting source-record-pinned
+  `reviewed-published-coordinate` evidence, raising the point layer to 206 accepted provider
+  coordinates and lowering named exclusions to 386; refreshed consumers report 26.5 km transport
+  road-proxy median and 18.0 km justitie point-road median
+- next: keep the four locality-only Ministry overlaps blocked until stronger provider-specific
+  evidence appears, and start source acquisition for the 114 no-candidate providers
 
 This should support service-access views in `administrativ`, `justitie` and `transport`
 without each simulator building its own hospital roster.

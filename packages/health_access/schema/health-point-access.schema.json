@@ -191,12 +191,13 @@
             "source-workbook-address",
             "provider-published-address",
             "osm-name-address-match",
-            "manual-review"
+            "manual-review",
+            "none"
           ]
         },
-        "source": { "type": "string", "minLength": 1 },
-        "sourceValue": { "type": "string", "minLength": 1 },
-        "retrievedDate": { "type": "string", "format": "date" }
+        "source": { "type": ["string", "null"], "minLength": 1 },
+        "sourceValue": { "type": ["string", "null"], "minLength": 1 },
+        "retrievedDate": { "type": ["string", "null"], "format": "date" }
       }
     },
     "pointEvidence": {
@@ -207,6 +208,7 @@
         "method": {
           "enum": [
             "published-coordinate",
+            "reviewed-published-coordinate",
             "geocoded-address",
             "osm-feature-match",
             "manual-review"
@@ -262,7 +264,7 @@
           "enum": ["name-derived-locality", "municipality-from-county"]
         },
         "serviceAccessEligible": { "const": true },
-        "address": { "type": "string", "minLength": 1 },
+        "address": { "type": ["string", "null"], "minLength": 1 },
         "latitude": { "type": "number", "minimum": 43, "maximum": 49 },
         "longitude": { "type": "number", "minimum": 20, "maximum": 30 },
         "ownerType": { "enum": ["public", "private", "unknown"] },

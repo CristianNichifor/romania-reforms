@@ -102,6 +102,14 @@ def fixture_address_aliases(aliases: list[dict]) -> dict:
     }
 
 
+def fixture_coordinate_reviews(acceptances: list[dict]) -> dict:
+    return {
+        "id": "ministerul-sanatatii-unitati-sanitare-coordinate-reviews-2026",
+        "reviewedDate": "2026-09-09",
+        "acceptances": acceptances,
+    }
+
+
 def address_alias(
     provider_id: str,
     source_record_id: str,
@@ -113,6 +121,20 @@ def address_alias(
         "countyCode": county_code,
         "matchMethod": "curated-same-county-official-name-alias",
         "reason": "Curated test alias.",
+    }
+
+
+def coordinate_review(
+    provider_id: str,
+    source_record_id: str,
+    county_code: str = "TS",
+) -> dict:
+    return {
+        "providerId": provider_id,
+        "sourceRecordId": source_record_id,
+        "countyCode": county_code,
+        "matchMethod": "reviewed-exact-name-county-coordinate-only",
+        "reason": "Curated test coordinate acceptance.",
     }
 
 
@@ -235,12 +257,12 @@ def test_committed_provider_points_cover_the_health_mart():
     assert points["summary"]["addressExactMatchedProviders"] == 174
     assert points["summary"]["addressAliasMatchedProviders"] == 40
     assert points["summary"]["ambiguousAddressProviders"] == 0
-    assert points["summary"]["pointAccessEligibleProviders"] == 202
-    assert points["summary"]["pointAccessBlockedProviders"] == 390
+    assert points["summary"]["pointAccessEligibleProviders"] == 206
+    assert points["summary"]["pointAccessBlockedProviders"] == 386
     assert points["summary"]["providersWithAddress"] == 214
-    assert points["summary"]["providersWithCoordinates"] == 202
-    assert points["summary"]["coordinateMatchedProviders"] == 214
-    assert points["summary"]["coordinateAcceptedProviders"] == 202
+    assert points["summary"]["providersWithCoordinates"] == 206
+    assert points["summary"]["coordinateMatchedProviders"] == 218
+    assert points["summary"]["coordinateAcceptedProviders"] == 206
     assert points["summary"]["coordinateRejectedProviders"] == 12
     assert points["summary"]["addressEvidence"] == {
         "none": 378,
@@ -252,15 +274,21 @@ def test_committed_provider_points_cover_the_health_mart():
         "none": 378,
     }
     assert points["summary"]["pointConfidence"] == {
-        "none": 390,
-        "official-coordinate": 202,
+        "none": 386,
+        "official-coordinate": 206,
     }
     assert points["registry"]["addressAliases"] == {
         "id": "ministerul-sanatatii-unitati-sanitare-address-aliases-2026",
         "reviewedDate": "2026-09-09",
         "aliases": 40,
     }
+    assert points["registry"]["coordinateReviews"] == {
+        "id": "ministerul-sanatatii-unitati-sanitare-coordinate-reviews-2026",
+        "reviewedDate": "2026-09-09",
+        "acceptances": 4,
+    }
     assert "msUnitatiSanitareAliasesSha256" in points["sourceHashes"]
+    assert "msUnitatiSanitareCoordinateReviewsSha256" in points["sourceHashes"]
     assert (
         points["summary"]["blockedReasons"]["county-only-location"]
         == health_mart["summary"]["locationConfidence"]["county-only"]
@@ -270,14 +298,14 @@ def test_committed_provider_points_cover_the_health_mart():
         for provider in points["providers"]
         if provider["locationConfidence"] == "county-only"
     )
-    assert points["summary"]["blockedReasons"]["no-point-evidence"] == 122
-    assert sum(1 for provider in points["providers"] if provider["pointAccessEligible"]) == 202
+    assert points["summary"]["blockedReasons"]["no-point-evidence"] == 118
+    assert sum(1 for provider in points["providers"] if provider["pointAccessEligible"]) == 206
     assert all(
         provider["pointConfidence"] == "official-coordinate"
         for provider in points["providers"]
         if provider["pointAccessEligible"]
     )
-    assert len(points["exclusions"]) == 390
+    assert len(points["exclusions"]) == 386
 
     accepted_review_aliases = {
         "anmcs-2025-230": "ms-unitati-sanitare-121",
@@ -291,10 +319,27 @@ def test_committed_provider_points_cover_the_health_mart():
         assert provider["addressMatchMethod"] == "curated-same-county-official-name-alias"
         assert provider["pointAccessEligible"] is True
 
+    accepted_coordinate_reviews = {
+        "anmcs-2025-001": "ms-unitati-sanitare-159",
+        "anmcs-2025-236": "ms-unitati-sanitare-065",
+        "anmcs-2025-256": "ms-unitati-sanitare-069",
+        "anmcs-2025-362": "ms-unitati-sanitare-066",
+    }
+    for provider_id, source_record_id in accepted_coordinate_reviews.items():
+        provider = by_provider_id[provider_id]
+        assert provider["address"] is None
+        assert provider["addressSourceRecordId"] == source_record_id
+        assert provider["addressMatchMethod"] is None
+        assert provider["addressEvidence"]["method"] == "none"
+        assert provider["pointEvidence"]["method"] == "reviewed-published-coordinate"
+        assert provider["pointEvidence"]["sourceValue"].startswith(f"{source_record_id}:")
+        assert provider["pointAccessEligible"] is True
+
     limitation_ids = {limitation["id"] for limitation in points["limitations"]}
     assert "coordinate-source-ministry-marker" in limitation_ids
     assert "coordinate-uat-polygon-validation-not-applied" in limitation_ids
     assert "address-source-exact-or-curated-id-only" in limitation_ids
+    assert "coordinate-only-review-is-not-address-evidence" in limitation_ids
     assert "county-only-not-promoted-to-points" in limitation_ids
 
 
@@ -445,6 +490,146 @@ def test_build_document_ignores_non_street_address_source_rows():
     assert document["summary"]["addressSourceRecordsWithStreetAddress"] == 0
     assert document["summary"]["addressMatchedProviders"] == 0
     assert document["summary"]["providersWithAddress"] == 0
+
+
+def test_build_document_accepts_reviewed_coordinate_only_exact_matches():
+    document = health_provider_points.build_document(
+        fixture_health_mart(),
+        {
+            "healthAccessMartSha256": "a" * 64,
+            "msUnitatiSanitareSha256": "b" * 64,
+            "msUnitatiSanitareCoordinateReviewsSha256": "c" * 64,
+        },
+        "2026-09-09",
+        fixture_address_source(
+            [
+                source_record(
+                    "ms-unitati-sanitare-001",
+                    "SPITALUL anmcs-2025-001",
+                    "SPITALUL anmcs-2025-001",
+                    has_street_address=False,
+                )
+            ]
+        ),
+        None,
+        fixture_coordinate_reviews(
+            [coordinate_review("anmcs-2025-001", "ms-unitati-sanitare-001")]
+        ),
+    )
+
+    provider = document["providers"][0]
+
+    assert provider["address"] is None
+    assert provider["addressSourceRecordId"] == "ms-unitati-sanitare-001"
+    assert provider["addressMatchMethod"] is None
+    assert provider["addressEvidence"] == {
+        "method": "none",
+        "source": None,
+        "sourceValue": None,
+        "retrievedDate": None,
+    }
+    assert provider["latitude"] == 44.1
+    assert provider["longitude"] == 26.1
+    assert provider["pointEvidence"] == {
+        "method": "reviewed-published-coordinate",
+        "source": "ministerul-sanatatii-unitati-sanitare-2026",
+        "sourceValue": "ms-unitati-sanitare-001:44.100000,26.100000",
+        "retrievedDate": "2026-09-09",
+    }
+    assert provider["pointAccessEligible"] is True
+    assert document["registry"]["coordinateReviews"] == {
+        "id": "ministerul-sanatatii-unitati-sanitare-coordinate-reviews-2026",
+        "reviewedDate": "2026-09-09",
+        "acceptances": 1,
+    }
+    assert document["summary"]["addressMatchedProviders"] == 0
+    assert document["summary"]["pointAccessEligibleProviders"] == 1
+    assert document["summary"]["providersWithAddress"] == 0
+    assert document["summary"]["providersWithCoordinates"] == 1
+    assert document["summary"]["coordinateMatchedProviders"] == 1
+    assert document["summary"]["coordinateAcceptedProviders"] == 1
+    assert document["summary"]["addressEvidence"] == {"none": 2}
+    assert document["summary"]["addressMatchMethods"] == {"none": 2}
+
+
+def test_build_document_rejects_coordinate_reviews_for_street_address_rows():
+    with pytest.raises(ValueError, match="street address"):
+        health_provider_points.build_document(
+            fixture_health_mart(),
+            {
+                "healthAccessMartSha256": "a" * 64,
+                "msUnitatiSanitareSha256": "b" * 64,
+                "msUnitatiSanitareCoordinateReviewsSha256": "c" * 64,
+            },
+            "2026-09-09",
+            fixture_address_source(),
+            None,
+            fixture_coordinate_reviews(
+                [coordinate_review("anmcs-2025-001", "ms-unitati-sanitare-001")]
+            ),
+        )
+
+
+def test_build_document_rejects_coordinate_reviews_without_exact_names():
+    with pytest.raises(ValueError, match="not an exact name match"):
+        health_provider_points.build_document(
+            fixture_health_mart(),
+            {
+                "healthAccessMartSha256": "a" * 64,
+                "msUnitatiSanitareSha256": "b" * 64,
+                "msUnitatiSanitareCoordinateReviewsSha256": "c" * 64,
+            },
+            "2026-09-09",
+            fixture_address_source(
+                [
+                    source_record(
+                        "ms-unitati-sanitare-001",
+                        "SPITALUL DIFERIT",
+                        "SPITALUL DIFERIT",
+                        has_street_address=False,
+                    )
+                ]
+            ),
+            None,
+            fixture_coordinate_reviews(
+                [coordinate_review("anmcs-2025-001", "ms-unitati-sanitare-001")]
+            ),
+        )
+
+
+def test_build_document_rejects_reused_coordinate_review_source_records():
+    mart = fixture_health_mart()
+    mart["records"][0]["name"] = "SPITALUL SHARED"
+    mart["records"][1] = access_provider("anmcs-2025-002", "102", True)
+    mart["records"][1]["name"] = "SPITALUL SHARED"
+
+    with pytest.raises(ValueError, match="reuses source record ids"):
+        health_provider_points.build_document(
+            mart,
+            {
+                "healthAccessMartSha256": "a" * 64,
+                "msUnitatiSanitareSha256": "b" * 64,
+                "msUnitatiSanitareCoordinateReviewsSha256": "c" * 64,
+            },
+            "2026-09-09",
+            fixture_address_source(
+                [
+                    source_record(
+                        "ms-unitati-sanitare-001",
+                        "SPITALUL SHARED",
+                        "SPITALUL SHARED",
+                        has_street_address=False,
+                    )
+                ]
+            ),
+            None,
+            fixture_coordinate_reviews(
+                [
+                    coordinate_review("anmcs-2025-001", "ms-unitati-sanitare-001"),
+                    coordinate_review("anmcs-2025-002", "ms-unitati-sanitare-001"),
+                ]
+            ),
+        )
 
 
 def test_build_document_keeps_ambiguous_address_candidates_blocked():

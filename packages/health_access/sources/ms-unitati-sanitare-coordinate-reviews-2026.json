@@ -1,0 +1,63 @@
+{
+  "$schema": "../schema/health-coordinate-reviews.schema.json",
+  "id": "ministerul-sanatatii-unitati-sanitare-coordinate-reviews-2026",
+  "title": "Reviewed Ministry health coordinate-only acceptances",
+  "publisher": "Cristian Nichifor",
+  "source": {
+    "id": "ministerul-sanatatii-unitati-sanitare-2026",
+    "publisher": "Ministerul Sanatatii",
+    "sourceUrl": "https://ms.ro/ro/unitati-sanitare/",
+    "retrievedDate": "2026-09-09"
+  },
+  "reviewedDate": "2026-09-09",
+  "provenance": {
+    "source": "ministerul-sanatatii-unitati-sanitare-2026 + health-access-mart-2024-2025",
+    "locator": "Curated providerId to sourceRecordId acceptances for exact same-county Ministry map rows that publish coordinates but do not expose street-address evidence.",
+    "confidence": "derived",
+    "note": "Acceptances are only coordinate evidence. The provider-point builder verifies exact normalised provider/source name equality, same county, published coordinates, Romania bounds, service-access eligibility, non-county-only provider placement, missing street-address evidence and source-record uniqueness."
+  },
+  "acceptances": [
+    {
+      "providerId": "anmcs-2025-001",
+      "sourceRecordId": "ms-unitati-sanitare-159",
+      "countyCode": "B",
+      "matchMethod": "reviewed-exact-name-county-coordinate-only",
+      "reason": "Exact same-county Ministry map row for Spitalul Clinic de Urgenta Bucuresti publishes coordinates, but the source address field repeats the provider name rather than a street address."
+    },
+    {
+      "providerId": "anmcs-2025-236",
+      "sourceRecordId": "ms-unitati-sanitare-065",
+      "countyCode": "VN",
+      "matchMethod": "reviewed-exact-name-county-coordinate-only",
+      "reason": "Exact same-county Ministry map row for Spitalul Orasenesc Panciu publishes coordinates, but the source address field is only the provider website URL."
+    },
+    {
+      "providerId": "anmcs-2025-256",
+      "sourceRecordId": "ms-unitati-sanitare-069",
+      "countyCode": "VN",
+      "matchMethod": "reviewed-exact-name-county-coordinate-only",
+      "reason": "Exact same-county Ministry map row for Spitalul N.N. Saveanu Vidra publishes coordinates, but the source address field is locality/postal-code level rather than a street address."
+    },
+    {
+      "providerId": "anmcs-2025-362",
+      "sourceRecordId": "ms-unitati-sanitare-066",
+      "countyCode": "VN",
+      "matchMethod": "reviewed-exact-name-county-coordinate-only",
+      "reason": "Exact same-county Ministry map row for Spitalul de Psihiatrie Cronici Dumbraveni publishes coordinates, but the source address field is locality/postal-code level rather than a street address."
+    }
+  ],
+  "limitations": [
+    {
+      "id": "coordinate-review-not-address-source",
+      "severity": "material",
+      "affects": ["acceptances", "address", "addressEvidence"],
+      "text": "These acceptances must not fill provider addresses. They only approve directly published Ministry map coordinates for exact same-county source rows without street-address evidence."
+    },
+    {
+      "id": "coordinate-review-not-fuzzy-matching",
+      "severity": "material",
+      "affects": ["acceptances"],
+      "text": "This file does not enable fuzzy matching. Each accepted row is pinned to one ANMCS provider id and one Ministry source record id, and the builder rejects non-exact normalised names, county mismatches, reused source records and source rows with street-address evidence."
+    }
+  ]
+}

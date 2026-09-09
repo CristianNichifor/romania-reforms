@@ -37,7 +37,7 @@
     }
   },
   "sourceHashes": {
-    "providerPointsSha256": "a4a81193481c5087719abd8635cdab5ed72883b573783698f817b65a5cb22f5c",
+    "providerPointsSha256": "7af746199792197d4cf3600dd109f20a8ec10b8a63716e95a9262b23abae6a46",
     "healthAccessMartSha256": "afc7828921e86da5bebf4c59925f9da45a809fdc6db4838bdc13d0c593078ca2",
     "msUnitatiSanitareSha256": "208fc0c281a4d45348eeff5733c37f5ddc2f9fa0d5648cfa9acf07711d503b54",
     "msUnitatiSanitareAliasesSha256": "4cf072835b726731989a11084421ddd62b7f133fcb7367e5b441fe28c19e1944"
@@ -48,27 +48,25 @@
   },
   "summary": {
     "providerPoints": 592,
-    "pointAccessEligibleProviders": 202,
-    "pointAccessBlockedProviders": 390,
-    "reviewProviders": 122,
+    "pointAccessEligibleProviders": 206,
+    "pointAccessBlockedProviders": 386,
+    "reviewProviders": 118,
     "countiesWithReviewProviders": 25,
-    "providersWithAnyCandidate": 8,
-    "candidateRows": 12,
+    "providersWithAnyCandidate": 4,
+    "candidateRows": 8,
     "candidateStatus": {
-      "exact-source-row-lacks-street-address": 4,
       "has-unused-ministry-review-candidate": 4,
       "no-ministry-review-candidate": 114
     },
     "reviewSignal": {
-      "high": 4,
       "low": 4,
       "none": 114
     },
-    "exactSourceRowsWithoutStreetAddress": 4,
+    "exactSourceRowsWithoutStreetAddress": 0,
     "unusedMinistryCandidateProviders": 4,
     "providersWithoutMinistryCandidate": 114,
     "ministrySourceRecords": 301,
-    "ministrySourceRecordsAlreadyMatched": 214,
+    "ministrySourceRecordsAlreadyMatched": 218,
     "unusedMinistryStreetSourceRecords": 76,
     "existingAddressAliases": 40,
     "byCounty": [
@@ -84,9 +82,9 @@
       {
         "countyCode": "B",
         "countyName": "Bucuresti",
-        "reviewProviders": 57,
-        "providersWithAnyCandidate": 1,
-        "exactSourceRowsWithoutStreetAddress": 1,
+        "reviewProviders": 56,
+        "providersWithAnyCandidate": 0,
+        "exactSourceRowsWithoutStreetAddress": 0,
         "unusedMinistryCandidateProviders": 0,
         "providersWithoutMinistryCandidate": 56
       },
@@ -291,51 +289,15 @@
       {
         "countyCode": "VN",
         "countyName": "Vrancea",
-        "reviewProviders": 4,
-        "providersWithAnyCandidate": 3,
-        "exactSourceRowsWithoutStreetAddress": 3,
+        "reviewProviders": 1,
+        "providersWithAnyCandidate": 0,
+        "exactSourceRowsWithoutStreetAddress": 0,
         "unusedMinistryCandidateProviders": 0,
         "providersWithoutMinistryCandidate": 1
       }
     ]
   },
   "records": [
-    {
-      "providerId": "anmcs-2025-001",
-      "name": "SPITALUL CLINIC DE URGENŢĂ BUCUREŞTI",
-      "countyCode": "B",
-      "countyName": "Bucuresti",
-      "siruta": "179132",
-      "localityName": "MUNICIPIUL BUCUREŞTI",
-      "locationConfidence": "municipality-from-county",
-      "ownerType": "public",
-      "bedCount": null,
-      "specialties": [],
-      "pointAccessBlockedReason": "no-point-evidence",
-      "candidateStatus": "exact-source-row-lacks-street-address",
-      "reviewSignal": "high",
-      "candidateCount": 1,
-      "candidates": [
-        {
-          "sourceRecordId": "ms-unitati-sanitare-159",
-          "name": "Spitalul Clinic de Urgență București",
-          "countyCode": "B",
-          "address": "Spitalul Clinic de Urgență București",
-          "hasStreetAddress": false,
-          "hasPublishedCoordinate": true,
-          "latitude": 44.45401347778285,
-          "longitude": 26.101257654022074,
-          "detailUrl": "https://ms.ro/ro/unitati-sanitare/spitalul-clinic-de-urgen%C8%9B%C4%83-bucure%C8%99ti/",
-          "reviewMethod": "exact-normalised-name-county-without-street-address",
-          "reviewSignal": "high",
-          "sharedTokens": [],
-          "providerTokenCoverage": 1,
-          "sourceTokenCoverage": 1,
-          "tokenScore": 1,
-          "reason": "Exact same-county Ministry source row exists, but the current provider-point contract rejects it because the source row has no street-address evidence."
-        }
-      ]
-    },
     {
       "providerId": "anmcs-2025-004",
       "name": "SPITALUL CLINIC JUDEȚEAN DE URGENȚĂ TÂRGU MUREȘ",
@@ -1455,44 +1417,6 @@
       "candidates": []
     },
     {
-      "providerId": "anmcs-2025-236",
-      "name": "SPITALUL ORĂȘENESC PANCIU",
-      "countyCode": "VN",
-      "countyName": "Vrancea",
-      "siruta": "175055",
-      "localityName": "ORAŞ PANCIU",
-      "locationConfidence": "name-derived-locality",
-      "ownerType": "public",
-      "bedCount": null,
-      "specialties": [],
-      "pointAccessBlockedReason": "no-point-evidence",
-      "candidateStatus": "exact-source-row-lacks-street-address",
-      "reviewSignal": "high",
-      "candidateCount": 1,
-      "candidates": [
-        {
-          "sourceRecordId": "ms-unitati-sanitare-065",
-          "name": "Spitalul orășenesc Panciu",
-          "countyCode": "VN",
-          "address": "https://spitalpanciu.ro/",
-          "hasStreetAddress": false,
-          "hasPublishedCoordinate": true,
-          "latitude": 45.909901974435044,
-          "longitude": 27.086510571167324,
-          "detailUrl": "https://ms.ro/ro/unitati-sanitare/spitalul-orasenesc-panciu/",
-          "reviewMethod": "exact-normalised-name-county-without-street-address",
-          "reviewSignal": "high",
-          "sharedTokens": [
-            "PANCIU"
-          ],
-          "providerTokenCoverage": 1,
-          "sourceTokenCoverage": 1,
-          "tokenScore": 1,
-          "reason": "Exact same-county Ministry source row exists, but the current provider-point contract rejects it because the source row has no street-address evidence."
-        }
-      ]
-    },
-    {
       "providerId": "anmcs-2025-238",
       "name": "SPITALUL GENERAL C.F. GALAŢI",
       "countyCode": "GL",
@@ -1559,45 +1483,6 @@
       "reviewSignal": "none",
       "candidateCount": 0,
       "candidates": []
-    },
-    {
-      "providerId": "anmcs-2025-256",
-      "name": "SPITALUL \"N.N. SAVEANU\" VIDRA",
-      "countyCode": "VN",
-      "countyName": "Vrancea",
-      "siruta": "178377",
-      "localityName": "VIDRA",
-      "locationConfidence": "name-derived-locality",
-      "ownerType": "private",
-      "bedCount": null,
-      "specialties": [],
-      "pointAccessBlockedReason": "no-point-evidence",
-      "candidateStatus": "exact-source-row-lacks-street-address",
-      "reviewSignal": "high",
-      "candidateCount": 1,
-      "candidates": [
-        {
-          "sourceRecordId": "ms-unitati-sanitare-069",
-          "name": "Spitalul N.N. Săveanu Vidra",
-          "countyCode": "VN",
-          "address": "627415 – com. Vidra, jud. Vrancea",
-          "hasStreetAddress": false,
-          "hasPublishedCoordinate": true,
-          "latitude": 45.911479228817875,
-          "longitude": 26.90807712699147,
-          "detailUrl": "https://ms.ro/ro/unitati-sanitare/spitalul-nn-saveanu-vidra/",
-          "reviewMethod": "exact-normalised-name-county-without-street-address",
-          "reviewSignal": "high",
-          "sharedTokens": [
-            "SAVEANU",
-            "VIDRA"
-          ],
-          "providerTokenCoverage": 1,
-          "sourceTokenCoverage": 1,
-          "tokenScore": 1,
-          "reason": "Exact same-county Ministry source row exists, but the current provider-point contract rejects it because the source row has no street-address evidence."
-        }
-      ]
     },
     {
       "providerId": "anmcs-2025-265",
@@ -1804,46 +1689,6 @@
       "reviewSignal": "none",
       "candidateCount": 0,
       "candidates": []
-    },
-    {
-      "providerId": "anmcs-2025-362",
-      "name": "SPITALUL DE PSIHIATRIE CRONICI DUMBRĂVENI",
-      "countyCode": "VN",
-      "countyName": "Vrancea",
-      "siruta": "175938",
-      "localityName": "DUMBRĂVENI",
-      "locationConfidence": "name-derived-locality",
-      "ownerType": "public",
-      "bedCount": null,
-      "specialties": [],
-      "pointAccessBlockedReason": "no-point-evidence",
-      "candidateStatus": "exact-source-row-lacks-street-address",
-      "reviewSignal": "high",
-      "candidateCount": 1,
-      "candidates": [
-        {
-          "sourceRecordId": "ms-unitati-sanitare-066",
-          "name": "Spitalul de psihiatrie cronici Dumbrăveni",
-          "countyCode": "VN",
-          "address": "627105 – com. Dumbrăveni, jud. Vrancea",
-          "hasStreetAddress": false,
-          "hasPublishedCoordinate": true,
-          "latitude": 45.55009349024915,
-          "longitude": 27.106425011641726,
-          "detailUrl": "https://ms.ro/ro/unitati-sanitare/spitalul-de-psihiatrie-cronici-dumbraveni/",
-          "reviewMethod": "exact-normalised-name-county-without-street-address",
-          "reviewSignal": "high",
-          "sharedTokens": [
-            "CRONICI",
-            "DUMBRAVENI",
-            "PSIHIATRIE"
-          ],
-          "providerTokenCoverage": 1,
-          "sourceTokenCoverage": 1,
-          "tokenScore": 1,
-          "reason": "Exact same-county Ministry source row exists, but the current provider-point contract rejects it because the source row has no street-address evidence."
-        }
-      ]
     },
     {
       "providerId": "anmcs-2025-363",
