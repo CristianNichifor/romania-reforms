@@ -18,6 +18,20 @@ ROOT = Path(__file__).resolve().parent.parent
 SERVICII = ROOT / "simulators/justitie/data/acces-servicii.json"
 HEALTH_ACCESS = ROOT / "packages/health_access/data/health-service-access-uat-2024-2026.json"
 HEALTH_POINT_ACCESS = ROOT / "packages/health_access/data/health-point-access-2024-2026.json"
+HEALTH_POINT_ROAD_ACCESS = (
+    ROOT / "packages/health_access/data/health-point-road-access-uat-2024-2026.json"
+)
+
+
+def population_weighted_median(rows: list[dict], field: str) -> int:
+    weighted = sorted((row[field], row["population"]) for row in rows)
+    total_population = sum(population for _, population in weighted)
+    running_population = 0
+    for metres, population in weighted:
+        running_population += population
+        if running_population >= total_population / 2:
+            return metres
+    return 0
 
 
 @pytest.fixture(scope="module")
@@ -63,18 +77,16 @@ def test_the_summary_recomputes_from_its_own_rows(servicii):
     assert summary["healthPointAccessMedianNearestMetres"] == int(
         statistics.median(point_distances)
     )
-    weighted = sorted(
-        (u["nearestHealthPointDistanceMetres"], u["population"]) for u in servicii["units"]
+    assert summary["healthPointAccessPopulationWeightedMedianNearestMetres"] == (
+        population_weighted_median(servicii["units"], "nearestHealthPointDistanceMetres")
     )
-    total_population = sum(population for _, population in weighted)
-    running_population = 0
-    weighted_median = 0
-    for metres, population in weighted:
-        running_population += population
-        if running_population >= total_population / 2:
-            weighted_median = metres
-            break
-    assert summary["healthPointAccessPopulationWeightedMedianNearestMetres"] == weighted_median
+    road_point_distances = sorted(u["nearestHealthPointRoadProxyMetres"] for u in servicii["units"])
+    assert summary["healthPointRoadAccessMedianNearestMetres"] == int(
+        statistics.median(road_point_distances)
+    )
+    assert summary["healthPointRoadAccessPopulationWeightedMedianNearestMetres"] == (
+        population_weighted_median(servicii["units"], "nearestHealthPointRoadProxyMetres")
+    )
 
 
 def test_the_point_health_access_view_is_reported_separately(servicii):
@@ -99,6 +111,36 @@ def test_the_point_health_access_view_is_reported_separately(servicii):
     for unit in servicii["units"]:
         assert unit["nearestHealthPointProviderId"] in point_ids, unit["siruta"]
         assert unit["nearestHealthPointDistanceMetres"] >= 0, unit["siruta"]
+
+
+def test_the_point_road_health_access_view_is_reported_as_a_proxy(servicii):
+    """The routed point metric comes from the shared road-proxy contract."""
+    road_access = json.loads(HEALTH_POINT_ROAD_ACCESS.read_text(encoding="utf-8"))
+    columns = {name: index for index, name in enumerate(road_access["uatDistanceColumns"])}
+    rows_by_siruta = {row[columns["siruta"]]: row for row in road_access["uats"]}
+    summary = servicii["summary"]
+
+    assert summary["healthPointRoadAccessView"] == road_access["id"]
+    assert summary["healthPointRoadAccessSourceRows"] == road_access["summary"]["uats"]
+    assert summary["healthPointRoadAccessProviders"] == road_access["summary"]["providers"]
+    assert (
+        summary["healthPointRoadAccessBlockedProviders"]
+        == road_access["summary"]["pointAccessBlockedProviders"]
+    )
+    assert (
+        summary["healthPointRoadAccessNamedExclusions"]
+        == road_access["summary"]["pointAccessNamedExclusions"]
+    )
+    assert (
+        summary["healthPointRoadAccessDistanceMethod"] == road_access["summary"]["distanceMethod"]
+    )
+    assert summary["healthPointRoadAccessRowsWithDistance"] == len(servicii["units"])
+    assert "sanatatea-punctuala-rutata-e-proxy" in {item["id"] for item in servicii["limitations"]}
+
+    for unit in servicii["units"]:
+        source = rows_by_siruta[unit["siruta"]]
+        assert unit["nearestHealthPointRoadProviderId"] == source[columns["nearestProviderId"]]
+        assert unit["nearestHealthPointRoadProxyMetres"] == source[columns["roadProxyMetres"]]
 
 
 def test_the_seat_coincidence_is_measured_on_one_set_of_seats(servicii):
@@ -226,6 +268,7 @@ def test_distances_are_plausible(servicii):
         assert 0 <= unit["courtMetres"] < 200_000, unit["siruta"]
         assert 0 <= unit["hospitalMetresAtMost"] < 200_000, unit["siruta"]
         assert 0 <= unit["nearestHealthPointDistanceMetres"] < 200_000, unit["siruta"]
+        assert 0 <= unit["nearestHealthPointRoadProxyMetres"] < 300_000, unit["siruta"]
 
 
 def test_units_further_from_court_are_counted_from_the_rows(servicii):

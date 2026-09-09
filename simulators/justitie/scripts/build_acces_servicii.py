@@ -37,6 +37,8 @@ BUCHAREST = "B"
 BUCHAREST_MUNICIPALITY_SIRUTA = "179132"
 HEALTH_POINT_ACCESS_VIEW_ID = "health-point-access-2024-2026"
 HEALTH_POINT_ACCESS_DISTANCE_METHOD = "straight-line"
+HEALTH_POINT_ROAD_ACCESS_VIEW_ID = "health-point-road-access-uat-2024-2026"
+HEALTH_POINT_ROAD_ACCESS_DISTANCE_METHOD = "road-graph-to-snap-node-plus-straight-line-offset"
 EARTH_RADIUS_METRES = 6_371_008.8
 WEB_MERCATOR_RADIUS_METRES = 6_378_137.0
 WEB_MERCATOR_MAX_LATITUDE = 85.05112878
@@ -192,6 +194,43 @@ def read_health_points(point_access: dict) -> list[dict]:
     return points
 
 
+def read_health_point_road_access(document: dict) -> dict[str, dict[str, object]]:
+    if document["id"] != HEALTH_POINT_ROAD_ACCESS_VIEW_ID:
+        raise SystemExit(f"expected {HEALTH_POINT_ROAD_ACCESS_VIEW_ID}, got {document['id']}")
+    if document["summary"]["distanceMethod"] != HEALTH_POINT_ROAD_ACCESS_DISTANCE_METHOD:
+        raise SystemExit(
+            "point road health-access view changed distance method: "
+            f"{document['summary']['distanceMethod']}"
+        )
+
+    columns = {name: index for index, name in enumerate(document["uatDistanceColumns"])}
+    required = {
+        "siruta",
+        "nearestProviderId",
+        "providerSnapNodeSiruta",
+        "roadProxyMetres",
+    }
+    missing = sorted(required - columns.keys())
+    if missing:
+        raise SystemExit("point road health-access view is missing columns: " + ", ".join(missing))
+
+    rows: dict[str, dict[str, object]] = {}
+    duplicates: list[str] = []
+    for row in document["uats"]:
+        siruta = str(row[columns["siruta"]])
+        if siruta in rows:
+            duplicates.append(siruta)
+        rows[siruta] = {
+            "nearestProviderId": str(row[columns["nearestProviderId"]]),
+            "providerSnapNodeSiruta": str(row[columns["providerSnapNodeSiruta"]]),
+            "roadProxyMetres": int(row[columns["roadProxyMetres"]]),
+        }
+    if duplicates:
+        listed = ", ".join(sorted(set(duplicates))[:10])
+        raise SystemExit(f"point road health-access view has duplicate SIRUTA rows: {listed}")
+    return rows
+
+
 def straight_line_metres(lat_a: float, lon_a: float, lat_b: float, lon_b: float) -> float:
     phi_a = math.radians(lat_a)
     phi_b = math.radians(lat_b)
@@ -282,6 +321,13 @@ def main() -> int:
     health_point_access_file = (
         REPO_ROOT / "packages" / "health_access" / "data" / "health-point-access-2024-2026.json"
     )
+    health_point_road_access_file = (
+        REPO_ROOT
+        / "packages"
+        / "health_access"
+        / "data"
+        / "health-point-road-access-uat-2024-2026.json"
+    )
     politie_file = ROOT / "data" / "politie-osm.json"
     located_file = ROOT / "data" / "instante-localizate-2025.json"
     courts_file = ROOT / "data" / "court-distance.json"
@@ -289,6 +335,7 @@ def main() -> int:
     for path in (
         health_access_file,
         health_point_access_file,
+        health_point_road_access_file,
         politie_file,
         located_file,
         courts_file,
@@ -298,7 +345,9 @@ def main() -> int:
 
     health_access = json.loads(health_access_file.read_text(encoding="utf-8"))
     health_point_access = json.loads(health_point_access_file.read_text(encoding="utf-8"))
+    health_point_road_access = json.loads(health_point_road_access_file.read_text(encoding="utf-8"))
     health_points = read_health_points(health_point_access)
+    health_point_road_by_siruta = read_health_point_road_access(health_point_road_access)
     uat_locations = read_uat_locations()
     politie = json.loads(politie_file.read_text(encoding="utf-8"))
     located = json.loads(located_file.read_text(encoding="utf-8"))["courts"]
@@ -423,6 +472,12 @@ def main() -> int:
                 print(f"missing UAT centroid for consolidated seat {seat}", file=sys.stderr)
                 return 1
             point, point_m = nearest_health_point(location, health_points)
+            road_point = health_point_road_by_siruta.get(seat)
+            if road_point is None:
+                print(
+                    f"missing routed health point row for consolidated seat {seat}", file=sys.stderr
+                )
+                return 1
             units.append(
                 {
                     "siruta": seat,
@@ -434,6 +489,8 @@ def main() -> int:
                     "localHealthProviderCount": local_health.get("localProviderCount", 0),
                     "nearestHealthPointProviderId": point["providerId"],
                     "nearestHealthPointDistanceMetres": point_m,
+                    "nearestHealthPointRoadProviderId": road_point["nearestProviderId"],
+                    "nearestHealthPointRoadProxyMetres": road_point["roadProxyMetres"],
                     "policeMetresAtMost": round(police_m),
                     "todayCourtMetres": round(today_m),
                     "comparable": True,
@@ -457,6 +514,12 @@ def main() -> int:
                 print(f"missing UAT centroid for consolidated seat {seat}", file=sys.stderr)
                 return 1
             point, point_m = nearest_health_point(location, health_points)
+            road_point = health_point_road_by_siruta.get(seat)
+            if road_point is None:
+                print(
+                    f"missing routed health point row for consolidated seat {seat}", file=sys.stderr
+                )
+                return 1
             units.append(
                 {
                     "siruta": seat,
@@ -468,6 +531,8 @@ def main() -> int:
                     "localHealthProviderCount": local_health.get("localProviderCount", 0),
                     "nearestHealthPointProviderId": point["providerId"],
                     "nearestHealthPointDistanceMetres": point_m,
+                    "nearestHealthPointRoadProviderId": road_point["nearestProviderId"],
+                    "nearestHealthPointRoadProxyMetres": road_point["roadProxyMetres"],
                     "policeMetresAtMost": unit["policeMetresAtMost"],
                     "todayCourtMetres": unit["todayCourtMetres"],
                     "comparable": True,
@@ -538,6 +603,27 @@ def main() -> int:
             if running >= total_weight / 2:
                 weighted_median_health_point = metres
                 break
+    rows_with_point_road_distance = [
+        u for u in units if u.get("nearestHealthPointRoadProxyMetres") is not None
+    ]
+    point_road_distances = [
+        u["nearestHealthPointRoadProxyMetres"] for u in rows_with_point_road_distance
+    ]
+    median_health_point_road = median(point_road_distances)
+    weighted_median_health_point_road = 0
+    if rows_with_point_road_distance:
+        weighted = sorted(
+            (u["nearestHealthPointRoadProxyMetres"], u["population"])
+            for u in rows_with_point_road_distance
+            if u["population"] > 0
+        )
+        total_weight = sum(weight for _, weight in weighted)
+        running = 0
+        for metres, weight in weighted:
+            running += weight
+            if running >= total_weight / 2:
+                weighted_median_health_point_road = metres
+                break
     # The same seats measured against both networks: this is the comparison that cannot be an
     # artefact of where consolidated seats are chosen, because it is one set of seats.
     seat_has_hospital = sum(1 for u in comparable if u["localHealthProviderCount"] > 0)
@@ -590,6 +676,10 @@ def main() -> int:
         f"punct sănătate cel mai apropiat: mediana {median_health_point / 1000:.1f} km "
         f"({HEALTH_POINT_ACCESS_DISTANCE_METHOD})"
     )
+    print(
+        f"punct sănătate rutat-proxy: mediana {median_health_point_road / 1000:.1f} km "
+        f"({HEALTH_POINT_ROAD_ACCESS_DISTANCE_METHOD})"
+    )
 
     document = {
         "$schema": "../schema/acces-servicii.schema.json",
@@ -604,7 +694,9 @@ def main() -> int:
                 "instanță și către cele mai apropiate UAT-uri cu furnizori de sănătate "
                 "serviceAccessEligible din pachetul health_access; cel mai apropiat punct de "
                 "sănătate este calculat separat din health-point-access-2024-2026, în linie "
-                "dreaptă de la centroidul UAT la coordonata furnizorului acceptat"
+                "dreaptă de la centroidul UAT la coordonata furnizorului acceptat; "
+                "health-point-road-access-uat-2024-2026 adaugă proxy-ul rutat către nodul UAT "
+                "la care a fost atașat furnizorul"
             ),
             "confidence": "derived",
         },
@@ -651,6 +743,23 @@ def main() -> int:
             "healthPointAccessDistanceMethod": HEALTH_POINT_ACCESS_DISTANCE_METHOD,
             "healthPointAccessMedianNearestMetres": median_health_point,
             "healthPointAccessPopulationWeightedMedianNearestMetres": weighted_median_health_point,
+            "healthPointRoadAccessView": health_point_road_access["id"],
+            "healthPointRoadAccessSourceRows": health_point_road_access["summary"]["uats"],
+            "healthPointRoadAccessProviders": health_point_road_access["summary"]["providers"],
+            "healthPointRoadAccessBlockedProviders": health_point_road_access["summary"][
+                "pointAccessBlockedProviders"
+            ],
+            "healthPointRoadAccessNamedExclusions": health_point_road_access["summary"][
+                "pointAccessNamedExclusions"
+            ],
+            "healthPointRoadAccessRowsWithDistance": len(rows_with_point_road_distance),
+            "healthPointRoadAccessDistanceMethod": health_point_road_access["summary"][
+                "distanceMethod"
+            ],
+            "healthPointRoadAccessMedianNearestMetres": median_health_point_road,
+            "healthPointRoadAccessPopulationWeightedMedianNearestMetres": (
+                weighted_median_health_point_road
+            ),
         },
         "units": units,
         "limitations": [
@@ -709,6 +818,19 @@ def main() -> int:
                     "coordonata furnizorului, deci nu este distanță rutieră sau timp de acces. "
                     f"{health_point_access['summary']['pointAccessBlockedProviders']} furnizori "
                     "fără punct acceptat rămân excluși nominal din calcul."
+                ),
+                "severity": "material",
+                "affects": ["acces", "colocare"],
+            },
+            {
+                "id": "sanatatea-punctuala-rutata-e-proxy",
+                "text": (
+                    "Distanța rutată la furnizor punctual citește "
+                    "health-point-road-access-uat-2024-2026. Furnizorul nu devine nod de drum: "
+                    "coordonata este atașată unui nod UAT din graful administrativ, apoi "
+                    "distanța publicată adună drumul pe graf cu offsetul în linie dreaptă până "
+                    "la coordonata furnizorului. Este un proxy rutat, nu distanță door-to-door "
+                    "sau timp de acces."
                 ),
                 "severity": "material",
                 "affects": ["acces", "colocare"],

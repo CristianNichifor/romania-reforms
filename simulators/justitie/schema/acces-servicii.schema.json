@@ -63,6 +63,15 @@
         "healthPointAccessDistanceMethod",
         "healthPointAccessMedianNearestMetres",
         "healthPointAccessPopulationWeightedMedianNearestMetres",
+        "healthPointRoadAccessView",
+        "healthPointRoadAccessSourceRows",
+        "healthPointRoadAccessProviders",
+        "healthPointRoadAccessBlockedProviders",
+        "healthPointRoadAccessNamedExclusions",
+        "healthPointRoadAccessRowsWithDistance",
+        "healthPointRoadAccessDistanceMethod",
+        "healthPointRoadAccessMedianNearestMetres",
+        "healthPointRoadAccessPopulationWeightedMedianNearestMetres",
         "medianMetresToPoliceAtMost",
         "seatsThatArePoliceTowns",
         "policeTowns",
@@ -182,6 +191,42 @@
           "type": "integer",
           "minimum": 0
         },
+        "healthPointRoadAccessView": {
+          "const": "health-point-road-access-uat-2024-2026"
+        },
+        "healthPointRoadAccessSourceRows": {
+          "description": "Rows in the shared UAT road-proxy source view.",
+          "type": "integer",
+          "minimum": 1
+        },
+        "healthPointRoadAccessProviders": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "healthPointRoadAccessBlockedProviders": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "healthPointRoadAccessNamedExclusions": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "healthPointRoadAccessRowsWithDistance": {
+          "description": "Consolidated service rows matched to the shared UAT road-proxy view.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "healthPointRoadAccessDistanceMethod": {
+          "const": "road-graph-to-snap-node-plus-straight-line-offset"
+        },
+        "healthPointRoadAccessMedianNearestMetres": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "healthPointRoadAccessPopulationWeightedMedianNearestMetres": {
+          "type": "integer",
+          "minimum": 0
+        },
         "medianMetresToPoliceAtMost": {
           "type": "number",
           "minimum": 0,
@@ -292,6 +337,8 @@
           "localHealthProviderCount",
           "nearestHealthPointProviderId",
           "nearestHealthPointDistanceMetres",
+          "nearestHealthPointRoadProviderId",
+          "nearestHealthPointRoadProxyMetres",
           "comparable",
           "policeMetresAtMost",
           "todayCourtMetres"
@@ -328,6 +375,15 @@
           },
           "nearestHealthPointDistanceMetres": {
             "description": "Straight-line distance from the consolidated UAT centroid to the nearest accepted provider point.",
+            "type": "integer",
+            "minimum": 0
+          },
+          "nearestHealthPointRoadProviderId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "nearestHealthPointRoadProxyMetres": {
+            "description": "Road-proxy distance from the consolidated UAT road node to the nearest accepted provider point snap.",
             "type": "integer",
             "minimum": 0
           },

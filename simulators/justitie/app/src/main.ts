@@ -83,6 +83,13 @@ interface Servicii {
     healthPointAccessDistanceMethod: 'straight-line';
     healthPointAccessMedianNearestMetres: number;
     healthPointAccessPopulationWeightedMedianNearestMetres: number;
+    healthPointRoadAccessSourceRows: number;
+    healthPointRoadAccessProviders: number;
+    healthPointRoadAccessBlockedProviders: number;
+    healthPointRoadAccessRowsWithDistance: number;
+    healthPointRoadAccessDistanceMethod: 'road-graph-to-snap-node-plus-straight-line-offset';
+    healthPointRoadAccessMedianNearestMetres: number;
+    healthPointRoadAccessPopulationWeightedMedianNearestMetres: number;
     seatsThatArePoliceTowns: number;
     medianMetresToPoliceAtMost: number;
     units: number;
@@ -2243,6 +2250,11 @@ async function main(): Promise<void> {
        ${servicii.summary.healthPointAccessBlockedProviders} furnizori rămân excluși din
        distanța punctuală; metoda publicată aici este
        ${servicii.summary.healthPointAccessDistanceMethod}, nu rutare pe drum.</p>
+     <p class="disagree">Rutat, justiția citește noua vedere
+       health-point-road-access-uat-2024-2026 pentru
+       ${servicii.summary.healthPointRoadAccessRowsWithDistance} sedii consolidate. Furnizorul
+       nu devine nod de drum: coordonata este atașată la nodul UAT din graful administrativ, iar
+       distanța adaugă offsetul până la punctul furnizorului.</p>
      <p class="disagree">Aceleași sedii, față de toate trei rețelele:
        ${servicii.summary.seatsThatArePoliceTowns} din ${ro.format(servicii.summary.units)} au
        poliție, ${servicii.summary.seatsThatAreHospitalTowns} au furnizor de sănătate localizat,
@@ -2256,10 +2268,12 @@ async function main(): Promise<void> {
        ${Math.round(servicii.summary.medianMetresToHospitalAtMost / 1000)} km până la sănătate.
        Din punctele acceptate, cel mai apropiat furnizor de sănătate este la mediana
        ${Math.round(servicii.summary.healthPointAccessMedianNearestMetres / 1000)} km în linie
-       dreaptă.
+       dreaptă și la ${Math.round(
+         servicii.summary.healthPointRoadAccessMedianNearestMetres / 1000,
+       )} km în proxy rutat.
        Rețeaua de justiție ar fi mult mai rară decât celelalte două. Ambele distanțe din urmă
        sunt limite de sus; distanța punctuală în linie dreaptă este doar un reper geografic,
-       nu timp de acces.</p>
+       iar proxy-ul rutat nu este timp de acces.</p>
      <p class="disagree">Invers, ${Math.round(
        100 - (100 * sp.hospitalsInCourtSeatTowns) / sp.located,
      )}% dintre spitale nu sunt în orașul unui sediu. Concentrarea serviciilor în 42 de orașe

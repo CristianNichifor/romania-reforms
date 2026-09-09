@@ -6,7 +6,7 @@
   "period": "2026",
   "provenance": {
     "source": "reforma-sistem-judiciar-romania",
-    "locator": "Unitățile consolidate rutate pe graful național către cele 42 de sedii de instanță și către cele mai apropiate UAT-uri cu furnizori de sănătate serviceAccessEligible din pachetul health_access; cel mai apropiat punct de sănătate este calculat separat din health-point-access-2024-2026, în linie dreaptă de la centroidul UAT la coordonata furnizorului acceptat",
+    "locator": "Unitățile consolidate rutate pe graful național către cele 42 de sedii de instanță și către cele mai apropiate UAT-uri cu furnizori de sănătate serviceAccessEligible din pachetul health_access; cel mai apropiat punct de sănătate este calculat separat din health-point-access-2024-2026, în linie dreaptă de la centroidul UAT la coordonata furnizorului acceptat; health-point-road-access-uat-2024-2026 adaugă proxy-ul rutat către nodul UAT la care a fost atașat furnizorul",
     "confidence": "derived"
   },
   "summary": {
@@ -68,7 +68,16 @@
     "healthPointAccessRowsWithDistance": 248,
     "healthPointAccessDistanceMethod": "straight-line",
     "healthPointAccessMedianNearestMetres": 16420,
-    "healthPointAccessPopulationWeightedMedianNearestMetres": 3620
+    "healthPointAccessPopulationWeightedMedianNearestMetres": 3620,
+    "healthPointRoadAccessView": "health-point-road-access-uat-2024-2026",
+    "healthPointRoadAccessSourceRows": 3186,
+    "healthPointRoadAccessProviders": 162,
+    "healthPointRoadAccessBlockedProviders": 430,
+    "healthPointRoadAccessNamedExclusions": 430,
+    "healthPointRoadAccessRowsWithDistance": 248,
+    "healthPointRoadAccessDistanceMethod": "road-graph-to-snap-node-plus-straight-line-offset",
+    "healthPointRoadAccessMedianNearestMetres": 23510,
+    "healthPointRoadAccessPopulationWeightedMedianNearestMetres": 3620
   },
   "units": [
     {
@@ -81,6 +90,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-353",
       "nearestHealthPointDistanceMetres": 48307,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-015",
+      "nearestHealthPointRoadProxyMetres": 64605,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -95,6 +106,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-214",
       "nearestHealthPointDistanceMetres": 39225,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-015",
+      "nearestHealthPointRoadProxyMetres": 64046,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -109,6 +122,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-154",
       "nearestHealthPointDistanceMetres": 2879,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-154",
+      "nearestHealthPointRoadProxyMetres": 2879,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -123,6 +138,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-197",
       "nearestHealthPointDistanceMetres": 7371,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-197",
+      "nearestHealthPointRoadProxyMetres": 5824,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -137,6 +154,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-078",
       "nearestHealthPointDistanceMetres": 28935,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-015",
+      "nearestHealthPointRoadProxyMetres": 36676,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 27370,
       "comparable": true
@@ -151,6 +170,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-093",
       "nearestHealthPointDistanceMetres": 759,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-093",
+      "nearestHealthPointRoadProxyMetres": 759,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -165,6 +186,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-078",
       "nearestHealthPointDistanceMetres": 24284,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-015",
+      "nearestHealthPointRoadProxyMetres": 35765,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 35255,
       "comparable": true
@@ -179,6 +202,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-154",
       "nearestHealthPointDistanceMetres": 20896,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-154",
+      "nearestHealthPointRoadProxyMetres": 29940,
       "policeMetresAtMost": 18665,
       "todayCourtMetres": 27061,
       "comparable": true
@@ -193,6 +218,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-197",
       "nearestHealthPointDistanceMetres": 10207,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-197",
+      "nearestHealthPointRoadProxyMetres": 12748,
       "policeMetresAtMost": 6925,
       "todayCourtMetres": 6925,
       "comparable": true
@@ -207,6 +234,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-214",
       "nearestHealthPointDistanceMetres": 26089,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-214",
+      "nearestHealthPointRoadProxyMetres": 36076,
       "policeMetresAtMost": 4998,
       "todayCourtMetres": 33287,
       "comparable": true
@@ -221,6 +250,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-008",
       "nearestHealthPointDistanceMetres": 27775,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-118",
+      "nearestHealthPointRoadProxyMetres": 41136,
       "policeMetresAtMost": 4606,
       "todayCourtMetres": 36024,
       "comparable": true
@@ -235,6 +266,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-025",
       "nearestHealthPointDistanceMetres": 17599,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-025",
+      "nearestHealthPointRoadProxyMetres": 18698,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 4121,
       "comparable": true
@@ -249,6 +282,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-008",
       "nearestHealthPointDistanceMetres": 19004,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-008",
+      "nearestHealthPointRoadProxyMetres": 28776,
       "policeMetresAtMost": 11631,
       "todayCourtMetres": 25174,
       "comparable": true
@@ -263,6 +298,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-118",
       "nearestHealthPointDistanceMetres": 24098,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-118",
+      "nearestHealthPointRoadProxyMetres": 28858,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 22795,
       "comparable": true
@@ -277,6 +314,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-118",
       "nearestHealthPointDistanceMetres": 23848,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-118",
+      "nearestHealthPointRoadProxyMetres": 36530,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 31419,
       "comparable": true
@@ -291,6 +330,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-008",
       "nearestHealthPointDistanceMetres": 9541,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-008",
+      "nearestHealthPointRoadProxyMetres": 13459,
       "policeMetresAtMost": 6012,
       "todayCourtMetres": 11800,
       "comparable": true
@@ -305,6 +346,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-322",
       "nearestHealthPointDistanceMetres": 8847,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-322",
+      "nearestHealthPointRoadProxyMetres": 8847,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -319,6 +362,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-430",
       "nearestHealthPointDistanceMetres": 26328,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-430",
+      "nearestHealthPointRoadProxyMetres": 49583,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -333,6 +378,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-189",
       "nearestHealthPointDistanceMetres": 53801,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-189",
+      "nearestHealthPointRoadProxyMetres": 91684,
       "policeMetresAtMost": 9740,
       "todayCourtMetres": 22340,
       "comparable": true
@@ -347,6 +394,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-430",
       "nearestHealthPointDistanceMetres": 23803,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-430",
+      "nearestHealthPointRoadProxyMetres": 39635,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -361,6 +410,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-430",
       "nearestHealthPointDistanceMetres": 59899,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-430",
+      "nearestHealthPointRoadProxyMetres": 79282,
       "policeMetresAtMost": 6379,
       "todayCourtMetres": 0,
       "comparable": true
@@ -375,6 +426,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-263",
       "nearestHealthPointDistanceMetres": 16698,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-263",
+      "nearestHealthPointRoadProxyMetres": 26239,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 21949,
       "comparable": true
@@ -389,6 +442,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-322",
       "nearestHealthPointDistanceMetres": 32400,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-322",
+      "nearestHealthPointRoadProxyMetres": 46227,
       "policeMetresAtMost": 15012,
       "todayCourtMetres": 26291,
       "comparable": true
@@ -403,6 +458,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-320",
       "nearestHealthPointDistanceMetres": 15005,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-320",
+      "nearestHealthPointRoadProxyMetres": 24295,
       "policeMetresAtMost": 22208,
       "todayCourtMetres": 0,
       "comparable": true
@@ -417,6 +474,8 @@
       "localHealthProviderCount": 2,
       "nearestHealthPointProviderId": "anmcs-2025-203",
       "nearestHealthPointDistanceMetres": 34265,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-203",
+      "nearestHealthPointRoadProxyMetres": 57436,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -431,6 +490,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-248",
       "nearestHealthPointDistanceMetres": 2299,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-248",
+      "nearestHealthPointRoadProxyMetres": 2299,
       "policeMetresAtMost": 25382,
       "todayCourtMetres": 0,
       "comparable": true
@@ -445,6 +506,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-248",
       "nearestHealthPointDistanceMetres": 43229,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-248",
+      "nearestHealthPointRoadProxyMetres": 81686,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -459,6 +522,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-267",
       "nearestHealthPointDistanceMetres": 15439,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-267",
+      "nearestHealthPointRoadProxyMetres": 28319,
       "policeMetresAtMost": 16320,
       "todayCourtMetres": 0,
       "comparable": true
@@ -473,6 +538,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-203",
       "nearestHealthPointDistanceMetres": 43013,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-293",
+      "nearestHealthPointRoadProxyMetres": 81315,
       "policeMetresAtMost": 34571,
       "todayCourtMetres": 0,
       "comparable": true
@@ -487,6 +554,8 @@
       "localHealthProviderCount": 2,
       "nearestHealthPointProviderId": "anmcs-2025-252",
       "nearestHealthPointDistanceMetres": 44641,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-252",
+      "nearestHealthPointRoadProxyMetres": 66900,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -501,6 +570,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-216",
       "nearestHealthPointDistanceMetres": 30542,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-252",
+      "nearestHealthPointRoadProxyMetres": 43194,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -515,6 +586,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-169",
       "nearestHealthPointDistanceMetres": 15925,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-169",
+      "nearestHealthPointRoadProxyMetres": 25034,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -529,6 +602,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-178",
       "nearestHealthPointDistanceMetres": 53422,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-178",
+      "nearestHealthPointRoadProxyMetres": 78616,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -543,6 +618,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-178",
       "nearestHealthPointDistanceMetres": 36557,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-123",
+      "nearestHealthPointRoadProxyMetres": 55149,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 49562,
       "comparable": true
@@ -557,6 +634,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-252",
       "nearestHealthPointDistanceMetres": 20072,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-252",
+      "nearestHealthPointRoadProxyMetres": 35187,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -571,6 +650,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-035",
       "nearestHealthPointDistanceMetres": 18622,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-035",
+      "nearestHealthPointRoadProxyMetres": 24002,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 21335,
       "comparable": true
@@ -585,6 +666,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-178",
       "nearestHealthPointDistanceMetres": 33972,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-178",
+      "nearestHealthPointRoadProxyMetres": 53034,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 25582,
       "comparable": true
@@ -599,6 +682,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-161",
       "nearestHealthPointDistanceMetres": 34573,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-161",
+      "nearestHealthPointRoadProxyMetres": 44065,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -613,6 +698,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-161",
       "nearestHealthPointDistanceMetres": 29956,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-161",
+      "nearestHealthPointRoadProxyMetres": 39443,
       "policeMetresAtMost": 19193,
       "todayCourtMetres": 0,
       "comparable": true
@@ -627,6 +714,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-035",
       "nearestHealthPointDistanceMetres": 22457,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-035",
+      "nearestHealthPointRoadProxyMetres": 28172,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 25505,
       "comparable": true
@@ -641,6 +730,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-336",
       "nearestHealthPointDistanceMetres": 22396,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-336",
+      "nearestHealthPointRoadProxyMetres": 45245,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -655,6 +746,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-138",
       "nearestHealthPointDistanceMetres": 26895,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-138",
+      "nearestHealthPointRoadProxyMetres": 36403,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -669,6 +762,8 @@
       "localHealthProviderCount": 2,
       "nearestHealthPointProviderId": "anmcs-2025-365",
       "nearestHealthPointDistanceMetres": 2232,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-365",
+      "nearestHealthPointRoadProxyMetres": 2232,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -683,6 +778,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-147",
       "nearestHealthPointDistanceMetres": 32338,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-147",
+      "nearestHealthPointRoadProxyMetres": 60705,
       "policeMetresAtMost": 22673,
       "todayCourtMetres": 26421,
       "comparable": true
@@ -697,6 +794,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-161",
       "nearestHealthPointDistanceMetres": 20109,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-161",
+      "nearestHealthPointRoadProxyMetres": 26605,
       "policeMetresAtMost": 4658,
       "todayCourtMetres": 17460,
       "comparable": true
@@ -711,6 +810,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-138",
       "nearestHealthPointDistanceMetres": 28762,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-138",
+      "nearestHealthPointRoadProxyMetres": 38931,
       "policeMetresAtMost": 16835,
       "todayCourtMetres": 12403,
       "comparable": true
@@ -725,6 +826,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-114",
       "nearestHealthPointDistanceMetres": 956,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-114",
+      "nearestHealthPointRoadProxyMetres": 956,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -739,6 +842,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-068",
       "nearestHealthPointDistanceMetres": 22848,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-135",
+      "nearestHealthPointRoadProxyMetres": 27481,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -753,6 +858,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-114",
       "nearestHealthPointDistanceMetres": 35929,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-142",
+      "nearestHealthPointRoadProxyMetres": 48955,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -767,6 +874,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-166",
       "nearestHealthPointDistanceMetres": 3185,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-166",
+      "nearestHealthPointRoadProxyMetres": 3185,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -781,6 +890,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-114",
       "nearestHealthPointDistanceMetres": 31263,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-114",
+      "nearestHealthPointRoadProxyMetres": 38778,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 23182,
       "comparable": true
@@ -795,6 +906,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-114",
       "nearestHealthPointDistanceMetres": 20931,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-114",
+      "nearestHealthPointRoadProxyMetres": 33062,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 32106,
       "comparable": true
@@ -809,6 +922,8 @@
       "localHealthProviderCount": 3,
       "nearestHealthPointProviderId": "anmcs-2025-149",
       "nearestHealthPointDistanceMetres": 284,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-149",
+      "nearestHealthPointRoadProxyMetres": 284,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -823,6 +938,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-167",
       "nearestHealthPointDistanceMetres": 15352,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-167",
+      "nearestHealthPointRoadProxyMetres": 17543,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 15687,
       "comparable": true
@@ -837,6 +954,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-149",
       "nearestHealthPointDistanceMetres": 11097,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-149",
+      "nearestHealthPointRoadProxyMetres": 10520,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 10236,
       "comparable": true
@@ -851,6 +970,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-310",
       "nearestHealthPointDistanceMetres": 2054,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-310",
+      "nearestHealthPointRoadProxyMetres": 2054,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 8436,
       "comparable": true
@@ -865,6 +986,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-167",
       "nearestHealthPointDistanceMetres": 1856,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-167",
+      "nearestHealthPointRoadProxyMetres": 1856,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -879,6 +1002,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-226",
       "nearestHealthPointDistanceMetres": 16934,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-226",
+      "nearestHealthPointRoadProxyMetres": 22475,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -893,6 +1018,8 @@
       "localHealthProviderCount": 2,
       "nearestHealthPointProviderId": "anmcs-2025-164",
       "nearestHealthPointDistanceMetres": 709,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-164",
+      "nearestHealthPointRoadProxyMetres": 709,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -907,6 +1034,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-152",
       "nearestHealthPointDistanceMetres": 2103,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-152",
+      "nearestHealthPointRoadProxyMetres": 2103,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -921,6 +1050,8 @@
       "localHealthProviderCount": 2,
       "nearestHealthPointProviderId": "anmcs-2025-162",
       "nearestHealthPointDistanceMetres": 3058,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-162",
+      "nearestHealthPointRoadProxyMetres": 3058,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 15232,
       "comparable": true
@@ -935,6 +1066,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-245",
       "nearestHealthPointDistanceMetres": 4100,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-245",
+      "nearestHealthPointRoadProxyMetres": 4100,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -949,6 +1082,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-179",
       "nearestHealthPointDistanceMetres": 31410,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-162",
+      "nearestHealthPointRoadProxyMetres": 46665,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -963,6 +1098,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-179",
       "nearestHealthPointDistanceMetres": 1495,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-179",
+      "nearestHealthPointRoadProxyMetres": 1495,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -977,6 +1114,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-372",
       "nearestHealthPointDistanceMetres": 2596,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-372",
+      "nearestHealthPointRoadProxyMetres": 2596,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -991,6 +1130,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-148",
       "nearestHealthPointDistanceMetres": 1773,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-148",
+      "nearestHealthPointRoadProxyMetres": 1773,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1005,6 +1146,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-263",
       "nearestHealthPointDistanceMetres": 4290,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-263",
+      "nearestHealthPointRoadProxyMetres": 4290,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1019,6 +1162,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-148",
       "nearestHealthPointDistanceMetres": 24112,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-148",
+      "nearestHealthPointRoadProxyMetres": 27954,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 26181,
       "comparable": true
@@ -1033,6 +1178,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-144",
       "nearestHealthPointDistanceMetres": 3161,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-144",
+      "nearestHealthPointRoadProxyMetres": 3161,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1047,6 +1194,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-322",
       "nearestHealthPointDistanceMetres": 28611,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-322",
+      "nearestHealthPointRoadProxyMetres": 48414,
       "policeMetresAtMost": 24054,
       "todayCourtMetres": 39567,
       "comparable": true
@@ -1061,6 +1210,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-164",
       "nearestHealthPointDistanceMetres": 17597,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-164",
+      "nearestHealthPointRoadProxyMetres": 26254,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1075,6 +1226,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-153",
       "nearestHealthPointDistanceMetres": 35397,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-153",
+      "nearestHealthPointRoadProxyMetres": 62673,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1089,6 +1242,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-153",
       "nearestHealthPointDistanceMetres": 47926,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-153",
+      "nearestHealthPointRoadProxyMetres": 64016,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1103,6 +1258,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-185",
       "nearestHealthPointDistanceMetres": 35338,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-185",
+      "nearestHealthPointRoadProxyMetres": 55410,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1117,6 +1274,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-153",
       "nearestHealthPointDistanceMetres": 10353,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-153",
+      "nearestHealthPointRoadProxyMetres": 16345,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 14786,
       "comparable": true
@@ -1131,6 +1290,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-177",
       "nearestHealthPointDistanceMetres": 21454,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-177",
+      "nearestHealthPointRoadProxyMetres": 27589,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 23035,
       "comparable": true
@@ -1145,6 +1306,8 @@
       "localHealthProviderCount": 5,
       "nearestHealthPointProviderId": "anmcs-2025-047",
       "nearestHealthPointDistanceMetres": 568,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-047",
+      "nearestHealthPointRoadProxyMetres": 568,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1159,6 +1322,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-252",
       "nearestHealthPointDistanceMetres": 2620,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-252",
+      "nearestHealthPointRoadProxyMetres": 2620,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1173,6 +1338,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-216",
       "nearestHealthPointDistanceMetres": 2075,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-216",
+      "nearestHealthPointRoadProxyMetres": 2075,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1187,6 +1354,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-252",
       "nearestHealthPointDistanceMetres": 16016,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-252",
+      "nearestHealthPointRoadProxyMetres": 25070,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 18125,
       "comparable": true
@@ -1201,6 +1370,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-194",
       "nearestHealthPointDistanceMetres": 20000,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-047",
+      "nearestHealthPointRoadProxyMetres": 26086,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1215,6 +1386,8 @@
       "localHealthProviderCount": 2,
       "nearestHealthPointProviderId": "anmcs-2025-420",
       "nearestHealthPointDistanceMetres": 4822,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-420",
+      "nearestHealthPointRoadProxyMetres": 4822,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1229,6 +1402,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-147",
       "nearestHealthPointDistanceMetres": 23069,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-147",
+      "nearestHealthPointRoadProxyMetres": 33247,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1243,6 +1418,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-157",
       "nearestHealthPointDistanceMetres": 4297,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-157",
+      "nearestHealthPointRoadProxyMetres": 4297,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1257,6 +1434,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-147",
       "nearestHealthPointDistanceMetres": 862,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-147",
+      "nearestHealthPointRoadProxyMetres": 862,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1271,6 +1450,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-225",
       "nearestHealthPointDistanceMetres": 3688,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-225",
+      "nearestHealthPointRoadProxyMetres": 3688,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1285,6 +1466,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-306",
       "nearestHealthPointDistanceMetres": 15455,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-306",
+      "nearestHealthPointRoadProxyMetres": 19409,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1299,6 +1482,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-189",
       "nearestHealthPointDistanceMetres": 2203,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-189",
+      "nearestHealthPointRoadProxyMetres": 2203,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1313,6 +1498,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-225",
       "nearestHealthPointDistanceMetres": 18934,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-225",
+      "nearestHealthPointRoadProxyMetres": 32448,
       "policeMetresAtMost": 9066,
       "todayCourtMetres": 21791,
       "comparable": true
@@ -1327,6 +1514,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-138",
       "nearestHealthPointDistanceMetres": 20866,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-147",
+      "nearestHealthPointRoadProxyMetres": 27345,
       "policeMetresAtMost": 20066,
       "todayCourtMetres": 26483,
       "comparable": true
@@ -1341,6 +1530,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-306",
       "nearestHealthPointDistanceMetres": 30735,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-306",
+      "nearestHealthPointRoadProxyMetres": 37300,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 25570,
       "comparable": true
@@ -1355,6 +1546,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-166",
       "nearestHealthPointDistanceMetres": 29326,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-166",
+      "nearestHealthPointRoadProxyMetres": 37801,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1369,6 +1562,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-353",
       "nearestHealthPointDistanceMetres": 4485,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-353",
+      "nearestHealthPointRoadProxyMetres": 9566,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1383,6 +1578,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-353",
       "nearestHealthPointDistanceMetres": 34252,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-353",
+      "nearestHealthPointRoadProxyMetres": 43664,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1397,6 +1594,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-197",
       "nearestHealthPointDistanceMetres": 29183,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-197",
+      "nearestHealthPointRoadProxyMetres": 45542,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1411,6 +1610,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-222",
       "nearestHealthPointDistanceMetres": 4464,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-222",
+      "nearestHealthPointRoadProxyMetres": 4464,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1425,6 +1626,8 @@
       "localHealthProviderCount": 7,
       "nearestHealthPointProviderId": "anmcs-2025-012",
       "nearestHealthPointDistanceMetres": 1969,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-012",
+      "nearestHealthPointRoadProxyMetres": 1969,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1439,6 +1642,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-246",
       "nearestHealthPointDistanceMetres": 3911,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-246",
+      "nearestHealthPointRoadProxyMetres": 3911,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1453,6 +1658,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-260",
       "nearestHealthPointDistanceMetres": 30992,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-260",
+      "nearestHealthPointRoadProxyMetres": 44501,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 41305,
       "comparable": true
@@ -1467,6 +1674,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-260",
       "nearestHealthPointDistanceMetres": 3196,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-260",
+      "nearestHealthPointRoadProxyMetres": 3196,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1481,6 +1690,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-239",
       "nearestHealthPointDistanceMetres": 17469,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-239",
+      "nearestHealthPointRoadProxyMetres": 19643,
       "policeMetresAtMost": 15193,
       "todayCourtMetres": 17078,
       "comparable": true
@@ -1495,6 +1706,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-303",
       "nearestHealthPointDistanceMetres": 26157,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-246",
+      "nearestHealthPointRoadProxyMetres": 40520,
       "policeMetresAtMost": 17555,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1509,6 +1722,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-020",
       "nearestHealthPointDistanceMetres": 21629,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-012",
+      "nearestHealthPointRoadProxyMetres": 27159,
       "policeMetresAtMost": 11678,
       "todayCourtMetres": 25187,
       "comparable": true
@@ -1523,6 +1738,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-241",
       "nearestHealthPointDistanceMetres": 54525,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-241",
+      "nearestHealthPointRoadProxyMetres": 75376,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1537,6 +1754,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-241",
       "nearestHealthPointDistanceMetres": 60753,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-241",
+      "nearestHealthPointRoadProxyMetres": 88050,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1551,6 +1770,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-241",
       "nearestHealthPointDistanceMetres": 619,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-241",
+      "nearestHealthPointRoadProxyMetres": 619,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1565,6 +1786,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-174",
       "nearestHealthPointDistanceMetres": 35738,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-174",
+      "nearestHealthPointRoadProxyMetres": 56339,
       "policeMetresAtMost": 28487,
       "todayCourtMetres": 37319,
       "comparable": true
@@ -1579,6 +1802,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-099",
       "nearestHealthPointDistanceMetres": 803,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-099",
+      "nearestHealthPointRoadProxyMetres": 803,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1593,6 +1818,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-182",
       "nearestHealthPointDistanceMetres": 2708,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-182",
+      "nearestHealthPointRoadProxyMetres": 2708,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1607,6 +1834,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-108",
       "nearestHealthPointDistanceMetres": 28484,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-108",
+      "nearestHealthPointRoadProxyMetres": 39735,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 38991,
       "comparable": true
@@ -1621,6 +1850,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-108",
       "nearestHealthPointDistanceMetres": 744,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-108",
+      "nearestHealthPointRoadProxyMetres": 744,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1635,6 +1866,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-108",
       "nearestHealthPointDistanceMetres": 24286,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-108",
+      "nearestHealthPointRoadProxyMetres": 38902,
       "policeMetresAtMost": 9147,
       "todayCourtMetres": 24610,
       "comparable": true
@@ -1649,6 +1882,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-108",
       "nearestHealthPointDistanceMetres": 29766,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-108",
+      "nearestHealthPointRoadProxyMetres": 48129,
       "policeMetresAtMost": 42243,
       "todayCourtMetres": 47385,
       "comparable": true
@@ -1663,6 +1898,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-373",
       "nearestHealthPointDistanceMetres": 1765,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-373",
+      "nearestHealthPointRoadProxyMetres": 1765,
       "policeMetresAtMost": 29392,
       "todayCourtMetres": 37389,
       "comparable": true
@@ -1677,6 +1914,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-179",
       "nearestHealthPointDistanceMetres": 26440,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-179",
+      "nearestHealthPointRoadProxyMetres": 37161,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1691,6 +1930,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-428",
       "nearestHealthPointDistanceMetres": 9857,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-428",
+      "nearestHealthPointRoadProxyMetres": 23319,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 17311,
       "comparable": true
@@ -1705,6 +1946,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-384",
       "nearestHealthPointDistanceMetres": 20214,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-384",
+      "nearestHealthPointRoadProxyMetres": 29206,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1719,6 +1962,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-207",
       "nearestHealthPointDistanceMetres": 8876,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-207",
+      "nearestHealthPointRoadProxyMetres": 8876,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1733,6 +1978,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-207",
       "nearestHealthPointDistanceMetres": 20919,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-165",
+      "nearestHealthPointRoadProxyMetres": 36536,
       "policeMetresAtMost": 10097,
       "todayCourtMetres": 29070,
       "comparable": true
@@ -1747,6 +1994,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-384",
       "nearestHealthPointDistanceMetres": 14962,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-384",
+      "nearestHealthPointRoadProxyMetres": 26381,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 22344,
       "comparable": true
@@ -1761,6 +2010,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-068",
       "nearestHealthPointDistanceMetres": 34467,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-114",
+      "nearestHealthPointRoadProxyMetres": 57589,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1775,6 +2026,8 @@
       "localHealthProviderCount": 2,
       "nearestHealthPointProviderId": "anmcs-2025-181",
       "nearestHealthPointDistanceMetres": 37242,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-181",
+      "nearestHealthPointRoadProxyMetres": 54405,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1789,6 +2042,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-168",
       "nearestHealthPointDistanceMetres": 2529,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-168",
+      "nearestHealthPointRoadProxyMetres": 2529,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1803,6 +2058,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-168",
       "nearestHealthPointDistanceMetres": 22475,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-168",
+      "nearestHealthPointRoadProxyMetres": 32072,
       "policeMetresAtMost": 15354,
       "todayCourtMetres": 15354,
       "comparable": true
@@ -1817,6 +2074,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-168",
       "nearestHealthPointDistanceMetres": 37468,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-168",
+      "nearestHealthPointRoadProxyMetres": 55581,
       "policeMetresAtMost": 5182,
       "todayCourtMetres": 11894,
       "comparable": true
@@ -1831,6 +2090,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-181",
       "nearestHealthPointDistanceMetres": 11848,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-181",
+      "nearestHealthPointRoadProxyMetres": 21805,
       "policeMetresAtMost": 10491,
       "todayCourtMetres": 17389,
       "comparable": true
@@ -1845,6 +2106,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-223",
       "nearestHealthPointDistanceMetres": 29752,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-096",
+      "nearestHealthPointRoadProxyMetres": 40876,
       "policeMetresAtMost": 10321,
       "todayCourtMetres": 55066,
       "comparable": true
@@ -1859,6 +2122,8 @@
       "localHealthProviderCount": 87,
       "nearestHealthPointProviderId": "anmcs-2025-118",
       "nearestHealthPointDistanceMetres": 1996,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-118",
+      "nearestHealthPointRoadProxyMetres": 1996,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1873,6 +2138,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-176",
       "nearestHealthPointDistanceMetres": 563,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-176",
+      "nearestHealthPointRoadProxyMetres": 563,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1887,6 +2154,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-164",
       "nearestHealthPointDistanceMetres": 19671,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-164",
+      "nearestHealthPointRoadProxyMetres": 29722,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 29013,
       "comparable": true
@@ -1901,6 +2170,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-393",
       "nearestHealthPointDistanceMetres": 1274,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-393",
+      "nearestHealthPointRoadProxyMetres": 1274,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1915,6 +2186,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-096",
       "nearestHealthPointDistanceMetres": 1453,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-096",
+      "nearestHealthPointRoadProxyMetres": 1453,
       "policeMetresAtMost": 6463,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1929,6 +2202,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-161",
       "nearestHealthPointDistanceMetres": 1543,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-161",
+      "nearestHealthPointRoadProxyMetres": 1543,
       "policeMetresAtMost": 18706,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1943,6 +2218,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-161",
       "nearestHealthPointDistanceMetres": 33342,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-161",
+      "nearestHealthPointRoadProxyMetres": 46336,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -1957,6 +2234,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-096",
       "nearestHealthPointDistanceMetres": 32130,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-096",
+      "nearestHealthPointRoadProxyMetres": 33738,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 18474,
       "comparable": true
@@ -1971,6 +2250,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-393",
       "nearestHealthPointDistanceMetres": 30557,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-393",
+      "nearestHealthPointRoadProxyMetres": 49300,
       "policeMetresAtMost": 33107,
       "todayCourtMetres": 48026,
       "comparable": true
@@ -1985,6 +2266,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-393",
       "nearestHealthPointDistanceMetres": 10271,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-393",
+      "nearestHealthPointRoadProxyMetres": 11617,
       "policeMetresAtMost": 9097,
       "todayCourtMetres": 10345,
       "comparable": true
@@ -1999,6 +2282,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-099",
       "nearestHealthPointDistanceMetres": 20453,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-168",
+      "nearestHealthPointRoadProxyMetres": 36473,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2013,6 +2298,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-168",
       "nearestHealthPointDistanceMetres": 14164,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-168",
+      "nearestHealthPointRoadProxyMetres": 15641,
       "policeMetresAtMost": 13112,
       "todayCourtMetres": 13112,
       "comparable": true
@@ -2027,6 +2314,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-034",
       "nearestHealthPointDistanceMetres": 1401,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-034",
+      "nearestHealthPointRoadProxyMetres": 1401,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2041,6 +2330,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-185",
       "nearestHealthPointDistanceMetres": 4178,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-185",
+      "nearestHealthPointRoadProxyMetres": 4178,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2055,6 +2346,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-122",
       "nearestHealthPointDistanceMetres": 16996,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-327",
+      "nearestHealthPointRoadProxyMetres": 19581,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2069,6 +2362,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-268",
       "nearestHealthPointDistanceMetres": 3916,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-268",
+      "nearestHealthPointRoadProxyMetres": 3916,
       "policeMetresAtMost": 19623,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2083,6 +2378,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-211",
       "nearestHealthPointDistanceMetres": 4799,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-211",
+      "nearestHealthPointRoadProxyMetres": 4799,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2097,6 +2394,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-177",
       "nearestHealthPointDistanceMetres": 46659,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-177",
+      "nearestHealthPointRoadProxyMetres": 62282,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2111,6 +2410,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-177",
       "nearestHealthPointDistanceMetres": 22324,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-177",
+      "nearestHealthPointRoadProxyMetres": 31525,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2125,6 +2426,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-177",
       "nearestHealthPointDistanceMetres": 43280,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-177",
+      "nearestHealthPointRoadProxyMetres": 62050,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2139,6 +2442,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-189",
       "nearestHealthPointDistanceMetres": 52686,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-189",
+      "nearestHealthPointRoadProxyMetres": 87961,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 28157,
       "comparable": true
@@ -2153,6 +2458,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-160",
       "nearestHealthPointDistanceMetres": 32145,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-177",
+      "nearestHealthPointRoadProxyMetres": 58668,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 28174,
       "comparable": true
@@ -2167,6 +2474,8 @@
       "localHealthProviderCount": 2,
       "nearestHealthPointProviderId": "anmcs-2025-326",
       "nearestHealthPointDistanceMetres": 1418,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-326",
+      "nearestHealthPointRoadProxyMetres": 1418,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2181,6 +2490,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-229",
       "nearestHealthPointDistanceMetres": 29950,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-229",
+      "nearestHealthPointRoadProxyMetres": 48824,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2195,6 +2506,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-229",
       "nearestHealthPointDistanceMetres": 3711,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-229",
+      "nearestHealthPointRoadProxyMetres": 3711,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2209,6 +2522,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-326",
       "nearestHealthPointDistanceMetres": 16588,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-326",
+      "nearestHealthPointRoadProxyMetres": 24194,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 22096,
       "comparable": true
@@ -2223,6 +2538,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-200",
       "nearestHealthPointDistanceMetres": 13733,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-200",
+      "nearestHealthPointRoadProxyMetres": 20195,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 20058,
       "comparable": true
@@ -2237,6 +2554,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-326",
       "nearestHealthPointDistanceMetres": 40198,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-326",
+      "nearestHealthPointRoadProxyMetres": 54691,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 38795,
       "comparable": true
@@ -2251,6 +2570,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-326",
       "nearestHealthPointDistanceMetres": 19740,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-326",
+      "nearestHealthPointRoadProxyMetres": 30456,
       "policeMetresAtMost": 13574,
       "todayCourtMetres": 13574,
       "comparable": true
@@ -2265,6 +2586,8 @@
       "localHealthProviderCount": 6,
       "nearestHealthPointProviderId": "anmcs-2025-039",
       "nearestHealthPointDistanceMetres": 3620,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-039",
+      "nearestHealthPointRoadProxyMetres": 3620,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2279,6 +2602,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-408",
       "nearestHealthPointDistanceMetres": 3062,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-408",
+      "nearestHealthPointRoadProxyMetres": 3062,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 15223,
       "comparable": true
@@ -2293,6 +2618,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-269",
       "nearestHealthPointDistanceMetres": 1626,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-269",
+      "nearestHealthPointRoadProxyMetres": 1626,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2307,6 +2634,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-123",
       "nearestHealthPointDistanceMetres": 28675,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-228",
+      "nearestHealthPointRoadProxyMetres": 45252,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2321,6 +2650,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-434",
       "nearestHealthPointDistanceMetres": 9089,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-434",
+      "nearestHealthPointRoadProxyMetres": 9089,
       "policeMetresAtMost": 6075,
       "todayCourtMetres": 10364,
       "comparable": true
@@ -2335,6 +2666,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-408",
       "nearestHealthPointDistanceMetres": 20989,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-408",
+      "nearestHealthPointRoadProxyMetres": 25431,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2349,6 +2682,8 @@
       "localHealthProviderCount": 2,
       "nearestHealthPointProviderId": "anmcs-2025-273",
       "nearestHealthPointDistanceMetres": 1094,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-273",
+      "nearestHealthPointRoadProxyMetres": 1094,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2363,6 +2698,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-431",
       "nearestHealthPointDistanceMetres": 2352,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-431",
+      "nearestHealthPointRoadProxyMetres": 2352,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2377,6 +2714,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-431",
       "nearestHealthPointDistanceMetres": 17848,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-431",
+      "nearestHealthPointRoadProxyMetres": 24115,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 21763,
       "comparable": true
@@ -2391,6 +2730,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-431",
       "nearestHealthPointDistanceMetres": 31679,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-237",
+      "nearestHealthPointRoadProxyMetres": 44911,
       "policeMetresAtMost": 33291,
       "todayCourtMetres": 47035,
       "comparable": true
@@ -2405,6 +2746,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-273",
       "nearestHealthPointDistanceMetres": 29969,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-273",
+      "nearestHealthPointRoadProxyMetres": 38489,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 37395,
       "comparable": true
@@ -2419,6 +2762,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-090",
       "nearestHealthPointDistanceMetres": 1781,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-090",
+      "nearestHealthPointRoadProxyMetres": 1781,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2433,6 +2778,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-181",
       "nearestHealthPointDistanceMetres": 4416,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-181",
+      "nearestHealthPointRoadProxyMetres": 4416,
       "policeMetresAtMost": 6086,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2447,6 +2794,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-095",
       "nearestHealthPointDistanceMetres": 9630,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-095",
+      "nearestHealthPointRoadProxyMetres": 11040,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 21803,
       "comparable": true
@@ -2461,6 +2810,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-124",
       "nearestHealthPointDistanceMetres": 564,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-124",
+      "nearestHealthPointRoadProxyMetres": 564,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 13154,
       "comparable": true
@@ -2475,6 +2826,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-380",
       "nearestHealthPointDistanceMetres": 14369,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-380",
+      "nearestHealthPointRoadProxyMetres": 19106,
       "policeMetresAtMost": 10468,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2489,6 +2842,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-129",
       "nearestHealthPointDistanceMetres": 5130,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-129",
+      "nearestHealthPointRoadProxyMetres": 5130,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2503,6 +2858,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-248",
       "nearestHealthPointDistanceMetres": 30817,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-248",
+      "nearestHealthPointRoadProxyMetres": 71785,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 23358,
       "comparable": true
@@ -2517,6 +2874,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-129",
       "nearestHealthPointDistanceMetres": 12944,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-129",
+      "nearestHealthPointRoadProxyMetres": 29306,
       "policeMetresAtMost": 10127,
       "todayCourtMetres": 24176,
       "comparable": true
@@ -2531,6 +2890,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-130",
       "nearestHealthPointDistanceMetres": 1483,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-130",
+      "nearestHealthPointRoadProxyMetres": 1483,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2545,6 +2906,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-242",
       "nearestHealthPointDistanceMetres": 4040,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-242",
+      "nearestHealthPointRoadProxyMetres": 4040,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2559,6 +2922,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-129",
       "nearestHealthPointDistanceMetres": 32298,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-129",
+      "nearestHealthPointRoadProxyMetres": 56016,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2573,6 +2938,8 @@
       "localHealthProviderCount": 8,
       "nearestHealthPointProviderId": "anmcs-2025-028",
       "nearestHealthPointDistanceMetres": 2713,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-028",
+      "nearestHealthPointRoadProxyMetres": 2713,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2587,6 +2954,8 @@
       "localHealthProviderCount": 2,
       "nearestHealthPointProviderId": "anmcs-2025-177",
       "nearestHealthPointDistanceMetres": 4554,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-177",
+      "nearestHealthPointRoadProxyMetres": 4554,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2601,6 +2970,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-258",
       "nearestHealthPointDistanceMetres": 2497,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-258",
+      "nearestHealthPointRoadProxyMetres": 2497,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2615,6 +2986,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-160",
       "nearestHealthPointDistanceMetres": 2293,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-160",
+      "nearestHealthPointRoadProxyMetres": 2293,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2629,6 +3002,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-153",
       "nearestHealthPointDistanceMetres": 1559,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-153",
+      "nearestHealthPointRoadProxyMetres": 1559,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2643,6 +3018,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-028",
       "nearestHealthPointDistanceMetres": 12228,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-028",
+      "nearestHealthPointRoadProxyMetres": 16128,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 13415,
       "comparable": true
@@ -2657,6 +3034,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-077",
       "nearestHealthPointDistanceMetres": 19012,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-028",
+      "nearestHealthPointRoadProxyMetres": 20708,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 17996,
       "comparable": true
@@ -2671,6 +3050,8 @@
       "localHealthProviderCount": 4,
       "nearestHealthPointProviderId": "anmcs-2025-072",
       "nearestHealthPointDistanceMetres": 3202,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-072",
+      "nearestHealthPointRoadProxyMetres": 3202,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2685,6 +3066,8 @@
       "localHealthProviderCount": 2,
       "nearestHealthPointProviderId": "anmcs-2025-235",
       "nearestHealthPointDistanceMetres": 3164,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-235",
+      "nearestHealthPointRoadProxyMetres": 3164,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2699,6 +3082,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-059",
       "nearestHealthPointDistanceMetres": 11088,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-072",
+      "nearestHealthPointRoadProxyMetres": 22115,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 18913,
       "comparable": true
@@ -2713,6 +3098,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-174",
       "nearestHealthPointDistanceMetres": 2393,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-174",
+      "nearestHealthPointRoadProxyMetres": 2393,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2727,6 +3114,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-131",
       "nearestHealthPointDistanceMetres": 846,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-131",
+      "nearestHealthPointRoadProxyMetres": 846,
       "policeMetresAtMost": 22729,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2741,6 +3130,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-274",
       "nearestHealthPointDistanceMetres": 32546,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-231",
+      "nearestHealthPointRoadProxyMetres": 57014,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 69630,
       "comparable": true
@@ -2755,6 +3146,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-235",
       "nearestHealthPointDistanceMetres": 26447,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-235",
+      "nearestHealthPointRoadProxyMetres": 36502,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 33338,
       "comparable": true
@@ -2769,6 +3162,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-039",
       "nearestHealthPointDistanceMetres": 26111,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-039",
+      "nearestHealthPointRoadProxyMetres": 35102,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2783,6 +3178,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-228",
       "nearestHealthPointDistanceMetres": 1386,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-228",
+      "nearestHealthPointRoadProxyMetres": 1386,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 43866,
       "comparable": true
@@ -2797,6 +3194,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-223",
       "nearestHealthPointDistanceMetres": 22729,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-223",
+      "nearestHealthPointRoadProxyMetres": 22288,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 19718,
       "comparable": true
@@ -2811,6 +3210,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-434",
       "nearestHealthPointDistanceMetres": 24163,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-434",
+      "nearestHealthPointRoadProxyMetres": 44704,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2825,6 +3226,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-223",
       "nearestHealthPointDistanceMetres": 2570,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-223",
+      "nearestHealthPointRoadProxyMetres": 2570,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2839,6 +3242,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-107",
       "nearestHealthPointDistanceMetres": 1047,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-107",
+      "nearestHealthPointRoadProxyMetres": 1047,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2853,6 +3258,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-107",
       "nearestHealthPointDistanceMetres": 25071,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-107",
+      "nearestHealthPointRoadProxyMetres": 39028,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2867,6 +3274,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-107",
       "nearestHealthPointDistanceMetres": 16253,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-107",
+      "nearestHealthPointRoadProxyMetres": 20639,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2881,6 +3290,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-107",
       "nearestHealthPointDistanceMetres": 16998,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-107",
+      "nearestHealthPointRoadProxyMetres": 22963,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2895,6 +3306,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-197",
       "nearestHealthPointDistanceMetres": 29115,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-197",
+      "nearestHealthPointRoadProxyMetres": 39591,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 20315,
       "comparable": true
@@ -2909,6 +3322,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-197",
       "nearestHealthPointDistanceMetres": 23650,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-197",
+      "nearestHealthPointRoadProxyMetres": 27338,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2923,6 +3338,8 @@
       "localHealthProviderCount": 4,
       "nearestHealthPointProviderId": "anmcs-2025-135",
       "nearestHealthPointDistanceMetres": 358,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-135",
+      "nearestHealthPointRoadProxyMetres": 358,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2937,6 +3354,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-293",
       "nearestHealthPointDistanceMetres": 21321,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-293",
+      "nearestHealthPointRoadProxyMetres": 36308,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2951,6 +3370,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-267",
       "nearestHealthPointDistanceMetres": 18364,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-267",
+      "nearestHealthPointRoadProxyMetres": 34331,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2965,6 +3386,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-187",
       "nearestHealthPointDistanceMetres": 637,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-187",
+      "nearestHealthPointRoadProxyMetres": 637,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -2979,6 +3402,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-142",
       "nearestHealthPointDistanceMetres": 3167,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-142",
+      "nearestHealthPointRoadProxyMetres": 3167,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 37571,
       "comparable": true
@@ -2993,6 +3418,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-068",
       "nearestHealthPointDistanceMetres": 7485,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-135",
+      "nearestHealthPointRoadProxyMetres": 11230,
       "policeMetresAtMost": 10872,
       "todayCourtMetres": 10872,
       "comparable": true
@@ -3007,6 +3434,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-232",
       "nearestHealthPointDistanceMetres": 39238,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-293",
+      "nearestHealthPointRoadProxyMetres": 52695,
       "policeMetresAtMost": 13045,
       "todayCourtMetres": 38234,
       "comparable": true
@@ -3021,6 +3450,8 @@
       "localHealthProviderCount": 6,
       "nearestHealthPointProviderId": "anmcs-2025-273",
       "nearestHealthPointDistanceMetres": 25763,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-273",
+      "nearestHealthPointRoadProxyMetres": 32825,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -3035,6 +3466,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-168",
       "nearestHealthPointDistanceMetres": 32583,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-168",
+      "nearestHealthPointRoadProxyMetres": 53225,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -3049,6 +3482,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-373",
       "nearestHealthPointDistanceMetres": 37320,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-373",
+      "nearestHealthPointRoadProxyMetres": 53226,
       "policeMetresAtMost": 17466,
       "todayCourtMetres": 0,
       "comparable": true
@@ -3063,6 +3498,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-181",
       "nearestHealthPointDistanceMetres": 51103,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-273",
+      "nearestHealthPointRoadProxyMetres": 72125,
       "policeMetresAtMost": 18199,
       "todayCourtMetres": 7436,
       "comparable": true
@@ -3077,6 +3514,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-273",
       "nearestHealthPointDistanceMetres": 44543,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-273",
+      "nearestHealthPointRoadProxyMetres": 55630,
       "policeMetresAtMost": 19166,
       "todayCourtMetres": 27916,
       "comparable": true
@@ -3091,6 +3530,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-098",
       "nearestHealthPointDistanceMetres": 19741,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-098",
+      "nearestHealthPointRoadProxyMetres": 25482,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -3105,6 +3546,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-203",
       "nearestHealthPointDistanceMetres": 2425,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-203",
+      "nearestHealthPointRoadProxyMetres": 2425,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -3119,6 +3562,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-098",
       "nearestHealthPointDistanceMetres": 978,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-098",
+      "nearestHealthPointRoadProxyMetres": 978,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -3133,6 +3578,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-188",
       "nearestHealthPointDistanceMetres": 18352,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-098",
+      "nearestHealthPointRoadProxyMetres": 40087,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 19586,
       "comparable": true
@@ -3147,6 +3594,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-267",
       "nearestHealthPointDistanceMetres": 23927,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-135",
+      "nearestHealthPointRoadProxyMetres": 40558,
       "policeMetresAtMost": 19045,
       "todayCourtMetres": 23336,
       "comparable": true
@@ -3161,6 +3610,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-203",
       "nearestHealthPointDistanceMetres": 19897,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-203",
+      "nearestHealthPointRoadProxyMetres": 43918,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 25299,
       "comparable": true
@@ -3175,6 +3626,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-123",
       "nearestHealthPointDistanceMetres": 1390,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-123",
+      "nearestHealthPointRoadProxyMetres": 1390,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -3189,6 +3642,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-228",
       "nearestHealthPointDistanceMetres": 33137,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-228",
+      "nearestHealthPointRoadProxyMetres": 43997,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -3203,6 +3658,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-123",
       "nearestHealthPointDistanceMetres": 20646,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-123",
+      "nearestHealthPointRoadProxyMetres": 28217,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 21959,
       "comparable": true
@@ -3217,6 +3674,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-262",
       "nearestHealthPointDistanceMetres": 7831,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-262",
+      "nearestHealthPointRoadProxyMetres": 7831,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -3231,6 +3690,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-178",
       "nearestHealthPointDistanceMetres": 8459,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-178",
+      "nearestHealthPointRoadProxyMetres": 8459,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -3245,6 +3706,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-128",
       "nearestHealthPointDistanceMetres": 1817,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-128",
+      "nearestHealthPointRoadProxyMetres": 1817,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -3259,6 +3722,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-128",
       "nearestHealthPointDistanceMetres": 12651,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-128",
+      "nearestHealthPointRoadProxyMetres": 19103,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -3273,6 +3738,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-102",
       "nearestHealthPointDistanceMetres": 2055,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-102",
+      "nearestHealthPointRoadProxyMetres": 2055,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -3287,6 +3754,8 @@
       "localHealthProviderCount": 2,
       "nearestHealthPointProviderId": "anmcs-2025-264",
       "nearestHealthPointDistanceMetres": 1603,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-264",
+      "nearestHealthPointRoadProxyMetres": 1603,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -3301,6 +3770,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-213",
       "nearestHealthPointDistanceMetres": 1533,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-213",
+      "nearestHealthPointRoadProxyMetres": 1533,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -3315,6 +3786,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-274",
       "nearestHealthPointDistanceMetres": 1954,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-274",
+      "nearestHealthPointRoadProxyMetres": 1954,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -3329,6 +3802,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-035",
       "nearestHealthPointDistanceMetres": 2667,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-035",
+      "nearestHealthPointRoadProxyMetres": 2667,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -3343,6 +3818,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-125",
       "nearestHealthPointDistanceMetres": 3204,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-125",
+      "nearestHealthPointRoadProxyMetres": 3204,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -3357,6 +3834,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-234",
       "nearestHealthPointDistanceMetres": 2829,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-234",
+      "nearestHealthPointRoadProxyMetres": 2829,
       "policeMetresAtMost": 18865,
       "todayCourtMetres": 0,
       "comparable": true
@@ -3371,6 +3850,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-237",
       "nearestHealthPointDistanceMetres": 8244,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-237",
+      "nearestHealthPointRoadProxyMetres": 8244,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 24903,
       "comparable": true
@@ -3385,6 +3866,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-125",
       "nearestHealthPointDistanceMetres": 14430,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-125",
+      "nearestHealthPointRoadProxyMetres": 23701,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 20497,
       "comparable": true
@@ -3399,6 +3882,8 @@
       "localHealthProviderCount": 7,
       "nearestHealthPointProviderId": "anmcs-2025-063",
       "nearestHealthPointDistanceMetres": 1458,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-063",
+      "nearestHealthPointRoadProxyMetres": 1458,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -3413,6 +3898,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-055",
       "nearestHealthPointDistanceMetres": 7300,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-063",
+      "nearestHealthPointRoadProxyMetres": 12427,
       "policeMetresAtMost": 3703,
       "todayCourtMetres": 10969,
       "comparable": true
@@ -3427,6 +3914,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-200",
       "nearestHealthPointDistanceMetres": 137,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-200",
+      "nearestHealthPointRoadProxyMetres": 137,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -3441,6 +3930,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-224",
       "nearestHealthPointDistanceMetres": 1521,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-224",
+      "nearestHealthPointRoadProxyMetres": 1521,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -3455,6 +3946,8 @@
       "localHealthProviderCount": 2,
       "nearestHealthPointProviderId": "anmcs-2025-138",
       "nearestHealthPointDistanceMetres": 649,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-138",
+      "nearestHealthPointRoadProxyMetres": 649,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -3469,6 +3962,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-138",
       "nearestHealthPointDistanceMetres": 20972,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-138",
+      "nearestHealthPointRoadProxyMetres": 28323,
       "policeMetresAtMost": 16819,
       "todayCourtMetres": 27674,
       "comparable": true
@@ -3483,6 +3978,8 @@
       "localHealthProviderCount": 1,
       "nearestHealthPointProviderId": "anmcs-2025-133",
       "nearestHealthPointDistanceMetres": 1657,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-133",
+      "nearestHealthPointRoadProxyMetres": 1657,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 0,
       "comparable": true
@@ -3497,6 +3994,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-055",
       "nearestHealthPointDistanceMetres": 8858,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-063",
+      "nearestHealthPointRoadProxyMetres": 14575,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 13117,
       "comparable": true
@@ -3511,6 +4010,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-010",
       "nearestHealthPointDistanceMetres": 22911,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-063",
+      "nearestHealthPointRoadProxyMetres": 36442,
       "policeMetresAtMost": 0,
       "todayCourtMetres": 34984,
       "comparable": true
@@ -3525,6 +4026,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-200",
       "nearestHealthPointDistanceMetres": 22993,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-200",
+      "nearestHealthPointRoadProxyMetres": 46397,
       "policeMetresAtMost": 12343,
       "todayCourtMetres": 46260,
       "comparable": true
@@ -3539,6 +4042,8 @@
       "localHealthProviderCount": 0,
       "nearestHealthPointProviderId": "anmcs-2025-055",
       "nearestHealthPointDistanceMetres": 27265,
+      "nearestHealthPointRoadProviderId": "anmcs-2025-063",
+      "nearestHealthPointRoadProxyMetres": 37581,
       "policeMetresAtMost": 17597,
       "todayCourtMetres": 36124,
       "comparable": true
@@ -3582,6 +4087,15 @@
     {
       "id": "sanatatea-punctuala-in-linie-dreapta",
       "text": "Distanța la cel mai apropiat furnizor punctual citește health-point-access-2024-2026 și folosește doar furnizorii cu coordonate acceptate: 162 rânduri. Metoda este în linie dreaptă de la centroidul UAT-ului consolidat la coordonata furnizorului, deci nu este distanță rutieră sau timp de acces. 430 furnizori fără punct acceptat rămân excluși nominal din calcul.",
+      "severity": "material",
+      "affects": [
+        "acces",
+        "colocare"
+      ]
+    },
+    {
+      "id": "sanatatea-punctuala-rutata-e-proxy",
+      "text": "Distanța rutată la furnizor punctual citește health-point-road-access-uat-2024-2026. Furnizorul nu devine nod de drum: coordonata este atașată unui nod UAT din graful administrativ, apoi distanța publicată adună drumul pe graf cu offsetul în linie dreaptă până la coordonata furnizorului. Este un proxy rutat, nu distanță door-to-door sau timp de acces.",
       "severity": "material",
       "affects": [
         "acces",
