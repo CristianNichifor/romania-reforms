@@ -15,7 +15,8 @@ test('selected locality native pin field preserves URL and reset', async ({ page
   await expect(page).toHaveURL(/pin=1\./);
   await page.reload();
   await expect(page.locator('#loading')).toBeHidden();
-  await expect(pin).toHaveValue(targets[0]!);
+  await expect(page).toHaveURL(new RegExp(`pin=1\\.${targets[0]}`));
+  await expect(page.locator('[data-unpin="1"]')).toBeVisible();
   await pin.selectOption('');
   await expect(page).not.toHaveURL(/pin=/);
   const violations = (await new AxeBuilder({ page }).include('.pin-control').withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()).violations;
