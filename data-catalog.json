@@ -177,6 +177,15 @@
           "license": "Official public webpage; reusable data license not published on the source page",
           "role": "source-of-truth",
           "notes": "The importer uses embedded hospital-map names, address strings, marker coordinates and detail URLs. Provider-point acceptance is limited to exact name/county street-address matches, curated source-record aliases and reviewed coordinate-only exact source rows with published coordinates that pass automated checks."
+        },
+        {
+          "id": "anmcs-capesaro-public-hospitals-2026",
+          "name": "CAPeSaRo public hospital dashboard",
+          "publisher": "Autoritatea Nationala de Management al Calitatii in Sanatate",
+          "url": "https://capesaro.gov.ro/hospitals_public.php?ajax=1",
+          "license": "Official public dashboard; reusable data license not published on the source page",
+          "role": "source-of-truth",
+          "notes": "The release-asset-backed compact source extract keeps active status, ANMCS source code, provider name, county, city, address, website and coordinates. Candidate reports are non-evidence; provider points may use CAPeSaRo only through explicit audited provider/sourceCode supplemental evidence rows."
         }
       ],
       "minimumFields": [
@@ -206,9 +215,9 @@
       ],
       "storagePolicy": "Provider summary JSON can be committed if small; geocoded/routing outputs should become release assets.",
       "nextSlice": {
-        "scope": "Health CAPeSaRo source expansion / remaining public source acquisition.",
-        "deliverable": "Decide whether CAPeSaRo should become a fuller release-asset-backed source import or stay an audited subset source, then process the next remaining public no-Ministry-candidate providers.",
-        "doneWhen": "Only rows with source-specific address or coordinate evidence are promoted; unresolved rows remain named exclusions and the queue regenerates without broad fuzzy dashboard matching."
+        "scope": "Health CAPeSaRo high-signal public candidate review.",
+        "deliverable": "Review the 29 public exact-name CAPeSaRo candidates and promote only provider/sourceCode pairs that pass the supplemental-evidence checks.",
+        "doneWhen": "Accepted pairs are added to the supplemental evidence source, generated point/access artifacts refresh, and unresolved public rows remain named exclusions."
       },
       "notes": [
         "The committed national mart covers 592 ANMCS providers and all 42 Ministry county bed totals. Clinical bed counts are attached only on confident ANMCS matches; county bed totals are kept separately.",
@@ -216,7 +225,7 @@
         "justitie consumes the shared UAT-level service-access view for its court/police/health comparison and no longer bases that comparison on the simulator-local plotted hospital map.",
         "administrativ consumes the shared UAT-level service-access view as an aligned web payload for merged-unit local health-provider counts; Bucharest sectors stay unassigned because the shared source only places Bucharest providers at municipality level.",
         "transport consumes the shared UAT-level service-access view in data/access.json and the map hover payload. The committed access run has 3,136 routed UAT rows with health data, 178 have at least one local eligible provider, and 235 eligible local providers are counted on those routed rows; the browser payload aligns the same shared view to all polygons and leaves Bucharest sectors unassigned.",
-        "The current ANMCS accreditation workbook, CNAS 31.03.2025 hospital contracts package and INSP UNITATI CU PATURI package do not expose national provider street-address or coordinate fields through data.gov.ro; the committed point layer therefore uses the Ministry unitati sanitare map extract and curated aliases instead.",
+        "The current ANMCS accreditation workbook, CNAS 31.03.2025 hospital contracts package and INSP UNITATI CU PATURI package do not expose national provider street-address or coordinate fields through data.gov.ro; the committed point layer therefore combines the Ministry unitati sanitare map extract, curated Ministry reviews and audited CAPeSaRo supplemental evidence.",
         "The health-provider-points-2024-2026 contract covers all 592 mart providers. The Ministry of Health unitati sanitare map extract contributes 174 exact name/county street-address and marker-coordinate matches, 40 curated same-county source-record aliases and 4 reviewed coordinate-only exact source-row acceptances. The audited CAPeSaRo supplemental source contributes 17 provider/sourceCode pairs with street-address and coordinate evidence. 223 serviceAccessEligible, non-county-only providers now have accepted official-coordinate point evidence; the other 369 provider rows remain blocked from point routing, including all 268 county-only rows and 101 remaining no-point-evidence rows. UAT polygon containment is not applied yet because the available committed UAT geometry is not SIRUTA-keyed for this package.",
         "The health-point-access-2024-2026 view publishes only the 223 accepted provider coordinates and names all 369 blocked providers as exclusions. It is a point layer, not a distance model; consumers must explicitly declare straight-line or routed distance before deriving access metrics.",
         "transport now consumes health-point-access-2024-2026 directly. It reports nearest accepted provider distance in straight-line metres from each routed UAT centroid, names the method in provenance and limitations, and publishes 3,136 distances with 17.2 km unweighted median and 11.1 km population-weighted median.",
@@ -226,8 +235,10 @@
         "transport now consumes health-point-road-access-uat-2024-2026 directly. It reports 3,136 nearest accepted provider-point road-proxy distances with the shared snap/routing methods, 26.0 km unweighted median and 15.8 km population-weighted median, while keeping the straight-line point metric as an explicitly labelled comparison.",
         "health-provider-point-evidence-review-2024-2026 is a manual-review queue for the 101 service-eligible providers still blocked by no-point-evidence after the CAPeSaRo first-batch pass. The remaining rows have no Ministry candidate; candidate rows are not accepted point evidence.",
         "The high-signal street-backed review candidates promoted in the latest alias pass are anmcs-2025-230 to ms-unitati-sanitare-121, anmcs-2025-261 to ms-unitati-sanitare-274 and anmcs-2025-279 to ms-unitati-sanitare-043. The reviewed coordinate-only pass then promoted anmcs-2025-001 to ms-unitati-sanitare-159, anmcs-2025-236 to ms-unitati-sanitare-065, anmcs-2025-256 to ms-unitati-sanitare-069 and anmcs-2025-362 to ms-unitati-sanitare-066 without creating address evidence. The remaining locality-only overlaps stay out of the alias source.",
-        "ANMCS CAPeSaRo proved useful as a public dashboard source: the first audited subset promoted the 4 remaining locality-only Ministry overlaps plus 13 public-bed/no-Ministry-candidate providers. The committed source keeps only audited provider/sourceCode pairs and records the dashboard URL, retrieval date and missing explicit reuse-license limitation instead of committing the full raw feed.",
-        "health-provider-point-source-acquisition-2024-2026 is a non-evidence work queue for the remaining 101 no-point providers. It now prioritizes 45 public no-candidate providers and 56 private or unknown no-candidate providers. Its source search order covers provider websites, DSP/local-authority pages, official contracting/register sources and OSM named-feature manual review."
+        "ANMCS CAPeSaRo proved useful as a public dashboard source: the first audited subset promoted the 4 remaining locality-only Ministry overlaps plus 13 public-bed/no-Ministry-candidate providers. The committed supplemental evidence source keeps only audited provider/sourceCode pairs and records the dashboard URL, retrieval date and missing explicit reuse-license limitation.",
+        "health-provider-point-source-acquisition-2024-2026 is a non-evidence work queue for the remaining 101 no-point providers. It now prioritizes 45 public no-candidate providers and 56 private or unknown no-candidate providers. Its source search order covers provider websites, DSP/local-authority pages, official contracting/register sources and OSM named-feature manual review.",
+        "anmcs-capesaro-public-hospitals-2026 is a release asset with a compact extract of 731 CAPeSaRo dashboard rows, including 680 active rows and 687 rows with street-address evidence. The raw dashboard response remains out of git.",
+        "health-provider-point-capesaro-candidates-2024-2026 is a release asset with a non-evidence candidate report over the 101 remaining acquisition rows. It finds 53 providers with active same-county street-address CAPeSaRo candidates and 57 candidate rows overall. Among the 45 remaining public providers, 35 have candidates: 29 high-signal exact-name candidates, 4 medium-signal candidates and 2 low-signal candidates; 10 public rows still need other source acquisition."
       ]
     }
   ]

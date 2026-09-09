@@ -87,6 +87,30 @@
       "needs": "Transparenta.eu GraphQL UAT budget execution for 2023-2025 plus packages/uat_registry/data/uat-registry-2026.json and packages/local_finance/data/data-gov-arrears-resources.json",
       "what": "Full 2023-2025 local-finance mart: 3,228 UAT/county-council entities and 9,684 UAT-year records, derived from Transparenta revenue and spending line items with shared-registry joins.",
       "withoutIt": "The impozit-teren budget export and multi-year local-finance consumers cannot build until the release payload is fetched."
+    },
+    {
+      "id": "health-capesaro-public-hospitals-2026",
+      "tag": "data-v1",
+      "asset": "anmcs-capesaro-public-hospitals-2026.json",
+      "destination": "packages/health_access/sources/anmcs-capesaro-public-hospitals-2026.json",
+      "bytes": 413226,
+      "sha256": "10dfae72dd107c5151e5982d1d9f84cb37108eb693a8e9078e9f60da37ac8cfc",
+      "producedBy": "packages/health_access/scripts/import_anmcs_capesaro_public_hospitals.py --retrieved-date 2026-09-09",
+      "needs": "CAPeSaRo dashboard JSON feed at https://capesaro.gov.ro/hospitals_public.php?ajax=1",
+      "what": "Compact ANMCS CAPeSaRo source extract: 731 rows, 680 active rows, counties, addresses and published coordinates for candidate discovery.",
+      "withoutIt": "CAPeSaRo candidate discovery cannot be rebuilt, but committed audited evidence keeps provider-point validation working."
+    },
+    {
+      "id": "health-provider-point-capesaro-candidates-2024-2026",
+      "tag": "data-v1",
+      "asset": "health-provider-point-capesaro-candidates-2024-2026.json",
+      "destination": "packages/health_access/data/health-provider-point-capesaro-candidates-2024-2026.json",
+      "bytes": 104731,
+      "sha256": "28a981962a78e10e8b60eb2d764dbfa442eb748fb9f11a5f7bfa44af2a63c42a",
+      "producedBy": "packages/health_access/scripts/build_health_provider_point_capesaro_candidates.py --retrieved-date 2026-09-09",
+      "needs": "health-provider-point-source-acquisition-2024-2026 plus anmcs-capesaro-public-hospitals-2026",
+      "what": "Non-evidence CAPeSaRo candidate report for 101 remaining acquisition rows: 53 providers with candidates, 57 candidate rows and 35 public providers with candidates.",
+      "withoutIt": "The next audited CAPeSaRo review must rebuild candidates before selecting supplemental-evidence provider/sourceCode pairs."
     }
   ]
 }

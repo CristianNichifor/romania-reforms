@@ -1,0 +1,296 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/packages/health_access/schema/health-provider-point-capesaro-candidates.schema.json",
+  "title": "Health provider point CAPeSaRo candidate report",
+  "description": "Non-evidence review report for remaining health provider point acquisition rows that have possible same-county CAPeSaRo dashboard candidates.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "id",
+    "title",
+    "publisher",
+    "scope",
+    "periodStart",
+    "periodEnd",
+    "retrievedDate",
+    "provenance",
+    "registry",
+    "sourceHashes",
+    "transform",
+    "matchingPolicy",
+    "summary",
+    "records",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "const": "health-provider-point-capesaro-candidates-2024-2026" },
+    "title": { "type": "string", "minLength": 1 },
+    "publisher": { "const": "Cristian Nichifor" },
+    "scope": { "const": "provider-point-capesaro-candidate-review" },
+    "periodStart": { "const": "2024" },
+    "periodEnd": { "const": "2026" },
+    "retrievedDate": { "type": "string", "format": "date" },
+    "provenance": {
+      "$ref": "https://cristiannichifor.github.io/romania-reforms/schema/provenance.schema.json#/$defs/provenance"
+    },
+    "registry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceAcquisition", "capesaroSource"],
+      "properties": {
+        "sourceAcquisition": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "periodStart", "periodEnd"],
+          "properties": {
+            "id": { "const": "health-provider-point-source-acquisition-2024-2026" },
+            "periodStart": { "const": "2024" },
+            "periodEnd": { "const": "2026" }
+          }
+        },
+        "capesaroSource": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "publisher", "sourceUrl", "retrievedDate", "records"],
+          "properties": {
+            "id": { "const": "anmcs-capesaro-public-hospitals-2026" },
+            "publisher": {
+              "const": "Autoritatea Nationala de Management al Calitatii in Sanatate"
+            },
+            "sourceUrl": { "type": "string", "format": "uri" },
+            "retrievedDate": { "type": "string", "format": "date" },
+            "records": { "type": "integer", "minimum": 1 }
+          }
+        }
+      }
+    },
+    "sourceHashes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceAcquisitionSha256", "capesaroSourceSha256"],
+      "properties": {
+        "sourceAcquisitionSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "capesaroSourceSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "transform": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["script", "version"],
+      "properties": {
+        "script": {
+          "const": "packages/health_access/scripts/build_health_provider_point_capesaro_candidates.py"
+        },
+        "version": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "matchingPolicy": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/policyRule" }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceAcquisitionProviders",
+        "capesaroSourceRecords",
+        "activeCapesaroSourceRecords",
+        "providersWithCandidates",
+        "providersWithoutCandidates",
+        "candidateRows",
+        "publicProviders",
+        "publicProvidersWithCandidates",
+        "publicProvidersWithoutCandidates",
+        "candidateStatus",
+        "candidateSignals",
+        "candidateMatchMethods",
+        "candidateOwnerTypes",
+        "candidatePriorities",
+        "byCounty"
+      ],
+      "properties": {
+        "sourceAcquisitionProviders": { "type": "integer", "minimum": 0 },
+        "capesaroSourceRecords": { "type": "integer", "minimum": 1 },
+        "activeCapesaroSourceRecords": { "type": "integer", "minimum": 0 },
+        "providersWithCandidates": { "type": "integer", "minimum": 0 },
+        "providersWithoutCandidates": { "type": "integer", "minimum": 0 },
+        "candidateRows": { "type": "integer", "minimum": 0 },
+        "publicProviders": { "type": "integer", "minimum": 0 },
+        "publicProvidersWithCandidates": { "type": "integer", "minimum": 0 },
+        "publicProvidersWithoutCandidates": { "type": "integer", "minimum": 0 },
+        "candidateStatus": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        },
+        "candidateSignals": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        },
+        "candidateMatchMethods": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        },
+        "candidateOwnerTypes": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        },
+        "candidatePriorities": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        },
+        "byCounty": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/countySummary" }
+        }
+      }
+    },
+    "records": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/providerRecord" }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "https://cristiannichifor.github.io/romania-reforms/schema/provenance.schema.json#/$defs/limitation"
+      }
+    }
+  },
+  "$defs": {
+    "policyRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "text"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "text": { "type": "string", "minLength": 1 }
+      }
+    },
+    "candidateStatus": {
+      "enum": ["has-capesaro-candidate", "no-capesaro-candidate"]
+    },
+    "candidateSignal": {
+      "enum": ["high", "medium", "low", "none"]
+    },
+    "candidateMatchMethod": {
+      "enum": [
+        "exact-normalised-name-county",
+        "contained-normalised-name-county",
+        "token-overlap-same-county",
+        "weak-token-overlap-same-county"
+      ]
+    },
+    "nextAction": {
+      "enum": [
+        "review-capesaro-source-row-for-supplemental-evidence",
+        "continue-other-source-acquisition"
+      ]
+    },
+    "countySummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "countyCode",
+        "countyName",
+        "providers",
+        "providersWithCandidates",
+        "candidateRows"
+      ],
+      "properties": {
+        "countyCode": { "type": "string", "pattern": "^[A-Z]{1,2}$" },
+        "countyName": { "type": "string", "minLength": 1 },
+        "providers": { "type": "integer", "minimum": 0 },
+        "providersWithCandidates": { "type": "integer", "minimum": 0 },
+        "candidateRows": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "providerRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "providerId",
+        "name",
+        "countyCode",
+        "countyName",
+        "siruta",
+        "localityName",
+        "ownerType",
+        "acquisitionPriority",
+        "candidateStatus",
+        "candidateSignal",
+        "candidateCount",
+        "nextAction",
+        "candidates"
+      ],
+      "properties": {
+        "providerId": { "type": "string", "pattern": "^anmcs-2025-[0-9]{3}$" },
+        "name": { "type": "string", "minLength": 1 },
+        "countyCode": { "type": "string", "pattern": "^[A-Z]{1,2}$" },
+        "countyName": { "type": "string", "minLength": 1 },
+        "siruta": { "type": "string", "pattern": "^[0-9]+$" },
+        "localityName": { "type": "string", "minLength": 1 },
+        "ownerType": { "enum": ["public", "private", "unknown"] },
+        "acquisitionPriority": {
+          "enum": [
+            "p3-public-provider-no-ministry-candidate",
+            "p4-private-or-unknown-provider-no-ministry-candidate"
+          ]
+        },
+        "candidateStatus": { "$ref": "#/$defs/candidateStatus" },
+        "candidateSignal": { "$ref": "#/$defs/candidateSignal" },
+        "candidateCount": { "type": "integer", "minimum": 0 },
+        "nextAction": { "$ref": "#/$defs/nextAction" },
+        "candidates": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/candidate" }
+        }
+      }
+    },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceRecordId",
+        "sourceNativeId",
+        "sourceCode",
+        "sourceName",
+        "sourceCountyName",
+        "sourceCity",
+        "address",
+        "latitude",
+        "longitude",
+        "website",
+        "matchMethod",
+        "matchScore",
+        "overlappingTokens",
+        "reviewSignal"
+      ],
+      "properties": {
+        "sourceRecordId": {
+          "type": "string",
+          "pattern": "^capesaro-2026-[A-Z]{1,2}[0-9]+$"
+        },
+        "sourceNativeId": { "type": "string", "pattern": "^[0-9]+$" },
+        "sourceCode": { "type": "string", "pattern": "^[A-Z]{1,2}[0-9]+$" },
+        "sourceName": { "type": "string", "minLength": 1 },
+        "sourceCountyName": { "type": "string", "minLength": 1 },
+        "sourceCity": { "type": "string", "minLength": 1 },
+        "address": { "type": "string", "minLength": 1 },
+        "latitude": { "type": "number", "minimum": 43, "maximum": 49 },
+        "longitude": { "type": "number", "minimum": 20, "maximum": 30 },
+        "website": { "type": ["string", "null"], "minLength": 1 },
+        "matchMethod": { "$ref": "#/$defs/candidateMatchMethod" },
+        "matchScore": { "type": "integer", "minimum": 50, "maximum": 100 },
+        "overlappingTokens": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "reviewSignal": { "$ref": "#/$defs/candidateSignal" }
+      }
+    }
+  }
+}
