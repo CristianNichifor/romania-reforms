@@ -1,0 +1,39 @@
+name: Native consumer UI
+on: [push, pull_request]
+jobs:
+  browsers:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: transport
+            app: simulators/transport/app
+          - name: administrativ
+            app: simulators/administrativ/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build and model checks
+        working-directory: ${{ matrix.app }}
+        run: |
+          npm ci --ignore-scripts
+          npm test
+          npm run build
+      - name: Three-browser native controls and maps
+        run: >-
+          docker run --rm --init --ipc=host -e CI=1 -e LIBGL_ALWAYS_SOFTWARE=1
+          -v "$PWD:/work" -w /work/${{ matrix.app }}
+          -v "$RUNNER_TEMP/${{ matrix.name }}-native-ui:/tmp/${{ matrix.name }}-native-ui"
+          mcr.microsoft.com/playwright:v1.63.0-noble
+          xvfb-run -a npm run check:ui -- --reporter=list
+      - name: Browser evidence
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.name }}-native-ui
+          path: ${{ runner.temp }}/${{ matrix.name }}-native-ui
+          if-no-files-found: ignore
+          retention-days: 7

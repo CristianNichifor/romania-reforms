@@ -7,6 +7,7 @@
  */
 
 import './style.css';
+import './native-ui.css';
 
 import { buildChain, edgeKey, indexShard } from './app/chain';
 import {
@@ -309,7 +310,7 @@ async function boot(): Promise<void> {
     el('#layers').innerHTML = rows
       .map(
         ([key, label, colour, dot, note]) => `
-        <label class="layer-row">
+        <label class="layer-row civic-choice">
           <input type="checkbox" data-overlay="${key}" ${overlayState[key] ? 'checked' : ''} />
           <span class="swatch${dot ? ' dot' : ''}" style="background:${colour}"></span>
           <span>${label}${note ? ` <span class="note">— ${note}</span>` : ''}</span>
@@ -657,7 +658,7 @@ async function boot(): Promise<void> {
           : ''
       }
       ${versions.length === 0 ? `<p class="muted">${strings.versionsNone}</p>` : `<ul class="version-list">${rows}</ul>`}
-      <button id="save-version" class="ghost small wide">${strings.versionsSave}</button>
+      <button id="save-version" class="ghost small wide civic-button">${strings.versionsSave}</button>
       <div class="version-actions">
         <button class="link" id="export-versions">${strings.versionsExport}</button>
         <button class="link" id="import-versions">${strings.versionsImport}</button>
@@ -1292,9 +1293,12 @@ async function boot(): Promise<void> {
 
     const filterBar = `
         <div class="candidate-filters">
-          <input id="candidate-search" type="search" placeholder="${strings.candSearch}"
+          <div class="civic-field">
+          <input id="candidate-search" class="civic-input" type="search" placeholder="${strings.candSearch}"
                  aria-label="${strings.candSearch}" value="${candidateQuery.replace(/"/g, '&quot;')}">
-          <select id="candidate-county" aria-label="${strings.candCounty}">
+          </div>
+          <div class="civic-field">
+          <select id="candidate-county" class="civic-select civic-select--native" aria-label="${strings.candCounty}">
             <option value="">${strings.candAllCounties}</option>
             ${candidateCounties
               .map(
@@ -1303,6 +1307,7 @@ async function boot(): Promise<void> {
               )
               .join('')}
           </select>
+          </div>
         </div>`;
 
     const listing = `
@@ -1957,16 +1962,16 @@ async function boot(): Promise<void> {
         // reports back as "already a centre".
         isForced || latest.forcedApplied.includes(index) || index !== region
           ? `<div class="force-control">
-               <button class="ghost small wide" data-force="${index}">${
+               <button class="ghost small wide civic-button" data-force="${index}">${
                  isForced ? strings.forceUndo : strings.forceMake
                }</button>
                <p class="help">${strings.forceNote}</p>
              </div>`
           : ''
       }
-      <div class="pin-control">
+      <div class="pin-control civic-field">
         <label for="pin-select">${strings.pinMoveTo}</label>
-        <select id="pin-select">
+        <select id="pin-select" class="civic-select civic-select--native">
           <option value="">${strings.pinKeepRules}</option>
           ${pinTargets(index)
             .map(
@@ -2362,7 +2367,7 @@ function methodologyHtml(s: Strings): string {
     <p><a href="${import.meta.env.BASE_URL}METHODOLOGY.md" target="_blank" rel="noopener">${
       ro ? 'Metodologia completă, inclusiv sursele și deciziile contestabile' : 'Full methodology, including sources and disputable decisions'
     }</a></p>
-    <button class="ghost">${s.close}</button>`;
+    <button class="ghost civic-button">${s.close}</button>`;
 }
 
 void boot();

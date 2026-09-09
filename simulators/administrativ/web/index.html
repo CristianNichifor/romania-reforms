@@ -10,7 +10,7 @@
       content="Simulator de consolidare administrativă pentru cele 3.186 de UAT-uri ale României. Instrument de analiză pentru dezbatere publică."
     />
   </head>
-  <body>
+  <body class="civic-scope civic-admin">
     <div id="map" aria-label="Hartă"></div>
 
     <header class="topbar">
@@ -22,7 +22,7 @@
       <div class="topbar-actions">
         <span class="version-badge" id="version-badge" hidden></span>
         <div class="modes" id="modes" role="group" aria-label="View"></div>
-        <button id="methodology-btn" class="ghost" data-i18n="methodology"></button>
+        <button id="methodology-btn" class="ghost civic-button" data-i18n="methodology"></button>
         <div class="lang" role="group" aria-label="Language">
           <button data-lang="ro">RO</button>
           <button data-lang="en">EN</button>
@@ -40,7 +40,7 @@
       <div class="panel-body" id="controls-body">
         <div class="controls-head">
           <h2 data-i18n="parameters"></h2>
-          <button id="reset-btn" class="ghost small" data-i18n="reset"></button>
+          <button id="reset-btn" class="ghost small civic-button" data-i18n="reset"></button>
         </div>
         <div id="sliders"></div>
         <div class="layers-block">
@@ -59,7 +59,7 @@
         <div class="layers-block" id="pins" hidden></div>
         <div class="layers-block" id="candidates" hidden></div>
         <div class="layers-block" id="audit" hidden></div>
-        <button id="copy-link" class="ghost small wide" data-i18n="copyLink"></button>
+        <button id="copy-link" class="ghost small wide civic-button" data-i18n="copyLink"></button>
       </div>
     </aside>
 

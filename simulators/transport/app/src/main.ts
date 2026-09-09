@@ -8,6 +8,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 
 maplibregl.setWorkerUrl(workerUrl);
 import './style.css';
+import './native-ui.css';
 import { buildNetwork, changedParams, loadCoupling, readScenario } from './consolidare';
 import {
   DAY_PROFILE,
