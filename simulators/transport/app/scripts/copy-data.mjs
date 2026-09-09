@@ -156,6 +156,10 @@ if (access.uats.some((u) => !Object.hasOwn(u, 'nearestHealthPointDistanceMetres'
   console.error('FATAL: access.json has no point health_access fields');
   process.exit(1);
 }
+if (access.uats.some((u) => !Object.hasOwn(u, 'nearestHealthPointRoadProxyMetres'))) {
+  console.error('FATAL: access.json has no point road-proxy health_access fields');
+  process.exit(1);
+}
 
 const healthBy = new Map();
 for (const unit of healthAccess.units) {
@@ -170,13 +174,14 @@ for (const unit of healthAccess.units) {
 // Same positional join, but only the health fields the hover needs. UAT-level local counts are
 // aligned directly from the shared health_access view so scenario changes in the browser are
 // not tied to the default transport access run. The nearest point distance comes from
-// access.json because transport owns the UAT centroid distance method.
+// access.json because transport owns which routed UAT rows appear in its published access model.
 const healthJoined = attributes.siruta.map((siruta, index) => {
   const unit = healthBy.get(normaliseSiruta(siruta));
   const accessRow = by.get(normaliseSiruta(siruta));
   const nearest = accessRow?.nearestHealthPointDistanceMetres ?? null;
+  const roadProxy = accessRow?.nearestHealthPointRoadProxyMetres ?? null;
   if (!unit) {
-    if (attributes.county[index] === 'B') return [null, null, null, 1, nearest];
+    if (attributes.county[index] === 'B') return [null, null, null, 1, nearest, roadProxy];
     console.error(`FATAL: shared health_access has no row for SIRUTA ${siruta}`);
     process.exit(1);
   }
@@ -186,6 +191,7 @@ const healthJoined = attributes.siruta.map((siruta, index) => {
     unit.localClinicalBeds,
     0,
     nearest,
+    roadProxy,
   ];
 });
 writeFileSync(join(out, 'health.json'), JSON.stringify(healthJoined));

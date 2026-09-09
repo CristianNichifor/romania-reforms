@@ -20,6 +20,9 @@ DEFAULT_HEALTH_ACCESS: Final[Path] = (
 DEFAULT_HEALTH_POINT_ACCESS: Final[Path] = (
     REPO_ROOT / "packages/health_access/data/health-point-access-2024-2026.json"
 )
+DEFAULT_HEALTH_POINT_ROAD_ACCESS: Final[Path] = (
+    REPO_ROOT / "packages/health_access/data/health-point-road-access-uat-2024-2026.json"
+)
 
 BUCHAREST: Final[str] = "B"
 HEALTH_ACCESS_VIEW_ID: Final[str] = "health-service-access-uat-2024-2026"
@@ -27,6 +30,11 @@ HEALTH_ACCESS_LIMITATION_ID: Final[str] = "sanatatea-vine-din-pachetul-shared"
 HEALTH_POINT_ACCESS_VIEW_ID: Final[str] = "health-point-access-2024-2026"
 HEALTH_POINT_ACCESS_LIMITATION_ID: Final[str] = "sanatatea-punctuala-in-linie-dreapta"
 HEALTH_POINT_DISTANCE_METHOD: Final[str] = "straight-line"
+HEALTH_POINT_ROAD_ACCESS_VIEW_ID: Final[str] = "health-point-road-access-uat-2024-2026"
+HEALTH_POINT_ROAD_ACCESS_LIMITATION_ID: Final[str] = "sanatatea-punctuala-rutata-e-proxy"
+HEALTH_POINT_ROAD_ACCESS_DISTANCE_METHOD: Final[str] = (
+    "road-graph-to-snap-node-plus-straight-line-offset"
+)
 HEALTH_POINT_ROW_FIELDS: Final[tuple[str, ...]] = (
     "nearestHealthPointProviderId",
     "nearestHealthPointName",
@@ -34,6 +42,10 @@ HEALTH_POINT_ROW_FIELDS: Final[tuple[str, ...]] = (
     "nearestHealthPointDistanceMetres",
     "nearestHealthPointDistanceMethod",
     "nearestHealthPointClinicalBeds",
+)
+HEALTH_POINT_ROAD_ROW_FIELDS: Final[tuple[str, ...]] = (
+    "nearestHealthPointRoadProviderId",
+    "nearestHealthPointRoadProxyMetres",
 )
 EARTH_RADIUS_METRES: Final[float] = 6_371_008.8
 
@@ -102,6 +114,69 @@ def health_points(point_access: dict[str, Any]) -> list[dict[str, Any]]:
             f"{len(points)} points, summary says {expected}"
         )
     return points
+
+
+def health_point_road_access(
+    point_road_access: dict[str, Any],
+    accepted_provider_ids: set[str],
+) -> dict[str, dict[str, Any]]:
+    if point_road_access["id"] != HEALTH_POINT_ROAD_ACCESS_VIEW_ID:
+        raise ValueError(
+            f"expected {HEALTH_POINT_ROAD_ACCESS_VIEW_ID}, got {point_road_access['id']}"
+        )
+    summary = point_road_access["summary"]
+    if summary["distanceMethod"] != HEALTH_POINT_ROAD_ACCESS_DISTANCE_METHOD:
+        raise ValueError(
+            f"point road health-access view changed distance method: {summary['distanceMethod']}"
+        )
+
+    columns = {name: index for index, name in enumerate(point_road_access["uatDistanceColumns"])}
+    required = {
+        "siruta",
+        "nearestProviderId",
+        "providerSnapNodeSiruta",
+        "roadProxyMetres",
+    }
+    missing = sorted(required - columns.keys())
+    if missing:
+        raise ValueError("point road health-access view is missing columns: " + ", ".join(missing))
+
+    rows: dict[str, dict[str, Any]] = {}
+    duplicate_sirutas: list[str] = []
+    unknown_providers: list[str] = []
+    for row in point_road_access["uats"]:
+        siruta = normalise_siruta(row[columns["siruta"]])
+        if siruta in rows:
+            duplicate_sirutas.append(siruta)
+
+        provider_id = str(row[columns["nearestProviderId"]])
+        if provider_id not in accepted_provider_ids:
+            unknown_providers.append(provider_id)
+        road_proxy_metres = int(row[columns["roadProxyMetres"]])
+        if road_proxy_metres < 0:
+            raise ValueError(f"point road health-access view has negative distance for {siruta}")
+        rows[siruta] = {
+            "nearestProviderId": provider_id,
+            "providerSnapNodeSiruta": normalise_siruta(row[columns["providerSnapNodeSiruta"]]),
+            "roadProxyMetres": road_proxy_metres,
+        }
+
+    if duplicate_sirutas:
+        listed = ", ".join(sorted(set(duplicate_sirutas))[:10])
+        raise ValueError(f"point road health-access view has duplicate SIRUTA rows: {listed}")
+    if unknown_providers:
+        listed = ", ".join(sorted(set(unknown_providers))[:10])
+        raise ValueError(
+            "point road health-access view routes providers outside accepted point-access "
+            f"providers: {listed}"
+        )
+    expected_rows = int(summary["uats"])
+    if len(rows) != expected_rows:
+        raise ValueError(
+            "point road health-access row count does not match summary: "
+            f"{len(rows)} rows, summary says {expected_rows}"
+        )
+    return rows
 
 
 def normalise_row_locations(
@@ -215,26 +290,63 @@ def health_point_access_limitation(point_access: dict[str, Any]) -> dict[str, An
     }
 
 
-def health_point_provenance(provenance: dict[str, Any]) -> dict[str, Any]:
+def health_point_road_access_limitation(point_road_access: dict[str, Any]) -> dict[str, Any]:
+    summary = point_road_access["summary"]
+    providers = int(summary["providers"])
+    blocked = int(summary["pointAccessBlockedProviders"])
+    distance_method = summary["distanceMethod"]
+    snap_method = summary["providerSnapMethod"]
+    routing_method = summary["routingMethod"]
+    return {
+        "id": HEALTH_POINT_ROAD_ACCESS_LIMITATION_ID,
+        "text": (
+            "Accesul punctual rutat-proxy la sănătate folosește vederea "
+            f"{HEALTH_POINT_ROAD_ACCESS_VIEW_ID}: {providers} furnizori cu punct acceptat sunt "
+            f"atașați la noduri UAT prin {snap_method}, apoi rutați cu {routing_method}. "
+            f"Distanța publicată este {distance_method}; furnizorul nu devine nod de drum și "
+            f"{blocked} furnizori fără punct acceptat rămân excluși nominal."
+        ),
+        "severity": "material",
+        "affects": ["access"],
+    }
+
+
+def health_point_provenance(
+    provenance: dict[str, Any],
+    *,
+    with_road_access: bool = False,
+) -> dict[str, Any]:
     out = deepcopy(provenance)
     locator = out.get("locator")
     point_locator = "health-point-access-2024-2026 cu distanță straight-line de la centroidul UAT"
+    road_locator = (
+        "health-point-road-access-uat-2024-2026 cu distanță "
+        "road-graph-to-snap-node-plus-straight-line-offset"
+    )
     if isinstance(locator, str):
         if HEALTH_POINT_ACCESS_VIEW_ID not in locator:
             out["locator"] = f"{locator}; {point_locator}"
     else:
         out["locator"] = point_locator
+    if with_road_access and HEALTH_POINT_ROAD_ACCESS_VIEW_ID not in out["locator"]:
+        out["locator"] = f"{out['locator']}; {road_locator}"
 
     note = out.get("note")
     point_note = (
         "Cel mai apropiat punct de sănătate este calculat separat, în linie dreaptă, "
         "de la centroidul UAT la coordonata furnizorului acceptat."
     )
+    road_note = (
+        "Metricul rutat-proxy folosește vederea shared point-to-road și păstrează distanța "
+        "în linie dreaptă doar ca termen de comparație."
+    )
     if isinstance(note, str):
         if "Cel mai apropiat punct de sănătate" not in note:
             out["note"] = f"{note} {point_note}"
     else:
         out["note"] = point_note
+    if with_road_access and "Metricul rutat-proxy" not in out["note"]:
+        out["note"] = f"{out['note']} {road_note}"
     return out
 
 
@@ -243,20 +355,46 @@ def enrich_access_document(
     access: dict[str, Any],
     point_access: dict[str, Any] | None = None,
     row_locations: dict[str, dict[str, float]] | None = None,
+    point_road_access: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     if access["id"] != HEALTH_ACCESS_VIEW_ID:
         raise ValueError(f"expected {HEALTH_ACCESS_VIEW_ID}, got {access['id']}")
     with_point_access = point_access is not None or row_locations is not None
     if with_point_access and (point_access is None or row_locations is None):
         raise ValueError("point health-access enrichment needs both point_access and row_locations")
+    with_road_access = point_road_access is not None
+    if with_road_access and point_access is None:
+        raise ValueError(
+            "point road health-access enrichment needs point_access to verify accepted providers"
+        )
 
     units = health_units_by_siruta(access)
     points = health_points(point_access) if point_access is not None else []
+    point_ids = {point["providerId"] for point in points}
+    road_points = (
+        health_point_road_access(point_road_access, point_ids)
+        if point_road_access is not None
+        else {}
+    )
+    if point_road_access is not None and point_access is not None:
+        point_summary = point_access["summary"]
+        road_summary = point_road_access["summary"]
+        if int(road_summary["providers"]) != int(point_summary["pointAccessProviders"]):
+            raise ValueError("point road provider count does not match point-access summary")
+        if int(road_summary["pointAccessBlockedProviders"]) != int(
+            point_summary["pointAccessBlockedProviders"]
+        ):
+            raise ValueError(
+                "point road blocked-provider count does not match point-access summary"
+            )
+        if int(road_summary["pointAccessNamedExclusions"]) != int(point_summary["namedExclusions"]):
+            raise ValueError("point road named-exclusion count does not match point-access summary")
     locations = normalise_row_locations(row_locations) if row_locations is not None else {}
     seen_rows: set[str] = set()
     duplicate_rows = []
     missing = []
     missing_locations = []
+    missing_road_points = []
     enriched_rows: list[dict[str, Any]] = []
 
     for row in document["uats"]:
@@ -268,6 +406,9 @@ def enrich_access_document(
         out = dict(row)
         if with_point_access:
             for field in HEALTH_POINT_ROW_FIELDS:
+                out.pop(field, None)
+        if with_road_access:
+            for field in HEALTH_POINT_ROAD_ROW_FIELDS:
                 out.pop(field, None)
         unit = units.get(siruta)
         if unit is None:
@@ -307,6 +448,17 @@ def enrich_access_document(
                         "nearestHealthPointDistanceMetres": distance_metres,
                     }
                 )
+        if with_road_access:
+            road_point = road_points.get(siruta)
+            if road_point is None:
+                missing_road_points.append(siruta)
+            else:
+                out.update(
+                    {
+                        "nearestHealthPointRoadProviderId": road_point["nearestProviderId"],
+                        "nearestHealthPointRoadProxyMetres": road_point["roadProxyMetres"],
+                    }
+                )
         enriched_rows.append(out)
 
     if duplicate_rows:
@@ -318,6 +470,9 @@ def enrich_access_document(
     if missing_locations:
         listed = ", ".join(missing_locations[:10])
         raise ValueError(f"point health-access is missing transport UAT row locations: {listed}")
+    if missing_road_points:
+        listed = ", ".join(missing_road_points[:10])
+        raise ValueError(f"point road health-access is missing transport UAT rows: {listed}")
 
     rows_with_data = [row for row in enriched_rows if row["localHealthProviderCount"] is not None]
     summary = {
@@ -368,10 +523,46 @@ def enrich_access_document(
                 ),
             }
         )
+    if with_road_access and point_road_access is not None:
+        rows_with_road_distance = [
+            row for row in enriched_rows if row.get("nearestHealthPointRoadProxyMetres") is not None
+        ]
+        road_distances = [
+            int(row["nearestHealthPointRoadProxyMetres"]) for row in rows_with_road_distance
+        ]
+        if not road_distances:
+            raise ValueError("point road health-access produced no transport distances")
+        road_summary = point_road_access["summary"]
+        summary.update(
+            {
+                "healthPointRoadAccessView": point_road_access["id"],
+                "healthPointRoadAccessSourceRows": int(road_summary["uats"]),
+                "healthPointRoadAccessProviders": int(road_summary["providers"]),
+                "healthPointRoadAccessBlockedProviders": int(
+                    road_summary["pointAccessBlockedProviders"]
+                ),
+                "healthPointRoadAccessNamedExclusions": int(
+                    road_summary["pointAccessNamedExclusions"]
+                ),
+                "healthPointRoadAccessRowsWithDistance": len(rows_with_road_distance),
+                "healthPointRoadAccessDistanceMethod": road_summary["distanceMethod"],
+                "healthPointRoadAccessProviderSnapMethod": road_summary["providerSnapMethod"],
+                "healthPointRoadAccessRoutingMethod": road_summary["routingMethod"],
+                "healthPointRoadAccessMedianNearestMetres": median_int(road_distances),
+                "healthPointRoadAccessPopulationWeightedMedianNearestMetres": (
+                    population_weighted_median_int(
+                        rows_with_road_distance,
+                        "nearestHealthPointRoadProxyMetres",
+                    )
+                ),
+            }
+        )
 
     replacement_limitations = {HEALTH_ACCESS_LIMITATION_ID}
     if with_point_access:
         replacement_limitations.add(HEALTH_POINT_ACCESS_LIMITATION_ID)
+    if with_road_access:
+        replacement_limitations.add(HEALTH_POINT_ROAD_ACCESS_LIMITATION_ID)
     limitations = [
         limitation
         for limitation in document["limitations"]
@@ -380,11 +571,16 @@ def enrich_access_document(
     limitations.append(health_access_limitation(access))
     if with_point_access and point_access is not None:
         limitations.append(health_point_access_limitation(point_access))
+    if with_road_access and point_road_access is not None:
+        limitations.append(health_point_road_access_limitation(point_road_access))
 
     enriched = deepcopy(document)
     enriched["summary"] = summary
     enriched["uats"] = enriched_rows
     enriched["limitations"] = limitations
-    if with_point_access:
-        enriched["provenance"] = health_point_provenance(document["provenance"])
+    if with_point_access or with_road_access:
+        enriched["provenance"] = health_point_provenance(
+            document["provenance"],
+            with_road_access=with_road_access,
+        )
     return enriched

@@ -112,8 +112,13 @@ First slice:
   coordinates as graph nodes
 - done: wire that shared road-proxy contract into `justitie` as the first consumer, while
   keeping straight-line point distance and UAT-level routed health distance separately named
-- next: wire the shared road-proxy provider-point distances into `transport`, keeping the
-  current straight-line point metric as a fallback/comparison rather than a routing claim
+- done: wire the shared road-proxy provider-point distances into `transport`, keeping the
+  current straight-line point metric as a fallback/comparison rather than a routing claim;
+  the committed run computes 3,136 routed-row road-proxy distances, with 28.7 km unweighted
+  median and 19.6 km population-weighted median
+- next: treat the current health-access consumer adoption as complete; future health work
+  should improve source quality by adding more authoritative provider points or replacing the
+  current road-proxy limitation with a stronger point-to-road method
 
 This should support service-access views in `administrativ`, `justitie` and `transport`
 without each simulator building its own hospital roster.
