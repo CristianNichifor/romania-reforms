@@ -142,9 +142,12 @@ First slice:
   for the remaining 118 no-point providers: 4 locality-only Ministry overlaps needing
   provider-specific corroboration, 13 public bed providers with no Ministry candidate, 45 other
   public no-candidate rows, and 56 private or unknown no-candidate rows
-- next: execute the first source-acquisition batch against the 4 locality-only overlaps and 13
-  public bed no-candidate rows, promoting only rows with source-specific address or coordinate
-  evidence and keeping unresolved rows blocked
+- done: execute the first source-acquisition batch through audited ANMCS CAPeSaRo dashboard rows,
+  promoting 17 provider/sourceCode pairs with source-specific street address and coordinate
+  evidence; the point layer now has 223 accepted provider coordinates and 369 named exclusions,
+  and the remaining source-acquisition queue has 101 no-Ministry-candidate providers
+- next: decide whether to formalize CAPeSaRo as a fuller release-asset-backed source import or
+  continue with a second audited subset batch for the remaining 45 public no-candidate providers
 
 This should support service-access views in `administrativ`, `justitie` and `transport`
 without each simulator building its own hospital roster.

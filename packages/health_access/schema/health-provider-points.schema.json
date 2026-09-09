@@ -84,6 +84,16 @@
             "reviewedDate": { "type": "string", "format": "date" },
             "acceptances": { "type": "integer", "minimum": 1 }
           }
+        },
+        "supplementalEvidence": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "reviewedDate", "records"],
+          "properties": {
+            "id": { "const": "anmcs-capesaro-provider-point-evidence-2026" },
+            "reviewedDate": { "type": "string", "format": "date" },
+            "records": { "type": "integer", "minimum": 1 }
+          }
         }
       }
     },
@@ -96,6 +106,10 @@
         "msUnitatiSanitareSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
         "msUnitatiSanitareAliasesSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
         "msUnitatiSanitareCoordinateReviewsSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "capesaroProviderPointEvidenceSha256": {
           "type": "string",
           "pattern": "^[a-f0-9]{64}$"
         }
@@ -122,6 +136,8 @@
         "addressSourceRecords",
         "addressSourceRecordsWithStreetAddress",
         "addressSourceRecordsWithCoordinates",
+        "supplementalEvidenceRecords",
+        "supplementalEvidenceProviders",
         "addressMatchedProviders",
         "addressExactMatchedProviders",
         "addressAliasMatchedProviders",
@@ -146,6 +162,8 @@
         "addressSourceRecords": { "type": "integer", "minimum": 0 },
         "addressSourceRecordsWithStreetAddress": { "type": "integer", "minimum": 0 },
         "addressSourceRecordsWithCoordinates": { "type": "integer", "minimum": 0 },
+        "supplementalEvidenceRecords": { "type": "integer", "minimum": 0 },
+        "supplementalEvidenceProviders": { "type": "integer", "minimum": 0 },
         "addressMatchedProviders": { "type": "integer", "minimum": 0 },
         "addressExactMatchedProviders": { "type": "integer", "minimum": 0 },
         "addressAliasMatchedProviders": { "type": "integer", "minimum": 0 },
@@ -275,12 +293,13 @@
         "address": { "type": ["string", "null"], "minLength": 1 },
         "addressSourceRecordId": {
           "type": ["string", "null"],
-          "pattern": "^ms-unitati-sanitare-[0-9]{3}$"
+          "pattern": "^(ms-unitati-sanitare-[0-9]{3}|capesaro-2026-[AB][0-9]+)$"
         },
         "addressMatchMethod": {
           "enum": [
             "exact-normalised-name-county",
             "curated-same-county-official-name-alias",
+            "capesaro-reviewed-provider-identity",
             null
           ]
         },

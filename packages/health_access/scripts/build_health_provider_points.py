@@ -23,17 +23,20 @@ HEALTH_MART = PACKAGE_ROOT / "data/health-access-mart-2024-2025.json"
 ADDRESS_SOURCE = PACKAGE_ROOT / "sources/ms-unitati-sanitare-2026.json"
 ADDRESS_ALIASES = PACKAGE_ROOT / "sources/ms-unitati-sanitare-address-aliases-2026.json"
 COORDINATE_REVIEWS = PACKAGE_ROOT / "sources/ms-unitati-sanitare-coordinate-reviews-2026.json"
+SUPPLEMENTAL_EVIDENCE = PACKAGE_ROOT / "sources/anmcs-capesaro-provider-point-evidence-2026.json"
 POINT_VIEW_ID: Final[str] = "health-provider-points-2024-2026"
 OUT = PACKAGE_ROOT / f"data/{POINT_VIEW_ID}.json"
-TRANSFORM_VERSION: Final[int] = 5
+TRANSFORM_VERSION: Final[int] = 6
 ROMANIA_LATITUDE_RANGE: Final[tuple[float, float]] = (43.0, 49.0)
 ROMANIA_LONGITUDE_RANGE: Final[tuple[float, float]] = (20.0, 30.0)
 ADDRESS_ALIAS_SOURCE_ID: Final[str] = "ministerul-sanatatii-unitati-sanitare-address-aliases-2026"
 COORDINATE_REVIEW_SOURCE_ID: Final[str] = (
     "ministerul-sanatatii-unitati-sanitare-coordinate-reviews-2026"
 )
+SUPPLEMENTAL_EVIDENCE_SOURCE_ID: Final[str] = "anmcs-capesaro-provider-point-evidence-2026"
 EXACT_ADDRESS_MATCH_METHOD: Final[str] = "exact-normalised-name-county"
 CURATED_ADDRESS_MATCH_METHOD: Final[str] = "curated-same-county-official-name-alias"
+SUPPLEMENTAL_ADDRESS_MATCH_METHOD: Final[str] = "capesaro-reviewed-provider-identity"
 REVIEWED_COORDINATE_MATCH_METHOD: Final[str] = "reviewed-exact-name-county-coordinate-only"
 REVIEWED_COORDINATE_EVIDENCE_METHOD: Final[str] = "reviewed-published-coordinate"
 
@@ -67,6 +70,10 @@ def none_point_evidence() -> dict[str, Any]:
     return {"method": "none", "source": None, "sourceValue": None, "retrievedDate": None}
 
 
+def evidence_retrieved_date(source: dict[str, Any]) -> str:
+    return source.get("retrievedDate") or source["source"]["retrievedDate"]
+
+
 def point_access_blocked_reason(
     provider: dict[str, Any],
     address_match_status: str | None,
@@ -94,10 +101,10 @@ def address_evidence(
     source_record: dict[str, Any],
 ) -> dict[str, Any]:
     return {
-        "method": "official-provider-address",
+        "method": source_record.get("addressEvidenceMethod", "official-provider-address"),
         "source": address_source["id"],
         "sourceValue": source_record["address"],
-        "retrievedDate": address_source["retrievedDate"],
+        "retrievedDate": evidence_retrieved_date(address_source),
     }
 
 
@@ -144,7 +151,9 @@ def coordinate_evidence(
     reviewed_coordinate_only: bool = False,
 ) -> dict[str, Any]:
     method = (
-        REVIEWED_COORDINATE_EVIDENCE_METHOD if reviewed_coordinate_only else "published-coordinate"
+        REVIEWED_COORDINATE_EVIDENCE_METHOD
+        if reviewed_coordinate_only
+        else source_record.get("pointEvidenceMethod", "published-coordinate")
     )
     source_value = (
         f"{source_record['sourceRecordId']}:{latitude:.6f},{longitude:.6f}"
@@ -155,8 +164,18 @@ def coordinate_evidence(
         "method": method,
         "source": address_source["id"],
         "sourceValue": source_value,
-        "retrievedDate": address_source["retrievedDate"],
+        "retrievedDate": evidence_retrieved_date(address_source),
     }
+
+
+def address_match_method(address_match_status: str | None) -> str | None:
+    if address_match_status == "matched":
+        return EXACT_ADDRESS_MATCH_METHOD
+    if address_match_status == "alias":
+        return CURATED_ADDRESS_MATCH_METHOD
+    if address_match_status == "supplemental":
+        return SUPPLEMENTAL_ADDRESS_MATCH_METHOD
+    return None
 
 
 def provider_point(
@@ -185,13 +204,7 @@ def provider_point(
             if address_record or coordinate_record
             else None
         ),
-        "addressMatchMethod": (
-            EXACT_ADDRESS_MATCH_METHOD
-            if address_match_status == "matched"
-            else CURATED_ADDRESS_MATCH_METHOD
-            if address_match_status == "alias"
-            else None
-        ),
+        "addressMatchMethod": address_match_method(address_match_status),
         "addressEvidence": (
             address_evidence(address_source, address_record)
             if address_source and address_record
@@ -494,6 +507,99 @@ def coordinate_review_index(
     return reviews
 
 
+def supplemental_source_record(evidence_record: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "sourceRecordId": evidence_record["sourceRecordId"],
+        "name": evidence_record["sourceName"],
+        "countyCode": evidence_record["countyCode"],
+        "address": evidence_record["address"],
+        "hasStreetAddress": True,
+        "latitude": evidence_record["latitude"],
+        "longitude": evidence_record["longitude"],
+        "hasPublishedCoordinate": True,
+        "addressEvidenceMethod": evidence_record["addressEvidenceMethod"],
+        "pointEvidenceMethod": evidence_record["pointEvidenceMethod"],
+    }
+
+
+def supplemental_evidence_index(
+    supplemental_evidence: dict[str, Any] | None,
+    providers_by_id: dict[str, dict[str, Any]],
+    providers_with_existing_evidence: set[str],
+) -> dict[str, dict[str, Any]]:
+    if not supplemental_evidence:
+        return {}
+    if supplemental_evidence["id"] != SUPPLEMENTAL_EVIDENCE_SOURCE_ID:
+        raise ValueError(
+            f"expected {SUPPLEMENTAL_EVIDENCE_SOURCE_ID}, got {supplemental_evidence['id']}"
+        )
+    if supplemental_evidence["source"]["id"] != "anmcs-capesaro-hospitals-public-2026":
+        raise ValueError(
+            "supplemental evidence uses unsupported source: "
+            f"{supplemental_evidence['source']['id']}"
+        )
+
+    records: dict[str, dict[str, Any]] = {}
+    source_record_ids: set[str] = set()
+    duplicate_providers = []
+    duplicate_source_records = []
+    for evidence_record in supplemental_evidence["records"]:
+        provider_id = evidence_record["providerId"]
+        source_record_id = evidence_record["sourceRecordId"]
+        if provider_id in records:
+            duplicate_providers.append(provider_id)
+        if source_record_id in source_record_ids:
+            duplicate_source_records.append(source_record_id)
+        source_record_ids.add(source_record_id)
+
+        provider = providers_by_id.get(provider_id)
+        if provider is None:
+            raise ValueError(f"supplemental evidence references missing provider: {provider_id}")
+        if evidence_record["providerName"] != provider["name"]:
+            raise ValueError(
+                f"supplemental evidence provider name differs from mart row: {provider_id}"
+            )
+        if provider_id in providers_with_existing_evidence:
+            raise ValueError(
+                f"supplemental evidence would override existing evidence: {provider_id}"
+            )
+        if provider["countyCode"] != evidence_record["countyCode"]:
+            raise ValueError(
+                f"supplemental evidence county differs from provider row: {provider_id}"
+            )
+        if not provider["serviceAccessEligible"]:
+            raise ValueError(
+                f"supplemental evidence provider is not service-access eligible: {provider_id}"
+            )
+        if provider["locationConfidence"] == "county-only":
+            raise ValueError(
+                f"supplemental evidence provider has county-only location: {provider_id}"
+            )
+        if not evidence_record.get("address"):
+            raise ValueError(f"supplemental evidence has no address: {provider_id}")
+        if not coordinate_in_romania(evidence_record["latitude"], evidence_record["longitude"]):
+            raise ValueError(f"supplemental evidence has invalid coordinate: {provider_id}")
+        if evidence_record["matchMethod"] != SUPPLEMENTAL_ADDRESS_MATCH_METHOD:
+            raise ValueError(f"supplemental evidence has unsupported match method: {provider_id}")
+        if evidence_record["addressEvidenceMethod"] != "official-provider-address":
+            raise ValueError(f"supplemental evidence has unsupported address method: {provider_id}")
+        if evidence_record["pointEvidenceMethod"] != "published-coordinate":
+            raise ValueError(f"supplemental evidence has unsupported point method: {provider_id}")
+        if evidence_record["sourceRecordId"] != f"capesaro-2026-{evidence_record['sourceCode']}":
+            raise ValueError(
+                f"supplemental evidence sourceRecordId does not match sourceCode: {provider_id}"
+            )
+        records[provider_id] = supplemental_source_record(evidence_record)
+
+    if duplicate_providers:
+        listed = ", ".join(sorted(set(duplicate_providers))[:10])
+        raise ValueError(f"supplemental evidence file has duplicate provider ids: {listed}")
+    if duplicate_source_records:
+        listed = ", ".join(sorted(set(duplicate_source_records))[:10])
+        raise ValueError(f"supplemental evidence file reuses source record ids: {listed}")
+    return records
+
+
 def match_address_record(
     provider: dict[str, Any],
     index: dict[tuple[str, str], list[dict[str, Any]]],
@@ -522,6 +628,7 @@ def build_document(
     address_source: dict[str, Any] | None = None,
     address_aliases: dict[str, Any] | None = None,
     coordinate_reviews: dict[str, Any] | None = None,
+    supplemental_evidence: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     records = health_mart["records"]
     assert_unique_provider_ids(records)
@@ -564,14 +671,26 @@ def build_document(
         set(address_source_record_by_provider.values()),
         set(address_record_by_provider),
     )
+    supplemental_records_by_provider = supplemental_evidence_index(
+        supplemental_evidence,
+        providers_by_id,
+        set(address_record_by_provider) | set(coordinate_records_by_provider),
+    )
     providers = [
         provider_point(
             record,
-            address_source,
-            address_record_by_provider.get(record["providerId"]),
+            supplemental_evidence
+            if record["providerId"] in supplemental_records_by_provider
+            else address_source,
+            address_record_by_provider.get(record["providerId"])
+            or supplemental_records_by_provider.get(record["providerId"]),
             coordinate_records_by_provider.get(record["providerId"])
-            or address_record_by_provider.get(record["providerId"]),
-            address_match_status_by_provider.get(record["providerId"]),
+            or address_record_by_provider.get(record["providerId"])
+            or supplemental_records_by_provider.get(record["providerId"]),
+            address_match_status_by_provider.get(record["providerId"])
+            or (
+                "supplemental" if record["providerId"] in supplemental_records_by_provider else None
+            ),
             record["providerId"] in coordinate_records_by_provider,
         )
         for record in records
@@ -602,6 +721,9 @@ def build_document(
     coordinate_rejected = [
         provider for provider in coordinate_matched if not provider["pointAccessEligible"]
     ]
+    address_match_statuses = list(address_match_status_by_provider.values()) + [
+        "supplemental" for _ in supplemental_records_by_provider
+    ]
 
     summary = {
         "providers": len(providers),
@@ -618,10 +740,12 @@ def build_document(
             if address_source
             else 0
         ),
+        "supplementalEvidenceRecords": (
+            len(supplemental_evidence["records"]) if supplemental_evidence else 0
+        ),
+        "supplementalEvidenceProviders": len(supplemental_records_by_provider),
         "addressMatchedProviders": sum(
-            1
-            for status in address_match_status_by_provider.values()
-            if status in {"matched", "alias"}
+            1 for status in address_match_statuses if status in {"matched", "alias", "supplemental"}
         ),
         "addressExactMatchedProviders": sum(
             1 for status in address_match_status_by_provider.values() if status == "matched"
@@ -674,6 +798,7 @@ def build_document(
             address_source,
             address_aliases,
             coordinate_reviews,
+            supplemental_evidence,
         ),
         "registry": {
             "healthMart": {
@@ -715,6 +840,17 @@ def build_document(
                 if coordinate_reviews
                 else {}
             ),
+            **(
+                {
+                    "supplementalEvidence": {
+                        "id": supplemental_evidence["id"],
+                        "reviewedDate": supplemental_evidence["reviewedDate"],
+                        "records": len(supplemental_evidence["records"]),
+                    }
+                }
+                if supplemental_evidence
+                else {}
+            ),
         },
         "sourceHashes": source_hashes,
         "transform": {
@@ -737,7 +873,8 @@ def build_document(
                     "Accepted coordinates come from Ministry of Health map markers "
                     "attached to exact normalised provider-name and county matches, "
                     "curated same-county source-record aliases, and reviewed "
-                    "coordinate-only exact source-row acceptances."
+                    "coordinate-only exact source-row acceptances, plus audited "
+                    "ANMCS CAPeSaRo supplemental provider rows."
                 ),
             ),
             limitation(
@@ -775,6 +912,17 @@ def build_document(
                 ),
             ),
             limitation(
+                "supplemental-capesaro-evidence-is-audited",
+                "material",
+                ["address", "latitude", "longitude", "pointEvidence"],
+                (
+                    "CAPeSaRo supplemental evidence is accepted only for explicit "
+                    "providerId/sourceCode pairs after county, service-access, "
+                    "address and coordinate checks. It does not enable broad fuzzy "
+                    "matching from the dashboard feed."
+                ),
+            ),
+            limitation(
                 "county-only-not-promoted-to-points",
                 "material",
                 ["pointAccessEligible", "pointAccessBlockedReason"],
@@ -803,8 +951,9 @@ def provider_point_provenance(
     address_source: dict[str, Any] | None,
     address_aliases: dict[str, Any] | None = None,
     coordinate_reviews: dict[str, Any] | None = None,
+    supplemental_evidence: dict[str, Any] | None = None,
 ) -> dict[str, str]:
-    if not address_source:
+    if not address_source and not supplemental_evidence:
         return {
             "source": health_mart["id"],
             "locator": (
@@ -821,9 +970,11 @@ def provider_point_provenance(
 
     return {
         "source": (
-            f"{health_mart['id']} + {address_source['id']}"
+            health_mart["id"]
+            + (f" + {address_source['id']}" if address_source else "")
             + (f" + {address_aliases['id']}" if address_aliases else "")
             + (f" + {coordinate_reviews['id']}" if coordinate_reviews else "")
+            + (f" + {supplemental_evidence['id']}" if supplemental_evidence else "")
         ),
         "locator": (
             "provider rows from the shared health access mart joined to the "
@@ -839,14 +990,20 @@ def provider_point_provenance(
                 if coordinate_reviews
                 else ""
             )
+            + (
+                ", plus audited ANMCS CAPeSaRo provider/sourceCode evidence"
+                if supplemental_evidence
+                else ""
+            )
         ),
         "confidence": "derived",
         "note": (
             "Official address and marker-coordinate evidence is attached where exact "
             "name/county matches or curated source-record aliases exist. Reviewed "
             "coordinate-only acceptances attach coordinates without creating address "
-            "evidence. Only non-county-only, service-eligible providers with accepted "
-            "coordinates are eligible for point routing."
+            "evidence. CAPeSaRo supplemental evidence is attached only for audited "
+            "provider/sourceCode pairs. Only non-county-only, service-eligible providers "
+            "with accepted coordinates are eligible for point routing."
         ),
     }
 
@@ -858,6 +1015,7 @@ def build_from_files(
     retrieved_date: str | None = None,
     *,
     coordinate_reviews_path: Path | None = COORDINATE_REVIEWS,
+    supplemental_evidence_path: Path | None = SUPPLEMENTAL_EVIDENCE,
 ) -> dict[str, Any]:
     if address_source_path is None:
         address_aliases_path = None
@@ -877,6 +1035,11 @@ def build_from_files(
         if coordinate_reviews_path
         else None
     )
+    supplemental_evidence = (
+        json.loads(supplemental_evidence_path.read_text(encoding="utf-8"))
+        if supplemental_evidence_path
+        else None
+    )
     source_hashes = {"healthAccessMartSha256": sha256_file(health_mart_path)}
     if address_source_path:
         source_hashes["msUnitatiSanitareSha256"] = sha256_file(address_source_path)
@@ -886,6 +1049,10 @@ def build_from_files(
         source_hashes["msUnitatiSanitareCoordinateReviewsSha256"] = sha256_file(
             coordinate_reviews_path
         )
+    if supplemental_evidence_path:
+        source_hashes["capesaroProviderPointEvidenceSha256"] = sha256_file(
+            supplemental_evidence_path
+        )
     return build_document(
         health_mart,
         source_hashes,
@@ -893,6 +1060,7 @@ def build_from_files(
         address_source,
         address_aliases,
         coordinate_reviews,
+        supplemental_evidence,
     )
 
 
@@ -902,9 +1070,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--address-source", type=Path, default=ADDRESS_SOURCE)
     parser.add_argument("--address-aliases", type=Path, default=ADDRESS_ALIASES)
     parser.add_argument("--coordinate-reviews", type=Path, default=COORDINATE_REVIEWS)
+    parser.add_argument("--supplemental-evidence", type=Path, default=SUPPLEMENTAL_EVIDENCE)
     parser.add_argument("--no-address-source", action="store_true")
     parser.add_argument("--no-address-aliases", action="store_true")
     parser.add_argument("--no-coordinate-reviews", action="store_true")
+    parser.add_argument("--no-supplemental-evidence", action="store_true")
     parser.add_argument("--output", type=Path, default=OUT)
     parser.add_argument("--retrieved-date")
     args = parser.parse_args(argv)
@@ -912,6 +1082,7 @@ def main(argv: list[str] | None = None) -> int:
     address_source = None if args.no_address_source else args.address_source
     address_aliases = None if args.no_address_aliases else args.address_aliases
     coordinate_reviews = None if args.no_coordinate_reviews else args.coordinate_reviews
+    supplemental_evidence = None if args.no_supplemental_evidence else args.supplemental_evidence
     if address_source is None:
         address_aliases = None
         coordinate_reviews = None
@@ -921,6 +1092,7 @@ def main(argv: list[str] | None = None) -> int:
         address_aliases,
         args.retrieved_date,
         coordinate_reviews_path=coordinate_reviews,
+        supplemental_evidence_path=supplemental_evidence,
     )
     args.output.write_text(
         json.dumps(document, ensure_ascii=False, indent=2) + "\n",

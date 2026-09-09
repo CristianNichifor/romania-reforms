@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/packages/health_access/schema/health-provider-point-supplemental-evidence.schema.json",
+  "title": "Supplemental provider point evidence",
+  "description": "Audited supplemental provider address and coordinate evidence used by the health provider-point builder when the Ministry map has no accepted provider-specific point evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "id",
+    "title",
+    "publisher",
+    "source",
+    "reviewedDate",
+    "provenance",
+    "records",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "const": "anmcs-capesaro-provider-point-evidence-2026" },
+    "title": { "type": "string", "minLength": 1 },
+    "publisher": { "const": "Cristian Nichifor" },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "publisher",
+        "sourcePageUrl",
+        "sourceUrl",
+        "retrievedDate",
+        "license",
+        "usageLimitation"
+      ],
+      "properties": {
+        "id": { "const": "anmcs-capesaro-hospitals-public-2026" },
+        "publisher": {
+          "const": "Autoritatea Nationala de Management al Calitatii in Sanatate"
+        },
+        "sourcePageUrl": { "type": "string", "format": "uri" },
+        "sourceUrl": { "type": "string", "format": "uri" },
+        "retrievedDate": { "type": "string", "format": "date" },
+        "license": { "type": "string", "minLength": 1 },
+        "usageLimitation": { "type": "string", "minLength": 1 }
+      }
+    },
+    "reviewedDate": { "type": "string", "format": "date" },
+    "provenance": {
+      "$ref": "https://cristiannichifor.github.io/romania-reforms/schema/provenance.schema.json#/$defs/provenance"
+    },
+    "records": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/record" }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "https://cristiannichifor.github.io/romania-reforms/schema/provenance.schema.json#/$defs/limitation"
+      }
+    }
+  },
+  "$defs": {
+    "record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "providerId",
+        "sourceRecordId",
+        "sourceNativeId",
+        "sourceCode",
+        "countyCode",
+        "sourceCountyName",
+        "sourceCity",
+        "providerName",
+        "sourceName",
+        "address",
+        "latitude",
+        "longitude",
+        "website",
+        "matchMethod",
+        "addressEvidenceMethod",
+        "pointEvidenceMethod",
+        "reason"
+      ],
+      "properties": {
+        "providerId": { "type": "string", "pattern": "^anmcs-2025-[0-9]{3}$" },
+        "sourceRecordId": { "type": "string", "pattern": "^capesaro-2026-[AB][0-9]+$" },
+        "sourceNativeId": { "type": "string", "pattern": "^[0-9]+$" },
+        "sourceCode": { "type": "string", "pattern": "^[AB][0-9]+$" },
+        "countyCode": { "type": "string", "pattern": "^[A-Z]{1,2}$" },
+        "sourceCountyName": { "type": "string", "minLength": 1 },
+        "sourceCity": { "type": "string", "minLength": 1 },
+        "providerName": { "type": "string", "minLength": 1 },
+        "sourceName": { "type": "string", "minLength": 1 },
+        "address": { "type": "string", "minLength": 1 },
+        "latitude": { "type": "number", "minimum": 43, "maximum": 49 },
+        "longitude": { "type": "number", "minimum": 20, "maximum": 30 },
+        "website": { "type": ["string", "null"], "minLength": 1 },
+        "matchMethod": { "const": "capesaro-reviewed-provider-identity" },
+        "addressEvidenceMethod": { "const": "official-provider-address" },
+        "pointEvidenceMethod": { "const": "published-coordinate" },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}
