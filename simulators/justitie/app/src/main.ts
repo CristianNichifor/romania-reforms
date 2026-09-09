@@ -74,6 +74,9 @@ interface Servicii {
     medianMetresToHospitalAtMost: number;
     seatsThatAreHospitalTowns: number;
     seatsThatAreCourtTowns: number;
+    healthAccessEligibleProviders: number;
+    healthAccessBlockedProviders: number;
+    healthProviderTowns: number;
     seatsThatArePoliceTowns: number;
     medianMetresToPoliceAtMost: number;
     units: number;
@@ -2223,17 +2226,22 @@ async function main(): Promise<void> {
        ${politie.summary.courtSeatsWithStation} din ${politie.summary.courtSeats} de sedii
        propuse au deja secție — iar asta rezistă la o hartă incompletă: punctele lipsă ar face
        potrivirea mai grea, nu mai ușoară.</p>
+     <p class="disagree">Pentru distanțe, sănătatea vine din pachetul shared:
+       ${servicii.summary.healthAccessEligibleProviders} furnizori localizați la nivel de UAT,
+       în ${servicii.summary.healthProviderTowns} UAT-uri. Alți
+       ${servicii.summary.healthAccessBlockedProviders} furnizori rămân excluși fiindcă au doar
+       localizare la nivel de județ.</p>
      <p class="disagree">Aceleași sedii, față de toate trei rețelele:
        ${servicii.summary.seatsThatArePoliceTowns} din ${ro.format(servicii.summary.units)} au
-       poliție, ${servicii.summary.seatsThatAreHospitalTowns} din
-       ${ro.format(servicii.summary.comparableUnits)} au spital, dar doar
+       poliție, ${servicii.summary.seatsThatAreHospitalTowns} au furnizor de sănătate localizat,
+       dar doar
        ${servicii.summary.seatsThatAreCourtTowns} ar avea instanță. Orașele pe care reforma le
        alege sunt deja centre de poliție și de sănătate; singurul lucru care le-ar lipsi e
        instanța.</p>
      <p class="disagree">În kilometri, mediana drumului ar fi
        ${Math.round(servicii.summary.medianMetresToCourt / 1000)} km până la instanță, față de
        ${Math.round(servicii.summary.medianMetresToPoliceAtMost / 1000)} km până la poliție și
-       ${Math.round(servicii.summary.medianMetresToHospitalAtMost / 1000)} km până la spital.
+       ${Math.round(servicii.summary.medianMetresToHospitalAtMost / 1000)} km până la sănătate.
        Rețeaua de justiție ar fi mult mai rară decât celelalte două. Ambele distanțe din urmă
        sunt limite de sus: un punct nemarcat scurtează drumul, nu îl lungește.</p>
      <p class="disagree">Invers, ${Math.round(
