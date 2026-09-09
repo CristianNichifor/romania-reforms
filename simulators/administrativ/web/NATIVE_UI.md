@@ -60,5 +60,24 @@ Reproduced in Chromium on unchanged `aab98ca`: open `#lang=en&sel=1`, choose the
 first nonblank target (230), and reload. The URL retains `pin=1.230` and the
 manual-override list still has UAT 1, but `#pin-select` has value `""`.
 
-Existing Vite/esbuild and legacy Vitest development-tool advisories remain a
-separate upgrade task. No audit rules are disabled by this adoption.
+## Development toolchain
+
+Use Node 22.12 or newer (CI uses Node 22). Vite is pinned to 7.3.6 and Vitest to
+4.1.11, already used in sibling simulators. The lint-only js-yaml transitive
+dependency is updated within its existing allowed range. All 23 runtime lock
+entries remain structurally identical, including MapLibre and its transitives.
+The existing explicit ES2022 build target and worker format are unchanged.
+
+The [Vitest 3](https://v3.vitest.dev/guide/migration) and
+[Vitest 4](https://v4.vitest.dev/guide/migration) migration guidance was checked.
+The model suite uses no mocks, fake timers, custom pools, workspace APIs or
+coverage provider. Node environment, globals, 120-second test timeout and the
+separate Playwright exclusion stay unchanged. The existing 150ms performance
+assertion is not relaxed. Model/parity assertions remain unchanged; the three
+browsers compare all 15 captured pre-upgrade domain states.
+
+`npm audit` reported zero findings for this lockfile on 2026-09-10, down from
+six development-tool findings. This is a point-in-time result. No audit
+suppression, dependency override or legacy-peer resolution flag is used.
+The updated lock was resolved with CI-image npm 11 after npm 10's peer-graph
+resolver crashed; clean `npm ci` with local Node 22/npm 10 then passed.
