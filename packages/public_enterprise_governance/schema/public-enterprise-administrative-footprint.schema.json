@@ -1,0 +1,367 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/packages/public_enterprise_governance/schema/public-enterprise-administrative-footprint.schema.json",
+  "title": "Public-enterprise administrative footprint",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "id",
+    "title",
+    "publisher",
+    "scope",
+    "periodStart",
+    "periodEnd",
+    "retrievedDate",
+    "license",
+    "attribution",
+    "sources",
+    "sourceHashes",
+    "registry",
+    "transform",
+    "provenance",
+    "summary",
+    "authorities",
+    "uats",
+    "counties",
+    "exclusions",
+    "limitations",
+    "nextSlice"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "const": "public-enterprise-administrative-footprint-2024-2026" },
+    "title": { "type": "string", "minLength": 1 },
+    "publisher": { "type": "string", "minLength": 1 },
+    "scope": { "const": "administrative-aggregate" },
+    "periodStart": { "type": "string", "pattern": "^[0-9]{4}$" },
+    "periodEnd": { "type": "string", "pattern": "^[0-9]{4}$" },
+    "retrievedDate": { "type": "string", "format": "date" },
+    "license": { "type": "string", "minLength": 1 },
+    "attribution": { "type": "string", "minLength": 1 },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/source" }
+    },
+    "sourceHashes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "anexa3SummarySha256",
+        "mfinBilanturiSha256",
+        "companiiSearchSha256",
+        "uatRegistrySha256"
+      ],
+      "properties": {
+        "anexa3SummarySha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "mfinBilanturiSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "companiiSearchSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "subventiiLocaleSha256": { "type": ["string", "null"], "pattern": "^[a-f0-9]{64}$" },
+        "uatRegistrySha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "registry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["uatRegistryId", "uatRegistryPeriod"],
+      "properties": {
+        "uatRegistryId": { "type": "string", "minLength": 1 },
+        "uatRegistryPeriod": { "type": "string", "pattern": "^[0-9]{4}$" }
+      }
+    },
+    "transform": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["script", "version"],
+      "properties": {
+        "script": { "type": "string", "minLength": 1 },
+        "version": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "provenance": {
+      "$ref": "https://cristiannichifor.github.io/romania-reforms/schema/provenance.schema.json#/$defs/provenance"
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceCompanies",
+        "matchedCompanies",
+        "duplicateCompanyRows",
+        "unmatchedCompanies",
+        "authorities",
+        "uats",
+        "counties",
+        "companiesWithFinancials",
+        "subsidizedUats",
+        "companyCount",
+        "activeCompanyCount",
+        "lossMakingCompanyCount",
+        "subsidizedCompanyCount",
+        "employeeCount",
+        "revenueRon",
+        "profitLossRon",
+        "debtRon",
+        "subsidiesRon"
+      ],
+      "properties": {
+        "sourceCompanies": { "type": "integer", "minimum": 0 },
+        "matchedCompanies": { "type": "integer", "minimum": 0 },
+        "duplicateCompanyRows": { "type": "integer", "minimum": 0 },
+        "unmatchedCompanies": { "type": "integer", "minimum": 0 },
+        "authorities": { "type": "integer", "minimum": 0 },
+        "uats": { "type": "integer", "minimum": 0 },
+        "counties": { "type": "integer", "minimum": 0 },
+        "companiesWithFinancials": { "type": "integer", "minimum": 0 },
+        "subsidizedUats": { "type": "integer", "minimum": 0 },
+        "companyCount": { "type": "integer", "minimum": 0 },
+        "activeCompanyCount": { "type": "integer", "minimum": 0 },
+        "lossMakingCompanyCount": { "type": "integer", "minimum": 0 },
+        "subsidizedCompanyCount": { "type": "integer", "minimum": 0 },
+        "employeeCount": { "type": "integer", "minimum": 0 },
+        "revenueRon": { "type": "number" },
+        "profitLossRon": { "type": "number" },
+        "debtRon": { "type": "number" },
+        "subsidiesRon": { "type": "number" }
+      }
+    },
+    "authorities": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/authority" }
+    },
+    "uats": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/uat" }
+    },
+    "counties": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/county" }
+    },
+    "exclusions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/exclusion" }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "https://cristiannichifor.github.io/romania-reforms/schema/provenance.schema.json#/$defs/limitation"
+      }
+    },
+    "nextSlice": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scope", "deliverable", "doneWhen"],
+      "properties": {
+        "scope": { "type": "string", "minLength": 1 },
+        "deliverable": { "type": "string", "minLength": 1 },
+        "doneWhen": { "type": "string", "minLength": 1 }
+      }
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "url", "role", "license"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "url": { "type": "string", "format": "uri" },
+        "role": { "enum": ["comparison", "registry"] },
+        "license": { "type": "string", "minLength": 1 },
+        "notes": { "type": "string" }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "required": [
+        "companyCount",
+        "activeCompanyCount",
+        "companiesWithFinancials",
+        "lossMakingCompanyCount",
+        "subsidizedCompanyCount",
+        "employeeCount",
+        "revenueRon",
+        "profitLossRon",
+        "debtRon",
+        "subsidiesRon"
+      ],
+      "properties": {
+        "companyCount": { "type": "integer", "minimum": 0 },
+        "activeCompanyCount": { "type": "integer", "minimum": 0 },
+        "companiesWithFinancials": { "type": "integer", "minimum": 0 },
+        "lossMakingCompanyCount": { "type": "integer", "minimum": 0 },
+        "subsidizedCompanyCount": { "type": "integer", "minimum": 0 },
+        "employeeCount": { "type": "integer", "minimum": 0 },
+        "revenueRon": { "type": "number" },
+        "profitLossRon": { "type": "number" },
+        "debtRon": { "type": "number" },
+        "subsidiesRon": { "type": "number" }
+      }
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authorityKey",
+        "authorityName",
+        "sourceAuthorityLabel",
+        "authorityType",
+        "ownershipLevel",
+        "siruta",
+        "countyCode",
+        "countyName",
+        "registryMatchMethod",
+        "companyCount",
+        "activeCompanyCount",
+        "companiesWithFinancials",
+        "lossMakingCompanyCount",
+        "subsidizedCompanyCount",
+        "employeeCount",
+        "revenueRon",
+        "profitLossRon",
+        "debtRon",
+        "subsidiesRon",
+        "sourceCoverage",
+        "provenance"
+      ],
+      "properties": {
+        "authorityKey": { "type": "string", "minLength": 1 },
+        "authorityName": { "type": "string", "minLength": 1 },
+        "sourceAuthorityLabel": { "type": "string", "minLength": 1 },
+        "authorityType": {
+          "enum": ["county-council", "municipality", "town", "commune", "sector", "other-local"]
+        },
+        "ownershipLevel": { "const": "local" },
+        "siruta": { "type": "string", "pattern": "^[0-9]+$" },
+        "countyCode": { "type": "string", "pattern": "^[A-Z]{1,2}$" },
+        "countyName": { "type": "string", "minLength": 1 },
+        "registryMatchMethod": { "enum": ["registry-alias", "registry-alias-county"] },
+        "companyCount": { "type": "integer", "minimum": 0 },
+        "activeCompanyCount": { "type": "integer", "minimum": 0 },
+        "companiesWithFinancials": { "type": "integer", "minimum": 0 },
+        "lossMakingCompanyCount": { "type": "integer", "minimum": 0 },
+        "subsidizedCompanyCount": { "type": "integer", "minimum": 0 },
+        "employeeCount": { "type": "integer", "minimum": 0 },
+        "revenueRon": { "type": "number" },
+        "profitLossRon": { "type": "number" },
+        "debtRon": { "type": "number" },
+        "subsidiesRon": { "type": "number" },
+        "sourceCoverage": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["amepipCompanies", "mfinCompanies", "subsidyRows"],
+          "properties": {
+            "amepipCompanies": { "type": "integer", "minimum": 0 },
+            "mfinCompanies": { "type": "integer", "minimum": 0 },
+            "subsidyRows": { "type": "integer", "minimum": 0 }
+          }
+        },
+        "provenance": {
+          "$ref": "https://cristiannichifor.github.io/romania-reforms/schema/provenance.schema.json#/$defs/provenance"
+        }
+      }
+    },
+    "uat": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "siruta",
+        "name",
+        "level",
+        "countyCode",
+        "countyName",
+        "population",
+        "authorityCount",
+        "companyCount",
+        "activeCompanyCount",
+        "companiesWithFinancials",
+        "lossMakingCompanyCount",
+        "subsidizedCompanyCount",
+        "employeeCount",
+        "revenueRon",
+        "profitLossRon",
+        "debtRon",
+        "subsidiesRon"
+      ],
+      "properties": {
+        "siruta": { "type": "string", "pattern": "^[0-9]+$" },
+        "name": { "type": "string", "minLength": 1 },
+        "level": { "enum": ["county", "municipality", "town", "commune", "sector"] },
+        "countyCode": { "type": "string", "pattern": "^[A-Z]{1,2}$" },
+        "countyName": { "type": "string", "minLength": 1 },
+        "population": { "type": ["integer", "null"], "minimum": 0 },
+        "authorityCount": { "type": "integer", "minimum": 0 },
+        "companyCount": { "type": "integer", "minimum": 0 },
+        "activeCompanyCount": { "type": "integer", "minimum": 0 },
+        "companiesWithFinancials": { "type": "integer", "minimum": 0 },
+        "lossMakingCompanyCount": { "type": "integer", "minimum": 0 },
+        "subsidizedCompanyCount": { "type": "integer", "minimum": 0 },
+        "employeeCount": { "type": "integer", "minimum": 0 },
+        "revenueRon": { "type": "number" },
+        "profitLossRon": { "type": "number" },
+        "debtRon": { "type": "number" },
+        "subsidiesRon": { "type": "number" }
+      }
+    },
+    "county": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "countyCode",
+        "countyName",
+        "uats",
+        "uatsWithCompanies",
+        "authorityCount",
+        "companyCount",
+        "activeCompanyCount",
+        "companiesWithFinancials",
+        "lossMakingCompanyCount",
+        "subsidizedCompanyCount",
+        "employeeCount",
+        "revenueRon",
+        "profitLossRon",
+        "debtRon",
+        "subsidiesRon"
+      ],
+      "properties": {
+        "countyCode": { "type": "string", "pattern": "^[A-Z]{1,2}$" },
+        "countyName": { "type": "string", "minLength": 1 },
+        "uats": { "type": "integer", "minimum": 0 },
+        "uatsWithCompanies": { "type": "integer", "minimum": 0 },
+        "authorityCount": { "type": "integer", "minimum": 0 },
+        "companyCount": { "type": "integer", "minimum": 0 },
+        "activeCompanyCount": { "type": "integer", "minimum": 0 },
+        "companiesWithFinancials": { "type": "integer", "minimum": 0 },
+        "lossMakingCompanyCount": { "type": "integer", "minimum": 0 },
+        "subsidizedCompanyCount": { "type": "integer", "minimum": 0 },
+        "employeeCount": { "type": "integer", "minimum": 0 },
+        "revenueRon": { "type": "number" },
+        "profitLossRon": { "type": "number" },
+        "debtRon": { "type": "number" },
+        "subsidiesRon": { "type": "number" }
+      }
+    },
+    "exclusion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reason", "sourceAuthorityLabel", "sourceRows"],
+      "properties": {
+        "reason": {
+          "enum": [
+            "central-authority",
+            "authority-company-not-uat",
+            "unmatched-authority",
+            "ambiguous-authority",
+            "duplicate-company-authority"
+          ]
+        },
+        "sourceAuthorityLabel": { "type": "string", "minLength": 1 },
+        "countyCode": { "type": ["string", "null"], "pattern": "^[A-Z]{1,2}$" },
+        "sourceRows": { "type": "integer", "minimum": 1 },
+        "note": { "type": "string" }
+      }
+    }
+  }
+}

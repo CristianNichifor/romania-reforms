@@ -83,14 +83,25 @@ This source family could serve more than one simulator:
    committed sample keeps 50 rows and summary metrics over all 833 parsed source rows.
 5. Done: define the full mart schema, release-asset policy and `salarizare` consumer contract.
    The importer can generate the full mart, but the generated row-level file stays out of git.
-6. Next: publish the mart as a checksum-pinned release asset and build a compact `salarizare`
-   comparison payload from the release asset rather than loading nominal rows in the browser.
-7. Later: parse KPI Annexes 1-3 only after the compensation sample proves the provenance and
-   validation contract.
+6. Done: build `public-enterprise-administrative-footprint-2024-2026`, a compact
+   authority/UAT/county aggregate from the documented companiidestat.ro API. This is a
+   comparison/reference layer under CC BY 4.0 attribution, not a replacement for official
+   AMEPIP/MFin provenance.
+7. Done: expose the aggregate in `administrativ` through `public-enterprise-footprint.json`,
+   aligned to the browser UAT index and containing only numeric arrays and summary metadata.
+   The app does not load company, CUI or person rows.
+8. Next: rebuild the same administrative footprint contract from official AMEPIP annexes and
+   MFin/data.gov.ro statements, using companiidestat.ro as validation/discovery instead of
+   primary source.
+9. Later: publish the compensation mart as a checksum-pinned release asset only when a compact
+   `salarizare` comparison payload is ready to consume it without loading nominal rows in the
+   browser.
 
 The slice should not scrape opaque Power BI internals as the source of truth. If Power BI is the
 only row-level route, require a documented export/API path before adoption.
 
-`companiidestat.ro` can accelerate validation because it already exposes a public API over CUI
-rosters, AMEPIP-derived fields and compensation data. Use it as a comparison layer unless the
-project explicitly decides to ingest civic-derived data in addition to official attachments.
+`companiidestat.ro` can accelerate validation because it exposes a documented public API over
+CUI rosters, AMEPIP-derived fields, MFin financials and subsidies. The administrative footprint
+slice ingests it only as a labelled comparison/reference aggregate, with `sourceUrl`, hashes,
+retrieval date, `license=CC BY 4.0` and attribution carried in the output. Official AMEPIP and
+MFin files remain the target source of truth for a future replacement import.
