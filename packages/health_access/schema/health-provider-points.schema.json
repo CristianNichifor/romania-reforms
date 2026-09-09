@@ -1,0 +1,311 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/packages/health_access/schema/health-provider-points.schema.json",
+  "title": "Provider-level health point evidence",
+  "description": "Provider-level point-evidence contract for health access. The file may contain providers without coordinates; point routing may use only rows with pointAccessEligible true.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "id",
+    "title",
+    "publisher",
+    "scope",
+    "periodStart",
+    "periodEnd",
+    "retrievedDate",
+    "provenance",
+    "registry",
+    "sourceHashes",
+    "transform",
+    "summary",
+    "providers",
+    "exclusions",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "const": "health-provider-points-2024-2026" },
+    "title": { "type": "string", "minLength": 1 },
+    "publisher": { "const": "Ministerul Sanatatii / ANMCS" },
+    "scope": { "const": "provider-point-evidence" },
+    "periodStart": { "const": "2024" },
+    "periodEnd": { "const": "2026" },
+    "retrievedDate": { "type": "string", "format": "date" },
+    "provenance": {
+      "$ref": "https://cristiannichifor.github.io/romania-reforms/schema/provenance.schema.json#/$defs/provenance"
+    },
+    "registry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["healthMart"],
+      "properties": {
+        "healthMart": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "periodStart", "periodEnd"],
+          "properties": {
+            "id": {
+              "enum": ["health-access-mart-2024-2025", "health-access-mart-sample-2024-2025"]
+            },
+            "periodStart": { "const": "2024" },
+            "periodEnd": { "const": "2025" }
+          }
+        }
+      }
+    },
+    "sourceHashes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["healthAccessMartSha256"],
+      "properties": {
+        "healthAccessMartSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "transform": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["script", "version"],
+      "properties": {
+        "script": {
+          "const": "packages/health_access/scripts/build_health_provider_points.py"
+        },
+        "version": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "providers",
+        "serviceAccessEligibleProviders",
+        "serviceAccessBlockedProviders",
+        "pointAccessEligibleProviders",
+        "pointAccessBlockedProviders",
+        "providersWithAddress",
+        "providersWithCoordinates",
+        "addressEvidence",
+        "pointConfidence",
+        "blockedReasons",
+        "byCounty"
+      ],
+      "properties": {
+        "providers": { "type": "integer", "minimum": 1 },
+        "serviceAccessEligibleProviders": { "type": "integer", "minimum": 0 },
+        "serviceAccessBlockedProviders": { "type": "integer", "minimum": 0 },
+        "pointAccessEligibleProviders": { "type": "integer", "minimum": 0 },
+        "pointAccessBlockedProviders": { "type": "integer", "minimum": 0 },
+        "providersWithAddress": { "type": "integer", "minimum": 0 },
+        "providersWithCoordinates": { "type": "integer", "minimum": 0 },
+        "addressEvidence": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        },
+        "pointConfidence": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        },
+        "blockedReasons": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        },
+        "byCounty": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/countySummary" }
+        }
+      }
+    },
+    "providers": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/providerPoint" }
+    },
+    "exclusions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/exclusion" }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "https://cristiannichifor.github.io/romania-reforms/schema/provenance.schema.json#/$defs/limitation"
+      }
+    }
+  },
+  "$defs": {
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "source", "sourceValue", "retrievedDate"],
+      "properties": {
+        "method": {
+          "enum": [
+            "official-provider-address",
+            "source-workbook-address",
+            "provider-published-address",
+            "osm-name-address-match",
+            "manual-review",
+            "none"
+          ]
+        },
+        "source": { "type": ["string", "null"], "minLength": 1 },
+        "sourceValue": { "type": ["string", "null"], "minLength": 1 },
+        "retrievedDate": { "type": ["string", "null"], "format": "date" }
+      }
+    },
+    "pointEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "source", "sourceValue", "retrievedDate"],
+      "properties": {
+        "method": {
+          "enum": [
+            "published-coordinate",
+            "geocoded-address",
+            "osm-feature-match",
+            "manual-review",
+            "none"
+          ]
+        },
+        "source": { "type": ["string", "null"], "minLength": 1 },
+        "sourceValue": { "type": ["string", "null"], "minLength": 1 },
+        "retrievedDate": { "type": ["string", "null"], "format": "date" }
+      }
+    },
+    "providerPoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "providerId",
+        "name",
+        "countyCode",
+        "countyName",
+        "siruta",
+        "localityName",
+        "locationConfidence",
+        "serviceAccessEligible",
+        "address",
+        "addressEvidence",
+        "latitude",
+        "longitude",
+        "pointConfidence",
+        "pointEvidence",
+        "pointAccessEligible",
+        "pointAccessBlockedReason"
+      ],
+      "properties": {
+        "providerId": { "type": "string", "pattern": "^anmcs-2025-[0-9]{3}$" },
+        "name": { "type": "string", "minLength": 1 },
+        "countyCode": { "type": "string", "pattern": "^[A-Z]{1,2}$" },
+        "countyName": { "type": "string", "minLength": 1 },
+        "siruta": { "type": ["string", "null"], "pattern": "^[0-9]+$" },
+        "localityName": { "type": ["string", "null"], "minLength": 1 },
+        "locationConfidence": {
+          "enum": ["name-derived-locality", "municipality-from-county", "county-only"]
+        },
+        "serviceAccessEligible": { "type": "boolean" },
+        "address": { "type": ["string", "null"], "minLength": 1 },
+        "addressEvidence": { "$ref": "#/$defs/evidence" },
+        "latitude": { "type": ["number", "null"], "minimum": 43, "maximum": 49 },
+        "longitude": { "type": ["number", "null"], "minimum": 20, "maximum": 30 },
+        "pointConfidence": {
+          "enum": [
+            "official-coordinate",
+            "address-geocoded",
+            "osm-name-address-match",
+            "manual-coordinate",
+            "none"
+          ]
+        },
+        "pointEvidence": { "$ref": "#/$defs/pointEvidence" },
+        "pointAccessEligible": { "type": "boolean" },
+        "pointAccessBlockedReason": {
+          "enum": [
+            "no-point-evidence",
+            "county-only-location",
+            "invalid-coordinate",
+            "ambiguous-address",
+            "outside-expected-uat",
+            "manual-review-needed",
+            null
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "pointAccessEligible": { "const": true } } },
+          "then": {
+            "properties": {
+              "latitude": { "type": "number", "minimum": 43, "maximum": 49 },
+              "longitude": { "type": "number", "minimum": 20, "maximum": 30 },
+              "pointConfidence": { "not": { "const": "none" } },
+              "pointAccessBlockedReason": { "type": "null" }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "pointAccessEligible": { "const": false } } },
+          "then": {
+            "properties": {
+              "pointAccessBlockedReason": { "type": "string" }
+            }
+          }
+        }
+      ]
+    },
+    "countySummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "countyCode",
+        "countyName",
+        "providers",
+        "serviceAccessEligibleProviders",
+        "pointAccessEligibleProviders",
+        "pointAccessBlockedProviders"
+      ],
+      "properties": {
+        "countyCode": { "type": "string", "pattern": "^[A-Z]{1,2}$" },
+        "countyName": { "type": "string", "minLength": 1 },
+        "providers": { "type": "integer", "minimum": 0 },
+        "serviceAccessEligibleProviders": { "type": "integer", "minimum": 0 },
+        "pointAccessEligibleProviders": { "type": "integer", "minimum": 0 },
+        "pointAccessBlockedProviders": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "exclusion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "source",
+        "providerId",
+        "name",
+        "countyCode",
+        "pointAccessBlockedReason",
+        "reason"
+      ],
+      "properties": {
+        "kind": { "const": "provider-excluded-from-point-access" },
+        "source": {
+          "enum": ["health-access-mart-2024-2025", "health-access-mart-sample-2024-2025"]
+        },
+        "providerId": { "type": "string", "pattern": "^anmcs-2025-[0-9]{3}$" },
+        "name": { "type": "string", "minLength": 1 },
+        "countyCode": { "type": "string", "pattern": "^[A-Z]{1,2}$" },
+        "pointAccessBlockedReason": {
+          "enum": [
+            "no-point-evidence",
+            "county-only-location",
+            "invalid-coordinate",
+            "ambiguous-address",
+            "outside-expected-uat",
+            "manual-review-needed"
+          ]
+        },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

@@ -92,7 +92,10 @@ First slice:
   panel as aligned local-provider counts
 - done: wire the shared UAT service-access view into `transport` as local-provider counts on
   routed UAT rows
-- next: add street-address or coordinate evidence for point-level provider locations
+- done: add a provider-point evidence contract that carries every mart provider and blocks all
+  rows from point routing until point evidence exists
+- next: import a first verified street-address source, preserving ambiguous/no-address rows as
+  named exclusions
 
 This should support service-access views in `administrativ`, `justitie` and `transport`
 without each simulator building its own hospital roster.
