@@ -4,9 +4,12 @@ import importlib.util
 import json
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parent.parent
 IMPORTER = ROOT / "packages" / "local_finance" / "scripts" / "import_local_finance.py"
 DATA = ROOT / "packages" / "local_finance" / "data"
+DATA_ASSETS = ROOT / "data-assets.json"
 
 spec = importlib.util.spec_from_file_location("import_local_finance", IMPORTER)
 assert spec and spec.loader
@@ -351,9 +354,6 @@ def test_committed_local_finance_sample_covers_the_first_slice_scope():
     mart = json.loads(
         (DATA / "local-finance-mart-sample-2023-2025.json").read_text(encoding="utf-8")
     )
-    report = json.loads(
-        (DATA / "local-finance-validation-report-2023-2025.json").read_text(encoding="utf-8")
-    )
 
     assert mart["summary"]["uats"] == 10
     assert mart["summary"]["years"] == 3
@@ -370,12 +370,44 @@ def test_committed_local_finance_sample_covers_the_first_slice_scope():
     }
     assert len(rural_counties) >= 3
 
+
+def test_full_2023_2025_history_is_documented_as_a_release_asset():
+    assets = json.loads(DATA_ASSETS.read_text(encoding="utf-8"))["assets"]
+    entry = next(asset for asset in assets if asset["id"] == "local-finance-mart-2023-2025")
+
+    assert entry["destination"] == "packages/local_finance/data/local-finance-mart-2023-2025.json"
+    assert entry["bytes"] > 9_000_000
+    assert len(entry["sha256"]) == 64
+    assert "9,684" in entry["what"]
+
+
+def test_full_2023_2025_history_report_covers_the_release_payload():
+    report = json.loads(
+        (DATA / "local-finance-validation-report-2023-2025.json").read_text(encoding="utf-8")
+    )
+
     statuses = {check["id"]: check["status"] for check in report["checks"]}
     assert report["summary"]["failed"] == 0
-    assert statuses["sample-scope"] == "pass"
+    assert report["martId"] == "local-finance-mart-2023-2025"
+    assert statuses["full-national-scope"] == "pass"
     assert statuses["registry-join"] == "pass"
     assert statuses["development-expense-type-coverage"] == "warning"
     assert statuses["data-gov-2024-national-comparison"] == "warning"
+    assert statuses["data-gov-arrears-coverage"] == "warning"
+
+
+def test_fetched_full_2023_2025_mart_covers_the_national_history():
+    path = DATA / "local-finance-mart-2023-2025.json"
+    if not path.exists():
+        pytest.skip("release asset was not fetched")
+
+    mart = json.loads(path.read_text(encoding="utf-8"))
+
+    assert mart["scope"] == "full"
+    assert mart["summary"]["uats"] == 3228
+    assert mart["summary"]["years"] == 3
+    assert mart["summary"]["records"] == 9684
+    assert mart["summary"]["registryMatchedUats"] == 3187
 
 
 def test_committed_full_2025_mart_exports_the_impozit_teren_budget():

@@ -123,13 +123,14 @@
       ],
       "storagePolicy": "Derived yearly marts should be release assets when they exceed the repository size budget; small summaries and schemas can be committed.",
       "nextSlice": {
-        "scope": "Historical finance expansion through release assets",
-        "deliverable": "Publish the full 2023-2025 national mart history as release assets and keep the committed tree under the size gate.",
-        "doneWhen": "The full 2023-2025 local finance history is reproducible and downloadable without increasing the tracked tree past its size gate."
+        "scope": "Simulator consumption",
+        "deliverable": "Wire the local-finance mart into a first consuming simulator view using the indicators already proven by the shared package.",
+        "doneWhen": "At least one simulator reads the shared mart/release asset rather than maintaining a parallel local finance import."
       },
       "notes": [
         "Transparenta data is useful, but the catalog must not imply that the repository license covers the underlying official budget data.",
-        "The official data.gov.ro Arierate package currently indexes UAT XLS resources only through 2018-06-30, so it cannot populate the 2025 mart."
+        "The official data.gov.ro Arierate package currently indexes UAT XLS resources only through 2018-06-30, so it cannot populate the 2025 mart.",
+        "The full 2023-2025 national mart is published as a `data-v1` release asset because the generated JSON is about 9.7 MB."
       ]
     },
     {
