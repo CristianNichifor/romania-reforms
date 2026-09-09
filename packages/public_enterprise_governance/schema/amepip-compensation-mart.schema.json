@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://cristiannichifor.github.io/romania-reforms/packages/public_enterprise_governance/schema/amepip-compensation-sample.schema.json",
-  "title": "AMEPIP nominal compensation sample",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/packages/public_enterprise_governance/schema/amepip-compensation-mart.schema.json",
+  "title": "AMEPIP nominal compensation mart",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -20,12 +20,14 @@
     "provenance",
     "summary",
     "records",
+    "releasePolicy",
+    "consumerContracts",
     "limitations",
     "nextSlice"
   ],
   "properties": {
     "$schema": { "type": "string" },
-    "id": { "const": "amepip-compensation-sample-august-2025" },
+    "id": { "const": "amepip-compensation-mart-august-2025" },
     "title": { "type": "string", "minLength": 1 },
     "sourceId": { "const": "amepip-indemnizatii-ip-centrale-august-2025" },
     "publisher": { "type": "string", "minLength": 1 },
@@ -39,49 +41,16 @@
     "provenance": {
       "$ref": "https://cristiannichifor.github.io/romania-reforms/schema/provenance.schema.json#/$defs/provenance"
     },
-    "summary": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "sourceRows",
-        "emittedRows",
-        "sampleRows",
-        "enterprises",
-        "authorities",
-        "people",
-        "rowsWithCui",
-        "rowsWithMonthlyFixedGross",
-        "rowsWithAnnualVariableGross",
-        "rowsWithNonNumericMonthlyFixed",
-        "rowsWithNonNumericAnnualVariable",
-        "boardRows",
-        "directorRows",
-        "unknownRoleRows",
-        "missingRoleRows",
-        "missingPersonRows"
-      ],
-      "properties": {
-        "sourceRows": { "type": "integer", "minimum": 0 },
-        "emittedRows": { "type": "integer", "minimum": 0 },
-        "sampleRows": { "type": "integer", "minimum": 0 },
-        "enterprises": { "type": "integer", "minimum": 0 },
-        "authorities": { "type": "integer", "minimum": 0 },
-        "people": { "type": "integer", "minimum": 0 },
-        "rowsWithCui": { "type": "integer", "minimum": 0 },
-        "rowsWithMonthlyFixedGross": { "type": "integer", "minimum": 0 },
-        "rowsWithAnnualVariableGross": { "type": "integer", "minimum": 0 },
-        "rowsWithNonNumericMonthlyFixed": { "type": "integer", "minimum": 0 },
-        "rowsWithNonNumericAnnualVariable": { "type": "integer", "minimum": 0 },
-        "boardRows": { "type": "integer", "minimum": 0 },
-        "directorRows": { "type": "integer", "minimum": 0 },
-        "unknownRoleRows": { "type": "integer", "minimum": 0 },
-        "missingRoleRows": { "type": "integer", "minimum": 0 },
-        "missingPersonRows": { "type": "integer", "minimum": 0 }
-      }
-    },
+    "summary": { "$ref": "#/$defs/summary" },
     "records": {
       "type": "array",
       "items": { "$ref": "#/$defs/record" }
+    },
+    "releasePolicy": { "$ref": "#/$defs/releasePolicy" },
+    "consumerContracts": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/consumerContract" }
     },
     "limitations": {
       "type": "array",
@@ -101,6 +70,44 @@
     }
   },
   "$defs": {
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceRows",
+        "emittedRows",
+        "enterprises",
+        "authorities",
+        "people",
+        "rowsWithCui",
+        "rowsWithMonthlyFixedGross",
+        "rowsWithAnnualVariableGross",
+        "rowsWithNonNumericMonthlyFixed",
+        "rowsWithNonNumericAnnualVariable",
+        "boardRows",
+        "directorRows",
+        "unknownRoleRows",
+        "missingRoleRows",
+        "missingPersonRows"
+      ],
+      "properties": {
+        "sourceRows": { "type": "integer", "minimum": 0 },
+        "emittedRows": { "type": "integer", "minimum": 0 },
+        "enterprises": { "type": "integer", "minimum": 0 },
+        "authorities": { "type": "integer", "minimum": 0 },
+        "people": { "type": "integer", "minimum": 0 },
+        "rowsWithCui": { "type": "integer", "minimum": 0 },
+        "rowsWithMonthlyFixedGross": { "type": "integer", "minimum": 0 },
+        "rowsWithAnnualVariableGross": { "type": "integer", "minimum": 0 },
+        "rowsWithNonNumericMonthlyFixed": { "type": "integer", "minimum": 0 },
+        "rowsWithNonNumericAnnualVariable": { "type": "integer", "minimum": 0 },
+        "boardRows": { "type": "integer", "minimum": 0 },
+        "directorRows": { "type": "integer", "minimum": 0 },
+        "unknownRoleRows": { "type": "integer", "minimum": 0 },
+        "missingRoleRows": { "type": "integer", "minimum": 0 },
+        "missingPersonRows": { "type": "integer", "minimum": 0 }
+      }
+    },
     "record": {
       "type": "object",
       "additionalProperties": false,
@@ -124,7 +131,7 @@
       "properties": {
         "sourceRecordId": {
           "type": "string",
-          "pattern": "^amepip-compensation-sample-august-2025-[0-9]{4}$"
+          "pattern": "^amepip-compensation-mart-august-2025-[0-9]{4}$"
         },
         "sourceRowNumber": { "type": "integer", "minimum": 1 },
         "sourcePageNumber": { "type": "integer", "minimum": 1 },
@@ -142,6 +149,48 @@
         "provenance": {
           "$ref": "https://cristiannichifor.github.io/romania-reforms/schema/provenance.schema.json#/$defs/provenance"
         }
+      }
+    },
+    "releasePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["storage", "assetId", "destination", "publishCommand", "gitPolicy"],
+      "properties": {
+        "storage": { "const": "release-asset" },
+        "assetId": { "const": "amepip-compensation-mart-august-2025" },
+        "destination": {
+          "const": "packages/public_enterprise_governance/data/amepip-compensation-mart-august-2025.json"
+        },
+        "publishCommand": { "type": "string", "minLength": 1 },
+        "gitPolicy": { "type": "string", "minLength": 1 }
+      }
+    },
+    "consumerContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "consumer",
+        "status",
+        "joinKeys",
+        "comparisonFields",
+        "limitationText"
+      ],
+      "properties": {
+        "consumer": { "type": "string", "minLength": 1 },
+        "status": { "enum": ["release-asset-required", "ready", "blocked"] },
+        "joinKeys": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "comparisonFields": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "limitationText": { "type": "string", "minLength": 1 }
       }
     }
   }

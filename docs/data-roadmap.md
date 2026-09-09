@@ -44,8 +44,10 @@ First slice:
 - done: build `amepip-compensation-sample-august-2025`, a compact 50-row sample generated
   from all 833 parsed August 2025 nominal compensation rows, preserving CUI, APT, enterprise,
   person, role, raw amount strings and fixed/variable compensation fields;
-- next: decide whether to publish the full compensation mart as a release asset and wire a
-  `salarizare` comparison view to the shared package.
+- done: define the full mart schema, release-asset policy and `salarizare` consumer contract
+  without committing the generated row-level mart;
+- next: publish the full compensation mart as a checksum-pinned release asset, then build a
+  compact `salarizare` comparison payload from that asset.
 
 ## 1. SIRUTA, UAT and CUI registry
 

@@ -70,6 +70,10 @@ simulators/impozit-teren/data/buget-uat-*.json
 packages/health_access/sources/anmcs-capesaro-public-hospitals-2026.json
 packages/health_access/data/health-provider-point-capesaro-candidates-2024-2026.json
 
+# Full public-enterprise compensation marts are row-level derived payloads. Keep the compact
+# sample in git; publish generated full marts as checksum-pinned release assets before use.
+packages/public_enterprise_governance/data/amepip-compensation-mart-*.json
+
 # The Romanian language pack for tesseract, fetched by hand for ocr_cache.py.
 # 2.3 MB of model weights that belong to the tesseract project, not to this repository.
 simulators/impozit-teren/tessdata/
