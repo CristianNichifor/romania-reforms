@@ -245,6 +245,15 @@ export interface Strings {
   healthAccessBeds: string;
   healthAccessSectorRows: string;
   healthAccessSource: string;
+  publicEnterpriseHeading: string;
+  publicEnterpriseCompanies: string;
+  publicEnterpriseLossMaking: string;
+  publicEnterpriseEmployees: string;
+  publicEnterpriseRevenue: string;
+  publicEnterpriseProfitLoss: string;
+  publicEnterpriseDebt: string;
+  publicEnterpriseSubsidies: string;
+  publicEnterpriseSource: string;
 
   budgetLink: string;
   budgetLinkTitle: string;
@@ -525,6 +534,16 @@ const ro: Strings = {
   healthAccessSectorRows:
     '{n} sectoare București nu intră în numărătoarea locală: sursa poate plasa furnizorii doar la nivelul municipiului.',
   healthAccessSource: 'Vedere shared health-access {years}, furnizori serviceAccessEligible',
+  publicEnterpriseHeading: 'Întreprinderi publice',
+  publicEnterpriseCompanies: 'Companii',
+  publicEnterpriseLossMaking: 'Pe pierdere',
+  publicEnterpriseEmployees: 'Salariați',
+  publicEnterpriseRevenue: 'Cifră de afaceri',
+  publicEnterpriseProfitLoss: 'Profit / pierdere netă',
+  publicEnterpriseDebt: 'Datorii',
+  publicEnterpriseSubsidies: 'Subvenții locale',
+  publicEnterpriseSource:
+    'Agregat UAT {years} din companiidestat.ro; comparație derivată, nu registru oficial complet.',
 
   budgetLink: 'Bugetul pe transparenta.eu',
   budgetLinkTitle: 'Execuția bugetară a acestui UAT pe transparenta.eu',
@@ -805,6 +824,16 @@ const en: Strings = {
   healthAccessSectorRows:
     '{n} Bucharest sector rows are left out of the local count: the source can place providers only at municipality level.',
   healthAccessSource: 'Shared health-access view {years}, serviceAccessEligible providers',
+  publicEnterpriseHeading: 'Public enterprises',
+  publicEnterpriseCompanies: 'Companies',
+  publicEnterpriseLossMaking: 'Loss-making',
+  publicEnterpriseEmployees: 'Employees',
+  publicEnterpriseRevenue: 'Turnover',
+  publicEnterpriseProfitLoss: 'Net profit / loss',
+  publicEnterpriseDebt: 'Debt',
+  publicEnterpriseSubsidies: 'Local subsidies',
+  publicEnterpriseSource:
+    'UAT aggregate {years} from companiidestat.ro; derived comparison layer, not a complete official register.',
 
   budgetLink: 'Budget on transparenta.eu',
   budgetLinkTitle: "This UAT's budget execution on transparenta.eu",

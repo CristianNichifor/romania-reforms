@@ -66,8 +66,9 @@ are verified before any frontend work begins.
 - [x] `build_finance.py` — operating vs development expenditure per UAT
 - [x] `reference_model.py` — Python implementation of the algorithm
 - [x] `export.py` — typed-array payload for the browser
-- [x] `build_local_finance.py` + `build_health_access.py` — shared-package payloads aligned
-  to the browser's UAT index
+- [x] `build_local_finance.py` + `build_health_access.py` +
+  `build_public_enterprise_footprint.py` — shared-package payloads aligned to the browser's
+  UAT index
 - [x] TypeScript port + parity tests
 - [x] Frontend — MapLibre map, model in a Web Worker, RO/EN, deep-linkable scenarios
 - [x] METHODOLOGY.md written out in full, RO + EN
@@ -94,6 +95,7 @@ WKB — not the file. A changed `.gpkg` checksum on its own means nothing.
 | Commune seats | SIRUTA `reședință de comună` + OSM `place=village/town` coordinates |
 | Roads | OSM Romania extract (Geofabrik) |
 | Budget execution | Ministerul Finanțelor, COFOG3 reports |
+| Public-enterprise footprint | Shared public-enterprise governance aggregate, aligned by SIRUTA |
 
 **SIRUTA is the join key for everything.** Codes have changed over time, INS and MF use
 different vintages, and some UATs have split or renamed. The pipeline builds an explicit

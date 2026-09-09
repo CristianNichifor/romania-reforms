@@ -23,6 +23,12 @@ import {
   type LocalFinancePayload,
 } from './app/local-finance';
 import { createPanel } from './app/panels';
+import {
+  publicEnterpriseFootprintPayloadAligned,
+  publicEnterpriseFootprintPeriodLabel,
+  publicEnterpriseFootprintTotals,
+  type PublicEnterpriseFootprintPayload,
+} from './app/public-enterprise-footprint';
 import { REFERENCE, sameMap } from './app/reference';
 import { decode as decodeScenario, encode as encodeScenario, writeHash, type Scenario } from './app/scenario';
 import {
@@ -262,6 +268,7 @@ async function boot(): Promise<void> {
     el('#sources').innerHTML =
       'ANCPI · INS (Recensământ 2021) · Ministerul Finanțelor · OpenStreetMap · ' +
       '<a href="https://www.transparenta.eu" target="_blank" rel="noopener">Transparenta.eu</a> · ' +
+      '<a href="https://companiidestat.ro/date/" target="_blank" rel="noopener">companiidestat.ro</a> · ' +
       '<a href="https://geo-spatial.org" target="_blank" rel="noopener">geo-spatial.org</a>';
     controlsPanel.setLabels(strings.panelResize, strings.panelResizeHelp);
     detailPanel.setLabels(strings.panelResize, strings.panelResizeHelp);
@@ -1528,6 +1535,30 @@ async function boot(): Promise<void> {
   };
 
   /**
+   * Public-enterprise footprint, aggregated by authority/UAT before it reaches the app.
+   *
+   * The source package may know company CUIs and names while building the aggregate; this
+   * payload deliberately does not. The browser gets only numeric arrays aligned to UAT index.
+   */
+  let publicEnterpriseFootprint: PublicEnterpriseFootprintPayload | null = null;
+  let publicEnterpriseFootprintLoad: Promise<void> | null = null;
+
+  const loadPublicEnterpriseFootprint = (): Promise<void> => {
+    publicEnterpriseFootprintLoad ??= fetch(`${DATA_BASE}public-enterprise-footprint.json`)
+      .then((response) => (response.ok ? response.json() : null))
+      .then((raw: PublicEnterpriseFootprintPayload | null) => {
+        publicEnterpriseFootprint =
+          raw && ready && publicEnterpriseFootprintPayloadAligned(raw, ready.attributes.siruta)
+            ? raw
+            : null;
+      })
+      .catch(() => {
+        publicEnterpriseFootprint = null;
+      });
+    return publicEnterpriseFootprintLoad;
+  };
+
+  /**
    * The 2020 local-council votes, fetched the first time a unit's detail is opened.
    *
    * 153 KB, and only a reader who opens a unit ever needs it — the map itself does not. Absent
@@ -1838,6 +1869,7 @@ async function boot(): Promise<void> {
     // The party table needs the votes; the rest of the panel does not wait for them.
     if (!localFinance) void loadLocalFinance().then(() => { if (scenario.selected === index) renderDetail(); });
     if (!healthAccess) void loadHealthAccess().then(() => { if (scenario.selected === index) renderDetail(); });
+    if (!publicEnterpriseFootprint) void loadPublicEnterpriseFootprint().then(() => { if (scenario.selected === index) renderDetail(); });
     if (!votes) void loadVotes().then(() => { if (scenario.selected === index) renderDetail(); });
     if (!courts) void loadCourts().then(() => { if (scenario.selected === index) renderDetail(); });
     const sharedHealth = healthAccessTotals(healthAccess, members);
@@ -1870,6 +1902,39 @@ async function boot(): Promise<void> {
            )}</p>
          </div>`
       : '';
+    const enterpriseFootprint = publicEnterpriseFootprintTotals(publicEnterpriseFootprint, members);
+    const enterpriseYears = publicEnterpriseFootprint
+      ? publicEnterpriseFootprintPeriodLabel(publicEnterpriseFootprint)
+      : '';
+    const enterpriseFootprintHtml =
+      enterpriseFootprint
+      && (enterpriseFootprint.companyCount > 0 || enterpriseFootprint.subsidiesRon > 0)
+        ? `<div class="public-enterprise-footprint">
+             <h4>${strings.publicEnterpriseHeading}</h4>
+             <dl>
+               <dt>${strings.publicEnterpriseCompanies}</dt>
+               <dd>${formatNumber(enterpriseFootprint.companyCount, scenario.lang)}</dd>
+               <dt>${strings.publicEnterpriseLossMaking}</dt>
+               <dd>${formatNumber(enterpriseFootprint.lossMakingCompanyCount, scenario.lang)}</dd>
+               <dt>${strings.publicEnterpriseEmployees}</dt>
+               <dd>${formatNumber(enterpriseFootprint.employeeCount, scenario.lang)}</dd>
+               <dt>${strings.publicEnterpriseRevenue}</dt>
+               <dd>${formatMoney(enterpriseFootprint.revenueRon, scenario.lang)}</dd>
+               <dt>${strings.publicEnterpriseProfitLoss}</dt>
+               <dd>${signed(enterpriseFootprint.profitLossRon, (value) =>
+                 formatMoney(value, scenario.lang),
+               )}</dd>
+               <dt>${strings.publicEnterpriseDebt}</dt>
+               <dd>${formatMoney(enterpriseFootprint.debtRon, scenario.lang)}</dd>
+               <dt>${strings.publicEnterpriseSubsidies}</dt>
+               <dd>${formatMoney(enterpriseFootprint.subsidiesRon, scenario.lang)}</dd>
+             </dl>
+             <p class="muted rep-source">${strings.publicEnterpriseSource.replace(
+               '{years}',
+               enterpriseYears,
+             )}</p>
+           </div>`
+        : '';
     detailPanel.setTitle(unitName(ready, region));
     el<HTMLElement>('#detail-kicker').innerHTML =
       `${strings.region}${orphan ? ` · <span class="badge orphan">${strings.legendOrphan}</span>` : ''}`;
@@ -1925,6 +1990,8 @@ async function boot(): Promise<void> {
       ${representationHtml(members, region, totalPop)}
 
       ${courtsHtml(members)}
+
+      ${enterpriseFootprintHtml}
 
       ${healthHtml}
 

@@ -20,8 +20,8 @@ Remaining work is maintenance, not an active build queue:
 
 New source families should start as separate reconnaissance PRs and are not blockers for
 closing this wave. AMEPIP/public-company data is now tracked as a planned family in the
-catalog after source inventory; the next slice is a compensation sample parser, not simulator
-ingestion.
+catalog after source inventory. The first app-facing use is deliberately aggregate-only:
+`administrativ` now consumes a public-enterprise footprint sidecar, not company/person rows.
 
 ## Planned: AMEPIP public enterprises
 
@@ -46,8 +46,16 @@ First slice:
   person, role, raw amount strings and fixed/variable compensation fields;
 - done: define the full mart schema, release-asset policy and `salarizare` consumer contract
   without committing the generated row-level mart;
-- next: publish the full compensation mart as a checksum-pinned release asset, then build a
-  compact `salarizare` comparison payload from that asset.
+- done: build `public-enterprise-administrative-footprint-2024-2026`, a committed
+  authority/UAT/county aggregate from companiidestat.ro reference endpoints, matched
+  conservatively to `uat-registry-2026` and carrying explicit unmatched/ambiguous authority
+  exclusions;
+- done: wire that aggregate into `administrativ` as `public-enterprise-footprint.json`, a
+  SIRUTA-aligned numeric sidecar for the merged-unit detail panel with no CUI, enterprise or
+  person rows in the browser payload;
+- next: replace the comparison aggregate with the same contract built from official AMEPIP
+  annexes and MFin/data.gov.ro financial statements, keeping companiidestat.ro as a validation
+  source rather than the primary provenance.
 
 ## 1. SIRUTA, UAT and CUI registry
 
