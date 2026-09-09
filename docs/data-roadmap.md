@@ -41,8 +41,11 @@ First slice:
   reuse limitations;
 - done: move the dataset from `candidate` to `planned` because six inspected PDFs expose
   CUI-level row data;
-- next: build a small August 2025 nominal compensation parser with CUI, APT, enterprise,
-  person, role and fixed/variable compensation fields.
+- done: build `amepip-compensation-sample-august-2025`, a compact 50-row sample generated
+  from all 833 parsed August 2025 nominal compensation rows, preserving CUI, APT, enterprise,
+  person, role, raw amount strings and fixed/variable compensation fields;
+- next: decide whether to publish the full compensation mart as a release asset and wire a
+  `salarizare` comparison view to the shared package.
 
 ## 1. SIRUTA, UAT and CUI registry
 

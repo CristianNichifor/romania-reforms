@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/packages/public_enterprise_governance/schema/amepip-compensation-sample.schema.json",
+  "title": "AMEPIP nominal compensation sample",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "id",
+    "title",
+    "sourceId",
+    "publisher",
+    "sourcePageUrl",
+    "sourceUrl",
+    "retrievedDate",
+    "license",
+    "transformVersion",
+    "sourceSha256",
+    "sourcePageCount",
+    "provenance",
+    "summary",
+    "records",
+    "limitations",
+    "nextSlice"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "const": "amepip-compensation-sample-august-2025" },
+    "title": { "type": "string", "minLength": 1 },
+    "sourceId": { "const": "amepip-indemnizatii-ip-centrale-august-2025" },
+    "publisher": { "type": "string", "minLength": 1 },
+    "sourcePageUrl": { "type": "string", "format": "uri" },
+    "sourceUrl": { "type": "string", "format": "uri" },
+    "retrievedDate": { "type": "string", "format": "date" },
+    "license": { "type": "string", "minLength": 1 },
+    "transformVersion": { "type": "string", "minLength": 1 },
+    "sourceSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "sourcePageCount": { "type": "integer", "minimum": 1 },
+    "provenance": {
+      "$ref": "https://cristiannichifor.github.io/romania-reforms/schema/provenance.schema.json#/$defs/provenance"
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceRows",
+        "sampleRows",
+        "enterprises",
+        "authorities",
+        "people",
+        "rowsWithCui",
+        "rowsWithMonthlyFixedGross",
+        "rowsWithAnnualVariableGross",
+        "rowsWithNonNumericMonthlyFixed",
+        "rowsWithNonNumericAnnualVariable",
+        "boardRows",
+        "directorRows",
+        "unknownRoleRows",
+        "missingRoleRows",
+        "missingPersonRows"
+      ],
+      "properties": {
+        "sourceRows": { "type": "integer", "minimum": 0 },
+        "sampleRows": { "type": "integer", "minimum": 0 },
+        "enterprises": { "type": "integer", "minimum": 0 },
+        "authorities": { "type": "integer", "minimum": 0 },
+        "people": { "type": "integer", "minimum": 0 },
+        "rowsWithCui": { "type": "integer", "minimum": 0 },
+        "rowsWithMonthlyFixedGross": { "type": "integer", "minimum": 0 },
+        "rowsWithAnnualVariableGross": { "type": "integer", "minimum": 0 },
+        "rowsWithNonNumericMonthlyFixed": { "type": "integer", "minimum": 0 },
+        "rowsWithNonNumericAnnualVariable": { "type": "integer", "minimum": 0 },
+        "boardRows": { "type": "integer", "minimum": 0 },
+        "directorRows": { "type": "integer", "minimum": 0 },
+        "unknownRoleRows": { "type": "integer", "minimum": 0 },
+        "missingRoleRows": { "type": "integer", "minimum": 0 },
+        "missingPersonRows": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "records": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/record" }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "$ref": "https://cristiannichifor.github.io/romania-reforms/schema/provenance.schema.json#/$defs/limitation"
+      }
+    },
+    "nextSlice": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scope", "deliverable", "doneWhen"],
+      "properties": {
+        "scope": { "type": "string", "minLength": 1 },
+        "deliverable": { "type": "string", "minLength": 1 },
+        "doneWhen": { "type": "string", "minLength": 1 }
+      }
+    }
+  },
+  "$defs": {
+    "record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceRecordId",
+        "sourceRowNumber",
+        "sourcePageNumber",
+        "enterpriseOrdinal",
+        "authorityName",
+        "enterpriseName",
+        "cui",
+        "personName",
+        "role",
+        "roleType",
+        "monthlyFixedGrossRon",
+        "annualVariableGrossRon",
+        "rawMonthlyFixedGross",
+        "rawAnnualVariableGross",
+        "provenance"
+      ],
+      "properties": {
+        "sourceRecordId": {
+          "type": "string",
+          "pattern": "^amepip-compensation-sample-august-2025-[0-9]{4}$"
+        },
+        "sourceRowNumber": { "type": "integer", "minimum": 1 },
+        "sourcePageNumber": { "type": "integer", "minimum": 1 },
+        "enterpriseOrdinal": { "type": ["integer", "null"], "minimum": 1 },
+        "authorityName": { "type": "string", "minLength": 1 },
+        "enterpriseName": { "type": "string", "minLength": 1 },
+        "cui": { "type": "string", "pattern": "^[0-9]+$" },
+        "personName": { "type": ["string", "null"] },
+        "role": { "type": ["string", "null"] },
+        "roleType": { "enum": ["board", "director", "unknown"] },
+        "monthlyFixedGrossRon": { "type": ["integer", "null"], "minimum": 0 },
+        "annualVariableGrossRon": { "type": ["integer", "null"], "minimum": 0 },
+        "rawMonthlyFixedGross": { "type": ["string", "null"] },
+        "rawAnnualVariableGross": { "type": ["string", "null"] },
+        "provenance": {
+          "$ref": "https://cristiannichifor.github.io/romania-reforms/schema/provenance.schema.json#/$defs/provenance"
+        }
+      }
+    }
+  }
+}

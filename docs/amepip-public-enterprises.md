@@ -25,6 +25,7 @@ Do not import rows into simulator payloads until the next slice preserves:
 | AMEPIP dashboard | <https://amepip.gov.ro/en/tablou-de-bord/> | Embedded Power BI dashboard for public enterprises. AMEPIP pages describe financial, non-financial and corporate-governance indicators. | Candidate source; not an importer source until export and reuse terms are explicit. |
 | KPI evaluation report | <https://amepip.gov.ro/raport-evaluare-kpi/> | 2024 public-enterprise evaluation report and annexes for central/local financial and non-financial indicators, plus listing-readiness recommendations. | Best first target for source-shape review because the annexes are named release artifacts. |
 | CA/CS indemnities | <https://amepip.gov.ro/indemnizatii-ca-cs/> | Monthly board, supervisory-board and director compensation reports. | Candidate for public-pay comparisons if enterprise keys are stable. |
+| Companiile de stat API | <https://companiidestat.ro/date/> | Documented read-only JSON API with CUI-keyed company files, financials, salaries, subsidies and AMEPIP-derived fields. | Comparison/reference source under CC BY 4.0; official AMEPIP/MFin attachments remain source of truth for imports. |
 | AMEPIP presentation | <https://amepip.gov.ro/prezentare/> | Institutional scope: AMEPIP collects, monitors and publishes financial and non-financial performance results of public enterprises. | Context only. |
 | Dashboard announcement | <https://amepip.gov.ro/tablou-de-bord-pentru-a-monitorizarea-indicatorilor-cheie-de-performanta-ai-companiilor-de-stat/> | Describes dashboard coverage and states that financial indicators come from Ministry of Finance data. | Context and validation hint. |
 
@@ -43,7 +44,7 @@ Inspected on 2026-09-10:
 | KPI Annex 3, local financial indicators | 1 | Yes | 1,212 local-company indicator blocks with CUI/APT/year/indicator fields. |
 | Listing Annex 4 | 1 | Yes | About 208 CUI-level listing-readiness rows. |
 | Listing Annexes 5-6 | 2 | No visible CUI | Recommendation context only until joined through an official CUI crosswalk. |
-| CA/CS compensation reports | 2 | Yes | July has about 139 enterprise rows; August has about 787 nominal/person rows. |
+| CA/CS compensation reports | 2 | Yes | July has about 139 enterprise rows; August parses to 833 nominal/person rows. |
 
 Decision: use the August 2025 nominal central-enterprise compensation report as the first
 parser target because it directly supports the `salarizare` public-pay comparison and has CUI,
@@ -78,9 +79,16 @@ This source family could serve more than one simulator:
 2. Done: record file type, source URLs, SHA-256 hashes, row estimates, available identifiers
    and visible license/reuse limitations.
 3. Done: decide that CUI-level PDFs justify moving the dataset to `planned`.
-4. Next: build a small parser for the August 2025 nominal compensation PDF/text source.
-5. Later: parse KPI Annexes 1-3 only after the compensation sample proves the provenance and
+4. Done: build a small parser for the August 2025 nominal compensation PDF source. The
+   committed sample keeps 50 rows and summary metrics over all 833 parsed source rows.
+5. Next: decide whether to publish the full compensation mart as a release asset and wire a
+   `salarizare` comparison view to the shared package.
+6. Later: parse KPI Annexes 1-3 only after the compensation sample proves the provenance and
    validation contract.
 
 The slice should not scrape opaque Power BI internals as the source of truth. If Power BI is the
 only row-level route, require a documented export/API path before adoption.
+
+`companiidestat.ro` can accelerate validation because it already exposes a public API over CUI
+rosters, AMEPIP-derived fields and compensation data. Use it as a comparison layer unless the
+project explicitly decides to ingest civic-derived data in addition to official attachments.
