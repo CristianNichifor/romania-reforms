@@ -1,9 +1,8 @@
-"""Build a shared health-access mart from Ministry of Health and ANMCS workbooks.
+"""Build a shared national health-access mart from Ministry of Health and ANMCS workbooks.
 
-The first slice is deliberately narrow: Cluj plus Bucharest. It establishes the
-provider/accreditation shape, attaches provider-level clinical bed counts when the
-source rows can be matched confidently, and names the rows that are excluded from
-provider-level access calculations.
+The mart uses ANMCS as the provider/accreditation roster, attaches provider-level
+clinical bed counts when Ministry source rows can be matched confidently, and
+names the rows that are excluded from provider-level access calculations.
 
 Usage:
     uv run python packages/health_access/scripts/import_health_access.py \
@@ -33,10 +32,11 @@ import pandas as pd
 REPO_ROOT = Path(__file__).resolve().parents[3]
 PACKAGE_ROOT = Path(__file__).resolve().parents[1]
 UAT_REGISTRY = REPO_ROOT / "packages/uat_registry/data/uat-registry-2026.json"
-OUT = PACKAGE_ROOT / "data/health-access-mart-sample-2024-2025.json"
+NATIONAL_MART_ID: Final[str] = "health-access-mart-2024-2025"
+SAMPLE_MART_ID: Final[str] = "health-access-mart-sample-2024-2025"
+OUT = PACKAGE_ROOT / f"data/{NATIONAL_MART_ID}.json"
 UA: Final[str] = "romania-reforms/0.1 (+https://github.com/CristianNichifor/romania-reforms)"
-TRANSFORM_VERSION: Final[int] = 1
-SCOPE_COUNTIES: Final[tuple[str, ...]] = ("B", "CJ")
+TRANSFORM_VERSION: Final[int] = 2
 
 HOSPITAL_BEDS_URL: Final[str] = (
     "https://data.gov.ro/dataset/37aa4af3-4b99-4277-8193-236b8ccbaea1/"
@@ -61,6 +61,7 @@ COUNTY_CODE_BY_NAME: Final[dict[str, str]] = {
     "ARGES": "AG",
     "BACAU": "BC",
     "BIHOR": "BH",
+    "BISTRITA N": "BN",
     "BISTRITA NASAUD": "BN",
     "BOTOSANI": "BT",
     "BRAILA": "BR",
@@ -69,6 +70,7 @@ COUNTY_CODE_BY_NAME: Final[dict[str, str]] = {
     "BUCURESTI": "B",
     "M BUCURESTI": "B",
     "CALARASI": "CL",
+    "CARAS S": "CS",
     "CARAS SEVERIN": "CS",
     "CLUJ": "CJ",
     "CONSTANTA": "CT",
@@ -101,8 +103,48 @@ COUNTY_CODE_BY_NAME: Final[dict[str, str]] = {
     "VRANCEA": "VN",
 }
 COUNTY_NAME_BY_CODE: Final[dict[str, str]] = {
+    "AB": "Alba",
+    "AG": "Arges",
+    "AR": "Arad",
     "B": "Bucuresti",
+    "BC": "Bacau",
+    "BH": "Bihor",
+    "BN": "Bistrita-Nasaud",
+    "BR": "Braila",
+    "BT": "Botosani",
+    "BV": "Brasov",
+    "BZ": "Buzau",
     "CJ": "Cluj",
+    "CL": "Calarasi",
+    "CS": "Caras-Severin",
+    "CT": "Constanta",
+    "CV": "Covasna",
+    "DB": "Dambovita",
+    "DJ": "Dolj",
+    "GJ": "Gorj",
+    "GL": "Galati",
+    "GR": "Giurgiu",
+    "HD": "Hunedoara",
+    "HR": "Harghita",
+    "IF": "Ilfov",
+    "IL": "Ialomita",
+    "IS": "Iasi",
+    "MH": "Mehedinti",
+    "MM": "Maramures",
+    "MS": "Mures",
+    "NT": "Neamt",
+    "OT": "Olt",
+    "PH": "Prahova",
+    "SB": "Sibiu",
+    "SJ": "Salaj",
+    "SM": "Satu Mare",
+    "SV": "Suceava",
+    "TL": "Tulcea",
+    "TM": "Timis",
+    "TR": "Teleorman",
+    "VL": "Valcea",
+    "VN": "Vrancea",
+    "VS": "Vaslui",
 }
 BEDS_COLUMN: Final[int] = 2
 SPECIALTY_COLUMNS: Final[dict[int, str]] = {
@@ -210,29 +252,42 @@ WEAK_SINGLE_TOKEN_MATCHES: Final[set[str]] = {
     "BOLI",
     "CHIRURGIE",
     "COPII",
+    "IOAN",
     "MEDICAL",
     "RECUPERARE",
 }
-NON_SCOPE_LOCATION_TOKENS: Final[tuple[str, ...]] = (
-    "ARAD",
-    "BAILE FELIX",
-    "BRAILA",
-    "BRASOV",
-    "BUZIAS",
-    "CONSTANTA",
-    "CRAIOVA",
-    "EFORIE",
-    "GALATI",
-    "IASI",
-    "LEAMNA",
-    "MOINESTI",
-    "ORADEA",
-    "SIBIU",
-    "SUCEAVA",
-    "TARGU MURES",
-    "TG MURES",
-    "TIMISOARA",
-)
+CLINICAL_LOCATION_HINTS: Final[dict[str, str]] = {
+    "ARAD": "AR",
+    "BAILE FELIX": "BH",
+    "BRAILA": "BR",
+    "BRASOV": "BV",
+    "BUCURESTI": "B",
+    "BUZIAS": "TM",
+    "CLUJ": "CJ",
+    "CONSTANTA": "CT",
+    "CRAIOVA": "DJ",
+    "EFORIE NORD": "CT",
+    "EFORIE": "CT",
+    "GALATI": "GL",
+    "IASI": "IS",
+    "LEAMNA": "DJ",
+    "MOINESTI": "BC",
+    "MURES": "MS",
+    "ORADEA": "BH",
+    "SIBIU": "SB",
+    "SUCEAVA": "SV",
+    "TARGU MURES": "MS",
+    "TG MURES": "MS",
+    "TIMISOARA": "TM",
+}
+LOCATION_ONLY_MATCH_TOKENS: Final[set[str]] = {
+    token for hint in CLINICAL_LOCATION_HINTS for token in hint.split()
+}
+LOCALITY_ALIASES: Final[dict[tuple[str, str], str]] = {
+    ("CJ", "CLUJ"): "CLUJ-NAPOCA",
+    ("MS", "TG MURES"): "TARGU MURES",
+    ("MS", "TIRGU MURES"): "TARGU MURES",
+}
 PRIVATE_MARKERS: Final[tuple[str, ...]] = (
     " S R L",
     " SRL",
@@ -342,7 +397,7 @@ def match_score(left: str, right: str) -> float:
     elif (
         len(common) == 1
         and min(len(left_tokens), len(right_tokens)) == 1
-        and next(iter(common)) not in WEAK_SINGLE_TOKEN_MATCHES
+        and next(iter(common)) not in WEAK_SINGLE_TOKEN_MATCHES | LOCATION_ONLY_MATCH_TOKENS
     ):
         token_score = 1.0
     return token_score
@@ -437,7 +492,7 @@ def parse_clinical_beds(data: bytes) -> list[dict[str, Any]]:
     return parsed
 
 
-def parse_anmcs(data: bytes, selected_counties: set[str]) -> list[dict[str, Any]]:
+def parse_anmcs(data: bytes, selected_counties: set[str] | None) -> list[dict[str, Any]]:
     frame = excel_frame(data, "Toate")
     rows: list[dict[str, Any]] = []
     for index, row in frame.iterrows():
@@ -445,7 +500,11 @@ def parse_anmcs(data: bytes, selected_counties: set[str]) -> list[dict[str, Any]
             continue
         name = clean_text(row.iloc[1] if len(row) > 1 else None)
         code = county_code(row.iloc[2] if len(row) > 2 else None)
-        if not name or code not in selected_counties:
+        if (
+            not name
+            or code is None
+            or (selected_counties is not None and code not in selected_counties)
+        ):
             continue
         ordinal = int(row.iloc[0])
         rows.append(
@@ -455,7 +514,7 @@ def parse_anmcs(data: bytes, selected_counties: set[str]) -> list[dict[str, Any]
                 "anmcsSheetRow": int(index) + 1,
                 "name": name,
                 "countyCode": code,
-                "countyName": COUNTY_NAME_BY_CODE.get(code, code),
+                "countyName": COUNTY_NAME_BY_CODE.get(code, clean_text(row.iloc[2]) or code),
                 "accreditationDecision": clean_text(row.iloc[3] if len(row) > 3 else None),
                 "accreditationOrder": clean_text(row.iloc[4] if len(row) > 4 else None),
                 "accreditationCategory": clean_text(row.iloc[5] if len(row) > 5 else None),
@@ -469,15 +528,11 @@ def parse_anmcs(data: bytes, selected_counties: set[str]) -> list[dict[str, Any]
 
 def clinical_county_hint(name: str) -> str | None:
     normalised = normalise_text(name)
-    if "CLUJ" in normalised:
-        return "CJ"
-    if "BUCURESTI" in normalised or "ILFOV" in normalised:
-        return "B"
-    if any(
-        re.search(rf"(^| ){re.escape(token)}( |$)", normalised)
-        for token in NON_SCOPE_LOCATION_TOKENS
+    for token, code in sorted(
+        CLINICAL_LOCATION_HINTS.items(), key=lambda item: len(item[0]), reverse=True
     ):
-        return "other"
+        if re.search(rf"(^| ){re.escape(token)}( |$)", normalised):
+            return code
     return None
 
 
@@ -496,7 +551,7 @@ def match_clinical_rows(
             if index in used:
                 continue
             county_hint = clinical_county_hint(clinical["name"])
-            if county_hint == "other" or county_hint not in {None, provider["countyCode"]}:
+            if county_hint is not None and county_hint != provider["countyCode"]:
                 continue
             score = match_score(provider["name"], clinical["name"])
             if score > best_score:
@@ -546,24 +601,34 @@ def locate_provider(
                 "locationConfidence": "name-derived-locality",
             }
 
-    if county_code_value == "CJ" and "CLUJ" in name:
-        cluj = next(
-            (unit for unit in units_by_county.get("CJ", []) if unit["shortName"] == "CLUJ-NAPOCA"),
+    for (county_code, alias), canonical in LOCALITY_ALIASES.items():
+        if county_code_value != county_code or not re.search(
+            rf"(^| ){re.escape(alias)}( |$)", name
+        ):
+            continue
+        unit = next(
+            (
+                unit
+                for unit in units_by_county.get(county_code, [])
+                if normalise_text(unit["shortName"]) == canonical
+            ),
             None,
         )
-        if cluj:
+        if unit:
             return {
-                "siruta": cluj["siruta"],
-                "localityName": cluj["name"],
+                "siruta": unit["siruta"],
+                "localityName": unit["name"],
                 "locationConfidence": "name-derived-locality",
             }
 
     return {"siruta": None, "localityName": None, "locationConfidence": "county-only"}
 
 
-def selected_clinical_row(clinical: dict[str, Any]) -> bool:
-    name = normalise_text(clinical["name"])
-    return "CLUJ" in name or "BUCURESTI" in name
+def selected_clinical_row(clinical: dict[str, Any], selected_counties: set[str]) -> bool:
+    hint = clinical_county_hint(clinical["name"])
+    if hint is not None:
+        return hint in selected_counties
+    return selected_counties == set(COUNTY_NAME_BY_CODE)
 
 
 def limitation(id_: str, severity: str, affects: list[str], text: str) -> dict[str, Any]:
@@ -578,8 +643,14 @@ def build_document(
     source_hashes: dict[str, str],
     retrieved_date: str,
     locators: dict[str, str],
-    selected_counties: tuple[str, ...] = SCOPE_COUNTIES,
+    selected_counties: tuple[str, ...] | None = None,
 ) -> dict[str, Any]:
+    if selected_counties is None:
+        selected_counties = tuple(row["countyCode"] for row in county_beds)
+        scope = "national"
+    else:
+        scope = "sample"
+
     selected = set(selected_counties)
     providers = [provider for provider in providers if provider["countyCode"] in selected]
     county_totals = [row for row in county_beds if row["countyCode"] in selected]
@@ -637,21 +708,22 @@ def build_document(
                     "source": "anmcs",
                     "name": provider["name"],
                     "countyCode": provider["countyCode"],
-                    "reason": (
-                        "The selected source rows carry county names but no address or coordinates."
-                    ),
+                    "reason": "The source rows carry county names but no address or coordinates.",
                 }
             )
 
     for clinical in clinical_rows:
-        if clinical["clinicalRow"] in matched_clinical_rows or not selected_clinical_row(clinical):
+        if clinical["clinicalRow"] in matched_clinical_rows or not selected_clinical_row(
+            clinical, selected
+        ):
             continue
+        hint = clinical_county_hint(clinical["name"])
         exclusions.append(
             {
                 "kind": "clinical-bed-row-without-selected-anmcs-match",
                 "source": "clinical-beds",
                 "name": clinical["name"],
-                "countyCode": "CJ" if "CLUJ" in normalise_text(clinical["name"]) else "B",
+                "countyCode": hint,
                 "reason": "Provider name was not matched to an ANMCS row in the selected scope.",
             }
         )
@@ -659,10 +731,14 @@ def build_document(
     by_county = []
     for code in selected_counties:
         county_records = [record for record in records if record["countyCode"] == code]
+        county_name = next(
+            (row["countyName"] for row in county_totals if row["countyCode"] == code),
+            COUNTY_NAME_BY_CODE.get(code, code),
+        )
         by_county.append(
             {
                 "countyCode": code,
-                "countyName": COUNTY_NAME_BY_CODE[code],
+                "countyName": county_name,
                 "anmcsProviders": len(county_records),
                 "providersWithClinicalBeds": sum(
                     1 for record in county_records if record["bedCount"] is not None
@@ -694,13 +770,18 @@ def build_document(
         "locationConfidence": dict(sorted(location_counts.items())),
         "byCounty": by_county,
     }
+    is_national = scope == "national"
 
     return {
         "$schema": "../schema/health-access-mart.schema.json",
-        "id": "health-access-mart-sample-2024-2025",
-        "title": "Health provider access mart sample, Cluj and Bucharest",
+        "id": NATIONAL_MART_ID if is_national else SAMPLE_MART_ID,
+        "title": (
+            "Health provider access mart, national"
+            if is_national
+            else "Health provider access mart sample"
+        ),
         "publisher": "Ministerul Sanatatii / ANMCS",
-        "scope": "sample",
+        "scope": scope,
         "periodStart": "2024",
         "periodEnd": "2025",
         "retrievedDate": retrieved_date,
@@ -713,7 +794,7 @@ def build_document(
             ),
             "confidence": "derived",
             "note": (
-                "ANMCS supplies the selected provider roster and accreditation. The Ministry "
+                "ANMCS supplies the provider roster and accreditation. The Ministry "
                 "clinical-beds workbook supplies provider-level bed counts only where names "
                 "match confidently; the broader hospital-beds workbook supplies county totals."
             ),
@@ -774,12 +855,13 @@ def build_from_sources(
     anmcs_source: str,
     registry_path: Path,
     retrieved_date: str,
+    selected_counties: tuple[str, ...] | None = None,
 ) -> dict[str, Any]:
     hospital_beds = read_source_bytes(hospital_beds_source)
     clinical_beds = read_source_bytes(clinical_beds_source)
     anmcs = read_source_bytes(anmcs_source)
     registry = json.loads(registry_path.read_text(encoding="utf-8"))
-    providers = parse_anmcs(anmcs, set(SCOPE_COUNTIES))
+    providers = parse_anmcs(anmcs, set(selected_counties) if selected_counties else None)
     clinical_rows = parse_clinical_beds(clinical_beds)
     county_beds = parse_county_beds(hospital_beds)
     return build_document(
@@ -799,12 +881,32 @@ def build_from_sources(
             "clinicalBeds": clinical_beds_source,
             "anmcs": anmcs_source,
         },
+        selected_counties=selected_counties,
     )
+
+
+def parse_scope_counties(value: str | None) -> tuple[str, ...] | None:
+    if not value:
+        return None
+    counties = tuple(
+        dict.fromkeys(part.strip().upper() for part in value.split(",") if part.strip())
+    )
+    unknown = sorted(set(counties) - set(COUNTY_NAME_BY_CODE))
+    if unknown:
+        raise ValueError(f"Unknown county code(s): {', '.join(unknown)}")
+    return counties
 
 
 def write_json(path: Path, document: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def display_path(path: Path) -> str:
+    try:
+        return str(path.relative_to(REPO_ROOT))
+    except ValueError:
+        return str(path)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -813,9 +915,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--clinical-beds-source", default=CLINICAL_BEDS_URL)
     parser.add_argument("--anmcs-source", default=ANMCS_URL)
     parser.add_argument("--registry", type=Path, default=UAT_REGISTRY)
-    parser.add_argument("--out", type=Path, default=OUT)
+    parser.add_argument("--scope-counties", help="Comma-separated county codes; omit for national.")
+    parser.add_argument("--out", type=Path)
     parser.add_argument("--retrieved-date", default=date.today().isoformat())
     args = parser.parse_args(argv)
+    selected_counties = parse_scope_counties(args.scope_counties)
 
     document = build_from_sources(
         args.hospital_beds_source,
@@ -823,11 +927,13 @@ def main(argv: list[str] | None = None) -> int:
         args.anmcs_source,
         args.registry,
         args.retrieved_date,
+        selected_counties=selected_counties,
     )
-    write_json(args.out, document)
+    out = args.out or (PACKAGE_ROOT / f"data/{SAMPLE_MART_ID}.json" if selected_counties else OUT)
+    write_json(out, document)
     print(
         f"{document['summary']['records']} providers -> "
-        f"{args.out.relative_to(REPO_ROOT)} "
+        f"{display_path(out)} "
         f"({document['summary']['providersWithClinicalBeds']} with clinical beds)"
     )
     return 0

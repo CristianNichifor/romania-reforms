@@ -66,14 +66,17 @@ def fixture_registry() -> dict:
 def test_clinical_matching_rejects_generic_and_wrong_city_rows():
     providers = [
         provider("anmcs-2025-009", "SPITALUL CLINIC FILANTROPIA BUCURESTI"),
+        provider("anmcs-2025-132", "SPITALUL CLINIC JUDETEAN DE URGENTA ILFOV"),
         provider(
             "anmcs-2025-005",
             'SPITALUL UNIVERSITAR DE URGENTA MILITAR CENTRAL "DR. CAROL DAVILA"',
         ),
+        provider("anmcs-2025-195", 'SPITALUL ORASENESC "PROF.DR. IOAN PUSCAS"'),
         provider("anmcs-2025-368", "CLINICA SF. LUCIA S.R.L."),
     ]
     clinical_rows = [
         clinical(26, 'Spit. clinc municipal "Filantropia" Craiova', 495),
+        clinical(47, "Spit. clinic judetean de urgenta Ilfov", 171),
         clinical(66, 'Spit. clinic "Filantropia"', 116),
         clinical(94, "Spit. Universitar de Urgenta Bucuresti", 1099),
         clinical(89, 'Spit.Clinic de Urgenta "Sf.Ioan"', 430),
@@ -82,7 +85,9 @@ def test_clinical_matching_rejects_generic_and_wrong_city_rows():
     matches = health_access.match_clinical_rows(providers, clinical_rows)
 
     assert matches["anmcs-2025-009"]["clinicalRow"] == 66
+    assert matches["anmcs-2025-132"]["clinicalRow"] == 47
     assert "anmcs-2025-005" not in matches
+    assert "anmcs-2025-195" not in matches
     assert "anmcs-2025-368" not in matches
 
 
@@ -106,22 +111,32 @@ def test_location_derivation_uses_registry_and_bucharest_municipality():
     assert bucharest["locationConfidence"] == "municipality-from-county"
 
 
-def test_committed_health_access_sample_covers_first_slice_scope():
-    document = json.loads(
-        (DATA / "health-access-mart-sample-2024-2025.json").read_text(encoding="utf-8")
-    )
+def test_committed_health_access_mart_covers_national_scope():
+    document = json.loads((DATA / "health-access-mart-2024-2025.json").read_text(encoding="utf-8"))
     records = document["records"]
     by_id = {record["providerId"]: record for record in records}
 
-    assert document["summary"]["scopeCounties"] == ["B", "CJ"]
-    assert document["summary"]["records"] == 116
-    assert document["summary"]["providersWithClinicalBeds"] == 36
-    assert document["summary"]["providersWithoutClinicalBeds"] == 80
-    assert document["summary"]["countyTotalBeds"] == 22627.0
-    assert document["summary"]["locationConfidence"]["county-only"] == 13
+    assert document["id"] == "health-access-mart-2024-2025"
+    assert document["scope"] == "national"
+    assert len(document["summary"]["scopeCounties"]) == 42
+    assert document["summary"]["records"] == 592
+    assert document["summary"]["providersWithClinicalBeds"] == 68
+    assert document["summary"]["providersWithoutClinicalBeds"] == 524
+    assert document["summary"]["countyTotalBeds"] == 116828.0
+    assert document["summary"]["locationConfidence"]["county-only"] == 268
     assert by_id["anmcs-2025-009"]["sourceRows"]["clinicalBedsRow"] == 66
+    assert by_id["anmcs-2025-024"]["sourceRows"]["clinicalBedsRow"] == 18
+    assert by_id["anmcs-2025-028"]["sourceRows"]["clinicalBedsRow"] == 20
     assert by_id["anmcs-2025-005"]["bedCount"] is None
     assert by_id["anmcs-2025-368"]["bedCount"] is None
+    assert by_id["anmcs-2025-132"]["sourceRows"]["clinicalBedsRow"] == 47
+    assert all(record["sourceRows"]["clinicalBedsRow"] != 89 for record in records)
+    assert any(
+        exclusion["source"] == "clinical-beds"
+        and exclusion["name"] == 'Spit.Clinic de Urgenţă "Sf.Ioan"'
+        and exclusion["countyCode"] is None
+        for exclusion in document["exclusions"]
+    )
     assert any(
         record["countyCode"] == "CJ" and record["siruta"] == "54975" and record["bedCount"]
         for record in records

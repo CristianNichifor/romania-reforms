@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cristiannichifor.github.io/romania-reforms/packages/health_access/schema/health-access-mart.schema.json",
   "title": "Shared health access mart",
-  "description": "Provider-level health access sample built from Ministry of Health bed workbooks and ANMCS accreditation data. Provider bed counts are present only where the clinical-beds workbook can be confidently matched to ANMCS.",
+  "description": "Provider-level health access mart built from Ministry of Health bed workbooks and ANMCS accreditation data. Provider bed counts are present only where the clinical-beds workbook can be confidently matched to ANMCS.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -26,10 +26,12 @@
   ],
   "properties": {
     "$schema": { "type": "string" },
-    "id": { "const": "health-access-mart-sample-2024-2025" },
+    "id": {
+      "enum": ["health-access-mart-2024-2025", "health-access-mart-sample-2024-2025"]
+    },
     "title": { "type": "string", "minLength": 1 },
     "publisher": { "const": "Ministerul Sanatatii / ANMCS" },
-    "scope": { "const": "sample" },
+    "scope": { "enum": ["national", "sample"] },
     "periodStart": { "const": "2024" },
     "periodEnd": { "const": "2025" },
     "retrievedDate": { "type": "string", "format": "date" },
@@ -91,9 +93,9 @@
       "properties": {
         "scopeCounties": {
           "type": "array",
-          "items": { "enum": ["B", "CJ"] },
+          "items": { "type": "string", "pattern": "^[A-Z]{1,2}$" },
           "uniqueItems": true,
-          "minItems": 2
+          "minItems": 1
         },
         "records": { "type": "integer", "minimum": 1 },
         "anmcsProviders": { "type": "integer", "minimum": 1 },
@@ -153,7 +155,7 @@
         "matchedClinicalBeds"
       ],
       "properties": {
-        "countyCode": { "enum": ["B", "CJ"] },
+        "countyCode": { "type": "string", "pattern": "^[A-Z]{1,2}$" },
         "countyName": { "type": "string", "minLength": 1 },
         "anmcsProviders": { "type": "integer", "minimum": 0 },
         "providersWithClinicalBeds": { "type": "integer", "minimum": 0 },
@@ -198,7 +200,7 @@
       "properties": {
         "providerId": { "type": "string", "pattern": "^anmcs-2025-[0-9]{3}$" },
         "name": { "type": "string", "minLength": 1 },
-        "countyCode": { "enum": ["B", "CJ"] },
+        "countyCode": { "type": "string", "pattern": "^[A-Z]{1,2}$" },
         "countyName": { "type": "string", "minLength": 1 },
         "siruta": { "type": ["string", "null"], "pattern": "^[0-9]+$" },
         "localityName": { "type": ["string", "null"], "minLength": 1 },
@@ -253,7 +255,7 @@
         },
         "source": { "enum": ["anmcs", "clinical-beds"] },
         "name": { "type": "string", "minLength": 1 },
-        "countyCode": { "enum": ["B", "CJ"] },
+        "countyCode": { "type": ["string", "null"], "pattern": "^[A-Z]{1,2}$" },
         "reason": { "type": "string", "minLength": 1 }
       }
     }
