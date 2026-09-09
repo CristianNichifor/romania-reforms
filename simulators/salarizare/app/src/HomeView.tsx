@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { Field, Input } from '@cristiannichifor/civic-ui';
 
 import type { Scenario, ViewId } from '../../engine/scenario';
 import type { Regime } from '../../engine/types';
@@ -148,13 +149,18 @@ export default function HomeView({
           calculat pentru ea, sub fiecare dintre cele patru sisteme.
         </p>
         <div className="card home-search">
-          <input
-            type="search"
-            value={query}
-            placeholder="caută după denumire sau cod"
-            aria-label="Caută o funcție din grilă"
-            onChange={(e) => setQuery(e.target.value)}
-          />
+          <Field id="home-search" label="Caută o funcție din grilă">
+            {(attributes) => (
+              <Input
+                {...attributes}
+                type="search"
+                value={query}
+                placeholder="caută după denumire sau cod"
+                aria-label="Caută o funcție din grilă"
+                onChange={(e) => setQuery(e.target.value)}
+              />
+            )}
+          </Field>
           {hits.length > 0 && (
             <ul className="home-hits">
               {hits.map((p) => (

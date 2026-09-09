@@ -1,7 +1,5 @@
 import { useMemo, useState } from 'react';
 import { Field, NativeSelect } from '@cristiannichifor/civic-ui';
-import '@cristiannichifor/civic-ui/styles.css';
-import './civic-pilot.css';
 
 import { payslip } from '../../engine/payslip';
 import { amountLine } from './money';

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { Checkbox, Field, Input, NativeSelect, Table } from '@cristiannichifor/civic-ui';
 
 import { ineligibility, payslip } from '../../engine/payslip';
 import type { Payslip, Person } from '../../engine/payslip';
@@ -188,15 +189,20 @@ export default function PayslipView({
       <section>
         <h2>Persoana</h2>
         <div className="card controls">
-          <label className="field">
-            <span>Funcția</span>
-            <input
-              type="search"
-              value={query}
-              placeholder="caută după denumire sau cod — ex. auditor, director, 81.101"
-              onChange={(e) => setQuery(e.target.value)}
-            />
+          <div className="field">
+            <Field id="payslip-search" label="Funcția">
+              {(attributes) => (
+                <Input
+                  {...attributes}
+                  type="search"
+                  value={query}
+                  placeholder="caută după denumire sau cod — ex. auditor, director, 81.101"
+                  onChange={(e) => setQuery(e.target.value)}
+                />
+              )}
+            </Field>
             <select
+              aria-label="Funcția selectată"
               size={8}
               value={scenario.positionCode ?? ''}
               onChange={(e) => set({ positionCode: e.target.value, dims: undefined })}
@@ -211,7 +217,7 @@ export default function PayslipView({
                 </option>
               ))}
             </select>
-          </label>
+          </div>
 
           <label className="field">
             <span>Vechime în muncă: {scenario.seniorityYears ?? 0} ani</span>
@@ -262,19 +268,21 @@ export default function PayslipView({
           )}
 
           {chosen && chosen.variants.length > 1 && chosen.variants[0].dims && (
-            <label className="field">
-              <span>Gradul sau treapta</span>
-              <select
-                value={JSON.stringify(scenario.dims ?? chosen.variants[0].dims)}
-                onChange={(e) => set({ dims: JSON.parse(e.target.value) })}
-              >
-                {chosen.variants.map((v, i) => (
-                  <option key={i} value={JSON.stringify(v.dims ?? {})}>
-                    {dimText(v.dims) || `varianta ${i + 1}`}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <Field id="payslip-variant" label="Gradul sau treapta">
+              {(attributes) => (
+                <NativeSelect
+                  {...attributes}
+                  value={JSON.stringify(scenario.dims ?? chosen.variants[0].dims)}
+                  onChange={(e) => set({ dims: JSON.parse(e.target.value) })}
+                >
+                  {chosen.variants.map((v, i) => (
+                    <option key={i} value={JSON.stringify(v.dims ?? {})}>
+                      {dimText(v.dims) || `varianta ${i + 1}`}
+                    </option>
+                  ))}
+                </NativeSelect>
+              )}
+            </Field>
           )}
 
           {primary && (
@@ -288,25 +296,23 @@ export default function PayslipView({
                   // that rule exists if the refusal is on the page.
                   const barred = chosen ? ineligibility(s, chosen) : undefined;
                   return (
-                    <label
+                    <Checkbox
                       key={s.id}
                       className={barred ? 'claim barred' : 'claim'}
                       title={barred?.reason}
-                    >
-                      <input
-                        type="checkbox"
-                        disabled={Boolean(barred)}
-                        checked={(scenario.claims ?? []).some((c) => c.supplementId === s.id)}
-                        onChange={() => toggleClaim(s.id)}
-                      />
-                      <span>
-                        {s.name}
-                        {s.mode === 'upTo' && <em> (până la)</em>}
-                        {s.countsToCap === false && <em> · exceptat de la plafon</em>}
-                        {s.countsToCap === 'partial' && <em> · parțial în plafon</em>}
-                        {barred && <em className="why-not"> · {barred.reason}</em>}
-                      </span>
-                    </label>
+                      disabled={Boolean(barred)}
+                      checked={(scenario.claims ?? []).some((c) => c.supplementId === s.id)}
+                      onChange={() => toggleClaim(s.id)}
+                      label={
+                        <>
+                          {s.name}
+                          {s.mode === 'upTo' && <em> (până la)</em>}
+                          {s.countsToCap === false && <em> · exceptat de la plafon</em>}
+                          {s.countsToCap === 'partial' && <em> · parțial în plafon</em>}
+                          {barred && <em className="why-not"> · {barred.reason}</em>}
+                        </>
+                      }
+                    />
                   );
                 })}
               </div>
@@ -357,8 +363,8 @@ export default function PayslipView({
             sume. Ce parte din brut e salariul de bază, cât adaugă sporurile, cât rămâne net, cât
             costă angajatorul peste brut.
           </p>
-          <div className="card chart-scroll">
-            <table className="data">
+          <div className="card">
+            <Table className="data" label="Comparație fără unități">
               <thead>
                 <tr>
                   <th>Raport</th>
@@ -411,7 +417,7 @@ export default function PayslipView({
                   ))}
                 </tr>
               </tbody>
-            </table>
+            </Table>
           </div>
         </section>
       )}
@@ -459,7 +465,7 @@ function PayslipCard({
 
       <Composition slip={slip} />
 
-      <table className="data">
+      <Table className="data" label={`Calcul salarial: ${regime.name}`}>
         <tbody>
           <tr>
             <td>Salariu de bază</td>
@@ -505,7 +511,7 @@ function PayslipCard({
             </tr>
           )}
         </tbody>
-      </table>
+      </Table>
 
       {slip.capUtilisation.map((cap) => (
         <div key={cap.capId} className="cap">

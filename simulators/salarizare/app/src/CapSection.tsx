@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { Checkbox, Table } from '@cristiannichifor/civic-ui';
 
 import { readCap, readCapEntities } from '../../engine/cap';
 import type { CapMeasure, CapScope, CapSeries } from '../../engine/cap';
@@ -39,29 +40,27 @@ export default function CapSection({ series }: { series: CapSeries[] }) {
         sunt.
       </p>
 
-      <div className="card controls occ-controls">
-        <label className="claim">
-          <input
-            type="checkbox"
-            checked={scope === 'pereche'}
-            onChange={() => setScope((s) => (s === 'pereche' ? 'ordonator' : 'pereche'))}
-          />
-          <span>
-            Măsoară pe ordonator <em>și</em> pe sursă de finanțare, cum scrie în lege — altfel
-            sursele se însumează și o depășire pe una singură dispare
-          </span>
-        </label>
-        <label className="claim">
-          <input
-            type="checkbox"
-            checked={measure === 'wide'}
-            onChange={() => setMeasure((m) => (m === 'wide' ? 'narrow' : 'wide'))}
-          />
-          <span>
-            Ia tot ce se plătește peste salariul de bază, nu doar paragrafele numite „sporuri“ —
-            altfel o instituție pare în regulă doar fiindcă a trecut banii la alt paragraf
-          </span>
-        </label>
+      <div className="card controls occ-controls civic-scope civic-pay">
+        <Checkbox
+          checked={scope === 'pereche'}
+          onChange={() => setScope((s) => (s === 'pereche' ? 'ordonator' : 'pereche'))}
+          label={
+            <>
+              Măsoară pe ordonator <em>și</em> pe sursă de finanțare, cum scrie în lege — altfel
+              sursele se însumează și o depășire pe una singură dispare
+            </>
+          }
+        />
+        <Checkbox
+          checked={measure === 'wide'}
+          onChange={() => setMeasure((m) => (m === 'wide' ? 'narrow' : 'wide'))}
+          label={
+            <>
+              Ia tot ce se plătește peste salariul de bază, nu doar paragrafele numite „sporuri“ —
+              altfel o instituție pare în regulă doar fiindcă a trecut banii la alt paragraf
+            </>
+          }
+        />
       </div>
 
       <div className="comp-hero">
@@ -149,7 +148,7 @@ export default function CapSection({ series }: { series: CapSeries[] }) {
 
       <details className="table-view">
         <summary>Vezi cifrele ca tabel</summary>
-        <table className="data">
+        <Table className="data" label="Plafonul pe ordonatori">
           <thead>
             <tr>
               <th>Ordonator</th>
@@ -170,7 +169,7 @@ export default function CapSection({ series }: { series: CapSeries[] }) {
               </tr>
             ))}
           </tbody>
-        </table>
+        </Table>
       </details>
 
       <div className="comp-excl">

@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Button, Checkbox } from '@cristiannichifor/civic-ui';
 
 import { applyProposal } from '../../engine/proposal';
 import type { PatchEffect, Proposal } from '../../engine/proposal';
@@ -145,21 +146,20 @@ export default function ProposalView({
             vezi propunerea strict ca reparație.
           </p>
         )}
-        <div className="patch-actions">
-          <button className="ghost" onClick={() => setAll(true)}>
+        <div className="patch-actions civic-scope civic-pay">
+          <Button onClick={() => setAll(true)}>
             pornește tot
-          </button>
-          <button className="ghost" onClick={() => setAll(false)}>
+          </Button>
+          <Button onClick={() => setAll(false)}>
             stinge tot
-          </button>
-          <button
-            className="ghost"
+          </Button>
+          <Button
             onClick={() =>
               onScenario({ ...scenario, offPatches: changes.map((p) => p.id) })
             }
           >
             doar reparațiile
-          </button>
+          </Button>
         </div>
       </section>
 
@@ -191,10 +191,14 @@ export default function ProposalView({
                       <span className="badge">reparație</span>
                     )}
                     {touched && <span className="touched">{touched}</span>}
-                    <label className="patch-switch">
-                      <input type="checkbox" checked={on} onChange={() => toggle(patch.id)} />
-                      <span>{on ? 'pornită' : 'stinsă'}</span>
-                    </label>
+                    <span className="patch-switch civic-scope civic-pay">
+                      <Checkbox
+                        checked={on}
+                        onChange={() => toggle(patch.id)}
+                        label={on ? 'pornită' : 'stinsă'}
+                        aria-label={`${patch.title}: ${on ? 'pornită' : 'stinsă'}`}
+                      />
+                    </span>
                   </span>
                 </div>
                 {patch.expectedEffect && <p className="effect">{patch.expectedEffect}</p>}
