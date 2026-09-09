@@ -38,6 +38,7 @@ OUT = ROOT / "data" / "access.json"
 sys.path.insert(0, str(ADMINISTRATIV))
 
 from scripts.county_times import county_times  # noqa: E402
+from scripts.health_access import DEFAULT_HEALTH_ACCESS, enrich_access_document  # noqa: E402
 from scripts.rail_costs import REFERENCE_TRAINS_PER_WEEKDAY  # noqa: E402
 from scripts.rail_speeds import class_commercial_kmh  # noqa: E402
 from scripts.tiers import DAY_PROFILE, service_for  # noqa: E402
@@ -205,6 +206,11 @@ def main(argv: list[str] | None = None) -> int:
     ):
         if not path.exists():
             raise SystemExit(f"Missing {path}. Run: uv run python -m {how}")
+    if not DEFAULT_HEALTH_ACCESS.exists():
+        raise SystemExit(
+            f"Missing {DEFAULT_HEALTH_ACCESS}. Run: uv run python "
+            "packages/health_access/scripts/build_health_service_access.py"
+        )
 
     network = json.loads((ROOT / "data/network.json").read_text(encoding="utf-8"))
     hub_of = json.loads((ROOT / "data/hubs.json").read_text(encoding="utf-8"))["hubOf"]
@@ -436,6 +442,9 @@ def main(argv: list[str] | None = None) -> int:
             },
         ],
     }
+    health_access = json.loads(DEFAULT_HEALTH_ACCESS.read_text(encoding="utf-8"))
+    document = enrich_access_document(document, health_access)
+    summary = document["summary"]
 
     OUT.write_text(json.dumps(document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
@@ -461,6 +470,11 @@ def main(argv: list[str] | None = None) -> int:
         f"  bus the train could release: {r['routesFullyRailServed']} routes of "
         f"{r['routesFullyRailServed'] + r['routesPartlyRailServed'] + r['routesUntouched']}, "
         f"{r['displaceableKmShare']:.1%} of km — the rest of the road network is needed anyway"
+    )
+    print(
+        f"\nhealth access: {s['healthAccessUatsWithLocalProvider']:,}/"
+        f"{s['healthAccessRowsWithData']:,} routed UATs have a local eligible provider; "
+        f"{s['healthAccessLocalProviders']:,} providers counted locally"
     )
     print("\nshare of population within:")
     for m, v in s["within"].items():

@@ -72,6 +72,12 @@ const hubs = JSON.parse(readFileSync(join(sim, 'data/hubs.json'), 'utf8'));
 const railnet = JSON.parse(readFileSync(join(sim, 'data/railnet.json'), 'utf8'));
 const railCost = JSON.parse(readFileSync(join(sim, 'data/rail-cost.json'), 'utf8'));
 const fares = JSON.parse(readFileSync(join(sim, 'data/fares.json'), 'utf8'));
+const healthAccess = JSON.parse(
+  readFileSync(
+    join(sim, '..', '..', 'packages/health_access/data/health-service-access-uat-2024-2026.json'),
+    'utf8',
+  ),
+);
 
 // The track and its stations. Copied rather than joined to anything: rail is its own layer,
 // and the whole point of the station geometry is that it does NOT line up with the settlements.
@@ -136,6 +142,47 @@ const joined = attributes.siruta.map((siruta) => {
 });
 writeFileSync(join(out, 'journey.json'), JSON.stringify(joined));
 
+if (access.uats.some((u) => !Object.hasOwn(u, 'localHealthProviderCount'))) {
+  console.error('FATAL: access.json has no shared health_access fields');
+  process.exit(1);
+}
+
+const normaliseSiruta = (value) => {
+  const text = String(value).trim();
+  const bare = text.endsWith('.0') ? text.slice(0, -2) : text;
+  return bare.replace(/^0+/, '') || '0';
+};
+
+const healthBy = new Map();
+for (const unit of healthAccess.units) {
+  const siruta = normaliseSiruta(unit.siruta);
+  if (healthBy.has(siruta)) {
+    console.error(`FATAL: shared health_access has duplicate SIRUTA ${siruta}`);
+    process.exit(1);
+  }
+  healthBy.set(siruta, unit);
+}
+
+// Same positional join, but only the health fields the hover needs. This is aligned directly
+// from the shared health_access UAT view so scenario changes in the browser are not tied to
+// the default transport access run. Bucharest sectors stay explicit nulls: the source places
+// Bucharest providers at municipality level only.
+const healthJoined = attributes.siruta.map((siruta, index) => {
+  const unit = healthBy.get(normaliseSiruta(siruta));
+  if (!unit) {
+    if (attributes.county[index] === 'B') return [null, null, null, 1];
+    console.error(`FATAL: shared health_access has no row for SIRUTA ${siruta}`);
+    process.exit(1);
+  }
+  return [
+    unit.localProviderCount,
+    unit.localClinicalBedProviders,
+    unit.localClinicalBeds,
+    0,
+  ];
+});
+writeFileSync(join(out, 'health.json'), JSON.stringify(healthJoined));
+
 // scenarios.json is gone. The page reads the reader's administrative scenario from the URL
 // and recomputes the network, so five presets frozen at build time are not an alternative
 // to that — they are a second answer to a question this app no longer asks.
@@ -146,7 +193,18 @@ if (attributes.siruta.length !== geo.features.length) {
   process.exit(1);
 }
 const matched = joined.filter(Boolean).length;
+const journeyWithoutHealth = joined.filter(
+  (row, index) => row && (!healthJoined[index] || healthJoined[index][0] === null),
+).length;
+const healthRowsWithData = healthJoined.filter((row) => row && row[0] !== null).length;
 console.log(`data ready: ${matched}/${geo.features.length} polygons joined to a journey time`);
+console.log(
+  `health ready: ${healthRowsWithData}/${geo.features.length} polygons joined to health access`,
+);
+if (journeyWithoutHealth) {
+  console.error('FATAL: a routed journey polygon has no UAT-level health access row');
+  process.exit(1);
+}
 if (matched < geo.features.length * 0.9) {
   console.error('FATAL: most polygons did not join — the siruta key is wrong');
   process.exit(1);
