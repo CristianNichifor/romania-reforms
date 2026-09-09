@@ -9,6 +9,12 @@
 import './style.css';
 
 import { buildChain, edgeKey, indexShard } from './app/chain';
+import {
+  healthAccessPayloadAligned,
+  healthAccessPeriodLabel,
+  healthAccessTotals,
+  type HealthAccessPayload,
+} from './app/health-access';
 import { budgetUrlFor } from './app/links';
 import {
   localFinancePayloadAligned,
@@ -1474,6 +1480,30 @@ async function boot(): Promise<void> {
   };
 
   /**
+   * Shared health-access indicators, fetched only for the detail panel.
+   *
+   * This reports UAT co-location counts from packages/health_access. It deliberately leaves
+   * Bucharest sector rows blank because the shared view can place Bucharest providers only at
+   * municipality level, not inside individual sectors.
+   */
+  let healthAccess: HealthAccessPayload | null = null;
+  let healthAccessLoad: Promise<void> | null = null;
+
+  const loadHealthAccess = (): Promise<void> => {
+    healthAccessLoad ??= fetch(`${DATA_BASE}health-access-uat.json`)
+      .then((response) => (response.ok ? response.json() : null))
+      .then((raw: HealthAccessPayload | null) => {
+        healthAccess = raw && ready && healthAccessPayloadAligned(raw, ready.attributes.siruta)
+          ? raw
+          : null;
+      })
+      .catch(() => {
+        healthAccess = null;
+      });
+    return healthAccessLoad;
+  };
+
+  /**
    * Shared local-finance indicators, fetched only for the detail panel.
    *
    * The model's own binary finance still carries administration-only spending. The shared mart
@@ -1782,8 +1812,39 @@ async function boot(): Promise<void> {
 
     // The party table needs the votes; the rest of the panel does not wait for them.
     if (!localFinance) void loadLocalFinance().then(() => { if (scenario.selected === index) renderDetail(); });
+    if (!healthAccess) void loadHealthAccess().then(() => { if (scenario.selected === index) renderDetail(); });
     if (!votes) void loadVotes().then(() => { if (scenario.selected === index) renderDetail(); });
     if (!courts) void loadCourts().then(() => { if (scenario.selected === index) renderDetail(); });
+    const sharedHealth = healthAccessTotals(healthAccess, members);
+    const healthYears = healthAccess ? healthAccessPeriodLabel(healthAccess) : '';
+    const healthHtml = sharedHealth
+      ? `<div class="health-access">
+           <h4>${strings.healthAccessHeading}</h4>
+           <dl>
+             <dt>${strings.healthAccessProviders}</dt>
+             <dd>${formatNumber(sharedHealth.localProviderCount, scenario.lang)}</dd>
+             <dt>${strings.healthAccessUats}</dt>
+             <dd>${formatNumber(sharedHealth.uatsWithLocalProvider, scenario.lang)} / ${formatNumber(
+               sharedHealth.uatsWithHealthData,
+               scenario.lang,
+             )}</dd>
+             <dt>${strings.healthAccessBeds}</dt>
+             <dd>${formatNumber(Math.round(sharedHealth.localClinicalBeds), scenario.lang)}</dd>
+           </dl>
+           ${
+             sharedHealth.sectorRowsExcluded > 0
+               ? `<p class="muted">${strings.healthAccessSectorRows.replace(
+                   '{n}',
+                   formatNumber(sharedHealth.sectorRowsExcluded, scenario.lang),
+                 )}</p>`
+               : ''
+           }
+           <p class="muted rep-source">${strings.healthAccessSource.replace(
+             '{years}',
+             healthYears,
+           )}</p>
+         </div>`
+      : '';
     detailPanel.setTitle(unitName(ready, region));
     el<HTMLElement>('#detail-kicker').innerHTML =
       `${strings.region}${orphan ? ` · <span class="badge orphan">${strings.legendOrphan}</span>` : ''}`;
@@ -1838,6 +1899,8 @@ async function boot(): Promise<void> {
       ${representationHtml(members, region, totalPop)}
 
       ${courtsHtml(members)}
+
+      ${healthHtml}
 
       <div class="savings">
         <h4>${strings.savingsHeading}</h4>

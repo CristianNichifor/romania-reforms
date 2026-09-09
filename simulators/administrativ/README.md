@@ -66,6 +66,8 @@ are verified before any frontend work begins.
 - [x] `build_finance.py` — operating vs development expenditure per UAT
 - [x] `reference_model.py` — Python implementation of the algorithm
 - [x] `export.py` — typed-array payload for the browser
+- [x] `build_local_finance.py` + `build_health_access.py` — shared-package payloads aligned
+  to the browser's UAT index
 - [x] TypeScript port + parity tests
 - [x] Frontend — MapLibre map, model in a Web Worker, RO/EN, deep-linkable scenarios
 - [x] METHODOLOGY.md written out in full, RO + EN

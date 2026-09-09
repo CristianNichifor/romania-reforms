@@ -236,6 +236,12 @@ export interface Strings {
   courtMany: string;
   courtSplitNote: string;
   courtSource: string;
+  healthAccessHeading: string;
+  healthAccessProviders: string;
+  healthAccessUats: string;
+  healthAccessBeds: string;
+  healthAccessSectorRows: string;
+  healthAccessSource: string;
 
   budgetLink: string;
   budgetLinkTitle: string;
@@ -506,6 +512,13 @@ const ro: Strings = {
     'Unitatea rezultată ar traversa circumscripții judecătorești. Fuziunea administrativă ar cere ' +
     'și o rearondare judiciară, altfel granița administrativă și cea judiciară nu mai coincid.',
   courtSource: 'Arondarea judecătoriilor, 2023 — Guvernul României',
+  healthAccessHeading: 'Sănătate',
+  healthAccessProviders: 'Furnizori locali',
+  healthAccessUats: 'UAT-uri cu furnizor',
+  healthAccessBeds: 'Paturi clinice localizate',
+  healthAccessSectorRows:
+    '{n} sectoare București nu intră în numărătoarea locală: sursa poate plasa furnizorii doar la nivelul municipiului.',
+  healthAccessSource: 'Vedere shared health-access {years}, furnizori serviceAccessEligible',
 
   budgetLink: 'Bugetul pe transparenta.eu',
   budgetLinkTitle: 'Execuția bugetară a acestui UAT pe transparenta.eu',
@@ -776,6 +789,13 @@ const en: Strings = {
     'The resulting unit would straddle judicial circumscriptions. Merging administratively would ' +
     'require redrawing the judicial map too, or the two boundaries stop agreeing.',
   courtSource: 'Judecătorie circumscriptions, 2023 — Government of Romania',
+  healthAccessHeading: 'Health access',
+  healthAccessProviders: 'Local providers',
+  healthAccessUats: 'UATs with provider',
+  healthAccessBeds: 'Located clinical beds',
+  healthAccessSectorRows:
+    '{n} Bucharest sector rows are left out of the local count: the source can place providers only at municipality level.',
+  healthAccessSource: 'Shared health-access view {years}, serviceAccessEligible providers',
 
   budgetLink: 'Budget on transparenta.eu',
   budgetLinkTitle: "This UAT's budget execution on transparenta.eu",
