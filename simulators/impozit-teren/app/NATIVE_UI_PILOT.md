@@ -39,7 +39,7 @@ pinned URL/checksum and rerunning the browser suite.
 
 ## Verification
 
-Use Node 22 and the existing release-data prerequisites described by `copy-data.mjs`.
+Use Node 22.12+ and the existing release-data prerequisites described by `copy-data.mjs`.
 
 ```sh
 npm ci
@@ -70,6 +70,11 @@ served build does not need the internet for these workflows, not that a cold
 GitHub Pages visit works offline. No service worker or caching feature is added.
 Automated checks are not a full accessibility or physical screen-reader audit.
 
-The existing Vite 5/esbuild development-tool advisories reported by `npm audit`
-remain a separate upgrade task. This pilot adds only pinned browser-test dev
-dependencies and does not change the affected versions or public map runtime.
+The follow-up toolchain upgrade pins Vite 7.3.6, matching the salary app, and
+replaces the affected Vite 5/esbuild dependency chain. The app keeps its explicit
+`es2022` build target and module-worker configuration. It does not use the removed
+Sass, SSR or plugin APIs described in the
+[Vite 6](https://v6.vite.dev/guide/migration) and
+[Vite 7](https://v7.vite.dev/guide/migration.html) migration guides.
+Run `npm audit` alongside build/browser checks when updating the lockfile;
+an audit result describes the advisories known at that time, not a security certification.
