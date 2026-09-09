@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Table } from '@cristiannichifor/civic-ui';
 
 import { distribution } from '../../engine/distribution';
 import type { Crosswalk, Regime } from '../../engine/types';
@@ -136,8 +137,8 @@ export default function DistributionView({
 
       <section>
         <h2>Cele mai mari mișcări</h2>
-        <div className="card chart-scroll">
-          <table className="data">
+        <div className="card">
+          <Table className="data" label="Distribuția schimbărilor pe familii">
             <thead>
               <tr>
                 <th>Postul</th>
@@ -161,7 +162,7 @@ export default function DistributionView({
                 </tr>
               ))}
             </tbody>
-          </table>
+          </Table>
         </div>
       </section>
 

@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Table } from '@cristiannichifor/civic-ui';
 
 import { structure } from '../../engine/structure';
 import { Term } from './Glossary';
@@ -150,7 +151,7 @@ export default function StructureView({
         </div>
         <details className="table-view">
           <summary>Vezi datele ca tabel</summary>
-          <table className="data">
+          <Table className="data" label="Distribuția coeficienților">
             <thead>
               <tr><th>Zecimale</th><th>Valori distincte</th><th>Interpretare</th></tr>
             </thead>
@@ -163,7 +164,7 @@ export default function StructureView({
                 </tr>
               ))}
             </tbody>
-          </table>
+          </Table>
         </details>
       </section>
 
@@ -201,7 +202,7 @@ export default function StructureView({
         </div>
         <details className="table-view">
           <summary>Vezi golurile ca tabel</summary>
-          <table className="data">
+          <Table className="data" label="Intervale pe familii ocupaționale">
             <thead>
               <tr><th>Între gradele</th><th>Interval fără grad</th><th>Variante</th></tr>
             </thead>
@@ -214,7 +215,7 @@ export default function StructureView({
                 </tr>
               ))}
             </tbody>
-          </table>
+          </Table>
         </details>
       </section>
 

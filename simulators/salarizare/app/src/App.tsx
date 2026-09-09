@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Button, Checkbox } from '@cristiannichifor/civic-ui';
 
 import { payslip } from '../../engine/payslip';
 import { applyProposal } from '../../engine/proposal';
@@ -411,7 +412,7 @@ export default function App() {
   };
 
   return (
-    <div className="wrap">
+    <div className="wrap civic-scope civic-pay">
       <nav className="tabs" aria-label="Secțiunile instrumentului">
         {NAV_GROUPS.map((group) => (
           <div className="tabgroup" key={group.title}>
@@ -432,18 +433,17 @@ export default function App() {
         {scenario.view === 'payslip' && (
           <div className="tabgroup regimes">
             {AVAILABLE.map((id) => (
-              <label key={id} className="regime-toggle">
-                <input
-                  type="checkbox"
-                  checked={wanted.includes(id)}
-                  onChange={() => toggleRegime(id)}
-                />
-                <span>{id}</span>
-              </label>
+              <Checkbox
+                key={id}
+                className="regime-toggle"
+                checked={wanted.includes(id)}
+                onChange={() => toggleRegime(id)}
+                label={id}
+              />
             ))}
-            <button className="share" onClick={share}>
+            <Button className="share" onClick={share}>
               {copied ? 'link copiat' : 'copiază linkul scenariului'}
-            </button>
+            </Button>
           </div>
         )}
       </nav>

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { Checkbox, Table } from '@cristiannichifor/civic-ui';
 
 import { COMPONENT_LABELS, COMPONENTS, compareComposition } from '../../engine/composition';
 import type { Component, Shares, Side } from '../../engine/composition';
@@ -126,18 +127,22 @@ export default function OccupationsView({
       </div>
 
       <section>
-        <div className="card controls occ-controls">
-          <label className="claim">
-            <input type="checkbox" checked={withCap} onChange={() => setWithCap((v) => !v)} />
-            <span>
-              Adaugă sporurile în plafon la partea românească (+20%) — altfel se compară baza
-              românească cu câștigul danez cu tot cu sporuri
-            </span>
-          </label>
-          <label className="claim">
-            <input type="checkbox" checked={showLegal} onChange={() => setShowLegal((v) => !v)} />
-            <span>Arată și intervalul legal complet al bazei (bara palidă)</span>
-          </label>
+        <div className="card controls occ-controls civic-scope civic-pay">
+          <Checkbox
+            checked={withCap}
+            onChange={() => setWithCap((v) => !v)}
+            label={
+              <>
+                Adaugă sporurile în plafon la partea românească (+20%) — altfel se compară baza
+                românească cu câștigul danez cu tot cu sporuri
+              </>
+            }
+          />
+          <Checkbox
+            checked={showLegal}
+            onChange={() => setShowLegal((v) => !v)}
+            label="Arată și intervalul legal complet al bazei (bara palidă)"
+          />
           <div className="occ-key">
             <span><i className="k-ro-solid" /> România, salariul de bază</span>
             {withCap && <span><i className="k-ro-cap" /> + sporuri în plafon (20%)</span>}
@@ -531,7 +536,7 @@ function CompositionSection({
       {national && (
         <details className="table-view">
           <summary>Vezi compoziția ca tabel</summary>
-          <table className="data">
+          <Table className="data" label="Compoziția salarială">
             <thead>
               <tr>
                 <th>Componentă</th>
@@ -552,7 +557,7 @@ function CompositionSection({
                 </tr>
               ))}
             </tbody>
-          </table>
+          </Table>
         </details>
       )}
 

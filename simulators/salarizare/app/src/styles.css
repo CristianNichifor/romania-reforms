@@ -117,8 +117,7 @@ table.data td.num, table.data th.num { text-align: right; font-variant-numeric: 
 
 .muted { color: var(--text-secondary); }
 /* A wide table scrolls inside its own box rather than widening the page. */
-.table-scroll { overflow-x: auto; }
-.table-scroll table.data { min-width: 520px; }
+.comparison-data { min-width: 520px; }
 
 details.table-view { margin-top: 14px; }
 details.table-view summary { cursor: pointer; color: var(--text-secondary); font-size: 13px; }
@@ -163,7 +162,6 @@ footer a { color: var(--text-secondary); }
 .tabs button.share { font-size: 13px; display: inline-block; }
 .tabs .regimes { grid-column: 1 / -1; display: flex; gap: 10px; align-items: center;
                  flex-wrap: wrap; }
-.regime-toggle { display: inline-flex; gap: 6px; align-items: center; font-size: 12.5px; color: var(--text-secondary); }
 .regime-toggle span { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
 @media (max-width: 980px) {
   .tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -182,7 +180,7 @@ footer a { color: var(--text-secondary); }
 .controls { display: grid; gap: 18px; }
 .field { display: grid; gap: 6px; }
 .field > span, .field > legend { font-size: 13px; color: var(--text-secondary); }
-.field input[type='search'], .field select {
+.field select {
   font: inherit; font-size: 14px; padding: 7px 9px;
   background: var(--surface-0); color: var(--text-primary);
   border: 1px solid var(--border); border-radius: 6px; width: 100%;
@@ -190,8 +188,7 @@ footer a { color: var(--text-secondary); }
 .field input[type='range'] { width: 100%; accent-color: var(--series-1); }
 fieldset.field { border: 0; padding: 0; margin: 0; }
 .claims { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 7px; }
-.claim { display: flex; gap: 8px; align-items: baseline; font-size: 13.5px; }
-.claim em { color: var(--text-muted); font-style: normal; font-size: 12px; }
+.claim em { color: var(--text-secondary); font-style: normal; font-size: 12px; }
 /* A supplement this job cannot be paid. Dimmed rather than hidden: the rule is the
    proposal's argument, so the reader has to be able to see it refuse. */
 .claim.barred { opacity: 0.55; cursor: not-allowed; }
@@ -378,17 +375,10 @@ section.hero { display: grid; grid-template-columns: auto 1fr; gap: 26px; align-
 .patch-off h3 { text-decoration: line-through; text-decoration-thickness: 1px; }
 .patch-switch { display: inline-flex; align-items: center; gap: 5px; font-size: 12px;
   color: var(--text-secondary); cursor: pointer; user-select: none; }
-.patch-switch input { accent-color: var(--accent); }
 .patch-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
-button.ghost { font: inherit; font-size: 12.5px; padding: 5px 11px; border-radius: 6px;
-  border: 1px solid var(--border); background: var(--surface-1); color: var(--text-secondary);
-  cursor: pointer; }
-button.ghost:hover { border-color: var(--accent); color: var(--text); }
 .kpi-from { display: block; font-style: normal; color: var(--text-muted); font-size: 11.5px;
   margin-top: 2px; }
 
-.home-search input[type='search'] { width: 100%; font: inherit; font-size: 15px; padding: 10px 12px;
-  border-radius: 7px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text); }
 .home-hits { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 4px; }
 .home-hits button { display: flex; flex-direction: column; gap: 2px; width: 100%; text-align: left;
   font: inherit; padding: 8px 10px; border-radius: 6px; border: 1px solid transparent;
@@ -942,7 +932,7 @@ i.k-measured { background: var(--series-1); border-radius: 50% !important; }
 
 .cards {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr));
   gap: 14px;
   margin-top: 14px;
 }
@@ -983,12 +973,4 @@ i.k-measured { background: var(--series-1); border-radius: 50% !important; }
 button.more {
   display: block;
   margin: 18px auto 0;
-  padding: 8px 18px;
-  background: var(--surface-1);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  color: inherit;
-  font: inherit;
-  cursor: pointer;
 }
-button.more:hover { border-color: var(--accent); }

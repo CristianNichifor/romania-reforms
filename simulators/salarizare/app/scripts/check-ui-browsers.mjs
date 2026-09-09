@@ -5,6 +5,7 @@ import { join } from 'node:path';
 for (const [filename, baselineKey] of [
   ['./check-civic-ui.mjs', 'CIVIC_BASELINE'],
   ['./check-merge-filters.mjs', 'CIVIC_MERGES_BASELINE'],
+  ['./check-shared-controls.mjs', 'CIVIC_CONTROLS_BASELINE'],
 ]) {
   const script = fileURLToPath(new URL(filename, import.meta.url));
   let baseline = process.env[baselineKey];

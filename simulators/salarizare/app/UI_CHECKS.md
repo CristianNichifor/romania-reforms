@@ -9,7 +9,7 @@ npm run check:ui
 ```
 
 The runner starts and stops a Vite preview for each engine: Chromium, Firefox,
-then WebKit. It checks `#/echivalente` and `#/functii`, not every simulator screen.
+then WebKit. It checks equivalence and merge filters plus the consolidated salary-control and table surfaces below, not every simulator workflow.
 
 - Six layouts per engine: 320/390/1440 pixels in light and dark modes.
 - Select padding, keyboard focus order and visible focus; scoped axe checks on
@@ -34,6 +34,31 @@ all displayed text/amounts and URL hashes, normalizing only rendered whitespace
 because engines insert different tabs and newlines around table cells.
 Screenshots and JSON reports go to a fresh `/tmp/pay-civic-ui-*` directory per
 engine and are retained as CI artifacts for seven days.
+
+## Consolidated Controls And Tables
+
+`scripts/check-shared-controls.mjs` covers 25 snapshots per engine: home search;
+proposal bulk actions, individual toggle and reload; occupation options and sector;
+envelope justification and cap toggles; payslip position, seniority, variant,
+supplement, reload and offline change; structure, distribution, comparison and
+merge tables. Snapshots preserve full text, table order, checkbox states and URL
+hashes. Only the two newly visible home/justification labels are omitted from the
+historical text comparison; numerical values and existing text remain intact.
+
+Additional assertions exercise the final-regime guard, add/remove regime behavior
+and scenario-copy payload with a browser clipboard stub (not an operating-system
+clipboard test). Four control surfaces and seven table surfaces are checked at
+320/390/1440 widths in light/dark mode: 66 layouts per engine. Table checks verify
+named keyboard-focusable regions, visible focus, keyboard horizontal scrolling,
+containment, no nested scrolling wrapper and right-aligned numeric cells. Axe checks target shared fields/choices,
+not the entire surrounding page.
+
+`CIVIC_CONTROLS_BASELINE=/path/to/results.json` compares all three engines against
+a pre-migration run. Without it, Firefox and WebKit compare with Chromium.
+`CIVIC_STAGE=before node scripts/check-shared-controls.mjs` captures an already-built
+historical UI without shared-component assertions. Build the old revision before
+capturing it, then build the migration and supply its baseline path. Baselines are
+temporary verification artifacts, not app payloads or tracked data.
 
 For one engine, use `CIVIC_BROWSER=firefox node scripts/check-civic-ui.mjs`.
 Use `scripts/check-merge-filters.mjs` instead for merge filters. On a pre-migration

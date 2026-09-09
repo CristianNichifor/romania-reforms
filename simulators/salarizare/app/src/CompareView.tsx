@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Table } from '@cristiannichifor/civic-ui';
 
 import { readCap } from '../../engine/cap';
 import type { CapSeries } from '../../engine/cap';
@@ -533,8 +534,7 @@ export default function CompareView({
                   coeficient de bază {num(Math.min(...position.variants.map((v) => Number(v.value ?? 0))))}
                 </small>
               </h3>
-              <div className="table-scroll">
-                <table className="data">
+                <Table className="data comparison-data" label="Comparația regimurilor salariale">
                   <thead>
                     <tr>
                       <th>Funcția absorbită</th>
@@ -563,8 +563,7 @@ export default function CompareView({
                         </tr>
                       ))}
                   </tbody>
-                </table>
-              </div>
+                </Table>
             </div>
           ))}
           <p className="src">

@@ -1,7 +1,5 @@
 import { useMemo } from 'react';
-import { Checkbox, Field, Input, NativeSelect } from '@cristiannichifor/civic-ui';
-import '@cristiannichifor/civic-ui/styles.css';
-import './civic-pilot.css';
+import { Button, Checkbox, Field, Input, NativeSelect, Table } from '@cristiannichifor/civic-ui';
 
 import { byFanIn, mergeCards } from '../../engine/merges';
 import type { MergeCard } from '../../engine/merges';
@@ -199,9 +197,9 @@ export default function MergesView({
       </div>
 
       {shown.length > limit && (
-        <button className="more" onClick={() => setExtra({ n: String(limit + 60) })}>
+        <Button className="more" onClick={() => setExtra({ n: String(limit + 60) })}>
           Încă {Math.min(60, shown.length - limit)} funcții
-        </button>
+        </Button>
       )}
     </>
   );
@@ -227,7 +225,7 @@ function Card({ card, rates }: { card: MergeCard; rates: Rates }) {
         {card.chapter && <> · {card.chapter}</>} · {card.code}
       </p>
 
-      <table className="data">
+      <Table className="data" label={`Comparație salarială: ${card.name}`}>
         <tbody>
           <Row label="În vigoare (153/2017)" value={ron(card.inForce)} missing="fără echivalare publicată" />
           <Row label="Proiectul" value={ron(card.draft)} missing="nepublicat" />
@@ -262,7 +260,7 @@ function Card({ card, rates }: { card: MergeCard; rates: Rates }) {
             </tr>
           )}
         </tbody>
-      </table>
+      </Table>
 
       {card.titles.length > 1 && (
         <details className="merge-titles">

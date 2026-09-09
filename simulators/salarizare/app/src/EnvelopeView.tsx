@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { Field, Input } from '@cristiannichifor/civic-ui';
 
 import type { CapSeries } from '../../engine/cap';
 import type { Scenario } from '../../engine/scenario';
@@ -200,15 +201,21 @@ export default function EnvelopeView({
                   onChange={(e) => set(f.family, { pct: Number(e.target.value) / 100 })}
                 />
                 {state.pct !== 0 && (
-                  <input
-                    type="text"
-                    className={`why${state.why.trim() ? '' : ' missing'}`}
-                    placeholder={
-                      state.pct > 0 ? 'De ce merită această creștere?' : 'De unde vine reducerea?'
-                    }
-                    value={state.why}
-                    onChange={(e) => set(f.family, { why: e.target.value })}
-                  />
+                  <Field id={`move-why-${f.family}`} label="Motivul mutării">
+                    {(attributes) => (
+                      <Input
+                        {...attributes}
+                        type="text"
+                        aria-label={`Motivul mutării: ${FAMILY_LABELS[f.family] ?? f.label}`}
+                        className={`why${state.why.trim() ? '' : ' missing'}`}
+                        placeholder={
+                          state.pct > 0 ? 'De ce merită această creștere?' : 'De unde vine reducerea?'
+                        }
+                        value={state.why}
+                        onChange={(e) => set(f.family, { why: e.target.value })}
+                      />
+                    )}
+                  </Field>
                 )}
               </div>
             );

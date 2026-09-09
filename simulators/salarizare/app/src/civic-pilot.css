@@ -13,3 +13,45 @@
   --civic-accent: var(--accent);
   --civic-danger: var(--text-primary);
 }
+
+.civic-pay .civic-field,
+.civic-pay .civic-table-scroll {
+  min-width: 0;
+}
+
+.civic-pay .civic-field {
+  margin-bottom: 14px;
+}
+
+.civic-pay .civic-choice {
+  font-size: 13.5px;
+}
+
+.civic-pay .civic-table.data {
+  font-size: 13px;
+}
+
+.civic-pay .civic-table.data .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.civic-pay .civic-table-scroll {
+  margin: 6px 0;
+}
+
+.civic-pay .claims {
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+}
+
+.civic-pay .slips {
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+}
+
+.civic-pay .regime-toggle {
+  min-width: 0;
+}
+
+.civic-pay .regime-toggle span {
+  overflow-wrap: anywhere;
+}
