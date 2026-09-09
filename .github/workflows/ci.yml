@@ -71,8 +71,15 @@ jobs:
         run: |
           npm ci --ignore-scripts
           npm run build
-          npx --no-install playwright install chromium
-          npm run check:ui
+          docker run --rm --ipc=host --user "$(id -u):$(id -g)" -v "$GITHUB_WORKSPACE:/work" -v /tmp:/tmp -w /work/simulators/salarizare/app mcr.microsoft.com/playwright:v1.63.0-noble npm run check:ui
+      - name: Upload pay browser evidence
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pay-browser-checks
+          path: /tmp/pay-civic-ui-*
+          if-no-files-found: ignore
+          retention-days: 7
 
   justitie:
     name: justitie
