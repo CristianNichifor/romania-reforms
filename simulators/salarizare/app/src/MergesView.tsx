@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Field, Input, NativeSelect } from '@cristiannichifor/civic-ui';
+import { Checkbox, Field, Input, NativeSelect } from '@cristiannichifor/civic-ui';
 import '@cristiannichifor/civic-ui/styles.css';
 import './civic-pilot.css';
 
@@ -174,14 +174,14 @@ export default function MergesView({
             )}
           </Field>
         </div>
-        <label className="claim">
-          <input
-            type="checkbox"
+        <div className="civic-scope civic-pay">
+          <Checkbox
+            className="claim"
+            label="doar funcțiile care chiar comasează"
             checked={onlyMerged}
             onChange={() => setExtra({ merged: onlyMerged ? undefined : '1' })}
           />
-          <span>doar funcțiile care chiar comasează</span>
-        </label>
+        </div>
       </div>
 
       <p className="note">

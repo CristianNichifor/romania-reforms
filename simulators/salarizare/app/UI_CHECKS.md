@@ -21,7 +21,8 @@ then WebKit. It checks `#/echivalente` and `#/functii`, not every simulator scre
   reload, empty and reset. Assertions verify nonempty reduced results, family
   metadata, merged badges, persisted controls and restored results.
 - Merge filters also check six layouts per engine, the longest family option,
-  control bounds, select padding, keyboard focus and scoped axe results. Layout
+  control bounds, select padding, keyboard checkbox activation, visible checkbox
+  focus and scoped axe results including the shared checkbox. Layout
   assertions and screenshots cover the filter row, not the entire cards page.
 
 Cross-engine agreement is not independent validation of the salary calculations.
