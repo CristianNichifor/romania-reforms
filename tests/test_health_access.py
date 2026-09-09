@@ -6,12 +6,18 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 IMPORTER = ROOT / "packages" / "health_access" / "scripts" / "import_health_access.py"
+ACCESS_BUILDER = ROOT / "packages" / "health_access" / "scripts" / "build_health_service_access.py"
 DATA = ROOT / "packages" / "health_access" / "data"
 
 spec = importlib.util.spec_from_file_location("import_health_access", IMPORTER)
 assert spec and spec.loader
 health_access = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(health_access)
+
+access_spec = importlib.util.spec_from_file_location("build_health_service_access", ACCESS_BUILDER)
+assert access_spec and access_spec.loader
+health_service_access = importlib.util.module_from_spec(access_spec)
+access_spec.loader.exec_module(health_service_access)
 
 
 def provider(provider_id: str, name: str, county_code: str = "B") -> dict:
@@ -59,6 +65,110 @@ def fixture_registry() -> dict:
                 "level": "municipality",
                 "countyCode": "CJ",
             },
+        ],
+    }
+
+
+def fixture_access_registry() -> dict:
+    return {
+        "id": "uat-registry-2026",
+        "period": "2026",
+        "units": [
+            {
+                "siruta": "100",
+                "name": "JUDETUL TEST",
+                "shortName": "TEST",
+                "level": "county",
+                "countyCode": "TS",
+                "countyName": "Test",
+                "population": 10_000,
+                "populationSource": "fixture",
+            },
+            {
+                "siruta": "101",
+                "name": "MUNICIPIUL TEST",
+                "shortName": "TEST",
+                "level": "municipality",
+                "countyCode": "TS",
+                "countyName": "Test",
+                "population": 8_000,
+                "populationSource": "fixture",
+            },
+            {
+                "siruta": "102",
+                "name": "COMUNA LIPSITA",
+                "shortName": "LIPSITA",
+                "level": "commune",
+                "countyCode": "TS",
+                "countyName": "Test",
+                "population": 2_000,
+                "populationSource": "fixture",
+            },
+            {
+                "siruta": "103",
+                "name": "TEST SECTORUL 1",
+                "shortName": "SECTORUL 1",
+                "level": "sector",
+                "countyCode": "TS",
+                "countyName": "Test",
+                "population": None,
+                "populationSource": None,
+            },
+        ],
+    }
+
+
+def access_provider(
+    provider_id: str,
+    siruta: str | None,
+    eligible: bool,
+    bed_count: float | None = None,
+) -> dict:
+    return {
+        "providerId": provider_id,
+        "name": f"SPITALUL {provider_id}",
+        "countyCode": "TS",
+        "countyName": "Test",
+        "siruta": siruta,
+        "localityName": "MUNICIPIUL TEST" if siruta else None,
+        "locationConfidence": "name-derived-locality" if siruta else "county-only",
+        "locationEvidence": {
+            "method": "provider-name-locality-match" if siruta else "county-only-source",
+            "sourceFields": ["fixture"],
+            "sourceValue": "fixture",
+            "accessUse": "eligible-for-uat-level-access" if eligible else "blocked-county-only",
+        },
+        "serviceAccessEligible": eligible,
+        "ownerType": "public",
+        "bedCount": bed_count,
+        "specialties": ["cardiology"] if bed_count else [],
+        "specialtyBeds": {},
+        "accreditationCategory": "fixture",
+        "accreditationScore": None,
+        "accreditationDecision": None,
+        "accreditationOrder": None,
+        "accreditationPeriod": None,
+        "sourceRows": {
+            "anmcsOrdinal": 1,
+            "anmcsSheetRow": 1,
+            "clinicalBedsRow": None,
+            "clinicalBedsSheetRow": None,
+        },
+    }
+
+
+def fixture_health_mart() -> dict:
+    return {
+        "id": "health-access-mart-2024-2025",
+        "periodStart": "2024",
+        "periodEnd": "2025",
+        "summary": {
+            "scopeCounties": ["TS"],
+            "byCounty": [{"countyCode": "TS", "countyName": "Test"}],
+        },
+        "records": [
+            access_provider("anmcs-2025-001", "101", True, 12.0),
+            access_provider("anmcs-2025-002", None, False),
         ],
     }
 
@@ -123,6 +233,33 @@ def test_location_derivation_uses_registry_and_bucharest_municipality():
     assert not health_access.service_access_eligible(blocked)
 
 
+def test_health_service_access_counts_only_eligible_uat_providers():
+    document = health_service_access.build_document(
+        fixture_health_mart(),
+        fixture_access_registry(),
+        {
+            "healthAccessMartSha256": "a" * 64,
+            "uatRegistrySha256": "b" * 64,
+        },
+        "2026-09-09",
+    )
+    units_by_siruta = {unit["siruta"]: unit for unit in document["units"]}
+
+    assert document["summary"]["uats"] == 2
+    assert document["summary"]["uatsWithLocalProvider"] == 1
+    assert document["summary"]["eligibleProviders"] == 1
+    assert document["summary"]["blockedProviders"] == 1
+    assert document["summary"]["namedExclusions"] == 1
+    assert document["summary"]["excludedSectorRows"] == 1
+    assert units_by_siruta["101"]["localProviderCount"] == 1
+    assert units_by_siruta["101"]["localClinicalBeds"] == 12.0
+    assert units_by_siruta["101"]["localSpecialties"] == ["cardiology"]
+    assert units_by_siruta["102"]["localProviderCount"] == 0
+    assert units_by_siruta["101"]["countyBlockedProviderCount"] == 1
+    assert all(unit["level"] != "sector" for unit in document["units"])
+    assert document["exclusions"][0]["providerId"] == "anmcs-2025-002"
+
+
 def test_committed_health_access_mart_covers_national_scope():
     document = json.loads((DATA / "health-access-mart-2024-2025.json").read_text(encoding="utf-8"))
     records = document["records"]
@@ -177,3 +314,41 @@ def test_committed_health_access_mart_covers_national_scope():
         "location-derived-from-provider-name",
         "bucharest-sector-not-identifiable",
     } <= {limitation["id"] for limitation in document["limitations"]}
+
+
+def test_committed_health_service_access_uses_only_eligible_providers():
+    mart = json.loads((DATA / "health-access-mart-2024-2025.json").read_text(encoding="utf-8"))
+    access = json.loads(
+        (DATA / "health-service-access-uat-2024-2026.json").read_text(encoding="utf-8")
+    )
+    eligible_provider_ids = {
+        record["providerId"] for record in mart["records"] if record["serviceAccessEligible"]
+    }
+    blocked_provider_ids = {
+        record["providerId"] for record in mart["records"] if not record["serviceAccessEligible"]
+    }
+    provider_ids_in_view = {
+        provider["providerId"] for unit in access["units"] for provider in unit["localProviders"]
+    }
+    excluded_provider_ids = {exclusion["providerId"] for exclusion in access["exclusions"]}
+
+    assert access["id"] == "health-service-access-uat-2024-2026"
+    assert access["summary"]["uats"] == 3181
+    assert (
+        access["summary"]["eligibleProviders"] == mart["summary"]["serviceAccessEligibleProviders"]
+    )
+    assert access["summary"]["blockedProviders"] == mart["summary"]["serviceAccessBlockedProviders"]
+    assert access["summary"]["namedExclusions"] == len(blocked_provider_ids)
+    assert access["summary"]["excludedSectorRows"] == 6
+    assert provider_ids_in_view == eligible_provider_ids
+    assert excluded_provider_ids == blocked_provider_ids
+    assert provider_ids_in_view.isdisjoint(excluded_provider_ids)
+    assert all(unit["level"] != "sector" for unit in access["units"])
+    assert access["summary"]["populationWithLocalProvider"] == sum(
+        unit["population"] or 0 for unit in access["units"] if unit["hasLocalProvider"]
+    )
+    assert {
+        "uat-colocation-not-travel-time",
+        "county-only-providers-excluded",
+        "bucharest-sectors-excluded",
+    } <= {limitation["id"] for limitation in access["limitations"]}

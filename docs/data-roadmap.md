@@ -84,8 +84,11 @@ First slice:
   and all Ministry county bed totals
 - done: attach per-provider location evidence and a service-access eligibility flag so
   county-only rows cannot be used as if they had a provider location
-- next: add street-address or coordinate evidence for point-level provider locations, then
-  build service-access views from eligible providers only
+- done: build a UAT-level service-access view from eligible providers only, with named
+  exclusions for county-only provider rows
+- next: wire the shared UAT service-access view into `administrativ`, `justitie` and
+  `transport`; then add street-address or coordinate evidence for point-level provider
+  locations
 
 This should support service-access views in `administrativ`, `justitie` and `transport`
 without each simulator building its own hospital roster.

@@ -1,0 +1,272 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/packages/health_access/schema/health-service-access.schema.json",
+  "title": "UAT-level health service access view",
+  "description": "Derived UAT-level view built from the shared health access mart and UAT registry. Only providers marked serviceAccessEligible are counted in local access rows.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "id",
+    "title",
+    "publisher",
+    "scope",
+    "periodStart",
+    "periodEnd",
+    "retrievedDate",
+    "provenance",
+    "registry",
+    "sourceHashes",
+    "transform",
+    "summary",
+    "units",
+    "exclusions",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "const": "health-service-access-uat-2024-2026" },
+    "title": { "type": "string", "minLength": 1 },
+    "publisher": { "const": "Ministerul Sanatatii / ANMCS / Institutul National de Statistica" },
+    "scope": { "const": "uat-level" },
+    "periodStart": { "const": "2024" },
+    "periodEnd": { "const": "2026" },
+    "retrievedDate": { "type": "string", "format": "date" },
+    "provenance": {
+      "$ref": "https://cristiannichifor.github.io/romania-reforms/schema/provenance.schema.json#/$defs/provenance"
+    },
+    "registry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["healthMart", "uatRegistry"],
+      "properties": {
+        "healthMart": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "periodStart", "periodEnd"],
+          "properties": {
+            "id": { "const": "health-access-mart-2024-2025" },
+            "periodStart": { "const": "2024" },
+            "periodEnd": { "const": "2025" }
+          }
+        },
+        "uatRegistry": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "period"],
+          "properties": {
+            "id": { "const": "uat-registry-2026" },
+            "period": { "const": "2026" }
+          }
+        }
+      }
+    },
+    "sourceHashes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["healthAccessMartSha256", "uatRegistrySha256"],
+      "properties": {
+        "healthAccessMartSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "uatRegistrySha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "transform": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["script", "version"],
+      "properties": {
+        "script": { "const": "packages/health_access/scripts/build_health_service_access.py" },
+        "version": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "uats",
+        "uatsWithLocalProvider",
+        "population",
+        "populationWithLocalProvider",
+        "eligibleProviders",
+        "blockedProviders",
+        "eligibleProvidersWithClinicalBeds",
+        "eligibleProviderLevelClinicalBeds",
+        "namedExclusions",
+        "excludedSectorRows",
+        "byCounty"
+      ],
+      "properties": {
+        "uats": { "type": "integer", "minimum": 1 },
+        "uatsWithLocalProvider": { "type": "integer", "minimum": 0 },
+        "population": { "type": "integer", "minimum": 0 },
+        "populationWithLocalProvider": { "type": "integer", "minimum": 0 },
+        "eligibleProviders": { "type": "integer", "minimum": 0 },
+        "blockedProviders": { "type": "integer", "minimum": 0 },
+        "eligibleProvidersWithClinicalBeds": { "type": "integer", "minimum": 0 },
+        "eligibleProviderLevelClinicalBeds": { "type": "number", "minimum": 0 },
+        "namedExclusions": { "type": "integer", "minimum": 0 },
+        "excludedSectorRows": { "type": "integer", "minimum": 0 },
+        "byCounty": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/countySummary" }
+        }
+      }
+    },
+    "units": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/unitAccess" }
+    },
+    "exclusions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/exclusion" }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "https://cristiannichifor.github.io/romania-reforms/schema/provenance.schema.json#/$defs/limitation"
+      }
+    }
+  },
+  "$defs": {
+    "ownerCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["public", "private", "unknown"],
+      "properties": {
+        "public": { "type": "integer", "minimum": 0 },
+        "private": { "type": "integer", "minimum": 0 },
+        "unknown": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "providerSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "providerId",
+        "name",
+        "ownerType",
+        "bedCount",
+        "specialties",
+        "accreditationCategory",
+        "locationConfidence"
+      ],
+      "properties": {
+        "providerId": { "type": "string", "pattern": "^anmcs-2025-[0-9]{3}$" },
+        "name": { "type": "string", "minLength": 1 },
+        "ownerType": { "enum": ["public", "private", "unknown"] },
+        "bedCount": { "type": ["number", "null"], "minimum": 0 },
+        "specialties": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "accreditationCategory": { "type": ["string", "null"], "minLength": 1 },
+        "locationConfidence": {
+          "enum": ["name-derived-locality", "municipality-from-county"]
+        }
+      }
+    },
+    "unitAccess": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "siruta",
+        "name",
+        "shortName",
+        "level",
+        "countyCode",
+        "countyName",
+        "population",
+        "populationSource",
+        "hasLocalProvider",
+        "localProviderCount",
+        "localClinicalBedProviders",
+        "localClinicalBeds",
+        "localOwnerTypes",
+        "localSpecialties",
+        "localProviders",
+        "countyEligibleProviderCount",
+        "countyBlockedProviderCount"
+      ],
+      "properties": {
+        "siruta": { "type": "string", "pattern": "^[0-9]+$" },
+        "name": { "type": "string", "minLength": 1 },
+        "shortName": { "type": "string", "minLength": 1 },
+        "level": { "enum": ["municipality", "town", "commune"] },
+        "countyCode": { "type": "string", "pattern": "^[A-Z]{1,2}$" },
+        "countyName": { "type": "string", "minLength": 1 },
+        "population": { "type": ["integer", "null"], "minimum": 0 },
+        "populationSource": { "type": ["string", "null"], "minLength": 1 },
+        "hasLocalProvider": { "type": "boolean" },
+        "localProviderCount": { "type": "integer", "minimum": 0 },
+        "localClinicalBedProviders": { "type": "integer", "minimum": 0 },
+        "localClinicalBeds": { "type": "number", "minimum": 0 },
+        "localOwnerTypes": { "$ref": "#/$defs/ownerCounts" },
+        "localSpecialties": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "localProviders": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/providerSummary" }
+        },
+        "countyEligibleProviderCount": { "type": "integer", "minimum": 0 },
+        "countyBlockedProviderCount": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "countySummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "countyCode",
+        "countyName",
+        "uats",
+        "uatsWithLocalProvider",
+        "population",
+        "populationWithLocalProvider",
+        "eligibleProviders",
+        "blockedProviders",
+        "eligibleProvidersWithClinicalBeds",
+        "eligibleProviderLevelClinicalBeds"
+      ],
+      "properties": {
+        "countyCode": { "type": "string", "pattern": "^[A-Z]{1,2}$" },
+        "countyName": { "type": "string", "minLength": 1 },
+        "uats": { "type": "integer", "minimum": 0 },
+        "uatsWithLocalProvider": { "type": "integer", "minimum": 0 },
+        "population": { "type": "integer", "minimum": 0 },
+        "populationWithLocalProvider": { "type": "integer", "minimum": 0 },
+        "eligibleProviders": { "type": "integer", "minimum": 0 },
+        "blockedProviders": { "type": "integer", "minimum": 0 },
+        "eligibleProvidersWithClinicalBeds": { "type": "integer", "minimum": 0 },
+        "eligibleProviderLevelClinicalBeds": { "type": "number", "minimum": 0 }
+      }
+    },
+    "exclusion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "source",
+        "providerId",
+        "name",
+        "countyCode",
+        "locationConfidence",
+        "reason"
+      ],
+      "properties": {
+        "kind": { "const": "provider-excluded-from-service-access" },
+        "source": { "const": "health-access-mart-2024-2025" },
+        "providerId": { "type": "string", "pattern": "^anmcs-2025-[0-9]{3}$" },
+        "name": { "type": "string", "minLength": 1 },
+        "countyCode": { "type": "string", "pattern": "^[A-Z]{1,2}$" },
+        "locationConfidence": { "const": "county-only" },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

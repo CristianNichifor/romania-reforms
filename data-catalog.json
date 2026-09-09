@@ -197,12 +197,13 @@
       ],
       "storagePolicy": "Provider summary JSON can be committed if small; geocoded/routing outputs should become release assets.",
       "nextSlice": {
-        "scope": "UAT-level health service-access views.",
-        "deliverable": "Build access views from serviceAccessEligible providers only, with named exclusions for county-only rows.",
-        "doneWhen": "Each consumer reports reachable health-provider counts without treating county-only providers as located."
+        "scope": "Consumer adoption of shared health service-access views.",
+        "deliverable": "Wire packages/health_access/data/health-service-access-uat-2024-2026.json into administrativ, justitie and transport service-access surfaces.",
+        "doneWhen": "Each consumer reports local health-provider counts from the shared view without treating county-only providers as located."
       },
       "notes": [
         "The committed national mart covers 592 ANMCS providers and all 42 Ministry county bed totals. Clinical bed counts are attached only on confident ANMCS matches; county bed totals are kept separately.",
+        "The UAT-level service-access view covers 3,181 municipality/town/commune rows, counts only the 324 serviceAccessEligible providers, and keeps the 268 county-only providers as named exclusions.",
         "The current ANMCS accreditation workbook, CNAS 31.03.2025 hospital contracts package and INSP UNITATI CU PATURI package do not expose national provider street-address or coordinate fields through data.gov.ro; point-level geocoding needs another source."
       ]
     }
