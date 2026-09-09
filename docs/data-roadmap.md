@@ -107,9 +107,13 @@ First slice:
   distances, with 18.7 km unweighted median and 13.5 km population-weighted median
 - done: wire the point-level health access view into `justitie`'s court/police/health
   comparison, keeping UAT-level local-provider counts separate from nearest-provider distance
-- next: add a shared point-to-road snapping/routing contract so point-level health distances
+- done: add a shared point-to-road snapping/routing contract so point-level health distances
   can graduate from straight-line evidence to road-network distances without treating provider
   coordinates as graph nodes
+- done: wire that shared road-proxy contract into `justitie` as the first consumer, while
+  keeping straight-line point distance and UAT-level routed health distance separately named
+- next: wire the shared road-proxy provider-point distances into `transport`, keeping the
+  current straight-line point metric as a fallback/comparison rather than a routing claim
 
 This should support service-access views in `administrativ`, `justitie` and `transport`
 without each simulator building its own hospital roster.

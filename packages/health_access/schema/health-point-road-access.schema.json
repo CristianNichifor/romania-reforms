@@ -1,0 +1,264 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/packages/health_access/schema/health-point-road-access.schema.json",
+  "title": "UAT-level routed provider-point health access",
+  "description": "Road-proxy distances from administrativ UAT graph nodes to the nearest accepted health-provider point. Provider coordinates are snapped to UAT graph nodes and are not inserted into the road graph.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "id",
+    "title",
+    "publisher",
+    "scope",
+    "periodStart",
+    "periodEnd",
+    "retrievedDate",
+    "provenance",
+    "accessModel",
+    "registry",
+    "sourceHashes",
+    "transform",
+    "summary",
+    "providerSnaps",
+    "uatDistanceColumns",
+    "uats",
+    "exclusions",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "const": "health-point-road-access-uat-2024-2026" },
+    "title": { "type": "string", "minLength": 1 },
+    "publisher": { "const": "Ministerul Sanatatii / ANMCS / Cristian Nichifor" },
+    "scope": { "const": "uat-to-provider-point-road-proxy" },
+    "periodStart": { "const": "2024" },
+    "periodEnd": { "const": "2026" },
+    "retrievedDate": { "type": "string", "format": "date" },
+    "provenance": {
+      "$ref": "https://cristiannichifor.github.io/romania-reforms/schema/provenance.schema.json#/$defs/provenance"
+    },
+    "accessModel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "providerSnapMethod",
+        "routingMethod",
+        "distanceMethod",
+        "distanceFormula",
+        "distanceIncludes",
+        "distanceExcludes"
+      ],
+      "properties": {
+        "kind": { "const": "uat-provider-point-road-proxy" },
+        "providerSnapMethod": {
+          "const": "provider-coordinate-to-administrativ-uat-road-node"
+        },
+        "routingMethod": { "const": "multi-source-dijkstra-road-metres" },
+        "distanceMethod": {
+          "const": "road-graph-to-snap-node-plus-straight-line-offset"
+        },
+        "distanceFormula": { "type": "string", "minLength": 1 },
+        "distanceIncludes": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "distanceExcludes": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "registry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["healthPointAccess", "roadGraph"],
+      "properties": {
+        "healthPointAccess": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "periodStart", "periodEnd"],
+          "properties": {
+            "id": { "const": "health-point-access-2024-2026" },
+            "periodStart": { "const": "2024" },
+            "periodEnd": { "const": "2026" }
+          }
+        },
+        "roadGraph": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "uatCount", "edgeCount", "traversableEdgeCount"],
+          "properties": {
+            "id": { "const": "administrativ-web-public-road-distance" },
+            "uatCount": { "type": "integer", "minimum": 1 },
+            "edgeCount": { "type": "integer", "minimum": 1 },
+            "traversableEdgeCount": { "type": "integer", "minimum": 1 }
+          }
+        }
+      }
+    },
+    "sourceHashes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "healthPointAccessSha256",
+        "administrativManifestSha256",
+        "administrativAttributesSha256",
+        "administrativAdjacencySha256",
+        "administrativUatGeometrySha256"
+      ],
+      "properties": {
+        "healthPointAccessSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "administrativManifestSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "administrativAttributesSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "administrativAdjacencySha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "administrativUatGeometrySha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "transform": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["script", "version"],
+      "properties": {
+        "script": {
+          "const": "packages/health_access/scripts/build_health_point_road_access.py"
+        },
+        "version": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "uats",
+        "providers",
+        "providerSnaps",
+        "providerSnapNodes",
+        "pointAccessBlockedProviders",
+        "pointAccessNamedExclusions",
+        "distanceMethod",
+        "providerSnapMethod",
+        "routingMethod",
+        "medianNearestMetres",
+        "medianProviderSnapMetres",
+        "maxProviderSnapMetres",
+        "snapMethods"
+      ],
+      "properties": {
+        "uats": { "type": "integer", "minimum": 1 },
+        "providers": { "type": "integer", "minimum": 1 },
+        "providerSnaps": { "type": "integer", "minimum": 1 },
+        "providerSnapNodes": { "type": "integer", "minimum": 1 },
+        "pointAccessBlockedProviders": { "type": "integer", "minimum": 0 },
+        "pointAccessNamedExclusions": { "type": "integer", "minimum": 0 },
+        "distanceMethod": {
+          "const": "road-graph-to-snap-node-plus-straight-line-offset"
+        },
+        "providerSnapMethod": {
+          "const": "provider-coordinate-to-administrativ-uat-road-node"
+        },
+        "routingMethod": { "const": "multi-source-dijkstra-road-metres" },
+        "medianNearestMetres": { "type": "integer", "minimum": 0 },
+        "medianProviderSnapMetres": { "type": "integer", "minimum": 0 },
+        "maxProviderSnapMetres": { "type": "integer", "minimum": 0 },
+        "snapMethods": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "providerSnaps": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/providerSnap" }
+    },
+    "uatDistanceColumns": {
+      "type": "array",
+      "prefixItems": [
+        { "const": "siruta" },
+        { "const": "nearestProviderId" },
+        { "const": "providerSnapNodeSiruta" },
+        { "const": "roadGraphMetres" },
+        { "const": "providerSnapMetres" },
+        { "const": "roadProxyMetres" }
+      ],
+      "minItems": 6,
+      "maxItems": 6
+    },
+    "uats": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/uatDistanceRow" }
+    },
+    "exclusions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/exclusion" }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "https://cristiannichifor.github.io/romania-reforms/schema/provenance.schema.json#/$defs/limitation"
+      }
+    }
+  },
+  "$defs": {
+    "providerSnap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "providerId",
+        "countyCode",
+        "providerSiruta",
+        "snapNodeSiruta",
+        "snapNodeName",
+        "snapMethod",
+        "snapDistanceMetres"
+      ],
+      "properties": {
+        "providerId": { "type": "string", "pattern": "^anmcs-2025-[0-9]{3}$" },
+        "countyCode": { "type": "string", "pattern": "^[A-Z]{1,2}$" },
+        "providerSiruta": { "type": "string", "pattern": "^[0-9]+$" },
+        "snapNodeSiruta": { "type": "string", "pattern": "^[0-9]+$" },
+        "snapNodeName": { "type": "string", "minLength": 1 },
+        "snapMethod": {
+          "enum": [
+            "provider-siruta-polygon",
+            "provider-siruta-centroid",
+            "bucharest-sector-polygon",
+            "point-containing-uat-polygon",
+            "nearest-county-uat-centroid"
+          ]
+        },
+        "snapDistanceMetres": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "uatDistanceRow": {
+      "type": "array",
+      "prefixItems": [
+        { "type": "string", "pattern": "^[0-9]+$" },
+        { "type": "string", "pattern": "^anmcs-2025-[0-9]{3}$" },
+        { "type": "string", "pattern": "^[0-9]+$" },
+        { "type": "integer", "minimum": 0 },
+        { "type": "integer", "minimum": 0 },
+        { "type": "integer", "minimum": 0 }
+      ],
+      "minItems": 6,
+      "maxItems": 6
+    },
+    "exclusion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "source", "providerId", "pointAccessBlockedReason"],
+      "properties": {
+        "kind": { "const": "provider-excluded-from-road-point-access" },
+        "source": { "const": "health-point-access-2024-2026" },
+        "providerId": { "type": "string", "pattern": "^anmcs-2025-[0-9]{3}$" },
+        "pointAccessBlockedReason": { "type": ["string", "null"], "minLength": 1 }
+      }
+    }
+  }
+}
