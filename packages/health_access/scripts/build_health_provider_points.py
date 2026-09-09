@@ -1,8 +1,7 @@
 """Build provider-level health point evidence from the shared health mart.
 
 This builder carries every provider from the health mart and attaches address
-evidence where the Ministry source can be matched safely. Providers remain
-blocked from point routing until coordinate evidence is accepted.
+and coordinate evidence where the Ministry source can be matched safely.
 
 Usage:
     uv run python packages/health_access/scripts/build_health_provider_points.py
@@ -24,7 +23,9 @@ HEALTH_MART = PACKAGE_ROOT / "data/health-access-mart-2024-2025.json"
 ADDRESS_SOURCE = PACKAGE_ROOT / "sources/ms-unitati-sanitare-2026.json"
 POINT_VIEW_ID: Final[str] = "health-provider-points-2024-2026"
 OUT = PACKAGE_ROOT / f"data/{POINT_VIEW_ID}.json"
-TRANSFORM_VERSION: Final[int] = 2
+TRANSFORM_VERSION: Final[int] = 3
+ROMANIA_LATITUDE_RANGE: Final[tuple[float, float]] = (43.0, 49.0)
+ROMANIA_LONGITUDE_RANGE: Final[tuple[float, float]] = (20.0, 30.0)
 
 
 def sha256_file(path: Path) -> str:
@@ -59,11 +60,22 @@ def none_point_evidence() -> dict[str, Any]:
 def point_access_blocked_reason(
     provider: dict[str, Any],
     address_match_status: str | None,
+    source_record: dict[str, Any] | None = None,
 ) -> str:
     if address_match_status == "ambiguous":
         return "ambiguous-address"
     if provider["locationConfidence"] == "county-only":
         return "county-only-location"
+    if source_record and has_published_coordinate(source_record):
+        if not coordinate_in_romania(
+            source_record["latitude"],
+            source_record["longitude"],
+        ):
+            return "invalid-coordinate"
+        if source_record.get("countyCode") != provider["countyCode"]:
+            return "manual-review-needed"
+        if not provider["serviceAccessEligible"]:
+            return "manual-review-needed"
     return "no-point-evidence"
 
 
@@ -79,12 +91,63 @@ def address_evidence(
     }
 
 
+def has_published_coordinate(source_record: dict[str, Any]) -> bool:
+    return bool(
+        source_record.get("hasPublishedCoordinate")
+        and source_record.get("latitude") is not None
+        and source_record.get("longitude") is not None
+    )
+
+
+def coordinate_in_romania(latitude: float, longitude: float) -> bool:
+    return (
+        ROMANIA_LATITUDE_RANGE[0] <= latitude <= ROMANIA_LATITUDE_RANGE[1]
+        and ROMANIA_LONGITUDE_RANGE[0] <= longitude <= ROMANIA_LONGITUDE_RANGE[1]
+    )
+
+
+def accepted_coordinate(
+    provider: dict[str, Any],
+    source_record: dict[str, Any] | None,
+) -> tuple[float, float] | None:
+    if not source_record or not has_published_coordinate(source_record):
+        return None
+    if not provider["serviceAccessEligible"]:
+        return None
+    if provider["locationConfidence"] == "county-only":
+        return None
+    if source_record.get("countyCode") != provider["countyCode"]:
+        return None
+
+    latitude = source_record["latitude"]
+    longitude = source_record["longitude"]
+    if not coordinate_in_romania(latitude, longitude):
+        return None
+    return latitude, longitude
+
+
+def coordinate_evidence(
+    address_source: dict[str, Any],
+    latitude: float,
+    longitude: float,
+) -> dict[str, Any]:
+    return {
+        "method": "published-coordinate",
+        "source": address_source["id"],
+        "sourceValue": f"{latitude:.6f},{longitude:.6f}",
+        "retrievedDate": address_source["retrievedDate"],
+    }
+
+
 def provider_point(
     provider: dict[str, Any],
     address_source: dict[str, Any] | None,
     source_record: dict[str, Any] | None,
     address_match_status: str | None,
 ) -> dict[str, Any]:
+    coordinate = accepted_coordinate(provider, source_record)
+    point_access_eligible = coordinate is not None
+    latitude, longitude = coordinate if coordinate else (None, None)
     return {
         "providerId": provider["providerId"],
         "name": provider["name"],
@@ -100,12 +163,20 @@ def provider_point(
             if address_source and source_record
             else none_address_evidence()
         ),
-        "latitude": None,
-        "longitude": None,
-        "pointConfidence": "none",
-        "pointEvidence": none_point_evidence(),
-        "pointAccessEligible": False,
-        "pointAccessBlockedReason": point_access_blocked_reason(provider, address_match_status),
+        "latitude": latitude,
+        "longitude": longitude,
+        "pointConfidence": "official-coordinate" if coordinate else "none",
+        "pointEvidence": (
+            coordinate_evidence(address_source, latitude, longitude)
+            if address_source and coordinate
+            else none_point_evidence()
+        ),
+        "pointAccessEligible": point_access_eligible,
+        "pointAccessBlockedReason": (
+            None
+            if point_access_eligible
+            else point_access_blocked_reason(provider, address_match_status, source_record)
+        ),
     }
 
 
@@ -120,8 +191,18 @@ def exclusion(provider: dict[str, Any], source: str) -> dict[str, Any]:
     elif reason == "county-only-location":
         text = (
             "The provider has only county-level location evidence in the health mart, "
-            "so it is blocked from point-level routing until address or coordinate "
-            "evidence is attached."
+            "so it is blocked from point-level routing until provider- or UAT-level "
+            "location evidence is attached."
+        )
+    elif reason == "invalid-coordinate":
+        text = (
+            "The provider has a published coordinate candidate outside the accepted "
+            "Romania bounds, so it is blocked from point-level routing until reviewed."
+        )
+    elif reason == "manual-review-needed":
+        text = (
+            "The provider has coordinate evidence that does not satisfy the automated "
+            "acceptance checks, so it is blocked from point-level routing until reviewed."
         )
     elif provider["address"]:
         text = (
@@ -269,6 +350,23 @@ def build_document(
     service_access_eligible = [
         provider for provider in providers if provider["serviceAccessEligible"]
     ]
+    coordinate_rejection_reasons = {
+        "county-only-location",
+        "invalid-coordinate",
+        "manual-review-needed",
+    }
+    coordinate_matched = [
+        provider
+        for provider in providers
+        if provider["addressEvidence"]["method"] != "none"
+        and (
+            provider["pointEvidence"]["method"] == "published-coordinate"
+            or provider["pointAccessBlockedReason"] in coordinate_rejection_reasons
+        )
+    ]
+    coordinate_rejected = [
+        provider for provider in coordinate_matched if not provider["pointAccessEligible"]
+    ]
 
     summary = {
         "providers": len(providers),
@@ -277,6 +375,11 @@ def build_document(
         "addressSourceRecords": len(address_source["records"]) if address_source else 0,
         "addressSourceRecordsWithStreetAddress": (
             sum(1 for record in address_source["records"] if record["hasStreetAddress"])
+            if address_source
+            else 0
+        ),
+        "addressSourceRecordsWithCoordinates": (
+            sum(1 for record in address_source["records"] if has_published_coordinate(record))
             if address_source
             else 0
         ),
@@ -294,6 +397,9 @@ def build_document(
             for provider in providers
             if provider["latitude"] is not None and provider["longitude"] is not None
         ),
+        "coordinateMatchedProviders": len(coordinate_matched),
+        "coordinateAcceptedProviders": len(point_access_eligible),
+        "coordinateRejectedProviders": len(coordinate_rejected),
         "addressEvidence": count_by(
             [provider["addressEvidence"]["method"] for provider in providers]
         ),
@@ -351,13 +457,24 @@ def build_document(
         ],
         "limitations": [
             limitation(
-                "coordinate-evidence-not-yet-imported",
+                "coordinate-source-ministry-marker",
+                "note",
+                ["latitude", "longitude", "pointEvidence"],
+                (
+                    "Accepted coordinates come from Ministry of Health map markers "
+                    "attached to exact normalised provider-name and county address "
+                    "matches."
+                ),
+            ),
+            limitation(
+                "coordinate-uat-polygon-validation-not-applied",
                 "material",
                 ["latitude", "longitude", "pointAccessEligible"],
                 (
-                    "Address evidence is not coordinate evidence. Every provider "
-                    "remains blocked from point-level routing until an accepted "
-                    "coordinate is attached."
+                    "This slice applies Romania bounding-box and source/provider "
+                    "county checks. UAT polygon containment is not applied because "
+                    "the committed UAT geometry available to this package is not "
+                    "SIRUTA-keyed."
                 ),
             ),
             limitation(
@@ -375,9 +492,9 @@ def build_document(
                 "material",
                 ["pointAccessEligible", "pointAccessBlockedReason"],
                 (
-                    "County-only health mart rows cannot become point-access "
-                    "locations until provider-level address or coordinate evidence "
-                    "exists."
+                    "County-only health mart rows remain blocked even when an exact "
+                    "Ministry address or marker match exists, because the mart has no "
+                    "provider- or UAT-level location anchor for those rows."
                 ),
             ),
             limitation(
@@ -385,8 +502,9 @@ def build_document(
                 "material",
                 ["siruta", "pointAccessEligible"],
                 (
-                    "Bucharest municipality-level providers are not assigned to "
-                    "sectors without address evidence."
+                    "Bucharest municipality-level providers are not reassigned to "
+                    "sectors by the coordinate import; sector-level service placement "
+                    "requires explicit address-to-sector resolution."
                 ),
             ),
         ],
@@ -421,9 +539,9 @@ def provider_point_provenance(
         ),
         "confidence": "derived",
         "note": (
-            "Official address evidence is attached where exact name/county matches "
-            "exist, but no address-only row is eligible for point routing until "
-            "coordinate evidence is accepted."
+            "Official address and marker-coordinate evidence is attached where exact "
+            "name/county matches exist. Only non-county-only, service-eligible "
+            "providers with accepted coordinates are eligible for point routing."
         ),
     }
 

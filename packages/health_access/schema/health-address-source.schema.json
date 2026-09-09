@@ -42,6 +42,7 @@
         "sourceRecords",
         "sourceRecordsWithCounty",
         "sourceRecordsWithStreetAddress",
+        "sourceRecordsWithCoordinates",
         "duplicateSourceNames",
         "duplicateDetailUrls"
       ],
@@ -49,6 +50,7 @@
         "sourceRecords": { "type": "integer", "minimum": 1 },
         "sourceRecordsWithCounty": { "type": "integer", "minimum": 0 },
         "sourceRecordsWithStreetAddress": { "type": "integer", "minimum": 0 },
+        "sourceRecordsWithCoordinates": { "type": "integer", "minimum": 0 },
         "duplicateSourceNames": { "type": "integer", "minimum": 0 },
         "duplicateDetailUrls": { "type": "integer", "minimum": 0 }
       }
@@ -77,6 +79,9 @@
         "countyCode",
         "address",
         "hasStreetAddress",
+        "latitude",
+        "longitude",
+        "hasPublishedCoordinate",
         "detailUrl"
       ],
       "properties": {
@@ -92,6 +97,9 @@
         },
         "address": { "type": "string", "minLength": 1 },
         "hasStreetAddress": { "type": "boolean" },
+        "latitude": { "type": ["number", "null"], "minimum": 43, "maximum": 49 },
+        "longitude": { "type": ["number", "null"], "minimum": 20, "maximum": 30 },
+        "hasPublishedCoordinate": { "type": "boolean" },
         "detailUrl": { "type": "string", "format": "uri" }
       }
     }
