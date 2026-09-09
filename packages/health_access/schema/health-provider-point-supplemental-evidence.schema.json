@@ -87,9 +87,12 @@
       ],
       "properties": {
         "providerId": { "type": "string", "pattern": "^anmcs-2025-[0-9]{3}$" },
-        "sourceRecordId": { "type": "string", "pattern": "^capesaro-2026-[AB][0-9]+$" },
+        "sourceRecordId": {
+          "type": "string",
+          "pattern": "^capesaro-2026-[A-Z]{1,2}[0-9]+$"
+        },
         "sourceNativeId": { "type": "string", "pattern": "^[0-9]+$" },
-        "sourceCode": { "type": "string", "pattern": "^[AB][0-9]+$" },
+        "sourceCode": { "type": "string", "pattern": "^[A-Z]{1,2}[0-9]+$" },
         "countyCode": { "type": "string", "pattern": "^[A-Z]{1,2}$" },
         "sourceCountyName": { "type": "string", "minLength": 1 },
         "sourceCity": { "type": "string", "minLength": 1 },

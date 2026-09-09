@@ -146,8 +146,12 @@ First slice:
   promoting 17 provider/sourceCode pairs with source-specific street address and coordinate
   evidence; the point layer now has 223 accepted provider coordinates and 369 named exclusions,
   and the remaining source-acquisition queue has 101 no-Ministry-candidate providers
-- next: decide whether to formalize CAPeSaRo as a fuller release-asset-backed source import or
-  continue with a second audited subset batch for the remaining 45 public no-candidate providers
+- done: formalize CAPeSaRo as a release-asset-backed compact source extract plus a non-evidence
+  candidate report instead of committing the raw dashboard feed; the report covers all 101
+  remaining acquisition rows and finds 53 providers with same-county active street-address
+  CAPeSaRo candidates, including 35 of the 45 public no-candidate providers
+- next: review the 29 high-signal public exact-name CAPeSaRo candidates first and promote only
+  provider/sourceCode pairs that pass the supplemental-evidence checks
 
 This should support service-access views in `administrativ`, `justitie` and `transport`
 without each simulator building its own hospital roster.

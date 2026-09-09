@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/packages/health_access/schema/anmcs-capesaro-public-hospitals.schema.json",
+  "title": "ANMCS CAPeSaRo public hospital dashboard extract",
+  "description": "Compact extract from the CAPeSaRo public hospital dashboard feed. Raw dashboard responses stay out of git; this file keeps the auditable fields used by health provider point candidate reports.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "id",
+    "title",
+    "publisher",
+    "sourcePageUrl",
+    "sourceUrl",
+    "retrievedDate",
+    "license",
+    "usageLimitation",
+    "transform",
+    "summary",
+    "records",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "const": "anmcs-capesaro-public-hospitals-2026" },
+    "title": { "type": "string", "minLength": 1 },
+    "publisher": { "const": "Autoritatea Nationala de Management al Calitatii in Sanatate" },
+    "sourcePageUrl": { "type": "string", "format": "uri" },
+    "sourceUrl": { "type": "string", "format": "uri" },
+    "retrievedDate": { "type": "string", "format": "date" },
+    "license": { "type": "string", "minLength": 1 },
+    "usageLimitation": { "type": "string", "minLength": 1 },
+    "transform": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["script", "version"],
+      "properties": {
+        "script": {
+          "const": "packages/health_access/scripts/import_anmcs_capesaro_public_hospitals.py"
+        },
+        "version": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceRecords",
+        "activeSourceRecords",
+        "sourceRecordsWithCounty",
+        "sourceRecordsWithStreetAddress",
+        "sourceRecordsWithCoordinates",
+        "duplicateSourceCodes",
+        "duplicateSourceNames"
+      ],
+      "properties": {
+        "sourceRecords": { "type": "integer", "minimum": 1 },
+        "activeSourceRecords": { "type": "integer", "minimum": 0 },
+        "sourceRecordsWithCounty": { "type": "integer", "minimum": 0 },
+        "sourceRecordsWithStreetAddress": { "type": "integer", "minimum": 0 },
+        "sourceRecordsWithCoordinates": { "type": "integer", "minimum": 0 },
+        "duplicateSourceCodes": { "type": "integer", "minimum": 0 },
+        "duplicateSourceNames": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "records": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/sourceRecord" }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "https://cristiannichifor.github.io/romania-reforms/schema/provenance.schema.json#/$defs/limitation"
+      }
+    }
+  },
+  "$defs": {
+    "sourceRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceRecordId",
+        "sourceOrdinal",
+        "sourceNativeId",
+        "sourceCode",
+        "name",
+        "countyCode",
+        "sourceCountyName",
+        "sourceCity",
+        "address",
+        "hasStreetAddress",
+        "latitude",
+        "longitude",
+        "hasPublishedCoordinate",
+        "website",
+        "active"
+      ],
+      "properties": {
+        "sourceRecordId": {
+          "type": "string",
+          "pattern": "^capesaro-2026-([A-Z]{1,2}[0-9]+|id-[0-9]+)$"
+        },
+        "sourceOrdinal": { "type": "integer", "minimum": 1 },
+        "sourceNativeId": { "type": "string", "pattern": "^[0-9]+$" },
+        "sourceCode": {
+          "type": ["string", "null"],
+          "pattern": "^[A-Z]{1,2}[0-9]+$"
+        },
+        "name": { "type": "string", "minLength": 1 },
+        "countyCode": {
+          "type": ["string", "null"],
+          "pattern": "^[A-Z]{1,2}$"
+        },
+        "sourceCountyName": { "type": ["string", "null"], "minLength": 1 },
+        "sourceCity": { "type": ["string", "null"], "minLength": 1 },
+        "address": { "type": ["string", "null"], "minLength": 1 },
+        "hasStreetAddress": { "type": "boolean" },
+        "latitude": { "type": ["number", "null"], "minimum": 43, "maximum": 49 },
+        "longitude": { "type": ["number", "null"], "minimum": 20, "maximum": 30 },
+        "hasPublishedCoordinate": { "type": "boolean" },
+        "website": { "type": ["string", "null"], "minLength": 1 },
+        "active": { "type": "boolean" }
+      }
+    }
+  }
+}
