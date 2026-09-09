@@ -34,11 +34,12 @@ jobs:
       # tree and says the fix when that trips is to move derived payloads out rather than raise
       # the ceiling; this is where they come back in. A missing asset is a warning and the
       # build continues where the apps degrade on their own, but the shared local-finance mart
-      # is now required because impozit-teren generates its budget denominator from it. A
+      # is required because impozit-teren generates its budget denominator from it. The July
+      # salary regime is also required because the salary app imports it at build time. A
       # payload whose checksum does not match the manifest is fatal, because publishing a
       # plausible-but-wrong map is the failure nobody would notice.
       - name: Fetch the derived payloads
-        run: uv run python scripts/fetch_release_data.py --require local-finance-mart-2023-2025
+        run: uv run python scripts/fetch_release_data.py --require local-finance-mart-2023-2025 --require salarizare-ro-draft-2026-07-16
 
       # Built separately rather than through a workspace: the two apps arrived with their own
       # lockfiles and their own dependency trees (one React, one not), and `npm ci` against the
