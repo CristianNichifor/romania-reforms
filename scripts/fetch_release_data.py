@@ -7,10 +7,10 @@ the payloads live as release assets and are pulled in at build time, listed in
 
 **The two failure modes are treated differently on purpose.**
 
-A *missing* asset is a warning and the build continues. The apps already degrade — the
-transport map disables its speed-limit toggle and says why — and a GitHub outage must not be
-able to stop four other simulators from publishing. The site loses a layer; nobody ships a
-broken page.
+A *missing* optional asset is a warning and the build continues. The apps already degrade —
+the transport map disables its speed-limit toggle and says why — and a GitHub outage must not
+be able to stop four other simulators from publishing. The site loses a layer; nobody ships a
+broken page. A caller can mark an asset required when a consumer cannot degrade without it.
 
 A *wrong* asset is fatal. A payload that downloaded corrupt, or that a rolling tag quietly
 replaced, would be published as though it were the real measurement, and a map is exactly the
@@ -24,6 +24,7 @@ overwrites it — it just confirms the checksum matches what the manifest promis
 Usage:
     uv run python scripts/fetch_release_data.py
     uv run python scripts/fetch_release_data.py --list
+    uv run python scripts/fetch_release_data.py --require local-finance-mart-2023-2025
 """
 
 from __future__ import annotations
@@ -33,6 +34,7 @@ import hashlib
 import json
 import shutil
 import tarfile
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -44,6 +46,8 @@ MANIFEST = ROOT / "data-assets.json"
 REPO: Final[str] = "CristianNichifor/romania-reforms"
 RELEASE_URL: Final[str] = "https://github.com/{repo}/releases/download/{tag}/{asset}"
 TIMEOUT_S: Final[int] = 300
+FETCH_ATTEMPTS: Final[int] = 3
+FETCH_BACKOFF_S: Final[tuple[float, ...]] = (5.0, 20.0)
 
 
 def digest(path: Path) -> str:
@@ -79,7 +83,15 @@ def unpack(entry: dict, archive: Path) -> str:
     return f" and unpacked {count} files into {entry['extractTo']}"
 
 
-def fetch(entry: dict, repo: str = REPO) -> tuple[bool, str]:
+def fetch(
+    entry: dict,
+    repo: str = REPO,
+    *,
+    required: bool = False,
+    attempts: int = FETCH_ATTEMPTS,
+    opener=urllib.request.urlopen,
+    sleep=time.sleep,
+) -> tuple[bool, str]:
     """Return (ok, message). `ok` False only for a fault worth failing the build over."""
     destination = ROOT / entry["destination"]
     expected = entry.get("sha256") or ""
@@ -104,14 +116,22 @@ def fetch(entry: dict, repo: str = REPO) -> tuple[bool, str]:
     url = RELEASE_URL.format(repo=repo, tag=entry["tag"], asset=entry["asset"])
     destination.parent.mkdir(parents=True, exist_ok=True)
     temporary = destination.with_suffix(destination.suffix + ".part")
-    try:
-        with urllib.request.urlopen(url, timeout=TIMEOUT_S) as response:  # noqa: S310
-            temporary.write_bytes(response.read())
-    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError) as error:
-        temporary.unlink(missing_ok=True)
+    last_error: BaseException | None = None
+    for attempt in range(attempts):
+        try:
+            with opener(url, timeout=TIMEOUT_S) as response:  # noqa: S310
+                temporary.write_bytes(response.read())
+            break
+        except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError) as error:
+            temporary.unlink(missing_ok=True)
+            last_error = error
+            if attempt < attempts - 1:
+                sleep(FETCH_BACKOFF_S[min(attempt, len(FETCH_BACKOFF_S) - 1)])
+    else:
         # Warning, not failure. See the module docstring: the apps degrade, and one missing
         # layer must not stop the other simulators publishing.
-        return True, f"{entry['id']}: NOT AVAILABLE ({error}) — {entry['withoutIt']}"
+        prefix = "REQUIRED BUT NOT AVAILABLE" if required else "NOT AVAILABLE"
+        return not required, f"{entry['id']}: {prefix} ({last_error}) — {entry['withoutIt']}"
 
     if expected:
         found = digest(temporary)
@@ -132,6 +152,13 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--list", action="store_true", help="show the manifest and exit")
     parser.add_argument("--repo", default=REPO, help="owner/name to fetch releases from")
+    parser.add_argument(
+        "--require",
+        action="append",
+        default=[],
+        metavar="ASSET_ID",
+        help="fail if this asset cannot be fetched; may be passed more than once",
+    )
     args = parser.parse_args(argv)
 
     assets = load_manifest()
@@ -141,9 +168,16 @@ def main(argv: list[str] | None = None) -> int:
             print(f"  {entry['id']:<28} {state:<8} {entry['tag']}/{entry['asset']}")
         return 0
 
+    required = set(args.require)
+    known = {entry["id"] for entry in assets}
+    unknown = sorted(required - known)
+    if unknown:
+        print(f"unknown required release asset(s): {', '.join(unknown)}")
+        return 2
+
     failures = []
     for entry in assets:
-        ok, message = fetch(entry, args.repo)
+        ok, message = fetch(entry, args.repo, required=entry["id"] in required)
         print(f"  {message}")
         if not ok:
             failures.append(entry["id"])
