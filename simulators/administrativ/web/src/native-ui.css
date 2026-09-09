@@ -1,0 +1,24 @@
+@import './vendor/civic-ui/styles.css';
+
+/* Keep the map application's host palette, not a party theme. */
+.civic-admin {
+  --civic-bg: var(--bg);
+  --civic-surface: var(--panel-solid);
+  --civic-raised: var(--border);
+  --civic-text: var(--text);
+  --civic-muted: var(--muted);
+  --civic-border: var(--muted);
+  --civic-focus: var(--accent);
+  --civic-action: var(--accent);
+}
+/* Interim native-select adapter for the published v0.2.0 stylesheet. */
+.civic-admin .civic-field .civic-select--native {
+  appearance: auto;
+  padding-right: 0.75rem;
+  color-scheme: dark;
+}
+.civic-admin .candidate-filters .civic-field { min-width: 0; flex: 1; }
+.civic-admin .candidate-filters .civic-select { max-width: 100%; }
+.civic-admin .civic-field .civic-input,
+.civic-admin .civic-field .civic-select { font-size: 12px; }
+.civic-admin .civic-button { font-size: 12px; }

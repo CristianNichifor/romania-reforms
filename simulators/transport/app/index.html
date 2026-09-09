@@ -7,7 +7,7 @@
     <title>Transport — cât durează până la reședința de județ</title>
     <meta name="description" content="Cât ar dura să ajungi la reședința ta de județ cu autobuzul, dacă fiecare UAT din România ar avea orar, și ce costă asta pe an." />
   </head>
-  <body>
+  <body class="civic-scope civic-transport">
     <main>
       <div id="map" aria-label="Harta timpului de călătorie până la reședința de județ"></div>
       <aside id="panel">
@@ -36,8 +36,10 @@
         <h2>Legendă</h2>
         <ul id="legend" class="legend"></ul>
 
-        <label class="pick" for="level">Nivel de serviciu</label>
-        <select id="level" aria-label="Nivel de serviciu"></select>
+        <div class="civic-field">
+          <label class="pick" for="level">Nivel de serviciu</label>
+          <select id="level" class="civic-select civic-select--native" aria-label="Nivel de serviciu"></select>
+        </div>
         <p class="hint" id="level-note"></p>
 
         <h2>Ce costă pe an</h2>
@@ -45,7 +47,9 @@
         <p class="hint" id="cost-note"></p>
 
         <h2>Costul pe niveluri</h2>
-        <table id="levels"></table>
+        <div class="civic-table-scroll" role="region" aria-label="Costul pe niveluri" tabindex="0">
+          <table id="levels"></table>
+        </div>
         <p class="hint" id="levels-note"></p>
 
         <h2>Din bilete și din buget</h2>
@@ -53,15 +57,15 @@
         <p class="hint" id="fares-note"></p>
 
         <h2>Drumurile</h2>
-        <label class="check">
+        <label class="check civic-choice">
           <input type="checkbox" id="roads-toggle" />
           Drumuri naționale
         </label>
-        <label class="check">
+        <label class="check civic-choice">
           <input type="checkbox" id="county-roads-toggle" />
           Drumuri județene și comunale
         </label>
-        <label class="check">
+        <label class="check civic-choice">
           <input type="checkbox" id="speeds-toggle" />
           Limitele de viteză semnalizate
         </label>
@@ -70,15 +74,15 @@
         <p class="hint" id="roads-note"></p>
 
         <h2>Investiția în drumuri</h2>
-        <label class="check">
+        <label class="check civic-choice">
           <input type="checkbox" id="trafic-toggle" />
           Traficul măsurat
         </label>
-        <label class="check">
+        <label class="check civic-choice">
           <input type="checkbox" id="ocoliri-toggle" />
           Centuri ocolitoare, în ordinea rentabilității
         </label>
-        <label class="check">
+        <label class="check civic-choice">
           <input type="checkbox" id="giratorii-toggle" />
           Intersecții care ar cere girație
         </label>
@@ -86,7 +90,7 @@
         <p class="hint" id="invest-note"></p>
 
         <h2>Calea ferată</h2>
-        <label class="check">
+        <label class="check civic-choice">
           <input type="checkbox" id="rail-toggle" />
           Arată linia și gările
         </label>

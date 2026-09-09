@@ -9,10 +9,14 @@
     "preview": "vite preview",
     "lint": "eslint src tests",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run --exclude 'tests/browser/**'",
+    "check:civic-css": "node scripts/vendor-civic-css.mjs",
+    "check:ui": "npm run check:civic-css && playwright test"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.10.2",
     "@eslint/js": "^9.14.0",
+    "@playwright/test": "1.63.0",
     "@types/node": "^22.9.0",
     "eslint": "^9.14.0",
     "typescript": "^5.6.3",
