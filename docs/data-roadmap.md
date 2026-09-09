@@ -121,9 +121,12 @@ First slice:
   coordinates and 393 named exclusions without enabling generic fuzzy matching
 - done: refresh `transport` and `justitie` from the larger point set; the transport road-proxy
   run now has 26.9 km unweighted median and 18.3 km population-weighted median
-- next: review the remaining 125 service-eligible no-point-evidence providers against new
-  official/licensed sources or stricter manual review, keeping any new acceptance pinned to
-  explicit source record ids
+- done: build `health-provider-point-evidence-review-2024-2026` as a manual-review queue
+  for the 125 service-eligible providers still blocked by `no-point-evidence`; it finds 4
+  exact same-county Ministry rows without street-address evidence, 7 providers with unused
+  same-county Ministry review candidates and 114 providers with no Ministry candidate
+- next: adjudicate the 11 candidate providers from the review report, starting with the
+  7 high-signal rows, and convert only source-record-pinned acceptances into curated aliases
 
 This should support service-access views in `administrativ`, `justitie` and `transport`
 without each simulator building its own hospital roster.

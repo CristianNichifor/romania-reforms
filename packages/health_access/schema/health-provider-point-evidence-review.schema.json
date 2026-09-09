@@ -1,0 +1,304 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/packages/health_access/schema/health-provider-point-evidence-review.schema.json",
+  "title": "Remaining health provider point evidence review",
+  "description": "Manual-review queue for service-eligible health providers that remain blocked from point-level routing because no accepted point evidence is attached.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "id",
+    "title",
+    "publisher",
+    "scope",
+    "periodStart",
+    "periodEnd",
+    "retrievedDate",
+    "provenance",
+    "registry",
+    "sourceHashes",
+    "transform",
+    "summary",
+    "records",
+    "limitations"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "const": "health-provider-point-evidence-review-2024-2026" },
+    "title": { "type": "string", "minLength": 1 },
+    "publisher": { "const": "Cristian Nichifor" },
+    "scope": { "const": "provider-point-evidence-review" },
+    "periodStart": { "const": "2024" },
+    "periodEnd": { "const": "2026" },
+    "retrievedDate": { "type": "string", "format": "date" },
+    "provenance": {
+      "$ref": "https://cristiannichifor.github.io/romania-reforms/schema/provenance.schema.json#/$defs/provenance"
+    },
+    "registry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["providerPoints", "healthMart", "addressSource", "addressAliases"],
+      "properties": {
+        "providerPoints": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "periodStart", "periodEnd"],
+          "properties": {
+            "id": { "const": "health-provider-points-2024-2026" },
+            "periodStart": { "const": "2024" },
+            "periodEnd": { "const": "2026" }
+          }
+        },
+        "healthMart": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "periodStart", "periodEnd"],
+          "properties": {
+            "id": { "const": "health-access-mart-2024-2025" },
+            "periodStart": { "const": "2024" },
+            "periodEnd": { "const": "2025" }
+          }
+        },
+        "addressSource": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "publisher", "sourceUrl", "retrievedDate"],
+          "properties": {
+            "id": { "const": "ministerul-sanatatii-unitati-sanitare-2026" },
+            "publisher": { "const": "Ministerul Sanatatii" },
+            "sourceUrl": { "type": "string", "format": "uri" },
+            "retrievedDate": { "type": "string", "format": "date" }
+          }
+        },
+        "addressAliases": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "reviewedDate", "aliases"],
+          "properties": {
+            "id": { "const": "ministerul-sanatatii-unitati-sanitare-address-aliases-2026" },
+            "reviewedDate": { "type": "string", "format": "date" },
+            "aliases": { "type": "integer", "minimum": 0 }
+          }
+        }
+      }
+    },
+    "sourceHashes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "providerPointsSha256",
+        "healthAccessMartSha256",
+        "msUnitatiSanitareSha256",
+        "msUnitatiSanitareAliasesSha256"
+      ],
+      "properties": {
+        "providerPointsSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "healthAccessMartSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "msUnitatiSanitareSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "msUnitatiSanitareAliasesSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "transform": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["script", "version"],
+      "properties": {
+        "script": {
+          "const": "packages/health_access/scripts/build_health_provider_point_review.py"
+        },
+        "version": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "providerPoints",
+        "pointAccessEligibleProviders",
+        "pointAccessBlockedProviders",
+        "reviewProviders",
+        "countiesWithReviewProviders",
+        "providersWithAnyCandidate",
+        "candidateRows",
+        "candidateStatus",
+        "reviewSignal",
+        "exactSourceRowsWithoutStreetAddress",
+        "unusedMinistryCandidateProviders",
+        "providersWithoutMinistryCandidate",
+        "ministrySourceRecords",
+        "ministrySourceRecordsAlreadyMatched",
+        "unusedMinistryStreetSourceRecords",
+        "existingAddressAliases",
+        "byCounty"
+      ],
+      "properties": {
+        "providerPoints": { "type": "integer", "minimum": 1 },
+        "pointAccessEligibleProviders": { "type": "integer", "minimum": 0 },
+        "pointAccessBlockedProviders": { "type": "integer", "minimum": 0 },
+        "reviewProviders": { "type": "integer", "minimum": 0 },
+        "countiesWithReviewProviders": { "type": "integer", "minimum": 0 },
+        "providersWithAnyCandidate": { "type": "integer", "minimum": 0 },
+        "candidateRows": { "type": "integer", "minimum": 0 },
+        "candidateStatus": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        },
+        "reviewSignal": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        },
+        "exactSourceRowsWithoutStreetAddress": { "type": "integer", "minimum": 0 },
+        "unusedMinistryCandidateProviders": { "type": "integer", "minimum": 0 },
+        "providersWithoutMinistryCandidate": { "type": "integer", "minimum": 0 },
+        "ministrySourceRecords": { "type": "integer", "minimum": 1 },
+        "ministrySourceRecordsAlreadyMatched": { "type": "integer", "minimum": 0 },
+        "unusedMinistryStreetSourceRecords": { "type": "integer", "minimum": 0 },
+        "existingAddressAliases": { "type": "integer", "minimum": 0 },
+        "byCounty": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/countySummary" }
+        }
+      }
+    },
+    "records": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/reviewRecord" }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "https://cristiannichifor.github.io/romania-reforms/schema/provenance.schema.json#/$defs/limitation"
+      }
+    }
+  },
+  "$defs": {
+    "countySummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "countyCode",
+        "countyName",
+        "reviewProviders",
+        "providersWithAnyCandidate",
+        "exactSourceRowsWithoutStreetAddress",
+        "unusedMinistryCandidateProviders",
+        "providersWithoutMinistryCandidate"
+      ],
+      "properties": {
+        "countyCode": { "type": "string", "pattern": "^[A-Z]{1,2}$" },
+        "countyName": { "type": "string", "minLength": 1 },
+        "reviewProviders": { "type": "integer", "minimum": 0 },
+        "providersWithAnyCandidate": { "type": "integer", "minimum": 0 },
+        "exactSourceRowsWithoutStreetAddress": { "type": "integer", "minimum": 0 },
+        "unusedMinistryCandidateProviders": { "type": "integer", "minimum": 0 },
+        "providersWithoutMinistryCandidate": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "reviewRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "providerId",
+        "name",
+        "countyCode",
+        "countyName",
+        "siruta",
+        "localityName",
+        "locationConfidence",
+        "ownerType",
+        "bedCount",
+        "specialties",
+        "pointAccessBlockedReason",
+        "candidateStatus",
+        "reviewSignal",
+        "candidateCount",
+        "candidates"
+      ],
+      "properties": {
+        "providerId": { "type": "string", "pattern": "^anmcs-2025-[0-9]{3}$" },
+        "name": { "type": "string", "minLength": 1 },
+        "countyCode": { "type": "string", "pattern": "^[A-Z]{1,2}$" },
+        "countyName": { "type": "string", "minLength": 1 },
+        "siruta": { "type": "string", "pattern": "^[0-9]+$" },
+        "localityName": { "type": "string", "minLength": 1 },
+        "locationConfidence": {
+          "enum": ["name-derived-locality", "municipality-from-county"]
+        },
+        "ownerType": { "enum": ["public", "private", "unknown"] },
+        "bedCount": { "type": ["number", "null"], "minimum": 0 },
+        "specialties": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "pointAccessBlockedReason": { "const": "no-point-evidence" },
+        "candidateStatus": {
+          "enum": [
+            "exact-source-row-lacks-street-address",
+            "has-unused-ministry-review-candidate",
+            "no-ministry-review-candidate"
+          ]
+        },
+        "reviewSignal": { "enum": ["high", "medium", "low", "none"] },
+        "candidateCount": { "type": "integer", "minimum": 0 },
+        "candidates": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/candidate" }
+        }
+      }
+    },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceRecordId",
+        "name",
+        "countyCode",
+        "address",
+        "hasStreetAddress",
+        "hasPublishedCoordinate",
+        "latitude",
+        "longitude",
+        "detailUrl",
+        "reviewMethod",
+        "reviewSignal",
+        "sharedTokens",
+        "providerTokenCoverage",
+        "sourceTokenCoverage",
+        "tokenScore",
+        "reason"
+      ],
+      "properties": {
+        "sourceRecordId": {
+          "type": "string",
+          "pattern": "^ms-unitati-sanitare-[0-9]{3}$"
+        },
+        "name": { "type": "string", "minLength": 1 },
+        "countyCode": { "type": "string", "pattern": "^[A-Z]{1,2}$" },
+        "address": { "type": "string", "minLength": 1 },
+        "hasStreetAddress": { "type": "boolean" },
+        "hasPublishedCoordinate": { "type": "boolean" },
+        "latitude": { "type": ["number", "null"], "minimum": 43, "maximum": 49 },
+        "longitude": { "type": ["number", "null"], "minimum": 20, "maximum": 30 },
+        "detailUrl": { "type": "string", "format": "uri" },
+        "reviewMethod": {
+          "enum": [
+            "exact-normalised-name-county-without-street-address",
+            "specific-name-token-overlap-same-county-unused-source",
+            "short-name-token-coverage-same-county-unused-source",
+            "locality-name-token-overlap-same-county-unused-source"
+          ]
+        },
+        "reviewSignal": { "enum": ["high", "medium", "low"] },
+        "sharedTokens": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "providerTokenCoverage": { "type": "number", "minimum": 0, "maximum": 1 },
+        "sourceTokenCoverage": { "type": "number", "minimum": 0, "maximum": 1 },
+        "tokenScore": { "type": "number", "minimum": 0, "maximum": 1 },
+        "reason": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}
