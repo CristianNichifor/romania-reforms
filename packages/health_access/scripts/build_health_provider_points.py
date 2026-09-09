@@ -1,8 +1,8 @@
 """Build provider-level health point evidence from the shared health mart.
 
-The first point-evidence slice is deliberately conservative: it carries every
-provider from the health mart, but blocks all providers from point routing until
-street-address or coordinate evidence is imported.
+This builder carries every provider from the health mart and attaches address
+evidence where the Ministry source can be matched safely. Providers remain
+blocked from point routing until coordinate evidence is accepted.
 
 Usage:
     uv run python packages/health_access/scripts/build_health_provider_points.py
@@ -13,15 +13,18 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
+import unicodedata
 from collections import Counter
 from pathlib import Path
 from typing import Any, Final
 
 PACKAGE_ROOT = Path(__file__).resolve().parents[1]
 HEALTH_MART = PACKAGE_ROOT / "data/health-access-mart-2024-2025.json"
+ADDRESS_SOURCE = PACKAGE_ROOT / "sources/ms-unitati-sanitare-2026.json"
 POINT_VIEW_ID: Final[str] = "health-provider-points-2024-2026"
 OUT = PACKAGE_ROOT / f"data/{POINT_VIEW_ID}.json"
-TRANSFORM_VERSION: Final[int] = 1
+TRANSFORM_VERSION: Final[int] = 2
 
 
 def sha256_file(path: Path) -> str:
@@ -36,6 +39,15 @@ def limitation(id_: str, severity: str, affects: list[str], text: str) -> dict[s
     return {"id": id_, "severity": severity, "affects": affects, "text": text}
 
 
+def normalise_text(value: object) -> str:
+    text = str(value or "").upper().replace("Ţ", "Ț").replace("Ş", "Ș")
+    text = "".join(
+        char for char in unicodedata.normalize("NFD", text) if unicodedata.category(char) != "Mn"
+    )
+    text = re.sub(r"[^A-Z0-9]+", " ", text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
 def none_address_evidence() -> dict[str, Any]:
     return {"method": "none", "source": None, "sourceValue": None, "retrievedDate": None}
 
@@ -44,13 +56,35 @@ def none_point_evidence() -> dict[str, Any]:
     return {"method": "none", "source": None, "sourceValue": None, "retrievedDate": None}
 
 
-def point_access_blocked_reason(provider: dict[str, Any]) -> str:
+def point_access_blocked_reason(
+    provider: dict[str, Any],
+    address_match_status: str | None,
+) -> str:
+    if address_match_status == "ambiguous":
+        return "ambiguous-address"
     if provider["locationConfidence"] == "county-only":
         return "county-only-location"
     return "no-point-evidence"
 
 
-def provider_point(provider: dict[str, Any]) -> dict[str, Any]:
+def address_evidence(
+    address_source: dict[str, Any],
+    source_record: dict[str, Any],
+) -> dict[str, Any]:
+    return {
+        "method": "official-provider-address",
+        "source": address_source["id"],
+        "sourceValue": source_record["address"],
+        "retrievedDate": address_source["retrievedDate"],
+    }
+
+
+def provider_point(
+    provider: dict[str, Any],
+    address_source: dict[str, Any] | None,
+    source_record: dict[str, Any] | None,
+    address_match_status: str | None,
+) -> dict[str, Any]:
     return {
         "providerId": provider["providerId"],
         "name": provider["name"],
@@ -60,24 +94,39 @@ def provider_point(provider: dict[str, Any]) -> dict[str, Any]:
         "localityName": provider["localityName"],
         "locationConfidence": provider["locationConfidence"],
         "serviceAccessEligible": bool(provider["serviceAccessEligible"]),
-        "address": None,
-        "addressEvidence": none_address_evidence(),
+        "address": source_record["address"] if source_record else None,
+        "addressEvidence": (
+            address_evidence(address_source, source_record)
+            if address_source and source_record
+            else none_address_evidence()
+        ),
         "latitude": None,
         "longitude": None,
         "pointConfidence": "none",
         "pointEvidence": none_point_evidence(),
         "pointAccessEligible": False,
-        "pointAccessBlockedReason": point_access_blocked_reason(provider),
+        "pointAccessBlockedReason": point_access_blocked_reason(provider, address_match_status),
     }
 
 
 def exclusion(provider: dict[str, Any], source: str) -> dict[str, Any]:
     reason = provider["pointAccessBlockedReason"]
-    if reason == "county-only-location":
+    if reason == "ambiguous-address":
+        text = (
+            "The provider has multiple exact name/county address candidates in the "
+            "address source, so it is blocked from point-level routing until the "
+            "address is reviewed."
+        )
+    elif reason == "county-only-location":
         text = (
             "The provider has only county-level location evidence in the health mart, "
             "so it is blocked from point-level routing until address or coordinate "
             "evidence is attached."
+        )
+    elif provider["address"]:
+        text = (
+            "The provider has official address evidence but no accepted coordinate "
+            "evidence, so it is blocked from point-level routing."
         )
     else:
         text = (
@@ -167,15 +216,52 @@ def assert_unique_provider_ids(records: list[dict[str, Any]]) -> None:
         raise ValueError("duplicate provider ids: " + ", ".join(duplicates))
 
 
+def address_match_index(
+    address_source: dict[str, Any] | None,
+) -> dict[tuple[str, str], list[dict[str, Any]]]:
+    if not address_source:
+        return {}
+
+    index: dict[tuple[str, str], list[dict[str, Any]]] = {}
+    for record in address_source["records"]:
+        county_code = record.get("countyCode")
+        if not county_code or not record.get("hasStreetAddress"):
+            continue
+        key = (normalise_text(record["name"]), county_code)
+        index.setdefault(key, []).append(record)
+    return index
+
+
+def match_address_record(
+    provider: dict[str, Any],
+    index: dict[tuple[str, str], list[dict[str, Any]]],
+) -> tuple[dict[str, Any] | None, str | None]:
+    matches = index.get((normalise_text(provider["name"]), provider["countyCode"]), [])
+    if len(matches) == 1:
+        return matches[0], "matched"
+    if len(matches) > 1:
+        return None, "ambiguous"
+    return None, None
+
+
 def build_document(
     health_mart: dict[str, Any],
     source_hashes: dict[str, str],
     retrieved_date: str | None = None,
+    address_source: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     records = health_mart["records"]
     assert_unique_provider_ids(records)
 
-    providers = [provider_point(record) for record in records]
+    address_index = address_match_index(address_source)
+    address_match_status_by_provider: dict[str, str] = {}
+    providers = []
+    for record in records:
+        source_record, match_status = match_address_record(record, address_index)
+        if match_status:
+            address_match_status_by_provider[record["providerId"]] = match_status
+        providers.append(provider_point(record, address_source, source_record, match_status))
+
     point_access_eligible = [provider for provider in providers if provider["pointAccessEligible"]]
     point_access_blocked = [
         provider for provider in providers if not provider["pointAccessEligible"]
@@ -188,6 +274,18 @@ def build_document(
         "providers": len(providers),
         "serviceAccessEligibleProviders": len(service_access_eligible),
         "serviceAccessBlockedProviders": len(providers) - len(service_access_eligible),
+        "addressSourceRecords": len(address_source["records"]) if address_source else 0,
+        "addressSourceRecordsWithStreetAddress": (
+            sum(1 for record in address_source["records"] if record["hasStreetAddress"])
+            if address_source
+            else 0
+        ),
+        "addressMatchedProviders": sum(
+            1 for status in address_match_status_by_provider.values() if status == "matched"
+        ),
+        "ambiguousAddressProviders": sum(
+            1 for status in address_match_status_by_provider.values() if status == "ambiguous"
+        ),
         "pointAccessEligibleProviders": len(point_access_eligible),
         "pointAccessBlockedProviders": len(point_access_blocked),
         "providersWithAddress": sum(1 for provider in providers if provider["address"]),
@@ -219,25 +317,25 @@ def build_document(
         "periodStart": "2024",
         "periodEnd": "2026",
         "retrievedDate": retrieved_date or health_mart["retrievedDate"],
-        "provenance": {
-            "source": health_mart["id"],
-            "locator": (
-                "provider rows from the shared health access mart; no address or "
-                "coordinate source imported yet"
-            ),
-            "confidence": "derived",
-            "note": (
-                "This file is a point-evidence contract. The first version blocks "
-                "every provider from point routing until explicit address or "
-                "coordinate evidence is attached."
-            ),
-        },
+        "provenance": provider_point_provenance(health_mart, address_source),
         "registry": {
             "healthMart": {
                 "id": health_mart["id"],
                 "periodStart": health_mart["periodStart"],
                 "periodEnd": health_mart["periodEnd"],
-            }
+            },
+            **(
+                {
+                    "addressSource": {
+                        "id": address_source["id"],
+                        "publisher": address_source["publisher"],
+                        "sourceUrl": address_source["sourceUrl"],
+                        "retrievedDate": address_source["retrievedDate"],
+                    }
+                }
+                if address_source
+                else {}
+            ),
         },
         "sourceHashes": source_hashes,
         "transform": {
@@ -253,13 +351,23 @@ def build_document(
         ],
         "limitations": [
             limitation(
-                "point-evidence-not-yet-imported",
+                "coordinate-evidence-not-yet-imported",
                 "material",
                 ["latitude", "longitude", "pointAccessEligible"],
                 (
-                    "This first point-evidence contract does not import provider "
-                    "street addresses or coordinates, so every provider is blocked "
-                    "from point-level routing."
+                    "Address evidence is not coordinate evidence. Every provider "
+                    "remains blocked from point-level routing until an accepted "
+                    "coordinate is attached."
+                ),
+            ),
+            limitation(
+                "address-source-exact-name-only",
+                "material",
+                ["address", "addressEvidence"],
+                (
+                    "The Ministry address import accepts only exact normalised "
+                    "provider-name and county matches. Non-exact source candidates "
+                    "remain unfilled until manual or stricter automated review."
                 ),
             ),
             limitation(
@@ -285,33 +393,82 @@ def build_document(
     }
 
 
+def provider_point_provenance(
+    health_mart: dict[str, Any],
+    address_source: dict[str, Any] | None,
+) -> dict[str, str]:
+    if not address_source:
+        return {
+            "source": health_mart["id"],
+            "locator": (
+                "provider rows from the shared health access mart; no address or "
+                "coordinate source imported yet"
+            ),
+            "confidence": "derived",
+            "note": (
+                "This file is a point-evidence contract. Providers are blocked "
+                "from point routing until explicit address or coordinate evidence "
+                "is attached."
+            ),
+        }
+
+    return {
+        "source": f"{health_mart['id']} + {address_source['id']}",
+        "locator": (
+            "provider rows from the shared health access mart joined to the "
+            "Ministry of Health unitati sanitare map extract by exact normalised "
+            "provider name and county"
+        ),
+        "confidence": "derived",
+        "note": (
+            "Official address evidence is attached where exact name/county matches "
+            "exist, but no address-only row is eligible for point routing until "
+            "coordinate evidence is accepted."
+        ),
+    }
+
+
 def build_from_files(
     health_mart_path: Path,
+    address_source_path: Path | None = ADDRESS_SOURCE,
     retrieved_date: str | None = None,
 ) -> dict[str, Any]:
     health_mart = json.loads(health_mart_path.read_text(encoding="utf-8"))
+    address_source = (
+        json.loads(address_source_path.read_text(encoding="utf-8"))
+        if address_source_path
+        else None
+    )
+    source_hashes = {"healthAccessMartSha256": sha256_file(health_mart_path)}
+    if address_source_path:
+        source_hashes["msUnitatiSanitareSha256"] = sha256_file(address_source_path)
     return build_document(
         health_mart,
-        {"healthAccessMartSha256": sha256_file(health_mart_path)},
+        source_hashes,
         retrieved_date,
+        address_source,
     )
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--health-mart", type=Path, default=HEALTH_MART)
+    parser.add_argument("--address-source", type=Path, default=ADDRESS_SOURCE)
+    parser.add_argument("--no-address-source", action="store_true")
     parser.add_argument("--output", type=Path, default=OUT)
     parser.add_argument("--retrieved-date")
     args = parser.parse_args(argv)
 
-    document = build_from_files(args.health_mart, args.retrieved_date)
+    address_source = None if args.no_address_source else args.address_source
+    document = build_from_files(args.health_mart, address_source, args.retrieved_date)
     args.output.write_text(
         json.dumps(document, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
     print(
         f"wrote {args.output} with {document['summary']['providers']} providers and "
-        f"{document['summary']['pointAccessEligibleProviders']} point-eligible providers"
+        f"{document['summary']['providersWithAddress']} addresses "
+        f"({document['summary']['pointAccessEligibleProviders']} point-eligible providers)"
     )
     return 0
 

@@ -51,6 +51,17 @@
             "periodStart": { "const": "2024" },
             "periodEnd": { "const": "2025" }
           }
+        },
+        "addressSource": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "publisher", "sourceUrl", "retrievedDate"],
+          "properties": {
+            "id": { "const": "ministerul-sanatatii-unitati-sanitare-2026" },
+            "publisher": { "const": "Ministerul Sanatatii" },
+            "sourceUrl": { "type": "string", "format": "uri" },
+            "retrievedDate": { "type": "string", "format": "date" }
+          }
         }
       }
     },
@@ -59,7 +70,8 @@
       "additionalProperties": false,
       "required": ["healthAccessMartSha256"],
       "properties": {
-        "healthAccessMartSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        "healthAccessMartSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "msUnitatiSanitareSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
       }
     },
     "transform": {
@@ -80,6 +92,10 @@
         "providers",
         "serviceAccessEligibleProviders",
         "serviceAccessBlockedProviders",
+        "addressSourceRecords",
+        "addressSourceRecordsWithStreetAddress",
+        "addressMatchedProviders",
+        "ambiguousAddressProviders",
         "pointAccessEligibleProviders",
         "pointAccessBlockedProviders",
         "providersWithAddress",
@@ -93,6 +109,10 @@
         "providers": { "type": "integer", "minimum": 1 },
         "serviceAccessEligibleProviders": { "type": "integer", "minimum": 0 },
         "serviceAccessBlockedProviders": { "type": "integer", "minimum": 0 },
+        "addressSourceRecords": { "type": "integer", "minimum": 0 },
+        "addressSourceRecordsWithStreetAddress": { "type": "integer", "minimum": 0 },
+        "addressMatchedProviders": { "type": "integer", "minimum": 0 },
+        "ambiguousAddressProviders": { "type": "integer", "minimum": 0 },
         "pointAccessEligibleProviders": { "type": "integer", "minimum": 0 },
         "pointAccessBlockedProviders": { "type": "integer", "minimum": 0 },
         "providersWithAddress": { "type": "integer", "minimum": 0 },

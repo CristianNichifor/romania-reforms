@@ -38,6 +38,8 @@ def data_documents() -> list[tuple[str, Path]]:
         documents.append((f"{data_file.parents[1].name}/{data_file.name}", data_file))
     for data_file in sorted(ROOT.glob("packages/*/data/*.json")):
         documents.append((f"{data_file.parents[1].name}/{data_file.name}", data_file))
+    for data_file in sorted(ROOT.glob("packages/*/sources/*.json")):
+        documents.append((f"{data_file.parents[1].name}/{data_file.name}", data_file))
     return documents
 
 
@@ -81,6 +83,7 @@ def main() -> int:
                 or document.get("units")
                 or document.get("uats")
                 or document.get("records")
+                or document.get("providers")
                 or []
             )
             print(f"  schema ok: {label} ({count} records)")
