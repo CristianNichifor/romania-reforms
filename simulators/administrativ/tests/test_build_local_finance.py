@@ -11,6 +11,7 @@ def mart_record(
     revenue: float,
     own_revenue: float,
     spending: float = 0,
+    personnel_spending: float = 0,
 ) -> dict:
     return {
         "year": year,
@@ -18,6 +19,7 @@ def mart_record(
         "revenueRon": revenue,
         "ownRevenueRon": own_revenue,
         "spendingRon": spending,
+        "personnelSpendingRon": personnel_spending,
     }
 
 
@@ -28,9 +30,9 @@ def test_build_payload_aligns_shared_mart_to_web_uat_order() -> None:
         "records": [
             mart_record(2023, "10", 1_000, 200, 1_000),
             mart_record(2023, "20", 100, 10, 200),
-            mart_record(2024, "AB", 1_000, 100),
-            mart_record(2024, "00010", 200, 50),
-            mart_record(2024, "20", 300, 75),
+            mart_record(2024, "AB", 1_000, 100, 600, 300),
+            mart_record(2024, "00010", 200, 50, 160, 80),
+            mart_record(2024, "20", 300, 75, 90, 30),
             mart_record(2025, "10", 2_000, 800, 1_500),
             mart_record(2025, "20", 100, 20, 100),
         ],
@@ -46,16 +48,17 @@ def test_build_payload_aligns_shared_mart_to_web_uat_order() -> None:
     assert payload["siruta"] == ["20", "10"]
     assert payload["revenueRon"] == [300.0, 200.0]
     assert payload["ownRevenueRon"] == [75.0, 50.0]
-    assert payload["ownRevenueShare"] == [0.25, 0.25]
+    assert payload["spendingRon"] == [90.0, 160.0]
+    assert payload["personnelSpendingRon"] == [30.0, 80.0]
     assert payload["spendingRon2023"] == [200.0, 1_000.0]
     assert payload["spendingRon2025"] == [100.0, 1_500.0]
     assert payload["revenueRon2023"] == [100.0, 1_000.0]
     assert payload["revenueRon2025"] == [100.0, 2_000.0]
     assert payload["ownRevenueRon2023"] == [10.0, 200.0]
     assert payload["ownRevenueRon2025"] == [20.0, 800.0]
-    assert payload["spendingGrowth2023To2025"] == [-0.5, 0.5]
-    assert payload["ownRevenueShareChange2023To2025"] == [0.1, 0.2]
     assert payload["summary"]["excludedSourceRecords"] == 1
+    assert payload["summary"]["spendingRon"] == 250.0
+    assert payload["summary"]["personnelSpendingRon"] == 110.0
 
 
 def test_build_payload_uses_null_for_missing_or_zero_trend_denominators() -> None:
@@ -63,8 +66,8 @@ def test_build_payload_uses_null_for_missing_or_zero_trend_denominators() -> Non
         "id": "local-finance-mart-2023-2025",
         "records": [
             mart_record(2023, "10", 0, 0, 0),
-            mart_record(2024, "10", 200, 50),
-            mart_record(2024, "20", 300, 75),
+            mart_record(2024, "10", 200, 50, 100, 25),
+            mart_record(2024, "20", 300, 75, 0, 0),
             mart_record(2025, "10", 100, 50, 200),
             mart_record(2025, "20", 100, 50, 200),
         ],
@@ -77,8 +80,8 @@ def test_build_payload_uses_null_for_missing_or_zero_trend_denominators() -> Non
     assert payload["spendingRon2025"] == [200.0, 200.0]
     assert payload["revenueRon2023"] == [0.0, None]
     assert payload["revenueRon2025"] == [100.0, 100.0]
-    assert payload["spendingGrowth2023To2025"] == [None, None]
-    assert payload["ownRevenueShareChange2023To2025"] == [None, None]
+    assert payload["spendingRon"] == [100.0, 0.0]
+    assert payload["personnelSpendingRon"] == [25.0, 0.0]
 
 
 def test_build_payload_refuses_missing_uats() -> None:

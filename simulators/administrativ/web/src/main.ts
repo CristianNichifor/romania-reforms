@@ -1757,7 +1757,7 @@ async function boot(): Promise<void> {
     const totalPersonnel = sum(ready.personnelRon);
     const totalAdminPersonnel = sum(ready.adminPersonnelRon);
     const totalIncome = sum(ready.incomeRon);
-    const sharedFinance = localFinanceTotals(localFinance, members);
+    const sharedFinance = localFinanceTotals(localFinance, members, ready.population);
     const sharedFinanceYears = localFinance ? localFinancePeriodLabel(localFinance) : '';
     const financeTrendRows: Array<[string, string]> = [];
     if (sharedFinance && sharedFinance.spendingGrowth2023To2025 !== null) {
@@ -1776,6 +1776,31 @@ async function boot(): Promise<void> {
         ),
       ]);
     }
+    const financeStressRows: Array<[string, string]> = [];
+    if (sharedFinance && sharedFinance.revenuePerInhabitantRon !== null) {
+      financeStressRows.push([
+        strings.revenuePerInhabitant,
+        `${formatNumber(sharedFinance.revenuePerInhabitantRon, scenario.lang)} RON`,
+      ]);
+    }
+    if (sharedFinance && sharedFinance.spendingPerInhabitantRon !== null) {
+      financeStressRows.push([
+        strings.spendingPerInhabitant,
+        `${formatNumber(sharedFinance.spendingPerInhabitantRon, scenario.lang)} RON`,
+      ]);
+    }
+    if (sharedFinance && sharedFinance.personnelSpendingShare !== null) {
+      financeStressRows.push([
+        strings.personnelSpendingShare,
+        formatPercent(sharedFinance.personnelSpendingShare, scenario.lang),
+      ]);
+    }
+    const financeStressHtml = financeStressRows
+      .map(
+        ([label, value]) =>
+          `<div class="finance-share"><span>${label}</span><span>${value}</span></div>`,
+      )
+      .join('');
     const financeTrendHtml =
       sharedFinanceYears && financeTrendRows.length > 0
         ? `<div class="finance-trends">
@@ -1879,6 +1904,7 @@ async function boot(): Promise<void> {
                     : formatPercent(sharedFinance.ownRevenueShare, scenario.lang)
                 }</span>
               </div>
+              ${financeStressHtml}
               ${financeTrendHtml}
               <p class="muted rep-source">${strings.localFinanceSource.replace(
                 '{year}',

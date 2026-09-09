@@ -52,8 +52,11 @@ First slice:
 - done: expose 2023-2025 spending growth and own-revenue-share movement from the shared
   mart in `administrativ`, with endpoint bases carried in the compact payload so merged
   units can recompute trends from summed values
-- next: add personnel-spending pressure or per-inhabitant stress views only when a
-  consuming simulator needs that extra fiscal dimension
+- done: expose 2024 per-inhabitant revenue/spending and personnel-spending pressure in
+  `administrativ`, recomputed from compact payload bases for merged units rather than
+  averaged member ratios
+- next: leave deeper local-finance dimensions deferred until a consuming simulator needs
+  arrears, capital/development mix or funding-source dependence
 
 Useful first indicators:
 
