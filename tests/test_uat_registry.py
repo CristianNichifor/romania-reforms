@@ -189,3 +189,68 @@ def test_committed_population_report_leaves_only_bucharest_sectors_unpopulated()
     assert report["summary"]["sourceRowsNotInRegistry"] == 0
     assert report["summary"]["duplicateSourceSiruta"] == 0
     assert [row["level"] for row in report["registryRowsWithoutPopulation"]] == ["sector"] * 6
+
+
+def test_current_shared_consumers_only_publish_known_registry_keys():
+    registry = json.loads((REGISTRY_DATA / "uat-registry-2026.json").read_text(encoding="utf-8"))
+    known = {unit["siruta"] for unit in registry["units"]}
+    county_codes = {unit["countyCode"] for unit in registry["units"] if unit["level"] == "county"}
+
+    consumers = {
+        "administrativ attributes": (
+            json.loads(
+                (ROOT / "simulators/administrativ/web/public/data/attributes.json").read_text(
+                    encoding="utf-8"
+                )
+            )["siruta"],
+            known,
+        ),
+        "local finance mart": (
+            [
+                row["siruta"]
+                for row in json.loads(
+                    (
+                        ROOT
+                        / "packages/local_finance/data/local-finance-mart-2023-2025.json"
+                    ).read_text(encoding="utf-8")
+                )["records"]
+            ],
+            known | county_codes,
+        ),
+        "health service access": (
+            [
+                row["siruta"]
+                for row in json.loads(
+                    (
+                        ROOT
+                        / "packages/health_access/data/health-service-access-uat-2024-2026.json"
+                    ).read_text(encoding="utf-8")
+                )["units"]
+            ],
+            known,
+        ),
+        "transport access": (
+            [
+                row["siruta"]
+                for row in json.loads(
+                    (ROOT / "simulators/transport/data/access.json").read_text(encoding="utf-8")
+                )["uats"]
+            ],
+            known,
+        ),
+        "justitie service access": (
+            [
+                row["siruta"]
+                for row in json.loads(
+                    (ROOT / "simulators/justitie/data/acces-servicii.json").read_text(
+                        encoding="utf-8"
+                    )
+                )["units"]
+            ],
+            known,
+        ),
+    }
+
+    for name, (keys, allowed) in consumers.items():
+        missing = sorted({str(key) for key in keys} - allowed)
+        assert missing == [], f"{name} publishes keys outside packages/uat_registry"
