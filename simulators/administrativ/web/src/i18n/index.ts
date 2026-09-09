@@ -122,6 +122,9 @@ export interface Strings {
   ownIncome: string;
   ownRevenue: string;
   ownRevenueShare: string;
+  revenuePerInhabitant: string;
+  spendingPerInhabitant: string;
+  personnelSpendingShare: string;
   fiscalTrend: string;
   spendingGrowth2023To2025: string;
   ownRevenueShareChange2023To2025: string;
@@ -384,6 +387,9 @@ const ro: Strings = {
   ownIncome: 'Venituri totale',
   ownRevenue: 'Venituri proprii',
   ownRevenueShare: 'Pondere venituri proprii',
+  revenuePerInhabitant: 'Venituri / locuitor',
+  spendingPerInhabitant: 'Cheltuieli / locuitor',
+  personnelSpendingShare: 'Pondere cheltuieli personal',
   fiscalTrend: 'Trend fiscal {years}',
   spendingGrowth2023To2025: 'Creștere cheltuieli',
   ownRevenueShareChange2023To2025: 'Schimbare pondere venituri proprii',
@@ -661,6 +667,9 @@ const en: Strings = {
   ownIncome: 'Total income',
   ownRevenue: 'Own revenue',
   ownRevenueShare: 'Own-revenue share',
+  revenuePerInhabitant: 'Revenue / resident',
+  spendingPerInhabitant: 'Spending / resident',
+  personnelSpendingShare: 'Personnel-spending share',
   fiscalTrend: 'Fiscal trend {years}',
   spendingGrowth2023To2025: 'Spending growth',
   ownRevenueShareChange2023To2025: 'Own-revenue share movement',

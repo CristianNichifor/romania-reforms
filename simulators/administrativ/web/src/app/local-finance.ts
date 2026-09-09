@@ -7,7 +7,9 @@ export interface LocalFinancePayload {
   siruta: string[];
   revenueRon: number[];
   ownRevenueRon: number[];
-  ownRevenueShare: Array<number | null>;
+  spendingRon?: number[];
+  personnelSpendingRon?: number[];
+  ownRevenueShare?: Array<number | null>;
   spendingRon2023?: Array<number | null>;
   spendingRon2025?: Array<number | null>;
   revenueRon2023?: Array<number | null>;
@@ -21,7 +23,13 @@ export interface LocalFinancePayload {
 export interface LocalFinanceTotals {
   revenueRon: number;
   ownRevenueRon: number;
+  spendingRon: number | null;
+  personnelSpendingRon: number | null;
+  population: number | null;
   ownRevenueShare: number | null;
+  personnelSpendingShare: number | null;
+  revenuePerInhabitantRon: number | null;
+  spendingPerInhabitantRon: number | null;
   sourceYears: number[];
   spendingGrowth2023To2025: number | null;
   ownRevenueShareChange2023To2025: number | null;
@@ -32,6 +40,11 @@ const optionalSeriesAligned = (
   uatCount: number,
 ): boolean => series == null || series.length === uatCount;
 
+type NumericSeries = {
+  readonly length: number;
+  readonly [index: number]: number | null | undefined;
+};
+
 export function localFinancePayloadAligned(
   payload: LocalFinancePayload,
   expectedSiruta: readonly string[],
@@ -41,7 +54,9 @@ export function localFinancePayloadAligned(
     payload.siruta.length === uatCount
     && payload.revenueRon.length === uatCount
     && payload.ownRevenueRon.length === uatCount
-    && payload.ownRevenueShare.length === uatCount
+    && optionalSeriesAligned(payload.spendingRon, uatCount)
+    && optionalSeriesAligned(payload.personnelSpendingRon, uatCount)
+    && optionalSeriesAligned(payload.ownRevenueShare, uatCount)
     && optionalSeriesAligned(payload.spendingRon2023, uatCount)
     && optionalSeriesAligned(payload.spendingRon2025, uatCount)
     && optionalSeriesAligned(payload.revenueRon2023, uatCount)
@@ -60,7 +75,7 @@ const valueAt = (series: readonly number[], index: number): number => {
 };
 
 const nullableValueAt = (
-  series: ReadonlyArray<number | null> | undefined,
+  series: NumericSeries | undefined,
   index: number,
 ): number | null => {
   const value = series?.[index];
@@ -68,7 +83,7 @@ const nullableValueAt = (
 };
 
 const averageAt = (
-  series: ReadonlyArray<number | null> | undefined,
+  series: NumericSeries | undefined,
   members: readonly number[],
 ): number | null => {
   let total = 0;
@@ -81,6 +96,23 @@ const averageAt = (
   }
   return count > 0 ? total / count : null;
 };
+
+const sumRequiredAt = (
+  series: NumericSeries | undefined,
+  members: readonly number[],
+): number | null => {
+  if (!series) return null;
+  let total = 0;
+  for (const index of members) {
+    const value = nullableValueAt(series, index);
+    if (value === null) return null;
+    total += value;
+  }
+  return total;
+};
+
+const nullableRatio = (numerator: number | null, denominator: number | null): number | null =>
+  numerator !== null && denominator !== null && denominator > 0 ? numerator / denominator : null;
 
 const ratioChangeFromSums = (
   startSeries: ReadonlyArray<number | null> | undefined,
@@ -158,6 +190,7 @@ export function localFinancePeriodLabel(payload: LocalFinancePayload): string {
 export function localFinanceTotals(
   payload: LocalFinancePayload | null,
   members: readonly number[],
+  populationSeries?: NumericSeries,
 ): LocalFinanceTotals | null {
   if (!payload) return null;
 
@@ -167,6 +200,9 @@ export function localFinanceTotals(
     revenueRon += valueAt(payload.revenueRon, index);
     ownRevenueRon += valueAt(payload.ownRevenueRon, index);
   }
+  const spendingRon = sumRequiredAt(payload.spendingRon, members);
+  const personnelSpendingRon = sumRequiredAt(payload.personnelSpendingRon, members);
+  const population = sumRequiredAt(populationSeries, members);
 
   const hasSpendingBases = Boolean(payload.spendingRon2023 && payload.spendingRon2025);
   const spendingGrowth2023To2025 = hasSpendingBases
@@ -191,7 +227,13 @@ export function localFinanceTotals(
   return {
     revenueRon,
     ownRevenueRon,
+    spendingRon,
+    personnelSpendingRon,
+    population,
     ownRevenueShare: revenueRon > 0 ? ownRevenueRon / revenueRon : null,
+    personnelSpendingShare: nullableRatio(personnelSpendingRon, spendingRon),
+    revenuePerInhabitantRon: nullableRatio(revenueRon, population),
+    spendingPerInhabitantRon: nullableRatio(spendingRon, population),
     sourceYears: [...(payload.sourceYears ?? [])],
     spendingGrowth2023To2025,
     ownRevenueShareChange2023To2025,

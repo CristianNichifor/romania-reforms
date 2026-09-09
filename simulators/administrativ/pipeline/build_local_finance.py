@@ -2,9 +2,9 @@
 
 The administrativ model keeps its own 2024 finance payload because it carries
 administration-only spending, which the shared mart deliberately does not. This build step
-adds the reusable fiscal indicators that *are* shared: total revenue, own revenue, own
-revenue share and multi-year fiscal trend bases, aligned to the same positional UAT
-index as `attributes.bin`.
+adds the reusable fiscal indicators that *are* shared: total revenue, own revenue,
+spending pressure and multi-year fiscal trend bases, aligned to the same positional
+UAT index as `attributes.bin`.
 
 Usage:
     uv run python -m pipeline.build_local_finance
@@ -64,21 +64,6 @@ def money(row: dict[str, Any], field: str) -> float:
     return round(float(value), 2)
 
 
-def own_revenue_share(row: dict[str, Any] | None) -> float | None:
-    if row is None:
-        return None
-    total = money(row, "revenueRon")
-    if total <= 0:
-        return None
-    return round(money(row, "ownRevenueRon") / total, 4)
-
-
-def ratio_change(start: float | None, end: float | None) -> float | None:
-    if start is None or end is None or start <= 0:
-        return None
-    return round((end - start) / start, 4)
-
-
 def source_records_by_year(
     mart: dict[str, Any],
     years: list[int],
@@ -136,10 +121,8 @@ def build_payload(
 
     revenue = [money(records[siruta], "revenueRon") for siruta in sirutas]
     own_revenue = [money(records[siruta], "ownRevenueRon") for siruta in sirutas]
-    own_share = [
-        round(own / total, 4) if total > 0 else None
-        for own, total in zip(own_revenue, revenue, strict=True)
-    ]
+    spending = [money(records[siruta], "spendingRon") for siruta in sirutas]
+    personnel_spending = [money(records[siruta], "personnelSpendingRon") for siruta in sirutas]
     start_records = records_by_year[TREND_START_YEAR]
     end_records = records_by_year[TREND_END_YEAR]
     spending_start = [optional_money(start_records, siruta, "spendingRon") for siruta in sirutas]
@@ -150,19 +133,6 @@ def build_payload(
         optional_money(start_records, siruta, "ownRevenueRon") for siruta in sirutas
     ]
     own_revenue_end = [optional_money(end_records, siruta, "ownRevenueRon") for siruta in sirutas]
-    spending_growth = [
-        ratio_change(start, end) for start, end in zip(spending_start, spending_end, strict=True)
-    ]
-    own_share_change = [
-        (
-            round(end_share - start_share, 4)
-            if (start_share := own_revenue_share(start_records.get(siruta))) is not None
-            and (end_share := own_revenue_share(end_records.get(siruta))) is not None
-            else None
-        )
-        for siruta in sirutas
-    ]
-
     return {
         "id": f"administrativ-local-finance-{year}",
         "sourceMartId": mart["id"],
@@ -173,21 +143,22 @@ def build_payload(
         "siruta": sirutas,
         "revenueRon": revenue,
         "ownRevenueRon": own_revenue,
-        "ownRevenueShare": own_share,
+        "spendingRon": spending,
+        "personnelSpendingRon": personnel_spending,
         "spendingRon2023": spending_start,
         "spendingRon2025": spending_end,
         "revenueRon2023": revenue_start,
         "revenueRon2025": revenue_end,
         "ownRevenueRon2023": own_revenue_start,
         "ownRevenueRon2025": own_revenue_end,
-        "spendingGrowth2023To2025": spending_growth,
-        "ownRevenueShareChange2023To2025": own_share_change,
         "summary": {
             "uats": len(sirutas),
             "sourceYearRecords": len(records),
             "excludedSourceRecords": len(records) - len(sirutas),
             "revenueRon": round(sum(revenue), 2),
             "ownRevenueRon": round(sum(own_revenue), 2),
+            "spendingRon": round(sum(spending), 2),
+            "personnelSpendingRon": round(sum(personnel_spending), 2),
         },
     }
 

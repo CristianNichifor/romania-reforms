@@ -23,7 +23,8 @@ const payload: LocalFinancePayload = {
   siruta: ['10', '20', '30'],
   revenueRon: [100, 0, 300],
   ownRevenueRon: [25, 0, 150],
-  ownRevenueShare: [0.25, null, 0.5],
+  spendingRon: [80, 0, 120],
+  personnelSpendingRon: [40, 0, 30],
   spendingRon2023: [100, null, 300],
   spendingRon2025: [120, null, 270],
   revenueRon2023: [200, null, 400],
@@ -53,17 +54,20 @@ describe('the generated local finance payload', () => {
     for (let i = 0; i < generated.siruta.length; i += 1) {
       expect(generated.revenueRon[i]!, generated.siruta[i]).toBeGreaterThan(0);
       expect(generated.ownRevenueRon[i]!, generated.siruta[i]).toBeGreaterThanOrEqual(0);
+      expect(generated.spendingRon).toBeDefined();
+      expect(generated.personnelSpendingRon).toBeDefined();
+      expect(generated.spendingRon![i]!, generated.siruta[i]).toBeGreaterThanOrEqual(0);
+      expect(generated.personnelSpendingRon![i]!, generated.siruta[i]).toBeGreaterThanOrEqual(0);
       expect(Number.isFinite(generated.revenueRon[i])).toBe(true);
       expect(Number.isFinite(generated.ownRevenueRon[i])).toBe(true);
-      expect(generated.ownRevenueShare[i], generated.siruta[i]).toBeCloseTo(
-        generated.ownRevenueRon[i]! / generated.revenueRon[i]!,
-        4,
-      );
     }
   });
 
-  it('keeps optional multi-year trend arrays aligned when they are present', () => {
+  it('keeps optional stress bases and multi-year trend arrays aligned when they are present', () => {
     for (const series of [
+      generated.ownRevenueShare,
+      generated.spendingRon,
+      generated.personnelSpendingRon,
       generated.spendingRon2023,
       generated.spendingRon2025,
       generated.revenueRon2023,
@@ -102,6 +106,15 @@ describe('local finance payload alignment', () => {
     ).toBe(false);
   });
 
+  it('rejects a payload whose optional stress arrays would shift the UAT index', () => {
+    expect(
+      localFinancePayloadAligned(
+        { ...payload, spendingRon: [80, 0] },
+        ['10', '20', '30'],
+      ),
+    ).toBe(false);
+  });
+
   it('rejects a payload whose optional trend base arrays would shift the UAT index', () => {
     expect(
       localFinancePayloadAligned(
@@ -114,6 +127,8 @@ describe('local finance payload alignment', () => {
   it('accepts older payloads before the optional trend arrays existed', () => {
     const legacy: LocalFinancePayload = { ...payload };
     delete legacy.sourceYears;
+    delete legacy.spendingRon;
+    delete legacy.personnelSpendingRon;
     delete legacy.spendingRon2023;
     delete legacy.spendingRon2025;
     delete legacy.revenueRon2023;
@@ -132,11 +147,17 @@ describe('local finance payload alignment', () => {
 
 describe('local finance totals', () => {
   it('sums own revenue in the selected unit order and recomputes merged trends from bases', () => {
-    const totals = localFinanceTotals(payload, [0, 2]);
+    const totals = localFinanceTotals(payload, [0, 2], [10, 20, 30]);
     expect(totals).toMatchObject({
       revenueRon: 400,
       ownRevenueRon: 175,
+      spendingRon: 200,
+      personnelSpendingRon: 70,
+      population: 40,
       ownRevenueShare: 0.4375,
+      personnelSpendingShare: 0.35,
+      revenuePerInhabitantRon: 10,
+      spendingPerInhabitantRon: 5,
       sourceYears: [2023, 2024, 2025],
     });
     expect(totals?.spendingGrowth2023To2025).toBeCloseTo(-0.025);
@@ -152,17 +173,23 @@ describe('local finance totals', () => {
     delete legacy.ownRevenueRon2023;
     delete legacy.ownRevenueRon2025;
 
-    const totals = localFinanceTotals(legacy, [0, 2]);
+    const totals = localFinanceTotals(legacy, [0, 2], [10, 20, 30]);
 
     expect(totals?.spendingGrowth2023To2025).toBeCloseTo(0.05);
     expect(totals?.ownRevenueShareChange2023To2025).toBeCloseTo(0);
   });
 
   it('has no share when the selected unit has no revenue denominator', () => {
-    expect(localFinanceTotals(payload, [1])).toEqual({
+    expect(localFinanceTotals(payload, [1], [10, null, 30])).toEqual({
       revenueRon: 0,
       ownRevenueRon: 0,
+      spendingRon: 0,
+      personnelSpendingRon: 0,
+      population: null,
       ownRevenueShare: null,
+      personnelSpendingShare: null,
+      revenuePerInhabitantRon: null,
+      spendingPerInhabitantRon: null,
       sourceYears: [2023, 2024, 2025],
       spendingGrowth2023To2025: null,
       ownRevenueShareChange2023To2025: null,
