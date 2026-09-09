@@ -1,7 +1,7 @@
 {
   "$schema": "schema/data-catalog.schema.json",
   "id": "romania-reforms-shared-data-catalog",
-  "updated": "2026-09-09",
+  "updated": "2026-09-10",
   "principles": [
     "Shared datasets live here only when at least two simulators need the same source or key vocabulary.",
     "Large derived payloads are published as release assets, not committed to git.",
@@ -242,6 +242,79 @@
         "health-provider-point-source-acquisition-2024-2026 is a non-evidence work queue for the remaining 72 no-point providers. It now prioritizes 16 public no-candidate providers and 56 private or unknown no-candidate providers. Its source search order covers provider websites, DSP/local-authority pages, official contracting/register sources and OSM named-feature manual review.",
         "anmcs-capesaro-public-hospitals-2026 is a release asset with a compact extract of 731 CAPeSaRo dashboard rows, including 680 active rows and 687 rows with street-address evidence. The raw dashboard response remains out of git.",
         "health-provider-point-capesaro-candidates-2024-2026 is a release asset with a non-evidence candidate report over the 72 remaining acquisition rows. It finds 24 providers with active same-county street-address CAPeSaRo candidates and 28 candidate rows overall. Among the 16 remaining public providers, 6 have only medium/low CAPeSaRo candidates and 10 have no CAPeSaRo candidate, so the high-signal public CAPeSaRo pass is complete."
+      ]
+    },
+    {
+      "id": "public-enterprise-governance",
+      "title": "Public enterprise governance and performance",
+      "status": "candidate",
+      "priority": "p1",
+      "owner": "shared",
+      "why": "Public-company performance, board pay and ownership data can connect fiscal stress, public pay, procurement and administrative-capacity reforms without each simulator inventing its own state-enterprise roster.",
+      "consumers": ["salarizare", "achizitii-deschise", "local-finance"],
+      "keys": ["cui", "enterpriseName", "authorityName", "year", "indicatorCode"],
+      "upstreamSources": [
+        {
+          "id": "amepip-dashboard",
+          "name": "AMEPIP dashboard",
+          "publisher": "Agentia pentru Monitorizarea si Evaluarea Performantelor Intreprinderilor Publice",
+          "url": "https://amepip.gov.ro/en/tablou-de-bord/",
+          "license": "Official public dashboard; reusable data/export license not published on the source page",
+          "role": "source-of-truth",
+          "notes": "The page embeds a public Power BI report. Candidate import must use an explicit export/API or published release file only after provenance and reuse terms are documented."
+        },
+        {
+          "id": "amepip-kpi-evaluation-report",
+          "name": "Raport evaluare KPI",
+          "publisher": "Agentia pentru Monitorizarea si Evaluarea Performantelor Intreprinderilor Publice",
+          "url": "https://amepip.gov.ro/raport-evaluare-kpi/",
+          "license": "Official public report page; reusable data/export license not published on the source page",
+          "role": "source-of-truth",
+          "notes": "The page publishes the 2024 public-enterprise evaluation report and annexes for central/local financial and non-financial indicators plus listing-readiness recommendations."
+        },
+        {
+          "id": "amepip-indemnizatii-ca-cs",
+          "name": "Indemnizatii CA/CS",
+          "publisher": "Agentia pentru Monitorizarea si Evaluarea Performantelor Intreprinderilor Publice",
+          "url": "https://amepip.gov.ro/indemnizatii-ca-cs/",
+          "license": "Official public report page; reusable data/export license not published on the source page",
+          "role": "source-of-truth",
+          "notes": "Monthly board, supervisory-board and director compensation reports can support public-pay comparisons if exported with stable enterprise identifiers."
+        }
+      ],
+      "minimumFields": [
+        "cui",
+        "enterpriseName",
+        "authorityName",
+        "ownershipLevel",
+        "year",
+        "indicatorCategory",
+        "indicatorName",
+        "indicatorValue",
+        "indicatorUnit",
+        "sourceUrl",
+        "retrievedDate"
+      ],
+      "provenanceRequirements": [
+        "Record exact AMEPIP page, report or export URL and retrieval date.",
+        "Record dashboard/report vintage and exported-file checksum before importing any row-level data.",
+        "Carry an explicit limitation when reuse terms, row-level export method or enterprise identifier coverage are missing."
+      ],
+      "validationPlan": [
+        "Require CUI or another stable enterprise key before joining to finance, pay or procurement views.",
+        "Compare AMEPIP financial indicators against Ministry of Finance/company finance totals where a CUI/year overlap exists.",
+        "Reject dashboard aggregate-only snapshots as simulator inputs unless row-level export and provenance are available."
+      ],
+      "storagePolicy": "Commit only small source notes, schemas and sample metadata; raw dashboard exports, workbooks and derived row-level marts should be release assets.",
+      "nextSlice": {
+        "scope": "Source/export reconnaissance",
+        "deliverable": "Document AMEPIP dashboard/report export shape, reuse limits, stable keys and the smallest row-level sample that could feed pay, procurement or finance consumers.",
+        "doneWhen": "A sample export has stable enterprise identifiers and provenance, or the source is explicitly deferred because only aggregate/unclear-reuse dashboard data is available."
+      },
+      "notes": [
+        "AMEPIP pages describe the dashboard as covering financial, non-financial and corporate-governance indicators for public enterprises. Public notes say financial indicators are extracted from Ministry of Finance data, non-financial indicators include ESG, and governance indicators relate to listed companies.",
+        "The KPI report page is the strongest starting point because its annexes name central/local financial and non-financial indicator sets separately from the interactive dashboard.",
+        "Do not scrape opaque Power BI internals as a source of truth. Use an official export, report attachment or documented API path before moving this dataset out of candidate status."
       ]
     }
   ]
