@@ -81,9 +81,11 @@ This source family could serve more than one simulator:
 3. Done: decide that CUI-level PDFs justify moving the dataset to `planned`.
 4. Done: build a small parser for the August 2025 nominal compensation PDF source. The
    committed sample keeps 50 rows and summary metrics over all 833 parsed source rows.
-5. Next: decide whether to publish the full compensation mart as a release asset and wire a
-   `salarizare` comparison view to the shared package.
-6. Later: parse KPI Annexes 1-3 only after the compensation sample proves the provenance and
+5. Done: define the full mart schema, release-asset policy and `salarizare` consumer contract.
+   The importer can generate the full mart, but the generated row-level file stays out of git.
+6. Next: publish the mart as a checksum-pinned release asset and build a compact `salarizare`
+   comparison payload from the release asset rather than loading nominal rows in the browser.
+7. Later: parse KPI Annexes 1-3 only after the compensation sample proves the provenance and
    validation contract.
 
 The slice should not scrape opaque Power BI internals as the source of truth. If Power BI is the

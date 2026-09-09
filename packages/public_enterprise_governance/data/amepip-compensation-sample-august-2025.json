@@ -19,6 +19,7 @@
   },
   "summary": {
     "sourceRows": 833,
+    "emittedRows": 50,
     "sampleRows": 50,
     "enterprises": 143,
     "authorities": 19,
@@ -1152,7 +1153,7 @@
         "parser",
         "amounts"
       ],
-      "text": "The source is a PDF table. Parsed numeric values keep raw amount strings so extraction issues can be audited before a full mart is published."
+      "text": "The source is a PDF table. Parsed numeric values keep raw amount strings so extraction issues can be audited before a full mart is used by consumers."
     },
     {
       "id": "amepip-sample-not-full-mart",
@@ -1164,8 +1165,8 @@
     }
   ],
   "nextSlice": {
-    "scope": "AMEPIP compensation mart contract",
-    "deliverable": "Decide whether to publish the full August 2025 compensation mart as a release asset and wire a salarizare comparison view to the shared package.",
-    "doneWhen": "A full-mart schema, release-asset policy and consumer-facing limitation text are agreed before any simulator imports these rows."
+    "scope": "AMEPIP compensation mart release asset",
+    "deliverable": "Publish the full August 2025 compensation mart as a checksum-pinned release asset and build a salarizare comparison payload from that asset.",
+    "doneWhen": "The mart is uploaded, data-assets.json carries its size and checksum, and the salarizare app consumes only an aggregate/comparison payload."
   }
 }

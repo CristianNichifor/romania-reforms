@@ -2,7 +2,11 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import subprocess
+import sys
 from pathlib import Path
+
+from jsonschema import Draft202012Validator
 
 ROOT = Path(__file__).resolve().parent.parent
 IMPORTER = (
@@ -15,11 +19,21 @@ IMPORTER = (
 DATA = ROOT / "packages" / "public_enterprise_governance" / "data"
 INVENTORY = DATA / "amepip-source-inventory-2025-2026.json"
 SAMPLE = DATA / "amepip-compensation-sample-august-2025.json"
+MART_SCHEMA = (
+    ROOT
+    / "packages"
+    / "public_enterprise_governance"
+    / "schema"
+    / "amepip-compensation-mart.schema.json"
+)
 
 spec = importlib.util.spec_from_file_location("import_amepip_compensation", IMPORTER)
 assert spec and spec.loader
 import_amepip_compensation = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(import_amepip_compensation)
+
+sys.path.insert(0, str(ROOT / "scripts"))
+from validate_data import registry  # noqa: E402
 
 
 def test_amount_parser_handles_pdf_spacing_and_non_numeric_values():
@@ -101,6 +115,7 @@ def test_build_document_reports_full_source_coverage_but_commits_sample_rows():
     )
 
     assert document["summary"]["sourceRows"] == 2
+    assert document["summary"]["emittedRows"] == 1
     assert document["summary"]["sampleRows"] == 1
     assert document["summary"]["enterprises"] == 1
     assert document["summary"]["people"] == 1
@@ -112,6 +127,85 @@ def test_build_document_reports_full_source_coverage_but_commits_sample_rows():
         "amepip-pdf-layout-sensitive",
         "amepip-sample-not-full-mart",
     }
+
+
+def test_build_mart_document_declares_release_policy_and_salarizare_contract():
+    records = [
+        import_amepip_compensation.parse_table_row(
+            [
+                "1",
+                "APT",
+                "COMPANIA A",
+                "123",
+                "Ana Pop",
+                "Membru CA/CS",
+                "4,000",
+                "-",
+            ],
+            source_row_number=1,
+            source_page_number=1,
+            document_id=import_amepip_compensation.MART_DOCUMENT_ID,
+        ),
+        import_amepip_compensation.parse_table_row(
+            [
+                "1",
+                "APT",
+                "COMPANIA A",
+                "123",
+                "Ana Pop",
+                "Director/directorat",
+                "1 0,000",
+                "1 00,000",
+            ],
+            source_row_number=2,
+            source_page_number=1,
+            document_id=import_amepip_compensation.MART_DOCUMENT_ID,
+        ),
+    ]
+
+    document = import_amepip_compensation.build_mart_document(
+        records,
+        source_sha256="a" * 64,
+        source_page_count=1,
+        retrieved_date="2026-09-10",
+    )
+
+    schema = json.loads(MART_SCHEMA.read_text(encoding="utf-8"))
+    validator = Draft202012Validator(schema, registry=registry())
+    errors = sorted(validator.iter_errors(document), key=lambda error: list(error.path))
+
+    assert errors == []
+    assert document["id"] == "amepip-compensation-mart-august-2025"
+    assert document["summary"]["sourceRows"] == 2
+    assert document["summary"]["emittedRows"] == 2
+    assert "sampleRows" not in document["summary"]
+    assert len(document["records"]) == 2
+    assert document["records"][0]["sourceRecordId"] == "amepip-compensation-mart-august-2025-0001"
+    assert document["releasePolicy"]["storage"] == "release-asset"
+    assert document["releasePolicy"]["destination"].endswith(
+        "amepip-compensation-mart-august-2025.json"
+    )
+    assert document["consumerContracts"][0]["consumer"] == "salarizare"
+    assert document["consumerContracts"][0]["status"] == "release-asset-required"
+    limitation_ids = {limitation["id"] for limitation in document["limitations"]}
+    assert "amepip-mart-release-required" in limitation_ids
+    assert "amepip-sample-not-full-mart" not in limitation_ids
+
+
+def test_generated_full_mart_destination_is_gitignored():
+    result = subprocess.run(  # noqa: S603
+        [
+            "git",
+            "check-ignore",
+            "-q",
+            str(import_amepip_compensation.MART_OUT.relative_to(ROOT)),
+        ],
+        cwd=ROOT,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0
 
 
 def test_committed_sample_matches_source_inventory_and_sample_contract():
@@ -126,6 +220,7 @@ def test_committed_sample_matches_source_inventory_and_sample_contract():
     assert sample["sourceId"] == august_source["id"]
     assert sample["sourceSha256"] == august_source["sha256"]
     assert sample["summary"]["sourceRows"] >= sample["summary"]["sampleRows"]
+    assert sample["summary"]["emittedRows"] == sample["summary"]["sampleRows"]
     assert sample["summary"]["sourceRows"] >= 700
     assert sample["summary"]["rowsWithCui"] == sample["summary"]["sourceRows"]
     assert sample["summary"]["directorRows"] > 0
