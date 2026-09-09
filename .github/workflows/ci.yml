@@ -323,3 +323,18 @@ jobs:
           npm run typecheck
           npm test
           npm run build
+      - name: Native UI pilot browser checks
+        run: >-
+          docker run --rm --init --ipc=host -e CI=1 -e LIBGL_ALWAYS_SOFTWARE=1
+          -v "$PWD:/work" -w /work/simulators/impozit-teren/app
+          -v "$RUNNER_TEMP/land-tax-ui-results:/tmp/land-tax-ui-results"
+          mcr.microsoft.com/playwright:v1.63.0-noble
+          xvfb-run -a npm run check:ui -- --reporter=list
+      - name: Native UI failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: land-tax-ui-failure
+          path: ${{ runner.temp }}/land-tax-ui-results
+          if-no-files-found: ignore
+          retention-days: 7
