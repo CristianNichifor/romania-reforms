@@ -1,16 +1,17 @@
 """Build the shared local finance mart from Transparenta budget execution.
 
 The first committed slice was deliberately small: ten UATs over 2023-2025, enough to lock
-down the data shape, classification choices and validation report. The same importer can now
-also build the full 2025 mart that feeds `simulators/impozit-teren` through a compatibility
-export.
+down the data shape, classification choices and validation report. The same importer now
+builds the full 2023-2025 mart published as a release asset and can emit the
+`simulators/impozit-teren` compatibility export from it.
 
 Usage:
     uv run python packages/local_finance/scripts/import_local_finance.py \
         --data-gov-2024-workbook /tmp/local-finance/situatia-veniturilor-cheltuielilor-2024.xlsx
     uv run python packages/local_finance/scripts/import_local_finance.py \
-        --scope full --years 2025 \
-        --legacy-budget-out simulators/impozit-teren/data/buget-uat-2025.json
+        --scope full --years 2023 2024 2025
+    uv run python simulators/impozit-teren/scripts/import_buget_uat.py \
+        --out simulators/impozit-teren/app/public/data/buget-uat-2025.json
 """
 
 from __future__ import annotations

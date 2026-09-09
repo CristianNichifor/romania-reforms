@@ -24,13 +24,20 @@
  * so anything in it that no longer has a dataset behind it is a file from an older build —
  * including, at one point, a county whose parse this repository had rejected.
  */
-import { copyFileSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
+const repo = resolve(here, '../../../..');
 const data = resolve(here, '../../data');
 const out = resolve(here, '../public/data');
+const sharedFinanceMart = resolve(
+  repo,
+  'packages/local_finance/data/local-finance-mart-2023-2025.json',
+);
+const budgetExporter = resolve(here, '../../scripts/import_buget_uat.py');
 mkdirSync(out, { recursive: true });
 
 /**
@@ -94,15 +101,34 @@ const sources = [
   // estimate is the only value they have.
   ['harta-judete-poligon.geojson', 'harta-judete-poligon.geojson'],
   ['valoare-nationala-2026.json', 'national.json'],
-  // What each commune actually spends. The only file here that is not about land: it is the
-  // denominator the third map metric divides by, and the one number that turns "this land is
-  // worth X" into "that would pay for Y% of what this place does".
-  ['buget-uat-2025.json', 'buget-uat-2025.json'],
 ];
 
-// The denominator. Optional in the same way the budget file is: a data directory built before
-// the GDP import ran still renders every figure on this page, and the share-of-GDP line simply
-// says it has nothing to divide by.
+// What each commune actually spends. The only file here that is not about land: it is the
+// denominator the third map metric divides by, and the one number that turns "this land is
+// worth X" into "that would pay for Y% of what this place does". It is generated from the
+// shared local-finance mart so the app does not carry a parallel finance artifact.
+if (!existsSync(sharedFinanceMart)) {
+  console.error(
+    `missing ${sharedFinanceMart}\n` +
+      'Run `uv run python scripts/fetch_release_data.py` from the repository root first.',
+  );
+  process.exit(1);
+}
+execFileSync(
+  process.env.PYTHON ?? 'python3',
+  [
+    budgetExporter,
+    '--mart',
+    sharedFinanceMart,
+    '--out',
+    resolve(out, 'buget-uat-2025.json'),
+  ],
+  { cwd: repo, stdio: 'inherit' },
+);
+
+// The GDP denominator is optional: a data directory built before the GDP import ran still
+// renders every figure on this page, and the share-of-GDP line simply says it has nothing to
+// divide by.
 const gdp = newest('pib');
 if (gdp) sources.push([gdp, 'pib.json']);
 else console.log('no pib-<year>.json; the page will render without the share of GDP');
@@ -111,7 +137,11 @@ for (const county of counties) {
   sources.push([taxes.get(county), `impozit-${county}.json`]);
 }
 
-const wanted = new Set(['manifest.json', ...sources.map(([, name]) => name)]);
+const wanted = new Set([
+  'manifest.json',
+  'buget-uat-2025.json',
+  ...sources.map(([, name]) => name),
+]);
 for (const [from, name] of sources) {
   copyFileSync(resolve(data, from), resolve(out, name));
   console.log(`copied ${name}`);
