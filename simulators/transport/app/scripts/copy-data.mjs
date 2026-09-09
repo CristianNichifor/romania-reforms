@@ -135,9 +135,15 @@ writeFileSync(
 // position against the parallel arrays in attributes.json. Joining on a `siruta` property
 // silently matches nothing, which is why the guard below is fatal rather than a warning.
 const attributes = JSON.parse(readFileSync(join(out, 'attributes.json'), 'utf8'));
-const by = new Map(access.uats.map((u) => [String(u.siruta), u]));
+const normaliseSiruta = (value) => {
+  const text = String(value).trim();
+  const bare = text.endsWith('.0') ? text.slice(0, -2) : text;
+  return bare.replace(/^0+/, '') || '0';
+};
+
+const by = new Map(access.uats.map((u) => [normaliseSiruta(u.siruta), u]));
 const joined = attributes.siruta.map((siruta) => {
-  const u = by.get(String(siruta));
+  const u = by.get(normaliseSiruta(siruta));
   return u ? [u.uncoordinatedMin, u.pulsedMin] : null;
 });
 writeFileSync(join(out, 'journey.json'), JSON.stringify(joined));
@@ -146,12 +152,10 @@ if (access.uats.some((u) => !Object.hasOwn(u, 'localHealthProviderCount'))) {
   console.error('FATAL: access.json has no shared health_access fields');
   process.exit(1);
 }
-
-const normaliseSiruta = (value) => {
-  const text = String(value).trim();
-  const bare = text.endsWith('.0') ? text.slice(0, -2) : text;
-  return bare.replace(/^0+/, '') || '0';
-};
+if (access.uats.some((u) => !Object.hasOwn(u, 'nearestHealthPointDistanceMetres'))) {
+  console.error('FATAL: access.json has no point health_access fields');
+  process.exit(1);
+}
 
 const healthBy = new Map();
 for (const unit of healthAccess.units) {
@@ -163,14 +167,16 @@ for (const unit of healthAccess.units) {
   healthBy.set(siruta, unit);
 }
 
-// Same positional join, but only the health fields the hover needs. This is aligned directly
-// from the shared health_access UAT view so scenario changes in the browser are not tied to
-// the default transport access run. Bucharest sectors stay explicit nulls: the source places
-// Bucharest providers at municipality level only.
+// Same positional join, but only the health fields the hover needs. UAT-level local counts are
+// aligned directly from the shared health_access view so scenario changes in the browser are
+// not tied to the default transport access run. The nearest point distance comes from
+// access.json because transport owns the UAT centroid distance method.
 const healthJoined = attributes.siruta.map((siruta, index) => {
   const unit = healthBy.get(normaliseSiruta(siruta));
+  const accessRow = by.get(normaliseSiruta(siruta));
+  const nearest = accessRow?.nearestHealthPointDistanceMetres ?? null;
   if (!unit) {
-    if (attributes.county[index] === 'B') return [null, null, null, 1];
+    if (attributes.county[index] === 'B') return [null, null, null, 1, nearest];
     console.error(`FATAL: shared health_access has no row for SIRUTA ${siruta}`);
     process.exit(1);
   }
@@ -179,6 +185,7 @@ const healthJoined = attributes.siruta.map((siruta, index) => {
     unit.localClinicalBedProviders,
     unit.localClinicalBeds,
     0,
+    nearest,
   ];
 });
 writeFileSync(join(out, 'health.json'), JSON.stringify(healthJoined));

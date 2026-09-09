@@ -35,7 +35,15 @@
         "healthAccessLocalProviders",
         "healthAccessLocalClinicalBedProviders",
         "healthAccessLocalClinicalBeds",
-        "healthAccessSectorRowsExcluded"
+        "healthAccessSectorRowsExcluded",
+        "healthPointAccessView",
+        "healthPointAccessProviders",
+        "healthPointAccessBlockedProviders",
+        "healthPointAccessNamedExclusions",
+        "healthPointAccessRowsWithDistance",
+        "healthPointAccessDistanceMethod",
+        "healthPointAccessMedianNearestMetres",
+        "healthPointAccessPopulationWeightedMedianNearestMetres"
       ],
       "properties": {
         "uats": { "type": "integer", "minimum": 1 },
@@ -119,7 +127,26 @@
         },
         "healthAccessLocalClinicalBedProviders": { "type": "integer", "minimum": 0 },
         "healthAccessLocalClinicalBeds": { "type": "number", "minimum": 0 },
-        "healthAccessSectorRowsExcluded": { "type": "integer", "minimum": 0 }
+        "healthAccessSectorRowsExcluded": { "type": "integer", "minimum": 0 },
+        "healthPointAccessView": { "const": "health-point-access-2024-2026" },
+        "healthPointAccessProviders": {
+          "description": "Accepted provider points from the shared point-level health access view.",
+          "type": "integer", "minimum": 0
+        },
+        "healthPointAccessBlockedProviders": {
+          "description": "Providers excluded from point-distance calculations because they lack accepted point evidence.",
+          "type": "integer", "minimum": 0
+        },
+        "healthPointAccessNamedExclusions": { "type": "integer", "minimum": 0 },
+        "healthPointAccessRowsWithDistance": {
+          "description": "Transport access rows for which a nearest accepted provider point distance was computed.",
+          "type": "integer", "minimum": 0
+        },
+        "healthPointAccessDistanceMethod": { "const": "straight-line" },
+        "healthPointAccessMedianNearestMetres": { "type": "integer", "minimum": 0 },
+        "healthPointAccessPopulationWeightedMedianNearestMetres": {
+          "type": "integer", "minimum": 0
+        }
       }
     },
     "uats": {
@@ -146,7 +173,9 @@
           "localHealthProviderCount",
           "localHealthClinicalBedProviders",
           "localHealthClinicalBeds",
-          "healthAccessSectorRowExcluded"
+          "healthAccessSectorRowExcluded",
+          "nearestHealthPointProviderId",
+          "nearestHealthPointDistanceMetres"
         ],
         "properties": {
           "siruta": { "type": "string", "minLength": 1 },
@@ -175,7 +204,12 @@
           "localHealthProviderCount": { "type": ["integer", "null"], "minimum": 0 },
           "localHealthClinicalBedProviders": { "type": ["integer", "null"], "minimum": 0 },
           "localHealthClinicalBeds": { "type": ["number", "null"], "minimum": 0 },
-          "healthAccessSectorRowExcluded": { "type": "boolean" }
+          "healthAccessSectorRowExcluded": { "type": "boolean" },
+          "nearestHealthPointProviderId": { "type": "string", "minLength": 1 },
+          "nearestHealthPointDistanceMetres": {
+            "description": "Straight-line distance from this UAT centroid to the nearest accepted provider point.",
+            "type": "integer", "minimum": 0
+          }
         }
       }
     },

@@ -7,11 +7,20 @@ from pathlib import Path
 
 import pytest
 
-from scripts.health_access import HEALTH_ACCESS_LIMITATION_ID, enrich_access_document
+from scripts.health_access import (
+    HEALTH_ACCESS_LIMITATION_ID,
+    HEALTH_POINT_ACCESS_LIMITATION_ID,
+    HEALTH_POINT_ACCESS_VIEW_ID,
+    HEALTH_POINT_DISTANCE_METHOD,
+    enrich_access_document,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 HEALTH_ACCESS = (
     ROOT.parent.parent / "packages/health_access/data/health-service-access-uat-2024-2026.json"
+)
+HEALTH_POINT_ACCESS = (
+    ROOT.parent.parent / "packages/health_access/data/health-point-access-2024-2026.json"
 )
 
 
@@ -37,6 +46,29 @@ def health_view(units: list[dict]) -> dict:
     }
 
 
+def health_point(provider_id: str, latitude: float, longitude: float, beds: float = 0.0) -> dict:
+    return {
+        "providerId": provider_id,
+        "name": f"Provider {provider_id}",
+        "countyCode": "AB",
+        "latitude": latitude,
+        "longitude": longitude,
+        "bedCount": beds,
+    }
+
+
+def point_view(points: list[dict]) -> dict:
+    return {
+        "id": HEALTH_POINT_ACCESS_VIEW_ID,
+        "summary": {
+            "pointAccessProviders": len(points),
+            "pointAccessBlockedProviders": 4,
+            "namedExclusions": 4,
+        },
+        "points": points,
+    }
+
+
 def access_row(siruta: str, county: str = "AB") -> dict:
     return {
         "siruta": siruta,
@@ -57,6 +89,12 @@ def access_row(siruta: str, county: str = "AB") -> dict:
 
 def access_doc(rows: list[dict]) -> dict:
     return {
+        "provenance": {
+            "source": "test",
+            "locator": "test",
+            "confidence": "derived",
+            "note": "test",
+        },
         "summary": {"uats": len(rows), "people": len(rows)},
         "uats": rows,
         "limitations": [{"id": "existing", "text": "existing"}],
@@ -86,6 +124,37 @@ def test_enriches_transport_rows_from_the_shared_view() -> None:
     }
 
 
+def test_enriches_transport_rows_with_nearest_health_point_distance() -> None:
+    document = enrich_access_document(
+        access_doc([access_row("10"), access_row("20")]),
+        health_view([health_unit("10", 0), health_unit("20", 1)]),
+        point_view(
+            [
+                health_point("provider-near-10", 44.0, 26.0),
+                health_point("provider-near-20", 47.0, 23.0, beds=12.5),
+            ]
+        ),
+        {
+            "10": {"latitude": 44.0, "longitude": 26.0},
+            "20": {"latitude": 47.0, "longitude": 23.0},
+        },
+    )
+
+    rows = {row["siruta"]: row for row in document["uats"]}
+    assert rows["10"]["nearestHealthPointProviderId"] == "provider-near-10"
+    assert rows["10"]["nearestHealthPointDistanceMetres"] == 0
+    assert rows["20"]["nearestHealthPointProviderId"] == "provider-near-20"
+    assert rows["20"]["nearestHealthPointDistanceMetres"] == 0
+    assert document["summary"]["healthPointAccessView"] == HEALTH_POINT_ACCESS_VIEW_ID
+    assert document["summary"]["healthPointAccessProviders"] == 2
+    assert document["summary"]["healthPointAccessBlockedProviders"] == 4
+    assert document["summary"]["healthPointAccessRowsWithDistance"] == 2
+    assert document["summary"]["healthPointAccessDistanceMethod"] == HEALTH_POINT_DISTANCE_METHOD
+    assert HEALTH_POINT_ACCESS_LIMITATION_ID in {
+        limitation["id"] for limitation in document["limitations"]
+    }
+
+
 def test_future_bucharest_sector_rows_stay_unassigned() -> None:
     document = enrich_access_document(
         access_doc([access_row("179141", county="B")]),
@@ -107,6 +176,29 @@ def test_missing_non_bucharest_rows_are_refused() -> None:
         enrich_access_document(
             access_doc([access_row("10"), access_row("20")]),
             health_view([health_unit("10", 1)]),
+        )
+
+
+def test_point_access_requires_row_locations_for_every_transport_row() -> None:
+    with pytest.raises(ValueError, match="missing transport UAT row locations"):
+        enrich_access_document(
+            access_doc([access_row("10"), access_row("20")]),
+            health_view([health_unit("10", 1), health_unit("20", 1)]),
+            point_view([health_point("provider-near-10", 44.0, 26.0)]),
+            {"10": {"latitude": 44.0, "longitude": 26.0}},
+        )
+
+
+def test_wrong_point_access_view_is_refused() -> None:
+    bad = point_view([health_point("provider-near-10", 44.0, 26.0)])
+    bad["id"] = "wrong"
+
+    with pytest.raises(ValueError, match=HEALTH_POINT_ACCESS_VIEW_ID):
+        enrich_access_document(
+            access_doc([access_row("10")]),
+            health_view([health_unit("10", 1)]),
+            bad,
+            {"10": {"latitude": 44.0, "longitude": 26.0}},
         )
 
 
@@ -134,6 +226,10 @@ class TestPublished:
     @staticmethod
     def _health() -> dict:
         return json.loads(HEALTH_ACCESS.read_text(encoding="utf-8"))
+
+    @staticmethod
+    def _health_point() -> dict:
+        return json.loads(HEALTH_POINT_ACCESS.read_text(encoding="utf-8"))
 
     def test_published_access_consumes_the_shared_health_view(self) -> None:
         access = self._access()
@@ -167,3 +263,29 @@ class TestPublished:
         assert access["summary"]["healthAccessUatsWithLocalProvider"] == sum(
             1 for row in access["uats"] if row["hasLocalHealthProvider"]
         )
+
+    def test_published_access_consumes_the_point_health_view(self) -> None:
+        access = self._access()
+        point_access = self._health_point()
+        point_ids = {point["providerId"] for point in point_access["points"]}
+        summary = access["summary"]
+
+        assert summary["healthPointAccessView"] == point_access["id"]
+        assert (
+            summary["healthPointAccessProviders"] == point_access["summary"]["pointAccessProviders"]
+        )
+        assert (
+            summary["healthPointAccessBlockedProviders"]
+            == point_access["summary"]["pointAccessBlockedProviders"]
+        )
+        assert (
+            summary["healthPointAccessNamedExclusions"]
+            == point_access["summary"]["namedExclusions"]
+        )
+        assert summary["healthPointAccessDistanceMethod"] == HEALTH_POINT_DISTANCE_METHOD
+        assert summary["healthPointAccessRowsWithDistance"] == len(access["uats"])
+        assert HEALTH_POINT_ACCESS_LIMITATION_ID in {item["id"] for item in access["limitations"]}
+
+        for row in access["uats"]:
+            assert row["nearestHealthPointProviderId"] in point_ids, row["siruta"]
+            assert row["nearestHealthPointDistanceMetres"] >= 0, row["siruta"]
