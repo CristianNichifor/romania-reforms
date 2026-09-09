@@ -8,10 +8,10 @@
   "periodEnd": "2026",
   "retrievedDate": "2026-09-09",
   "provenance": {
-    "source": "health-access-mart-2024-2025 + ministerul-sanatatii-unitati-sanitare-2026 + ministerul-sanatatii-unitati-sanitare-address-aliases-2026",
-    "locator": "provider rows from the shared health access mart joined to the Ministry of Health unitati sanitare map extract by exact normalised provider name and county, with additional curated same-county source-record aliases",
+    "source": "health-access-mart-2024-2025 + ministerul-sanatatii-unitati-sanitare-2026 + ministerul-sanatatii-unitati-sanitare-address-aliases-2026 + ministerul-sanatatii-unitati-sanitare-coordinate-reviews-2026",
+    "locator": "provider rows from the shared health access mart joined to the Ministry of Health unitati sanitare map extract by exact normalised provider name and county, with additional curated same-county source-record aliases, and reviewed coordinate-only exact source-record acceptances",
     "confidence": "derived",
-    "note": "Official address and marker-coordinate evidence is attached where exact name/county matches or curated source-record aliases exist. Only non-county-only, service-eligible providers with accepted coordinates are eligible for point routing."
+    "note": "Official address and marker-coordinate evidence is attached where exact name/county matches or curated source-record aliases exist. Reviewed coordinate-only acceptances attach coordinates without creating address evidence. Only non-county-only, service-eligible providers with accepted coordinates are eligible for point routing."
   },
   "registry": {
     "healthMart": {
@@ -29,16 +29,22 @@
       "id": "ministerul-sanatatii-unitati-sanitare-address-aliases-2026",
       "reviewedDate": "2026-09-09",
       "aliases": 40
+    },
+    "coordinateReviews": {
+      "id": "ministerul-sanatatii-unitati-sanitare-coordinate-reviews-2026",
+      "reviewedDate": "2026-09-09",
+      "acceptances": 4
     }
   },
   "sourceHashes": {
     "healthAccessMartSha256": "afc7828921e86da5bebf4c59925f9da45a809fdc6db4838bdc13d0c593078ca2",
     "msUnitatiSanitareSha256": "208fc0c281a4d45348eeff5733c37f5ddc2f9fa0d5648cfa9acf07711d503b54",
-    "msUnitatiSanitareAliasesSha256": "4cf072835b726731989a11084421ddd62b7f133fcb7367e5b441fe28c19e1944"
+    "msUnitatiSanitareAliasesSha256": "4cf072835b726731989a11084421ddd62b7f133fcb7367e5b441fe28c19e1944",
+    "msUnitatiSanitareCoordinateReviewsSha256": "4f6d9d1bb7109562c56947d129bed931ee27ec5ddc8ebec239559a884d423ed6"
   },
   "transform": {
     "script": "packages/health_access/scripts/build_health_provider_points.py",
-    "version": 4
+    "version": 5
   },
   "summary": {
     "providers": 592,
@@ -51,12 +57,12 @@
     "addressExactMatchedProviders": 174,
     "addressAliasMatchedProviders": 40,
     "ambiguousAddressProviders": 0,
-    "pointAccessEligibleProviders": 202,
-    "pointAccessBlockedProviders": 390,
+    "pointAccessEligibleProviders": 206,
+    "pointAccessBlockedProviders": 386,
     "providersWithAddress": 214,
-    "providersWithCoordinates": 202,
-    "coordinateMatchedProviders": 214,
-    "coordinateAcceptedProviders": 202,
+    "providersWithCoordinates": 206,
+    "coordinateMatchedProviders": 218,
+    "coordinateAcceptedProviders": 206,
     "coordinateRejectedProviders": 12,
     "addressEvidence": {
       "none": 378,
@@ -68,12 +74,12 @@
       "none": 378
     },
     "pointConfidence": {
-      "none": 390,
-      "official-coordinate": 202
+      "none": 386,
+      "official-coordinate": 206
     },
     "blockedReasons": {
       "county-only-location": 268,
-      "no-point-evidence": 122
+      "no-point-evidence": 118
     },
     "byCounty": [
       {
@@ -401,16 +407,16 @@
         "countyName": "Vrancea",
         "providers": 8,
         "serviceAccessEligibleProviders": 6,
-        "pointAccessEligibleProviders": 2,
-        "pointAccessBlockedProviders": 6
+        "pointAccessEligibleProviders": 5,
+        "pointAccessBlockedProviders": 3
       },
       {
         "countyCode": "B",
         "countyName": "Bucuresti",
         "providers": 87,
         "serviceAccessEligibleProviders": 87,
-        "pointAccessEligibleProviders": 30,
-        "pointAccessBlockedProviders": 57
+        "pointAccessEligibleProviders": 31,
+        "pointAccessBlockedProviders": 56
       }
     ]
   },
@@ -425,7 +431,7 @@
       "locationConfidence": "municipality-from-county",
       "serviceAccessEligible": true,
       "address": null,
-      "addressSourceRecordId": null,
+      "addressSourceRecordId": "ms-unitati-sanitare-159",
       "addressMatchMethod": null,
       "addressEvidence": {
         "method": "none",
@@ -433,17 +439,17 @@
         "sourceValue": null,
         "retrievedDate": null
       },
-      "latitude": null,
-      "longitude": null,
-      "pointConfidence": "none",
+      "latitude": 44.45401347778285,
+      "longitude": 26.101257654022074,
+      "pointConfidence": "official-coordinate",
       "pointEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "reviewed-published-coordinate",
+        "source": "ministerul-sanatatii-unitati-sanitare-2026",
+        "sourceValue": "ms-unitati-sanitare-159:44.454013,26.101258",
+        "retrievedDate": "2026-09-09"
       },
-      "pointAccessEligible": false,
-      "pointAccessBlockedReason": "no-point-evidence"
+      "pointAccessEligible": true,
+      "pointAccessBlockedReason": null
     },
     {
       "providerId": "anmcs-2025-002",
@@ -7475,7 +7481,7 @@
       "locationConfidence": "name-derived-locality",
       "serviceAccessEligible": true,
       "address": null,
-      "addressSourceRecordId": null,
+      "addressSourceRecordId": "ms-unitati-sanitare-065",
       "addressMatchMethod": null,
       "addressEvidence": {
         "method": "none",
@@ -7483,17 +7489,17 @@
         "sourceValue": null,
         "retrievedDate": null
       },
-      "latitude": null,
-      "longitude": null,
-      "pointConfidence": "none",
+      "latitude": 45.909901974435044,
+      "longitude": 27.086510571167324,
+      "pointConfidence": "official-coordinate",
       "pointEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "reviewed-published-coordinate",
+        "source": "ministerul-sanatatii-unitati-sanitare-2026",
+        "sourceValue": "ms-unitati-sanitare-065:45.909902,27.086511",
+        "retrievedDate": "2026-09-09"
       },
-      "pointAccessEligible": false,
-      "pointAccessBlockedReason": "no-point-evidence"
+      "pointAccessEligible": true,
+      "pointAccessBlockedReason": null
     },
     {
       "providerId": "anmcs-2025-237",
@@ -8075,7 +8081,7 @@
       "locationConfidence": "name-derived-locality",
       "serviceAccessEligible": true,
       "address": null,
-      "addressSourceRecordId": null,
+      "addressSourceRecordId": "ms-unitati-sanitare-069",
       "addressMatchMethod": null,
       "addressEvidence": {
         "method": "none",
@@ -8083,17 +8089,17 @@
         "sourceValue": null,
         "retrievedDate": null
       },
-      "latitude": null,
-      "longitude": null,
-      "pointConfidence": "none",
+      "latitude": 45.911479228817875,
+      "longitude": 26.90807712699147,
+      "pointConfidence": "official-coordinate",
       "pointEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "reviewed-published-coordinate",
+        "source": "ministerul-sanatatii-unitati-sanitare-2026",
+        "sourceValue": "ms-unitati-sanitare-069:45.911479,26.908077",
+        "retrievedDate": "2026-09-09"
       },
-      "pointAccessEligible": false,
-      "pointAccessBlockedReason": "no-point-evidence"
+      "pointAccessEligible": true,
+      "pointAccessBlockedReason": null
     },
     {
       "providerId": "anmcs-2025-257",
@@ -11255,7 +11261,7 @@
       "locationConfidence": "name-derived-locality",
       "serviceAccessEligible": true,
       "address": null,
-      "addressSourceRecordId": null,
+      "addressSourceRecordId": "ms-unitati-sanitare-066",
       "addressMatchMethod": null,
       "addressEvidence": {
         "method": "none",
@@ -11263,17 +11269,17 @@
         "sourceValue": null,
         "retrievedDate": null
       },
-      "latitude": null,
-      "longitude": null,
-      "pointConfidence": "none",
+      "latitude": 45.55009349024915,
+      "longitude": 27.106425011641726,
+      "pointConfidence": "official-coordinate",
       "pointEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "reviewed-published-coordinate",
+        "source": "ministerul-sanatatii-unitati-sanitare-2026",
+        "sourceValue": "ms-unitati-sanitare-066:45.550093,27.106425",
+        "retrievedDate": "2026-09-09"
       },
-      "pointAccessEligible": false,
-      "pointAccessBlockedReason": "no-point-evidence"
+      "pointAccessEligible": true,
+      "pointAccessBlockedReason": null
     },
     {
       "providerId": "anmcs-2025-363",
@@ -18180,15 +18186,6 @@
     {
       "kind": "provider-excluded-from-point-access",
       "source": "health-access-mart-2024-2025",
-      "providerId": "anmcs-2025-001",
-      "name": "SPITALUL CLINIC DE URGENŢĂ BUCUREŞTI",
-      "countyCode": "B",
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-access-mart-2024-2025",
       "providerId": "anmcs-2025-003",
       "name": "SPITALUL CLINIC JUDEȚEAN DE URGENȚĂ SF. APOSTOL ANDREI",
       "countyCode": "CT",
@@ -19053,15 +19050,6 @@
     {
       "kind": "provider-excluded-from-point-access",
       "source": "health-access-mart-2024-2025",
-      "providerId": "anmcs-2025-236",
-      "name": "SPITALUL ORĂȘENESC PANCIU",
-      "countyCode": "VN",
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-access-mart-2024-2025",
       "providerId": "anmcs-2025-238",
       "name": "SPITALUL GENERAL C.F. GALAŢI",
       "countyCode": "GL",
@@ -19110,15 +19098,6 @@
       "providerId": "anmcs-2025-255",
       "name": "SPITALUL ORĂȘENESC FĂGET",
       "countyCode": "TM",
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-access-mart-2024-2025",
-      "providerId": "anmcs-2025-256",
-      "name": "SPITALUL \"N.N. SAVEANU\" VIDRA",
-      "countyCode": "VN",
       "pointAccessBlockedReason": "no-point-evidence",
       "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
     },
@@ -19751,15 +19730,6 @@
       "countyCode": "TM",
       "pointAccessBlockedReason": "county-only-location",
       "reason": "The provider has only county-level location evidence in the health mart, so it is blocked from point-level routing until provider- or UAT-level location evidence is attached."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-access-mart-2024-2025",
-      "providerId": "anmcs-2025-362",
-      "name": "SPITALUL DE PSIHIATRIE CRONICI DUMBRĂVENI",
-      "countyCode": "VN",
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
     },
     {
       "kind": "provider-excluded-from-point-access",
@@ -21697,7 +21667,7 @@
         "longitude",
         "pointEvidence"
       ],
-      "text": "Accepted coordinates come from Ministry of Health map markers attached to exact normalised provider-name and county matches, plus curated same-county source-record aliases."
+      "text": "Accepted coordinates come from Ministry of Health map markers attached to exact normalised provider-name and county matches, curated same-county source-record aliases, and reviewed coordinate-only exact source-row acceptances."
     },
     {
       "id": "coordinate-uat-polygon-validation-not-applied",
@@ -21717,6 +21687,16 @@
         "addressEvidence"
       ],
       "text": "The Ministry address import accepts exact normalised provider-name and county matches, plus audited providerId to sourceRecordId aliases from ms-unitati-sanitare-address-aliases-2026. Other non-exact source candidates remain unfilled until manual or stricter automated review."
+    },
+    {
+      "id": "coordinate-only-review-is-not-address-evidence",
+      "severity": "material",
+      "affects": [
+        "address",
+        "addressEvidence",
+        "pointEvidence"
+      ],
+      "text": "Reviewed coordinate-only acceptances attach a source-record-pinned published coordinate without filling an address. Their address evidence remains method none until a street-address source is found."
     },
     {
       "id": "county-only-not-promoted-to-points",

@@ -33,6 +33,9 @@ def point_provider(
     point_access_blocked_reason: str | None = None,
     latitude: float | None = 44.1,
     longitude: float | None = 26.1,
+    address: str | None = "Strada Sanatatii nr. 1, Municipiul Test",
+    address_evidence_method: str = "official-provider-address",
+    point_evidence_method: str = "published-coordinate",
 ) -> dict:
     return {
         "providerId": provider_id,
@@ -43,14 +46,18 @@ def point_provider(
         "localityName": "MUNICIPIUL TEST" if point_access_eligible else None,
         "locationConfidence": "name-derived-locality" if point_access_eligible else "county-only",
         "serviceAccessEligible": point_access_eligible,
-        "address": "Strada Sanatatii nr. 1, Municipiul Test" if point_access_eligible else None,
+        "address": address if point_access_eligible else None,
         "addressSourceRecordId": "ms-unitati-sanitare-001" if point_access_eligible else None,
         "addressMatchMethod": "exact-normalised-name-county" if point_access_eligible else None,
-        "addressEvidence": evidence("official-provider-address", "Strada Sanatatii nr. 1"),
+        "addressEvidence": (
+            evidence(address_evidence_method, address or "Strada Sanatatii nr. 1")
+            if address_evidence_method != "none"
+            else {"method": "none", "source": None, "sourceValue": None, "retrievedDate": None}
+        ),
         "latitude": latitude if point_access_eligible else None,
         "longitude": longitude if point_access_eligible else None,
         "pointConfidence": "official-coordinate" if point_access_eligible else "none",
-        "pointEvidence": evidence("published-coordinate", "44.100000,26.100000")
+        "pointEvidence": evidence(point_evidence_method, "44.100000,26.100000")
         if point_access_eligible
         else {"method": "none", "source": None, "sourceValue": None, "retrievedDate": None},
         "pointAccessEligible": point_access_eligible,
@@ -146,6 +153,33 @@ def test_build_document_filters_to_point_access_eligible_providers():
     assert exclusion["hasAddress"] is False
 
 
+def test_build_document_carries_reviewed_coordinate_only_points_without_address():
+    document = health_point_access.build_document(
+        fixture_provider_points(
+            [
+                point_provider(
+                    "anmcs-2025-001",
+                    True,
+                    address=None,
+                    address_evidence_method="none",
+                    point_evidence_method="reviewed-published-coordinate",
+                )
+            ]
+        ),
+        fixture_health_mart([mart_provider("anmcs-2025-001")]),
+        {"providerPointsSha256": "a" * 64, "healthAccessMartSha256": "b" * 64},
+        "2026-09-09",
+    )
+
+    point = document["points"][0]
+
+    assert point["address"] is None
+    assert point["addressEvidence"]["method"] == "none"
+    assert point["pointEvidence"]["method"] == "reviewed-published-coordinate"
+    assert document["summary"]["pointAccessProviders"] == 1
+    assert document["summary"]["pointEvidence"] == {"reviewed-published-coordinate": 1}
+
+
 def test_build_document_refuses_point_access_rows_without_coordinates():
     providers = [point_provider("anmcs-2025-001", True, latitude=None)]
 
@@ -191,19 +225,22 @@ def test_committed_health_point_access_uses_only_point_eligible_providers():
 
     assert point_access["id"] == "health-point-access-2024-2026"
     assert point_access["summary"]["providers"] == 592
-    assert point_access["summary"]["pointAccessProviders"] == 202
-    assert point_access["summary"]["pointAccessBlockedProviders"] == 390
-    assert point_access["summary"]["namedExclusions"] == 390
+    assert point_access["summary"]["pointAccessProviders"] == 206
+    assert point_access["summary"]["pointAccessBlockedProviders"] == 386
+    assert point_access["summary"]["namedExclusions"] == 386
     assert point_access["summary"]["distanceMethod"] == "not-computed"
     assert point_access["summary"]["supportedConsumerDistanceMethods"] == [
         "straight-line",
         "routed",
     ]
-    assert point_access["summary"]["pointConfidence"] == {"official-coordinate": 202}
-    assert point_access["summary"]["pointEvidence"] == {"published-coordinate": 202}
+    assert point_access["summary"]["pointConfidence"] == {"official-coordinate": 206}
+    assert point_access["summary"]["pointEvidence"] == {
+        "published-coordinate": 202,
+        "reviewed-published-coordinate": 4,
+    }
     assert point_access["summary"]["blockedReasons"] == {
         "county-only-location": 268,
-        "no-point-evidence": 122,
+        "no-point-evidence": 118,
     }
     assert view_point_ids == source_point_ids
     assert excluded_ids == source_blocked_ids
@@ -213,6 +250,7 @@ def test_committed_health_point_access_uses_only_point_eligible_providers():
     )
     assert all(point["latitude"] is not None for point in point_access["points"])
     assert all(point["longitude"] is not None for point in point_access["points"])
+    assert sum(1 for point in point_access["points"] if point["address"] is None) == 4
 
     limitation_ids = {limitation["id"] for limitation in point_access["limitations"]}
     assert "point-layer-not-distance-model" in limitation_ids

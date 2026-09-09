@@ -72,6 +72,18 @@
             "sourceUrl": { "type": "string", "format": "uri" },
             "retrievedDate": { "type": "string", "format": "date" }
           }
+        },
+        "coordinateReviews": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "reviewedDate", "acceptances"],
+          "properties": {
+            "id": {
+              "const": "ministerul-sanatatii-unitati-sanitare-coordinate-reviews-2026"
+            },
+            "reviewedDate": { "type": "string", "format": "date" },
+            "acceptances": { "type": "integer", "minimum": 1 }
+          }
         }
       }
     },
@@ -82,7 +94,11 @@
       "properties": {
         "healthAccessMartSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
         "msUnitatiSanitareSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
-        "msUnitatiSanitareAliasesSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        "msUnitatiSanitareAliasesSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "msUnitatiSanitareCoordinateReviewsSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
       }
     },
     "transform": {
@@ -210,6 +226,7 @@
         "method": {
           "enum": [
             "published-coordinate",
+            "reviewed-published-coordinate",
             "geocoded-address",
             "osm-feature-match",
             "manual-review",
