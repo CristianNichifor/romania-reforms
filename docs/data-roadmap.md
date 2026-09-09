@@ -3,6 +3,24 @@
 This is the execution plan for the first shared datasets that should move out of
 simulator-local code and into a shared data layer.
 
+## Current status
+
+The first shared-data wave is complete. The shared registry, local-finance mart and health
+access mart are adopted by their current consumers, release-asset-backed where the payloads
+are too large for git, and covered by validation/tests that fail on unknown join keys or
+schema drift.
+
+Remaining work is maintenance, not an active build queue:
+
+- SIRUTA/UAT registry: extend only when a new dataset exposes a real local join assumption.
+- Local finance: add arrears, capital/development mix or funding-source dependence only
+  when a consuming simulator needs the extra fiscal dimension.
+- Health access: pause point expansion; the remaining 72 no-point rows are a maintenance
+  backlog and should stay named exclusions until explicit source evidence exists.
+
+New source families, such as AMEPIP/public-company data, should start as a separate
+reconnaissance PR and are not blockers for closing this wave.
+
 ## 1. SIRUTA, UAT and CUI registry
 
 Make this the first shared import. Every other dataset joins on it.
@@ -20,8 +38,8 @@ First slice:
 - done: import official UAT population from the committed POP107D county extracts
 - done: point the `impozit-teren` land-value map builder at the shared registry for
   SIRUTA, county and sector-parent joins
-- next: move remaining simulator-local SIRUTA assumptions to this registry as each
-  shared dataset adopts it
+- done: add a shared-consumer audit so current registry users cannot publish unknown keys
+- next: maintain the registry for future consumers; no first-wave migration remains active
 
 ## 2. Local finance mart
 

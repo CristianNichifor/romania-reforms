@@ -33,6 +33,23 @@ common but the ethos, and forcing them into one abstraction would cost more than
 because what makes these useful is that a scenario is a link you can paste into an
 argument. This repository is an index, not a monolith.
 
+## Shared data status
+
+The first shared-data wave is complete. Three datasets are now shared inputs rather than
+simulator-local one-offs:
+
+- `packages/uat_registry`: the SIRUTA/UAT/CUI registry and population join vocabulary.
+- `packages/local_finance`: 2023-2025 local budget execution and fiscal-stress bases,
+  with large national history published as a release asset.
+- `packages/health_access`: UAT health access, accepted provider points, road-proxy point
+  access and explicit maintenance queues for providers that still lack source evidence.
+
+Current follow-up work is maintenance. New consumers should reuse these shared packages or
+document why they cannot. Health point expansion is paused until new evidence exists;
+finance dimensions such as arrears or funding-source dependence wait for a consuming UI;
+new source families such as AMEPIP/public-company data should begin as reconnaissance, not
+as a blocker for the completed wave.
+
 ## Simulators
 
 | | | |
