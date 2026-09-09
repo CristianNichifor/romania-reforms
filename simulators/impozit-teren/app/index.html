@@ -10,8 +10,9 @@
       content="Cât valorează pământul după grilele notarilor, cât se impozitează azi după Codul fiscal, și ce cotă pe valoare ar aduce aceiași bani."
     />
     <link rel="stylesheet" href="/src/style.css" />
+    <link rel="stylesheet" href="/src/native-ui-pilot.css" />
   </head>
-  <body>
+  <body class="civic-scope civic-land">
     <aside id="panel">
       <header>
         <a class="up" href="../" title="Toate simulatoarele de reformă">← Toate simulatoarele</a>
@@ -22,7 +23,7 @@
         </p>
       </header>
 
-      <section class="counties" id="counties"></section>
+      <section class="counties civic-field" id="counties"></section>
 
       <section class="control">
         <label class="slider-label" for="rate">
@@ -116,11 +117,11 @@
         </p>
       </section>
 
-      <section class="control" id="gdp-control">
+      <section class="control civic-field" id="gdp-control">
         <label class="slider-label" for="gdp-year">
           Cât face asta din economie <output id="gdp-value"></output>
         </label>
-        <select id="gdp-year"></select>
+        <select id="gdp-year" class="civic-select" aria-describedby="gdp-note"></select>
         <p class="note" id="gdp-note"></p>
       </section>
 
@@ -177,19 +178,21 @@
             <button data-sort="name">alfabetic</button>
           </div>
         </div>
-        <table id="table">
-          <thead>
-            <tr>
-              <th>Localitate</th>
-              <th class="num">Suprafață</th>
-              <th class="num">Valoarea terenului</th>
-              <th class="num">Cod fiscal</th>
-              <th class="num">Pe valoare</th>
-              <th class="num">Diferență</th>
-            </tr>
-          </thead>
-          <tbody id="rows"></tbody>
-        </table>
+        <div class="civic-table-scroll" role="region" aria-label="Localități: comparația impozitelor" tabindex="0">
+          <table id="table" aria-labelledby="table-title">
+            <thead>
+              <tr>
+                <th scope="col">Localitate</th>
+                <th scope="col" class="num">Suprafață</th>
+                <th scope="col" class="num">Valoarea terenului</th>
+                <th scope="col" class="num">Cod fiscal</th>
+                <th scope="col" class="num">Pe valoare</th>
+                <th scope="col" class="num">Diferență</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
         <div class="pager" id="pager"></div>
       </section>
     </main>

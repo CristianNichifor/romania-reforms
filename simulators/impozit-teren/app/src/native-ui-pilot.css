@@ -1,0 +1,46 @@
+@import './vendor/civic-ui/styles.css';
+
+/* Experimental native mapping of v0.2.0 CSS, not a new library component API. */
+.civic-land {
+  --civic-bg: var(--bg);
+  --civic-surface: var(--panel);
+  --civic-raised: var(--line);
+  --civic-text: var(--fg);
+  --civic-muted: var(--muted);
+  --civic-border: var(--muted);
+  --civic-focus: var(--accent);
+}
+
+/* Keep the browser's native select arrow; no React/Lucide markup is required. */
+.civic-land .civic-field .civic-select {
+  color-scheme: dark;
+  appearance: auto;
+  padding-right: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.civic-land .civic-field label {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.civic-land .table-wrap {
+  overflow: visible;
+}
+
+.civic-land .table-head {
+  flex-wrap: wrap;
+}
+
+.civic-land .table-head .segmented {
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.civic-land .pager {
+  flex-wrap: wrap;
+}
+
+.civic-land .pager .civic-button:disabled {
+  opacity: 1;
+}

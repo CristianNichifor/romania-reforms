@@ -492,7 +492,7 @@ async function main() {
   );
   $('counties').innerHTML = `
     <label class="field" for="county">Județul</label>
-    <select id="county">
+    <select id="county" class="civic-select">
       <option value="${ALL}">Toate județele (${manifest.counties.length})</option>
       ${named
         .map((c) => `<option value="${c}">${COUNTY_NAMES[c] ?? c.toUpperCase()}</option>`)
@@ -876,11 +876,11 @@ async function main() {
     $('pager').innerHTML =
       pages === 1
         ? ''
-        : `<button data-page="${page - 1}" ${page === 1 ? 'disabled' : ''}>← înapoi</button>
+        : `<button type="button" class="civic-button" data-page="${page - 1}" ${page === 1 ? 'disabled' : ''}>← înapoi</button>
            <span>${money.format(from + 1)}–${money.format(
              Math.min(from + PAGE_SIZE, sorted.length),
            )} din ${money.format(sorted.length)}</span>
-           <button data-page="${page + 1}" ${page === pages ? 'disabled' : ''}>înainte →</button>`;
+           <button type="button" class="civic-button" data-page="${page + 1}" ${page === pages ? 'disabled' : ''}>înainte →</button>`;
 
     // The caveats travel with the data rather than living in a footnote, so the page shows
     // exactly the ones its own numbers carry, blocking first.
