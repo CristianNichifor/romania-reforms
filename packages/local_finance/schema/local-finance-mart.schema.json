@@ -44,7 +44,8 @@
       "required": ["transparentaResponsesSha256", "uatRegistrySha256"],
       "properties": {
         "transparentaResponsesSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
-        "uatRegistrySha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        "uatRegistrySha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "dataGovArrearsWorkbookSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
       }
     },
     "registry": {
@@ -232,6 +233,7 @@
         "capitalSpendingRon": { "type": "number" },
         "developmentSpendingRon": { "type": "number" },
         "arrearsRon": { "type": ["number", "null"], "minimum": 0 },
+        "arrearsPerInhabitantRon": { "type": ["number", "null"], "minimum": 0 },
         "ownRevenueShare": { "type": ["number", "null"] },
         "personnelSpendingShare": { "type": ["number", "null"] },
         "capitalSpendingShare": { "type": ["number", "null"] },

@@ -18,6 +18,37 @@ def line(functional: str, economic: str, amount: float) -> dict:
     return {"functional_code": functional, "economic_code": economic, "amount": amount}
 
 
+def arrears_registry() -> dict:
+    return {
+        "units": [
+            {
+                "siruta": "10",
+                "name": "JUDEŢUL ALBA",
+                "shortName": "ALBA",
+                "level": "county",
+                "countyCode": "AB",
+                "countyName": "ALBA",
+            },
+            {
+                "siruta": "29",
+                "name": "JUDEŢUL ARAD",
+                "shortName": "ARAD",
+                "level": "county",
+                "countyCode": "AR",
+                "countyName": "ARAD",
+            },
+            {
+                "siruta": "9502",
+                "name": "INEU",
+                "shortName": "INEU",
+                "level": "town",
+                "countyCode": "AR",
+                "countyName": "ARAD",
+            },
+        ]
+    }
+
+
 def test_full_scope_keeps_the_whole_roster_and_marks_records_as_full_import():
     uats = [
         {"siruta": "1017", "name": "MUNICIPIUL ALBA IULIA"},
@@ -33,6 +64,131 @@ def test_full_scope_keeps_the_whole_roster_and_marks_records_as_full_import():
         import_local_finance.mart_id("sample", [2023, 2024, 2025])
         == "local-finance-mart-sample-2023-2025"
     )
+
+
+def test_data_gov_arrears_index_prefers_later_duplicate_uat_resource():
+    package = {
+        "success": True,
+        "result": {
+            "license_title": "OGL-ROU-1.0",
+            "organization": {"title": "Ministerul Finanţelor Publice"},
+            "resources": [
+                {
+                    "id": "11111111-1111-1111-1111-111111111111",
+                    "name": "ArierateBGCiunie2018.xls",
+                    "description": "Arierate ale bugetului general consolidat - iunie 2018",
+                    "url": "https://example.test/arieratebgciunie2018.xls",
+                    "created": "2018-08-03T08:00:00",
+                    "position": 1,
+                },
+                {
+                    "id": "22222222-2222-2222-2222-222222222222",
+                    "name": "ArierateUAT30062018.xls",
+                    "description": "",
+                    "url": "https://example.test/arierateuat30062018.xls",
+                    "created": "2018-08-03T08:00:00",
+                    "position": 2,
+                },
+                {
+                    "id": "33333333-3333-3333-3333-333333333333",
+                    "name": (
+                        "Situaţia-plăţilor-restante-mai-mari-de-90-de-zile-la-data-de-30.06.2018-"
+                    ),
+                    "description": "",
+                    "url": "https://example.test/valid-arierateuat30062018.xls",
+                    "created": "2018-08-08T13:00:00",
+                    "position": 3,
+                },
+                {
+                    "id": "44444444-4444-4444-4444-444444444444",
+                    "name": "ArierateUAT31122017.xls",
+                    "description": "",
+                    "url": "https://example.test/arierateuat31122017.xls",
+                    "created": "2018-08-03T08:00:00",
+                    "position": 4,
+                },
+            ],
+        },
+    }
+
+    index = import_local_finance.build_arrears_resource_index(
+        package, "2026-09-09", package_sha256="a" * 64
+    )
+
+    assert index["summary"]["resources"] == 4
+    assert index["summary"]["uatResources"] == 2
+    assert index["summary"]["coveredYears"] == [2017, 2018]
+    assert index["summary"]["latestUatSnapshotDate"] == "2018-06-30"
+    assert index["summary"]["has2025UatResource"] is False
+    assert index["latestUatResource"]["resourceId"] == "33333333-3333-3333-3333-333333333333"
+    assert index["latestUatResource"]["duplicateResources"] == 2
+    assert {
+        "data-gov-arrears-current-years-unavailable",
+        "data-gov-arrears-duplicate-uploads",
+    } <= {limitation["id"] for limitation in index["limitations"]}
+
+
+def test_arrears_rows_join_county_councils_and_localities_by_name_within_county():
+    rows = [
+        ["", "TOTAL", 150.0],
+        ["", "din care:", ""],
+        [1.0, "ALBA", 10.0],
+        ["", "Consiliul Judeţean Alba", 10.0],
+        [2.0, "ARAD", 140.0],
+        ["", "Ineu", 100.0],
+        ["", "Missing Place", 40.0],
+    ]
+
+    snapshot = import_local_finance.parse_arrears_rows(rows, arrears_registry(), "2018-06-30")
+
+    assert snapshot["recordsBySiruta"] == {"9502": 100.0, "AB": 10.0}
+    assert snapshot["summary"]["countySubtotalRows"] == 2
+    assert snapshot["summary"]["authorityRows"] == 3
+    assert snapshot["summary"]["matchedRows"] == 2
+    assert snapshot["summary"]["unmatchedRows"] == 1
+    assert snapshot["summary"]["workbookTotalArrearsRon"] == 150.0
+    assert snapshot["summary"]["unmatchedArrearsRon"] == 40.0
+
+
+def test_arrears_snapshot_enriches_only_matching_mart_year_and_sets_missing_rows_to_zero():
+    records = [
+        {"year": 2018, "siruta": "AB", "population": 2, "arrearsRon": None},
+        {"year": 2018, "siruta": "9502", "population": 4, "arrearsRon": None},
+        {"year": 2018, "siruta": "9999", "population": 5, "arrearsRon": None},
+        {"year": 2025, "siruta": "9502", "population": 4, "arrearsRon": None},
+    ]
+    snapshot = {
+        "snapshotDate": "2018-06-30",
+        "recordsBySiruta": {"AB": 10.0, "9502": 100.0},
+    }
+
+    changed = import_local_finance.apply_arrears_snapshot(records, snapshot)
+
+    assert changed == 3
+    assert records[0]["arrearsRon"] == 10.0
+    assert records[0]["arrearsPerInhabitantRon"] == 5.0
+    assert records[1]["arrearsRon"] == 100.0
+    assert records[2]["arrearsRon"] == 0.0
+    assert records[2]["arrearsPerInhabitantRon"] == 0.0
+    assert records[3]["arrearsRon"] is None
+
+
+def test_arrears_coverage_warns_when_official_package_has_no_requested_year():
+    mart = {
+        "records": [{"year": 2025, "siruta": "1017", "arrearsRon": None}],
+    }
+    arrears_resources = {
+        "summary": {
+            "coveredYears": [2017, 2018],
+            "latestUatSnapshotDate": "2018-06-30",
+        }
+    }
+
+    check = import_local_finance.arrears_coverage_check(mart, arrears_resources)
+
+    assert check["status"] == "warning"
+    assert check["metrics"]["missingYears"] == "2025"
+    assert check["metrics"]["latestUatSnapshotDate"] == "2018-06-30"
 
 
 def test_record_from_lines_derives_finance_indicators_from_classification_prefixes():
@@ -75,6 +231,7 @@ def test_record_from_lines_derives_finance_indicators_from_classification_prefix
     assert record["developmentSpendingRon"] == 5
     assert record["ownRevenueShare"] == 0.2
     assert record["spendingPerInhabitantRon"] == 0.3
+    assert record["arrearsPerInhabitantRon"] is None
 
 
 def test_full_validation_checks_numeric_registry_join_but_keeps_county_councils():
@@ -236,3 +393,21 @@ def test_committed_full_2025_mart_exports_the_impozit_teren_budget():
     regenerated = import_local_finance.build_legacy_budget_document_from_mart(mart, 2025)
 
     assert regenerated == budget
+
+
+def test_committed_arrears_index_documents_no_2025_source_for_the_full_mart():
+    index = json.loads((DATA / "data-gov-arrears-resources.json").read_text(encoding="utf-8"))
+    report = json.loads(
+        (DATA / "local-finance-validation-report-2025.json").read_text(encoding="utf-8")
+    )
+
+    assert index["summary"]["latestUatSnapshotDate"] == "2018-06-30"
+    assert index["summary"]["has2025UatResource"] is False
+    assert index["latestUatResource"]["url"].endswith("/arierateuat30062018.xls")
+
+    statuses = {check["id"]: check["status"] for check in report["checks"]}
+    assert statuses["data-gov-arrears-coverage"] == "warning"
+    assert {
+        "data-gov-arrears-current-years-unavailable",
+        "data-gov-arrears-duplicate-uploads",
+    } <= {limitation["id"] for limitation in report["limitations"]}

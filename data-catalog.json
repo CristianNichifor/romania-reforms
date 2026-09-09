@@ -1,7 +1,7 @@
 {
   "$schema": "schema/data-catalog.schema.json",
   "id": "romania-reforms-shared-data-catalog",
-  "updated": "2026-09-08",
+  "updated": "2026-09-09",
   "principles": [
     "Shared datasets live here only when at least two simulators need the same source or key vocabulary.",
     "Large derived payloads are published as release assets, not committed to git.",
@@ -123,12 +123,13 @@
       ],
       "storagePolicy": "Derived yearly marts should be release assets when they exceed the repository size budget; small summaries and schemas can be committed.",
       "nextSlice": {
-        "scope": "Arrears and historical finance expansion",
-        "deliverable": "Import arrears from data.gov.ro or publish the 2023-2025 national mart history as release assets if the committed size budget cannot hold it.",
-        "doneWhen": "The local finance mart can expose arrears per UAT-year, or the full 2023-2025 history is reproducible without increasing the tracked tree past its size gate."
+        "scope": "Historical finance expansion through release assets",
+        "deliverable": "Publish the full 2023-2025 national mart history as release assets and keep the committed tree under the size gate.",
+        "doneWhen": "The full 2023-2025 local finance history is reproducible and downloadable without increasing the tracked tree past its size gate."
       },
       "notes": [
-        "Transparenta data is useful, but the catalog must not imply that the repository license covers the underlying official budget data."
+        "Transparenta data is useful, but the catalog must not imply that the repository license covers the underlying official budget data.",
+        "The official data.gov.ro Arierate package currently indexes UAT XLS resources only through 2018-06-30, so it cannot populate the 2025 mart."
       ]
     },
     {

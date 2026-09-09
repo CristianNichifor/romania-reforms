@@ -20,8 +20,9 @@ import hashlib
 import json
 import re
 import sys
+import unicodedata
 import urllib.request
-from collections import Counter
+from collections import Counter, defaultdict
 from datetime import date
 from pathlib import Path
 from typing import Final
@@ -42,6 +43,10 @@ DATA_GOV_2024_URL: Final[str] = (
     "https://data.gov.ro/dataset/c0d25ff7-27d5-4c31-9809-540f77b20180/resource/"
     "aac89795-56f0-41ee-a631-26695f73c5d6/download/"
     "situaia-veniturilor-i-cheltuielilor-2024.xlsx"
+)
+DATA_GOV_ARREARS_DATASET_URL: Final[str] = "https://data.gov.ro/dataset/arierate"
+DATA_GOV_ARREARS_PACKAGE_URL: Final[str] = (
+    "https://data.gov.ro/api/3/action/package_show?id=arierate"
 )
 
 # Revenue that arrives from above rather than being raised locally. Chapter prefixes of the
@@ -64,6 +69,20 @@ SUSPECT_MULTIPLE: Final[int] = 20
 # How many UATs are asked for in one HTTP request. The endpoint has no group-by for
 # line-items, so GraphQL aliases let many authorities share a request.
 BATCH: Final[int] = 40
+MONTH_BY_NAME: Final[dict[str, int]] = {
+    "IANUARIE": 1,
+    "FEBRUARIE": 2,
+    "MARTIE": 3,
+    "APRILIE": 4,
+    "MAI": 5,
+    "IUNIE": 6,
+    "IULIE": 7,
+    "AUGUST": 8,
+    "SEPTEMBRIE": 9,
+    "OCTOMBRIE": 10,
+    "NOIEMBRIE": 11,
+    "DECEMBRIE": 12,
+}
 
 SAMPLE_UATS: Final[tuple[tuple[str, str], ...]] = (
     ("1017", "county-seat"),
@@ -103,6 +122,15 @@ def sha256_file(path: Path) -> str:
 def sha256_json(document: object) -> str:
     data = json.dumps(document, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()
     return sha256_bytes(data)
+
+
+def read_source_bytes(location: str | Path) -> bytes:
+    text = str(location)
+    if re.match(r"https?://", text):
+        request = urllib.request.Request(text, headers={"User-Agent": UA})
+        with urllib.request.urlopen(request, timeout=180) as response:
+            return response.read()
+    return Path(text).read_bytes()
 
 
 def post(query: str, variables: dict | None = None) -> dict:
@@ -161,6 +189,230 @@ def shared_registry_population(path: Path = UAT_REGISTRY) -> dict[str, int]:
         for unit in document["units"]
         if unit["population"] is not None
     }
+
+
+def fold(text: object) -> str:
+    normalized = unicodedata.normalize("NFKD", str(text or ""))
+    return "".join(char for char in normalized if not unicodedata.combining(char)).strip().upper()
+
+
+def arrears_join_key(text: object) -> str:
+    folded = fold(text)
+    folded = folded.replace("MUNICIPIUL BUCURESTI SECTORUL", "SECTORUL")
+    folded = folded.replace("BUCURESTI SECTORUL", "SECTORUL")
+    folded = re.sub(r"\b(SECTORUL|SECTOR)\s+([1-6])\b", r"SECTOR \2", folded)
+    for prefix in (
+        "CONSILIUL JUDETEAN AL ",
+        "CONSILIUL JUDETEAN ",
+        "JUDETUL ",
+        "MUNICIPIUL ",
+        "ORASUL ",
+        "ORAS ",
+        "COMUNA ",
+    ):
+        if folded.startswith(prefix):
+            folded = folded[len(prefix) :]
+            break
+    folded = re.sub(r"\bDR\W*TR\b", "DROBETA TURNU", folded)
+    folded = re.sub(r"\bTG\b", "TARGU", folded)
+    for old, new in (
+        ("SIRBI", "SARBI"),
+        ("SIMBURESTI", "SAMBURESTI"),
+        ("GIRCENI", "GARCENI"),
+        ("BIRLAD", "BARLAD"),
+    ):
+        folded = folded.replace(old, new)
+    folded = re.sub(r"[^A-Z0-9]+", " ", folded)
+    return re.sub(r"\s+", " ", folded).strip()
+
+
+def is_county_council_name(name: object) -> bool:
+    folded = fold(name)
+    return "CONSILIUL" in folded and "JUDETEAN" in folded
+
+
+def registry_arrears_indexes(
+    registry_document: dict,
+) -> tuple[dict[tuple[str, str], list[dict]], dict[str, str]]:
+    unit_index: dict[tuple[str, str], list[dict]] = defaultdict(list)
+    county_by_key: dict[str, str] = {}
+    seen_unit_keys: set[tuple[str, str, str]] = set()
+    for unit in registry_document["units"]:
+        county_code = unit["countyCode"]
+        if unit["level"] == "county":
+            for name in (unit["shortName"], unit["countyName"], unit["name"]):
+                county_by_key[arrears_join_key(name)] = county_code
+            continue
+        for name in {unit["name"], unit["shortName"]}:
+            key = arrears_join_key(name)
+            unique_key = (county_code, key, unit["siruta"])
+            if key and unique_key not in seen_unit_keys:
+                unit_index[(county_code, key)].append(unit)
+                seen_unit_keys.add(unique_key)
+    return unit_index, county_by_key
+
+
+def arrears_candidates(
+    unit_index: dict[tuple[str, str], list[dict]], county_code: str, key: str
+) -> list[dict]:
+    candidates = unit_index.get((county_code, key), [])
+    if candidates:
+        return candidates
+
+    prefix_matches = []
+    for (index_county_code, index_key), units in unit_index.items():
+        if index_county_code == county_code and index_key.startswith(f"{key} "):
+            prefix_matches.extend(units)
+    by_siruta = {unit["siruta"]: unit for unit in prefix_matches}
+    return list(by_siruta.values())
+
+
+def date_from_parts(day: str, month: str, year: str) -> str | None:
+    try:
+        return date(int(year), int(month), int(day)).isoformat()
+    except ValueError:
+        return None
+
+
+def parse_arrears_snapshot_date(*texts: object) -> str | None:
+    joined = " ".join(str(text or "") for text in texts)
+    folded = fold(joined)
+    for match in re.finditer(r"\b([0-3]?\d)[.\-/]([01]?\d)[.\-/]((?:19|20)\d{2})\b", folded):
+        parsed = date_from_parts(match.group(1), match.group(2), match.group(3))
+        if parsed:
+            return parsed
+    for match in re.finditer(r"\b([0-3]?\d)\s+([A-Z]+)\s+((?:19|20)\d{2})\b", folded):
+        month = MONTH_BY_NAME.get(match.group(2))
+        if month:
+            parsed = date_from_parts(match.group(1), str(month), match.group(3))
+            if parsed:
+                return parsed
+    for match in re.finditer(r"(?<!\d)([0-3]\d)([01]\d)((?:19|20)\d{2})(?!\d)", folded):
+        parsed = date_from_parts(match.group(1), match.group(2), match.group(3))
+        if parsed:
+            return parsed
+    return None
+
+
+def is_uat_arrears_resource(resource: dict) -> bool:
+    text = fold(" ".join(str(resource.get(key) or "") for key in ("name", "description", "url")))
+    if "BUGETULUI GENERAL CONSOLIDAT" in text and "UNITATILOR" not in text:
+        return False
+    return "UAT" in text or ("UNITATILOR" in text and "TERITORIALE" in text)
+
+
+def compact_arrears_resource(resource: dict, snapshot_date: str, duplicate_resources: int) -> dict:
+    return {
+        "snapshotDate": snapshot_date,
+        "year": int(snapshot_date[:4]),
+        "month": int(snapshot_date[5:7]),
+        "resourceId": resource["id"],
+        "name": resource.get("name") or "",
+        "url": resource.get("url") or "",
+        "format": resource.get("format") or "XLS",
+        "created": resource.get("created") or None,
+        "lastModified": resource.get("last_modified") or None,
+        "duplicateResources": duplicate_resources,
+    }
+
+
+def build_arrears_resource_index(
+    package_document: dict,
+    retrieved_date: str,
+    package_sha256: str | None = None,
+) -> dict:
+    result = package_document["result"] if package_document.get("success") else package_document
+    grouped: dict[str, list[dict]] = defaultdict(list)
+    for resource in result.get("resources", []):
+        if not is_uat_arrears_resource(resource):
+            continue
+        snapshot_date = parse_arrears_snapshot_date(
+            resource.get("description"), resource.get("name"), resource.get("url")
+        )
+        if snapshot_date:
+            grouped[snapshot_date].append(resource)
+
+    uat_resources = []
+    for snapshot_date, resources in grouped.items():
+        selected = sorted(
+            resources,
+            key=lambda resource: (
+                resource.get("created") or "",
+                int(resource.get("position") or 0),
+            ),
+        )[-1]
+        uat_resources.append(compact_arrears_resource(selected, snapshot_date, len(resources)))
+    uat_resources.sort(key=lambda resource: resource["snapshotDate"])
+
+    covered_years = sorted({resource["year"] for resource in uat_resources})
+    latest = uat_resources[-1] if uat_resources else None
+    limitations = []
+    if latest and latest["year"] < YEAR:
+        limitations.append(
+            {
+                "id": "data-gov-arrears-current-years-unavailable",
+                "severity": "material",
+                "affects": ["arrearsRon"],
+                "text": (
+                    "The official data.gov.ro Arierate package has no UAT arrears resources "
+                    f"after {latest['snapshotDate']} in the CKAN metadata inspected for this "
+                    "import, so current mart years must keep arrears null unless a newer "
+                    "official workbook is supplied separately."
+                ),
+            }
+        )
+    if any(resource["duplicateResources"] > 1 for resource in uat_resources):
+        limitations.append(
+            {
+                "id": "data-gov-arrears-duplicate-uploads",
+                "severity": "note",
+                "affects": ["source"],
+                "text": (
+                    "Several monthly UAT arrears snapshots have duplicate resource uploads. "
+                    "The compact index keeps one resource per snapshot date, preferring the "
+                    "later CKAN resource creation timestamp."
+                ),
+            }
+        )
+
+    return {
+        "$schema": "../schema/data-gov-arrears-resources.schema.json",
+        "id": "data-gov-ro-arrears-resources",
+        "title": "data.gov.ro Arierate UAT resource index",
+        "publisher": result.get("organization", {}).get("title")
+        or result.get("publisher")
+        or "Ministerul Finantelor Publice",
+        "license": result.get("license_title") or "",
+        "retrievedDate": retrieved_date,
+        "provenance": {
+            "source": "data-gov-ro-ckan-package-show",
+            "locator": f"{DATA_GOV_ARREARS_PACKAGE_URL}; {DATA_GOV_ARREARS_DATASET_URL}",
+            "confidence": "verbatim",
+            "note": (
+                "Compact index derived from CKAN package metadata for the Arierate dataset. "
+                "Only UAT-level monthly arrears resources are retained here."
+            ),
+        },
+        "sourceHashes": {
+            "ckanPackageSha256": package_sha256 or sha256_json(package_document),
+        },
+        "summary": {
+            "resources": len(result.get("resources", [])),
+            "uatResources": len(uat_resources),
+            "firstUatSnapshotDate": uat_resources[0]["snapshotDate"] if uat_resources else None,
+            "latestUatSnapshotDate": latest["snapshotDate"] if latest else None,
+            "coveredYears": covered_years,
+            "has2025UatResource": any(resource["year"] == 2025 for resource in uat_resources),
+        },
+        "latestUatResource": latest,
+        "uatResources": uat_resources,
+        "limitations": limitations,
+    }
+
+
+def read_arrears_resource_index(location: str | Path, retrieved_date: str) -> dict:
+    raw = read_source_bytes(location)
+    return build_arrears_resource_index(json.loads(raw), retrieved_date, sha256_bytes(raw))
 
 
 def prefer_registry_population(uats: list[dict], population_by_siruta: dict[str, int]) -> None:
@@ -290,6 +542,197 @@ def per_inhabitant(value: float, population: int | None) -> float | None:
     return round(value / population, 2) if population and population > 0 else None
 
 
+def as_text(value: object) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, float) and value.is_integer():
+        return str(int(value))
+    return str(value).strip()
+
+
+def as_number(value: object) -> float | None:
+    if isinstance(value, bool) or value is None:
+        return None
+    if isinstance(value, int | float):
+        return float(value)
+    text = str(value).strip()
+    if not text:
+        return None
+    cleaned = text.replace("\xa0", "").replace(" ", "")
+    if "," in cleaned and "." in cleaned:
+        cleaned = cleaned.replace(".", "").replace(",", ".")
+    else:
+        cleaned = cleaned.replace(",", ".")
+    try:
+        return float(cleaned)
+    except ValueError:
+        return None
+
+
+def read_xls_workbook(data: bytes, label: str):
+    import xlrd
+
+    try:
+        return xlrd.open_workbook(file_contents=data)
+    except Exception as original_error:
+        try:
+            repaired = data.decode("utf-8").encode("latin-1")
+        except UnicodeError:
+            repaired = b""
+        if repaired.startswith(b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1"):
+            try:
+                return xlrd.open_workbook(file_contents=repaired)
+            except Exception:
+                pass
+        raise SystemExit(f"{label}: could not read legacy XLS workbook: {original_error}") from (
+            original_error
+        )
+
+
+def parse_arrears_rows(
+    rows: list[list[object]],
+    registry_document: dict,
+    snapshot_date: str,
+) -> dict:
+    unit_index, county_by_key = registry_arrears_indexes(registry_document)
+    current_county_code: str | None = None
+    workbook_total: float | None = None
+    county_totals: dict[str, float] = {}
+    records_by_siruta: dict[str, float] = {}
+    matched_rows = []
+    unmatched_rows = []
+    ambiguous_rows = []
+
+    for row in rows:
+        number = as_number(row[0]) if len(row) > 0 else None
+        name = as_text(row[1]) if len(row) > 1 else ""
+        amount = as_number(row[2]) if len(row) > 2 else None
+        key = arrears_join_key(name)
+        if not key:
+            continue
+        if key == "TOTAL":
+            if amount is not None:
+                workbook_total = amount
+            continue
+        if key in {"DIN CARE", "NR CRT", "UNITATEA SUBDIVIZIUNEA ADMINISTRATIV TERITORIALA"}:
+            continue
+
+        county_code = county_by_key.get(key)
+        if county_code and number is not None:
+            current_county_code = county_code
+            if amount is not None:
+                county_totals[county_code] = round_money(amount)
+            continue
+        if amount is None or current_county_code is None:
+            continue
+
+        if is_county_council_name(name):
+            siruta = current_county_code
+            match_kind = "county-council"
+        else:
+            candidates = arrears_candidates(unit_index, current_county_code, key)
+            if len(candidates) > 1:
+                ambiguous_rows.append(
+                    {
+                        "countyCode": current_county_code,
+                        "sourceName": name,
+                        "amountRon": round_money(amount),
+                        "candidateSirutas": ",".join(sorted(unit["siruta"] for unit in candidates)),
+                    }
+                )
+                continue
+            if not candidates:
+                unmatched_rows.append(
+                    {
+                        "countyCode": current_county_code,
+                        "sourceName": name,
+                        "amountRon": round_money(amount),
+                    }
+                )
+                continue
+            siruta = candidates[0]["siruta"]
+            match_kind = "name-within-county"
+
+        records_by_siruta[siruta] = round_money(records_by_siruta.get(siruta, 0.0) + amount)
+        matched_rows.append(
+            {
+                "siruta": siruta,
+                "countyCode": current_county_code,
+                "sourceName": name,
+                "amountRon": round_money(amount),
+                "matchKind": match_kind,
+            }
+        )
+
+    authority_total = round_money(
+        sum(row["amountRon"] for row in matched_rows)
+        + sum(row["amountRon"] for row in unmatched_rows)
+        + sum(row["amountRon"] for row in ambiguous_rows)
+    )
+    matched_total = round_money(sum(records_by_siruta.values()))
+    return {
+        "snapshotDate": snapshot_date,
+        "amountUnit": "RON",
+        "recordsBySiruta": dict(
+            sorted(records_by_siruta.items(), key=lambda item: siruta_sort_key(item[0]))
+        ),
+        "matchedRows": sorted(matched_rows, key=lambda row: (row["countyCode"], row["sourceName"])),
+        "unmatchedRows": unmatched_rows,
+        "ambiguousRows": ambiguous_rows,
+        "summary": {
+            "countySubtotalRows": len(county_totals),
+            "authorityRows": len(matched_rows) + len(unmatched_rows) + len(ambiguous_rows),
+            "matchedRows": len(matched_rows),
+            "unmatchedRows": len(unmatched_rows),
+            "ambiguousRows": len(ambiguous_rows),
+            "workbookTotalArrearsRon": round_money(workbook_total)
+            if workbook_total is not None
+            else None,
+            "authorityRowsArrearsRon": authority_total,
+            "matchedArrearsRon": matched_total,
+            "unmatchedArrearsRon": round_money(authority_total - matched_total),
+        },
+    }
+
+
+def read_arrears_workbook(
+    location: str | Path,
+    registry_document: dict,
+    snapshot_date: str | None = None,
+) -> dict:
+    raw = read_source_bytes(location)
+    workbook = read_xls_workbook(raw, str(location))
+    sheet = workbook.sheet_by_index(0)
+    rows = [
+        [sheet.cell_value(row_index, column_index) for column_index in range(sheet.ncols)]
+        for row_index in range(sheet.nrows)
+    ]
+    found_date = snapshot_date or parse_arrears_snapshot_date(str(location), *rows[:8])
+    if not found_date:
+        raise SystemExit(f"{location}: could not infer arrears snapshot date")
+    snapshot = parse_arrears_rows(rows, registry_document, found_date)
+    snapshot["source"] = {
+        "source": "data-gov-ro-arierate-uat-xls",
+        "locator": f"{location}; sheet {sheet.name!r}",
+        "sha256": sha256_bytes(raw),
+    }
+    return snapshot
+
+
+def apply_arrears_snapshot(records: list[dict], snapshot: dict) -> int:
+    year = int(snapshot["snapshotDate"][:4])
+    amounts = snapshot["recordsBySiruta"]
+    changed = 0
+    for record in records:
+        if record["year"] != year:
+            continue
+        amount = round_money(amounts.get(record["siruta"], 0.0))
+        record["arrearsRon"] = amount
+        record["arrearsPerInhabitantRon"] = per_inhabitant(amount, record.get("population"))
+        changed += 1
+    return changed
+
+
 def select_sample_uats(
     uats: list[dict], sample: tuple[tuple[str, str], ...] = SAMPLE_UATS
 ) -> list[dict]:
@@ -384,6 +827,7 @@ def record_from_lines(
         "capitalSpendingRon": round_money(capital),
         "developmentSpendingRon": round_money(development),
         "arrearsRon": None,
+        "arrearsPerInhabitantRon": None,
         "ownRevenueShare": share(own_revenue, revenue),
         "personnelSpendingShare": share(personnel, spending),
         "capitalSpendingShare": share(capital, spending),
@@ -452,7 +896,11 @@ def build_year_summary(records: list[dict]) -> list[dict]:
     return out
 
 
-def finance_limitations(records: list[dict]) -> list[dict]:
+def finance_limitations(
+    records: list[dict],
+    arrears_snapshot: dict | None = None,
+    arrears_resources: dict | None = None,
+) -> list[dict]:
     has_population_fallback = any(
         row["populationSource"] == "transparenta-eu-uat-roster-fallback" for row in records
     )
@@ -482,17 +930,59 @@ def finance_limitations(records: list[dict]) -> list[dict]:
                 "indicator, so the prefix list is published with the mart."
             ),
         },
-        {
-            "id": "arrears-not-imported-yet",
-            "severity": "material",
-            "affects": ["arrearsRon"],
-            "text": (
-                "The first slice does not import arrears. The field is present and null so "
-                "downstream consumers can depend on the schema without mistaking missing arrears "
-                "for zero arrears."
-            ),
-        },
     ]
+    rows_with_arrears = sum(1 for row in records if row.get("arrearsRon") is not None)
+    if rows_with_arrears:
+        limitations.append(
+            {
+                "id": "data-gov-arrears-name-county-join",
+                "severity": "material",
+                "affects": ["arrearsRon", "arrearsPerInhabitantRon"],
+                "text": (
+                    "The official UAT arrears workbook does not publish SIRUTA or CUI columns. "
+                    "Imported arrears are joined by normalized authority name within county; "
+                    "unlisted authorities in the workbook snapshot are treated as zero arrears."
+                ),
+            }
+        )
+        if arrears_snapshot and arrears_snapshot["summary"]["unmatchedRows"]:
+            limitations.append(
+                {
+                    "id": "data-gov-arrears-unmatched-source-rows",
+                    "severity": "material",
+                    "affects": ["arrearsRon", "siruta"],
+                    "text": (
+                        "Some named authority rows in the official arrears workbook could not "
+                        "be matched unambiguously to the shared UAT registry. Their arrears are "
+                        "reported in the import summary and excluded from per-UAT records."
+                    ),
+                }
+            )
+    else:
+        latest = (arrears_resources or {}).get("summary", {}).get("latestUatSnapshotDate")
+        limitations.append(
+            {
+                "id": (
+                    "data-gov-arrears-period-unavailable"
+                    if arrears_resources
+                    else "arrears-not-imported-yet"
+                ),
+                "severity": "material",
+                "affects": ["arrearsRon", "arrearsPerInhabitantRon"],
+                "text": (
+                    "The official data.gov.ro arrears package was inspected, but it has no UAT "
+                    f"arrears resource covering this mart period; the latest indexed UAT "
+                    f"snapshot is {latest}. Arrears stay null rather than being backfilled from "
+                    "stale data."
+                    if latest
+                    else (
+                        "This mart was generated without an arrears workbook. The field is "
+                        "present and null so downstream consumers can depend on the schema "
+                        "without mistaking missing arrears for zero arrears."
+                    )
+                ),
+            }
+        )
     if missing_development_years:
         limitations.append(
             {
@@ -531,12 +1021,21 @@ def build_mart_document(
     registry_sha256: str,
     transparenta_sha256: str,
     scope: str = "sample",
+    arrears_snapshot: dict | None = None,
+    arrears_resources: dict | None = None,
 ) -> dict:
     sample = [
         {"siruta": siruta, "role": role}
         for siruta, role in SAMPLE_UATS
         if any(row["siruta"] == siruta for row in records)
     ]
+    source_hashes = {
+        "transparentaResponsesSha256": transparenta_sha256,
+        "uatRegistrySha256": registry_sha256,
+    }
+    if arrears_snapshot:
+        source_hashes["dataGovArrearsWorkbookSha256"] = arrears_snapshot["source"]["sha256"]
+
     return {
         "$schema": "../schema/local-finance-mart.schema.json",
         "id": mart_id(scope, years),
@@ -561,10 +1060,7 @@ def build_mart_document(
                 "classification-code prefixes."
             ),
         },
-        "sourceHashes": {
-            "transparentaResponsesSha256": transparenta_sha256,
-            "uatRegistrySha256": registry_sha256,
-        },
+        "sourceHashes": source_hashes,
         "registry": {
             "id": registry_document["id"],
             "period": registry_document["period"],
@@ -599,7 +1095,9 @@ def build_mart_document(
             "byYear": build_year_summary(records),
         },
         "records": records,
-        "limitations": finance_limitations(records),
+        "limitations": finance_limitations(
+            records, arrears_snapshot=arrears_snapshot, arrears_resources=arrears_resources
+        ),
     }
 
 
@@ -712,8 +1210,66 @@ def comparison_check(data_gov: dict | None, transparenta: dict | None) -> dict:
     }
 
 
+def arrears_coverage_check(mart: dict, arrears_resources: dict | None = None) -> dict:
+    records = mart["records"]
+    years = sorted({row["year"] for row in records})
+    rows_with_arrears = sum(1 for row in records if row.get("arrearsRon") is not None)
+    if rows_with_arrears:
+        target_years = sorted({row["year"] for row in records if row.get("arrearsRon") is not None})
+        return {
+            "id": "data-gov-arrears-coverage",
+            "status": "pass",
+            "text": "Arrears values are populated for at least one mart year.",
+            "metrics": {
+                "recordsWithArrears": rows_with_arrears,
+                "yearsWithArrears": ",".join(map(str, target_years)),
+            },
+        }
+    if not arrears_resources:
+        return {
+            "id": "data-gov-arrears-coverage",
+            "status": "not_run",
+            "text": (
+                "No data.gov.ro Arierate package metadata or workbook was supplied, so arrears "
+                "coverage was not checked."
+            ),
+            "metrics": {
+                "requestedYears": ",".join(map(str, years)),
+                "recordsWithArrears": 0,
+            },
+        }
+
+    summary = arrears_resources["summary"]
+    covered_years = set(summary["coveredYears"])
+    missing_years = [year for year in years if year not in covered_years]
+    return {
+        "id": "data-gov-arrears-coverage",
+        "status": "warning" if missing_years else "not_run",
+        "text": (
+            "The official data.gov.ro Arierate package was inspected, but it has no UAT arrears "
+            "resource for the mart year(s); arrears remain null rather than using stale source "
+            "snapshots."
+            if missing_years
+            else (
+                "The data.gov.ro Arierate package has UAT resources for the mart year(s), but "
+                "no workbook was supplied to populate per-UAT arrears."
+            )
+        ),
+        "metrics": {
+            "requestedYears": ",".join(map(str, years)),
+            "coveredYears": ",".join(map(str, summary["coveredYears"])),
+            "missingYears": ",".join(map(str, missing_years)) if missing_years else None,
+            "latestUatSnapshotDate": summary["latestUatSnapshotDate"],
+            "recordsWithArrears": 0,
+        },
+    }
+
+
 def build_validation_report(
-    mart: dict, data_gov: dict | None = None, transparenta: dict | None = None
+    mart: dict,
+    data_gov: dict | None = None,
+    transparenta: dict | None = None,
+    arrears_resources: dict | None = None,
 ) -> dict:
     records = mart["records"]
     scope = mart.get("scope", "sample" if "-sample-" in mart["id"] else "full")
@@ -827,9 +1383,20 @@ def build_validation_report(
             },
         },
         comparison_check(data_gov, transparenta),
+        arrears_coverage_check(mart, arrears_resources),
     ]
     counts = Counter(check["status"] for check in checks)
     report_period = period_slug([int(mart["periodStart"]), int(mart["periodEnd"])])
+    limitations = (
+        finance_limitations(records, arrears_resources=arrears_resources)
+        if arrears_resources
+        else list(mart["limitations"])
+    )
+    known_limitation_ids = {limitation["id"] for limitation in limitations}
+    for limitation in (arrears_resources or {}).get("limitations", []):
+        if limitation["id"] not in known_limitation_ids:
+            limitations.append(limitation)
+            known_limitation_ids.add(limitation["id"])
     return {
         "$schema": "../schema/local-finance-validation-report.schema.json",
         "id": f"local-finance-validation-report-{report_period}",
@@ -854,7 +1421,7 @@ def build_validation_report(
             if data_gov and transparenta
             else None
         ),
-        "limitations": mart["limitations"],
+        "limitations": limitations,
     }
 
 
@@ -1047,6 +1614,9 @@ def build_finance_documents(
     retrieved_date: str,
     registry: Path,
     data_gov_2024_workbook: Path | None = None,
+    arrears_workbook: str | Path | None = None,
+    arrears_snapshot_date: str | None = None,
+    arrears_resources: dict | None = None,
 ) -> tuple[dict, dict]:
     registry_document = read_registry(registry)
     uats = roster()
@@ -1058,6 +1628,12 @@ def build_finance_documents(
 
     requested_years = sorted(set(years))
     records, raw = fetch_mart_records(selected, requested_years, registry_document)
+    arrears_snapshot = None
+    if arrears_workbook:
+        arrears_snapshot = read_arrears_workbook(
+            arrears_workbook, registry_document, snapshot_date=arrears_snapshot_date
+        )
+        apply_arrears_snapshot(records, arrears_snapshot)
     mart = build_mart_document(
         records,
         requested_years,
@@ -1066,17 +1642,28 @@ def build_finance_documents(
         sha256_file(registry),
         sha256_json(raw),
         scope=scope,
+        arrears_snapshot=arrears_snapshot,
+        arrears_resources=arrears_resources,
     )
 
     data_gov = data_gov_2024_totals(data_gov_2024_workbook) if data_gov_2024_workbook else None
     transparenta = transparenta_national_totals(2024) if data_gov else None
-    report = build_validation_report(mart, data_gov=data_gov, transparenta=transparenta)
+    report = build_validation_report(
+        mart, data_gov=data_gov, transparenta=transparenta, arrears_resources=arrears_resources
+    )
     return mart, report
 
 
 def write_json(path: Path, document: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def display_path(path: Path) -> Path:
+    try:
+        return path.resolve().relative_to(REPO_ROOT)
+    except ValueError:
+        return path
 
 
 def main() -> int:
@@ -1088,11 +1675,77 @@ def main() -> int:
     parser.add_argument("--out-dir", type=Path, default=PACKAGE_ROOT / "data")
     parser.add_argument("--data-gov-2024-workbook", type=Path)
     parser.add_argument(
+        "--data-gov-arrears-package",
+        help="CKAN package_show JSON path or URL for the official data.gov.ro Arierate dataset",
+    )
+    parser.add_argument(
+        "--data-gov-arrears-index-out",
+        type=Path,
+        help="also write a compact data.gov.ro Arierate UAT resource index",
+    )
+    parser.add_argument(
+        "--arrears-workbook",
+        help="official UAT arrears XLS workbook path or URL to join into matching mart years",
+    )
+    parser.add_argument(
+        "--arrears-snapshot-date",
+        help="override workbook snapshot date, YYYY-MM-DD",
+    )
+    parser.add_argument(
+        "--existing-mart",
+        type=Path,
+        help=(
+            "read an existing mart and rebuild only report/index unless an arrears workbook "
+            "is supplied"
+        ),
+    )
+    parser.add_argument(
         "--legacy-budget-out",
         type=Path,
         help="also write the impozit-teren buget-uat compatibility export",
     )
     args = parser.parse_args()
+
+    arrears_resources = (
+        read_arrears_resource_index(args.data_gov_arrears_package, args.retrieved_date)
+        if args.data_gov_arrears_package
+        else None
+    )
+    if args.data_gov_arrears_index_out:
+        if not arrears_resources:
+            raise SystemExit("--data-gov-arrears-index-out requires --data-gov-arrears-package")
+        write_json(args.data_gov_arrears_index_out, arrears_resources)
+        print(f"Wrote {display_path(args.data_gov_arrears_index_out)}")
+
+    if args.existing_mart:
+        mart = json.loads(args.existing_mart.read_text(encoding="utf-8"))
+        if args.arrears_workbook:
+            registry_document = read_registry(args.registry)
+            arrears_snapshot = read_arrears_workbook(
+                args.arrears_workbook,
+                registry_document,
+                snapshot_date=args.arrears_snapshot_date,
+            )
+            changed = apply_arrears_snapshot(mart["records"], arrears_snapshot)
+            if not changed:
+                raise SystemExit(
+                    f"{mart['id']} has no records for arrears snapshot "
+                    f"{arrears_snapshot['snapshotDate'][:4]}"
+                )
+            mart["sourceHashes"]["dataGovArrearsWorkbookSha256"] = arrears_snapshot["source"][
+                "sha256"
+            ]
+            mart["limitations"] = finance_limitations(
+                mart["records"],
+                arrears_snapshot=arrears_snapshot,
+                arrears_resources=arrears_resources,
+            )
+            write_json(args.existing_mart, mart)
+        report = build_validation_report(mart, arrears_resources=arrears_resources)
+        report_path = args.out_dir / f"{report['id']}.json"
+        write_json(report_path, report)
+        print(f"Wrote {report_path.relative_to(REPO_ROOT)}")
+        return 0
 
     mart, report = build_finance_documents(
         args.scope,
@@ -1100,6 +1753,9 @@ def main() -> int:
         args.retrieved_date,
         args.registry,
         data_gov_2024_workbook=args.data_gov_2024_workbook,
+        arrears_workbook=args.arrears_workbook,
+        arrears_snapshot_date=args.arrears_snapshot_date,
+        arrears_resources=arrears_resources,
     )
 
     mart_path = args.out_dir / f"{mart['id']}.json"
