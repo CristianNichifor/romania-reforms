@@ -17,6 +17,7 @@ import pytest
 ROOT = Path(__file__).resolve().parent.parent
 SERVICII = ROOT / "simulators/justitie/data/acces-servicii.json"
 HEALTH_ACCESS = ROOT / "packages/health_access/data/health-service-access-uat-2024-2026.json"
+HEALTH_POINT_ACCESS = ROOT / "packages/health_access/data/health-point-access-2024-2026.json"
 
 
 @pytest.fixture(scope="module")
@@ -58,6 +59,46 @@ def test_the_summary_recomputes_from_its_own_rows(servicii):
     assert summary["medianMetresToCourt"] == int(
         statistics.median(sorted(u["courtMetres"] for u in comparable))
     )
+    point_distances = sorted(u["nearestHealthPointDistanceMetres"] for u in servicii["units"])
+    assert summary["healthPointAccessMedianNearestMetres"] == int(
+        statistics.median(point_distances)
+    )
+    weighted = sorted(
+        (u["nearestHealthPointDistanceMetres"], u["population"]) for u in servicii["units"]
+    )
+    total_population = sum(population for _, population in weighted)
+    running_population = 0
+    weighted_median = 0
+    for metres, population in weighted:
+        running_population += population
+        if running_population >= total_population / 2:
+            weighted_median = metres
+            break
+    assert summary["healthPointAccessPopulationWeightedMedianNearestMetres"] == weighted_median
+
+
+def test_the_point_health_access_view_is_reported_separately(servicii):
+    """Provider coordinates are a separate access view, not a replacement for UAT road routing."""
+    point_access = json.loads(HEALTH_POINT_ACCESS.read_text(encoding="utf-8"))
+    point_ids = {point["providerId"] for point in point_access["points"]}
+    summary = servicii["summary"]
+
+    assert summary["healthPointAccessView"] == point_access["id"]
+    assert summary["healthPointAccessProviders"] == point_access["summary"]["pointAccessProviders"]
+    assert (
+        summary["healthPointAccessBlockedProviders"]
+        == point_access["summary"]["pointAccessBlockedProviders"]
+    )
+    assert summary["healthPointAccessNamedExclusions"] == point_access["summary"]["namedExclusions"]
+    assert summary["healthPointAccessDistanceMethod"] == "straight-line"
+    assert summary["healthPointAccessRowsWithDistance"] == len(servicii["units"])
+    assert "sanatatea-punctuala-in-linie-dreapta" in {
+        item["id"] for item in servicii["limitations"]
+    }
+
+    for unit in servicii["units"]:
+        assert unit["nearestHealthPointProviderId"] in point_ids, unit["siruta"]
+        assert unit["nearestHealthPointDistanceMetres"] >= 0, unit["siruta"]
 
 
 def test_the_seat_coincidence_is_measured_on_one_set_of_seats(servicii):
@@ -184,6 +225,7 @@ def test_distances_are_plausible(servicii):
     for unit in servicii["units"]:
         assert 0 <= unit["courtMetres"] < 200_000, unit["siruta"]
         assert 0 <= unit["hospitalMetresAtMost"] < 200_000, unit["siruta"]
+        assert 0 <= unit["nearestHealthPointDistanceMetres"] < 200_000, unit["siruta"]
 
 
 def test_units_further_from_court_are_counted_from_the_rows(servicii):

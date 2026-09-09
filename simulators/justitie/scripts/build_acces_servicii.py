@@ -2,7 +2,7 @@
 
 Chapter 7 argues consolidation on logistics — put the county's services in one town. The
 simulator can now put a number on what that means for a citizen, because the arondare and the
-shared health service-access view sit on the same road graph and the same corrected court seats.
+shared health service-access views sit beside the same corrected court seats.
 
 The comparison is deliberately asymmetric, and the asymmetry is the point. A consolidated UAT
 gets one court, chosen by distance from among 42. It does not get "one health provider" — it
@@ -10,10 +10,10 @@ uses whichever eligible provider UAT is nearest. So the question is not whether 
 moves courts closer than health care; it is whether a country that already accepts driving
 *this far* for a county-scale service would find the court's distance unusual.
 
-**Every health distance here is an upper bound, and that is not a hedge.** The shared health
-view excludes county-only providers rather than pretending they have a UAT. A provider nobody
-can place can only make the true distance shorter, never longer, so wherever this file says a
-court is nearer than health care, the real gap is at most that and possibly smaller.
+The UAT-routed health distance is still an upper bound. The shared UAT view excludes county-only
+providers rather than pretending they have a UAT; a provider nobody can place can only make the
+true UAT-level distance shorter, never longer. The point-level health distance is different:
+it uses only providers with accepted coordinates and is explicitly straight-line, not road time.
 
 Usage:
     uv run python scripts/build_acces_servicii.py
@@ -22,6 +22,7 @@ Usage:
 from __future__ import annotations
 
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -34,6 +35,189 @@ sys.path.insert(0, str(ADMINISTRATIV))
 
 BUCHAREST = "B"
 BUCHAREST_MUNICIPALITY_SIRUTA = "179132"
+HEALTH_POINT_ACCESS_VIEW_ID = "health-point-access-2024-2026"
+HEALTH_POINT_ACCESS_DISTANCE_METHOD = "straight-line"
+EARTH_RADIUS_METRES = 6_371_008.8
+WEB_MERCATOR_RADIUS_METRES = 6_378_137.0
+WEB_MERCATOR_MAX_LATITUDE = 85.05112878
+
+
+def finite_float(value, field: str) -> float:
+    number = float(value)
+    if not math.isfinite(number):
+        raise SystemExit(f"{field} must be finite")
+    return number
+
+
+def project_wgs84(lon: float, lat: float) -> tuple[float, float]:
+    clipped_lat = max(min(lat, WEB_MERCATOR_MAX_LATITUDE), -WEB_MERCATOR_MAX_LATITUDE)
+    return (
+        WEB_MERCATOR_RADIUS_METRES * math.radians(lon),
+        WEB_MERCATOR_RADIUS_METRES
+        * math.log(math.tan(math.pi / 4 + math.radians(clipped_lat) / 2)),
+    )
+
+
+def unproject_wgs84(x: float, y: float) -> tuple[float, float]:
+    return (
+        math.degrees(x / WEB_MERCATOR_RADIUS_METRES),
+        math.degrees(2 * math.atan(math.exp(y / WEB_MERCATOR_RADIUS_METRES)) - math.pi / 2),
+    )
+
+
+def ring_centroid(ring: list[list[float]]) -> tuple[float, float, float]:
+    points = [
+        project_wgs84(
+            finite_float(point[0], "geometry.longitude"),
+            finite_float(point[1], "geometry.latitude"),
+        )
+        for point in ring
+    ]
+    if len(points) < 3:
+        raise SystemExit("UAT geometry ring has fewer than three points")
+    if points[0] != points[-1]:
+        points.append(points[0])
+
+    double_area = 0.0
+    cx_acc = 0.0
+    cy_acc = 0.0
+    for (x0, y0), (x1, y1) in zip(points, points[1:], strict=False):
+        cross = x0 * y1 - x1 * y0
+        double_area += cross
+        cx_acc += (x0 + x1) * cross
+        cy_acc += (y0 + y1) * cross
+
+    if abs(double_area) < 1e-6:
+        xs = [point[0] for point in points[:-1]]
+        ys = [point[1] for point in points[:-1]]
+        return 0.0, sum(xs) / len(xs), sum(ys) / len(ys)
+    return abs(double_area / 2), cx_acc / (3 * double_area), cy_acc / (3 * double_area)
+
+
+def polygon_centroid(polygon: list[list[list[float]]]) -> tuple[float, float, float]:
+    if not polygon:
+        raise SystemExit("UAT polygon has no rings")
+    outer_area, outer_x, outer_y = ring_centroid(polygon[0])
+    total_area = outer_area
+    x_acc = outer_x * outer_area
+    y_acc = outer_y * outer_area
+    for hole in polygon[1:]:
+        hole_area, hole_x, hole_y = ring_centroid(hole)
+        total_area -= hole_area
+        x_acc -= hole_x * hole_area
+        y_acc -= hole_y * hole_area
+    if total_area <= 0:
+        return outer_area, outer_x, outer_y
+    return total_area, x_acc / total_area, y_acc / total_area
+
+
+def geometry_centroid(geometry: dict) -> dict[str, float]:
+    kind = geometry["type"]
+    polygons = (
+        geometry["coordinates"]
+        if kind == "MultiPolygon"
+        else [geometry["coordinates"]]
+        if kind == "Polygon"
+        else None
+    )
+    if polygons is None:
+        raise SystemExit(f"unsupported UAT geometry type {kind}")
+
+    total_area = 0.0
+    x_acc = 0.0
+    y_acc = 0.0
+    for polygon in polygons:
+        area, x, y = polygon_centroid(polygon)
+        total_area += area
+        x_acc += x * area
+        y_acc += y * area
+    if total_area <= 0:
+        raise SystemExit("UAT geometry has zero area")
+    lon, lat = unproject_wgs84(x_acc / total_area, y_acc / total_area)
+    return {"latitude": lat, "longitude": lon}
+
+
+def read_uat_locations() -> dict[str, dict[str, float]]:
+    geometry_file = ADMINISTRATIV / "web" / "public" / "data" / "uats.geojson"
+    attributes_file = ADMINISTRATIV / "web" / "public" / "data" / "attributes.json"
+    for path in (geometry_file, attributes_file):
+        if not path.exists():
+            raise SystemExit(f"Missing {path}")
+
+    geometry = json.loads(geometry_file.read_text(encoding="utf-8"))
+    attributes = json.loads(attributes_file.read_text(encoding="utf-8"))
+    sirutas = [str(siruta) for siruta in attributes["siruta"]]
+    features = geometry["features"]
+    if len(features) != len(sirutas):
+        raise SystemExit("administrativ geometry and attributes have different row counts")
+
+    locations: dict[str, dict[str, float]] = {}
+    duplicates: list[str] = []
+    for siruta, feature in zip(sirutas, features, strict=True):
+        if siruta in locations:
+            duplicates.append(siruta)
+        locations[siruta] = geometry_centroid(feature["geometry"])
+    if duplicates:
+        listed = ", ".join(sorted(set(duplicates))[:10])
+        raise SystemExit(f"administrativ geometry has duplicate SIRUTA rows: {listed}")
+    return locations
+
+
+def read_health_points(point_access: dict) -> list[dict]:
+    if point_access["id"] != HEALTH_POINT_ACCESS_VIEW_ID:
+        raise SystemExit(f"expected {HEALTH_POINT_ACCESS_VIEW_ID}, got {point_access['id']}")
+    points: list[dict] = []
+    duplicate_ids: list[str] = []
+    seen: set[str] = set()
+    for point in point_access["points"]:
+        provider_id = str(point["providerId"])
+        if provider_id in seen:
+            duplicate_ids.append(provider_id)
+        seen.add(provider_id)
+        lat = finite_float(point["latitude"], f"{provider_id}.latitude")
+        lon = finite_float(point["longitude"], f"{provider_id}.longitude")
+        if not (-90 <= lat <= 90 and -180 <= lon <= 180):
+            raise SystemExit(f"health point {provider_id} has coordinates outside WGS84 bounds")
+        out = dict(point)
+        out["latitude"] = lat
+        out["longitude"] = lon
+        points.append(out)
+    if duplicate_ids:
+        listed = ", ".join(sorted(set(duplicate_ids))[:10])
+        raise SystemExit(f"point health-access view has duplicate provider rows: {listed}")
+    if len(points) != int(point_access["summary"]["pointAccessProviders"]):
+        raise SystemExit("point health-access provider count does not match its summary")
+    if not points:
+        raise SystemExit("point health-access view has no provider points")
+    return points
+
+
+def straight_line_metres(lat_a: float, lon_a: float, lat_b: float, lon_b: float) -> float:
+    phi_a = math.radians(lat_a)
+    phi_b = math.radians(lat_b)
+    delta_phi = math.radians(lat_b - lat_a)
+    delta_lambda = math.radians(lon_b - lon_a)
+    hav = (
+        math.sin(delta_phi / 2) ** 2
+        + math.cos(phi_a) * math.cos(phi_b) * math.sin(delta_lambda / 2) ** 2
+    )
+    return EARTH_RADIUS_METRES * 2 * math.atan2(math.sqrt(hav), math.sqrt(1 - hav))
+
+
+def nearest_health_point(location: dict[str, float], points: list[dict]) -> tuple[dict, int]:
+    best = points[0]
+    best_metres = math.inf
+    for point in points:
+        metres = straight_line_metres(
+            location["latitude"],
+            location["longitude"],
+            point["latitude"],
+            point["longitude"],
+        )
+        if metres < best_metres:
+            best = point
+            best_metres = metres
+    return best, int(round(best_metres))
 
 
 def graph_from_web_payload(np, coo_matrix, expected_order=None):
@@ -95,15 +279,27 @@ def main() -> int:
         / "data"
         / "health-service-access-uat-2024-2026.json"
     )
+    health_point_access_file = (
+        REPO_ROOT / "packages" / "health_access" / "data" / "health-point-access-2024-2026.json"
+    )
     politie_file = ROOT / "data" / "politie-osm.json"
     located_file = ROOT / "data" / "instante-localizate-2025.json"
     courts_file = ROOT / "data" / "court-distance.json"
     edges_file = ADMINISTRATIV / "data" / "processed" / "road_distance.parquet"
-    for path in (health_access_file, politie_file, located_file, courts_file):
+    for path in (
+        health_access_file,
+        health_point_access_file,
+        politie_file,
+        located_file,
+        courts_file,
+    ):
         if not path.exists():
             raise SystemExit(f"Missing {path}")
 
     health_access = json.loads(health_access_file.read_text(encoding="utf-8"))
+    health_point_access = json.loads(health_point_access_file.read_text(encoding="utf-8"))
+    health_points = read_health_points(health_point_access)
+    uat_locations = read_uat_locations()
     politie = json.loads(politie_file.read_text(encoding="utf-8"))
     located = json.loads(located_file.read_text(encoding="utf-8"))["courts"]
     courts = json.loads(courts_file.read_text(encoding="utf-8"))
@@ -122,7 +318,7 @@ def main() -> int:
             else graph_from_web_payload(np, coo_matrix, order)[0]
         )
         base_units = None
-    except SystemExit as error:
+    except (ModuleNotFoundError, SystemExit) as error:
         if not OUT.exists():
             raise
         print(f"{error}. Reusing committed consolidated service rows.", file=sys.stderr)
@@ -222,6 +418,11 @@ def main() -> int:
                 local_health = health_by_siruta.get(BUCHAREST_MUNICIPALITY_SIRUTA, {})
             if local_health is None:
                 local_health = {}
+            location = uat_locations.get(seat)
+            if location is None:
+                print(f"missing UAT centroid for consolidated seat {seat}", file=sys.stderr)
+                return 1
+            point, point_m = nearest_health_point(location, health_points)
             units.append(
                 {
                     "siruta": seat,
@@ -231,6 +432,8 @@ def main() -> int:
                     "courtMetres": round(court_m),
                     "hospitalMetresAtMost": round(health_m),
                     "localHealthProviderCount": local_health.get("localProviderCount", 0),
+                    "nearestHealthPointProviderId": point["providerId"],
+                    "nearestHealthPointDistanceMetres": point_m,
                     "policeMetresAtMost": round(police_m),
                     "todayCourtMetres": round(today_m),
                     "comparable": True,
@@ -249,6 +452,11 @@ def main() -> int:
                 local_health = health_by_siruta.get(BUCHAREST_MUNICIPALITY_SIRUTA, {})
             if local_health is None:
                 local_health = {}
+            location = uat_locations.get(seat)
+            if location is None:
+                print(f"missing UAT centroid for consolidated seat {seat}", file=sys.stderr)
+                return 1
+            point, point_m = nearest_health_point(location, health_points)
             units.append(
                 {
                     "siruta": seat,
@@ -258,6 +466,8 @@ def main() -> int:
                     "courtMetres": unit["courtMetres"],
                     "hospitalMetresAtMost": round(health_m),
                     "localHealthProviderCount": local_health.get("localProviderCount", 0),
+                    "nearestHealthPointProviderId": point["providerId"],
+                    "nearestHealthPointDistanceMetres": point_m,
                     "policeMetresAtMost": unit["policeMetresAtMost"],
                     "todayCourtMetres": unit["todayCourtMetres"],
                     "comparable": True,
@@ -309,6 +519,25 @@ def main() -> int:
     seat_has_police = sum(1 for u in units if u["policeMetresAtMost"] == 0)
     median_court = median([u["courtMetres"] for u in comparable])
     median_hospital = median([u["hospitalMetresAtMost"] for u in comparable])
+    rows_with_point_distance = [
+        u for u in units if u.get("nearestHealthPointDistanceMetres") is not None
+    ]
+    point_distances = [u["nearestHealthPointDistanceMetres"] for u in rows_with_point_distance]
+    median_health_point = median(point_distances)
+    weighted_median_health_point = 0
+    if rows_with_point_distance:
+        weighted = sorted(
+            (u["nearestHealthPointDistanceMetres"], u["population"])
+            for u in rows_with_point_distance
+            if u["population"] > 0
+        )
+        total_weight = sum(weight for _, weight in weighted)
+        running = 0
+        for metres, weight in weighted:
+            running += weight
+            if running >= total_weight / 2:
+                weighted_median_health_point = metres
+                break
     # The same seats measured against both networks: this is the comparison that cannot be an
     # artefact of where consolidated seats are chosen, because it is one set of seats.
     seat_has_hospital = sum(1 for u in comparable if u["localHealthProviderCount"] > 0)
@@ -357,6 +586,10 @@ def main() -> int:
         f"unități mai departe de instanță decât de sănătate: {len(further_to_court)} "
         f"({100 * people_further / people:.0f}% din locuitori)"
     )
+    print(
+        f"punct sănătate cel mai apropiat: mediana {median_health_point / 1000:.1f} km "
+        f"({HEALTH_POINT_ACCESS_DISTANCE_METHOD})"
+    )
 
     document = {
         "$schema": "../schema/acces-servicii.schema.json",
@@ -369,7 +602,9 @@ def main() -> int:
             "locator": (
                 "Unitățile consolidate rutate pe graful național către cele 42 de sedii de "
                 "instanță și către cele mai apropiate UAT-uri cu furnizori de sănătate "
-                "serviceAccessEligible din pachetul health_access"
+                "serviceAccessEligible din pachetul health_access; cel mai apropiat punct de "
+                "sănătate este calculat separat din health-point-access-2024-2026, în linie "
+                "dreaptă de la centroidul UAT la coordonata furnizorului acceptat"
             ),
             "confidence": "derived",
         },
@@ -406,6 +641,16 @@ def main() -> int:
             "healthAccessEligibleProviders": health_access["summary"]["eligibleProviders"],
             "healthAccessBlockedProviders": health_access["summary"]["blockedProviders"],
             "healthAccessNamedExclusions": health_access["summary"]["namedExclusions"],
+            "healthPointAccessView": health_point_access["id"],
+            "healthPointAccessProviders": health_point_access["summary"]["pointAccessProviders"],
+            "healthPointAccessBlockedProviders": health_point_access["summary"][
+                "pointAccessBlockedProviders"
+            ],
+            "healthPointAccessNamedExclusions": health_point_access["summary"]["namedExclusions"],
+            "healthPointAccessRowsWithDistance": len(rows_with_point_distance),
+            "healthPointAccessDistanceMethod": HEALTH_POINT_ACCESS_DISTANCE_METHOD,
+            "healthPointAccessMedianNearestMetres": median_health_point,
+            "healthPointAccessPopulationWeightedMedianNearestMetres": weighted_median_health_point,
         },
         "units": units,
         "limitations": [
@@ -452,6 +697,20 @@ def main() -> int:
                     "pachetul shared."
                 ),
                 "severity": "note",
+                "affects": ["acces", "colocare"],
+            },
+            {
+                "id": "sanatatea-punctuala-in-linie-dreapta",
+                "text": (
+                    "Distanța la cel mai apropiat furnizor punctual citește "
+                    "health-point-access-2024-2026 și folosește doar furnizorii cu coordonate "
+                    f"acceptate: {health_point_access['summary']['pointAccessProviders']} rânduri. "
+                    "Metoda este în linie dreaptă de la centroidul UAT-ului consolidat la "
+                    "coordonata furnizorului, deci nu este distanță rutieră sau timp de acces. "
+                    f"{health_point_access['summary']['pointAccessBlockedProviders']} furnizori "
+                    "fără punct acceptat rămân excluși nominal din calcul."
+                ),
+                "severity": "material",
                 "affects": ["acces", "colocare"],
             },
             {

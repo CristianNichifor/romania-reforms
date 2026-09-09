@@ -206,9 +206,9 @@
       ],
       "storagePolicy": "Provider summary JSON can be committed if small; geocoded/routing outputs should become release assets.",
       "nextSlice": {
-        "scope": "Justice point-level health access adoption.",
-        "deliverable": "Wire health-point-access-2024-2026 into justitie's court/police/health comparison while keeping UAT-level local-provider counts separate.",
-        "doneWhen": "justitie reports nearest-provider distance from accepted provider points, names the straight-line or routed method in provenance and limitations, and still excludes county-only provider rows from point distance."
+        "scope": "Shared point-to-road health access routing contract.",
+        "deliverable": "Define and implement the first reusable provider-point snapping/routing contract so consumers can move from straight-line nearest-provider distances to road-network distances.",
+        "doneWhen": "A shared health-access output snaps accepted provider coordinates to the road graph, names the snap/routing method and exclusions, and at least one consumer can report routed provider-point distances without treating provider coordinates as UAT graph nodes."
       },
       "notes": [
         "The committed national mart covers 592 ANMCS providers and all 42 Ministry county bed totals. Clinical bed counts are attached only on confident ANMCS matches; county bed totals are kept separately.",
@@ -219,7 +219,8 @@
         "The current ANMCS accreditation workbook, CNAS 31.03.2025 hospital contracts package and INSP UNITATI CU PATURI package do not expose national provider street-address or coordinate fields through data.gov.ro; point-level geocoding needs another source.",
         "The health-provider-points-2024-2026 contract covers all 592 mart providers. The Ministry of Health unitati sanitare map extract contributes 174 exact name/county street-address and marker-coordinate matches. 162 serviceAccessEligible, non-county-only providers now have accepted official-coordinate point evidence; the other 430 provider rows remain blocked from point routing, including all 268 county-only rows. UAT polygon containment is not applied yet because the available committed UAT geometry is not SIRUTA-keyed for this package.",
         "The health-point-access-2024-2026 view publishes only the 162 accepted provider coordinates and names all 430 blocked providers as exclusions. It is a point layer, not a distance model; consumers must explicitly declare straight-line or routed distance before deriving access metrics.",
-        "transport now consumes health-point-access-2024-2026 directly. It reports nearest accepted provider distance in straight-line metres from each routed UAT centroid, names the method in provenance and limitations, and publishes 3,136 distances with 18.7 km unweighted median and 13.5 km population-weighted median."
+        "transport now consumes health-point-access-2024-2026 directly. It reports nearest accepted provider distance in straight-line metres from each routed UAT centroid, names the method in provenance and limitations, and publishes 3,136 distances with 18.7 km unweighted median and 13.5 km population-weighted median.",
+        "justitie now consumes health-point-access-2024-2026 directly. It keeps the UAT-level local-provider and routed upper-bound hospital metrics separate, and adds nearest accepted provider point distances from consolidated UAT centroids with an explicit straight-line method."
       ]
     }
   ]

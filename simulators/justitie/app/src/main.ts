@@ -77,6 +77,12 @@ interface Servicii {
     healthAccessEligibleProviders: number;
     healthAccessBlockedProviders: number;
     healthProviderTowns: number;
+    healthPointAccessProviders: number;
+    healthPointAccessBlockedProviders: number;
+    healthPointAccessRowsWithDistance: number;
+    healthPointAccessDistanceMethod: 'straight-line';
+    healthPointAccessMedianNearestMetres: number;
+    healthPointAccessPopulationWeightedMedianNearestMetres: number;
     seatsThatArePoliceTowns: number;
     medianMetresToPoliceAtMost: number;
     units: number;
@@ -2231,6 +2237,12 @@ async function main(): Promise<void> {
        în ${servicii.summary.healthProviderTowns} UAT-uri. Alți
        ${servicii.summary.healthAccessBlockedProviders} furnizori rămân excluși fiindcă au doar
        localizare la nivel de județ.</p>
+     <p class="disagree">Punctual, aceeași comparație citește
+       ${servicii.summary.healthPointAccessProviders} furnizori cu coordonate acceptate din
+       health-point-access-2024-2026. Alți
+       ${servicii.summary.healthPointAccessBlockedProviders} furnizori rămân excluși din
+       distanța punctuală; metoda publicată aici este
+       ${servicii.summary.healthPointAccessDistanceMethod}, nu rutare pe drum.</p>
      <p class="disagree">Aceleași sedii, față de toate trei rețelele:
        ${servicii.summary.seatsThatArePoliceTowns} din ${ro.format(servicii.summary.units)} au
        poliție, ${servicii.summary.seatsThatAreHospitalTowns} au furnizor de sănătate localizat,
@@ -2242,8 +2254,12 @@ async function main(): Promise<void> {
        ${Math.round(servicii.summary.medianMetresToCourt / 1000)} km până la instanță, față de
        ${Math.round(servicii.summary.medianMetresToPoliceAtMost / 1000)} km până la poliție și
        ${Math.round(servicii.summary.medianMetresToHospitalAtMost / 1000)} km până la sănătate.
+       Din punctele acceptate, cel mai apropiat furnizor de sănătate este la mediana
+       ${Math.round(servicii.summary.healthPointAccessMedianNearestMetres / 1000)} km în linie
+       dreaptă.
        Rețeaua de justiție ar fi mult mai rară decât celelalte două. Ambele distanțe din urmă
-       sunt limite de sus: un punct nemarcat scurtează drumul, nu îl lungește.</p>
+       sunt limite de sus; distanța punctuală în linie dreaptă este doar un reper geografic,
+       nu timp de acces.</p>
      <p class="disagree">Invers, ${Math.round(
        100 - (100 * sp.hospitalsInCourtSeatTowns) / sp.located,
      )}% dintre spitale nu sunt în orașul unui sediu. Concentrarea serviciilor în 42 de orașe

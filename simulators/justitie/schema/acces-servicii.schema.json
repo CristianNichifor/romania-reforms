@@ -55,6 +55,14 @@
         "healthAccessEligibleProviders",
         "healthAccessBlockedProviders",
         "healthAccessNamedExclusions",
+        "healthPointAccessView",
+        "healthPointAccessProviders",
+        "healthPointAccessBlockedProviders",
+        "healthPointAccessNamedExclusions",
+        "healthPointAccessRowsWithDistance",
+        "healthPointAccessDistanceMethod",
+        "healthPointAccessMedianNearestMetres",
+        "healthPointAccessPopulationWeightedMedianNearestMetres",
         "medianMetresToPoliceAtMost",
         "seatsThatArePoliceTowns",
         "policeTowns",
@@ -138,6 +146,39 @@
           "minimum": 0
         },
         "healthAccessNamedExclusions": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "healthPointAccessView": {
+          "const": "health-point-access-2024-2026"
+        },
+        "healthPointAccessProviders": {
+          "description": "Accepted provider points from the shared point-level health access view.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "healthPointAccessBlockedProviders": {
+          "description": "Providers excluded from point-distance calculations because they lack accepted point evidence.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "healthPointAccessNamedExclusions": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "healthPointAccessRowsWithDistance": {
+          "description": "Consolidated service rows for which a nearest accepted provider point distance was computed.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "healthPointAccessDistanceMethod": {
+          "const": "straight-line"
+        },
+        "healthPointAccessMedianNearestMetres": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "healthPointAccessPopulationWeightedMedianNearestMetres": {
           "type": "integer",
           "minimum": 0
         },
@@ -249,6 +290,8 @@
           "courtMetres",
           "hospitalMetresAtMost",
           "localHealthProviderCount",
+          "nearestHealthPointProviderId",
+          "nearestHealthPointDistanceMetres",
           "comparable",
           "policeMetresAtMost",
           "todayCourtMetres"
@@ -276,6 +319,15 @@
             "minimum": 0
           },
           "localHealthProviderCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "nearestHealthPointProviderId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "nearestHealthPointDistanceMetres": {
+            "description": "Straight-line distance from the consolidated UAT centroid to the nearest accepted provider point.",
             "type": "integer",
             "minimum": 0
           },
