@@ -90,8 +90,9 @@ First slice:
   comparison
 - done: wire the shared UAT service-access view into `administrativ`'s merged-unit detail
   panel as aligned local-provider counts
-- next: wire the shared UAT service-access view into `transport`; then add street-address
-  or coordinate evidence for point-level provider locations
+- done: wire the shared UAT service-access view into `transport` as local-provider counts on
+  routed UAT rows
+- next: add street-address or coordinate evidence for point-level provider locations
 
 This should support service-access views in `administrativ`, `justitie` and `transport`
 without each simulator building its own hospital roster.

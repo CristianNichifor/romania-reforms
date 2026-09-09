@@ -61,6 +61,7 @@ import {
  */
 
 type Timetable = 'uncoordinated' | 'pulsed';
+type HealthRow = [number | null, number | null, number | null, 0 | 1] | null;
 
 const base = import.meta.env.BASE_URL;
 const asset = (name: string) => `${base}data/${name}`;
@@ -86,11 +87,12 @@ async function main() {
   // The consolidation is no longer chosen here. It is read from the URL — the same hash the
   // administrative simulator writes — and the whole network is recomputed from it. A reader
   // who moves those sliders is looking at a different country, and this map now follows.
-  const [summary, coupled, costInputs, railBin] = await Promise.all([
+  const [summary, coupled, costInputs, railBin, healthRows] = await Promise.all([
     fetch(asset('summary.json')).then((r) => r.json()),
     loadCoupling(base),
     fetch(asset('cost-inputs.json')).then((r) => r.json()),
     fetch(asset('rail-access.bin')).then((r) => r.arrayBuffer()),
+    fetch(asset('health.json')).then((r) => r.json() as Promise<HealthRow[]>),
   ]);
 
   const { params, pins } = readScenario(location.hash);
@@ -280,8 +282,27 @@ async function main() {
       (row
         ? `<br><strong>${min(row[scenario === 'pulsed' ? 1 : 0])}</strong> până la reședință` +
           `<br><span style="opacity:.7">fără corespondență ${min(row[0])} · cu ${min(row[1])}</span>`
-        : '<br>Fără traseu rutier până la centru')
+        : '<br>Fără traseu rutier până la centru') +
+      healthHtml(i)
     );
+  }
+
+  function healthHtml(i: number): string {
+    const row = healthRows[i];
+    if (!row) return '';
+    const [providers, bedProviders, beds, sectorExcluded] = row;
+    if (sectorExcluded === 1 || providers === null) {
+      return '<br><span style="opacity:.7">sănătate: București doar la nivel de municipiu</span>';
+    }
+    if (providers === 0) {
+      return '<br><span style="opacity:.7">sănătate: fără furnizor local eligibil</span>';
+    }
+    const label = providers === 1 ? 'furnizor local eligibil' : 'furnizori locali eligibili';
+    const bedText =
+      bedProviders && beds
+        ? ` · ${fmt.format(bedProviders)} cu paturi (${fmt.format(Math.round(beds))} paturi)`
+        : '';
+    return `<br><span style="opacity:.7">sănătate: ${fmt.format(providers)} ${label}${bedText}</span>`;
   }
 
   // The legend gives five bands; the road itself knows its exact signed value, and that is the
@@ -391,6 +412,22 @@ async function main() {
     return 0;
   }
 
+  function healthTotals() {
+    let rowsWithData = 0;
+    let uatsWithLocalProvider = 0;
+    let localProviders = 0;
+    journeyOf().forEach((journey, index) => {
+      if (!journey) return;
+      const health = healthRows[index];
+      if (!health || health[0] === null) return;
+      const providers = health[0];
+      rowsWithData += 1;
+      localProviders += providers;
+      if (providers > 0) uatsWithLocalProvider += 1;
+    });
+    return { rowsWithData, uatsWithLocalProvider, localProviders };
+  }
+
   el('legend').innerHTML = [
     ...BANDS.map((b) => `<li><i style="background:${b.colour}"></i>${b.label}</li>`),
     `<li><i style="background:${NO_DATA}"></i>fără traseu rutier</li>`,
@@ -400,12 +437,17 @@ async function main() {
 
   function renderStats() {
     const median = weightedMedian(scenario === 'pulsed' ? 1 : 0);
+    const health = healthTotals();
     el('stats').innerHTML = `
       <dt>Mediană, ponderată cu populația</dt><dd class="big">${min(median)}</dd>
       <dt>Așteptare la schimb</dt><dd>${min(
         scenario === 'pulsed' ? a.waitPulsedMin : a.waitUncoordinatedMin,
       )}</dd>
       <dt>Centre</dt><dd>${fmt.format(net.centres.length)}</dd>
+      <dt>UAT-uri rutate cu furnizor de sănătate</dt><dd>${fmt.format(
+        health.uatsWithLocalProvider,
+      )} / ${fmt.format(health.rowsWithData)}</dd>
+      <dt>Furnizori locali eligibili</dt><dd>${fmt.format(health.localProviders)}</dd>
       <dt>Autobuze</dt><dd>${fmt.format(resourcesFor().fleetTotal)}</dd>`;
     // The map is per commune and the median is per person. Most communes are small and far,
     // so the typical polygon is redder than the median — saying so stops the map and the

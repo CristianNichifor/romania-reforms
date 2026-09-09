@@ -197,15 +197,16 @@
       ],
       "storagePolicy": "Provider summary JSON can be committed if small; geocoded/routing outputs should become release assets.",
       "nextSlice": {
-        "scope": "Consumer adoption of shared health service-access views.",
-        "deliverable": "Wire packages/health_access/data/health-service-access-uat-2024-2026.json into transport service-access surfaces.",
-        "doneWhen": "The transport consumer reports local health-provider counts from the shared view without treating county-only providers as located."
+        "scope": "Point-level health provider location evidence.",
+        "deliverable": "Find or derive street-address or coordinate evidence for health providers without treating county-only rows as local facilities.",
+        "doneWhen": "A provider-level point view can route to facilities while preserving named exclusions for providers that still lack point evidence."
       },
       "notes": [
         "The committed national mart covers 592 ANMCS providers and all 42 Ministry county bed totals. Clinical bed counts are attached only on confident ANMCS matches; county bed totals are kept separately.",
         "The UAT-level service-access view covers 3,181 municipality/town/commune rows, counts only the 324 serviceAccessEligible providers, and keeps the 268 county-only providers as named exclusions.",
         "justitie consumes the shared UAT-level service-access view for its court/police/health comparison and no longer bases that comparison on the simulator-local plotted hospital map.",
         "administrativ consumes the shared UAT-level service-access view as an aligned web payload for merged-unit local health-provider counts; Bucharest sectors stay unassigned because the shared source only places Bucharest providers at municipality level.",
+        "transport consumes the shared UAT-level service-access view in data/access.json and the map hover payload. The committed access run has 3,136 routed UAT rows with health data, 178 have at least one local eligible provider, and 235 eligible local providers are counted on those routed rows; the browser payload aligns the same shared view to all polygons and leaves Bucharest sectors unassigned.",
         "The current ANMCS accreditation workbook, CNAS 31.03.2025 hospital contracts package and INSP UNITATI CU PATURI package do not expose national provider street-address or coordinate fields through data.gov.ro; point-level geocoding needs another source."
       ]
     }

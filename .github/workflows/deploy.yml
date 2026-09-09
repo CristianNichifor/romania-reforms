@@ -145,9 +145,11 @@ jobs:
           # And transport: its map is polygons coloured by a journey time joined at build
           # time by polygon position. A failed copy leaves a map of uniform grey that still
           # renders, which is worse than one that does not.
-          if [ ! -s dist/transport/data/journey.json ]; then
-            echo "MISSING dist/transport/data/journey.json"; fail=1
-          fi
+          for name in journey.json health.json; do
+            if [ ! -s "dist/transport/data/$name" ]; then
+              echo "MISSING dist/transport/data/$name"; fail=1
+            fi
+          done
           # The consolidation now arrives from the administrative simulator's own URL, so the
           # payload that model needs must be present or the map has no country to draw.
           for name in admin-manifest.json admin-attributes.bin admin-adjacency.bin \

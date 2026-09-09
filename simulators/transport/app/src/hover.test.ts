@@ -45,4 +45,10 @@ describe('map hover', () => {
     expect(main).toContain('pop-sep');
     expect(css).toContain('hr.pop-sep');
   });
+
+  it('adds health access to the same commune popup', () => {
+    expect(main).toContain("fetch(asset('health.json'))");
+    expect(main).toContain('function healthHtml');
+    expect(main).toContain('sănătate:');
+  });
 });

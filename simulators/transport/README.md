@@ -12,7 +12,9 @@ Design: [`docs/superpowers/specs/2026-08-29-transport-design.md`](../../docs/sup
 whichever consolidation scenario the reader built next door — from the same URL `justitie` reads —
 and recomputes centres, routes, journeys, fleet, drivers, capacity and cost for it in the browser.
 Measured road limits → derived speeds → hubs → routes → fleet → cost in lei → journey times →
-rail track and rail cost, all following the reader's own map.
+rail track and rail cost, all following the reader's own map. The access payload also consumes
+the shared health-access UAT view, so the map can say whether a routed locality has an eligible
+local health provider without rebuilding a hospital roster here.
 
 **Checked at both ends, and the two checks disagree in opposite directions.** The composite
 commercial speed is 3,7% *slow* against 552 timetabled county bus runs read out of six county
@@ -41,6 +43,9 @@ ledger       transport 2,22 md against an administrative saving of 8,73 md
              buses only — rail is priced separately and NOT added
 rail         magistrale 9.839 km, secondary 2.677 km, 1.993 stations
              45,0 km/h as the track stands, 74,3 km/h rehabilitated
+health       3.136 routed UAT rows matched to the shared health view
+             178 UATs with a local eligible provider, 235 providers counted locally
+             268 county-only providers kept as named exclusions upstream
 ```
 
 ## What the model found
@@ -104,6 +109,7 @@ charges it for that.
 | `scripts/network.py` `tiers.py` | Routes from shortest-path trees; three fixed service classes. |
 | `scripts/fleet.py` `costs.py` | Peak vehicles vs bus-hours; unit prices into lei. |
 | `scripts/build_access.py` | Feeder + wait + trunk → `data/access.json`. |
+| `scripts/health_access.py` `build_health_access.py` | Shared health-access UAT view → local provider counts on routed rows. |
 | `scripts/rail_speeds.py` | Commercial speed by track condition class, calibrated at both ends. |
 | `scripts/build_railnet.py` | Rail graph, station↔UAT join, county-seat times, map geometry. |
 | `scripts/rail_costs.py` `build_rail_cost.py` | TUI, energy, crew, rolling stock, rehabilitation, extra track. |

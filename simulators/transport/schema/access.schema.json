@@ -16,7 +16,27 @@
     "summary": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["uats", "people", "trunkHeadwayMin", "waitUncoordinatedMin", "waitPulsedMin", "medianUncoordinatedMin", "medianPulsedMin", "within", "rail"],
+      "required": [
+        "uats",
+        "people",
+        "trunkHeadwayMin",
+        "waitUncoordinatedMin",
+        "waitPulsedMin",
+        "medianUncoordinatedMin",
+        "medianPulsedMin",
+        "within",
+        "rail",
+        "healthAccessView",
+        "healthAccessEligibleProviders",
+        "healthAccessBlockedProviders",
+        "healthAccessNamedExclusions",
+        "healthAccessRowsWithData",
+        "healthAccessUatsWithLocalProvider",
+        "healthAccessLocalProviders",
+        "healthAccessLocalClinicalBedProviders",
+        "healthAccessLocalClinicalBeds",
+        "healthAccessSectorRowsExcluded"
+      ],
       "properties": {
         "uats": { "type": "integer", "minimum": 1 },
         "people": { "type": "integer", "minimum": 1 },
@@ -77,7 +97,29 @@
               }
             }
           }
-        }
+        },
+        "healthAccessView": { "const": "health-service-access-uat-2024-2026" },
+        "healthAccessEligibleProviders": {
+          "description": "National source total from the shared health_access UAT view.",
+          "type": "integer", "minimum": 0
+        },
+        "healthAccessBlockedProviders": {
+          "description": "National source total of providers excluded because they lack UAT-level evidence.",
+          "type": "integer", "minimum": 0
+        },
+        "healthAccessNamedExclusions": { "type": "integer", "minimum": 0 },
+        "healthAccessRowsWithData": {
+          "description": "Transport access rows that could be matched to the shared health_access UAT view.",
+          "type": "integer", "minimum": 0
+        },
+        "healthAccessUatsWithLocalProvider": { "type": "integer", "minimum": 0 },
+        "healthAccessLocalProviders": {
+          "description": "Eligible providers located in transport's routed UAT rows, not the national source total.",
+          "type": "integer", "minimum": 0
+        },
+        "healthAccessLocalClinicalBedProviders": { "type": "integer", "minimum": 0 },
+        "healthAccessLocalClinicalBeds": { "type": "number", "minimum": 0 },
+        "healthAccessSectorRowsExcluded": { "type": "integer", "minimum": 0 }
       }
     },
     "uats": {
@@ -86,7 +128,26 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["siruta", "name", "county", "population", "feederMin", "trunkMin", "uncoordinatedMin", "pulsedMin", "railUncoordinatedMin", "railPulsedMin", "bestUncoordinatedMin", "bestPulsedMin", "mode"],
+        "required": [
+          "siruta",
+          "name",
+          "county",
+          "population",
+          "feederMin",
+          "trunkMin",
+          "uncoordinatedMin",
+          "pulsedMin",
+          "railUncoordinatedMin",
+          "railPulsedMin",
+          "bestUncoordinatedMin",
+          "bestPulsedMin",
+          "mode",
+          "hasLocalHealthProvider",
+          "localHealthProviderCount",
+          "localHealthClinicalBedProviders",
+          "localHealthClinicalBeds",
+          "healthAccessSectorRowExcluded"
+        ],
         "properties": {
           "siruta": { "type": "string", "minLength": 1 },
           "name": { "type": "string", "minLength": 1 },
@@ -106,7 +167,15 @@
           "mode": {
             "description": "Which mode actually wins for this UAT under a pulse. The mode choice is an output of comparing two journeys, never an assumption about who rides what.",
             "enum": ["bus", "rail"]
-          }
+          },
+          "hasLocalHealthProvider": {
+            "description": "null only for rows that cannot honestly receive citywide health counts, such as future Bucharest sector rows.",
+            "type": ["boolean", "null"]
+          },
+          "localHealthProviderCount": { "type": ["integer", "null"], "minimum": 0 },
+          "localHealthClinicalBedProviders": { "type": ["integer", "null"], "minimum": 0 },
+          "localHealthClinicalBeds": { "type": ["number", "null"], "minimum": 0 },
+          "healthAccessSectorRowExcluded": { "type": "boolean" }
         }
       }
     },
