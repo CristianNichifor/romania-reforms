@@ -171,29 +171,25 @@ def test_committed_source_acquisition_queue_covers_remaining_review_rows():
 
     assert acquisition_ids == review_ids == no_point_ids
     assert acquisition["summary"]["providerPoints"] == 592
-    assert acquisition["summary"]["pointAccessEligibleProviders"] == 206
-    assert acquisition["summary"]["pointAccessBlockedProviders"] == 386
-    assert acquisition["summary"]["reviewProviders"] == 118
-    assert acquisition["summary"]["acquisitionProviders"] == 118
-    assert acquisition["summary"]["localityOnlyCandidateProviders"] == 4
-    assert acquisition["summary"]["noMinistryCandidateProviders"] == 114
-    assert acquisition["summary"]["publicBedNoCandidateProviders"] == 13
+    assert acquisition["summary"]["pointAccessEligibleProviders"] == 223
+    assert acquisition["summary"]["pointAccessBlockedProviders"] == 369
+    assert acquisition["summary"]["reviewProviders"] == 101
+    assert acquisition["summary"]["acquisitionProviders"] == 101
+    assert acquisition["summary"]["localityOnlyCandidateProviders"] == 0
+    assert acquisition["summary"]["noMinistryCandidateProviders"] == 101
+    assert acquisition["summary"]["publicBedNoCandidateProviders"] == 0
     assert acquisition["summary"]["acquisitionStatus"] == {
-        "needs-new-source": 114,
-        "needs-provider-specific-evidence": 4,
+        "needs-new-source": 101,
     }
     assert acquisition["summary"]["acquisitionPriority"] == {
-        "p1-locality-candidate-needs-provider-evidence": 4,
-        "p2-public-bed-provider-no-ministry-candidate": 13,
         "p3-public-provider-no-ministry-candidate": 45,
         "p4-private-or-unknown-provider-no-ministry-candidate": 56,
     }
     assert acquisition["summary"]["sourceSearchTypes"] == {
-        "cnas-or-official-contracting-list": 118,
-        "dsp-or-local-authority-list": 118,
-        "ministry-locality-candidate-provider-verification": 4,
-        "osm-named-feature-manual-review": 118,
-        "provider-official-website": 118,
+        "cnas-or-official-contracting-list": 101,
+        "dsp-or-local-authority-list": 101,
+        "osm-named-feature-manual-review": 101,
+        "provider-official-website": 101,
     }
 
     locality_candidate_ids = {
@@ -201,12 +197,7 @@ def test_committed_source_acquisition_queue_covers_remaining_review_rows():
         for record in acquisition["records"]
         if record["acquisitionPriority"] == "p1-locality-candidate-needs-provider-evidence"
     }
-    assert locality_candidate_ids == {
-        "anmcs-2025-038",
-        "anmcs-2025-115",
-        "anmcs-2025-140",
-        "anmcs-2025-584",
-    }
+    assert locality_candidate_ids == set()
     assert all(
         record["candidateStatus"] != "has-unused-ministry-review-candidate"
         or record["reviewSignal"] == "low"

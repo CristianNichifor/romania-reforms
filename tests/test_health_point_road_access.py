@@ -186,9 +186,9 @@ def test_committed_road_access_view_routes_only_accepted_provider_points():
     assert document["id"] == "health-point-road-access-uat-2024-2026"
     assert document["summary"]["uats"] == manifest["uatCount"] == len(document["uats"])
     assert document["summary"]["providers"] == point_access["summary"]["pointAccessProviders"]
-    assert document["summary"]["providerSnaps"] == len(document["providerSnaps"]) == 206
-    assert document["summary"]["pointAccessBlockedProviders"] == 386
-    assert document["summary"]["pointAccessNamedExclusions"] == 386
+    assert document["summary"]["providerSnaps"] == len(document["providerSnaps"]) == 223
+    assert document["summary"]["pointAccessBlockedProviders"] == 369
+    assert document["summary"]["pointAccessNamedExclusions"] == 369
     assert document["summary"]["distanceMethod"] == road_access.DISTANCE_METHOD
     assert routed_ids <= accepted_ids
     assert routed_ids.isdisjoint(blocked_ids)

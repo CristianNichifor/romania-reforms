@@ -26,8 +26,8 @@
     }
   },
   "sourceHashes": {
-    "providerPointsSha256": "7af746199792197d4cf3600dd109f20a8ec10b8a63716e95a9262b23abae6a46",
-    "providerPointReviewSha256": "70bad3b25ed2eac1fc5d4cb12638ae515f11c6088498bfca112f3d73926c38c3"
+    "providerPointsSha256": "0f9d9a56210bad214a02deff38f004cedd77044f45467106656a570dfc6900e3",
+    "providerPointReviewSha256": "37b63bace54c62ab09152f9f03faae95f7928287f9dd764b0dbbfffec09eabad"
   },
   "transform": {
     "script": "packages/health_access/scripts/build_health_provider_point_source_acquisition.py",
@@ -35,33 +35,29 @@
   },
   "summary": {
     "providerPoints": 592,
-    "pointAccessEligibleProviders": 206,
-    "pointAccessBlockedProviders": 386,
-    "reviewProviders": 118,
-    "acquisitionProviders": 118,
-    "localityOnlyCandidateProviders": 4,
-    "noMinistryCandidateProviders": 114,
-    "publicBedNoCandidateProviders": 13,
+    "pointAccessEligibleProviders": 223,
+    "pointAccessBlockedProviders": 369,
+    "reviewProviders": 101,
+    "acquisitionProviders": 101,
+    "localityOnlyCandidateProviders": 0,
+    "noMinistryCandidateProviders": 101,
+    "publicBedNoCandidateProviders": 0,
     "acquisitionStatus": {
-      "needs-new-source": 114,
-      "needs-provider-specific-evidence": 4
+      "needs-new-source": 101
     },
     "acquisitionPriority": {
-      "p1-locality-candidate-needs-provider-evidence": 4,
-      "p2-public-bed-provider-no-ministry-candidate": 13,
       "p3-public-provider-no-ministry-candidate": 45,
       "p4-private-or-unknown-provider-no-ministry-candidate": 56
     },
     "sourceSearchTypes": {
-      "cnas-or-official-contracting-list": 118,
-      "dsp-or-local-authority-list": 118,
-      "ministry-locality-candidate-provider-verification": 4,
-      "osm-named-feature-manual-review": 118,
-      "provider-official-website": 118
+      "cnas-or-official-contracting-list": 101,
+      "dsp-or-local-authority-list": 101,
+      "osm-named-feature-manual-review": 101,
+      "provider-official-website": 101
     },
     "ownerTypes": {
-      "private": 54,
-      "public": 61,
+      "private": 53,
+      "public": 45,
       "unknown": 3
     },
     "byCounty": [
@@ -76,10 +72,10 @@
       {
         "countyCode": "B",
         "countyName": "Bucuresti",
-        "acquisitionProviders": 56,
+        "acquisitionProviders": 49,
         "localityOnlyCandidateProviders": 0,
-        "noMinistryCandidateProviders": 56,
-        "publicBedNoCandidateProviders": 7
+        "noMinistryCandidateProviders": 49,
+        "publicBedNoCandidateProviders": 0
       },
       {
         "countyCode": "BC",
@@ -108,16 +104,16 @@
       {
         "countyCode": "BV",
         "countyName": "Brasov",
-        "acquisitionProviders": 3,
+        "acquisitionProviders": 2,
         "localityOnlyCandidateProviders": 0,
-        "noMinistryCandidateProviders": 3,
-        "publicBedNoCandidateProviders": 1
+        "noMinistryCandidateProviders": 2,
+        "publicBedNoCandidateProviders": 0
       },
       {
         "countyCode": "CJ",
         "countyName": "Cluj",
-        "acquisitionProviders": 3,
-        "localityOnlyCandidateProviders": 2,
+        "acquisitionProviders": 1,
+        "localityOnlyCandidateProviders": 0,
         "noMinistryCandidateProviders": 1,
         "publicBedNoCandidateProviders": 0
       },
@@ -148,10 +144,10 @@
       {
         "countyCode": "GL",
         "countyName": "Galati",
-        "acquisitionProviders": 7,
+        "acquisitionProviders": 3,
         "localityOnlyCandidateProviders": 0,
-        "noMinistryCandidateProviders": 7,
-        "publicBedNoCandidateProviders": 4
+        "noMinistryCandidateProviders": 3,
+        "publicBedNoCandidateProviders": 0
       },
       {
         "countyCode": "IF",
@@ -170,14 +166,6 @@
         "publicBedNoCandidateProviders": 0
       },
       {
-        "countyCode": "MH",
-        "countyName": "Mehedinti",
-        "acquisitionProviders": 2,
-        "localityOnlyCandidateProviders": 2,
-        "noMinistryCandidateProviders": 0,
-        "publicBedNoCandidateProviders": 0
-      },
-      {
         "countyCode": "MM",
         "countyName": "Maramures",
         "acquisitionProviders": 1,
@@ -188,10 +176,10 @@
       {
         "countyCode": "MS",
         "countyName": "Mures",
-        "acquisitionProviders": 7,
+        "acquisitionProviders": 6,
         "localityOnlyCandidateProviders": 0,
-        "noMinistryCandidateProviders": 7,
-        "publicBedNoCandidateProviders": 1
+        "noMinistryCandidateProviders": 6,
+        "publicBedNoCandidateProviders": 0
       },
       {
         "countyCode": "NT",
@@ -325,701 +313,6 @@
     }
   ],
   "records": [
-    {
-      "providerId": "anmcs-2025-038",
-      "name": "SPITALUL CLINIC CĂI FERATE CLUJ NAPOCA",
-      "countyCode": "CJ",
-      "countyName": "Cluj",
-      "siruta": "54975",
-      "localityName": "MUNICIPIUL CLUJ-NAPOCA",
-      "locationConfidence": "name-derived-locality",
-      "ownerType": "public",
-      "bedCount": null,
-      "specialties": [],
-      "candidateStatus": "has-unused-ministry-review-candidate",
-      "reviewSignal": "low",
-      "candidateCount": 3,
-      "ministryCandidateSourceRecordIds": [
-        "ms-unitati-sanitare-204",
-        "ms-unitati-sanitare-211",
-        "ms-unitati-sanitare-208"
-      ],
-      "candidateReviewMethods": [
-        "locality-name-token-overlap-same-county-unused-source"
-      ],
-      "acquisitionStatus": "needs-provider-specific-evidence",
-      "acquisitionPriority": "p1-locality-candidate-needs-provider-evidence",
-      "sourceSearchOrder": [
-        "provider-official-website",
-        "dsp-or-local-authority-list",
-        "ministry-locality-candidate-provider-verification",
-        "cnas-or-official-contracting-list",
-        "osm-named-feature-manual-review"
-      ],
-      "acceptableEvidence": [
-        "provider-published-street-address",
-        "provider-published-coordinate",
-        "official-authority-street-address",
-        "official-authority-coordinate",
-        "named-osm-feature-coordinate",
-        "verified-ministry-source-row-alias"
-      ],
-      "nextAction": "verify-locality-only-ministry-candidate-with-provider-source"
-    },
-    {
-      "providerId": "anmcs-2025-115",
-      "name": "SPITALUL MILITAR DE URGENŢĂ \"DR. CONSTANTIN PAPILIAN\", CLUJ-NAPOCA",
-      "countyCode": "CJ",
-      "countyName": "Cluj",
-      "siruta": "54975",
-      "localityName": "MUNICIPIUL CLUJ-NAPOCA",
-      "locationConfidence": "name-derived-locality",
-      "ownerType": "public",
-      "bedCount": null,
-      "specialties": [],
-      "candidateStatus": "has-unused-ministry-review-candidate",
-      "reviewSignal": "low",
-      "candidateCount": 3,
-      "ministryCandidateSourceRecordIds": [
-        "ms-unitati-sanitare-204",
-        "ms-unitati-sanitare-211",
-        "ms-unitati-sanitare-208"
-      ],
-      "candidateReviewMethods": [
-        "locality-name-token-overlap-same-county-unused-source"
-      ],
-      "acquisitionStatus": "needs-provider-specific-evidence",
-      "acquisitionPriority": "p1-locality-candidate-needs-provider-evidence",
-      "sourceSearchOrder": [
-        "provider-official-website",
-        "dsp-or-local-authority-list",
-        "ministry-locality-candidate-provider-verification",
-        "cnas-or-official-contracting-list",
-        "osm-named-feature-manual-review"
-      ],
-      "acceptableEvidence": [
-        "provider-published-street-address",
-        "provider-published-coordinate",
-        "official-authority-street-address",
-        "official-authority-coordinate",
-        "named-osm-feature-coordinate",
-        "verified-ministry-source-row-alias"
-      ],
-      "nextAction": "verify-locality-only-ministry-candidate-with-provider-source"
-    },
-    {
-      "providerId": "anmcs-2025-140",
-      "name": "SPITALUL GENERAL CĂI FERATE DROBETA TURNU SEVERIN",
-      "countyCode": "MH",
-      "countyName": "Mehedinti",
-      "siruta": "109773",
-      "localityName": "MUNICIPIUL DROBETA-TURNU SEVERIN",
-      "locationConfidence": "name-derived-locality",
-      "ownerType": "public",
-      "bedCount": null,
-      "specialties": [],
-      "candidateStatus": "has-unused-ministry-review-candidate",
-      "reviewSignal": "low",
-      "candidateCount": 1,
-      "ministryCandidateSourceRecordIds": [
-        "ms-unitati-sanitare-276"
-      ],
-      "candidateReviewMethods": [
-        "locality-name-token-overlap-same-county-unused-source"
-      ],
-      "acquisitionStatus": "needs-provider-specific-evidence",
-      "acquisitionPriority": "p1-locality-candidate-needs-provider-evidence",
-      "sourceSearchOrder": [
-        "provider-official-website",
-        "dsp-or-local-authority-list",
-        "ministry-locality-candidate-provider-verification",
-        "cnas-or-official-contracting-list",
-        "osm-named-feature-manual-review"
-      ],
-      "acceptableEvidence": [
-        "provider-published-street-address",
-        "provider-published-coordinate",
-        "official-authority-street-address",
-        "official-authority-coordinate",
-        "named-osm-feature-coordinate",
-        "verified-ministry-source-row-alias"
-      ],
-      "nextAction": "verify-locality-only-ministry-candidate-with-provider-source"
-    },
-    {
-      "providerId": "anmcs-2025-584",
-      "name": "„CENTRU DE ONCOLOGIE DROBETA-TURNU SEVERIN” S.R.L.",
-      "countyCode": "MH",
-      "countyName": "Mehedinti",
-      "siruta": "109773",
-      "localityName": "MUNICIPIUL DROBETA-TURNU SEVERIN",
-      "locationConfidence": "name-derived-locality",
-      "ownerType": "private",
-      "bedCount": null,
-      "specialties": [],
-      "candidateStatus": "has-unused-ministry-review-candidate",
-      "reviewSignal": "low",
-      "candidateCount": 1,
-      "ministryCandidateSourceRecordIds": [
-        "ms-unitati-sanitare-276"
-      ],
-      "candidateReviewMethods": [
-        "locality-name-token-overlap-same-county-unused-source"
-      ],
-      "acquisitionStatus": "needs-provider-specific-evidence",
-      "acquisitionPriority": "p1-locality-candidate-needs-provider-evidence",
-      "sourceSearchOrder": [
-        "provider-official-website",
-        "dsp-or-local-authority-list",
-        "ministry-locality-candidate-provider-verification",
-        "cnas-or-official-contracting-list",
-        "osm-named-feature-manual-review"
-      ],
-      "acceptableEvidence": [
-        "provider-published-street-address",
-        "provider-published-coordinate",
-        "official-authority-street-address",
-        "official-authority-coordinate",
-        "named-osm-feature-coordinate",
-        "verified-ministry-source-row-alias"
-      ],
-      "nextAction": "verify-locality-only-ministry-candidate-with-provider-source"
-    },
-    {
-      "providerId": "anmcs-2025-019",
-      "name": "SPITALUL CLINIC DE PSIHIATRIE „PROF. DR. ALEXANDRU OBREGIA”",
-      "countyCode": "B",
-      "countyName": "Bucuresti",
-      "siruta": "179132",
-      "localityName": "MUNICIPIUL BUCUREŞTI",
-      "locationConfidence": "municipality-from-county",
-      "ownerType": "public",
-      "bedCount": 704.0,
-      "specialties": [
-        "acutePsychiatry",
-        "chronicPsychiatry",
-        "neurology",
-        "neuropsychomotorRecovery",
-        "psychiatry",
-        "psychiatryTotal"
-      ],
-      "candidateStatus": "no-ministry-review-candidate",
-      "reviewSignal": "none",
-      "candidateCount": 0,
-      "ministryCandidateSourceRecordIds": [],
-      "candidateReviewMethods": [],
-      "acquisitionStatus": "needs-new-source",
-      "acquisitionPriority": "p2-public-bed-provider-no-ministry-candidate",
-      "sourceSearchOrder": [
-        "provider-official-website",
-        "dsp-or-local-authority-list",
-        "cnas-or-official-contracting-list",
-        "osm-named-feature-manual-review"
-      ],
-      "acceptableEvidence": [
-        "provider-published-street-address",
-        "provider-published-coordinate",
-        "official-authority-street-address",
-        "official-authority-coordinate",
-        "named-osm-feature-coordinate"
-      ],
-      "nextAction": "find-provider-specific-address-or-coordinate-source"
-    },
-    {
-      "providerId": "anmcs-2025-031",
-      "name": "SPITALUL CLINIC DE URGENȚĂ PENTRU COPII „GRIGORE ALEXANDRESCU”",
-      "countyCode": "B",
-      "countyName": "Bucuresti",
-      "siruta": "179132",
-      "localityName": "MUNICIPIUL BUCUREŞTI",
-      "locationConfidence": "municipality-from-county",
-      "ownerType": "public",
-      "bedCount": 305.0,
-      "specialties": [
-        "gastroenterology",
-        "intensiveCare",
-        "medicalOncology",
-        "orthopedicsTraumatology",
-        "pediatricSurgery",
-        "pediatrics",
-        "plasticSurgery"
-      ],
-      "candidateStatus": "no-ministry-review-candidate",
-      "reviewSignal": "none",
-      "candidateCount": 0,
-      "ministryCandidateSourceRecordIds": [],
-      "candidateReviewMethods": [],
-      "acquisitionStatus": "needs-new-source",
-      "acquisitionPriority": "p2-public-bed-provider-no-ministry-candidate",
-      "sourceSearchOrder": [
-        "provider-official-website",
-        "dsp-or-local-authority-list",
-        "cnas-or-official-contracting-list",
-        "osm-named-feature-manual-review"
-      ],
-      "acceptableEvidence": [
-        "provider-published-street-address",
-        "provider-published-coordinate",
-        "official-authority-street-address",
-        "official-authority-coordinate",
-        "named-osm-feature-coordinate"
-      ],
-      "nextAction": "find-provider-specific-address-or-coordinate-source"
-    },
-    {
-      "providerId": "anmcs-2025-037",
-      "name": "SPITALUL CLINIC \"SFÂNTA MARIA\" BUCUREȘTI",
-      "countyCode": "B",
-      "countyName": "Bucuresti",
-      "siruta": "179132",
-      "localityName": "MUNICIPIUL BUCUREŞTI",
-      "locationConfidence": "municipality-from-county",
-      "ownerType": "public",
-      "bedCount": 180.0,
-      "specialties": [
-        "ent",
-        "generalSurgery",
-        "intensiveCare",
-        "internalMedicine"
-      ],
-      "candidateStatus": "no-ministry-review-candidate",
-      "reviewSignal": "none",
-      "candidateCount": 0,
-      "ministryCandidateSourceRecordIds": [],
-      "candidateReviewMethods": [],
-      "acquisitionStatus": "needs-new-source",
-      "acquisitionPriority": "p2-public-bed-provider-no-ministry-candidate",
-      "sourceSearchOrder": [
-        "provider-official-website",
-        "dsp-or-local-authority-list",
-        "cnas-or-official-contracting-list",
-        "osm-named-feature-manual-review"
-      ],
-      "acceptableEvidence": [
-        "provider-published-street-address",
-        "provider-published-coordinate",
-        "official-authority-street-address",
-        "official-authority-coordinate",
-        "named-osm-feature-coordinate"
-      ],
-      "nextAction": "find-provider-specific-address-or-coordinate-source"
-    },
-    {
-      "providerId": "anmcs-2025-049",
-      "name": "SPITALUL CLINIC DE OBSTETRICĂ - GINECOLOGIE „PROF. DR. PANAIT SIRBU”",
-      "countyCode": "B",
-      "countyName": "Bucuresti",
-      "siruta": "179132",
-      "localityName": "MUNICIPIUL BUCUREŞTI",
-      "locationConfidence": "municipality-from-county",
-      "ownerType": "public",
-      "bedCount": 138.0,
-      "specialties": [
-        "obstetricsGynecology"
-      ],
-      "candidateStatus": "no-ministry-review-candidate",
-      "reviewSignal": "none",
-      "candidateCount": 0,
-      "ministryCandidateSourceRecordIds": [],
-      "candidateReviewMethods": [],
-      "acquisitionStatus": "needs-new-source",
-      "acquisitionPriority": "p2-public-bed-provider-no-ministry-candidate",
-      "sourceSearchOrder": [
-        "provider-official-website",
-        "dsp-or-local-authority-list",
-        "cnas-or-official-contracting-list",
-        "osm-named-feature-manual-review"
-      ],
-      "acceptableEvidence": [
-        "provider-published-street-address",
-        "provider-published-coordinate",
-        "official-authority-street-address",
-        "official-authority-coordinate",
-        "named-osm-feature-coordinate"
-      ],
-      "nextAction": "find-provider-specific-address-or-coordinate-source"
-    },
-    {
-      "providerId": "anmcs-2025-052",
-      "name": "SPITALUL CLINIC DE NEFROLOGIE „DR. CAROL DAVILA”",
-      "countyCode": "B",
-      "countyName": "Bucuresti",
-      "siruta": "179132",
-      "localityName": "MUNICIPIUL BUCUREŞTI",
-      "locationConfidence": "municipality-from-county",
-      "ownerType": "public",
-      "bedCount": 208.0,
-      "specialties": [
-        "generalSurgery",
-        "intensiveCare",
-        "internalMedicine",
-        "urology"
-      ],
-      "candidateStatus": "no-ministry-review-candidate",
-      "reviewSignal": "none",
-      "candidateCount": 0,
-      "ministryCandidateSourceRecordIds": [],
-      "candidateReviewMethods": [],
-      "acquisitionStatus": "needs-new-source",
-      "acquisitionPriority": "p2-public-bed-provider-no-ministry-candidate",
-      "sourceSearchOrder": [
-        "provider-official-website",
-        "dsp-or-local-authority-list",
-        "cnas-or-official-contracting-list",
-        "osm-named-feature-manual-review"
-      ],
-      "acceptableEvidence": [
-        "provider-published-street-address",
-        "provider-published-coordinate",
-        "official-authority-street-address",
-        "official-authority-coordinate",
-        "named-osm-feature-coordinate"
-      ],
-      "nextAction": "find-provider-specific-address-or-coordinate-source"
-    },
-    {
-      "providerId": "anmcs-2025-126",
-      "name": "SPITALUL CLINIC NICOLAE MALAXA",
-      "countyCode": "B",
-      "countyName": "Bucuresti",
-      "siruta": "179132",
-      "localityName": "MUNICIPIUL BUCUREŞTI",
-      "locationConfidence": "municipality-from-county",
-      "ownerType": "public",
-      "bedCount": 163.0,
-      "specialties": [
-        "diabetesNutritionMetabolic",
-        "internalMedicine",
-        "obstetricsGynecology"
-      ],
-      "candidateStatus": "no-ministry-review-candidate",
-      "reviewSignal": "none",
-      "candidateCount": 0,
-      "ministryCandidateSourceRecordIds": [],
-      "candidateReviewMethods": [],
-      "acquisitionStatus": "needs-new-source",
-      "acquisitionPriority": "p2-public-bed-provider-no-ministry-candidate",
-      "sourceSearchOrder": [
-        "provider-official-website",
-        "dsp-or-local-authority-list",
-        "cnas-or-official-contracting-list",
-        "osm-named-feature-manual-review"
-      ],
-      "acceptableEvidence": [
-        "provider-published-street-address",
-        "provider-published-coordinate",
-        "official-authority-street-address",
-        "official-authority-coordinate",
-        "named-osm-feature-coordinate"
-      ],
-      "nextAction": "find-provider-specific-address-or-coordinate-source"
-    },
-    {
-      "providerId": "anmcs-2025-132",
-      "name": "SPITALUL CLINIC JUDEȚEAN DE URGENȚĂ ILFOV",
-      "countyCode": "B",
-      "countyName": "Bucuresti",
-      "siruta": "179132",
-      "localityName": "MUNICIPIUL BUCUREŞTI",
-      "locationConfidence": "municipality-from-county",
-      "ownerType": "public",
-      "bedCount": 171.0,
-      "specialties": [
-        "ent",
-        "generalSurgery",
-        "internalMedicine",
-        "neurology",
-        "orthopedicsTraumatology",
-        "rehabilitationPhysicalMedicineBalneology"
-      ],
-      "candidateStatus": "no-ministry-review-candidate",
-      "reviewSignal": "none",
-      "candidateCount": 0,
-      "ministryCandidateSourceRecordIds": [],
-      "candidateReviewMethods": [],
-      "acquisitionStatus": "needs-new-source",
-      "acquisitionPriority": "p2-public-bed-provider-no-ministry-candidate",
-      "sourceSearchOrder": [
-        "provider-official-website",
-        "dsp-or-local-authority-list",
-        "cnas-or-official-contracting-list",
-        "osm-named-feature-manual-review"
-      ],
-      "acceptableEvidence": [
-        "provider-published-street-address",
-        "provider-published-coordinate",
-        "official-authority-street-address",
-        "official-authority-coordinate",
-        "named-osm-feature-coordinate"
-      ],
-      "nextAction": "find-provider-specific-address-or-coordinate-source"
-    },
-    {
-      "providerId": "anmcs-2025-067",
-      "name": "SPITALUL CLINIC DE PSIHIATRIE ȘI NEUROLOGIE BRAȘOV",
-      "countyCode": "BV",
-      "countyName": "Brasov",
-      "siruta": "40198",
-      "localityName": "MUNICIPIUL BRAŞOV",
-      "locationConfidence": "name-derived-locality",
-      "ownerType": "public",
-      "bedCount": 170.0,
-      "specialties": [
-        "acutePsychiatry",
-        "neurology",
-        "neuropsychomotorRecovery",
-        "psychiatry",
-        "psychiatryTotal"
-      ],
-      "candidateStatus": "no-ministry-review-candidate",
-      "reviewSignal": "none",
-      "candidateCount": 0,
-      "ministryCandidateSourceRecordIds": [],
-      "candidateReviewMethods": [],
-      "acquisitionStatus": "needs-new-source",
-      "acquisitionPriority": "p2-public-bed-provider-no-ministry-candidate",
-      "sourceSearchOrder": [
-        "provider-official-website",
-        "dsp-or-local-authority-list",
-        "cnas-or-official-contracting-list",
-        "osm-named-feature-manual-review"
-      ],
-      "acceptableEvidence": [
-        "provider-published-street-address",
-        "provider-published-coordinate",
-        "official-authority-street-address",
-        "official-authority-coordinate",
-        "named-osm-feature-coordinate"
-      ],
-      "nextAction": "find-provider-specific-address-or-coordinate-source"
-    },
-    {
-      "providerId": "anmcs-2025-041",
-      "name": "SPITALUL CLINIC JUDEȚEAN DE URGENȚĂ „SF. APOSTOL ANDREI” GALAȚI",
-      "countyCode": "GL",
-      "countyName": "Galati",
-      "siruta": "75098",
-      "localityName": "MUNICIPIUL GALAŢI",
-      "locationConfidence": "name-derived-locality",
-      "ownerType": "public",
-      "bedCount": 962.0,
-      "specialties": [
-        "cardiology",
-        "ent",
-        "gastroenterology",
-        "generalSurgery",
-        "geriatricsGerontology",
-        "hematology",
-        "intensiveCare",
-        "internalMedicine",
-        "maxillofacialSurgery",
-        "medicalOncology",
-        "neonatology",
-        "neurology",
-        "neurosurgery",
-        "obstetricsGynecology",
-        "ophthalmology",
-        "orthopedicsTraumatology",
-        "plasticSurgery",
-        "prematureNeonatology",
-        "thoracicSurgery"
-      ],
-      "candidateStatus": "no-ministry-review-candidate",
-      "reviewSignal": "none",
-      "candidateCount": 0,
-      "ministryCandidateSourceRecordIds": [],
-      "candidateReviewMethods": [],
-      "acquisitionStatus": "needs-new-source",
-      "acquisitionPriority": "p2-public-bed-provider-no-ministry-candidate",
-      "sourceSearchOrder": [
-        "provider-official-website",
-        "dsp-or-local-authority-list",
-        "cnas-or-official-contracting-list",
-        "osm-named-feature-manual-review"
-      ],
-      "acceptableEvidence": [
-        "provider-published-street-address",
-        "provider-published-coordinate",
-        "official-authority-street-address",
-        "official-authority-coordinate",
-        "named-osm-feature-coordinate"
-      ],
-      "nextAction": "find-provider-specific-address-or-coordinate-source"
-    },
-    {
-      "providerId": "anmcs-2025-054",
-      "name": "SPITALUL CLINIC DE URGENŢĂ PENTRU COPII \"SF. IOAN\" GALAŢI",
-      "countyCode": "GL",
-      "countyName": "Galati",
-      "siruta": "75098",
-      "localityName": "MUNICIPIUL GALAŢI",
-      "locationConfidence": "name-derived-locality",
-      "ownerType": "public",
-      "bedCount": 255.0,
-      "specialties": [
-        "cardiology",
-        "diabetesNutritionMetabolic",
-        "endocrinology",
-        "gastroenterology",
-        "hematology",
-        "intensiveCare",
-        "maxillofacialSurgery",
-        "medicalOncology",
-        "neurology",
-        "neurosurgery",
-        "ophthalmology",
-        "pediatricSurgery",
-        "pediatrics",
-        "plasticSurgery"
-      ],
-      "candidateStatus": "no-ministry-review-candidate",
-      "reviewSignal": "none",
-      "candidateCount": 0,
-      "ministryCandidateSourceRecordIds": [],
-      "candidateReviewMethods": [],
-      "acquisitionStatus": "needs-new-source",
-      "acquisitionPriority": "p2-public-bed-provider-no-ministry-candidate",
-      "sourceSearchOrder": [
-        "provider-official-website",
-        "dsp-or-local-authority-list",
-        "cnas-or-official-contracting-list",
-        "osm-named-feature-manual-review"
-      ],
-      "acceptableEvidence": [
-        "provider-published-street-address",
-        "provider-published-coordinate",
-        "official-authority-street-address",
-        "official-authority-coordinate",
-        "named-osm-feature-coordinate"
-      ],
-      "nextAction": "find-provider-specific-address-or-coordinate-source"
-    },
-    {
-      "providerId": "anmcs-2025-349",
-      "name": "SPITALUL CLINIC DE OBSTETRICĂ GINECOLOGIE \"BUNA VESTIRE\" GALAȚI",
-      "countyCode": "GL",
-      "countyName": "Galati",
-      "siruta": "75098",
-      "localityName": "MUNICIPIUL GALAŢI",
-      "locationConfidence": "name-derived-locality",
-      "ownerType": "public",
-      "bedCount": 60.0,
-      "specialties": [
-        "obstetricsGynecology"
-      ],
-      "candidateStatus": "no-ministry-review-candidate",
-      "reviewSignal": "none",
-      "candidateCount": 0,
-      "ministryCandidateSourceRecordIds": [],
-      "candidateReviewMethods": [],
-      "acquisitionStatus": "needs-new-source",
-      "acquisitionPriority": "p2-public-bed-provider-no-ministry-candidate",
-      "sourceSearchOrder": [
-        "provider-official-website",
-        "dsp-or-local-authority-list",
-        "cnas-or-official-contracting-list",
-        "osm-named-feature-manual-review"
-      ],
-      "acceptableEvidence": [
-        "provider-published-street-address",
-        "provider-published-coordinate",
-        "official-authority-street-address",
-        "official-authority-coordinate",
-        "named-osm-feature-coordinate"
-      ],
-      "nextAction": "find-provider-specific-address-or-coordinate-source"
-    },
-    {
-      "providerId": "anmcs-2025-400",
-      "name": "SPITALUL DE PSIHIATRIE \" ELISABETA DOAMNA\" GALAŢI",
-      "countyCode": "GL",
-      "countyName": "Galati",
-      "siruta": "75098",
-      "localityName": "MUNICIPIUL GALAŢI",
-      "locationConfidence": "name-derived-locality",
-      "ownerType": "public",
-      "bedCount": 150.0,
-      "specialties": [
-        "chronicPsychiatry",
-        "psychiatry",
-        "psychiatryTotal"
-      ],
-      "candidateStatus": "no-ministry-review-candidate",
-      "reviewSignal": "none",
-      "candidateCount": 0,
-      "ministryCandidateSourceRecordIds": [],
-      "candidateReviewMethods": [],
-      "acquisitionStatus": "needs-new-source",
-      "acquisitionPriority": "p2-public-bed-provider-no-ministry-candidate",
-      "sourceSearchOrder": [
-        "provider-official-website",
-        "dsp-or-local-authority-list",
-        "cnas-or-official-contracting-list",
-        "osm-named-feature-manual-review"
-      ],
-      "acceptableEvidence": [
-        "provider-published-street-address",
-        "provider-published-coordinate",
-        "official-authority-street-address",
-        "official-authority-coordinate",
-        "named-osm-feature-coordinate"
-      ],
-      "nextAction": "find-provider-specific-address-or-coordinate-source"
-    },
-    {
-      "providerId": "anmcs-2025-029",
-      "name": "INSTITUTUL DE URGENŢĂ PENTRU BOLI CARDIOVASCULARE ŞI TRANSPLANT TG. MUREŞ",
-      "countyCode": "MS",
-      "countyName": "Mures",
-      "siruta": "114319",
-      "localityName": "MUNICIPIUL TÂRGU MUREŞ",
-      "locationConfidence": "name-derived-locality",
-      "ownerType": "public",
-      "bedCount": 1050.0,
-      "specialties": [
-        "cardiology",
-        "diabetesNutritionMetabolic",
-        "ent",
-        "gastroenterology",
-        "generalSurgery",
-        "hematology",
-        "intensiveCare",
-        "internalMedicine",
-        "maxillofacialSurgery",
-        "neonatology",
-        "neurology",
-        "neurosurgery",
-        "obstetricsGynecology",
-        "orthopedicsTraumatology",
-        "pediatricSurgery",
-        "pediatrics",
-        "prematureNeonatology",
-        "rehabilitationPhysicalMedicineBalneology",
-        "rheumatology",
-        "thoracicSurgery"
-      ],
-      "candidateStatus": "no-ministry-review-candidate",
-      "reviewSignal": "none",
-      "candidateCount": 0,
-      "ministryCandidateSourceRecordIds": [],
-      "candidateReviewMethods": [],
-      "acquisitionStatus": "needs-new-source",
-      "acquisitionPriority": "p2-public-bed-provider-no-ministry-candidate",
-      "sourceSearchOrder": [
-        "provider-official-website",
-        "dsp-or-local-authority-list",
-        "cnas-or-official-contracting-list",
-        "osm-named-feature-manual-review"
-      ],
-      "acceptableEvidence": [
-        "provider-published-street-address",
-        "provider-published-coordinate",
-        "official-authority-street-address",
-        "official-authority-coordinate",
-        "named-osm-feature-coordinate"
-      ],
-      "nextAction": "find-provider-specific-address-or-coordinate-source"
-    },
     {
       "providerId": "anmcs-2025-092",
       "name": "SPITALUL JUDEŢEAN DE URGENŢĂ CU AMBULATORIU INTEGRAT DE SPECIALITATE PITEŞTI",

@@ -225,22 +225,22 @@ def test_committed_health_point_access_uses_only_point_eligible_providers():
 
     assert point_access["id"] == "health-point-access-2024-2026"
     assert point_access["summary"]["providers"] == 592
-    assert point_access["summary"]["pointAccessProviders"] == 206
-    assert point_access["summary"]["pointAccessBlockedProviders"] == 386
-    assert point_access["summary"]["namedExclusions"] == 386
+    assert point_access["summary"]["pointAccessProviders"] == 223
+    assert point_access["summary"]["pointAccessBlockedProviders"] == 369
+    assert point_access["summary"]["namedExclusions"] == 369
     assert point_access["summary"]["distanceMethod"] == "not-computed"
     assert point_access["summary"]["supportedConsumerDistanceMethods"] == [
         "straight-line",
         "routed",
     ]
-    assert point_access["summary"]["pointConfidence"] == {"official-coordinate": 206}
+    assert point_access["summary"]["pointConfidence"] == {"official-coordinate": 223}
     assert point_access["summary"]["pointEvidence"] == {
-        "published-coordinate": 202,
+        "published-coordinate": 219,
         "reviewed-published-coordinate": 4,
     }
     assert point_access["summary"]["blockedReasons"] == {
         "county-only-location": 268,
-        "no-point-evidence": 118,
+        "no-point-evidence": 101,
     }
     assert view_point_ids == source_point_ids
     assert excluded_ids == source_blocked_ids
