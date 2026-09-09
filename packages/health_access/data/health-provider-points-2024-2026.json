@@ -28,13 +28,13 @@
     "addressAliases": {
       "id": "ministerul-sanatatii-unitati-sanitare-address-aliases-2026",
       "reviewedDate": "2026-09-09",
-      "aliases": 37
+      "aliases": 40
     }
   },
   "sourceHashes": {
     "healthAccessMartSha256": "afc7828921e86da5bebf4c59925f9da45a809fdc6db4838bdc13d0c593078ca2",
     "msUnitatiSanitareSha256": "208fc0c281a4d45348eeff5733c37f5ddc2f9fa0d5648cfa9acf07711d503b54",
-    "msUnitatiSanitareAliasesSha256": "9e46605773349ec82e62968c28a66f4671cf2b12799771d81b0720cdceaeddd4"
+    "msUnitatiSanitareAliasesSha256": "4cf072835b726731989a11084421ddd62b7f133fcb7367e5b441fe28c19e1944"
   },
   "transform": {
     "script": "packages/health_access/scripts/build_health_provider_points.py",
@@ -47,33 +47,33 @@
     "addressSourceRecords": 301,
     "addressSourceRecordsWithStreetAddress": 290,
     "addressSourceRecordsWithCoordinates": 301,
-    "addressMatchedProviders": 211,
+    "addressMatchedProviders": 214,
     "addressExactMatchedProviders": 174,
-    "addressAliasMatchedProviders": 37,
+    "addressAliasMatchedProviders": 40,
     "ambiguousAddressProviders": 0,
-    "pointAccessEligibleProviders": 199,
-    "pointAccessBlockedProviders": 393,
-    "providersWithAddress": 211,
-    "providersWithCoordinates": 199,
-    "coordinateMatchedProviders": 211,
-    "coordinateAcceptedProviders": 199,
+    "pointAccessEligibleProviders": 202,
+    "pointAccessBlockedProviders": 390,
+    "providersWithAddress": 214,
+    "providersWithCoordinates": 202,
+    "coordinateMatchedProviders": 214,
+    "coordinateAcceptedProviders": 202,
     "coordinateRejectedProviders": 12,
     "addressEvidence": {
-      "none": 381,
-      "official-provider-address": 211
+      "none": 378,
+      "official-provider-address": 214
     },
     "addressMatchMethods": {
-      "curated-same-county-official-name-alias": 37,
+      "curated-same-county-official-name-alias": 40,
       "exact-normalised-name-county": 174,
-      "none": 381
+      "none": 378
     },
     "pointConfidence": {
-      "none": 393,
-      "official-coordinate": 199
+      "none": 390,
+      "official-coordinate": 202
     },
     "blockedReasons": {
       "county-only-location": 268,
-      "no-point-evidence": 125
+      "no-point-evidence": 122
     },
     "byCounty": [
       {
@@ -97,8 +97,8 @@
         "countyName": "Arges",
         "providers": 18,
         "serviceAccessEligibleProviders": 10,
-        "pointAccessEligibleProviders": 7,
-        "pointAccessBlockedProviders": 11
+        "pointAccessEligibleProviders": 8,
+        "pointAccessBlockedProviders": 10
       },
       {
         "countyCode": "BC",
@@ -281,8 +281,8 @@
         "countyName": "Maramures",
         "providers": 16,
         "serviceAccessEligibleProviders": 6,
-        "pointAccessEligibleProviders": 4,
-        "pointAccessBlockedProviders": 12
+        "pointAccessEligibleProviders": 5,
+        "pointAccessBlockedProviders": 11
       },
       {
         "countyCode": "MH",
@@ -369,8 +369,8 @@
         "countyName": "Timis",
         "providers": 28,
         "serviceAccessEligibleProviders": 14,
-        "pointAccessEligibleProviders": 10,
-        "pointAccessBlockedProviders": 18
+        "pointAccessEligibleProviders": 11,
+        "pointAccessBlockedProviders": 17
       },
       {
         "countyCode": "TL",
@@ -7294,26 +7294,26 @@
       "localityName": "MUNICIPIUL TIMIŞOARA",
       "locationConfidence": "name-derived-locality",
       "serviceAccessEligible": true,
-      "address": null,
-      "addressSourceRecordId": null,
-      "addressMatchMethod": null,
+      "address": "Splaiul Tudor Vladimirescu nr. 13-15, Timișoara, jud. Timiș",
+      "addressSourceRecordId": "ms-unitati-sanitare-121",
+      "addressMatchMethod": "curated-same-county-official-name-alias",
       "addressEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "official-provider-address",
+        "source": "ministerul-sanatatii-unitati-sanitare-2026",
+        "sourceValue": "Splaiul Tudor Vladimirescu nr. 13-15, Timișoara, jud. Timiș",
+        "retrievedDate": "2026-09-09"
       },
-      "latitude": null,
-      "longitude": null,
-      "pointConfidence": "none",
+      "latitude": 45.7496183233689,
+      "longitude": 21.2185484558227,
+      "pointConfidence": "official-coordinate",
       "pointEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "published-coordinate",
+        "source": "ministerul-sanatatii-unitati-sanitare-2026",
+        "sourceValue": "45.749618,21.218548",
+        "retrievedDate": "2026-09-09"
       },
-      "pointAccessEligible": false,
-      "pointAccessBlockedReason": "no-point-evidence"
+      "pointAccessEligible": true,
+      "pointAccessBlockedReason": null
     },
     {
       "providerId": "anmcs-2025-231",
@@ -8224,26 +8224,26 @@
       "localityName": "LĂPUŞ",
       "locationConfidence": "name-derived-locality",
       "serviceAccessEligible": true,
-      "address": null,
-      "addressSourceRecordId": null,
-      "addressMatchMethod": null,
+      "address": "Localitatea Tg.Lapus, str.Tineretului nr.9-11, jud.Maramures, cod postal 435600",
+      "addressSourceRecordId": "ms-unitati-sanitare-274",
+      "addressMatchMethod": "curated-same-county-official-name-alias",
       "addressEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "official-provider-address",
+        "source": "ministerul-sanatatii-unitati-sanitare-2026",
+        "sourceValue": "Localitatea Tg.Lapus, str.Tineretului nr.9-11, jud.Maramures, cod postal 435600",
+        "retrievedDate": "2026-09-09"
       },
-      "latitude": null,
-      "longitude": null,
-      "pointConfidence": "none",
+      "latitude": 47.45536938065984,
+      "longitude": 23.8617138319268,
+      "pointConfidence": "official-coordinate",
       "pointEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "published-coordinate",
+        "source": "ministerul-sanatatii-unitati-sanitare-2026",
+        "sourceValue": "47.455369,23.861714",
+        "retrievedDate": "2026-09-09"
       },
-      "pointAccessEligible": false,
-      "pointAccessBlockedReason": "no-point-evidence"
+      "pointAccessEligible": true,
+      "pointAccessBlockedReason": null
     },
     {
       "providerId": "anmcs-2025-262",
@@ -8764,26 +8764,26 @@
       "localityName": "STOLNICI",
       "locationConfidence": "name-derived-locality",
       "serviceAccessEligible": true,
-      "address": null,
-      "addressSourceRecordId": null,
-      "addressMatchMethod": null,
+      "address": "Str. Coasta Câmpului, Nr. 54, Loc. Ștefănești, Jud. Argeș",
+      "addressSourceRecordId": "ms-unitati-sanitare-043",
+      "addressMatchMethod": "curated-same-county-official-name-alias",
       "addressEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "official-provider-address",
+        "source": "ministerul-sanatatii-unitati-sanitare-2026",
+        "sourceValue": "Str. Coasta Câmpului, Nr. 54, Loc. Ștefănești, Jud. Argeș",
+        "retrievedDate": "2026-09-09"
       },
-      "latitude": null,
-      "longitude": null,
-      "pointConfidence": "none",
+      "latitude": 44.86619214924628,
+      "longitude": 24.92419696408501,
+      "pointConfidence": "official-coordinate",
       "pointEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "published-coordinate",
+        "source": "ministerul-sanatatii-unitati-sanitare-2026",
+        "sourceValue": "44.866192,24.924197",
+        "retrievedDate": "2026-09-09"
       },
-      "pointAccessEligible": false,
-      "pointAccessBlockedReason": "no-point-evidence"
+      "pointAccessEligible": true,
+      "pointAccessBlockedReason": null
     },
     {
       "providerId": "anmcs-2025-280",
@@ -19044,15 +19044,6 @@
     {
       "kind": "provider-excluded-from-point-access",
       "source": "health-access-mart-2024-2025",
-      "providerId": "anmcs-2025-230",
-      "name": "SPITALUL CLINIC C.F. TIMIȘOARA",
-      "countyCode": "TM",
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-access-mart-2024-2025",
       "providerId": "anmcs-2025-233",
       "name": "SPITALUL MUNICIPAL \"DR. GHEORGHE MARINESCU\"",
       "countyCode": "MS",
@@ -19134,15 +19125,6 @@
     {
       "kind": "provider-excluded-from-point-access",
       "source": "health-access-mart-2024-2025",
-      "providerId": "anmcs-2025-261",
-      "name": "SPITALUL ORĂȘENESC TG. LĂPUȘ",
-      "countyCode": "MM",
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-access-mart-2024-2025",
       "providerId": "anmcs-2025-265",
       "name": "SOCIETATEA TINOS CLINIC S.R.L.",
       "countyCode": "B",
@@ -19202,15 +19184,6 @@
       "countyCode": "BV",
       "pointAccessBlockedReason": "county-only-location",
       "reason": "The provider has only county-level location evidence in the health mart, so it is blocked from point-level routing until provider- or UAT-level location evidence is attached."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-access-mart-2024-2025",
-      "providerId": "anmcs-2025-279",
-      "name": "SPITAL DE BOLI CRONICE ŞI GERIATRIE \"CONSTANTIN BĂLĂCEANU STOLNICI\"",
-      "countyCode": "AG",
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
     },
     {
       "kind": "provider-excluded-from-point-access",
