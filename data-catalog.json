@@ -206,9 +206,9 @@
       ],
       "storagePolicy": "Provider summary JSON can be committed if small; geocoded/routing outputs should become release assets.",
       "nextSlice": {
-        "scope": "Remaining health provider point evidence review.",
-        "deliverable": "Review the remaining service-eligible no-point-evidence providers against new official/licensed sources or stricter manual review, without enabling generic fuzzy matching.",
-        "doneWhen": "Each remaining service-eligible no-point-evidence provider is either accepted with source-record-pinned coordinates or remains named with a clear reason it cannot be promoted."
+        "scope": "Health provider point candidate adjudication.",
+        "deliverable": "Review the 11 provider rows with Ministry review candidates from health-provider-point-evidence-review-2024-2026, starting with the 7 high-signal rows, and convert only source-record-pinned acceptances into curated aliases.",
+        "doneWhen": "Each candidate provider is either promoted through an audited alias/source-record fix or remains blocked with a source-specific reason; the provider-point, point-access and consumer outputs are regenerated if accepted coordinates change."
       },
       "notes": [
         "The committed national mart covers 592 ANMCS providers and all 42 Ministry county bed totals. Clinical bed counts are attached only on confident ANMCS matches; county bed totals are kept separately.",
@@ -223,7 +223,8 @@
         "justitie now consumes health-point-access-2024-2026 directly. It keeps the UAT-level local-provider and routed upper-bound hospital metrics separate, and adds nearest accepted provider point distances from consolidated UAT centroids with an explicit straight-line method.",
         "health-point-road-access-uat-2024-2026 snaps the 199 accepted provider coordinates to administrativ UAT road-graph nodes and publishes 3,186 compact UAT road-proxy rows. The distance is road graph metres to the provider snap node plus a straight-line destination offset, not exact door-to-door routing.",
         "justitie now consumes health-point-road-access-uat-2024-2026 as the first road-proxy consumer. It reports the shared routed provider-point proxy beside the straight-line point distance and the older UAT-level routed hospital upper bound.",
-        "transport now consumes health-point-road-access-uat-2024-2026 directly. It reports 3,136 nearest accepted provider-point road-proxy distances with the shared snap/routing methods, 26.9 km unweighted median and 18.3 km population-weighted median, while keeping the straight-line point metric as an explicitly labelled comparison."
+        "transport now consumes health-point-road-access-uat-2024-2026 directly. It reports 3,136 nearest accepted provider-point road-proxy distances with the shared snap/routing methods, 26.9 km unweighted median and 18.3 km population-weighted median, while keeping the straight-line point metric as an explicitly labelled comparison.",
+        "health-provider-point-evidence-review-2024-2026 is a manual-review queue for the 125 service-eligible providers still blocked by no-point-evidence. It finds 4 exact same-county Ministry rows that lack street-address evidence, 7 providers with unused same-county Ministry review candidates, and 114 providers with no Ministry candidate; candidate rows are not accepted point evidence."
       ]
     }
   ]
