@@ -52,6 +52,16 @@
             "periodEnd": { "const": "2025" }
           }
         },
+        "addressAliases": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "reviewedDate", "aliases"],
+          "properties": {
+            "id": { "const": "ministerul-sanatatii-unitati-sanitare-address-aliases-2026" },
+            "reviewedDate": { "type": "string", "format": "date" },
+            "aliases": { "type": "integer", "minimum": 1 }
+          }
+        },
         "addressSource": {
           "type": "object",
           "additionalProperties": false,
@@ -71,7 +81,8 @@
       "required": ["healthAccessMartSha256"],
       "properties": {
         "healthAccessMartSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
-        "msUnitatiSanitareSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        "msUnitatiSanitareSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "msUnitatiSanitareAliasesSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
       }
     },
     "transform": {
@@ -96,6 +107,8 @@
         "addressSourceRecordsWithStreetAddress",
         "addressSourceRecordsWithCoordinates",
         "addressMatchedProviders",
+        "addressExactMatchedProviders",
+        "addressAliasMatchedProviders",
         "ambiguousAddressProviders",
         "pointAccessEligibleProviders",
         "pointAccessBlockedProviders",
@@ -105,6 +118,7 @@
         "coordinateAcceptedProviders",
         "coordinateRejectedProviders",
         "addressEvidence",
+        "addressMatchMethods",
         "pointConfidence",
         "blockedReasons",
         "byCounty"
@@ -117,6 +131,8 @@
         "addressSourceRecordsWithStreetAddress": { "type": "integer", "minimum": 0 },
         "addressSourceRecordsWithCoordinates": { "type": "integer", "minimum": 0 },
         "addressMatchedProviders": { "type": "integer", "minimum": 0 },
+        "addressExactMatchedProviders": { "type": "integer", "minimum": 0 },
+        "addressAliasMatchedProviders": { "type": "integer", "minimum": 0 },
         "ambiguousAddressProviders": { "type": "integer", "minimum": 0 },
         "pointAccessEligibleProviders": { "type": "integer", "minimum": 0 },
         "pointAccessBlockedProviders": { "type": "integer", "minimum": 0 },
@@ -126,6 +142,10 @@
         "coordinateAcceptedProviders": { "type": "integer", "minimum": 0 },
         "coordinateRejectedProviders": { "type": "integer", "minimum": 0 },
         "addressEvidence": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        },
+        "addressMatchMethods": {
           "type": "object",
           "additionalProperties": { "type": "integer", "minimum": 0 }
         },
@@ -214,6 +234,8 @@
         "locationConfidence",
         "serviceAccessEligible",
         "address",
+        "addressSourceRecordId",
+        "addressMatchMethod",
         "addressEvidence",
         "latitude",
         "longitude",
@@ -234,6 +256,17 @@
         },
         "serviceAccessEligible": { "type": "boolean" },
         "address": { "type": ["string", "null"], "minLength": 1 },
+        "addressSourceRecordId": {
+          "type": ["string", "null"],
+          "pattern": "^ms-unitati-sanitare-[0-9]{3}$"
+        },
+        "addressMatchMethod": {
+          "enum": [
+            "exact-normalised-name-county",
+            "curated-same-county-official-name-alias",
+            null
+          ]
+        },
         "addressEvidence": { "$ref": "#/$defs/evidence" },
         "latitude": { "type": ["number", "null"], "minimum": 43, "maximum": 49 },
         "longitude": { "type": ["number", "null"], "minimum": 20, "maximum": 30 },
