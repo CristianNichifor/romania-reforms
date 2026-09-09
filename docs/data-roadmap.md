@@ -45,8 +45,13 @@ First slice:
   2013-09-30 through 2018-06-30, so it cannot populate the 2025 mart
 - done: publish the full 2023-2025 national mart as a release asset so the full history is
   downloadable without pushing the tracked tree past the repository size gate
-- next: wire the local-finance mart into a first consuming simulator view, starting with the
-  indicators that are already proven by the mart and validation report
+- done: wire the local-finance mart into `administrativ` through a compact 2024 own-revenue
+  payload, without replacing its simulator-specific administration-spending series
+- done: move `impozit-teren`'s budget denominator onto the 2023-2025 shared mart/release
+  asset so the app no longer carries a parallel finance artifact
+- next: expose a multi-year fiscal-stress indicator from the shared mart in a consuming
+  simulator, such as spending growth, own-revenue-share movement or personnel-spending
+  pressure
 
 Useful first indicators:
 

@@ -13,8 +13,10 @@ than publish a plausible map, because a wrong map is the failure nobody reports.
 
 from __future__ import annotations
 
+import hashlib
 import subprocess
 import sys
+import urllib.error
 from pathlib import Path
 
 import pytest
@@ -24,6 +26,24 @@ MANIFEST = ROOT / "data-assets.json"
 
 sys.path.insert(0, str(ROOT / "scripts"))
 from fetch_release_data import digest, fetch, load_manifest  # noqa: E402
+
+
+class AssetResponse:
+    def __init__(self, body: bytes) -> None:
+        self.body = body
+
+    def read(self) -> bytes:
+        return self.body
+
+    def __enter__(self) -> AssetResponse:
+        return self
+
+    def __exit__(self, *_: object) -> None:
+        return None
+
+
+def unavailable_opener(*_: object, **__: object) -> AssetResponse:
+    raise urllib.error.URLError("offline")
 
 
 @pytest.fixture(scope="module")
@@ -103,7 +123,7 @@ def test_a_present_and_correct_file_is_left_alone(tmp_path):
         "withoutIt": "nothing",
     }
     # An unreachable repo: if this tried to download, it would fail rather than pass.
-    ok, message = fetch(entry, repo="example/does-not-exist")
+    ok, message = fetch(entry, repo="example/does-not-exist", attempts=1, opener=unavailable_opener)
     assert ok
     assert "matches" in message
     assert payload.read_bytes() == b"the real thing"
@@ -122,7 +142,7 @@ def test_a_present_but_wrong_file_is_fatal_and_not_overwritten(tmp_path):
         "sha256": "0" * 64,
         "withoutIt": "nothing",
     }
-    ok, message = fetch(entry, repo="example/does-not-exist")
+    ok, message = fetch(entry, repo="example/does-not-exist", attempts=1, opener=unavailable_opener)
     assert not ok
     assert "does not match" in message
     assert payload.read_bytes() == b"locally rebuilt, newer", "a local rebuild was clobbered"
@@ -139,11 +159,64 @@ def test_an_unreachable_asset_is_a_warning_not_a_failure(tmp_path):
         "sha256": "0" * 64,
         "withoutIt": "the toggle disables itself",
     }
-    ok, message = fetch(entry, repo="example/does-not-exist")
+    ok, message = fetch(entry, repo="example/does-not-exist", attempts=1, opener=unavailable_opener)
     assert ok, "a missing payload must not fail the build"
     assert "NOT AVAILABLE" in message
     assert "the toggle disables itself" in message
     assert not (tmp_path / "absent.bin").exists(), "no partial file may be left behind"
+
+
+def test_a_required_unreachable_asset_is_fatal(tmp_path):
+    """A consumer may depend on an asset that cannot degrade, so the fetcher must say so."""
+    entry = {
+        "id": "sample",
+        "tag": "data-v1",
+        "asset": "payload.bin",
+        "destination": str(tmp_path / "absent.bin"),
+        "sha256": "0" * 64,
+        "withoutIt": "the app cannot build",
+    }
+
+    ok, message = fetch(
+        entry,
+        repo="example/does-not-exist",
+        required=True,
+        attempts=1,
+        opener=unavailable_opener,
+    )
+
+    assert not ok
+    assert "REQUIRED BUT NOT AVAILABLE" in message
+    assert "the app cannot build" in message
+    assert not (tmp_path / "absent.bin").exists(), "no partial file may be left behind"
+
+
+def test_fetch_retries_a_transient_release_error(tmp_path):
+    payload = b"published bytes"
+    destination = tmp_path / "payload.bin"
+    entry = {
+        "id": "sample",
+        "tag": "data-v1",
+        "asset": "payload.bin",
+        "destination": str(destination),
+        "sha256": hashlib.sha256(payload).hexdigest(),
+        "withoutIt": "nothing",
+    }
+    calls = 0
+
+    def opener(url: str, timeout: float) -> AssetResponse:
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            raise urllib.error.URLError("temporary")
+        return AssetResponse(payload)
+
+    ok, message = fetch(entry, opener=opener, sleep=lambda _: None)
+
+    assert ok
+    assert calls == 2
+    assert "fetched" in message
+    assert destination.read_bytes() == payload
 
 
 def test_the_manifest_matches_what_is_on_disk(assets):

@@ -10,19 +10,27 @@ three. So the tests guard the arithmetic, the quarantine that stops one broken f
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "simulators" / "impozit-teren" / "data"
+SCRIPTS = ROOT / "simulators" / "impozit-teren" / "scripts"
+SHARED_MART = ROOT / "packages" / "local_finance" / "data" / "local-finance-mart-2023-2025.json"
+sys.path.insert(0, str(SCRIPTS))
+
+import import_buget_uat  # noqa: E402
 
 
 def latest(prefix: str) -> dict:
     found = sorted(DATA.glob(f"{prefix}-*.json"))
-    if not found:
-        pytest.skip(f"{prefix} is not built")
-    return json.loads(found[-1].read_text(encoding="utf-8"))
+    if found:
+        return json.loads(found[-1].read_text(encoding="utf-8"))
+    if prefix == "buget-uat" and SHARED_MART.exists():
+        return import_buget_uat.budget_document_from_mart(SHARED_MART, 2025)
+    pytest.skip(f"{prefix} is not built")
 
 
 @pytest.fixture(scope="module")

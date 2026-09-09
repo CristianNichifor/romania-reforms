@@ -10,11 +10,19 @@ ROOT = Path(__file__).resolve().parent.parent
 IMPORTER = ROOT / "packages" / "local_finance" / "scripts" / "import_local_finance.py"
 DATA = ROOT / "packages" / "local_finance" / "data"
 DATA_ASSETS = ROOT / "data-assets.json"
+FULL_HISTORY_MART = DATA / "local-finance-mart-2023-2025.json"
 
 spec = importlib.util.spec_from_file_location("import_local_finance", IMPORTER)
 assert spec and spec.loader
 import_local_finance = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(import_local_finance)
+
+
+def impozit_teren_budget_from_shared_history() -> dict:
+    if not FULL_HISTORY_MART.exists():
+        pytest.skip("release asset was not fetched")
+    mart = json.loads(FULL_HISTORY_MART.read_text(encoding="utf-8"))
+    return import_local_finance.build_legacy_budget_document_from_mart(mart, 2025)
 
 
 def line(functional: str, economic: str, amount: float) -> dict:
@@ -307,11 +315,7 @@ def test_legacy_budget_document_keeps_the_impozit_teren_shape():
 
 
 def test_legacy_budget_document_round_trips_from_mart_records():
-    budget = json.loads(
-        (ROOT / "simulators" / "impozit-teren" / "data" / "buget-uat-2025.json").read_text(
-            encoding="utf-8"
-        )
-    )
+    budget = impozit_teren_budget_from_shared_history()
     records = [
         {
             "year": 2025,
@@ -397,11 +401,10 @@ def test_full_2023_2025_history_report_covers_the_release_payload():
 
 
 def test_fetched_full_2023_2025_mart_covers_the_national_history():
-    path = DATA / "local-finance-mart-2023-2025.json"
-    if not path.exists():
+    if not FULL_HISTORY_MART.exists():
         pytest.skip("release asset was not fetched")
 
-    mart = json.loads(path.read_text(encoding="utf-8"))
+    mart = json.loads(FULL_HISTORY_MART.read_text(encoding="utf-8"))
 
     assert mart["scope"] == "full"
     assert mart["summary"]["uats"] == 3228
@@ -410,27 +413,27 @@ def test_fetched_full_2023_2025_mart_covers_the_national_history():
     assert mart["summary"]["registryMatchedUats"] == 3187
 
 
-def test_committed_full_2025_mart_exports_the_impozit_teren_budget():
-    mart = json.loads((DATA / "local-finance-mart-2025.json").read_text(encoding="utf-8"))
-    budget = json.loads(
-        (ROOT / "simulators" / "impozit-teren" / "data" / "buget-uat-2025.json").read_text(
-            encoding="utf-8"
-        )
-    )
+def test_fetched_full_history_exports_the_impozit_teren_budget():
+    if not FULL_HISTORY_MART.exists():
+        pytest.skip("release asset was not fetched")
+    mart = json.loads(FULL_HISTORY_MART.read_text(encoding="utf-8"))
 
     assert mart["scope"] == "full"
     assert mart["summary"]["uats"] > 3000
-    assert mart["summary"]["years"] == 1
+    assert mart["summary"]["years"] == 3
 
-    regenerated = import_local_finance.build_legacy_budget_document_from_mart(mart, 2025)
+    budget = import_local_finance.build_legacy_budget_document_from_mart(mart, 2025)
 
-    assert regenerated == budget
+    assert budget["id"] == "buget-uat-2025"
+    assert budget["summary"]["uatsReporting"] == 3225
+    assert budget["summary"]["spendingRon"] == pytest.approx(184_822_260_751.28)
+    assert [row["siruta"] for row in budget["excluded"]] == ["179141", "179187", "179169"]
 
 
 def test_committed_arrears_index_documents_no_2025_source_for_the_full_mart():
     index = json.loads((DATA / "data-gov-arrears-resources.json").read_text(encoding="utf-8"))
     report = json.loads(
-        (DATA / "local-finance-validation-report-2025.json").read_text(encoding="utf-8")
+        (DATA / "local-finance-validation-report-2023-2025.json").read_text(encoding="utf-8")
     )
 
     assert index["summary"]["latestUatSnapshotDate"] == "2018-06-30"

@@ -15,7 +15,7 @@ jobs:
       - name: Repository size
         run: uv run python scripts/check_repo_size.py
       - name: Fetch release data
-        run: uv run python scripts/fetch_release_data.py
+        run: uv run python scripts/fetch_release_data.py --require local-finance-mart-2023-2025
       - name: Validate every simulator's data against its schema
         run: uv run --with referencing python scripts/validate_data.py
       - name: Pay grades and costs are reproducible
@@ -300,7 +300,7 @@ jobs:
           uv run --with geopandas python simulators/impozit-teren/scripts/build_harta.py \
             --allow-missing-boundaries
       - name: Fetch release payloads
-        run: uv run python scripts/fetch_release_data.py
+        run: uv run python scripts/fetch_release_data.py --require local-finance-mart-2023-2025
       - name: App
         working-directory: simulators/impozit-teren/app
         run: |

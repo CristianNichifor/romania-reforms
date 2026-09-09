@@ -18,9 +18,13 @@ import sys
 from pathlib import Path
 
 import pytest
+from jsonschema import Draft202012Validator
 
-DATA = Path(__file__).resolve().parents[1] / "simulators" / "impozit-teren" / "data"
-SCRIPTS = Path(__file__).resolve().parents[1] / "simulators" / "impozit-teren" / "scripts"
+ROOT = Path(__file__).resolve().parents[1]
+DATA = ROOT / "simulators" / "impozit-teren" / "data"
+SCRIPTS = ROOT / "simulators" / "impozit-teren" / "scripts"
+SHARED_MART = ROOT / "packages" / "local_finance" / "data" / "local-finance-mart-2023-2025.json"
+BUDGET_SCHEMA = ROOT / "simulators" / "impozit-teren" / "schema" / "buget-uat.schema.json"
 sys.path.insert(0, str(SCRIPTS))
 
 import import_buget_uat  # noqa: E402
@@ -28,10 +32,22 @@ import import_buget_uat  # noqa: E402
 
 @pytest.fixture(scope="module")
 def budget() -> dict:
-    path = DATA / "buget-uat-2025.json"
-    if not path.exists():
-        pytest.skip("buget-uat-2025.json is not built")
-    return json.loads(path.read_text(encoding="utf-8"))
+    if not SHARED_MART.exists():
+        pytest.skip("local-finance release asset was not fetched")
+    return import_buget_uat.budget_document_from_mart(SHARED_MART, 2025)
+
+
+def test_budget_is_exported_from_the_shared_local_finance_mart(budget):
+    assert budget["id"] == "buget-uat-2025"
+    assert budget["period"] == "2025"
+    assert budget["summary"]["uatsReporting"] == 3225
+    assert budget["summary"]["spendingRon"] == pytest.approx(184_822_260_751.28)
+
+
+def test_exported_budget_document_still_matches_the_app_schema(budget):
+    schema = json.loads(BUDGET_SCHEMA.read_text(encoding="utf-8"))
+    errors = sorted(Draft202012Validator(schema).iter_errors(budget), key=lambda e: list(e.path))
+    assert [error.message for error in errors[:5]] == []
 
 
 def test_the_country_is_covered(budget):
