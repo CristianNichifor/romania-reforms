@@ -194,12 +194,12 @@
       ],
       "storagePolicy": "Provider summary JSON can be committed if small; geocoded/routing outputs should become release assets.",
       "nextSlice": {
-        "scope": "National health-provider expansion and address/location evidence.",
-        "deliverable": "Extend the sample beyond Cluj and Bucharest, then attach address or geocoded UAT confidence before producing access views.",
-        "doneWhen": "All counties have provider rows, unmatched providers are named, and access views use only providers with non-county-only location confidence."
+        "scope": "Address/location evidence for national health providers.",
+        "deliverable": "Attach address or geocoded UAT confidence before producing health service-access views.",
+        "doneWhen": "Access views use only providers with non-county-only location confidence and name every excluded provider."
       },
       "notes": [
-        "The first committed sample covers Cluj plus Bucharest from Ministry of Health and ANMCS workbooks. Clinical bed counts are attached only on confident ANMCS matches; county bed totals are kept separately."
+        "The committed national mart covers 592 ANMCS providers and all 42 Ministry county bed totals. Clinical bed counts are attached only on confident ANMCS matches; county bed totals are kept separately."
       ]
     }
   ]

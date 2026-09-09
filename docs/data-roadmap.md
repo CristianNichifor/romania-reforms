@@ -80,8 +80,10 @@ First slice:
 - done: provider identity, beds, specialty, owner type and accreditation
 - done: explicit location confidence for each provider
 - done: named exclusions for unmatched providers
-- next: expand beyond the Cluj and Bucharest sample and add address/geocoding evidence
-  before routing or service-access views rely on provider distance
+- done: expand beyond the Cluj and Bucharest sample to the national ANMCS provider roster
+  and all Ministry county bed totals
+- next: add address/geocoding evidence before routing or service-access views rely on
+  provider distance
 
 This should support service-access views in `administrativ`, `justitie` and `transport`
 without each simulator building its own hospital roster.
