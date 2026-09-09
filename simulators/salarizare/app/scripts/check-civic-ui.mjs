@@ -1,4 +1,4 @@
-import { chromium } from '@playwright/test';
+import { chromium, firefox, webkit } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -7,6 +7,9 @@ import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
 const stage = 'after';
+const browserName = process.env.CIVIC_BROWSER || 'chromium';
+const browserType = { chromium, firefox, webkit }[browserName];
+assert.ok(browserType, `Unsupported CIVIC_BROWSER: ${browserName}`);
 const app = fileURLToPath(new URL('../', import.meta.url));
 const out = (await mkdtemp(join(tmpdir(), 'pay-civic-ui-'))) + '/';
 const port = process.env.DEMO_PORT || '5200';
@@ -22,7 +25,7 @@ try {
     try { if ((await fetch(url)).ok) break; } catch {}
     await new Promise(resolve => setTimeout(resolve, 250));
   }
-  browser = await chromium.launch({ executablePath: process.env.DEMO_CHROMIUM });
+  browser = await browserType.launch({ executablePath: browserName === 'chromium' ? process.env.DEMO_CHROMIUM : undefined });
   const context = await browser.newContext();
   const page = await context.newPage();
   const errors = [];
@@ -35,7 +38,7 @@ try {
   });
   for (const mode of ['light', 'dark']) {
     await page.emulateMedia({ colorScheme: mode });
-    for (const width of [390, 1440]) {
+    for (const width of [320, 390, 1440]) {
       await page.setViewportSize({ width, height: 1000 });
       await page.goto(url);
       await page.reload();
@@ -48,6 +51,7 @@ try {
         assert.equal(await select.evaluate(el => getComputedStyle(el).paddingRight), '44px');
         await select.focus();
         await page.keyboard.press('Tab');
+        assert.equal(await page.locator('.anchor-controls input[type=range]').evaluate(el => el === document.activeElement), true);
         await page.keyboard.press('Shift+Tab');
         assert.equal(await select.evaluate(el => el === document.activeElement && getComputedStyle(el).outlineStyle === 'solid'), true);
         const scan = await new AxeBuilder({ page }).include('.civic-pay .civic-field').withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
@@ -59,6 +63,7 @@ try {
   const scenarios = [];
   for (const anchor of ['avg', 'gov', 'floor']) {
     await page.locator('.anchor-controls select').selectOption(anchor);
+    assert.equal(await page.locator('.anchor-controls select').inputValue(), anchor);
     for (const years of [0, 35]) {
       await page.locator('.anchor-controls input[type=range]').focus();
       await page.keyboard.press(years === 0 ? 'Home' : 'End');
@@ -78,8 +83,8 @@ try {
   }
   assert.deepEqual(errors, []);
   assert.deepEqual(external, []);
-  await writeFile(out + 'results.json', JSON.stringify({ stage, results, scenarios, errors, external }, null, 2));
-  console.log(JSON.stringify({ output: out, layouts: results.length, scenarios: scenarios.length, errors, external, matchesBaseline: Boolean(process.env.CIVIC_BASELINE) }));
+  await writeFile(out + 'results.json', JSON.stringify({ stage, browserName, results, scenarios, errors, external }, null, 2));
+  console.log(JSON.stringify({ browserName, output: out, layouts: results.length, scenarios: scenarios.length, errors, external, matchesBaseline: Boolean(process.env.CIVIC_BASELINE) }));
 } finally {
   if (browser) await browser.close();
   if (server.exitCode === null) server.kill('SIGTERM');
