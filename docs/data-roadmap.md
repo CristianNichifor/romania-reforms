@@ -102,8 +102,11 @@ First slice:
 - done: build `health-point-access-2024-2026` from pointAccessEligible providers only,
   with 162 accepted provider coordinates, 430 named exclusions and an explicit
   `distanceMethod: not-computed` contract for downstream consumers
-- next: wire the point-level health access view into the first consumer with an explicit
-  straight-line or routed distance method
+- done: wire the point-level health access view into `transport` as nearest accepted provider
+  straight-line distances from UAT centroids; the committed run computes 3,136 routed-row
+  distances, with 18.7 km unweighted median and 13.5 km population-weighted median
+- next: wire the point-level health access view into `justitie`'s court/police/health
+  comparison, keeping UAT-level local-provider counts separate from nearest-provider distance
 
 This should support service-access views in `administrativ`, `justitie` and `transport`
 without each simulator building its own hospital roster.

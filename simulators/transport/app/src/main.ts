@@ -61,14 +61,16 @@ import {
  */
 
 type Timetable = 'uncoordinated' | 'pulsed';
-type HealthRow = [number | null, number | null, number | null, 0 | 1] | null;
+type HealthRow = [number | null, number | null, number | null, 0 | 1, number | null] | null;
 
 const base = import.meta.env.BASE_URL;
 const asset = (name: string) => `${base}data/${name}`;
 
 const fmt = new Intl.NumberFormat('ro-RO');
+const fmt1 = new Intl.NumberFormat('ro-RO', { maximumFractionDigits: 1 });
 const min = (v: number) => `${fmt.format(Math.round(v))} min`;
 const bn = (v: number) => `${(v / 1e9).toFixed(2).replace('.', ',')} mld lei`;
+const km = (metres: number) => `${fmt1.format(metres / 1000)} km`;
 
 function hash() {
   return new URLSearchParams(location.hash.slice(1));
@@ -290,19 +292,24 @@ async function main() {
   function healthHtml(i: number): string {
     const row = healthRows[i];
     if (!row) return '';
-    const [providers, bedProviders, beds, sectorExcluded] = row;
+    const [providers, bedProviders, beds, sectorExcluded, nearestMetres] = row;
+    const nearest =
+      nearestMetres === null ? '' : ` · punct acceptat la ${km(nearestMetres)} în linie dreaptă`;
     if (sectorExcluded === 1 || providers === null) {
-      return '<br><span style="opacity:.7">sănătate: București doar la nivel de municipiu</span>';
+      return (
+        '<br><span style="opacity:.7">sănătate: București doar la nivel de municipiu' +
+        `${nearest}</span>`
+      );
     }
     if (providers === 0) {
-      return '<br><span style="opacity:.7">sănătate: fără furnizor local eligibil</span>';
+      return `<br><span style="opacity:.7">sănătate: fără furnizor local eligibil${nearest}</span>`;
     }
     const label = providers === 1 ? 'furnizor local eligibil' : 'furnizori locali eligibili';
     const bedText =
       bedProviders && beds
         ? ` · ${fmt.format(bedProviders)} cu paturi (${fmt.format(Math.round(beds))} paturi)`
         : '';
-    return `<br><span style="opacity:.7">sănătate: ${fmt.format(providers)} ${label}${bedText}</span>`;
+    return `<br><span style="opacity:.7">sănătate: ${fmt.format(providers)} ${label}${bedText}${nearest}</span>`;
   }
 
   // The legend gives five bands; the road itself knows its exact signed value, and that is the

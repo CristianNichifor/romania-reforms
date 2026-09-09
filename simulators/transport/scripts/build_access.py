@@ -38,7 +38,11 @@ OUT = ROOT / "data" / "access.json"
 sys.path.insert(0, str(ADMINISTRATIV))
 
 from scripts.county_times import county_times  # noqa: E402
-from scripts.health_access import DEFAULT_HEALTH_ACCESS, enrich_access_document  # noqa: E402
+from scripts.health_access import (  # noqa: E402
+    DEFAULT_HEALTH_ACCESS,
+    DEFAULT_HEALTH_POINT_ACCESS,
+    enrich_access_document,
+)
 from scripts.rail_costs import REFERENCE_TRAINS_PER_WEEKDAY  # noqa: E402
 from scripts.rail_speeds import class_commercial_kmh  # noqa: E402
 from scripts.tiers import DAY_PROFILE, service_for  # noqa: E402
@@ -211,6 +215,11 @@ def main(argv: list[str] | None = None) -> int:
             f"Missing {DEFAULT_HEALTH_ACCESS}. Run: uv run python "
             "packages/health_access/scripts/build_health_service_access.py"
         )
+    if not DEFAULT_HEALTH_POINT_ACCESS.exists():
+        raise SystemExit(
+            f"Missing {DEFAULT_HEALTH_POINT_ACCESS}. Run: uv run python "
+            "packages/health_access/scripts/build_health_point_access.py"
+        )
 
     network = json.loads((ROOT / "data/network.json").read_text(encoding="utf-8"))
     hub_of = json.loads((ROOT / "data/hubs.json").read_text(encoding="utf-8"))["hubOf"]
@@ -220,9 +229,25 @@ def main(argv: list[str] | None = None) -> int:
     times = pd.read_parquet(ROOT / "data/road_time.parquet")
     adjacency = pd.read_parquet(processed / "adjacency.parquet")
     uats = gpd.read_file(processed / "uat_geometry.gpkg", layer="uat")
+    if uats.crs is None:
+        raise SystemExit("UAT geometry has no CRS; cannot derive health point distances")
     county = dict(zip(uats.siruta, uats.county_code, strict=True))
     population = dict(zip(uats.siruta, uats.population, strict=True))
     name = dict(zip(uats.siruta, uats.name_uat, strict=True))
+
+    # Centroids are only a proxy for the settlement point, and the limitation says so. They
+    # are still computed in a projected CRS first; a centroid in lon/lat would add distortion
+    # before the health distance model even starts.
+    projected_uats = uats.to_crs(3844)
+    centroid_frame = gpd.GeoDataFrame(
+        projected_uats[["siruta"]].copy(),
+        geometry=projected_uats.geometry.centroid,
+        crs=projected_uats.crs,
+    ).to_crs(4326)
+    uat_locations = {
+        str(row.siruta): {"latitude": row.geometry.y, "longitude": row.geometry.x}
+        for row in centroid_frame.itertuples()
+    }
 
     edge_s: dict[tuple[str, str], float] = {}
     for a, b, seconds in zip(times.a_siruta, times.b_siruta, times.road_s, strict=True):
@@ -373,14 +398,18 @@ def main(argv: list[str] | None = None) -> int:
             "source": "retea-plus-orar",
             "locator": (
                 "traseele din data/network.json, timpii din data/road_time.parquet, "
-                "standardul de serviciu din scripts/tiers.py"
+                "standardul de serviciu din scripts/tiers.py, vederea "
+                "health-point-access-2024-2026 cu distanță în linie dreaptă de la "
+                "centroidul UAT"
             ),
             "confidence": "derived",
             "note": (
                 "Călătoria este rabatere plus așteptare plus trunchi. Așteptarea "
                 "necoordonată este jumătate din intervalul de succedare, rezultatul clasic "
                 "pentru sosiri uniforme; cea cu corespondență este staționarea trunchiului. "
-                "Aceleași autobuze în ambele cazuri."
+                "Aceleași autobuze în ambele cazuri. Cel mai apropiat punct de sănătate este "
+                "calculat separat, în linie dreaptă, de la centroidul UAT la coordonata "
+                "furnizorului acceptat."
             ),
         },
         "summary": summary,
@@ -443,7 +472,8 @@ def main(argv: list[str] | None = None) -> int:
         ],
     }
     health_access = json.loads(DEFAULT_HEALTH_ACCESS.read_text(encoding="utf-8"))
-    document = enrich_access_document(document, health_access)
+    health_point_access = json.loads(DEFAULT_HEALTH_POINT_ACCESS.read_text(encoding="utf-8"))
+    document = enrich_access_document(document, health_access, health_point_access, uat_locations)
     summary = document["summary"]
 
     OUT.write_text(json.dumps(document, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -475,6 +505,12 @@ def main(argv: list[str] | None = None) -> int:
         f"\nhealth access: {s['healthAccessUatsWithLocalProvider']:,}/"
         f"{s['healthAccessRowsWithData']:,} routed UATs have a local eligible provider; "
         f"{s['healthAccessLocalProviders']:,} providers counted locally"
+    )
+    print(
+        f"health points: nearest accepted provider computed with "
+        f"{s['healthPointAccessDistanceMethod']} for "
+        f"{s['healthPointAccessRowsWithDistance']:,} UATs; population-weighted median "
+        f"{s['healthPointAccessPopulationWeightedMedianNearestMetres'] / 1000:.1f} km"
     )
     print("\nshare of population within:")
     for m, v in s["within"].items():

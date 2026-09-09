@@ -50,5 +50,6 @@ describe('map hover', () => {
     expect(main).toContain("fetch(asset('health.json'))");
     expect(main).toContain('function healthHtml');
     expect(main).toContain('sănătate:');
+    expect(main).toContain('punct acceptat');
   });
 });
