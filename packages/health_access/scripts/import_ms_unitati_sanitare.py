@@ -1,8 +1,8 @@
 """Extract Ministry of Health provider address evidence from the public map page.
 
-The source page embeds marker popups with provider names, addresses and detail
-links. This importer keeps a compact, auditable address extract and leaves the
-raw HTML page out of git.
+The source page embeds marker popups with provider names, addresses, detail
+links and marker coordinates. This importer keeps a compact, auditable extract
+and leaves the raw HTML page out of git.
 
 Usage:
     uv run python packages/health_access/scripts/import_ms_unitati_sanitare.py
@@ -26,7 +26,7 @@ from typing import Any, Final
 PACKAGE_ROOT = Path(__file__).resolve().parents[1]
 SOURCE_ID: Final[str] = "ministerul-sanatatii-unitati-sanitare-2026"
 OUT = PACKAGE_ROOT / "sources/ms-unitati-sanitare-2026.json"
-TRANSFORM_VERSION: Final[int] = 1
+TRANSFORM_VERSION: Final[int] = 2
 UA: Final[str] = "romania-reforms/0.1 (+https://github.com/CristianNichifor/romania-reforms)"
 MS_UNITATI_SANITARE_URL: Final[str] = "https://ms.ro/ro/unitati-sanitare/"
 
@@ -179,6 +179,8 @@ def parse_source_records(source_text: str) -> list[dict[str, Any]]:
         address = clean_text(match.group("address"))
         relative_url = clean_text(match.group("url"))
         detail_url = urllib.parse.urljoin(MS_UNITATI_SANITARE_URL, relative_url)
+        latitude = float(match.group("lat"))
+        longitude = float(match.group("lng"))
         records.append(
             {
                 "sourceRecordId": f"ms-unitati-sanitare-{ordinal:03d}",
@@ -189,6 +191,9 @@ def parse_source_records(source_text: str) -> list[dict[str, Any]]:
                 ),
                 "address": address,
                 "hasStreetAddress": has_street_address(address, name),
+                "latitude": latitude,
+                "longitude": longitude,
+                "hasPublishedCoordinate": True,
                 "detailUrl": detail_url,
             }
         )
@@ -225,6 +230,9 @@ def build_document(source_text: str, retrieved_date: str) -> dict[str, Any]:
             "sourceRecordsWithStreetAddress": sum(
                 1 for record in records if record["hasStreetAddress"]
             ),
+            "sourceRecordsWithCoordinates": sum(
+                1 for record in records if record["hasPublishedCoordinate"]
+            ),
             "duplicateSourceNames": sum(1 for count in name_counts.values() if count > 1),
             "duplicateDetailUrls": sum(1 for count in url_counts.values() if count > 1),
         },
@@ -241,13 +249,13 @@ def build_document(source_text: str, retrieved_date: str) -> dict[str, Any]:
                 ),
             ),
             limitation(
-                "map-coordinates-out-of-scope",
+                "map-coordinates-source-evidence",
                 "material",
-                ["records"],
+                ["latitude", "longitude", "hasPublishedCoordinate"],
                 (
-                    "The source page also embeds marker coordinates, but this extract "
-                    "does not promote them to point evidence. Coordinate acceptance is "
-                    "handled by a later slice."
+                    "The source page embeds marker coordinates. This extract retains "
+                    "them as source evidence; the provider-point builder decides "
+                    "which coordinates can become point evidence."
                 ),
             ),
             limitation(
@@ -290,6 +298,7 @@ def main(argv: list[str] | None = None) -> int:
     print(
         f"wrote {args.output} with {document['summary']['sourceRecords']} source rows "
         f"({document['summary']['sourceRecordsWithStreetAddress']} street addresses; "
+        f"{document['summary']['sourceRecordsWithCoordinates']} coordinates; "
         f"source sha256 {sha256_text(source_text)[:12]})"
     )
     return 0

@@ -61,6 +61,9 @@ def source_record(
     address: str,
     county_code: str | None = "TS",
     has_street_address: bool = True,
+    latitude: float | None = 44.1,
+    longitude: float | None = 26.1,
+    has_published_coordinate: bool = True,
 ) -> dict:
     return {
         "sourceRecordId": source_record_id,
@@ -69,6 +72,9 @@ def source_record(
         "countyCode": county_code,
         "address": address,
         "hasStreetAddress": has_street_address,
+        "latitude": latitude,
+        "longitude": longitude,
+        "hasPublishedCoordinate": has_published_coordinate,
         "detailUrl": f"https://ms.ro/ro/unitati-sanitare/{source_record_id}/",
     }
 
@@ -205,33 +211,45 @@ def test_committed_provider_points_cover_the_health_mart():
     assert points["summary"]["serviceAccessBlockedProviders"] == 268
     assert points["summary"]["addressSourceRecords"] == 301
     assert points["summary"]["addressSourceRecordsWithStreetAddress"] == 290
+    assert points["summary"]["addressSourceRecordsWithCoordinates"] == 301
     assert points["summary"]["addressMatchedProviders"] == 174
     assert points["summary"]["ambiguousAddressProviders"] == 0
-    assert points["summary"]["pointAccessEligibleProviders"] == 0
-    assert points["summary"]["pointAccessBlockedProviders"] == 592
+    assert points["summary"]["pointAccessEligibleProviders"] == 162
+    assert points["summary"]["pointAccessBlockedProviders"] == 430
     assert points["summary"]["providersWithAddress"] == 174
-    assert points["summary"]["providersWithCoordinates"] == 0
+    assert points["summary"]["providersWithCoordinates"] == 162
+    assert points["summary"]["coordinateMatchedProviders"] == 174
+    assert points["summary"]["coordinateAcceptedProviders"] == 162
+    assert points["summary"]["coordinateRejectedProviders"] == 12
     assert points["summary"]["addressEvidence"] == {
         "none": 418,
         "official-provider-address": 174,
+    }
+    assert points["summary"]["pointConfidence"] == {
+        "none": 430,
+        "official-coordinate": 162,
     }
     assert (
         points["summary"]["blockedReasons"]["county-only-location"]
         == health_mart["summary"]["locationConfidence"]["county-only"]
     )
-    assert (
-        points["summary"]["blockedReasons"]["no-point-evidence"]
-        == health_mart["summary"]["records"]
-        - health_mart["summary"]["locationConfidence"]["county-only"]
-    )
-    assert all(not provider["pointAccessEligible"] for provider in points["providers"])
     assert all(
-        provider["pointConfidence"] == "none" for provider in points["providers"]
+        not provider["pointAccessEligible"]
+        for provider in points["providers"]
+        if provider["locationConfidence"] == "county-only"
     )
-    assert len(points["exclusions"]) == 592
+    assert points["summary"]["blockedReasons"]["no-point-evidence"] == 162
+    assert sum(1 for provider in points["providers"] if provider["pointAccessEligible"]) == 162
+    assert all(
+        provider["pointConfidence"] == "official-coordinate"
+        for provider in points["providers"]
+        if provider["pointAccessEligible"]
+    )
+    assert len(points["exclusions"]) == 430
 
     limitation_ids = {limitation["id"] for limitation in points["limitations"]}
-    assert "coordinate-evidence-not-yet-imported" in limitation_ids
+    assert "coordinate-source-ministry-marker" in limitation_ids
+    assert "coordinate-uat-polygon-validation-not-applied" in limitation_ids
     assert "address-source-exact-name-only" in limitation_ids
     assert "county-only-not-promoted-to-points" in limitation_ids
 
@@ -254,22 +272,100 @@ def test_build_document_attaches_exact_county_safe_address_evidence():
         "sourceValue": "Strada Sanatatii nr. 1, Municipiul Test",
         "retrievedDate": "2026-09-09",
     }
-    assert provider["latitude"] is None
-    assert provider["longitude"] is None
-    assert provider["pointAccessEligible"] is False
-    assert provider["pointAccessBlockedReason"] == "no-point-evidence"
+    assert provider["latitude"] == 44.1
+    assert provider["longitude"] == 26.1
+    assert provider["pointConfidence"] == "official-coordinate"
+    assert provider["pointEvidence"] == {
+        "method": "published-coordinate",
+        "source": "ministerul-sanatatii-unitati-sanitare-2026",
+        "sourceValue": "44.100000,26.100000",
+        "retrievedDate": "2026-09-09",
+    }
+    assert provider["pointAccessEligible"] is True
+    assert provider["pointAccessBlockedReason"] is None
 
     assert document["registry"]["addressSource"]["id"] == (
         "ministerul-sanatatii-unitati-sanitare-2026"
     )
     assert document["summary"]["addressSourceRecords"] == 1
     assert document["summary"]["addressSourceRecordsWithStreetAddress"] == 1
+    assert document["summary"]["addressSourceRecordsWithCoordinates"] == 1
     assert document["summary"]["addressMatchedProviders"] == 1
+    assert document["summary"]["pointAccessEligibleProviders"] == 1
+    assert document["summary"]["pointAccessBlockedProviders"] == 1
     assert document["summary"]["providersWithAddress"] == 1
+    assert document["summary"]["providersWithCoordinates"] == 1
+    assert document["summary"]["coordinateMatchedProviders"] == 1
+    assert document["summary"]["coordinateAcceptedProviders"] == 1
+    assert document["summary"]["coordinateRejectedProviders"] == 0
     assert document["summary"]["addressEvidence"] == {
         "none": 1,
         "official-provider-address": 1,
     }
+    assert document["summary"]["pointConfidence"] == {
+        "none": 1,
+        "official-coordinate": 1,
+    }
+
+
+def test_build_document_rejects_coordinates_outside_romania_bounds():
+    document = health_provider_points.build_document(
+        fixture_health_mart(),
+        {"healthAccessMartSha256": "a" * 64, "msUnitatiSanitareSha256": "b" * 64},
+        "2026-09-09",
+        fixture_address_source(
+            [
+                source_record(
+                    "ms-unitati-sanitare-001",
+                    "SPITALUL anmcs-2025-001",
+                    "Strada Sanatatii nr. 1, Municipiul Test",
+                    latitude=50.0,
+                    longitude=26.1,
+                )
+            ]
+        ),
+    )
+
+    provider = document["providers"][0]
+
+    assert provider["address"] == "Strada Sanatatii nr. 1, Municipiul Test"
+    assert provider["latitude"] is None
+    assert provider["longitude"] is None
+    assert provider["pointEvidence"]["method"] == "none"
+    assert provider["pointAccessEligible"] is False
+    assert provider["pointAccessBlockedReason"] == "invalid-coordinate"
+    assert document["summary"]["coordinateMatchedProviders"] == 1
+    assert document["summary"]["coordinateAcceptedProviders"] == 0
+    assert document["summary"]["coordinateRejectedProviders"] == 1
+    assert document["summary"]["blockedReasons"]["invalid-coordinate"] == 1
+
+
+def test_build_document_keeps_county_only_address_matches_blocked_from_points():
+    document = health_provider_points.build_document(
+        fixture_health_mart(),
+        {"healthAccessMartSha256": "a" * 64, "msUnitatiSanitareSha256": "b" * 64},
+        "2026-09-09",
+        fixture_address_source(
+            [
+                source_record(
+                    "ms-unitati-sanitare-001",
+                    "SPITALUL anmcs-2025-002",
+                    "Strada Sanatatii nr. 2, Municipiul Test",
+                )
+            ]
+        ),
+    )
+
+    provider = document["providers"][1]
+
+    assert provider["address"] == "Strada Sanatatii nr. 2, Municipiul Test"
+    assert provider["latitude"] is None
+    assert provider["longitude"] is None
+    assert provider["pointAccessEligible"] is False
+    assert provider["pointAccessBlockedReason"] == "county-only-location"
+    assert document["summary"]["coordinateMatchedProviders"] == 1
+    assert document["summary"]["coordinateAcceptedProviders"] == 0
+    assert document["summary"]["coordinateRejectedProviders"] == 1
 
 
 def test_build_document_ignores_non_street_address_source_rows():
@@ -366,4 +462,8 @@ def test_committed_ms_address_source_extract_is_available():
     assert source["id"] == "ministerul-sanatatii-unitati-sanitare-2026"
     assert source["summary"]["sourceRecords"] == 301
     assert source["summary"]["sourceRecordsWithStreetAddress"] > 250
+    assert source["summary"]["sourceRecordsWithCoordinates"] == 301
     assert source["summary"]["duplicateDetailUrls"] == 0
+    assert all(record["hasPublishedCoordinate"] for record in source["records"])
+    assert all(record["latitude"] is not None for record in source["records"])
+    assert all(record["longitude"] is not None for record in source["records"])

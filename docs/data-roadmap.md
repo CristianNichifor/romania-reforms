@@ -96,8 +96,11 @@ First slice:
   rows from point routing until point evidence exists
 - done: import the Ministry of Health `Unitati sanitare` map as a compact source extract and
   attach 174 exact name/county street-address matches without making any provider routeable
-- next: resolve coordinates from accepted address evidence under explicit county and UAT
-  consistency checks
+- done: retain Ministry map marker coordinates and accept 162 exact name/county,
+  service-eligible, non-county-only provider points after source/provider county and Romania
+  bounds checks; UAT polygon containment still needs SIRUTA-keyed geometry
+- next: build a point-level health access view from pointAccessEligible providers, with
+  straight-line/routing method labels so consumers cannot treat blocked rows as local access
 
 This should support service-access views in `administrativ`, `justitie` and `transport`
 without each simulator building its own hospital roster.
