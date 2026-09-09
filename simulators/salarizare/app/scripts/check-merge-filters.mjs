@@ -60,7 +60,9 @@ try {
   await snapshot('combined');
   assert.ok(scenarios[2].cards.length > 0 && scenarios[2].cards.length < scenarios[1].cards.length);
   assert.ok((await cards.locator('.merge-meta').allInnerTexts()).every(text => text.startsWith(`${matchingFamily} · `)));
-  await merged.check();
+  await merged.focus();
+  await page.keyboard.press('Space');
+  await expect(merged).toBeChecked();
   await snapshot('merged');
   assert.ok(scenarios[3].cards.length > 0 && scenarios[3].cards.length < scenarios[2].cards.length);
   assert.equal(await cards.locator('.badge').count(), scenarios[3].cards.length);
@@ -114,10 +116,13 @@ try {
         assert.equal(await family.evaluate(el => el === document.activeElement && getComputedStyle(el).outlineStyle === 'solid'), true);
         await page.keyboard.press('Tab');
         assert.equal(await merged.evaluate(el => el === document.activeElement), true);
+        await expect(merged).toHaveCSS('outline-style', 'solid');
+        await expect(merged).toHaveCSS('width', '20px');
+        await expect(page.locator('.merges-controls .civic-choice')).toHaveCount(1);
         await page.keyboard.press('Shift+Tab');
         await page.keyboard.press('Shift+Tab');
         assert.equal(await search.evaluate(el => el === document.activeElement && getComputedStyle(el).outlineStyle === 'solid'), true);
-        const scan = await new AxeBuilder({ page }).include('.merges-controls .civic-field').withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
+        const scan = await new AxeBuilder({ page }).include('.merges-controls .civic-scope').withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
         assert.deepEqual(scan.violations, []);
       }
       await page.locator('.merges-controls').screenshot({ path: join(output, `${mode}-${width}.png`) });
