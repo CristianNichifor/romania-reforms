@@ -61,7 +61,9 @@ import {
  */
 
 type Timetable = 'uncoordinated' | 'pulsed';
-type HealthRow = [number | null, number | null, number | null, 0 | 1, number | null] | null;
+type HealthRow =
+  | [number | null, number | null, number | null, 0 | 1, number | null, number | null]
+  | null;
 
 const base = import.meta.env.BASE_URL;
 const asset = (name: string) => `${base}data/${name}`;
@@ -292,9 +294,15 @@ async function main() {
   function healthHtml(i: number): string {
     const row = healthRows[i];
     if (!row) return '';
-    const [providers, bedProviders, beds, sectorExcluded, nearestMetres] = row;
+    const [providers, bedProviders, beds, sectorExcluded, nearestMetres, roadProxyMetres] = row;
     const nearest =
-      nearestMetres === null ? '' : ` · punct acceptat la ${km(nearestMetres)} în linie dreaptă`;
+      roadProxyMetres !== null
+        ? ` · punct rutat-proxy ${km(roadProxyMetres)}${
+            nearestMetres === null ? '' : ` (${km(nearestMetres)} linie dreaptă)`
+          }`
+        : nearestMetres === null
+          ? ''
+          : ` · punct acceptat ${km(nearestMetres)} în linie dreaptă`;
     if (sectorExcluded === 1 || providers === null) {
       return (
         '<br><span style="opacity:.7">sănătate: București doar la nivel de municipiu' +

@@ -43,7 +43,18 @@
         "healthPointAccessRowsWithDistance",
         "healthPointAccessDistanceMethod",
         "healthPointAccessMedianNearestMetres",
-        "healthPointAccessPopulationWeightedMedianNearestMetres"
+        "healthPointAccessPopulationWeightedMedianNearestMetres",
+        "healthPointRoadAccessView",
+        "healthPointRoadAccessSourceRows",
+        "healthPointRoadAccessProviders",
+        "healthPointRoadAccessBlockedProviders",
+        "healthPointRoadAccessNamedExclusions",
+        "healthPointRoadAccessRowsWithDistance",
+        "healthPointRoadAccessDistanceMethod",
+        "healthPointRoadAccessProviderSnapMethod",
+        "healthPointRoadAccessRoutingMethod",
+        "healthPointRoadAccessMedianNearestMetres",
+        "healthPointRoadAccessPopulationWeightedMedianNearestMetres"
       ],
       "properties": {
         "uats": { "type": "integer", "minimum": 1 },
@@ -146,6 +157,43 @@
         "healthPointAccessMedianNearestMetres": { "type": "integer", "minimum": 0 },
         "healthPointAccessPopulationWeightedMedianNearestMetres": {
           "type": "integer", "minimum": 0
+        },
+        "healthPointRoadAccessView": {
+          "const": "health-point-road-access-uat-2024-2026"
+        },
+        "healthPointRoadAccessSourceRows": {
+          "description": "Rows in the shared UAT road-proxy source view.",
+          "type": "integer", "minimum": 0
+        },
+        "healthPointRoadAccessProviders": {
+          "description": "Accepted provider points routed through the shared point-to-road proxy.",
+          "type": "integer", "minimum": 0
+        },
+        "healthPointRoadAccessBlockedProviders": {
+          "description": "Providers excluded from routed point calculations because they lack accepted point evidence.",
+          "type": "integer", "minimum": 0
+        },
+        "healthPointRoadAccessNamedExclusions": {
+          "type": "integer", "minimum": 0
+        },
+        "healthPointRoadAccessRowsWithDistance": {
+          "description": "Transport access rows matched to the shared UAT road-proxy view.",
+          "type": "integer", "minimum": 0
+        },
+        "healthPointRoadAccessDistanceMethod": {
+          "const": "road-graph-to-snap-node-plus-straight-line-offset"
+        },
+        "healthPointRoadAccessProviderSnapMethod": {
+          "const": "provider-coordinate-to-administrativ-uat-road-node"
+        },
+        "healthPointRoadAccessRoutingMethod": {
+          "const": "multi-source-dijkstra-road-metres"
+        },
+        "healthPointRoadAccessMedianNearestMetres": {
+          "type": "integer", "minimum": 0
+        },
+        "healthPointRoadAccessPopulationWeightedMedianNearestMetres": {
+          "type": "integer", "minimum": 0
         }
       }
     },
@@ -175,7 +223,9 @@
           "localHealthClinicalBeds",
           "healthAccessSectorRowExcluded",
           "nearestHealthPointProviderId",
-          "nearestHealthPointDistanceMetres"
+          "nearestHealthPointDistanceMetres",
+          "nearestHealthPointRoadProviderId",
+          "nearestHealthPointRoadProxyMetres"
         ],
         "properties": {
           "siruta": { "type": "string", "minLength": 1 },
@@ -208,6 +258,13 @@
           "nearestHealthPointProviderId": { "type": "string", "minLength": 1 },
           "nearestHealthPointDistanceMetres": {
             "description": "Straight-line distance from this UAT centroid to the nearest accepted provider point.",
+            "type": "integer", "minimum": 0
+          },
+          "nearestHealthPointRoadProviderId": {
+            "type": "string", "minLength": 1
+          },
+          "nearestHealthPointRoadProxyMetres": {
+            "description": "Road-proxy distance from this UAT road node to the nearest accepted provider point snap.",
             "type": "integer", "minimum": 0
           }
         }

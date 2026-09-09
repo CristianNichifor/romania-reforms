@@ -15,6 +15,7 @@ from typing import Any
 from scripts.health_access import (
     DEFAULT_HEALTH_ACCESS,
     DEFAULT_HEALTH_POINT_ACCESS,
+    DEFAULT_HEALTH_POINT_ROAD_ACCESS,
     enrich_access_document,
 )
 
@@ -66,6 +67,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--access", type=Path, default=DEFAULT_ACCESS)
     parser.add_argument("--health-access", type=Path, default=DEFAULT_HEALTH_ACCESS)
     parser.add_argument("--health-point-access", type=Path, default=DEFAULT_HEALTH_POINT_ACCESS)
+    parser.add_argument(
+        "--health-point-road-access",
+        type=Path,
+        default=DEFAULT_HEALTH_POINT_ROAD_ACCESS,
+    )
     parser.add_argument("--uat-geometry", type=Path, default=DEFAULT_UAT_GEOMETRY)
     parser.add_argument("--attributes", type=Path, default=DEFAULT_ATTRIBUTES)
     parser.add_argument("--out", type=Path, default=DEFAULT_ACCESS)
@@ -77,6 +83,10 @@ def main(argv: list[str] | None = None) -> int:
         raise SystemExit(f"Missing {args.health_access} - build packages/health_access first")
     if not args.health_point_access.exists():
         raise SystemExit(f"Missing {args.health_point_access} - build packages/health_access first")
+    if not args.health_point_road_access.exists():
+        raise SystemExit(
+            f"Missing {args.health_point_road_access} - build packages/health_access first"
+        )
     if not args.uat_geometry.exists():
         raise SystemExit(f"Missing {args.uat_geometry} - build administrativ web data first")
     if not args.attributes.exists():
@@ -87,9 +97,11 @@ def main(argv: list[str] | None = None) -> int:
         read_json(args.health_access),
         read_json(args.health_point_access),
         read_uat_locations(args.uat_geometry, args.attributes),
+        read_json(args.health_point_road_access),
     )
     args.out.write_text(
-        json.dumps(document, ensure_ascii=False, indent=2) + "\n",
+        # This payload is row-heavy and the repository has a strict 60 MB tracked-size gate.
+        json.dumps(document, ensure_ascii=False, separators=(",", ":")) + "\n",
         encoding="utf-8",
     )
 
@@ -103,6 +115,11 @@ def main(argv: list[str] | None = None) -> int:
         f"{summary['healthPointAccessRowsWithDistance']:,} transport UAT rows carry nearest "
         f"provider point distances from {summary['healthPointAccessView']} with "
         f"{summary['healthPointAccessDistanceMethod']}"
+    )
+    print(
+        f"{summary['healthPointRoadAccessRowsWithDistance']:,} transport UAT rows carry nearest "
+        f"provider point road-proxy distances from {summary['healthPointRoadAccessView']} with "
+        f"{summary['healthPointRoadAccessDistanceMethod']}"
     )
     print(f"Wrote {display_path(args.out)}")
     return 0
