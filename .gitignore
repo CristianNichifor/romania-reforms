@@ -56,6 +56,10 @@ simulators/impozit-teren/cache/
 # administrativ's processed geometry exists locally; CI and deploy fetch the pinned release copy.
 simulators/impozit-teren/data/harta-uat.geojson
 
+# Full multi-year local-finance marts are reproducible release assets; committing one would
+# exceed the tracked-tree size budget. Keep the small sample and current-year mart in git.
+packages/local_finance/data/local-finance-mart-2023-2025.json
+
 # The Romanian language pack for tesseract, fetched by hand for ocr_cache.py.
 # 2.3 MB of model weights that belong to the tesseract project, not to this repository.
 simulators/impozit-teren/tessdata/

@@ -43,8 +43,10 @@ First slice:
 - done: inspect the official `data.gov.ro` Arierate package, add a compact UAT resource index,
   and add importer hooks for the legacy UAT XLS workbooks; the official package only covers
   2013-09-30 through 2018-06-30, so it cannot populate the 2025 mart
-- next: move a 2023-2025 national expansion to release assets, and keep current arrears sourcing
-  as a separate discovery task unless a newer official workbook appears
+- done: publish the full 2023-2025 national mart as a release asset so the full history is
+  downloadable without pushing the tracked tree past the repository size gate
+- next: wire the local-finance mart into a first consuming simulator view, starting with the
+  indicators that are already proven by the mart and validation report
 
 Useful first indicators:
 

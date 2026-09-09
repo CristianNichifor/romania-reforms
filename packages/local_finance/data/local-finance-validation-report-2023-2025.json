@@ -2,50 +2,54 @@
   "$schema": "../schema/local-finance-validation-report.schema.json",
   "id": "local-finance-validation-report-2023-2025",
   "title": "Local finance mart validation report, 2023-2025",
-  "martId": "local-finance-mart-sample-2023-2025",
+  "martId": "local-finance-mart-2023-2025",
   "periodStart": "2023",
   "periodEnd": "2025",
-  "retrievedDate": "2026-09-08",
+  "retrievedDate": "2026-09-09",
   "summary": {
-    "checks": 5,
+    "checks": 6,
     "passed": 3,
-    "warnings": 2,
+    "warnings": 3,
     "failed": 0,
     "notRun": 0
   },
   "checks": [
     {
-      "id": "sample-scope",
+      "id": "full-national-scope",
       "status": "pass",
-      "text": "Sample covers ten UATs over three years, including a county seat, a Bucharest sector and rural communes from at least three counties.",
+      "text": "Full mart covers the national Transparenta UAT roster, including county councils that file under county letter codes.",
       "metrics": {
-        "uats": 10,
+        "uats": 3228,
+        "numericUats": 3187,
+        "countyCouncils": 41,
         "years": 3,
-        "ruralCommuneCounties": 4
+        "records": 9684,
+        "expectedRecords": 9684
       }
     },
     {
       "id": "registry-join",
       "status": "pass",
-      "text": "Every sampled SIRUTA joins to the shared UAT registry and carries a CUI.",
+      "text": "Every numeric SIRUTA joins to the shared UAT registry and carries a CUI; county-council letter codes are kept outside that join.",
       "metrics": {
-        "registryMatchedUats": 10,
-        "sampleUats": 10
+        "registryMatchedUats": 3187,
+        "numericUats": 3187,
+        "countyCouncils": 41
       }
     },
     {
       "id": "transparenta-line-items",
       "status": "pass",
-      "text": "Every sampled UAT-year has at least one revenue or spending line item.",
+      "text": "Every UAT-year has at least one revenue or spending line item.",
       "metrics": {
-        "records": 30,
+        "records": 9684,
         "emptyRecords": 0
       }
     },
     {
       "id": "development-expense-type-coverage",
       "status": "warning",
-      "text": "Transparenta returns no development-spending expense-type rows for at least one sampled year; the mart keeps those fields as source-missing zeros with a named limitation.",
+      "text": "Transparenta returns no development-spending expense-type rows for at least one requested year; the mart keeps those fields as source-missing zeros with a named limitation.",
       "metrics": {
         "missingYears": "2023"
       }
@@ -61,6 +65,18 @@
         "transparentaSpendingRon": 164693368043.7,
         "dataGovSpendingRon": 123426088731.0,
         "spendingRelativeDifference": 0.3343
+      }
+    },
+    {
+      "id": "data-gov-arrears-coverage",
+      "status": "warning",
+      "text": "The official data.gov.ro Arierate package was inspected, but it has no UAT arrears resource for the mart year(s); arrears remain null rather than using stale source snapshots.",
+      "metrics": {
+        "requestedYears": "2023,2024,2025",
+        "coveredYears": "2013,2014,2015,2016,2017,2018",
+        "missingYears": "2023,2024,2025",
+        "latestUatSnapshotDate": "2018-06-30",
+        "recordsWithArrears": 0
       }
     }
   ],
@@ -104,12 +120,13 @@
       "text": "Own revenue is derived by excluding functional-code prefixes for income-tax shares, VAT allocations, subsidies and EU funds. Moving a prefix changes the indicator, so the prefix list is published with the mart."
     },
     {
-      "id": "arrears-not-imported-yet",
+      "id": "data-gov-arrears-period-unavailable",
       "severity": "material",
       "affects": [
-        "arrearsRon"
+        "arrearsRon",
+        "arrearsPerInhabitantRon"
       ],
-      "text": "The first slice does not import arrears. The field is present and null so downstream consumers can depend on the schema without mistaking missing arrears for zero arrears."
+      "text": "The official data.gov.ro arrears package was inspected, but it has no UAT arrears resource covering this mart period; the latest indexed UAT snapshot is 2018-06-30. Arrears stay null rather than being backfilled from stale data."
     },
     {
       "id": "development-expense-type-missing-for-year",
@@ -128,6 +145,22 @@
         "perInhabitantIndicators"
       ],
       "text": "The shared UAT registry has no official POP107D population split for Bucharest sectors. Sector rows keep Transparenta roster population as a fallback and mark the source on each record."
+    },
+    {
+      "id": "data-gov-arrears-current-years-unavailable",
+      "severity": "material",
+      "affects": [
+        "arrearsRon"
+      ],
+      "text": "The official data.gov.ro Arierate package has no UAT arrears resources after 2018-06-30 in the CKAN metadata inspected for this import, so current mart years must keep arrears null unless a newer official workbook is supplied separately."
+    },
+    {
+      "id": "data-gov-arrears-duplicate-uploads",
+      "severity": "note",
+      "affects": [
+        "source"
+      ],
+      "text": "Several monthly UAT arrears snapshots have duplicate resource uploads. The compact index keeps one resource per snapshot date, preferring the later CKAN resource creation timestamp."
     }
   ]
 }

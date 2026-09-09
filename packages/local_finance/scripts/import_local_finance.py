@@ -1717,6 +1717,11 @@ def main() -> int:
         write_json(args.data_gov_arrears_index_out, arrears_resources)
         print(f"Wrote {display_path(args.data_gov_arrears_index_out)}")
 
+    data_gov = (
+        data_gov_2024_totals(args.data_gov_2024_workbook) if args.data_gov_2024_workbook else None
+    )
+    transparenta = transparenta_national_totals(2024) if data_gov else None
+
     if args.existing_mart:
         mart = json.loads(args.existing_mart.read_text(encoding="utf-8"))
         if args.arrears_workbook:
@@ -1741,7 +1746,9 @@ def main() -> int:
                 arrears_resources=arrears_resources,
             )
             write_json(args.existing_mart, mart)
-        report = build_validation_report(mart, arrears_resources=arrears_resources)
+        report = build_validation_report(
+            mart, data_gov=data_gov, transparenta=transparenta, arrears_resources=arrears_resources
+        )
         report_path = args.out_dir / f"{report['id']}.json"
         write_json(report_path, report)
         print(f"Wrote {report_path.relative_to(REPO_ROOT)}")
