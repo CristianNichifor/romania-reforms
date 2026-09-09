@@ -138,8 +138,13 @@ First slice:
   `reviewed-published-coordinate` evidence, raising the point layer to 206 accepted provider
   coordinates and lowering named exclusions to 386; refreshed consumers report 26.5 km transport
   road-proxy median and 18.0 km justitie point-road median
-- next: keep the four locality-only Ministry overlaps blocked until stronger provider-specific
-  evidence appears, and start source acquisition for the 114 no-candidate providers
+- done: add `health-provider-point-source-acquisition-2024-2026` as a non-evidence work queue
+  for the remaining 118 no-point providers: 4 locality-only Ministry overlaps needing
+  provider-specific corroboration, 13 public bed providers with no Ministry candidate, 45 other
+  public no-candidate rows, and 56 private or unknown no-candidate rows
+- next: execute the first source-acquisition batch against the 4 locality-only overlaps and 13
+  public bed no-candidate rows, promoting only rows with source-specific address or coordinate
+  evidence and keeping unresolved rows blocked
 
 This should support service-access views in `administrativ`, `justitie` and `transport`
 without each simulator building its own hospital roster.

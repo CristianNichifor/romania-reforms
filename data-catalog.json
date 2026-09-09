@@ -206,9 +206,9 @@
       ],
       "storagePolicy": "Provider summary JSON can be committed if small; geocoded/routing outputs should become release assets.",
       "nextSlice": {
-        "scope": "Health low-signal candidate source acquisition.",
-        "deliverable": "Resolve the four remaining locality-only Ministry overlaps only if stronger provider-specific evidence can pin a source row, then begin source acquisition for the 114 no-candidate providers.",
-        "doneWhen": "No locality-only overlap is promoted without provider-specific evidence; accepted matches regenerate downstream, and unresolved rows remain named exclusions."
+        "scope": "Health first source-acquisition batch.",
+        "deliverable": "Use the source-acquisition queue to verify the four locality-only Ministry overlaps and the 13 public bed providers with no Ministry candidate against provider-specific sources.",
+        "doneWhen": "Only rows with source-specific address or coordinate evidence are promoted; unresolved rows remain named exclusions and the queue regenerates with lower counts."
       },
       "notes": [
         "The committed national mart covers 592 ANMCS providers and all 42 Ministry county bed totals. Clinical bed counts are attached only on confident ANMCS matches; county bed totals are kept separately.",
@@ -225,7 +225,8 @@
         "justitie now consumes health-point-road-access-uat-2024-2026 as the first road-proxy consumer. It reports the shared routed provider-point proxy beside the straight-line point distance and the older UAT-level routed hospital upper bound.",
         "transport now consumes health-point-road-access-uat-2024-2026 directly. It reports 3,136 nearest accepted provider-point road-proxy distances with the shared snap/routing methods, 26.5 km unweighted median and 17.9 km population-weighted median, while keeping the straight-line point metric as an explicitly labelled comparison.",
         "health-provider-point-evidence-review-2024-2026 is a manual-review queue for the 118 service-eligible providers still blocked by no-point-evidence after the coordinate-only review pass. It finds 4 providers with locality-only unused Ministry review candidates and 114 providers with no Ministry candidate; candidate rows are not accepted point evidence.",
-        "The high-signal street-backed review candidates promoted in the latest alias pass are anmcs-2025-230 to ms-unitati-sanitare-121, anmcs-2025-261 to ms-unitati-sanitare-274 and anmcs-2025-279 to ms-unitati-sanitare-043. The reviewed coordinate-only pass then promoted anmcs-2025-001 to ms-unitati-sanitare-159, anmcs-2025-236 to ms-unitati-sanitare-065, anmcs-2025-256 to ms-unitati-sanitare-069 and anmcs-2025-362 to ms-unitati-sanitare-066 without creating address evidence. The remaining locality-only overlaps stay out of the alias source."
+        "The high-signal street-backed review candidates promoted in the latest alias pass are anmcs-2025-230 to ms-unitati-sanitare-121, anmcs-2025-261 to ms-unitati-sanitare-274 and anmcs-2025-279 to ms-unitati-sanitare-043. The reviewed coordinate-only pass then promoted anmcs-2025-001 to ms-unitati-sanitare-159, anmcs-2025-236 to ms-unitati-sanitare-065, anmcs-2025-256 to ms-unitati-sanitare-069 and anmcs-2025-362 to ms-unitati-sanitare-066 without creating address evidence. The remaining locality-only overlaps stay out of the alias source.",
+        "health-provider-point-source-acquisition-2024-2026 is a non-evidence work queue for the remaining 118 no-point providers. It prioritizes 4 locality-only Ministry overlaps for provider-specific corroboration, then 13 public bed providers with no Ministry candidate, 45 other public no-candidate providers and 56 private or unknown no-candidate providers. Its source search order covers provider websites, DSP/local-authority pages, official contracting/register sources, OSM named-feature manual review and Ministry locality-candidate verification."
       ]
     }
   ]
