@@ -38,7 +38,7 @@
     "supplementalEvidence": {
       "id": "anmcs-capesaro-provider-point-evidence-2026",
       "reviewedDate": "2026-09-09",
-      "records": 17
+      "records": 46
     }
   },
   "sourceHashes": {
@@ -46,7 +46,7 @@
     "msUnitatiSanitareSha256": "208fc0c281a4d45348eeff5733c37f5ddc2f9fa0d5648cfa9acf07711d503b54",
     "msUnitatiSanitareAliasesSha256": "4cf072835b726731989a11084421ddd62b7f133fcb7367e5b441fe28c19e1944",
     "msUnitatiSanitareCoordinateReviewsSha256": "4f6d9d1bb7109562c56947d129bed931ee27ec5ddc8ebec239559a884d423ed6",
-    "capesaroProviderPointEvidenceSha256": "b8cca0608f686f298e1638a8a5de9bb91fd578dc65bf709d7d4fa1f2cbb40def"
+    "capesaroProviderPointEvidenceSha256": "364c779d2a9e75cc5e7c954b9a68224dc1eb50464cccf0b7e28214afedea287a"
   },
   "transform": {
     "script": "packages/health_access/scripts/build_health_provider_points.py",
@@ -59,36 +59,36 @@
     "addressSourceRecords": 301,
     "addressSourceRecordsWithStreetAddress": 290,
     "addressSourceRecordsWithCoordinates": 301,
-    "supplementalEvidenceRecords": 17,
-    "supplementalEvidenceProviders": 17,
-    "addressMatchedProviders": 231,
+    "supplementalEvidenceRecords": 46,
+    "supplementalEvidenceProviders": 46,
+    "addressMatchedProviders": 260,
     "addressExactMatchedProviders": 174,
     "addressAliasMatchedProviders": 40,
     "ambiguousAddressProviders": 0,
-    "pointAccessEligibleProviders": 223,
-    "pointAccessBlockedProviders": 369,
-    "providersWithAddress": 231,
-    "providersWithCoordinates": 223,
-    "coordinateMatchedProviders": 235,
-    "coordinateAcceptedProviders": 223,
+    "pointAccessEligibleProviders": 252,
+    "pointAccessBlockedProviders": 340,
+    "providersWithAddress": 260,
+    "providersWithCoordinates": 252,
+    "coordinateMatchedProviders": 264,
+    "coordinateAcceptedProviders": 252,
     "coordinateRejectedProviders": 12,
     "addressEvidence": {
-      "none": 361,
-      "official-provider-address": 231
+      "none": 332,
+      "official-provider-address": 260
     },
     "addressMatchMethods": {
-      "capesaro-reviewed-provider-identity": 17,
+      "capesaro-reviewed-provider-identity": 46,
       "curated-same-county-official-name-alias": 40,
       "exact-normalised-name-county": 174,
-      "none": 361
+      "none": 332
     },
     "pointConfidence": {
-      "none": 369,
-      "official-coordinate": 223
+      "none": 340,
+      "official-coordinate": 252
     },
     "blockedReasons": {
       "county-only-location": 268,
-      "no-point-evidence": 101
+      "no-point-evidence": 72
     },
     "byCounty": [
       {
@@ -112,8 +112,8 @@
         "countyName": "Arges",
         "providers": 18,
         "serviceAccessEligibleProviders": 10,
-        "pointAccessEligibleProviders": 8,
-        "pointAccessBlockedProviders": 10
+        "pointAccessEligibleProviders": 9,
+        "pointAccessBlockedProviders": 9
       },
       {
         "countyCode": "BC",
@@ -136,8 +136,8 @@
         "countyName": "Bistrita-Nasaud",
         "providers": 5,
         "serviceAccessEligibleProviders": 2,
-        "pointAccessEligibleProviders": 0,
-        "pointAccessBlockedProviders": 5
+        "pointAccessEligibleProviders": 2,
+        "pointAccessBlockedProviders": 3
       },
       {
         "countyCode": "BT",
@@ -200,8 +200,8 @@
         "countyName": "Constanta",
         "providers": 37,
         "serviceAccessEligibleProviders": 11,
-        "pointAccessEligibleProviders": 6,
-        "pointAccessBlockedProviders": 31
+        "pointAccessEligibleProviders": 7,
+        "pointAccessBlockedProviders": 30
       },
       {
         "countyCode": "CV",
@@ -224,16 +224,16 @@
         "countyName": "Dolj",
         "providers": 38,
         "serviceAccessEligibleProviders": 9,
-        "pointAccessEligibleProviders": 6,
-        "pointAccessBlockedProviders": 32
+        "pointAccessEligibleProviders": 7,
+        "pointAccessBlockedProviders": 31
       },
       {
         "countyCode": "GL",
         "countyName": "Galati",
         "providers": 11,
         "serviceAccessEligibleProviders": 7,
-        "pointAccessEligibleProviders": 4,
-        "pointAccessBlockedProviders": 7
+        "pointAccessEligibleProviders": 7,
+        "pointAccessBlockedProviders": 4
       },
       {
         "countyCode": "GR",
@@ -280,24 +280,24 @@
         "countyName": "Iasi",
         "providers": 33,
         "serviceAccessEligibleProviders": 13,
-        "pointAccessEligibleProviders": 8,
-        "pointAccessBlockedProviders": 25
+        "pointAccessEligibleProviders": 10,
+        "pointAccessBlockedProviders": 23
       },
       {
         "countyCode": "IF",
         "countyName": "Ilfov",
         "providers": 4,
         "serviceAccessEligibleProviders": 2,
-        "pointAccessEligibleProviders": 0,
-        "pointAccessBlockedProviders": 4
+        "pointAccessEligibleProviders": 2,
+        "pointAccessBlockedProviders": 2
       },
       {
         "countyCode": "MM",
         "countyName": "Maramures",
         "providers": 16,
         "serviceAccessEligibleProviders": 6,
-        "pointAccessEligibleProviders": 5,
-        "pointAccessBlockedProviders": 11
+        "pointAccessEligibleProviders": 6,
+        "pointAccessBlockedProviders": 10
       },
       {
         "countyCode": "MH",
@@ -312,32 +312,32 @@
         "countyName": "Mures",
         "providers": 17,
         "serviceAccessEligibleProviders": 7,
-        "pointAccessEligibleProviders": 1,
-        "pointAccessBlockedProviders": 16
+        "pointAccessEligibleProviders": 5,
+        "pointAccessBlockedProviders": 12
       },
       {
         "countyCode": "NT",
         "countyName": "Neamt",
         "providers": 9,
         "serviceAccessEligibleProviders": 2,
-        "pointAccessEligibleProviders": 0,
-        "pointAccessBlockedProviders": 9
+        "pointAccessEligibleProviders": 1,
+        "pointAccessBlockedProviders": 8
       },
       {
         "countyCode": "OT",
         "countyName": "Olt",
         "providers": 7,
         "serviceAccessEligibleProviders": 3,
-        "pointAccessEligibleProviders": 2,
-        "pointAccessBlockedProviders": 5
+        "pointAccessEligibleProviders": 3,
+        "pointAccessBlockedProviders": 4
       },
       {
         "countyCode": "PH",
         "countyName": "Prahova",
         "providers": 21,
         "serviceAccessEligibleProviders": 9,
-        "pointAccessEligibleProviders": 7,
-        "pointAccessBlockedProviders": 14
+        "pointAccessEligibleProviders": 9,
+        "pointAccessBlockedProviders": 12
       },
       {
         "countyCode": "SM",
@@ -352,8 +352,8 @@
         "countyName": "Salaj",
         "providers": 6,
         "serviceAccessEligibleProviders": 3,
-        "pointAccessEligibleProviders": 0,
-        "pointAccessBlockedProviders": 6
+        "pointAccessEligibleProviders": 3,
+        "pointAccessBlockedProviders": 3
       },
       {
         "countyCode": "SB",
@@ -368,8 +368,8 @@
         "countyName": "Suceava",
         "providers": 16,
         "serviceAccessEligibleProviders": 6,
-        "pointAccessEligibleProviders": 5,
-        "pointAccessBlockedProviders": 11
+        "pointAccessEligibleProviders": 6,
+        "pointAccessBlockedProviders": 10
       },
       {
         "countyCode": "TR",
@@ -384,8 +384,8 @@
         "countyName": "Timis",
         "providers": 28,
         "serviceAccessEligibleProviders": 14,
-        "pointAccessEligibleProviders": 11,
-        "pointAccessBlockedProviders": 17
+        "pointAccessEligibleProviders": 12,
+        "pointAccessBlockedProviders": 16
       },
       {
         "countyCode": "TL",
@@ -416,16 +416,16 @@
         "countyName": "Vrancea",
         "providers": 8,
         "serviceAccessEligibleProviders": 6,
-        "pointAccessEligibleProviders": 5,
-        "pointAccessBlockedProviders": 3
+        "pointAccessEligibleProviders": 6,
+        "pointAccessBlockedProviders": 2
       },
       {
         "countyCode": "B",
         "countyName": "Bucuresti",
         "providers": 87,
         "serviceAccessEligibleProviders": 87,
-        "pointAccessEligibleProviders": 38,
-        "pointAccessBlockedProviders": 49
+        "pointAccessEligibleProviders": 40,
+        "pointAccessBlockedProviders": 47
       }
     ]
   },
@@ -529,26 +529,26 @@
       "localityName": "MUNICIPIUL TÂRGU MUREŞ",
       "locationConfidence": "name-derived-locality",
       "serviceAccessEligible": true,
-      "address": null,
-      "addressSourceRecordId": null,
-      "addressMatchMethod": null,
+      "address": "TG. MURES, STR. GH. MARINESCU, NR. 50, JUDETUL MURES",
+      "addressSourceRecordId": "capesaro-2026-A7128",
+      "addressMatchMethod": "capesaro-reviewed-provider-identity",
       "addressEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "official-provider-address",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "TG. MURES, STR. GH. MARINESCU, NR. 50, JUDETUL MURES",
+        "retrievedDate": "2026-09-09"
       },
-      "latitude": null,
-      "longitude": null,
-      "pointConfidence": "none",
+      "latitude": 46.5599388,
+      "longitude": 24.5837403,
+      "pointConfidence": "official-coordinate",
       "pointEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "published-coordinate",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "46.559939,24.583740",
+        "retrievedDate": "2026-09-09"
       },
-      "pointAccessEligible": false,
-      "pointAccessBlockedReason": "no-point-evidence"
+      "pointAccessEligible": true,
+      "pointAccessBlockedReason": null
     },
     {
       "providerId": "anmcs-2025-005",
@@ -2839,26 +2839,26 @@
       "localityName": "MUNICIPIUL BISTRIŢA",
       "locationConfidence": "name-derived-locality",
       "serviceAccessEligible": true,
-      "address": null,
-      "addressSourceRecordId": null,
-      "addressMatchMethod": null,
+      "address": "STR. G-RAL GRIGORE BĂLAN NR. 43,",
+      "addressSourceRecordId": "capesaro-2026-A10007",
+      "addressMatchMethod": "capesaro-reviewed-provider-identity",
       "addressEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "official-provider-address",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "STR. G-RAL GRIGORE BĂLAN NR. 43,",
+        "retrievedDate": "2026-09-09"
       },
-      "latitude": null,
-      "longitude": null,
-      "pointConfidence": "none",
+      "latitude": 47.1347991,
+      "longitude": 24.500127,
+      "pointConfidence": "official-coordinate",
       "pointEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "published-coordinate",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "47.134799,24.500127",
+        "retrievedDate": "2026-09-09"
       },
-      "pointAccessEligible": false,
-      "pointAccessBlockedReason": "no-point-evidence"
+      "pointAccessEligible": true,
+      "pointAccessBlockedReason": null
     },
     {
       "providerId": "anmcs-2025-082",
@@ -2869,26 +2869,26 @@
       "localityName": "MUNICIPIUL CONSTANŢA",
       "locationConfidence": "name-derived-locality",
       "serviceAccessEligible": true,
-      "address": null,
-      "addressSourceRecordId": null,
-      "addressMatchMethod": null,
+      "address": "Bdul Mamaia nr 96, CONSTANȚA",
+      "addressSourceRecordId": "capesaro-2026-A10013",
+      "addressMatchMethod": "capesaro-reviewed-provider-identity",
       "addressEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "official-provider-address",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "Bdul Mamaia nr 96, CONSTANȚA",
+        "retrievedDate": "2026-09-09"
       },
-      "latitude": null,
-      "longitude": null,
-      "pointConfidence": "none",
+      "latitude": 44.18966,
+      "longitude": 28.6516915,
+      "pointConfidence": "official-coordinate",
       "pointEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "published-coordinate",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "44.189660,28.651691",
+        "retrievedDate": "2026-09-09"
       },
-      "pointAccessEligible": false,
-      "pointAccessBlockedReason": "no-point-evidence"
+      "pointAccessEligible": true,
+      "pointAccessBlockedReason": null
     },
     {
       "providerId": "anmcs-2025-083",
@@ -2959,26 +2959,26 @@
       "localityName": "MUNICIPIUL CRAIOVA",
       "locationConfidence": "name-derived-locality",
       "serviceAccessEligible": true,
-      "address": null,
-      "addressSourceRecordId": null,
-      "addressMatchMethod": null,
+      "address": "STRADA CARACAL, NR. 150,. LOCALITATEA CRAIOVA, JUDEŢUL DOLJ",
+      "addressSourceRecordId": "capesaro-2026-A078",
+      "addressMatchMethod": "capesaro-reviewed-provider-identity",
       "addressEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "official-provider-address",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "STRADA CARACAL, NR. 150,. LOCALITATEA CRAIOVA, JUDEŢUL DOLJ",
+        "retrievedDate": "2026-09-09"
       },
-      "latitude": null,
-      "longitude": null,
-      "pointConfidence": "none",
+      "latitude": 44.3024655,
+      "longitude": 23.8181923,
+      "pointConfidence": "official-coordinate",
       "pointEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "published-coordinate",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "44.302465,23.818192",
+        "retrievedDate": "2026-09-09"
       },
-      "pointAccessEligible": false,
-      "pointAccessBlockedReason": "no-point-evidence"
+      "pointAccessEligible": true,
+      "pointAccessBlockedReason": null
     },
     {
       "providerId": "anmcs-2025-086",
@@ -2989,26 +2989,26 @@
       "localityName": "JILAVA",
       "locationConfidence": "name-derived-locality",
       "serviceAccessEligible": true,
-      "address": null,
-      "addressSourceRecordId": null,
-      "addressMatchMethod": null,
+      "address": "Str. Sabarului, nr.1, comuna Jilava, judet Ilfov",
+      "addressSourceRecordId": "capesaro-2026-A50126",
+      "addressMatchMethod": "capesaro-reviewed-provider-identity",
       "addressEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "official-provider-address",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "Str. Sabarului, nr.1, comuna Jilava, judet Ilfov",
+        "retrievedDate": "2026-09-09"
       },
-      "latitude": null,
-      "longitude": null,
-      "pointConfidence": "none",
+      "latitude": 44.3339032,
+      "longitude": 26.1079346,
+      "pointConfidence": "official-coordinate",
       "pointEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "published-coordinate",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "44.333903,26.107935",
+        "retrievedDate": "2026-09-09"
       },
-      "pointAccessEligible": false,
-      "pointAccessBlockedReason": "no-point-evidence"
+      "pointAccessEligible": true,
+      "pointAccessBlockedReason": null
     },
     {
       "providerId": "anmcs-2025-087",
@@ -3079,26 +3079,26 @@
       "localityName": "MUNICIPIUL ZALĂU",
       "locationConfidence": "name-derived-locality",
       "serviceAccessEligible": true,
-      "address": null,
-      "addressSourceRecordId": null,
-      "addressMatchMethod": null,
+      "address": "STR. SIMION BĂRNUŢIU NR. 67 LOC. ZALĂU JUD.SĂLAJ RO-450129",
+      "addressSourceRecordId": "capesaro-2026-A10026",
+      "addressMatchMethod": "capesaro-reviewed-provider-identity",
       "addressEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "official-provider-address",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "STR. SIMION BĂRNUŢIU NR. 67 LOC. ZALĂU JUD.SĂLAJ RO-450129",
+        "retrievedDate": "2026-09-09"
       },
-      "latitude": null,
-      "longitude": null,
-      "pointConfidence": "none",
+      "latitude": 47.199091,
+      "longitude": 23.0451891,
+      "pointConfidence": "official-coordinate",
       "pointEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "published-coordinate",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "47.199091,23.045189",
+        "retrievedDate": "2026-09-09"
       },
-      "pointAccessEligible": false,
-      "pointAccessBlockedReason": "no-point-evidence"
+      "pointAccessEligible": true,
+      "pointAccessBlockedReason": null
     },
     {
       "providerId": "anmcs-2025-090",
@@ -3319,26 +3319,26 @@
       "localityName": "MUNICIPIUL ROMAN",
       "locationConfidence": "name-derived-locality",
       "serviceAccessEligible": true,
-      "address": null,
-      "addressSourceRecordId": null,
-      "addressMatchMethod": null,
+      "address": "STRADA TINERETULUI NR.28-30, ROMAN, JUD. NEAMT",
+      "addressSourceRecordId": "capesaro-2026-A111",
+      "addressMatchMethod": "capesaro-reviewed-provider-identity",
       "addressEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "official-provider-address",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "STRADA TINERETULUI NR.28-30, ROMAN, JUD. NEAMT",
+        "retrievedDate": "2026-09-09"
       },
-      "latitude": null,
-      "longitude": null,
-      "pointConfidence": "none",
+      "latitude": 46.929535,
+      "longitude": 26.929615,
+      "pointConfidence": "official-coordinate",
       "pointEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "published-coordinate",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "46.929535,26.929615",
+        "retrievedDate": "2026-09-09"
       },
-      "pointAccessEligible": false,
-      "pointAccessBlockedReason": "no-point-evidence"
+      "pointAccessEligible": true,
+      "pointAccessBlockedReason": null
     },
     {
       "providerId": "anmcs-2025-098",
@@ -3409,26 +3409,26 @@
       "localityName": "ORAŞ MIOVENI",
       "locationConfidence": "name-derived-locality",
       "serviceAccessEligible": true,
-      "address": null,
-      "addressSourceRecordId": null,
-      "addressMatchMethod": null,
+      "address": "B-DUL DACIA NR. 1, LOC. MIOVENI, JUD. ARGEȘ",
+      "addressSourceRecordId": "capesaro-2026-A126",
+      "addressMatchMethod": "capesaro-reviewed-provider-identity",
       "addressEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "official-provider-address",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "B-DUL DACIA NR. 1, LOC. MIOVENI, JUD. ARGEȘ",
+        "retrievedDate": "2026-09-09"
       },
-      "latitude": null,
-      "longitude": null,
-      "pointConfidence": "none",
+      "latitude": 44.9561211,
+      "longitude": 24.9366841,
+      "pointConfidence": "official-coordinate",
       "pointEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "published-coordinate",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "44.956121,24.936684",
+        "retrievedDate": "2026-09-09"
       },
-      "pointAccessEligible": false,
-      "pointAccessBlockedReason": "no-point-evidence"
+      "pointAccessEligible": true,
+      "pointAccessBlockedReason": null
     },
     {
       "providerId": "anmcs-2025-101",
@@ -3439,26 +3439,26 @@
       "localityName": "MUNICIPIUL FOCŞANI",
       "locationConfidence": "name-derived-locality",
       "serviceAccessEligible": true,
-      "address": null,
-      "addressSourceRecordId": null,
-      "addressMatchMethod": null,
+      "address": "STRADA CEZAR BOLLIAC NR. 3-5, Focşani, Vrancea",
+      "addressSourceRecordId": "capesaro-2026-A10035",
+      "addressMatchMethod": "capesaro-reviewed-provider-identity",
       "addressEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "official-provider-address",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "STRADA CEZAR BOLLIAC NR. 3-5, Focşani, Vrancea",
+        "retrievedDate": "2026-09-09"
       },
-      "latitude": null,
-      "longitude": null,
-      "pointConfidence": "none",
+      "latitude": 45.6968231,
+      "longitude": 27.1904183,
+      "pointConfidence": "official-coordinate",
       "pointEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "published-coordinate",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "45.696823,27.190418",
+        "retrievedDate": "2026-09-09"
       },
-      "pointAccessEligible": false,
-      "pointAccessBlockedReason": "no-point-evidence"
+      "pointAccessEligible": true,
+      "pointAccessBlockedReason": null
     },
     {
       "providerId": "anmcs-2025-102",
@@ -4789,26 +4789,26 @@
       "localityName": "MUNICIPIUL REGHIN",
       "locationConfidence": "name-derived-locality",
       "serviceAccessEligible": true,
-      "address": null,
-      "addressSourceRecordId": null,
-      "addressMatchMethod": null,
+      "address": "STR. SPITALULUI NR.20",
+      "addressSourceRecordId": "capesaro-2026-A50134",
+      "addressMatchMethod": "capesaro-reviewed-provider-identity",
       "addressEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "official-provider-address",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "STR. SPITALULUI NR.20",
+        "retrievedDate": "2026-09-09"
       },
-      "latitude": null,
-      "longitude": null,
-      "pointConfidence": "none",
+      "latitude": 46.781829,
+      "longitude": 24.695379,
+      "pointConfidence": "official-coordinate",
       "pointEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "published-coordinate",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "46.781829,24.695379",
+        "retrievedDate": "2026-09-09"
       },
-      "pointAccessEligible": false,
-      "pointAccessBlockedReason": "no-point-evidence"
+      "pointAccessEligible": true,
+      "pointAccessBlockedReason": null
     },
     {
       "providerId": "anmcs-2025-147",
@@ -5299,26 +5299,26 @@
       "localityName": "MUNICIPIUL BUCUREŞTI",
       "locationConfidence": "municipality-from-county",
       "serviceAccessEligible": true,
-      "address": null,
-      "addressSourceRecordId": null,
-      "addressMatchMethod": null,
+      "address": "ALEEA CĂUZAŞI NR. 49-51, SECTOR 3",
+      "addressSourceRecordId": "capesaro-2026-B082",
+      "addressMatchMethod": "capesaro-reviewed-provider-identity",
       "addressEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "official-provider-address",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "ALEEA CĂUZAŞI NR. 49-51, SECTOR 3",
+        "retrievedDate": "2026-09-09"
       },
-      "latitude": null,
-      "longitude": null,
-      "pointConfidence": "none",
+      "latitude": 44.4277,
+      "longitude": 26.112913,
+      "pointConfidence": "official-coordinate",
       "pointEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "published-coordinate",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "44.427700,26.112913",
+        "retrievedDate": "2026-09-09"
       },
-      "pointAccessEligible": false,
-      "pointAccessBlockedReason": "no-point-evidence"
+      "pointAccessEligible": true,
+      "pointAccessBlockedReason": null
     },
     {
       "providerId": "anmcs-2025-164",
@@ -5509,26 +5509,26 @@
       "localityName": "MUNICIPIUL PAŞCANI",
       "locationConfidence": "name-derived-locality",
       "serviceAccessEligible": true,
-      "address": null,
-      "addressSourceRecordId": null,
-      "addressMatchMethod": null,
+      "address": "STR. MIHAIL KOGĂLNICEANU NR. 24, Pascani, Jud Iasi",
+      "addressSourceRecordId": "capesaro-2026-A10018",
+      "addressMatchMethod": "capesaro-reviewed-provider-identity",
       "addressEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "official-provider-address",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "STR. MIHAIL KOGĂLNICEANU NR. 24, Pascani, Jud Iasi",
+        "retrievedDate": "2026-09-09"
       },
-      "latitude": null,
-      "longitude": null,
-      "pointConfidence": "none",
+      "latitude": 47.2448637,
+      "longitude": 26.722971,
+      "pointConfidence": "official-coordinate",
       "pointEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "published-coordinate",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "47.244864,26.722971",
+        "retrievedDate": "2026-09-09"
       },
-      "pointAccessEligible": false,
-      "pointAccessBlockedReason": "no-point-evidence"
+      "pointAccessEligible": true,
+      "pointAccessBlockedReason": null
     },
     {
       "providerId": "anmcs-2025-171",
@@ -5989,26 +5989,26 @@
       "localityName": "MUNICIPIUL PLOIEŞTI",
       "locationConfidence": "name-derived-locality",
       "serviceAccessEligible": true,
-      "address": null,
-      "addressSourceRecordId": null,
-      "addressMatchMethod": null,
+      "address": "STR.DOMNIŞORI NR.93 Ploiesti, jud. Prahova",
+      "addressSourceRecordId": "capesaro-2026-A50142",
+      "addressMatchMethod": "capesaro-reviewed-provider-identity",
       "addressEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "official-provider-address",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "STR.DOMNIŞORI NR.93 Ploiesti, jud. Prahova",
+        "retrievedDate": "2026-09-09"
       },
-      "latitude": null,
-      "longitude": null,
-      "pointConfidence": "none",
+      "latitude": 44.9275387,
+      "longitude": 25.9975497,
+      "pointConfidence": "official-coordinate",
       "pointEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "published-coordinate",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "44.927539,25.997550",
+        "retrievedDate": "2026-09-09"
       },
-      "pointAccessEligible": false,
-      "pointAccessBlockedReason": "no-point-evidence"
+      "pointAccessEligible": true,
+      "pointAccessBlockedReason": null
     },
     {
       "providerId": "anmcs-2025-187",
@@ -6169,26 +6169,26 @@
       "localityName": "MUNICIPIUL SIGHIŞOARA",
       "locationConfidence": "name-derived-locality",
       "serviceAccessEligible": true,
-      "address": null,
-      "addressSourceRecordId": null,
-      "addressMatchMethod": null,
+      "address": "STR.ZAHARIA BOIU NR.40,SIGHISOARA JUD MURES",
+      "addressSourceRecordId": "capesaro-2026-A066",
+      "addressMatchMethod": "capesaro-reviewed-provider-identity",
       "addressEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "official-provider-address",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "STR.ZAHARIA BOIU NR.40,SIGHISOARA JUD MURES",
+        "retrievedDate": "2026-09-09"
       },
-      "latitude": null,
-      "longitude": null,
-      "pointConfidence": "none",
+      "latitude": 46.220995,
+      "longitude": 24.786541,
+      "pointConfidence": "official-coordinate",
       "pointEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "published-coordinate",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "46.220995,24.786541",
+        "retrievedDate": "2026-09-09"
       },
-      "pointAccessEligible": false,
-      "pointAccessBlockedReason": "no-point-evidence"
+      "pointAccessEligible": true,
+      "pointAccessBlockedReason": null
     },
     {
       "providerId": "anmcs-2025-193",
@@ -6259,26 +6259,26 @@
       "localityName": "ORAŞ ŞIMLEU SILVANIEI",
       "locationConfidence": "name-derived-locality",
       "serviceAccessEligible": true,
-      "address": null,
-      "addressSourceRecordId": null,
-      "addressMatchMethod": null,
+      "address": "STR.G.COSBUC, NR.29",
+      "addressSourceRecordId": "capesaro-2026-A50152",
+      "addressMatchMethod": "capesaro-reviewed-provider-identity",
       "addressEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "official-provider-address",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "STR.G.COSBUC, NR.29",
+        "retrievedDate": "2026-09-09"
       },
-      "latitude": null,
-      "longitude": null,
-      "pointConfidence": "none",
+      "latitude": 47.22627,
+      "longitude": 22.802831,
+      "pointConfidence": "official-coordinate",
       "pointEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "published-coordinate",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "47.226270,22.802831",
+        "retrievedDate": "2026-09-09"
       },
-      "pointAccessEligible": false,
-      "pointAccessBlockedReason": "no-point-evidence"
+      "pointAccessEligible": true,
+      "pointAccessBlockedReason": null
     },
     {
       "providerId": "anmcs-2025-196",
@@ -6379,26 +6379,26 @@
       "localityName": "ORAŞ BECLEAN",
       "locationConfidence": "name-derived-locality",
       "serviceAccessEligible": true,
-      "address": null,
-      "addressSourceRecordId": null,
-      "addressMatchMethod": null,
+      "address": "STR.1 DECEMBRIE 1918 NR.65",
+      "addressSourceRecordId": "capesaro-2026-A006",
+      "addressMatchMethod": "capesaro-reviewed-provider-identity",
       "addressEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "official-provider-address",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "STR.1 DECEMBRIE 1918 NR.65",
+        "retrievedDate": "2026-09-09"
       },
-      "latitude": null,
-      "longitude": null,
-      "pointConfidence": "none",
+      "latitude": 47.1832862,
+      "longitude": 24.1866465,
+      "pointConfidence": "official-coordinate",
       "pointEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "published-coordinate",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "47.183286,24.186646",
+        "retrievedDate": "2026-09-09"
       },
-      "pointAccessEligible": false,
-      "pointAccessBlockedReason": "no-point-evidence"
+      "pointAccessEligible": true,
+      "pointAccessBlockedReason": null
     },
     {
       "providerId": "anmcs-2025-200",
@@ -6769,26 +6769,26 @@
       "localityName": "ORAŞ LUDUŞ",
       "locationConfidence": "name-derived-locality",
       "serviceAccessEligible": true,
-      "address": null,
-      "addressSourceRecordId": null,
-      "addressMatchMethod": null,
+      "address": "B-DUL I DECEMBRIE 1918 NR.20",
+      "addressSourceRecordId": "capesaro-2026-A50135",
+      "addressMatchMethod": "capesaro-reviewed-provider-identity",
       "addressEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "official-provider-address",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "B-DUL I DECEMBRIE 1918 NR.20",
+        "retrievedDate": "2026-09-09"
       },
-      "latitude": null,
-      "longitude": null,
-      "pointConfidence": "none",
+      "latitude": 46.475264,
+      "longitude": 24.095381,
+      "pointConfidence": "official-coordinate",
       "pointEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "published-coordinate",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "46.475264,24.095381",
+        "retrievedDate": "2026-09-09"
       },
-      "pointAccessEligible": false,
-      "pointAccessBlockedReason": "no-point-evidence"
+      "pointAccessEligible": true,
+      "pointAccessBlockedReason": null
     },
     {
       "providerId": "anmcs-2025-213",
@@ -7009,26 +7009,26 @@
       "localityName": "ORAŞ BALŞ",
       "locationConfidence": "name-derived-locality",
       "serviceAccessEligible": true,
-      "address": null,
-      "addressSourceRecordId": null,
-      "addressMatchMethod": null,
+      "address": "STR. NICOLAE BĂLCESCU, NR.113-115",
+      "addressSourceRecordId": "capesaro-2026-A117",
+      "addressMatchMethod": "capesaro-reviewed-provider-identity",
       "addressEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "official-provider-address",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "STR. NICOLAE BĂLCESCU, NR.113-115",
+        "retrievedDate": "2026-09-09"
       },
-      "latitude": null,
-      "longitude": null,
-      "pointConfidence": "none",
+      "latitude": 44.3440748,
+      "longitude": 24.125205,
+      "pointConfidence": "official-coordinate",
       "pointEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "published-coordinate",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "44.344075,24.125205",
+        "retrievedDate": "2026-09-09"
       },
-      "pointAccessEligible": false,
-      "pointAccessBlockedReason": "no-point-evidence"
+      "pointAccessEligible": true,
+      "pointAccessBlockedReason": null
     },
     {
       "providerId": "anmcs-2025-221",
@@ -7039,26 +7039,26 @@
       "localityName": "ORAŞ BORŞA",
       "locationConfidence": "name-derived-locality",
       "serviceAccessEligible": true,
-      "address": null,
-      "addressSourceRecordId": null,
-      "addressMatchMethod": null,
+      "address": "str,Floare de Colt nr.1",
+      "addressSourceRecordId": "capesaro-2026-A10019",
+      "addressMatchMethod": "capesaro-reviewed-provider-identity",
       "addressEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "official-provider-address",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "str,Floare de Colt nr.1",
+        "retrievedDate": "2026-09-09"
       },
-      "latitude": null,
-      "longitude": null,
-      "pointConfidence": "none",
+      "latitude": 47.654197,
+      "longitude": 24.6659778,
+      "pointConfidence": "official-coordinate",
       "pointEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "published-coordinate",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "47.654197,24.665978",
+        "retrievedDate": "2026-09-09"
       },
-      "pointAccessEligible": false,
-      "pointAccessBlockedReason": "no-point-evidence"
+      "pointAccessEligible": true,
+      "pointAccessBlockedReason": null
     },
     {
       "providerId": "anmcs-2025-222",
@@ -7549,26 +7549,26 @@
       "localityName": "MUNICIPIUL GALAŢI",
       "locationConfidence": "name-derived-locality",
       "serviceAccessEligible": true,
-      "address": null,
-      "addressSourceRecordId": null,
-      "addressMatchMethod": null,
+      "address": "STR. ALEXANDRU MORUZZI NR. 5-7, COD POŞTAL 800223",
+      "addressSourceRecordId": "capesaro-2026-A50104",
+      "addressMatchMethod": "capesaro-reviewed-provider-identity",
       "addressEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "official-provider-address",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "STR. ALEXANDRU MORUZZI NR. 5-7, COD POŞTAL 800223",
+        "retrievedDate": "2026-09-09"
       },
-      "latitude": null,
-      "longitude": null,
-      "pointConfidence": "none",
+      "latitude": 45.4391325,
+      "longitude": 28.061772,
+      "pointConfidence": "official-coordinate",
       "pointEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "published-coordinate",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "45.439132,28.061772",
+        "retrievedDate": "2026-09-09"
       },
-      "pointAccessEligible": false,
-      "pointAccessBlockedReason": "no-point-evidence"
+      "pointAccessEligible": true,
+      "pointAccessBlockedReason": null
     },
     {
       "providerId": "anmcs-2025-239",
@@ -7909,26 +7909,26 @@
       "localityName": "MUNICIPIUL TECUCI",
       "locationConfidence": "name-derived-locality",
       "serviceAccessEligible": true,
-      "address": null,
-      "addressSourceRecordId": null,
-      "addressMatchMethod": null,
+      "address": "Str. Costache Conachi Nr. 35, localitatea Tecuci, judetul Galati",
+      "addressSourceRecordId": "capesaro-2026-A100",
+      "addressMatchMethod": "capesaro-reviewed-provider-identity",
       "addressEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "official-provider-address",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "Str. Costache Conachi Nr. 35, localitatea Tecuci, judetul Galati",
+        "retrievedDate": "2026-09-09"
       },
-      "latitude": null,
-      "longitude": null,
-      "pointConfidence": "none",
+      "latitude": 45.8459975,
+      "longitude": 27.4372183,
+      "pointConfidence": "official-coordinate",
       "pointEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "published-coordinate",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "45.845998,27.437218",
+        "retrievedDate": "2026-09-09"
       },
-      "pointAccessEligible": false,
-      "pointAccessBlockedReason": "no-point-evidence"
+      "pointAccessEligible": true,
+      "pointAccessBlockedReason": null
     },
     {
       "providerId": "anmcs-2025-251",
@@ -8059,26 +8059,26 @@
       "localityName": "ORAŞ FĂGET",
       "locationConfidence": "name-derived-locality",
       "serviceAccessEligible": true,
-      "address": null,
-      "addressSourceRecordId": null,
-      "addressMatchMethod": null,
+      "address": "FAGET, STR. SPITALULUI NR.4",
+      "addressSourceRecordId": "capesaro-2026-A50168",
+      "addressMatchMethod": "capesaro-reviewed-provider-identity",
       "addressEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "official-provider-address",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "FAGET, STR. SPITALULUI NR.4",
+        "retrievedDate": "2026-09-09"
       },
-      "latitude": null,
-      "longitude": null,
-      "pointConfidence": "none",
+      "latitude": 45.844441,
+      "longitude": 22.1717701,
+      "pointConfidence": "official-coordinate",
       "pointEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "published-coordinate",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "45.844441,22.171770",
+        "retrievedDate": "2026-09-09"
       },
-      "pointAccessEligible": false,
-      "pointAccessBlockedReason": "no-point-evidence"
+      "pointAccessEligible": true,
+      "pointAccessBlockedReason": null
     },
     {
       "providerId": "anmcs-2025-256",
@@ -10609,26 +10609,26 @@
       "localityName": "MUNICIPIUL GALAŢI",
       "locationConfidence": "name-derived-locality",
       "serviceAccessEligible": true,
-      "address": null,
-      "addressSourceRecordId": null,
-      "addressMatchMethod": null,
+      "address": "MUN. GALAȚI, STR. ȘTIINȚEI, NR.117, JUD. GALAȚI",
+      "addressSourceRecordId": "capesaro-2026-A50103",
+      "addressMatchMethod": "capesaro-reviewed-provider-identity",
       "addressEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "official-provider-address",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "MUN. GALAȚI, STR. ȘTIINȚEI, NR.117, JUD. GALAȚI",
+        "retrievedDate": "2026-09-09"
       },
-      "latitude": null,
-      "longitude": null,
-      "pointConfidence": "none",
+      "latitude": 45.4563871,
+      "longitude": 28.046375,
+      "pointConfidence": "official-coordinate",
       "pointEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "published-coordinate",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "45.456387,28.046375",
+        "retrievedDate": "2026-09-09"
       },
-      "pointAccessEligible": false,
-      "pointAccessBlockedReason": "no-point-evidence"
+      "pointAccessEligible": true,
+      "pointAccessBlockedReason": null
     },
     {
       "providerId": "anmcs-2025-341",
@@ -10669,26 +10669,26 @@
       "localityName": "ORAŞ TÂRGU FRUMOS",
       "locationConfidence": "name-derived-locality",
       "serviceAccessEligible": true,
-      "address": null,
-      "addressSourceRecordId": null,
-      "addressMatchMethod": null,
+      "address": "STRADA CUZA VODA NR 59 , Targu Frumos, jud.Iasi",
+      "addressSourceRecordId": "capesaro-2026-B073",
+      "addressMatchMethod": "capesaro-reviewed-provider-identity",
       "addressEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "official-provider-address",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "STRADA CUZA VODA NR 59 , Targu Frumos, jud.Iasi",
+        "retrievedDate": "2026-09-09"
       },
-      "latitude": null,
-      "longitude": null,
-      "pointConfidence": "none",
+      "latitude": 47.2091668,
+      "longitude": 27.0188275,
+      "pointConfidence": "official-coordinate",
       "pointEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "published-coordinate",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "47.209167,27.018828",
+        "retrievedDate": "2026-09-09"
       },
-      "pointAccessEligible": false,
-      "pointAccessBlockedReason": "no-point-evidence"
+      "pointAccessEligible": true,
+      "pointAccessBlockedReason": null
     },
     {
       "providerId": "anmcs-2025-343",
@@ -10699,26 +10699,26 @@
       "localityName": "ORAŞ BUFTEA",
       "locationConfidence": "name-derived-locality",
       "serviceAccessEligible": true,
-      "address": null,
-      "addressSourceRecordId": null,
-      "addressMatchMethod": null,
+      "address": "Judetul Ilfov, Buftea, str. Studioului nr. 5",
+      "addressSourceRecordId": "capesaro-2026-B024",
+      "addressMatchMethod": "capesaro-reviewed-provider-identity",
       "addressEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "official-provider-address",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "Judetul Ilfov, Buftea, str. Studioului nr. 5",
+        "retrievedDate": "2026-09-09"
       },
-      "latitude": null,
-      "longitude": null,
-      "pointConfidence": "none",
+      "latitude": 44.5719042,
+      "longitude": 25.9401595,
+      "pointConfidence": "official-coordinate",
       "pointEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "published-coordinate",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "44.571904,25.940160",
+        "retrievedDate": "2026-09-09"
       },
-      "pointAccessEligible": false,
-      "pointAccessBlockedReason": "no-point-evidence"
+      "pointAccessEligible": true,
+      "pointAccessBlockedReason": null
     },
     {
       "providerId": "anmcs-2025-344",
@@ -11659,26 +11659,26 @@
       "localityName": "MUNICIPIUL BUCUREŞTI",
       "locationConfidence": "municipality-from-county",
       "serviceAccessEligible": true,
-      "address": null,
-      "addressSourceRecordId": null,
-      "addressMatchMethod": null,
+      "address": "B-DUL NICOLAE GRIGORESCU NR.41, SECTOR 3",
+      "addressSourceRecordId": "capesaro-2026-A7126",
+      "addressMatchMethod": "capesaro-reviewed-provider-identity",
       "addressEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "official-provider-address",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "B-DUL NICOLAE GRIGORESCU NR.41, SECTOR 3",
+        "retrievedDate": "2026-09-09"
       },
-      "latitude": null,
-      "longitude": null,
-      "pointConfidence": "none",
+      "latitude": 44.4206258,
+      "longitude": 26.1651401,
+      "pointConfidence": "official-coordinate",
       "pointEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "published-coordinate",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "44.420626,26.165140",
+        "retrievedDate": "2026-09-09"
       },
-      "pointAccessEligible": false,
-      "pointAccessBlockedReason": "no-point-evidence"
+      "pointAccessEligible": true,
+      "pointAccessBlockedReason": null
     },
     {
       "providerId": "anmcs-2025-376",
@@ -12049,26 +12049,26 @@
       "localityName": "ORAŞ SIRET",
       "locationConfidence": "name-derived-locality",
       "serviceAccessEligible": true,
-      "address": null,
-      "addressSourceRecordId": null,
-      "addressMatchMethod": null,
+      "address": "STRADA 9 MAI NR. 6",
+      "addressSourceRecordId": "capesaro-2026-A50155",
+      "addressMatchMethod": "capesaro-reviewed-provider-identity",
       "addressEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "official-provider-address",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "STRADA 9 MAI NR. 6",
+        "retrievedDate": "2026-09-09"
       },
-      "latitude": null,
-      "longitude": null,
-      "pointConfidence": "none",
+      "latitude": 47.9552669,
+      "longitude": 26.0641683,
+      "pointConfidence": "official-coordinate",
       "pointEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "published-coordinate",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "47.955267,26.064168",
+        "retrievedDate": "2026-09-09"
       },
-      "pointAccessEligible": false,
-      "pointAccessBlockedReason": "no-point-evidence"
+      "pointAccessEligible": true,
+      "pointAccessBlockedReason": null
     },
     {
       "providerId": "anmcs-2025-389",
@@ -12559,26 +12559,26 @@
       "localityName": "MUNICIPIUL PLOIEŞTI",
       "locationConfidence": "name-derived-locality",
       "serviceAccessEligible": true,
-      "address": null,
-      "addressSourceRecordId": null,
-      "addressMatchMethod": null,
+      "address": "STR. MIHAI EMINESCU, NR.4-6,PLOIEŞTI, PRAHOVA",
+      "addressSourceRecordId": "capesaro-2026-A124",
+      "addressMatchMethod": "capesaro-reviewed-provider-identity",
       "addressEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "official-provider-address",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "STR. MIHAI EMINESCU, NR.4-6,PLOIEŞTI, PRAHOVA",
+        "retrievedDate": "2026-09-09"
       },
-      "latitude": null,
-      "longitude": null,
-      "pointConfidence": "none",
+      "latitude": 44.9323544,
+      "longitude": 26.0266138,
+      "pointConfidence": "official-coordinate",
       "pointEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "published-coordinate",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "44.932354,26.026614",
+        "retrievedDate": "2026-09-09"
       },
-      "pointAccessEligible": false,
-      "pointAccessBlockedReason": "no-point-evidence"
+      "pointAccessEligible": true,
+      "pointAccessBlockedReason": null
     },
     {
       "providerId": "anmcs-2025-407",
@@ -13519,26 +13519,26 @@
       "localityName": "ORAŞ JIBOU",
       "locationConfidence": "name-derived-locality",
       "serviceAccessEligible": true,
-      "address": null,
-      "addressSourceRecordId": null,
-      "addressMatchMethod": null,
+      "address": "LIBERTATII NR 28",
+      "addressSourceRecordId": "capesaro-2026-A10027",
+      "addressMatchMethod": "capesaro-reviewed-provider-identity",
       "addressEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "official-provider-address",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "LIBERTATII NR 28",
+        "retrievedDate": "2026-09-09"
       },
-      "latitude": null,
-      "longitude": null,
-      "pointConfidence": "none",
+      "latitude": 47.2589056,
+      "longitude": 23.2521708,
+      "pointConfidence": "official-coordinate",
       "pointEvidence": {
-        "method": "none",
-        "source": null,
-        "sourceValue": null,
-        "retrievedDate": null
+        "method": "published-coordinate",
+        "source": "anmcs-capesaro-provider-point-evidence-2026",
+        "sourceValue": "47.258906,23.252171",
+        "retrievedDate": "2026-09-09"
       },
-      "pointAccessEligible": false,
-      "pointAccessBlockedReason": "no-point-evidence"
+      "pointAccessEligible": true,
+      "pointAccessBlockedReason": null
     },
     {
       "providerId": "anmcs-2025-439",
@@ -18204,15 +18204,6 @@
     {
       "kind": "provider-excluded-from-point-access",
       "source": "health-access-mart-2024-2025",
-      "providerId": "anmcs-2025-004",
-      "name": "SPITALUL CLINIC JUDEȚEAN DE URGENȚĂ TÂRGU MUREȘ",
-      "countyCode": "MS",
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-access-mart-2024-2025",
       "providerId": "anmcs-2025-005",
       "name": "SPITALUL UNIVERSITAR DE URGENTA MILITAR CENTRAL \"DR. CAROL DAVILA\"",
       "countyCode": "B",
@@ -18357,24 +18348,6 @@
     {
       "kind": "provider-excluded-from-point-access",
       "source": "health-access-mart-2024-2025",
-      "providerId": "anmcs-2025-081",
-      "name": "SPITALUL CLINIC JUDEŢEAN DE URGENŢĂ BISTRIŢA",
-      "countyCode": "BN",
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-access-mart-2024-2025",
-      "providerId": "anmcs-2025-082",
-      "name": "SPITALUL MILITAR DE URGENȚĂ ”DR. ALEXANDRU GAFENCU” CONSTANȚA",
-      "countyCode": "CT",
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-access-mart-2024-2025",
       "providerId": "anmcs-2025-083",
       "name": "SPITALUL MILITAR DE URGENȚĂ \"Regina Maria\" Brașov",
       "countyCode": "BV",
@@ -18393,38 +18366,11 @@
     {
       "kind": "provider-excluded-from-point-access",
       "source": "health-access-mart-2024-2025",
-      "providerId": "anmcs-2025-085",
-      "name": "SPITALUL CLINIC DE URGENŢĂ MILITAR \"DR. ŞTEFAN ODOBLEJA\" CRAIOVA",
-      "countyCode": "DJ",
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-access-mart-2024-2025",
-      "providerId": "anmcs-2025-086",
-      "name": "PENITENCIARUL-SPITAL BUCURESTI-JILAVA",
-      "countyCode": "IF",
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-access-mart-2024-2025",
       "providerId": "anmcs-2025-088",
       "name": "SPITALUL JUDEȚEAN DE URGENȚĂ ”SFÂNTUL IOAN CEL NOU”",
       "countyCode": "SV",
       "pointAccessBlockedReason": "county-only-location",
       "reason": "The provider has only county-level location evidence in the health mart, so it is blocked from point-level routing until provider- or UAT-level location evidence is attached."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-access-mart-2024-2025",
-      "providerId": "anmcs-2025-089",
-      "name": "SPITALUL JUDEŢEAN DE URGENŢĂ ZALĂU",
-      "countyCode": "SJ",
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
     },
     {
       "kind": "provider-excluded-from-point-access",
@@ -18450,33 +18396,6 @@
       "providerId": "anmcs-2025-094",
       "name": "Societatea SANADOR S.R.L.",
       "countyCode": "B",
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-access-mart-2024-2025",
-      "providerId": "anmcs-2025-097",
-      "name": "SPITALUL MUNICIPAL DE URGENȚĂ ROMAN",
-      "countyCode": "NT",
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-access-mart-2024-2025",
-      "providerId": "anmcs-2025-100",
-      "name": "PENITENCIARUL-SPITAL MIOVENI",
-      "countyCode": "AG",
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-access-mart-2024-2025",
-      "providerId": "anmcs-2025-101",
-      "name": "SPITALUL MILITAR DE URGENŢĂ \"Dr. ALEXANDRU POPESCU\" FOCŞANI",
-      "countyCode": "VN",
       "pointAccessBlockedReason": "no-point-evidence",
       "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
     },
@@ -18627,15 +18546,6 @@
     {
       "kind": "provider-excluded-from-point-access",
       "source": "health-access-mart-2024-2025",
-      "providerId": "anmcs-2025-146",
-      "name": "SPITALUL MUNICIPAL ”DR. EUGEN NICOARĂ” REGHIN",
-      "countyCode": "MS",
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-access-mart-2024-2025",
       "providerId": "anmcs-2025-150",
       "name": "SPITALUL \"PROVIDENȚA\"",
       "countyCode": "IS",
@@ -18690,24 +18600,6 @@
     {
       "kind": "provider-excluded-from-point-access",
       "source": "health-access-mart-2024-2025",
-      "providerId": "anmcs-2025-163",
-      "name": "SPITALUL PROF. DR. CONSTANTIN ANGELESCU",
-      "countyCode": "B",
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-access-mart-2024-2025",
-      "providerId": "anmcs-2025-170",
-      "name": "SPITALUL GENERAL C.F. PAȘCANI",
-      "countyCode": "IS",
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-access-mart-2024-2025",
       "providerId": "anmcs-2025-171",
       "name": "SOCIETATEA POLIMED S.R.L.",
       "countyCode": "BC",
@@ -18753,27 +18645,9 @@
     {
       "kind": "provider-excluded-from-point-access",
       "source": "health-access-mart-2024-2025",
-      "providerId": "anmcs-2025-186",
-      "name": "SPITALUL GENERAL C.F. PLOIEŞTI",
-      "countyCode": "PH",
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-access-mart-2024-2025",
       "providerId": "anmcs-2025-191",
       "name": "Societatea MEDICOVER HOSPITALS S.R.L.",
       "countyCode": "B",
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-access-mart-2024-2025",
-      "providerId": "anmcs-2025-192",
-      "name": "SPITALUL MUNICIPAL SIGHIŞOARA",
-      "countyCode": "MS",
       "pointAccessBlockedReason": "no-point-evidence",
       "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
     },
@@ -18789,29 +18663,11 @@
     {
       "kind": "provider-excluded-from-point-access",
       "source": "health-access-mart-2024-2025",
-      "providerId": "anmcs-2025-195",
-      "name": "SPITALUL ORASENESC \"PROF.DR. IOAN PUSCAȘ\" ȘIMLEU SILVANIEI",
-      "countyCode": "SJ",
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-access-mart-2024-2025",
       "providerId": "anmcs-2025-198",
       "name": "SPITALUL ORĂŞENESC \"'DR.GEORGE TRIFON''",
       "countyCode": "BN",
       "pointAccessBlockedReason": "county-only-location",
       "reason": "The provider has only county-level location evidence in the health mart, so it is blocked from point-level routing until provider- or UAT-level location evidence is attached."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-access-mart-2024-2025",
-      "providerId": "anmcs-2025-199",
-      "name": "SPITALUL ORĂŞENESC BECLEAN",
-      "countyCode": "BN",
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
     },
     {
       "kind": "provider-excluded-from-point-access",
@@ -18870,15 +18726,6 @@
     {
       "kind": "provider-excluded-from-point-access",
       "source": "health-access-mart-2024-2025",
-      "providerId": "anmcs-2025-212",
-      "name": "SPITALUL ORĂȘENESC „DR.VALER RUSSU” LUDUȘ",
-      "countyCode": "MS",
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-access-mart-2024-2025",
       "providerId": "anmcs-2025-217",
       "name": "SPITALUL MUNICIPAL \"SF. DOCTORI COSMA ȘI DAMIAN\"",
       "countyCode": "SV",
@@ -18906,38 +18753,11 @@
     {
       "kind": "provider-excluded-from-point-access",
       "source": "health-access-mart-2024-2025",
-      "providerId": "anmcs-2025-220",
-      "name": "SPITALUL ORĂȘENESC BALȘ",
-      "countyCode": "OT",
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-access-mart-2024-2025",
-      "providerId": "anmcs-2025-221",
-      "name": "SPITALUL DE RECUPERARE BORȘA",
-      "countyCode": "MM",
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-access-mart-2024-2025",
       "providerId": "anmcs-2025-233",
       "name": "SPITALUL MUNICIPAL \"DR. GHEORGHE MARINESCU\"",
       "countyCode": "MS",
       "pointAccessBlockedReason": "county-only-location",
       "reason": "The provider has only county-level location evidence in the health mart, so it is blocked from point-level routing until provider- or UAT-level location evidence is attached."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-access-mart-2024-2025",
-      "providerId": "anmcs-2025-238",
-      "name": "SPITALUL GENERAL C.F. GALAŢI",
-      "countyCode": "GL",
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
     },
     {
       "kind": "provider-excluded-from-point-access",
@@ -18960,29 +18780,11 @@
     {
       "kind": "provider-excluded-from-point-access",
       "source": "health-access-mart-2024-2025",
-      "providerId": "anmcs-2025-250",
-      "name": "SPITALUL MUNICIPAL \"ANTON CINCU\" TECUCI",
-      "countyCode": "GL",
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-access-mart-2024-2025",
       "providerId": "anmcs-2025-251",
       "name": "SPITALUL MUNICIPAL „CARITAS” ROȘIORII DE VEDE",
       "countyCode": "TR",
       "pointAccessBlockedReason": "county-only-location",
       "reason": "The provider has only county-level location evidence in the health mart, so it is blocked from point-level routing until provider- or UAT-level location evidence is attached."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-access-mart-2024-2025",
-      "providerId": "anmcs-2025-255",
-      "name": "SPITALUL ORĂȘENESC FĂGET",
-      "countyCode": "TM",
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
     },
     {
       "kind": "provider-excluded-from-point-access",
@@ -19437,38 +19239,11 @@
     {
       "kind": "provider-excluded-from-point-access",
       "source": "health-access-mart-2024-2025",
-      "providerId": "anmcs-2025-340",
-      "name": "SPITALUL DE PNEUMOFTIZIOLOGIE GALAŢI",
-      "countyCode": "GL",
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-access-mart-2024-2025",
       "providerId": "anmcs-2025-341",
       "name": "SOCIETATEA RECHINUL IMPEX S.R.L.",
       "countyCode": "CJ",
       "pointAccessBlockedReason": "county-only-location",
       "reason": "The provider has only county-level location evidence in the health mart, so it is blocked from point-level routing until provider- or UAT-level location evidence is attached."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-access-mart-2024-2025",
-      "providerId": "anmcs-2025-342",
-      "name": "SPITALUL DE BOLI CRONICE \"SFÂNTUL IOAN\" TÂRGU FRUMOS",
-      "countyCode": "IS",
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-access-mart-2024-2025",
-      "providerId": "anmcs-2025-343",
-      "name": "SPITALUL DE OBSTETRICĂ GINECOLOGIE BUFTEA",
-      "countyCode": "IF",
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
     },
     {
       "kind": "provider-excluded-from-point-access",
@@ -19689,15 +19464,6 @@
     {
       "kind": "provider-excluded-from-point-access",
       "source": "health-access-mart-2024-2025",
-      "providerId": "anmcs-2025-375",
-      "name": "SPITALUL DE PSIHIATRIE TITAN \"Dr. CONSTANTIN GORGOS\"",
-      "countyCode": "B",
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-access-mart-2024-2025",
       "providerId": "anmcs-2025-377",
       "name": "SOCIETATEA NEW CENTRAL MED S.R.L.",
       "countyCode": "BC",
@@ -19773,15 +19539,6 @@
       "providerId": "anmcs-2025-387",
       "name": "VICTORIA MEDICAL CENTER S.R.L.",
       "countyCode": "B",
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-access-mart-2024-2025",
-      "providerId": "anmcs-2025-388",
-      "name": "SPITALUL DE BOLI CRONICE SIRET",
-      "countyCode": "SV",
       "pointAccessBlockedReason": "no-point-evidence",
       "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
     },
@@ -19892,15 +19649,6 @@
       "countyCode": "SV",
       "pointAccessBlockedReason": "county-only-location",
       "reason": "The provider has only county-level location evidence in the health mart, so it is blocked from point-level routing until provider- or UAT-level location evidence is attached."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-access-mart-2024-2025",
-      "providerId": "anmcs-2025-406",
-      "name": "SPITALUL DE PEDIATRIE PLOIEȘTI",
-      "countyCode": "PH",
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
     },
     {
       "kind": "provider-excluded-from-point-access",
@@ -20117,15 +19865,6 @@
       "countyCode": "BC",
       "pointAccessBlockedReason": "county-only-location",
       "reason": "The provider has only county-level location evidence in the health mart, so it is blocked from point-level routing until provider- or UAT-level location evidence is attached."
-    },
-    {
-      "kind": "provider-excluded-from-point-access",
-      "source": "health-access-mart-2024-2025",
-      "providerId": "anmcs-2025-438",
-      "name": "SPITALUL ORĂȘENESC JIBOU ”DR. TRAIAN HERȚA”",
-      "countyCode": "SJ",
-      "pointAccessBlockedReason": "no-point-evidence",
-      "reason": "The provider has UAT-level service-access evidence but no street-address or coordinate evidence, so it is blocked from point-level routing."
     },
     {
       "kind": "provider-excluded-from-point-access",
