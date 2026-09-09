@@ -49,9 +49,11 @@ First slice:
   payload, without replacing its simulator-specific administration-spending series
 - done: move `impozit-teren`'s budget denominator onto the 2023-2025 shared mart/release
   asset so the app no longer carries a parallel finance artifact
-- next: expose a multi-year fiscal-stress indicator from the shared mart in a consuming
-  simulator, such as spending growth, own-revenue-share movement or personnel-spending
-  pressure
+- done: expose 2023-2025 spending growth and own-revenue-share movement from the shared
+  mart in `administrativ`, with endpoint bases carried in the compact payload so merged
+  units can recompute trends from summed values
+- next: add personnel-spending pressure or per-inhabitant stress views only when a
+  consuming simulator needs that extra fiscal dimension
 
 Useful first indicators:
 
@@ -74,7 +76,7 @@ Source of truth:
 
 First slice:
 
-- one validation county plus Bucharest
+- next: one validation county plus Bucharest
 - provider identity, beds, specialty, owner type and accreditation
 - explicit location confidence for each provider
 - named exclusions for unmatched providers
