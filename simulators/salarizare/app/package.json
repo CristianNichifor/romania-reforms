@@ -9,13 +9,18 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --passWithNoTests",
+    "check:ui": "node scripts/check-civic-ui.mjs"
   },
   "dependencies": {
+    "@cristiannichifor/civic-ui": "https://github.com/CristianNichifor/civic-ui/releases/download/v0.1.0/civic-ui-0.1.0.tgz",
+    "lucide-react": "1.43.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.10.2",
+    "@playwright/test": "1.63.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.3",
