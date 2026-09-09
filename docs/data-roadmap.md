@@ -125,8 +125,17 @@ First slice:
   for the 125 service-eligible providers still blocked by `no-point-evidence`; it finds 4
   exact same-county Ministry rows without street-address evidence, 7 providers with unused
   same-county Ministry review candidates and 114 providers with no Ministry candidate
-- next: adjudicate the 11 candidate providers from the review report, starting with the
-  7 high-signal rows, and convert only source-record-pinned acceptances into curated aliases
+- done: adjudicate the high-signal street-backed candidates from the review report and add
+  three curated source-record aliases for Timisoara railway hospital, Targu Lapus town
+  hospital and Constantin Balaceanu Stolnici chronic/geriatrics hospital; the point layer now
+  has 202 accepted provider coordinates and 390 named exclusions, and the remaining review
+  queue has 122 providers: 4 exact/no-street rows, 4 locality-only Ministry overlaps and 114
+  rows with no Ministry candidate; refreshed consumers report 26.7 km transport road-proxy
+  median and 18.9 km justitie point-road median
+- next: resolve the four exact same-county Ministry rows that publish coordinates but no
+  street-address evidence, either by sourcing street-address evidence or by adding a separate
+  reviewed coordinate-only acceptance method; keep locality-only candidate overlaps out of the
+  alias source unless a stronger provider-specific source appears
 
 This should support service-access views in `administrativ`, `justitie` and `transport`
 without each simulator building its own hospital roster.

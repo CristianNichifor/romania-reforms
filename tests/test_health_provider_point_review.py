@@ -187,20 +187,36 @@ def test_committed_review_covers_remaining_service_eligible_no_point_rows():
 
     assert report["id"] == "health-provider-point-evidence-review-2024-2026"
     assert report_ids == expected_ids
-    assert report["summary"]["reviewProviders"] == 125
-    assert report["summary"]["providersWithAnyCandidate"] == 11
-    assert report["summary"]["candidateRows"] == 15
+    assert report["summary"]["reviewProviders"] == 122
+    assert report["summary"]["providersWithAnyCandidate"] == 8
+    assert report["summary"]["candidateRows"] == 12
     assert report["summary"]["candidateStatus"] == {
         "exact-source-row-lacks-street-address": 4,
-        "has-unused-ministry-review-candidate": 7,
+        "has-unused-ministry-review-candidate": 4,
         "no-ministry-review-candidate": 114,
     }
     assert report["summary"]["reviewSignal"] == {
-        "high": 7,
+        "high": 4,
         "low": 4,
         "none": 114,
     }
-    assert report["summary"]["existingAddressAliases"] == 37
+    assert report["summary"]["existingAddressAliases"] == 40
+
+    remaining_candidate_ids = {
+        record["providerId"]
+        for record in report["records"]
+        if record["candidateStatus"] != "no-ministry-review-candidate"
+    }
+    assert remaining_candidate_ids == {
+        "anmcs-2025-001",
+        "anmcs-2025-038",
+        "anmcs-2025-115",
+        "anmcs-2025-140",
+        "anmcs-2025-236",
+        "anmcs-2025-256",
+        "anmcs-2025-362",
+        "anmcs-2025-584",
+    }
 
     for record in report["records"]:
         assert record["candidateCount"] == len(record["candidates"])

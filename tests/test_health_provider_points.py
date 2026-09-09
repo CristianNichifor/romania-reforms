@@ -231,34 +231,34 @@ def test_committed_provider_points_cover_the_health_mart():
     assert points["summary"]["addressSourceRecords"] == 301
     assert points["summary"]["addressSourceRecordsWithStreetAddress"] == 290
     assert points["summary"]["addressSourceRecordsWithCoordinates"] == 301
-    assert points["summary"]["addressMatchedProviders"] == 211
+    assert points["summary"]["addressMatchedProviders"] == 214
     assert points["summary"]["addressExactMatchedProviders"] == 174
-    assert points["summary"]["addressAliasMatchedProviders"] == 37
+    assert points["summary"]["addressAliasMatchedProviders"] == 40
     assert points["summary"]["ambiguousAddressProviders"] == 0
-    assert points["summary"]["pointAccessEligibleProviders"] == 199
-    assert points["summary"]["pointAccessBlockedProviders"] == 393
-    assert points["summary"]["providersWithAddress"] == 211
-    assert points["summary"]["providersWithCoordinates"] == 199
-    assert points["summary"]["coordinateMatchedProviders"] == 211
-    assert points["summary"]["coordinateAcceptedProviders"] == 199
+    assert points["summary"]["pointAccessEligibleProviders"] == 202
+    assert points["summary"]["pointAccessBlockedProviders"] == 390
+    assert points["summary"]["providersWithAddress"] == 214
+    assert points["summary"]["providersWithCoordinates"] == 202
+    assert points["summary"]["coordinateMatchedProviders"] == 214
+    assert points["summary"]["coordinateAcceptedProviders"] == 202
     assert points["summary"]["coordinateRejectedProviders"] == 12
     assert points["summary"]["addressEvidence"] == {
-        "none": 381,
-        "official-provider-address": 211,
+        "none": 378,
+        "official-provider-address": 214,
     }
     assert points["summary"]["addressMatchMethods"] == {
-        "curated-same-county-official-name-alias": 37,
+        "curated-same-county-official-name-alias": 40,
         "exact-normalised-name-county": 174,
-        "none": 381,
+        "none": 378,
     }
     assert points["summary"]["pointConfidence"] == {
-        "none": 393,
-        "official-coordinate": 199,
+        "none": 390,
+        "official-coordinate": 202,
     }
     assert points["registry"]["addressAliases"] == {
         "id": "ministerul-sanatatii-unitati-sanitare-address-aliases-2026",
         "reviewedDate": "2026-09-09",
-        "aliases": 37,
+        "aliases": 40,
     }
     assert "msUnitatiSanitareAliasesSha256" in points["sourceHashes"]
     assert (
@@ -270,14 +270,26 @@ def test_committed_provider_points_cover_the_health_mart():
         for provider in points["providers"]
         if provider["locationConfidence"] == "county-only"
     )
-    assert points["summary"]["blockedReasons"]["no-point-evidence"] == 125
-    assert sum(1 for provider in points["providers"] if provider["pointAccessEligible"]) == 199
+    assert points["summary"]["blockedReasons"]["no-point-evidence"] == 122
+    assert sum(1 for provider in points["providers"] if provider["pointAccessEligible"]) == 202
     assert all(
         provider["pointConfidence"] == "official-coordinate"
         for provider in points["providers"]
         if provider["pointAccessEligible"]
     )
-    assert len(points["exclusions"]) == 393
+    assert len(points["exclusions"]) == 390
+
+    accepted_review_aliases = {
+        "anmcs-2025-230": "ms-unitati-sanitare-121",
+        "anmcs-2025-261": "ms-unitati-sanitare-274",
+        "anmcs-2025-279": "ms-unitati-sanitare-043",
+    }
+    by_provider_id = {provider["providerId"]: provider for provider in points["providers"]}
+    for provider_id, source_record_id in accepted_review_aliases.items():
+        provider = by_provider_id[provider_id]
+        assert provider["addressSourceRecordId"] == source_record_id
+        assert provider["addressMatchMethod"] == "curated-same-county-official-name-alias"
+        assert provider["pointAccessEligible"] is True
 
     limitation_ids = {limitation["id"] for limitation in points["limitations"]}
     assert "coordinate-source-ministry-marker" in limitation_ids
