@@ -89,7 +89,7 @@ for (const width of [320, 390, 1440]) test(`native controls and map at ${width}p
     const control = page.locator(`#${id}`);
     expect(await control.evaluate(el => !!el.closest('.civic-field') && !!el.getAttribute('aria-label'))).toBe(true);
     expect((await control.boundingBox())!.height).toBeGreaterThanOrEqual(44);
-    expect(await control.evaluate(el => el.clientWidth >= el.parentElement!.clientWidth - 4)).toBe(true);
+    expect(await control.evaluate(el => el.getBoundingClientRect().width >= el.parentElement!.getBoundingClientRect().width - 2)).toBe(true);
     await control.focus();
     await page.keyboard.press('Tab');
     await page.keyboard.press('Shift+Tab');

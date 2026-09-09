@@ -60,7 +60,10 @@ for (const width of [320, 390, 1440]) test(`native controls and map at ${width}p
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
   const violations = (await new AxeBuilder({ page }).include('.civic-field, .civic-choice, .civic-table-scroll').withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()).violations;
   expect(violations.map(v => ({ id: v.id, nodes: v.nodes.map(n => n.target) }))).toEqual([]);
+  await region.evaluate(el => el.scrollIntoView({ block: 'start' }));
+  if (width < 900) expect((await region.boundingBox())!.y).toBeGreaterThanOrEqual((await page.locator('#map').boundingBox())!.height);
   await region.screenshot({ path: info.outputPath('table.png') });
+  await select.evaluate(el => el.scrollIntoView({ block: 'start' }));
   await select.screenshot({ path: info.outputPath('select.png') });
   expect(external).toEqual([]);
 });
