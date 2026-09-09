@@ -120,6 +120,9 @@ export interface Strings {
   fiscalHeading: string;
   savingsHeading: string;
   ownIncome: string;
+  ownRevenue: string;
+  ownRevenueShare: string;
+  localFinanceSource: string;
   adminPersonnel: string;
   totalPersonnel: string;
   developmentCost: string;
@@ -370,6 +373,9 @@ const ro: Strings = {
   fiscalHeading: 'Situație fiscală',
   savingsHeading: 'Economii estimate',
   ownIncome: 'Venituri totale',
+  ownRevenue: 'Venituri proprii',
+  ownRevenueShare: 'Pondere venituri proprii',
+  localFinanceSource: 'Mart local-finance {year}, din Transparenta.eu / Ministerul Finanțelor',
   adminPersonnel: 'Personal administrativ',
   totalPersonnel: 'Personal total',
   developmentCost: 'Cheltuieli de dezvoltare',
@@ -634,6 +640,9 @@ const en: Strings = {
   fiscalHeading: 'Fiscal position',
   savingsHeading: 'Estimated saving',
   ownIncome: 'Total income',
+  ownRevenue: 'Own revenue',
+  ownRevenueShare: 'Own-revenue share',
+  localFinanceSource: 'Shared local-finance mart {year}, from Transparenta.eu / Ministry of Finance',
   adminPersonnel: 'Administrative staff',
   totalPersonnel: 'Total staff',
   developmentCost: 'Development spending',
@@ -803,4 +812,11 @@ export function formatMoney(ron: number, lang: Lang): string {
     return `${new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(ron / 1e6)} mil RON`;
   }
   return `${new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(ron)} RON`;
+}
+
+export function formatPercent(value: number, lang: Lang): string {
+  return new Intl.NumberFormat(lang === 'ro' ? 'ro-RO' : 'en-GB', {
+    style: 'percent',
+    maximumFractionDigits: 1,
+  }).format(value);
 }

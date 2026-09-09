@@ -10,6 +10,11 @@ import './style.css';
 
 import { buildChain, edgeKey, indexShard } from './app/chain';
 import { budgetUrlFor } from './app/links';
+import {
+  localFinancePayloadAligned,
+  localFinanceTotals,
+  type LocalFinancePayload,
+} from './app/local-finance';
 import { createPanel } from './app/panels';
 import { REFERENCE, sameMap } from './app/reference';
 import { decode as decodeScenario, encode as encodeScenario, writeHash, type Scenario } from './app/scenario';
@@ -25,7 +30,7 @@ import {
   upsertVersion,
   type SavedVersion,
 } from './app/versions';
-import { STRINGS, detectLang, formatMoney, formatNumber, type Lang, type Strings } from './i18n';
+import { STRINGS, detectLang, formatMoney, formatNumber, formatPercent, type Lang, type Strings } from './i18n';
 import {
   createMap,
   CAPITAL_COLOUR,
@@ -1450,6 +1455,30 @@ async function boot(): Promise<void> {
   };
 
   /**
+   * Shared local-finance indicators, fetched only for the detail panel.
+   *
+   * The model's own binary finance still carries administration-only spending. The shared mart
+   * adds comparable revenue/own-revenue indicators, aligned to the same UAT index so a merged
+   * unit can be summed without a string join in the browser.
+   */
+  let localFinance: LocalFinancePayload | null = null;
+  let localFinanceLoad: Promise<void> | null = null;
+
+  const loadLocalFinance = (): Promise<void> => {
+    localFinanceLoad ??= fetch(`${DATA_BASE}local-finance-2024.json`)
+      .then((response) => (response.ok ? response.json() : null))
+      .then((raw: LocalFinancePayload | null) => {
+        localFinance = raw && ready && localFinancePayloadAligned(raw, ready.attributes.siruta)
+          ? raw
+          : null;
+      })
+      .catch(() => {
+        localFinance = null;
+      });
+    return localFinanceLoad;
+  };
+
+  /**
    * The 2020 local-council votes, fetched the first time a unit's detail is opened.
    *
    * 153 KB, and only a reader who opens a unit ever needs it — the map itself does not. Absent
@@ -1679,6 +1708,7 @@ async function boot(): Promise<void> {
     const totalPersonnel = sum(ready.personnelRon);
     const totalAdminPersonnel = sum(ready.adminPersonnelRon);
     const totalIncome = sum(ready.incomeRon);
+    const sharedFinance = localFinanceTotals(localFinance, members);
 
     // The saving is the administration of everyone except the centre: the centre keeps its
     // own town hall, and the rest is what a merger removes.
@@ -1686,7 +1716,12 @@ async function boot(): Promise<void> {
     const saved = Math.max(0, totalAdmin - centreAdmin);
     const balance = totalIncome - (totalOperating + totalDevelopment);
 
-    const scale = Math.max(totalIncome, totalOperating + totalDevelopment, 1);
+    const scale = Math.max(
+      totalIncome,
+      totalOperating + totalDevelopment,
+      sharedFinance?.revenueRon ?? 0,
+      1,
+    );
     const bar = (label: string, value: number, colour: string): string => `
       <div class="row">
         <div class="top"><span>${label}</span><span>${formatMoney(value, scenario.lang)}</span></div>
@@ -1694,6 +1729,7 @@ async function boot(): Promise<void> {
       </div>`;
 
     // The party table needs the votes; the rest of the panel does not wait for them.
+    if (!localFinance) void loadLocalFinance().then(() => { if (scenario.selected === index) renderDetail(); });
     if (!votes) void loadVotes().then(() => { if (scenario.selected === index) renderDetail(); });
     if (!courts) void loadCourts().then(() => { if (scenario.selected === index) renderDetail(); });
     detailPanel.setTitle(unitName(ready, region));
@@ -1719,6 +1755,23 @@ async function boot(): Promise<void> {
       <div class="fiscal">
         <h4>${strings.fiscalHeading}</h4>
         ${bar(strings.ownIncome, totalIncome, '#43b07a')}
+        ${
+          sharedFinance
+            ? `${bar(strings.ownRevenue, sharedFinance.ownRevenueRon, '#2aa6a1')}
+              <div class="finance-share">
+                <span>${strings.ownRevenueShare}</span>
+                <span>${
+                  sharedFinance.ownRevenueShare === null
+                    ? '—'
+                    : formatPercent(sharedFinance.ownRevenueShare, scenario.lang)
+                }</span>
+              </div>
+              <p class="muted rep-source">${strings.localFinanceSource.replace(
+                '{year}',
+                localFinance!.period,
+              )}</p>`
+            : ''
+        }
         ${bar(strings.adminPersonnel, totalAdminPersonnel, '#e0b13a')}
         ${bar(strings.totalPersonnel, totalPersonnel, '#e08a34')}
         ${bar(strings.operatingCost, totalOperating, '#d4544c')}
