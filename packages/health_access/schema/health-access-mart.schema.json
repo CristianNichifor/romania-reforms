@@ -84,6 +84,8 @@
         "providersWithClinicalBeds",
         "providersWithoutClinicalBeds",
         "providersWithSiruta",
+        "serviceAccessEligibleProviders",
+        "serviceAccessBlockedProviders",
         "providerLevelClinicalBeds",
         "countyTotalBeds",
         "namedExclusions",
@@ -104,6 +106,8 @@
         "providersWithClinicalBeds": { "type": "integer", "minimum": 0 },
         "providersWithoutClinicalBeds": { "type": "integer", "minimum": 0 },
         "providersWithSiruta": { "type": "integer", "minimum": 0 },
+        "serviceAccessEligibleProviders": { "type": "integer", "minimum": 0 },
+        "serviceAccessBlockedProviders": { "type": "integer", "minimum": 0 },
         "providerLevelClinicalBeds": { "type": "number", "minimum": 0 },
         "countyTotalBeds": { "type": "number", "minimum": 0 },
         "namedExclusions": { "type": "integer", "minimum": 1 },
@@ -186,6 +190,8 @@
         "siruta",
         "localityName",
         "locationConfidence",
+        "locationEvidence",
+        "serviceAccessEligible",
         "ownerType",
         "bedCount",
         "specialties",
@@ -207,6 +213,32 @@
         "locationConfidence": {
           "enum": ["name-derived-locality", "municipality-from-county", "county-only"]
         },
+        "locationEvidence": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["method", "sourceFields", "sourceValue", "accessUse"],
+          "properties": {
+            "method": {
+              "enum": [
+                "provider-name-locality-match",
+                "provider-name-locality-alias-match",
+                "bucharest-county-municipality-fallback",
+                "county-only-source"
+              ]
+            },
+            "sourceFields": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "string", "minLength": 1 },
+              "uniqueItems": true
+            },
+            "sourceValue": { "type": "string", "minLength": 1 },
+            "accessUse": {
+              "enum": ["eligible-for-uat-level-access", "blocked-county-only"]
+            }
+          }
+        },
+        "serviceAccessEligible": { "type": "boolean" },
         "ownerType": { "enum": ["public", "private", "unknown"] },
         "bedCount": { "type": ["number", "null"], "minimum": 0 },
         "specialties": {

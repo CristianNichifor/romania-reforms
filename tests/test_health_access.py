@@ -106,9 +106,21 @@ def test_location_derivation_uses_registry_and_bucharest_municipality():
 
     assert dej["siruta"] == "55008"
     assert dej["locationConfidence"] == "name-derived-locality"
+    assert dej["locationEvidence"]["method"] == "provider-name-locality-match"
+    assert health_access.service_access_eligible(dej)
     assert cluj["siruta"] == "54975"
     assert bucharest["siruta"] == "179132"
     assert bucharest["locationConfidence"] == "municipality-from-county"
+    assert bucharest["locationEvidence"]["accessUse"] == "eligible-for-uat-level-access"
+    assert health_access.service_access_eligible(bucharest)
+
+    blocked = health_access.locate_provider(
+        provider("anmcs-2025-203", "SPITALUL FARA LOCALITATE", "CJ"), index
+    )
+    assert blocked["siruta"] is None
+    assert blocked["locationConfidence"] == "county-only"
+    assert blocked["locationEvidence"]["accessUse"] == "blocked-county-only"
+    assert not health_access.service_access_eligible(blocked)
 
 
 def test_committed_health_access_mart_covers_national_scope():
@@ -124,6 +136,8 @@ def test_committed_health_access_mart_covers_national_scope():
     assert document["summary"]["providersWithoutClinicalBeds"] == 524
     assert document["summary"]["countyTotalBeds"] == 116828.0
     assert document["summary"]["locationConfidence"]["county-only"] == 268
+    assert document["summary"]["serviceAccessEligibleProviders"] == 324
+    assert document["summary"]["serviceAccessBlockedProviders"] == 268
     assert by_id["anmcs-2025-009"]["sourceRows"]["clinicalBedsRow"] == 66
     assert by_id["anmcs-2025-024"]["sourceRows"]["clinicalBedsRow"] == 18
     assert by_id["anmcs-2025-028"]["sourceRows"]["clinicalBedsRow"] == 20
@@ -140,6 +154,23 @@ def test_committed_health_access_mart_covers_national_scope():
     assert any(
         record["countyCode"] == "CJ" and record["siruta"] == "54975" and record["bedCount"]
         for record in records
+    )
+    assert all(
+        record["serviceAccessEligible"]
+        == (
+            record["siruta"] is not None
+            and record["locationConfidence"] != "county-only"
+            and record["locationEvidence"]["accessUse"] == "eligible-for-uat-level-access"
+        )
+        for record in records
+    )
+    blocked_provider_names = {
+        record["name"] for record in records if not record["serviceAccessEligible"]
+    }
+    assert all(
+        exclusion["name"] in blocked_provider_names
+        for exclusion in document["exclusions"]
+        if exclusion["kind"] == "provider-without-uat-location"
     )
     assert {
         "clinical-beds-provider-scope-is-partial",

@@ -36,7 +36,7 @@ NATIONAL_MART_ID: Final[str] = "health-access-mart-2024-2025"
 SAMPLE_MART_ID: Final[str] = "health-access-mart-sample-2024-2025"
 OUT = PACKAGE_ROOT / f"data/{NATIONAL_MART_ID}.json"
 UA: Final[str] = "romania-reforms/0.1 (+https://github.com/CristianNichifor/romania-reforms)"
-TRANSFORM_VERSION: Final[int] = 2
+TRANSFORM_VERSION: Final[int] = 3
 
 HOSPITAL_BEDS_URL: Final[str] = (
     "https://data.gov.ro/dataset/37aa4af3-4b99-4277-8193-236b8ccbaea1/"
@@ -312,6 +312,10 @@ PUBLIC_MARKERS: Final[tuple[str, ...]] = (
     "CENTRUL NATIONAL",
     "CENTRUL CLINIC",
 )
+ACCESS_ELIGIBLE_LOCATION_CONFIDENCE: Final[set[str]] = {
+    "municipality-from-county",
+    "name-derived-locality",
+}
 
 
 def sha256_bytes(data: bytes) -> str:
@@ -587,6 +591,12 @@ def locate_provider(
             "siruta": municipality["siruta"] if municipality else None,
             "localityName": municipality["name"] if municipality else None,
             "locationConfidence": "municipality-from-county",
+            "locationEvidence": {
+                "method": "bucharest-county-municipality-fallback",
+                "sourceFields": ["anmcs.county", "uatRegistry.countyCode"],
+                "sourceValue": county_code_value,
+                "accessUse": "eligible-for-uat-level-access",
+            },
         }
 
     name = normalise_text(provider["name"])
@@ -599,6 +609,12 @@ def locate_provider(
                 "siruta": unit["siruta"],
                 "localityName": unit["name"],
                 "locationConfidence": "name-derived-locality",
+                "locationEvidence": {
+                    "method": "provider-name-locality-match",
+                    "sourceFields": ["anmcs.name", "uatRegistry.shortName"],
+                    "sourceValue": unit["shortName"],
+                    "accessUse": "eligible-for-uat-level-access",
+                },
             }
 
     for (county_code, alias), canonical in LOCALITY_ALIASES.items():
@@ -619,9 +635,33 @@ def locate_provider(
                 "siruta": unit["siruta"],
                 "localityName": unit["name"],
                 "locationConfidence": "name-derived-locality",
+                "locationEvidence": {
+                    "method": "provider-name-locality-alias-match",
+                    "sourceFields": ["anmcs.name", "uatRegistry.shortName"],
+                    "sourceValue": alias,
+                    "accessUse": "eligible-for-uat-level-access",
+                },
             }
 
-    return {"siruta": None, "localityName": None, "locationConfidence": "county-only"}
+    return {
+        "siruta": None,
+        "localityName": None,
+        "locationConfidence": "county-only",
+        "locationEvidence": {
+            "method": "county-only-source",
+            "sourceFields": ["anmcs.county"],
+            "sourceValue": county_code_value,
+            "accessUse": "blocked-county-only",
+        },
+    }
+
+
+def service_access_eligible(location: dict[str, Any]) -> bool:
+    return (
+        location["siruta"] is not None
+        and location["locationConfidence"] in ACCESS_ELIGIBLE_LOCATION_CONFIDENCE
+        and location["locationEvidence"]["accessUse"] == "eligible-for-uat-level-access"
+    )
 
 
 def selected_clinical_row(clinical: dict[str, Any], selected_counties: set[str]) -> bool:
@@ -663,6 +703,7 @@ def build_document(
     for provider in providers:
         match = matches.get(provider["providerId"])
         location = locate_provider(provider, units_by_county)
+        access_eligible = service_access_eligible(location)
         records.append(
             {
                 "providerId": provider["providerId"],
@@ -672,6 +713,8 @@ def build_document(
                 "siruta": location["siruta"],
                 "localityName": location["localityName"],
                 "locationConfidence": location["locationConfidence"],
+                "locationEvidence": location["locationEvidence"],
+                "serviceAccessEligible": access_eligible,
                 "ownerType": provider["ownerType"],
                 "bedCount": match["bedCount"] if match else None,
                 "specialties": match["specialties"] if match else [],
@@ -708,7 +751,10 @@ def build_document(
                     "source": "anmcs",
                     "name": provider["name"],
                     "countyCode": provider["countyCode"],
-                    "reason": "The source rows carry county names but no address or coordinates.",
+                    "reason": (
+                        "The source rows carry county names but no provider address, "
+                        "coordinates or locality evidence."
+                    ),
                 }
             )
 
@@ -764,6 +810,12 @@ def build_document(
         "providersWithClinicalBeds": sum(1 for record in records if record["bedCount"] is not None),
         "providersWithoutClinicalBeds": sum(1 for record in records if record["bedCount"] is None),
         "providersWithSiruta": sum(1 for record in records if record["siruta"] is not None),
+        "serviceAccessEligibleProviders": sum(
+            1 for record in records if record["serviceAccessEligible"]
+        ),
+        "serviceAccessBlockedProviders": sum(
+            1 for record in records if not record["serviceAccessEligible"]
+        ),
         "providerLevelClinicalBeds": round(sum(record["bedCount"] or 0 for record in records), 2),
         "countyTotalBeds": round(sum(row["totalBeds"] for row in county_totals), 2),
         "namedExclusions": len(exclusions),
@@ -825,9 +877,9 @@ def build_document(
                 "material",
                 ["siruta", "localityName", "locationConfidence"],
                 (
-                    "The source workbooks do not publish address or coordinates. UAT placement "
-                    "is derived from locality text in provider names; unmatched rows remain "
-                    "county-only."
+                    "The source workbooks do not publish provider address or coordinates. UAT "
+                    "placement is derived from locality text in provider names; unmatched rows "
+                    "remain county-only and are blocked from service-access calculations."
                 ),
             ),
             limitation(
