@@ -1,4 +1,7 @@
 import { useMemo, useState } from 'react';
+import { Field, NativeSelect } from '@cristiannichifor/civic-ui';
+import '@cristiannichifor/civic-ui/styles.css';
+import './civic-pilot.css';
 
 import { payslip } from '../../engine/payslip';
 import { amountLine } from './money';
@@ -119,15 +122,14 @@ export default function EquivalenceView({
       </header>
 
       <section>
-        <div className="card controls anchor-controls">
-          <label className="field">
-            <span>Raportat la</span>
-            <select value={anchor} onChange={(e) => setAnchor(e.target.value as 'avg' | 'gov' | 'floor')}>
+        <div className="card controls anchor-controls civic-scope civic-pay">
+          <Field id="equivalence-anchor" label="Raportat la">
+            {(props) => <NativeSelect {...props} value={anchor} onChange={(e) => setAnchor(e.target.value as 'avg' | 'gov' | 'floor')}>
               <option value="avg">salariul mediu din toată economia</option>
               <option value="gov">salariul mediu din sectorul public</option>
               <option value="floor">pragul de jos</option>
-            </select>
-          </label>
+            </NativeSelect>}
+          </Field>
           <label className="field">
             <span>Vechime presupusă: {seniority} ani</span>
             <input

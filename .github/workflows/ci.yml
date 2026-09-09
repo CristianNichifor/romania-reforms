@@ -66,6 +66,13 @@ jobs:
           npm ci
           npm run typecheck
           npm test
+      - name: Pay app and shared-control browser checks
+        working-directory: simulators/salarizare/app
+        run: |
+          npm ci --ignore-scripts
+          npm run build
+          npx --no-install playwright install chromium
+          npm run check:ui
 
   justitie:
     name: justitie
