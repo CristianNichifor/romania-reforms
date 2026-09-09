@@ -40,8 +40,11 @@ First slice:
   spending
 - done: generate the full 2025 national mart and prove the existing `buget-uat-2025`
   output can be regenerated through the shared package without changing published totals
-- next: add arrears or move a 2023-2025 national expansion to release assets; the committed
-  2025 mart fits the current size gate, but the full three-year history probably will not
+- done: inspect the official `data.gov.ro` Arierate package, add a compact UAT resource index,
+  and add importer hooks for the legacy UAT XLS workbooks; the official package only covers
+  2013-09-30 through 2018-06-30, so it cannot populate the 2025 mart
+- next: move a 2023-2025 national expansion to release assets, and keep current arrears sourcing
+  as a separate discovery task unless a newer official workbook appears
 
 Useful first indicators:
 

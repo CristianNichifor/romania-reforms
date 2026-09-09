@@ -7,9 +7,9 @@
   "periodEnd": "2025",
   "retrievedDate": "2026-09-08",
   "summary": {
-    "checks": 5,
+    "checks": 6,
     "passed": 4,
-    "warnings": 0,
+    "warnings": 1,
     "failed": 0,
     "notRun": 1
   },
@@ -59,6 +59,18 @@
       "status": "not_run",
       "text": "No data.gov.ro workbook was supplied, so the report records the comparison hook only.",
       "metrics": {}
+    },
+    {
+      "id": "data-gov-arrears-coverage",
+      "status": "warning",
+      "text": "The official data.gov.ro Arierate package was inspected, but it has no UAT arrears resource for the mart year(s); arrears remain null rather than using stale source snapshots.",
+      "metrics": {
+        "requestedYears": "2025",
+        "coveredYears": "2013,2014,2015,2016,2017,2018",
+        "missingYears": "2025",
+        "latestUatSnapshotDate": "2018-06-30",
+        "recordsWithArrears": 0
+      }
     }
   ],
   "dataGovComparison": null,
@@ -81,12 +93,13 @@
       "text": "Own revenue is derived by excluding functional-code prefixes for income-tax shares, VAT allocations, subsidies and EU funds. Moving a prefix changes the indicator, so the prefix list is published with the mart."
     },
     {
-      "id": "arrears-not-imported-yet",
+      "id": "data-gov-arrears-period-unavailable",
       "severity": "material",
       "affects": [
-        "arrearsRon"
+        "arrearsRon",
+        "arrearsPerInhabitantRon"
       ],
-      "text": "The first slice does not import arrears. The field is present and null so downstream consumers can depend on the schema without mistaking missing arrears for zero arrears."
+      "text": "The official data.gov.ro arrears package was inspected, but it has no UAT arrears resource covering this mart period; the latest indexed UAT snapshot is 2018-06-30. Arrears stay null rather than being backfilled from stale data."
     },
     {
       "id": "bucharest-sector-population-fallback",
@@ -96,6 +109,22 @@
         "perInhabitantIndicators"
       ],
       "text": "The shared UAT registry has no official POP107D population split for Bucharest sectors. Sector rows keep Transparenta roster population as a fallback and mark the source on each record."
+    },
+    {
+      "id": "data-gov-arrears-current-years-unavailable",
+      "severity": "material",
+      "affects": [
+        "arrearsRon"
+      ],
+      "text": "The official data.gov.ro Arierate package has no UAT arrears resources after 2018-06-30 in the CKAN metadata inspected for this import, so current mart years must keep arrears null unless a newer official workbook is supplied separately."
+    },
+    {
+      "id": "data-gov-arrears-duplicate-uploads",
+      "severity": "note",
+      "affects": [
+        "source"
+      ],
+      "text": "Several monthly UAT arrears snapshots have duplicate resource uploads. The compact index keeps one resource per snapshot date, preferring the later CKAN resource creation timestamp."
     }
   ]
 }
