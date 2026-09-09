@@ -240,30 +240,30 @@ def test_committed_capesaro_candidate_report_covers_remaining_acquisition_queue(
         "duplicateSourceCodes": 0,
         "duplicateSourceNames": 3,
     }
-    assert report["summary"]["sourceAcquisitionProviders"] == 101
+    assert report["summary"]["sourceAcquisitionProviders"] == 72
     assert report["summary"]["capesaroSourceRecords"] == 731
     assert report["summary"]["activeCapesaroSourceRecords"] == 680
-    assert report["summary"]["providersWithCandidates"] == 53
+    assert report["summary"]["providersWithCandidates"] == 24
     assert report["summary"]["providersWithoutCandidates"] == 48
-    assert report["summary"]["candidateRows"] == 57
-    assert report["summary"]["publicProviders"] == 45
-    assert report["summary"]["publicProvidersWithCandidates"] == 35
+    assert report["summary"]["candidateRows"] == 28
+    assert report["summary"]["publicProviders"] == 16
+    assert report["summary"]["publicProvidersWithCandidates"] == 6
     assert report["summary"]["publicProvidersWithoutCandidates"] == 10
     assert report["summary"]["candidateSignals"] == {
-        "high": 38,
+        "high": 9,
         "low": 7,
         "medium": 8,
         "none": 48,
     }
     assert report["summary"]["candidateMatchMethods"] == {
         "contained-normalised-name-county": 7,
-        "exact-normalised-name-county": 38,
+        "exact-normalised-name-county": 9,
         "token-overlap-same-county": 4,
         "weak-token-overlap-same-county": 8,
     }
     assert report["summary"]["candidateOwnerTypes"] == {
         "private": 17,
-        "public": 35,
+        "public": 6,
         "unknown": 1,
     }
 

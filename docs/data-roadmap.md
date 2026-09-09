@@ -150,8 +150,13 @@ First slice:
   candidate report instead of committing the raw dashboard feed; the report covers all 101
   remaining acquisition rows and finds 53 providers with same-county active street-address
   CAPeSaRo candidates, including 35 of the 45 public no-candidate providers
-- next: review the 29 high-signal public exact-name CAPeSaRo candidates first and promote only
-  provider/sourceCode pairs that pass the supplemental-evidence checks
+- done: run the final high-signal CAPeSaRo review batch, promoting 29 public exact-name
+  provider/sourceCode pairs; the point layer now has 252 accepted provider coordinates and 340
+  named exclusions, and the remaining source-acquisition queue has 72 no-point-evidence
+  providers: 16 public rows and 56 private or unknown rows
+- next: pause health-point expansion and switch active development back to a non-health target;
+  when health resumes, the remaining 72-row queue is the maintenance backlog, with only medium
+  or low public CAPeSaRo candidates left
 
 This should support service-access views in `administrativ`, `justitie` and `transport`
 without each simulator building its own hospital roster.
