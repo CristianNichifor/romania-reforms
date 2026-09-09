@@ -19,4 +19,4 @@ The browser check starts and stops a loopback preview server, tests 390/1440 wid
 
 The separate engine suite remains the calculation regression gate. No engine, tracked dataset, scenario codec, charts or slider behavior is changed by this pilot. This is not a full UI migration or accessibility/security audit. Offline installation still requires cached dependencies and datasets; browser operation requires a reachable local server.
 
-Existing Vite/Vitest toolchain advisories are not addressed here. Browser previews bind only to loopback. Dependency maintenance belongs in a separate change.
+The subsequent tooling-maintenance change pins Vite 7.3.6 and Vitest 4.1.11 for both app and engine tests. On 2026-09-09, clean installs and npm audits reported zero known vulnerabilities in these two packages' dependency trees. This is not a security audit of the wider repository. Browser previews still bind only to loopback.
