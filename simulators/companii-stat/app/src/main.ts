@@ -156,6 +156,7 @@ async function main(): Promise<void> {
   wireControls();
   buildRows();
   renderCaveats();
+  $('#argument').hidden = false;
 }
 
 void main();
