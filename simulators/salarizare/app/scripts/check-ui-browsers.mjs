@@ -5,15 +5,18 @@ import { readFileSync } from 'node:fs';
 import assert from 'node:assert/strict';
 
 const packageName = '@cristiannichifor/civic-ui';
-const artifact = 'https://github.com/CristianNichifor/civic-ui/releases/download/v0.2.0/civic-ui-0.2.0.tgz';
+const artifact = 'https://github.com/CristianNichifor/civic-ui/releases/download/v0.3.0/civic-ui-0.3.0.tgz';
 const manifest = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
 const lock = JSON.parse(readFileSync(new URL('../package-lock.json', import.meta.url), 'utf8'));
 assert.equal(manifest.dependencies[packageName], artifact, 'Civic UI must use the reviewed public release');
 assert.equal(lock.packages[''].dependencies[packageName], artifact, 'Root lock must match the manifest');
 const dependency = lock.packages[`node_modules/${packageName}`];
-assert.equal(dependency.version, '0.2.0');
+assert.equal(dependency.version, '0.3.0');
 assert.equal(dependency.resolved, artifact);
-assert.equal(dependency.integrity, 'sha512-njM2sa8x280dzdNdL5WUcnuRYOYcfNS7d/QE3xX7YM12/BiedF0l5AE4Z+rlKjE1Zj10O6GLDI2yrxOoYmYTIw==');
+// Checked against the SHA256SUMS published with the release, not copied out of the lockfile:
+// 83cb4244c2ef1154cd4e2d86c621d30ddfae803eff6da20b9c092b000880814b  civic-ui-0.3.0.tgz
+// A hash taken from the lockfile only proves npm downloaded the same thing twice.
+assert.equal(dependency.integrity, 'sha512-1en/v9AOp2Yk9dvzSSbmHceYB1PyDkVcPxkXq81FViyLm0D78nZiyLBHSOfYcK/rCPNAD45YYtva/J3dNA8H+Q==');
 
 for (const [filename, baselineKey] of [
   ['./check-civic-ui.mjs', 'CIVIC_BASELINE'],
