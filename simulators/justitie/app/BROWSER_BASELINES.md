@@ -19,11 +19,13 @@ From `simulators/justitie/app`:
 
 ```sh
 npm ci --ignore-scripts
-npm test
 npm run build
+npm test
 ```
 
-The `Justice browser baselines` workflow then runs `npm run check:ui` in the
+Build first: the existing arondare unit tests consume the copied `public/data`
+payloads prepared by the build scripts. The `Justice browser baselines` workflow
+then runs `npm run check:ui` in the
 existing Playwright `v1.63.0-noble` container, using software graphics and Xvfb
 for Firefox WebGL. All three engines run with one worker, no retries, a 90-second
 per-test timeout and a 15-minute CI job budget. Evidence goes to

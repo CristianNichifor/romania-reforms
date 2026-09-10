@@ -20,8 +20,8 @@ jobs:
         working-directory: simulators/justitie/app
         run: |
           npm ci --ignore-scripts
-          npm test
           npm run build
+          npm test
       - name: Statistics and real map in three browsers
         run: >-
           docker run --rm --init --ipc=host -e CI=1 -e LIBGL_ALWAYS_SOFTWARE=1
