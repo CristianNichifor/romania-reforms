@@ -19,17 +19,18 @@ Remaining work is maintenance, not an active build queue:
   backlog and should stay named exclusions until explicit source evidence exists.
 
 New source families should start as separate reconnaissance PRs and are not blockers for
-closing this wave. AMEPIP/public-company data is now tracked as a planned family in the
-catalog after source inventory. The first app-facing use is deliberately aggregate-only:
-`administrativ` now consumes a public-enterprise footprint sidecar, not company/person rows.
+closing this wave. AMEPIP/public-company data now has the two app-facing pieces this project
+needed: `administrativ` consumes a public-enterprise footprint sidecar and `salarizare`
+consumes an aggregate pay-scale comparison. Both use attributed, machine-readable
+companiidestat.ro API data and avoid company/person rows in browser payloads.
 
 ## Planned: AMEPIP public enterprises
 
 AMEPIP data could connect public-enterprise performance, board/director compensation,
 ownership and fiscal-risk context across pay, procurement and local-finance work. The source
-family is planned because the source inventory found official PDFs with CUI-level rows. The
-public dashboard is still only context: the next build should use official report attachments,
-not opaque Power BI internals.
+family is adopted for the current aggregate app payloads because the source inventory found
+usable public-enterprise data and the documented companiidestat.ro API gives a machine-readable
+route. The public dashboard is still only context unless AMEPIP publishes an explicit export/API.
 
 Reconnaissance note: [AMEPIP public enterprise data](amepip-public-enterprises.md).
 
@@ -56,9 +57,14 @@ First slice:
 - done: move the full package aggregate to `data-v1` release assets because the tracked tree
   has less than 1 MB of size-gate headroom; the compact `administrativ` sidecar remains
   committed;
-- next: replace the comparison aggregate with the same contract built from official AMEPIP
-  annexes and MFin/data.gov.ro financial statements, keeping companiidestat.ro as a validation
-  source rather than the primary provenance.
+- done: keep the administrative footprint on the documented companiidestat.ro API route,
+  with CC BY 4.0 attribution, instead of blocking this app-facing slice on AMEPIP PDF
+  extraction;
+- done: add a compact `salarizare` fiscal payload from `data.json` pay-scale rows:
+  fixed-tier count, median, top, annual-bonus extreme and benchmark ratios, with no CUI,
+  company, authority or person lists in the browser;
+- next: maintenance only. Add deeper official AMEPIP/MFin, procurement or local-finance slices
+  only when a consuming simulator asks a specific question that needs them.
 
 ## 1. SIRUTA, UAT and CUI registry
 

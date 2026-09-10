@@ -1,13 +1,15 @@
 # AMEPIP public enterprise data reconnaissance
 
-AMEPIP is a useful shared-data family, but it should enter through official report
-attachments rather than the embedded dashboard. The source inventory found CUI-level rows in
-several PDFs, so the family can move from candidate to planned. The public Power BI dashboard
-still needs an explicit export/API and reuse path before it can be a source of truth.
+AMEPIP is a useful shared-data family, but app-facing payloads should use documented,
+machine-readable data with clear attribution rather than opaque dashboard internals. The current
+adopted slice uses the companiidestat.ro JSON API under CC BY 4.0 attribution for aggregate
+administrative and salary-context payloads. The public Power BI dashboard still needs an explicit
+export/API and reuse path before it can be a source of truth.
 
 ## Decision
 
-Treat AMEPIP/public-enterprise data as a `planned` shared dataset.
+Treat AMEPIP/public-enterprise data as an `adopted` shared dataset for the aggregate
+`administrativ` and `salarizare` use cases.
 
 Do not import rows into simulator payloads until the next slice preserves:
 
@@ -92,18 +94,20 @@ This source family could serve more than one simulator:
    The app does not load company, CUI or person rows.
 8. Done: keep the full package aggregate out of git as a checksum-pinned `data-v1` release
    asset; keep the compact `administrativ` sidecar committed because it is the app payload.
-9. Next: rebuild the same administrative footprint contract from official AMEPIP annexes and
-   MFin/data.gov.ro statements, using companiidestat.ro as validation/discovery instead of
-   primary source.
-10. Later: publish the compensation mart as a checksum-pinned release asset only when a compact
-   `salarizare` comparison payload is ready to consume it without loading nominal rows in the
-   browser.
+9. Done: keep the administrative footprint on the documented companiidestat.ro JSON API route
+   with CC BY 4.0 attribution. This closes the app-facing slice without making AMEPIP PDF
+   extraction a blocker.
+10. Done: build a compact `salarizare` comparison payload from the API aggregate pay-scale rows:
+    fixed-tier count, median, top, annual-bonus extreme and benchmark ratios. The app does not
+    load nominal rows, CUIs, authority names or company-name lists.
+11. Next: maintenance only. Start deeper AMEPIP/MFin, procurement or local-finance work only
+    when a consuming simulator has a specific question that needs it.
 
 The slice should not scrape opaque Power BI internals as the source of truth. If Power BI is the
 only row-level route, require a documented export/API path before adoption.
 
-`companiidestat.ro` can accelerate validation because it exposes a documented public API over
-CUI rosters, AMEPIP-derived fields, MFin financials and subsidies. The administrative footprint
-slice ingests it only as a labelled comparison/reference aggregate, with `sourceUrl`, hashes,
-retrieval date, `license=CC BY 4.0` and attribution carried in the output. Official AMEPIP and
-MFin files remain the target source of truth for a future replacement import.
+`companiidestat.ro` is the chosen machine-readable source for the app-facing closeout because it
+exposes a documented public API over CUI rosters, AMEPIP-derived fields, MFin financials, pay-scale
+rows and subsidies under CC BY 4.0 attribution. Official AMEPIP and MFin files remain upstream
+provenance and future validation material, but they are not blockers for the current aggregate
+payloads.
