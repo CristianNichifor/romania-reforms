@@ -55,8 +55,10 @@ describe('filtered', () => {
       reductionPercent: 0,
       microUnder20: 0,
       headcountKnown: 0,
+      inFlightMergers: 0,
     },
     limitations: [],
+    inFlightMergers: [],
     clusters: [
       cluster({ caen: '3600', tier: 'regional' }),
       cluster({ caen: '3511', tier: 'national' }),

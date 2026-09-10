@@ -5,7 +5,7 @@
   "description": "Companies grouped by four-digit CAEN, with the network utilities proposed as one operator per development region. The tier assignment is a policy judgement, marked assumed.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "title", "publisher", "period", "provenance", "clusters", "summary", "limitations"],
+  "required": ["id", "title", "publisher", "period", "provenance", "operatorRule", "clusters", "inFlightMergers", "summary", "limitations"],
   "properties": {
     "$schema": { "type": "string" },
     "id": { "const": "companii-stat" },
@@ -13,6 +13,29 @@
     "publisher": { "type": "string" },
     "period": { "type": "string" },
     "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+    "operatorRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["confidence", "note"],
+      "properties": {
+        "confidence": { "const": "assumed" },
+        "note": { "type": "string" }
+      }
+    },
+    "inFlightMergers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["cui", "name", "caen", "status"],
+        "properties": {
+          "cui": { "type": "integer" },
+          "name": { "type": "string" },
+          "caen": { "type": ["string", "null"] },
+          "status": { "type": "string" }
+        }
+      }
+    },
     "clusters": {
       "type": "array",
       "items": {
@@ -27,7 +50,43 @@
           "headcountKnown": { "type": "integer", "minimum": 0 },
           "micro": { "type": "integer", "minimum": 0 },
           "tier": { "enum": ["regional", "local", "national", "other"] },
-          "proposed": { "type": "integer", "minimum": 0 }
+          "proposed": { "type": "integer", "minimum": 0 },
+          "regions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["region", "seatCounty", "absorber", "absorbedCount", "absorbed"],
+              "properties": {
+                "region": { "type": "string" },
+                "seatCounty": { "type": "string" },
+                "absorber": {
+                  "type": ["object", "null"],
+                  "additionalProperties": false,
+                  "required": ["cui", "name", "employees"],
+                  "properties": {
+                    "cui": { "type": "integer" },
+                    "name": { "type": "string" },
+                    "employees": { "type": "number" }
+                  }
+                },
+                "absorbedCount": { "type": "integer", "minimum": 0 },
+                "absorbed": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["cui", "name", "county"],
+                    "properties": {
+                      "cui": { "type": "integer" },
+                      "name": { "type": "string" },
+                      "county": { "type": ["string", "null"] }
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -42,7 +101,8 @@
         "operatorsProposedOnEightRegions",
         "reductionPercent",
         "microUnder20",
-        "headcountKnown"
+        "headcountKnown",
+        "inFlightMergers"
       ],
       "properties": {
         "companies": { "type": "integer", "minimum": 0 },
@@ -52,7 +112,8 @@
         "operatorsProposedOnEightRegions": { "type": "integer", "minimum": 0 },
         "reductionPercent": { "type": "number" },
         "microUnder20": { "type": "integer", "minimum": 0 },
-        "headcountKnown": { "type": "integer", "minimum": 0 }
+        "headcountKnown": { "type": "integer", "minimum": 0 },
+        "inFlightMergers": { "type": "integer", "minimum": 0 }
       }
     },
     "limitations": {

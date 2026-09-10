@@ -25,6 +25,7 @@ DATA = SIM / "data" / "deconcentrare.json"
 INSTITUTIONS = SIM / "data" / "institutii-2025.json"
 BUILD = SIM / "scripts" / "build_deconcentrare.py"
 REGIONS = ROOT / "simulators" / "justitie" / "data" / "curti-apel-regiuni.json"
+REGISTRY = ROOT / "packages" / "uat_registry" / "data" / "uat-registry-2026.json"
 
 # Legea 315/2004: the eight development regions hold 2, 4, 5, 6, 6, 6, 6 and 7 counties.
 EXPECTED_SIZES = sorted([2, 4, 5, 6, 6, 6, 6, 7])
@@ -39,7 +40,7 @@ def data() -> dict:
 
 def test_the_regions_are_the_same_eight_justitie_derived(data):
     """One country, one cut. The composition must equal the court variant's, county for county."""
-    ours = {region for fam in data["families"] for region in fam["byRegion"]}
+    ours = {group["region"] for fam in data["families"] for group in fam["regions"]}
     theirs = json.loads(REGIONS.read_text(encoding="utf-8"))["regions"]
     assert ours == {r["region"] for r in theirs}
     assert sorted(len(r["counties"]) for r in theirs) == EXPECTED_SIZES
@@ -48,8 +49,8 @@ def test_the_regions_are_the_same_eight_justitie_derived(data):
 def test_every_county_sits_in_exactly_one_region(data):
     seen: list[str] = []
     for family in data["families"]:
-        for counties in family["byRegion"].values():
-            seen.extend(counties)
+        for group in family["regions"]:
+            seen.extend(group["counties"])
     # 42 counties appear once per family that reaches them; the union must still be the 42.
     union = set(seen)
     assert len(union) == 42
@@ -59,9 +60,39 @@ def test_a_regional_family_proposes_one_office_per_region_it_reaches(data):
     for family in data["families"]:
         if family["tier"] != "regional":
             continue
-        assert family["officesProposed"] == len(family["byRegion"])
+        assert family["officesProposed"] == len(family["regions"])
         assert family["officesProposed"] <= 8
         assert family["officesToday"] >= family["officesProposed"]
+
+
+def test_every_region_group_names_a_seat_among_its_counties(data):
+    """The seat is a county the family actually has, and exactly one per region."""
+    for family in data["families"]:
+        for group in family["regions"]:
+            assert group["seat"] in group["counties"]
+            assert group["counties"].count(group["seat"]) == 1
+            assert group["seatPopulation"] is not None
+
+
+def test_the_seat_is_the_largest_present_county_by_population(data):
+    """The rule is written down: the seat is the largest county by population among those the
+    family actually has. Recompute it from the shared registry rather than hardcoding, because
+    partial-coverage families may lack the region's largest county."""
+    registry = json.loads(REGISTRY.read_text(encoding="utf-8"))["units"]
+    population = {
+        unit["countyCode"]: unit["population"]
+        for unit in registry
+        if unit.get("level") == "county" and unit.get("countyCode") and unit.get("population")
+    }
+    for family in data["families"]:
+        for group in family["regions"]:
+            expected = max(
+                group["counties"],
+                key=lambda county: (population.get(county, 0), county),
+            )
+            assert group["seat"] == expected
+            assert group["seatPopulation"] == population[group["seat"]]
+    assert data["seatRule"]["confidence"] == "assumed"
 
 
 def test_the_headline_reconciles_with_the_source_rows(data):

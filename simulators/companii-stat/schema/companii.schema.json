@@ -5,7 +5,7 @@
   "description": "One row per state company: identity, registration, CAEN activity, status, and the latest reported full-time-equivalent headcount. Financial ratios are dropped at import.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "title", "publisher", "period", "provenance", "sourceChecksum", "dataQuality", "summary", "companies"],
+  "required": ["id", "title", "publisher", "period", "provenance", "countySource", "sourceChecksum", "dataQuality", "summary", "companies"],
   "properties": {
     "$schema": { "type": "string" },
     "id": { "const": "companii-stat-2025" },
@@ -13,6 +13,27 @@
     "publisher": { "type": "string" },
     "period": { "type": "string" },
     "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+    "countySource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "url", "license", "confidence", "note", "snapshotChecksum"],
+      "properties": {
+        "source": { "type": "string" },
+        "url": { "type": "string" },
+        "license": { "type": "string" },
+        "confidence": { "type": "string" },
+        "note": { "type": "string" },
+        "snapshotChecksum": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["sha256", "file"],
+          "properties": {
+            "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+            "file": { "type": "string" }
+          }
+        }
+      }
+    },
     "sourceChecksum": {
       "type": "object",
       "additionalProperties": false,
@@ -25,7 +46,7 @@
     "dataQuality": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["headcountExcluded"],
+      "required": ["headcountExcluded", "unmatchedCounties"],
       "properties": {
         "headcountExcluded": {
           "type": "array",
@@ -40,6 +61,19 @@
               "reported": { "type": "number" },
               "year": { "type": "integer" },
               "reason": { "type": "string" }
+            }
+          }
+        },
+        "unmatchedCounties": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["cui", "name", "reportedCounty"],
+            "properties": {
+              "cui": { "type": "integer" },
+              "name": { "type": "string" },
+              "reportedCounty": { "type": ["string", "null"] }
             }
           }
         }
@@ -69,7 +103,9 @@
           "caen": { "type": ["string", "null"] },
           "status": { "type": "string" },
           "employees": { "type": "number" },
-          "employeesYear": { "type": "integer" }
+          "employeesYear": { "type": "integer" },
+          "county": { "type": "string" },
+          "countySource": { "type": "string" }
         }
       }
     }

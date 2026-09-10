@@ -3,6 +3,20 @@
 
 export type Tier = 'regional' | 'local' | 'national' | 'other';
 
+export interface AbsorbedCompany {
+  cui: number;
+  name: string;
+  county: string | null;
+}
+
+export interface RegionOperator {
+  region: string;
+  seatCounty: string;
+  absorber: { cui: number; name: string; employees: number } | null;
+  absorbedCount: number;
+  absorbed: AbsorbedCompany[];
+}
+
 export interface Cluster {
   caen: string;
   name: string;
@@ -12,6 +26,14 @@ export interface Cluster {
   headcountKnown: number;
   micro: number;
   proposed: number;
+  regions?: RegionOperator[];
+}
+
+export interface InFlightMerger {
+  cui: number;
+  name: string;
+  caen: string | null;
+  status: string;
 }
 
 export interface Summary {
@@ -23,6 +45,7 @@ export interface Summary {
   reductionPercent: number;
   microUnder20: number;
   headcountKnown: number;
+  inFlightMergers: number;
 }
 
 export interface Limitation {
@@ -36,6 +59,7 @@ export interface Document {
   title: string;
   period: string;
   clusters: Cluster[];
+  inFlightMergers: InFlightMerger[];
   summary: Summary;
   limitations: Limitation[];
 }

@@ -24,11 +24,13 @@ Usage:
 
 from __future__ import annotations
 
+import collections
 import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 COMPANIES = ROOT / "data" / "companii-2025.json"
+REGION_MAP = ROOT.parents[1] / "simulators" / "justitie" / "data" / "curti-apel-regiuni.json"
 OUT = ROOT / "data" / "companii-stat.json"
 
 REGIONS = 8
@@ -71,6 +73,70 @@ TIERS = {
 }
 
 
+def load_region_of_county() -> dict[str, str]:
+    """County code -> development region, reused from the justitie variant."""
+    regions = json.loads(REGION_MAP.read_text(encoding="utf-8"))["regions"]
+    return {code: region["region"] for region in regions for code in region["counties"]}
+
+
+def regionalization(caen: str, companies: list[dict]) -> list[dict]:
+    """The proposed operators for one regional cluster: seat county, named absorber, absorbed.
+
+    The rule, in a paragraph: companies are grouped by their registration county, folded into
+    the eight development regions; the seat is the county in the region with the most companies
+    in the activity (ties: largest headcount sum, then code); the absorber is the largest
+    company there by reported headcount — and where none report a headcount, the operator is
+    left unnamed rather than guessed.
+    """
+    region_of_county = load_region_of_county()
+    by_region: dict[str, dict[str, list[dict]]] = collections.defaultdict(
+        lambda: collections.defaultdict(list)
+    )
+    for company in companies:
+        county = company.get("county")
+        if not county:
+            continue
+        region = region_of_county.get(county, "?").strip()
+        by_region[region][county].append(company)
+
+    out = []
+    for region, by_county in sorted(by_region.items()):
+        seat = max(
+            by_county,
+            key=lambda county: (
+                len(by_county[county]),
+                sum(c.get("employees") or 0 for c in by_county[county]),
+                county,
+            ),
+        )
+        with_headcount = [c for c in by_county[seat] if c.get("employees") is not None]
+        absorber = max(with_headcount, key=lambda c: c["employees"]) if with_headcount else None
+        members = [c for county in by_county.values() for c in county]
+        absorbed = [c for c in members if absorber is None or c["cui"] != absorber["cui"]]
+        out.append(
+            {
+                "region": region,
+                "seatCounty": seat,
+                "absorber": {
+                    "cui": absorber["cui"],
+                    "name": absorber["name"],
+                    "employees": absorber["employees"],
+                }
+                if absorber
+                else None,
+                "absorbedCount": len(absorbed),
+                "absorbed": sorted(
+                    (
+                        {"cui": c["cui"], "name": c["name"], "county": c.get("county")}
+                        for c in absorbed
+                    ),
+                    key=lambda c: c["name"],
+                ),
+            }
+        )
+    return out
+
+
 def main() -> None:
     source = json.loads(COMPANIES.read_text(encoding="utf-8"))
 
@@ -97,10 +163,17 @@ def main() -> None:
                 cluster["micro"] += 1
 
     out = []
+    companies_by_caen: dict[str, list[dict]] = collections.defaultdict(list)
+    for company in source["companies"]:
+        companies_by_caen[(company.get("caen") or "")[:4] or "????"].append(company)
     for cluster in clusters.values():
         tier = TIERS.get(cluster["caen"], "other")
         cluster["tier"] = tier
         cluster["proposed"] = REGIONS if tier == "regional" else cluster["companies"]
+        if tier == "regional":
+            cluster["regions"] = regionalization(
+                cluster["caen"], companies_by_caen[cluster["caen"]]
+            )
         out.append(cluster)
     out.sort(key=lambda c: (-c["companies"], c["caen"]))
 
@@ -108,6 +181,17 @@ def main() -> None:
     companies_in_regional = sum(c["companies"] for c in regional)
     operators_today = companies_in_regional
     operators_proposed = REGIONS * len(regional)
+
+    in_flight = [
+        {
+            "cui": c["cui"],
+            "name": c["name"],
+            "caen": c["caen"],
+            "status": c["status"],
+        }
+        for c in source["companies"]
+        if "fuziune" in (c["status"] or "") or "absorb" in (c["status"] or "").lower()
+    ]
 
     payload = {
         "$schema": "../schema/companii-stat.schema.json",
@@ -125,6 +209,16 @@ def main() -> None:
             "politică publică, nu un fapt din sursă, și este un singur tabel editabil în script.",
         },
         "clusters": out,
+        "operatorRule": {
+            "confidence": "assumed",
+            "note": "Sursa nu desemnează operatorul regional. Regula de aici: companiile sunt "
+            "grupate după județul de înregistrare, pliat pe cele opt regiuni; sediul este județul "
+            "cu cele mai multe companii din activitate (egalitate: cei mai mulți angajați, apoi "
+            "codul), iar nucleul absorbant este cea mai mare companie din acel județ după "
+            "efectivul raportat — iar unde nimeni nu raportează efectiv, operatorul rămâne "
+            "nenumit, nu ghicit.",
+        },
+        "inFlightMergers": in_flight,
         "summary": {
             "companies": source["summary"]["companies"],
             "clusters": len(out),
@@ -138,6 +232,7 @@ def main() -> None:
             else 0,
             "microUnder20": sum(c["micro"] for c in out),
             "headcountKnown": sum(c["headcountKnown"] for c in out),
+            "inFlightMergers": len(in_flight),
         },
         "limitations": [
             {
@@ -155,11 +250,26 @@ def main() -> None:
                 "affects": ["clusters", "summary"],
             },
             {
-                "id": "no-geography",
-                "text": "Sursa nu dă județul fiecărei companii, deci scenariul numără operatorii "
-                "regionali, nu îi așază pe hartă.",
+                "id": "county-is-registration",
+                "text": "Județul vine din registrul companiidestat.ro și este județul de "
+                "înregistrare (sediul), nu teritoriul de servire. Un operator înregistrat în "
+                "capitală poate servi alt județ; gruparea pe regiuni rămâne o aproximare.",
+                "severity": "material",
+                "affects": ["clusters", "regions"],
+            },
+            {
+                "id": "operator-rule-assumed",
+                "text": "Cine absoarbe pe cine este o regulă scrisă în operatorRule, marcată "
+                "assumed: sursa spune câte companii sunt, nu care dintre ele devine nucleul.",
+                "severity": "material",
+                "affects": ["clusters", "regions"],
+            },
+            {
+                "id": "in-flight-status-only",
+                "text": "Statusul „fuziune prin absorbție” din sursă spune că o fuziune este "
+                "în curs, nu cine absoarbe pe cine; lista inFlightMergers o raportează ca atare.",
                 "severity": "note",
-                "affects": ["summary"],
+                "affects": ["inFlightMergers"],
             },
         ],
     }

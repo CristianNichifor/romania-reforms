@@ -58,7 +58,7 @@ function buildRows(): void {
       <td class="num">${family.officesToday.toLocaleString('ro-RO')}</td>
       <td class="num">${family.officesProposed.toLocaleString('ro-RO')}</td>
       <td class="num">−${reduction(family).toLocaleString('ro-RO')}%</td>
-      <td class="num">${Object.keys(family.byRegion).length}</td>`;
+      <td class="num">${family.regions.length}</td>`;
     tr.addEventListener('click', () => selectFamily(family));
     tr.addEventListener('keydown', (event) => {
       if (event.key === 'Enter' || event.key === ' ') {
@@ -87,13 +87,14 @@ function renderRegionGrid(family: Family): void {
   $('#detail-title').hidden = false;
   $('#detail-note').hidden = false;
   $('#detail-note').textContent = family.tier === 'regional'
-    ? `${family.name}: ${family.officesToday.toLocaleString('ro-RO')} birouri în ${family.counties.length} județe, propuse ${family.officesProposed.toLocaleString('ro-RO')} — câte unul pe fiecare regiune de mai jos.`
+    ? `${family.name}: ${family.officesToday.toLocaleString('ro-RO')} birouri în ${family.counties.length} județe, propuse ${family.officesProposed.toLocaleString('ro-RO')} — biroul din județul cel mai populat al fiecărei regiuni devine direcția regională, iar restul sunt absorbite. Sediile nu sunt în sursă; regula este scrisă ca presupunere în datele paginii.`
     : `${family.name} nu se regionalizează prin această regulă; județele în care există:`;
+  const groups = new Map(family.regions.map((g) => [g.region, g]));
   for (const region of regionsOf(doc)) {
-    const counties = family.byRegion[region];
+    const group = groups.get(region);
     const card = document.createElement('div');
     card.className = 'region-card';
-    if (!counties || counties.length === 0) {
+    if (!group || group.counties.length === 0) {
       card.classList.add('empty');
       card.textContent = region;
       card.title = `${region}: nicio unitate a acestei familii`;
@@ -103,13 +104,16 @@ function renderRegionGrid(family: Family): void {
     const title = document.createElement('div');
     title.className = 'region-name';
     title.textContent = region;
-    const count = document.createElement('div');
-    count.className = 'region-count';
-    count.textContent = counties.length === 1 ? '1 județ' : `${counties.length} județe`;
+    const absorbed = group.counties.filter((county) => county !== group.seat);
+    const seat = document.createElement('div');
+    seat.className = 'region-seat';
+    seat.textContent = `sediu: ${group.seat}`;
     const list = document.createElement('div');
     list.className = 'region-counties';
-    list.textContent = counties.join(' · ');
-    card.append(title, count, list);
+    list.textContent = absorbed.length > 0
+      ? `absoarbe: ${absorbed.join(' · ')}`
+      : 'singurul județ al regiunii';
+    card.append(title, seat, list);
     grid.appendChild(card);
   }
   grid.hidden = false;

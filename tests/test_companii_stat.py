@@ -114,3 +114,59 @@ def test_the_build_is_deterministic():
     first = DATA.read_bytes()
     subprocess.run([sys.executable, str(BUILD)], check=True, capture_output=True)
     assert DATA.read_bytes() == first
+
+
+def test_every_company_carries_a_registration_county(data):
+    """The county join must be complete: a company without one silently drops out of the
+    regional operators below."""
+    if not COMPANIES.exists():
+        pytest.skip("the state-company import is not built")
+    source = json.loads(COMPANIES.read_text(encoding="utf-8"))
+    with_county = sum(1 for c in source["companies"] if c.get("county"))
+    assert with_county == source["summary"]["companies"]
+    assert source["dataQuality"]["unmatchedCounties"] == []
+
+
+def test_regional_operators_rebuild_the_cluster(data):
+    """Absorbed + absorber must account for every company in the cluster."""
+    for cluster in data["clusters"]:
+        if cluster["tier"] != "regional":
+            continue
+        assert len(cluster["regions"]) <= 8
+        accounted = sum(
+            group["absorbedCount"] + (1 if group["absorber"] else 0) for group in cluster["regions"]
+        )
+        assert accounted == cluster["companies"]
+
+
+def test_the_absorber_is_the_largest_by_headcount_in_the_seat_county(data):
+    """The rule: the seat county's largest company by reported headcount. Where none report
+    one, the operator stays unnamed rather than guessed."""
+    if not COMPANIES.exists():
+        pytest.skip("the state-company import is not built")
+    source = json.loads(COMPANIES.read_text(encoding="utf-8"))
+    for cluster in data["clusters"]:
+        if cluster["tier"] != "regional":
+            continue
+        for group in cluster["regions"]:
+            members = [
+                c
+                for c in source["companies"]
+                if c["caen"] == cluster["caen"]
+                and c.get("county") == group["seatCounty"]
+                and c.get("employees") is not None
+            ]
+            if not members:
+                assert group["absorber"] is None
+                continue
+            largest = max(members, key=lambda c: c["employees"])
+            assert group["absorber"] is not None
+            assert group["absorber"]["cui"] == largest["cui"]
+            assert group["absorber"]["employees"] == largest["employees"]
+
+
+def test_in_flight_mergers_are_reported_as_status_only(data):
+    for merger in data["inFlightMergers"]:
+        assert "fuziune" in merger["status"] or "absorb" in merger["status"].lower()
+    assert data["summary"]["inFlightMergers"] == len(data["inFlightMergers"])
+    assert "in-flight-status-only" in {x["id"] for x in data["limitations"]}
