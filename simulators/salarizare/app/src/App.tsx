@@ -13,7 +13,7 @@ import { asOfForYear, periodForYear, phaseYears, yearOfAsOf } from '../../engine
 import type { Shares } from '../../engine/composition';
 import type { DkOccupation, GroupsDocument } from '../../engine/occupations';
 import type { Crosswalk, Regime } from '../../engine/types';
-import CompareView from './CompareView';
+import CompareView, { type PublicEnterpriseCompensationDoc } from './CompareView';
 import DomainsView from './DomainsView';
 import HomeView from './HomeView';
 import DistributionView from './DistributionView';
@@ -41,6 +41,7 @@ const DK_OCC_ID = 'dk-occupations';
 const EXEC_ID = 'executie-personal';
 const CAP_ID = 'plafon-sporuri';
 const INS_ID = 'ins-ocupatii';
+const AMEPIP_COMPENSATION_ID = 'amepip-public-enterprise-compensation';
 
 async function loadJson<T>(path: string): Promise<T> {
   const primary = `${import.meta.env.BASE_URL}${path}`;
@@ -152,6 +153,9 @@ export default function App() {
   const [capSeries, setCapSeries] = useState<CapSeries[] | null>(null);
   /** What INS measured people are actually paid, for education and health. */
   const [measured, setMeasured] = useState<MeasuredSeries[] | null>(null);
+  /** Aggregate-only AMEPIP governance compensation context; no nominal rows in the app. */
+  const [amepipCompensation, setAmepipCompensation] =
+    useState<PublicEnterpriseCompensationDoc | null>(null);
 
   const wanted = scenario.regimeIds;
 
@@ -176,6 +180,12 @@ export default function App() {
 
     loadJson<Crosswalk>(`data/crosswalks/${ASSIMILATION_ID}.json`)
       .then(setAssimilation)
+      .catch((e: Error) => setError(e.message));
+
+    loadJson<PublicEnterpriseCompensationDoc>(
+      `data/fiscal/${AMEPIP_COMPENSATION_ID}.json`,
+    )
+      .then(setAmepipCompensation)
       .catch((e: Error) => setError(e.message));
 
     // The rate is read from the committed ECB document rather than hard-coded, so a
@@ -497,6 +507,7 @@ export default function App() {
           rates={fx}
           capSeries={capSeries}
           period={period}
+          amepipCompensation={amepipCompensation}
           onOpen={(view) => setScenario({ ...scenario, view })}
         />
       )}

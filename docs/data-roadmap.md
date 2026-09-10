@@ -5,10 +5,10 @@ simulator-local code and into a shared data layer.
 
 ## Current status
 
-The first shared-data wave is complete. The shared registry, local-finance mart and health
-access mart are adopted by their current consumers, release-asset-backed where the payloads
-are too large for git, and covered by validation/tests that fail on unknown join keys or
-schema drift.
+The first shared-data wave is complete. The shared registry, local-finance mart, health
+access mart and public-enterprise aggregate payloads are adopted by their current consumers,
+release-asset-backed where the payloads are too large for git, and covered by validation/tests
+that fail on unknown join keys or schema drift.
 
 Remaining work is maintenance, not an active build queue:
 
@@ -17,19 +17,20 @@ Remaining work is maintenance, not an active build queue:
   when a consuming simulator needs the extra fiscal dimension.
 - Health access: pause point expansion; the remaining 72 no-point rows are a maintenance
   backlog and should stay named exclusions until explicit source evidence exists.
+- Public enterprises: keep the current `administrativ` footprint and `salarizare` pay-scale
+  comparison on attributed companiidestat.ro API data; add deeper AMEPIP/MFin, procurement or
+  local-finance fields only for a concrete consuming question.
 
 New source families should start as separate reconnaissance PRs and are not blockers for
-closing this wave. AMEPIP/public-company data is now tracked as a planned family in the
-catalog after source inventory. The first app-facing use is deliberately aggregate-only:
-`administrativ` now consumes a public-enterprise footprint sidecar, not company/person rows.
+closing this wave.
 
-## Planned: AMEPIP public enterprises
+## Adopted: AMEPIP public enterprises
 
 AMEPIP data could connect public-enterprise performance, board/director compensation,
 ownership and fiscal-risk context across pay, procurement and local-finance work. The source
-family is planned because the source inventory found official PDFs with CUI-level rows. The
-public dashboard is still only context: the next build should use official report attachments,
-not opaque Power BI internals.
+family is adopted for the current aggregate app payloads because the source inventory found
+usable public-enterprise data and the documented companiidestat.ro API gives a machine-readable
+route. The public dashboard is still only context unless AMEPIP publishes an explicit export/API.
 
 Reconnaissance note: [AMEPIP public enterprise data](amepip-public-enterprises.md).
 
@@ -39,8 +40,8 @@ First slice:
   `packages/public_enterprise_governance/data/amepip-source-inventory-2025-2026.json`;
 - done: record file type, URLs, SHA-256 hashes, page counts, row estimates, identifiers and
   reuse limitations;
-- done: move the dataset from `candidate` to `planned` because six inspected PDFs expose
-  CUI-level row data;
+- done: promote the dataset beyond `candidate` because six inspected PDFs expose CUI-level
+  row data;
 - done: build `amepip-compensation-sample-august-2025`, a compact 50-row sample generated
   from all 833 parsed August 2025 nominal compensation rows, preserving CUI, APT, enterprise,
   person, role, raw amount strings and fixed/variable compensation fields;
@@ -56,9 +57,14 @@ First slice:
 - done: move the full package aggregate to `data-v1` release assets because the tracked tree
   has less than 1 MB of size-gate headroom; the compact `administrativ` sidecar remains
   committed;
-- next: replace the comparison aggregate with the same contract built from official AMEPIP
-  annexes and MFin/data.gov.ro financial statements, keeping companiidestat.ro as a validation
-  source rather than the primary provenance.
+- done: keep the administrative footprint on the documented companiidestat.ro API route,
+  with CC BY 4.0 attribution, instead of blocking this app-facing slice on AMEPIP PDF
+  extraction;
+- done: add a compact `salarizare` fiscal payload from `data.json` pay-scale rows:
+  fixed-tier count, median, top, annual-bonus extreme and benchmark ratios, with no CUI,
+  company, authority or person lists in the browser;
+- next: maintenance only. Add deeper official AMEPIP/MFin, procurement or local-finance slices
+  only when a consuming simulator asks a specific question that needs them.
 
 ## 1. SIRUTA, UAT and CUI registry
 
