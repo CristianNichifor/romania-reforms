@@ -840,6 +840,9 @@ async function main(): Promise<void> {
     attributionControl: false,
     pitchWithRotate: false,
     dragRotate: false,
+    // Browser evidence reads screenshots from the WebGL canvas. Without preserving the buffer,
+    // WebKit can legally hand Playwright a composited blank frame.
+    canvasContextAttributes: { preserveDrawingBuffer: true },
   });
   map.addControl(new NavigationControl({ showCompass: false }), 'top-right');
   compactMap.addEventListener('change', () => {
