@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { localOnly, mapPixels, publicData, formatCount } from './helpers';
+import { localOnly, mapPixels, settledPixels, publicData, formatCount } from './helpers';
 
 test('map modes, real pixels, zoom/pan, ranges, optional layers and reader', async ({ page }, info) => {
   const audit = await localOnly(page);
@@ -12,7 +12,7 @@ test('map modes, real pixels, zoom/pan, ranges, optional layers and reader', asy
   const initial = await mapPixels(page, info, 'today');
   await page.getByRole('button', { name: 'Zoom in', exact: true }).click();
   await page.mouse.move(0, 0);
-  await expect.poll(async () => (await initial.capture()).equals(initial.png)).toBe(false);
+  expect((await settledPixels(initial.capture)).equals(initial.png)).toBe(false);
   await mapPixels(page, info, 'zoomed');
   const beforePan = await initial.capture();
   await page.mouse.move(1050, 500);
@@ -20,7 +20,7 @@ test('map modes, real pixels, zoom/pan, ranges, optional layers and reader', asy
   await page.mouse.move(1170, 560, { steps: 12 });
   await page.mouse.up();
   await page.mouse.move(0, 0);
-  await expect.poll(async () => (await initial.capture()).equals(beforePan)).toBe(false);
+  expect((await settledPixels(initial.capture)).equals(beforePan)).toBe(false);
   await page.locator('[data-mode="proposed"]').click();
   await expect(page.locator('#staffing')).toBeVisible();
   await expect(page.locator('#ceiling')).toBeHidden();
@@ -32,7 +32,8 @@ test('map modes, real pixels, zoom/pan, ranges, optional layers and reader', asy
   await page.locator('#target').fill('1325');
   await expect(page.locator('#summary')).toHaveText(proposalSummary, { useInnerText: true });
   await mapPixels(page, info, 'proposed');
-  await page.locator('#roads-toggle').check();
+  // The failure path immediately clears the check; do not ask Playwright to keep it checked.
+  await page.locator('#roads-toggle').click();
   await expect(page.locator('#roads-toggle')).toBeDisabled();
   await expect(page.locator('#roads-toggle')).not.toBeChecked();
   await page.locator('#outline-toggle').check();

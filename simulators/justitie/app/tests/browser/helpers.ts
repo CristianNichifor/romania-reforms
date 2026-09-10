@@ -66,3 +66,15 @@ export async function mapPixels(page: Page, info: TestInfo, name: string) {
   await info.attach(`${name}.png`, { body: png, contentType: 'image/png' });
   return { png, capture };
 }
+
+export async function settledPixels(capture: () => Promise<Buffer>) {
+  let previous = await capture();
+  let stable = 0;
+  await expect.poll(async () => {
+    const next = await capture();
+    stable = next.equals(previous) ? stable + 1 : 0;
+    previous = next;
+    return stable;
+  }, { intervals: [150, 250, 350] }).toBeGreaterThanOrEqual(2);
+  return previous;
+}
