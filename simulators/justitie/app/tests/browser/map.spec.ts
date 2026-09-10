@@ -79,10 +79,33 @@ test('map modes, real pixels, zoom/pan, ranges, optional layers and reader', asy
 
 test('mobile map controls and reading dialog remain within the viewport', async ({ page }, info) => {
   const audit = await localOnly(page);
-  for (const width of [320, 390]) {
-    await page.setViewportSize({ width, height: 1000 });
+  for (const [width, height] of [[320, 700], [390, 844]] as const) {
+    await page.setViewportSize({ width, height });
     await page.goto('/');
     await expect(page.locator('#summary')).toContainText('instanțe');
+    const canvas = page.locator('#map canvas').first();
+    const mapBox = (await canvas.boundingBox())!;
+    const panel = page.locator('#panel');
+    const panelBox = (await panel.boundingBox())!;
+    expect(mapBox.width).toBeGreaterThanOrEqual(width - 1);
+    expect(mapBox.height).toBeGreaterThanOrEqual(height * 0.4);
+    expect(panelBox.y).toBeGreaterThanOrEqual(mapBox.y + mapBox.height - 1);
+    expect(panelBox.height).toBeGreaterThanOrEqual(height * 0.4);
+    await page.screenshot({ path: info.outputPath(`map-framing-${width}.png`) });
+    const probe = await mapPixels(page, info, `mobile-initial-${width}`);
+    await page.getByRole('button', { name: 'Zoom in', exact: true }).click();
+    await page.mouse.move(0, 0);
+    expect((await settledPixels(probe.capture)).equals(probe.png)).toBe(false);
+    const zoomed = await probe.capture();
+    await page.mouse.move(width * 0.45, mapBox.height * 0.55);
+    await page.mouse.down();
+    await page.mouse.move(width * 0.65, mapBox.height * 0.65, { steps: 10 });
+    await page.mouse.up();
+    await page.mouse.move(0, 0);
+    expect((await settledPixels(probe.capture)).equals(zoomed)).toBe(false);
+    await panel.evaluate(element => { element.scrollTop = element.scrollHeight; });
+    expect((await canvas.boundingBox())!.y).toBe(mapBox.y);
+    await panel.evaluate(element => { element.scrollTop = 0; });
     for (const mode of ['today', 'proposed', 'acces', 'arondare']) {
       await page.locator(`[data-mode="${mode}"]`).click();
       await expect(page.locator(`#panel [data-mode="${mode}"]`)).toHaveClass('on');

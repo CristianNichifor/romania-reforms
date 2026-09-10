@@ -1,6 +1,7 @@
 import { expect, type Page, type TestInfo } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { writeFile } from 'node:fs/promises';
+import { basename, join } from 'node:path';
 
 export const publicData = (name: string) => JSON.parse(readFileSync(new URL(`../../public/data/${name}`, import.meta.url), 'utf8'));
 export const formatCount = (value: number) => Math.round(value).toLocaleString('ro-RO');
@@ -35,6 +36,14 @@ export async function recordStatistics(page: Page, info: TestInfo, name: string)
     hash: location.hash,
   }));
   await jsonEvidence(info, name, snapshot);
+  if (process.env.JUSTICE_BASELINE) {
+    const before = JSON.parse(readFileSync(join(process.env.JUSTICE_BASELINE, basename(info.outputDir), `${name}.json`), 'utf8'));
+    const normalize = (value: typeof snapshot) => ({
+      ...value, text: value.text?.replace(/\s+/g, ' ').trim(),
+      charts: value.charts.map(chart => ({ ...chart, text: chart.text?.replace(/\s+/g, ' ').trim() })),
+    });
+    expect(normalize(snapshot)).toEqual(normalize(before));
+  }
   return snapshot;
 }
 
@@ -50,9 +59,10 @@ export async function mapPixels(page: Page, info: TestInfo, name: string) {
   // Sample the map's exposed right-hand area, excluding the sidebar and zoom buttons.
   const box = (await canvas.boundingBox())!;
   const panel = (await page.locator('#panel').boundingBox())!;
-  const left = Math.max(box.x + box.width * 0.55, panel.x + panel.width + 3);
+  const stacked = panel.y >= box.y + box.height - 1;
+  const left = stacked ? box.x + box.width * 0.1 : Math.max(box.x + box.width * 0.55, panel.x + panel.width + 3);
   const clip = { x: left, y: box.y + box.height * 0.25,
-    width: box.x + box.width - left - 3, height: box.height * 0.6 };
+    width: stacked ? box.width * 0.8 : box.x + box.width - left - 3, height: box.height * 0.6 };
   expect(clip.width).toBeGreaterThan(0);
   const capture = () => page.screenshot({ clip });
   await expect.poll(async () => {

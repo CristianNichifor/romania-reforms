@@ -411,7 +411,7 @@ function renderScope(view: View, scopeLabel: string, extra = ''): void {
     ${snapshotNotes}
     ${
       view.trunchiate
-        ? `<p class="warn">${
+        ? `<p class="warn civic-notice">${
             view.trunchiate === 1
               ? 'O instanță a rămas necolectată și este scoasă'
               : `${count(view.trunchiate)} instanțe au rămas necolectate și sunt scoase`
@@ -523,11 +523,11 @@ async function main(): Promise<void> {
   const snap = stats.snapshot;
   snapshotNotes =
     (snap.coverageComplete === false
-      ? '<p class="warn">Colectarea a raportat lipsuri: unele instanțe au ferestre eșuate sau trunchiate. Cifrele pe instanță sunt praguri de jos.</p>'
+      ? '<p class="warn civic-notice">Colectarea a raportat lipsuri: unele instanțe au ferestre eșuate sau trunchiate. Cifrele pe instanță sunt praguri de jos.</p>'
       : '') +
     (snap.institutieDinFisier
       ? ''
-      : '<p class="warn">Termenele sunt legate de instanță prin instanța care avea dosarul în ziua ședinței, nu prin numărul dosarului. Pentru cele 11,2% dintre cauze care stau la două instanțe deodată, împărțirea este dedusă din datele de înregistrare.</p>');
+      : '<p class="warn civic-notice">Termenele sunt legate de instanță prin instanța care avea dosarul în ziua ședinței, nu prin numărul dosarului. Pentru cele 11,2% dintre cauze care stau la două instanțe deodată, împărțirea este dedusă din datele de înregistrare.</p>');
   el('cohort-note').textContent =
     `Cifrele de durată și de termene privesc dosarele înregistrate după ${stats.durata.cohortFrom}. ` +
     'Mai vechi de atât, portalul a arhivat deja cauzele rapide, iar orice medie ar măsura de două ' +
@@ -928,7 +928,7 @@ function finish(stats: Stats, courts: CourtsFile | null): void {
 main().catch((error) => {
   el('app').insertAdjacentHTML(
     'afterbegin',
-    `<p class="warn">Datele nu au putut fi încărcate: ${String(error)}. Rulează
+    `<p class="warn civic-notice">Datele nu au putut fi încărcate: ${String(error)}. Rulează
      <code>node scripts/copy-data.mjs</code> și
      <code>uv run python scripts/build_portal_stats.py</code>.</p>`,
   );

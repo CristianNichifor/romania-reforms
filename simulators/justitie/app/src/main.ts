@@ -14,6 +14,7 @@
  */
 import {
   Map as MapLibreMap,
+  LngLatBounds,
   NavigationControl,
   setWorkerUrl,
   type ExpressionSpecification,
@@ -827,16 +828,24 @@ async function main(): Promise<void> {
     new ResizeObserver(measure).observe(toolbar);
   }
 
+  const compactMap = matchMedia('(max-width: 46rem)');
+  const courtBounds = doc.courts.reduce((bounds, court) => bounds.extend(court.point), new LngLatBounds());
   const map = new MapLibreMap({
     container: 'map',
     style: BLANK,
     center: [25.0, 45.9],
     zoom: 6.1,
+    bounds: compactMap.matches ? courtBounds : undefined,
+    fitBoundsOptions: { padding: 24 },
     attributionControl: false,
     pitchWithRotate: false,
     dragRotate: false,
   });
   map.addControl(new NavigationControl({ showCompass: false }), 'top-right');
+  compactMap.addEventListener('change', () => {
+    map.resize();
+    if (compactMap.matches) map.fitBounds(courtBounds, { padding: 24, duration: 0 });
+  });
 
   let mode: 'today' | 'proposed' | 'acces' | 'arondare' = 'today';
   // Held for the map: the catchment view repaints from these whenever the scenario moves.
