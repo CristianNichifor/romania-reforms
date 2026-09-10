@@ -1,6 +1,6 @@
-@import './vendor/civic-ui/styles.css';
+@import './vendor/civic-ui/native.css';
 
-/* Experimental native mapping of v0.2.0 CSS, not a new library component API. */
+/* Host theme and layout remain local; native select behavior comes from Civic UI. */
 .civic-land {
   --civic-bg: var(--bg);
   --civic-surface: var(--panel);
@@ -11,11 +11,8 @@
   --civic-focus: var(--accent);
 }
 
-/* Keep the browser's native select arrow; no React/Lucide markup is required. */
 .civic-land .civic-field .civic-select {
   color-scheme: dark;
-  appearance: auto;
-  padding-right: 0.75rem;
   font-size: 0.9rem;
 }
 

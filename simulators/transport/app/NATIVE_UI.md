@@ -5,17 +5,19 @@ scenario encoding or network dependency is introduced by this styling change.
 
 ## Published dependency
 
-`src/vendor/civic-ui` contains the unmodified CSS and MIT license extracted from
-the public Civic UI v0.2.0 release. `provenance.json` records the release URL,
+`src/vendor/civic-ui` contains the eight unmodified CSS, documentation and license
+files from the public Civic UI v0.3.0 CSS-only archive. `provenance.json` records the release URL,
 archive SHA-256 and file hashes. `npm run check:civic-css` verifies local bytes
 without network access; `node scripts/vendor-civic-css.mjs --update` downloads
 and verifies that exact release. The source is committed so normal installs,
 builds and the running application need no GitHub connection.
 
-The separate native CSS contract/release is not published yet. `native-ui.css`
-therefore keeps an explicit interim `civic-select--native` adapter, restoring
-the browser arrow and padding. It does not claim to consume an unreleased asset.
-Host palette tokens remain transport's own; no USR theme is imported.
+`native-ui.css` imports the released `native.css`; the equivalent temporary
+appearance/padding overrides have been removed. Host palette, fonts and
+color-scheme remain transport's own; no USR theme is imported.
+The [v0.3.0 release](https://github.com/CristianNichifor/civic-ui/releases/tag/v0.3.0)
+is public. Its vendored `NATIVE.md` still contains historical "Unreleased 0.3.0
+preparation" wording; the artifact is retained unmodified for checksum verification.
 
 ## Scope and exceptions
 

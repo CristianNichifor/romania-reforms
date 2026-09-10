@@ -7,6 +7,8 @@ test('selected locality native pin field preserves URL and reset', async ({ page
   await page.goto('/#lang=en&sel=1');
   await expect(page.locator('#loading')).toBeHidden();
   const pin = page.locator('#pin-select');
+  await expect(pin).toHaveClass(/civic-select--native/);
+  await expect(pin).toHaveCSS('appearance', 'auto');
   await expect(pin).toBeVisible();
   expect(await pin.evaluate(el => !!el.closest('.civic-field') && !!(el as HTMLSelectElement).labels?.length)).toBe(true);
   const targets = await pin.locator('option').evaluateAll(options => options.map(o => (o as HTMLOptionElement).value).filter(Boolean));
@@ -98,6 +100,10 @@ for (const width of [320, 390, 1440]) test(`native controls and map at ${width}p
   await expect(page.locator('#candidate-search')).toBeVisible();
   for (const id of ['candidate-search', 'candidate-county']) {
     const control = page.locator(`#${id}`);
+    if (id === 'candidate-county') {
+      await expect(control).toHaveClass(/civic-select--native/);
+      await expect(control).toHaveCSS('appearance', 'auto');
+    }
     expect(await control.evaluate(el => !!el.closest('.civic-field') && !!el.getAttribute('aria-label'))).toBe(true);
     expect((await control.boundingBox())!.height).toBeGreaterThanOrEqual(44);
     expect(await control.evaluate(el => el.getBoundingClientRect().width >= el.parentElement!.getBoundingClientRect().width - 2)).toBe(true);

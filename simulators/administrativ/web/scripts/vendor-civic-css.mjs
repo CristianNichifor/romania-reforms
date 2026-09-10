@@ -5,9 +5,9 @@ import { mkdtemp, readFile, mkdir, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-const release = 'https://github.com/CristianNichifor/civic-ui/releases/download/v0.2.0/civic-ui-0.2.0.tgz';
-const sha256 = '9a78cb63fd9885febc5aa94eefbb3647f7dd5841fda5e7a6b2e78192b3d0c802';
-const files = ['dist/styles.css', 'dist/foundations.css', 'dist/controls.css', 'LICENSE'];
+const release = 'https://github.com/CristianNichifor/civic-ui/releases/download/v0.3.0/civic-ui-css-0.3.0.tgz';
+const sha256 = '644b181b1a061516ddfe7cbcbba9d94101e7e0b4f97f4a52c085cccba1f27226';
+const files = ['styles.css', 'foundations.css', 'controls.css', 'native.css', 'themes/neutral.css', 'themes/usr.css', 'NATIVE.md', 'LICENSE'];
 const destination = new URL('../src/vendor/civic-ui/', import.meta.url);
 const digest = data => createHash('sha256').update(data).digest('hex');
 
@@ -22,10 +22,11 @@ if (process.argv.includes('--update')) {
     await writeFile(path, archive);
     const hashes = {};
     await mkdir(destination, { recursive: true });
+    await mkdir(new URL('themes/', destination), { recursive: true });
     for (const file of files) {
       // Read only the selected members, never extract archive paths onto the filesystem.
-      const data = execFileSync('tar', ['-xOf', path, `package/${file}`]);
-      const name = file.split('/').at(-1);
+      const data = execFileSync('tar', ['-xOf', path, file]);
+      const name = file;
       hashes[name] = digest(data);
       await writeFile(new URL(name, destination), data);
     }
@@ -38,7 +39,7 @@ if (process.argv.includes('--update')) {
 const provenance = JSON.parse(await readFile(new URL('provenance.json', destination), 'utf8'));
 assert.equal(provenance.release, release);
 assert.equal(provenance.sha256, sha256);
-assert.deepEqual(Object.keys(provenance.files).sort(), files.map(file => file.split('/').at(-1)).sort());
+assert.deepEqual(Object.keys(provenance.files).sort(), [...files].sort());
 for (const [name, hash] of Object.entries(provenance.files)) {
   assert.equal(digest(await readFile(new URL(name, destination))), hash, `Vendored file changed: ${name}`);
 }

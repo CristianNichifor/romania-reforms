@@ -94,6 +94,8 @@ for (const width of [320, 390, 1440]) {
     await expect(page.locator('#pager button')).toHaveCount(2);
     for (const selector of ['#county', '#gdp-year']) {
       const field = page.locator(selector);
+      await expect(field).toHaveClass(/civic-select--native/);
+      await expect(field).toHaveCSS('appearance', 'auto');
       expect(await field.evaluate(el => !!el.closest('.civic-field') && !!el.closest('.civic-scope') && !!(el as HTMLSelectElement).labels?.length)).toBe(true);
       expect((await field.boundingBox())!.height).toBeGreaterThanOrEqual(44);
       await field.focus();

@@ -1,6 +1,6 @@
-@import './vendor/civic-ui/styles.css';
+@import './vendor/civic-ui/native.css';
 
-/* Pinned v0.2.0 CSS; native.css has not been released yet. */
+/* Preserve the host palette while using the published native CSS contract. */
 .civic-transport {
   --civic-bg: var(--bg);
   --civic-surface: var(--panel);
@@ -12,8 +12,6 @@
   --civic-action: #7aa2f7;
 }
 .civic-transport .civic-field .civic-select--native {
-  appearance: auto;
-  padding-right: 0.75rem;
   color-scheme: dark;
   font-size: 13px;
 }

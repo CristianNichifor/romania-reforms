@@ -1,4 +1,4 @@
-@import './vendor/civic-ui/styles.css';
+@import './vendor/civic-ui/native.css';
 
 /* Keep the map application's host palette, not a party theme. */
 .civic-admin {
@@ -11,10 +11,7 @@
   --civic-focus: var(--accent);
   --civic-action: var(--accent);
 }
-/* Interim native-select adapter for the published v0.2.0 stylesheet. */
 .civic-admin .civic-field .civic-select--native {
-  appearance: auto;
-  padding-right: 0.75rem;
   color-scheme: dark;
 }
 .civic-admin .candidate-filters .civic-field { min-width: 0; flex: 1; }
