@@ -247,7 +247,7 @@
     {
       "id": "public-enterprise-governance",
       "title": "Public enterprise governance and performance",
-      "status": "planned",
+      "status": "adopted",
       "priority": "p1",
       "owner": "shared",
       "why": "Public-company performance, board pay and ownership data can connect fiscal stress, public pay, procurement and administrative-capacity reforms without each simulator inventing its own state-enterprise roster.",
@@ -295,7 +295,7 @@
           "url": "https://companiidestat.ro/date/",
           "license": "Creative Commons Attribution 4.0, with attribution to companiidestat.ro",
           "role": "comparison",
-          "notes": "Useful comparison API for CUI-keyed public-company roster, MFin financials, AMEPIP-derived evaluation data, salaries and subsidies. Keep official AMEPIP/MFin attachments as source-of-truth imports unless this civic API is explicitly selected as a derived comparison layer."
+          "notes": "Chosen machine-readable app source for CUI-keyed public-company roster, MFin financials, AMEPIP-derived evaluation data, salaries and subsidies, with CC BY 4.0 attribution."
         }
       ],
       "minimumFields": [
@@ -325,18 +325,19 @@
       ],
       "storagePolicy": "Commit only small source notes, schemas and compact app payloads; raw dashboard exports, workbooks, full aggregates and derived row-level marts should be release assets.",
       "nextSlice": {
-        "scope": "Official-source administrative footprint",
-        "deliverable": "Replace the release-asset-backed companiidestat.ro comparison aggregate with the same authority/UAT/county contract built from official AMEPIP annexes and MFin/data.gov.ro financial statements.",
-        "doneWhen": "administrativ consumes the same SIRUTA-aligned public-enterprise footprint with official-source hashes, named authority-match exclusions and no row-level company data in the browser."
+        "scope": "Maintenance only",
+        "deliverable": "Keep the app-facing public-enterprise payloads on attributed machine-readable companiidestat.ro API data; add deeper AMEPIP/MFin, procurement or local-finance slices only when a consumer needs a specific field.",
+        "doneWhen": "Future AMEPIP work starts from a consumer-specific question and preserves the no-row-level-browser policy."
       },
       "notes": [
         "AMEPIP pages describe the dashboard as covering financial, non-financial and corporate-governance indicators for public enterprises. Public notes say financial indicators are extracted from Ministry of Finance data, non-financial indicators include ESG, and governance indicators relate to listed companies.",
         "amepip-source-inventory-2025-2026 inspected 10 AMEPIP PDFs from the KPI/report and CA/CS compensation pages: 8 KPI documents and 2 compensation documents. Six expose CUI-level rows; Annexes 1, 2 and 3 expose 170, 170 and 1212 company indicator blocks respectively.",
         "amepip-compensation-sample-august-2025 parses the August 2025 nominal compensation PDF into 833 CUI rows and commits a 50-row sample with CUI, APT, enterprise, person, role and fixed/variable compensation fields.",
-        "amepip-compensation-mart.schema.json now defines the full row-level mart, release-asset policy and salarizare consumer contract; the generated full mart remains out of git until it is uploaded and checksum-pinned.",
+        "amepip-compensation-mart.schema.json defines a full row-level mart contract for future work, but the current salarizare integration does not need that mart and does not load nominal rows.",
         "public-enterprise-administrative-footprint-2024-2026 is a data-v1 release asset with an authority/UAT/county aggregate from companiidestat.ro reference endpoints, matched conservatively to uat-registry-2026 and consumed by administrativ through committed public-enterprise-footprint.json. The browser payload contains aligned numeric arrays only and no CUI, enterprise or person rows.",
-        "companiidestat.ro publishes a documented read-only API over public-company data under CC BY 4.0. It is useful for cross-checks and discovery, but this package still imports official AMEPIP PDFs directly for first-party provenance.",
-        "Do not scrape opaque Power BI internals as a source of truth. Use official PDF/report attachments or a documented export/API path before importing dashboard-derived data."
+        "salarizare consumes amepip-public-enterprise-compensation.json, a compact fiscal payload from companiidestat.ro data.json pay_scale_rows with fixed-tier count, median, top, annual-bonus extreme and benchmark ratios. It emits no CUI, authority, person or company-name lists.",
+        "companiidestat.ro publishes a documented read-only API over public-company data under CC BY 4.0. This project uses it as the machine-readable app source with attribution instead of blocking app payloads on AMEPIP PDF extraction.",
+        "Do not scrape opaque Power BI internals as a source of truth. Use documented JSON API data or future official export/API paths before adding new app-facing datasets."
       ]
     }
   ]
