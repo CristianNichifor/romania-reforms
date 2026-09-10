@@ -171,8 +171,9 @@ try {
   await open('payslip?r=ro-draft-2026-08-20');
   await page.locator('input[type=search]').fill('auditor');
   const positions = page.locator('select[size]');
-  await expect(positions.locator('option').first()).toHaveText(/auditor/i);
-  const code = await positions.locator('option').first().getAttribute('value');
+  const auditor = positions.locator('option').filter({ hasText: /auditor/i });
+  await expect(auditor).toHaveCount(1);
+  const code = await auditor.first().getAttribute('value');
   await positions.selectOption(code);
   await snapshot('payslip-position');
   await page.locator('input[type=range]').last().fill('35');
