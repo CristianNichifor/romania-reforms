@@ -20,6 +20,38 @@ sharing.
 affects. One definition, resolved by every simulator's schema, so a caveat means the same
 thing in all of them.
 
+## A check that stops checking does not fail
+
+The rule above is enforced by tests, and tests here have a specific way of going wrong: they
+stop looking, and stay green. Six of these were found in a single day, in six different
+mechanisms, and not one of them turned a build red.
+
+| Where | How it went quiet |
+|---|---|
+| `achizitii-deschise` tests | four `skipif(… .is_file(), reason="bundle not built")` guards. Move the bundle out of git and every one of them becomes a pass. |
+| `impozit-teren`, `justitie` | `git diff --exit-code` over rebuilt data. Move the committed baseline to a release asset and eight steps diff nothing, forever. |
+| `salarizare` browser check | typed into a search box before the grid loaded, then snapshotted. It photographed the no-results branch and compared it to a baseline. |
+| `achizitii-deschise` browser job | served a page whose data had been removed, measuring a site whose manifest 404s. |
+| `portal-snapshot.yml` | published a day missing a shard — twenty courts — and reported success, because the guard only fired at zero shards. |
+| Civic UI vendoring | four copies, each with a `provenance.json` of SHA-256s, and a verifier that three of the four apps never invoked. |
+
+The shape is always the same: **the assertion's subject disappears, and absence reads as
+agreement.** Nothing throws. The suite gets faster. The only signal is that a number nobody
+watches got smaller.
+
+So when a check depends on something being *present* — a file, a baseline, loaded data, a
+row — the check must also assert that the thing is there. Two rules follow:
+
+- **Never let a missing input become a skip.** Fetch it, or fail. `tests.yml` in
+  `achizitii-deschise` downloads the bundle so the tests that describe it keep running.
+- **A guard that fires only at zero is not a guard.** Eleven shards of twelve, three vendored
+  copies of four, one browser of three — partial is the case that actually happens.
+
+This is why several checks here look paranoid: the favicon copies are hashed against each
+other, the vendored CSS is verified against its own manifest on every build, and the landing
+page's links are resolved against `dist/`. Each exists because the quiet version already
+happened once.
+
 ## What gets shared, and what does not
 
 **Shared:** the vocabulary above, and the clients or marts for sources more than one
