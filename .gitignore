@@ -88,3 +88,13 @@ simulators/impozit-teren/tessdata/
 # They are published as Release assets by .github/workflows/portal-snapshot.yml, which is the
 # same rule data-assets.json applies to every other derived payload here.
 simulators/justitie/data/portal/
+
+# Screenshots and page dumps written by the Playwright MCP server into whatever directory it
+# was started from, which is this one. Tool output, not repository content: 286 files and
+# 2,9 MB were sitting untracked in a working clone, so `git status` ran to 290 lines over
+# three real changes and `git add -A` would have staged a folder of PNGs and YAML page trees.
+.playwright-mcp/
+# The same screenshots taken by hand, which land at the repository root for the same reason.
+# Anchored to the root deliberately: this repository tracks no PNG anywhere, and a simulator
+# that one day needs one should not have to argue with this line to add it.
+/*.png
