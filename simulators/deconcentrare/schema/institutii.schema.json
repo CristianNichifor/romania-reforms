@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/institutii.schema.json",
+  "title": "ANFP register of public institutions",
+  "description": "The annual list of institutions and authorities that manage public functions, as published by ANFP on data.gov.ro. The central / territorial-deconcentrated / local split is the source's own TipInstitutie column, not a classification built here.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "publisher",
+    "period",
+    "provenance",
+    "sourceChecksum",
+    "summary",
+    "institutions"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "const": "anfp-institutii-2025" },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "period": { "type": "string" },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+    "sourceChecksum": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sha256", "file"],
+      "properties": {
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "file": { "type": "string" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total", "byType"],
+      "properties": {
+        "total": { "type": "integer", "minimum": 0 },
+        "byType": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "institutions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "type", "county", "locality"],
+        "properties": {
+          "name": { "type": "string" },
+          "type": { "type": "string" },
+          "county": { "type": "string" },
+          "locality": { "type": "string" }
+        }
+      }
+    }
+  }
+}
