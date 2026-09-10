@@ -152,6 +152,9 @@ def main() -> None:
                 "employees": 0,
                 "headcountKnown": 0,
                 "micro": 0,
+                "revenueRon": 0,
+                "lossCount": 0,
+                "debtRon": 0,
             },
         )
         cluster["companies"] += 1
@@ -161,6 +164,15 @@ def main() -> None:
             cluster["headcountKnown"] += 1
             if employees < MICRO:
                 cluster["micro"] += 1
+        revenue = company.get("revenueRon")
+        if revenue is not None:
+            cluster["revenueRon"] += revenue
+        result = company.get("netResultRon")
+        if result is not None and result < 0:
+            cluster["lossCount"] += 1
+        debt = company.get("debtRon")
+        if debt is not None:
+            cluster["debtRon"] += debt
 
     out = []
     companies_by_caen: dict[str, list[dict]] = collections.defaultdict(list)
@@ -232,9 +244,19 @@ def main() -> None:
             else 0,
             "microUnder20": sum(c["micro"] for c in out),
             "headcountKnown": sum(c["headcountKnown"] for c in out),
+            "revenueRon": sum(c["revenueRon"] for c in out),
+            "lossMaking": sum(c["lossCount"] for c in out),
             "inFlightMergers": len(in_flight),
         },
         "limitations": [
+            {
+                "id": "financials-partial",
+                "text": "Cifrele financiare vin din bilanțurile MFin 2025 și acoperă o parte "
+                "din companii; acolo unde lipsește rândul, compania rămâne fără venituri, "
+                "rezultat și datorii, iar totalurile sunt limite inferioare.",
+                "severity": "material",
+                "affects": ["clusters", "summary"],
+            },
             {
                 "id": "headcount-partial",
                 "text": "Doar o parte dintre companii raportează numărul de angajați, deci "

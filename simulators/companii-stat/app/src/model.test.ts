@@ -16,6 +16,9 @@ const cluster = (over: Partial<Cluster>): Cluster => ({
   employees: 27533,
   headcountKnown: 141,
   micro: 86,
+  revenueRon: 0,
+  lossCount: 0,
+  debtRon: 0,
   proposed: 8,
   ...over,
 });
@@ -55,6 +58,8 @@ describe('filtered', () => {
       reductionPercent: 0,
       microUnder20: 0,
       headcountKnown: 0,
+      revenueRon: 0,
+      lossMaking: 0,
       inFlightMergers: 0,
     },
     limitations: [],

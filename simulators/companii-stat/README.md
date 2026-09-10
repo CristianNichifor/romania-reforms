@@ -47,11 +47,14 @@ identity, CAEN, status and **headcount**; the ratios are dropped.
 
 Two limitations travel with every number:
 
-- **Headcount is a lower bound.** Only 698 of 1 247 companies report a usable full-time-equivalent
-  headcount, so every employee total is over what the register contains, never an estimate. One
-  reported value is excluded as an entry error and named in the data's `dataQuality` section:
-  *Utilități și Servicii Publice Murighiol SRL* reports 10 776 employees in 2023 and none in the
-  four years before, in a commune of about 3 000 inhabitants.
+- **Headcount and financials are official-first, lower bounds still.** The headcount comes
+  first from the MFin 2025 statements (via the documented companiidestat.ro API, CC BY 4.0),
+  and only where MFin has no row, from the workbook form — 1 107 of 1 247 companies end up with
+  a headcount. Revenue, net result and debt cover the companies MFin has a row for; totals over
+  them are lower bounds. One workbook value stays excluded as an entry error and is named in the
+  data's `dataQuality` section: *Utilități și Servicii Publice Murighiol SRL* reports 10 776
+  employees in 2023 and none in the four years before, in a commune of about 3 000 inhabitants —
+  the MFin statement for the same company reads 14, and that official figure stands.
 - **There is no geography.** The source gives no county per company, so the scenario counts
   regional operators, it does not place them on a map.
 

@@ -27,6 +27,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "sources" / "companii-stat-finnefin.xlsx"
 SEARCH = ROOT / "sources" / "companii-search-2026-09-10.json"
+BILANTURI = ROOT / "sources" / "mfin-bilanturi-2025.json"
 REGISTRY = ROOT.parents[1] / "packages" / "uat_registry" / "data" / "uat-registry-2026.json"
 OUT = ROOT / "data" / "companii-2025.json"
 
@@ -35,6 +36,7 @@ NONFINANCIAL_SHEET = "Indicatori formular"
 HEADCOUNT = "Număr de angajați cu echivalent normă întreagă"
 
 SEARCH_URL = "https://companiidestat.ro/date/v1/companii_search.json"
+BILANTURI_URL = "https://companiidestat.ro/date/v1/mfin_bilanturi_2025.json"
 
 # Company ids whose reported headcount is a data-entry error, checked against the workbook
 # itself. A generic threshold would quietly discard a genuinely large operator, so the guard
@@ -102,6 +104,19 @@ def load_county_search() -> dict[str, dict]:
     )
 
 
+def load_bilanturi() -> dict[str, dict]:
+    """CUI -> MFin financial statements, from the committed bilanturi snapshot.
+
+    The snapshot is derived by companiidestat.ro from the data.gov.ro financial statements,
+    published under CC BY 4.0; it carries revenue, net result, debt and an official headcount
+    (nr_salariati). Committed with the other sources so the import stays offline.
+    """
+    if not BILANTURI.exists():
+        raise SystemExit(f"missing source {BILANTURI}")
+    payload = json.loads(BILANTURI.read_text(encoding="utf-8"))
+    return {str(cui): row for cui, row in payload.get("companii", {}).items()}
+
+
 def main() -> None:
     if not SOURCE.exists():
         raise SystemExit(f"missing source {SOURCE}")
@@ -110,6 +125,7 @@ def main() -> None:
     nonfinancial = load_sheet(NONFINANCIAL_SHEET)
     county_by_name = load_county_by_name()
     search = load_county_search()
+    bilanturi = load_bilanturi()
 
     headcount: dict[int, dict[int, float]] = collections.defaultdict(dict)
     for row in nonfinancial:
@@ -130,10 +146,26 @@ def main() -> None:
                 "status": row["status"],
             },
         )
+        # Headcount precedence: the official MFin figure first, the workbook form only where
+        # MFin has no row. The workbook outlier stays excluded as a source, but a company it
+        # touched can still carry a headcount from MFin.
+        mfin = bilanturi.get(str(row["cui"]))
+        mfin_headcount = mfin.get("nr_salariati") if mfin else None
         years = headcount.get(row["company_id"], {})
-        if years and row["company_id"] not in HEADCOUNT_OUTLIERS:
-            company["employees"] = years[max(years)]
+        reported = years[max(years)] if years else None
+        if mfin_headcount is not None:
+            company["employees"] = mfin_headcount
+            company["employeesSource"] = "mfin"
+        elif reported is not None and row["company_id"] not in HEADCOUNT_OUTLIERS:
+            company["employees"] = reported
             company["employeesYear"] = max(years)
+            company["employeesSource"] = "formular"
+        if mfin:
+            company["revenueRon"] = mfin.get("cifra_afaceri")
+            company["netResultRon"] = (mfin.get("profit_net") or 0) - (
+                mfin.get("pierdere_neta") or 0
+            )
+            company["debtRon"] = mfin.get("datorii")
 
     unmatched_counties: list[dict] = []
     for company in companies.values():
@@ -176,6 +208,17 @@ def main() -> None:
             "companiei (sediul), nu teritoriul de servire. Nepotrivirile sunt listate în "
             "dataQuality, nu ghicite.",
             "snapshotChecksum": {"sha256": sha256(SEARCH), "file": SEARCH.name},
+        },
+        "financialsSource": {
+            "source": "mfin-bilanturi-2025",
+            "url": BILANTURI_URL,
+            "license": "CC BY 4.0",
+            "confidence": "derived",
+            "note": "Veniturile, rezultatul net, datoriile și efectivul oficial (nr_salariati) "
+            "vin din bilanțurile MFin publicate pe data.gov.ro, potrivite pe CUI prin "
+            "companiidestat.ro. Acolo unde MFin are efectiv, el este folosit înaintea "
+            "formularului; unde nu are rând, compania rămâne fără cifre financiare.",
+            "snapshotChecksum": {"sha256": sha256(BILANTURI), "file": BILANTURI.name},
         },
         "sourceChecksum": {"sha256": sha256(SOURCE), "file": SOURCE.name},
         "dataQuality": {

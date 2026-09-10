@@ -41,7 +41,7 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["caen", "name", "companies", "employees", "headcountKnown", "micro", "tier", "proposed"],
+        "required": ["caen", "name", "companies", "employees", "headcountKnown", "micro", "revenueRon", "lossCount", "debtRon", "tier", "proposed"],
         "properties": {
           "caen": { "type": "string" },
           "name": { "type": "string" },
@@ -49,6 +49,9 @@
           "employees": { "type": "number", "minimum": 0 },
           "headcountKnown": { "type": "integer", "minimum": 0 },
           "micro": { "type": "integer", "minimum": 0 },
+          "revenueRon": { "type": "number", "minimum": 0 },
+          "lossCount": { "type": "integer", "minimum": 0 },
+          "debtRon": { "type": "number", "minimum": 0 },
           "tier": { "enum": ["regional", "local", "national", "other"] },
           "proposed": { "type": "integer", "minimum": 0 },
           "regions": {
@@ -102,6 +105,8 @@
         "reductionPercent",
         "microUnder20",
         "headcountKnown",
+        "revenueRon",
+        "lossMaking",
         "inFlightMergers"
       ],
       "properties": {
@@ -113,6 +118,8 @@
         "reductionPercent": { "type": "number" },
         "microUnder20": { "type": "integer", "minimum": 0 },
         "headcountKnown": { "type": "integer", "minimum": 0 },
+        "revenueRon": { "type": "number", "minimum": 0 },
+        "lossMaking": { "type": "integer", "minimum": 0 },
         "inFlightMergers": { "type": "integer", "minimum": 0 }
       }
     },

@@ -48,12 +48,17 @@
           <span class="big" id="stat-cut">—</span>
           <span class="small">mai puține entități</span>
         </div>
+        <div class="stat">
+          <span class="big" id="stat-loss">—</span>
+          <span class="small">companii cu rând financiar în pierdere (MFin 2025)</span>
+        </div>
       </section>
 
       <p class="hint" id="stats-note" hidden>
         <span id="stat-micro">—</span> de companii au sub 20 de angajați, indiferent de regulă.
-        Efectivul de personal este raportat doar de <span id="stat-headcount">—</span> companii,
-        deci orice total de angajați de aici este o <em>limită inferioară</em>, nu o estimare.
+        Efectivul de personal vine întâi din bilanțurile MFin și doar unde acestea nu au rând,
+        din formular; cifrele financiare acoperă o parte din companii, deci orice total de aici
+        este o <em>limită inferioară</em>, nu o estimare.
       </p>
 
       <section id="clusters" aria-label="Activitățile companiilor de stat" hidden>
@@ -76,6 +81,8 @@
                 <th scope="col" class="num">Propuse</th>
                 <th scope="col" class="sortable num" data-key="reduction">Reducere</th>
                 <th scope="col" class="sortable num" data-key="employees">Angajați (min.)</th>
+                <th scope="col" class="sortable num" data-key="revenue">Venituri (RON)</th>
+                <th scope="col" class="num">În pierdere</th>
                 <th scope="col" class="num">Sub 20</th>
               </tr>
             </thead>
@@ -158,14 +165,18 @@
           <li><strong>De la 659 de entități la 56 de operatori</strong> în cele șapte activități
           de rețea: fiecare cu un singur consiliu, un singur buget, un singur audit, un singur
           contract de achiziție.</li>
+          <li><strong>Începe de unde doare: 287 de companii sunt în pierdere</strong> în
+          bilanțurile MFin 2025 — 91 dintre ele doar operatori de apă. Absorbția unei companii
+          în pierdere într-un operator regional este o economie, nu o cheltuială.</li>
           <li><strong>Micro-companiile ies din calcul</strong>: 255 de entități sub 20 de
           angajați devin sucursale sau dispar, fără a atinge serviciul.</li>
-          <li><strong>Ce nu se poate spune:</strong> economiile în lei. Sursa nu publică
-          costurile per companie, deci pagina numără entități și angajați (limita inferioară),
-          nu bugete. Unde datele nu ajung, pagina o spune.</li>
+          <li><strong>Ce nu se poate spune:</strong> economiile exacte în lei. Cifrele MFin dau
+          venituri, rezultat și datorii, nu costurile de administrare per companie — deci pagina
+          numără entități, angajați și pierderi, nu bugete. Unde datele nu ajung, pagina o
+          spune.</li>
           <li><strong>Ordinea contează</strong>: întâi înghețul entităților noi, apoi absorbția
-          micro-entităților, apoi operatorii regionali — ca să nu se taie serviciul înainte de
-          a exista operatorul care îl preia.</li>
+          micro-entităților și a pierzătoarelor, apoi operatorii regionali — ca să nu se taie
+          serviciul înainte de a exista operatorul care îl preia.</li>
         </ul>
       </section>
 
