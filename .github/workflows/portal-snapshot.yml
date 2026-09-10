@@ -165,12 +165,23 @@ jobs:
             stamp="$stamp-backfill-${{ github.run_id }}"
           fi
           echo "stamp=$stamp" >> "$GITHUB_OUTPUT"
+          expected=12
           shards=$(ls out/coverage-*.json 2>/dev/null | wc -l)
-          echo "Collected $shards of 12 shards"
+          echo "Collected $shards of $expected shards"
           if [ "$shards" -eq 0 ]; then
             echo "No shard produced output; nothing to publish." >&2
             exit 1
           fi
+          # Which ones, not just how many. A missing shard is roughly twenty courts, and the
+          # number alone does not say whose. The names carry it: coverage-<date>-partNNof12.json.
+          missing=""
+          for i in $(seq 0 $((expected - 1))); do
+            printf -v part 'part%02dof%d' "$i" "$expected"
+            ls out/coverage-*"$part".json >/dev/null 2>&1 || missing="$missing $i"
+          done
+          echo "missing=${missing# }" >> "$GITHUB_OUTPUT"
+          [ -n "$missing" ] && echo "Missing shards:$missing"
+          true
           # One combined report so a reader does not have to open twelve files to learn whether
           # the day is usable. Written before the upload so it ships with the data it describes.
           #
@@ -210,3 +221,33 @@ jobs:
             --notes-file out/coverage.json \
             out/*.parquet out/coverage*.json \
           || gh release upload "$tag" out/*.parquet out/coverage*.json --clobber
+
+      # Upload first, then fail. Both halves are deliberate.
+      #
+      # The upload has to happen because the source is perishable: the portal drops cases as
+      # courts archive them, so eleven shards of a day that cannot be re-crawled are worth
+      # keeping. That is why `publish` runs on `always()` in the first place.
+      #
+      # The failure has to happen because until now it did not. `shardsCollected` recorded the
+      # truth and nothing acted on it, so an incomplete day published green and looked like
+      # every other day in the series. 2026-09-08 lost shard 10 — around twenty courts — and
+      # said nothing; the only way to notice was to count the assets, which is what turned it
+      # up two days later.
+      #
+      # This is the third time the same shape has bitten. The round-robin sharding sent the two
+      # heaviest shards over the ceiling and dropped forty-one courts "without failing
+      # anything". The 2026-09-05 backfill stitched two crawls into one release, and it
+      # "validated, summed and rendered". Each fix removed its own cause; none of them made
+      # incompleteness itself loud. A red run does.
+      #
+      # Deliberately not conditioned on the run being scheduled: a backfill missing two shards
+      # is exactly as incomplete, and the 09-05 incident was a backfill.
+      - name: Refuse to call an incomplete day a success
+        if: steps.day.outputs.missing != ''
+        run: |
+          echo "::error::Published, but shards${{ steps.day.outputs.missing }} produced nothing."
+          echo "The release holds what was collected and is worth keeping — the source is"
+          echo "perishable and this day cannot be re-crawled. It is not a complete snapshot."
+          echo "Check the per-shard coverage assets for which courts are absent, and re-run"
+          echo "the missing shards if the portal is answering again."
+          exit 1
