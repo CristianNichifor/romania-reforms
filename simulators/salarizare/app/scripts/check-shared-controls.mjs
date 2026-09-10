@@ -41,6 +41,23 @@ try {
     await page.goto(`${origin}/#/${route}`);
     await page.locator('.masthead h1').waitFor();
     await page.waitForLoadState('networkidle');
+    // Neither wait above proves the grid arrived. Routes are hash-only, so `goto` fires a
+    // hashchange rather than a navigation: the masthead is already on screen from the previous
+    // view, and `networkidle` can settle before a route's fetch has even started.
+    //
+    // Every view then filters data it may not have yet, and does it silently. PayslipView's
+    // `matches` opens with `if (!primary) return []`, and HomeView's `hits` with
+    // `if (q.length < 2 || !ministry) return []` — so typing into a search box too early
+    // filters an empty list. Downstream that is a hard failure in one place (the payslip
+    // asserts a specific occupation code and saw zero, 14 retries running) and something worse
+    // in the other: `home-search` snapshots the no-results branch and compares it against a
+    // baseline, measuring nothing while staying green.
+    //
+    // App.tsx renders `p.loading` until `loaded` is non-empty, so its absence is the one signal
+    // that covers every route and every snapshot rather than the two searches that happened to
+    // break. If the grid failed outright the same element carries the error text, and this
+    // fails rather than photographing it.
+    await expect(page.locator('p.loading')).toHaveCount(0);
   };
   const snapshot = async name => {
     if (!before) {
