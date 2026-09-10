@@ -431,6 +431,11 @@ export default function App() {
             {group.views.map((id) => (
               <button
                 key={id}
+                // Which view is on screen, readable from the DOM. The `on` class already said
+                // *a* view is active; it could not say *which*, so a check waiting for the
+                // route it asked for had nothing to wait on and settled for a signal the
+                // previous route already satisfied.
+                data-view={id}
                 className={scenario.view === id ? 'on' : ''}
                 onClick={() => setScenario({ ...scenario, view: id })}
               >

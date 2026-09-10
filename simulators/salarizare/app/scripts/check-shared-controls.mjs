@@ -57,6 +57,27 @@ try {
     // that covers every route and every snapshot rather than the two searches that happened to
     // break. If the grid failed outright the same element carries the error text, and this
     // fails rather than photographing it.
+    //
+    // But `loaded` maps over the *current* scenario's regimeIds, and the scenario only changes
+    // when React handles the hashchange this `goto` fired. Until it does, every wait above is
+    // answered by the view that was already on screen: the masthead is the old one, the network
+    // is idle because the old route finished, and `p.loading` is absent because the old route's
+    // data is present. Three waits, none of which the new route can fail. On this machine the
+    // gap never opened across twenty-two runs; on a two-vCPU runner it opens roughly one time
+    // in ten, and the payslip check then filters the previous regime's positions and asserts an
+    // occupation code that regime does not contain.
+    //
+    // So wait for the route to be on screen before waiting for its data. `data-view` carries
+    // the id the scenario resolved to, which is the first thing that cannot be true early.
+    const [view, query] = route.split('?');
+    await expect(page.locator(`nav button.on[data-view="${view}"]`)).toHaveCount(1);
+    // And when the route names regimes, wait for those too: the view can be right while
+    // `regimeIds` is still the previous route's, which is the half that picks the grid.
+    for (const id of new URLSearchParams(query ?? '').get('r')?.split(',') ?? []) {
+      await expect(
+        page.locator('.regime-toggle', { hasText: id }).locator('input[type=checkbox]'),
+      ).toBeChecked();
+    }
     await expect(page.locator('p.loading')).toHaveCount(0);
   };
   const snapshot = async name => {
