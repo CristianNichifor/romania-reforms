@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { localOnly, mapPixels, settledPixels, publicData, formatCount } from './helpers';
+import { localOnly, mapPixels, settledPixels, jsonEvidence, publicData, formatCount } from './helpers';
 
 test('map modes, real pixels, zoom/pan, ranges, optional layers and reader', async ({ page }, info) => {
   const audit = await localOnly(page);
@@ -53,10 +53,10 @@ test('map modes, real pixels, zoom/pan, ranges, optional layers and reader', asy
   await expect.poll(() => audit.requests.some(url => url.endsWith('/data/court-distance.bin'))).toBe(true);
   await expect(page.locator('#catchment-note')).toBeVisible();
   await mapPixels(page, info, 'catchments');
-  await info.attach('map-summaries.json', { body: JSON.stringify({
+  await jsonEvidence(info, 'map-summaries', {
     today: initialSummary, proposed: proposalSummary, access: adjustedAccessSummary,
     catchments: await page.locator('#summary').innerText(),
-  }, null, 2), contentType: 'application/json' });
+  });
   await page.locator('[data-mode="today"]').click();
   await expect(page.locator('#summary')).toHaveText(initialSummary, { useInnerText: true });
   await page.context().setOffline(true);

@@ -1,5 +1,6 @@
 import { expect, type Page, type TestInfo } from '@playwright/test';
 import { readFileSync } from 'node:fs';
+import { writeFile } from 'node:fs/promises';
 
 export const publicData = (name: string) => JSON.parse(readFileSync(new URL(`../../public/data/${name}`, import.meta.url), 'utf8'));
 export const formatCount = (value: number) => Math.round(value).toLocaleString('ro-RO');
@@ -33,8 +34,14 @@ export async function recordStatistics(page: Page, info: TestInfo, name: string)
     })),
     hash: location.hash,
   }));
-  await info.attach(`${name}.json`, { body: JSON.stringify(snapshot, null, 2), contentType: 'application/json' });
+  await jsonEvidence(info, name, snapshot);
   return snapshot;
+}
+
+export async function jsonEvidence(info: TestInfo, name: string, value: unknown) {
+  const path = info.outputPath(`${name}.json`);
+  await writeFile(path, JSON.stringify(value, null, 2));
+  await info.attach(`${name}.json`, { path, contentType: 'application/json' });
 }
 
 export async function mapPixels(page: Page, info: TestInfo, name: string) {
@@ -63,7 +70,9 @@ export async function mapPixels(page: Page, info: TestInfo, name: string) {
     }, png.toString('base64'));
   }).toBeGreaterThan(20);
   const png = await capture();
-  await info.attach(`${name}.png`, { body: png, contentType: 'image/png' });
+  const path = info.outputPath(`${name}.png`);
+  await writeFile(path, png);
+  await info.attach(`${name}.png`, { path, contentType: 'image/png' });
   return { png, capture };
 }
 

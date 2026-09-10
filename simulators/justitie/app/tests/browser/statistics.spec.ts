@@ -164,6 +164,7 @@ test('statistics keyboard, chart values and responsive light/dark layouts', asyn
         if (id !== 'load-proposal') expect(await control.evaluate(node => (node as HTMLSelectElement).labels?.length)).toBeGreaterThan(0);
       }
       await page.screenshot({ path: info.outputPath(`statistics-${colorScheme}-${width}.png`), fullPage: true });
+      await page.screenshot({ path: info.outputPath(`statistics-top-${colorScheme}-${width}.png`) });
       // Layout may change percentage widths; the chart labels, values and caveats must not.
       expect((await recordStatistics(page, info, `${colorScheme}-${width}`)).text).toEqual(national.text);
       await expect(page.locator('#acoperire .facts b').first()).toHaveText(formatCount(stats.snapshot.dosare));
