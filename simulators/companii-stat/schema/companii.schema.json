@@ -5,7 +5,7 @@
   "description": "One row per state company: identity, registration, CAEN activity, status, and the latest reported full-time-equivalent headcount. Financial ratios are dropped at import.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "title", "publisher", "period", "provenance", "sourceChecksum", "summary", "companies"],
+  "required": ["id", "title", "publisher", "period", "provenance", "sourceChecksum", "dataQuality", "summary", "companies"],
   "properties": {
     "$schema": { "type": "string" },
     "id": { "const": "companii-stat-2025" },
@@ -20,6 +20,29 @@
       "properties": {
         "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
         "file": { "type": "string" }
+      }
+    },
+    "dataQuality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["headcountExcluded"],
+      "properties": {
+        "headcountExcluded": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["companyId", "cui", "name", "reported", "year", "reason"],
+            "properties": {
+              "companyId": { "type": "integer" },
+              "cui": { "type": "integer" },
+              "name": { "type": "string" },
+              "reported": { "type": "number" },
+              "year": { "type": "integer" },
+              "reason": { "type": "string" }
+            }
+          }
+        }
       }
     },
     "summary": {

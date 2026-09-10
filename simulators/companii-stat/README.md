@@ -47,8 +47,11 @@ identity, CAEN, status and **headcount**; the ratios are dropped.
 
 Two limitations travel with every number:
 
-- **Headcount is a lower bound.** Only 699 of 1 247 companies report full-time-equivalent
-  employees, so every employee total is over what the register contains, never an estimate.
+- **Headcount is a lower bound.** Only 698 of 1 247 companies report a usable full-time-equivalent
+  headcount, so every employee total is over what the register contains, never an estimate. One
+  reported value is excluded as an entry error and named in the data's `dataQuality` section:
+  *Utilități și Servicii Publice Murighiol SRL* reports 10 776 employees in 2023 and none in the
+  four years before, in a commune of about 3 000 inhabitants.
 - **There is no geography.** The source gives no county per company, so the scenario counts
   regional operators, it does not place them on a map.
 

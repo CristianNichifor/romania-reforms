@@ -30,6 +30,22 @@ FINANCIAL_SHEET = "Indicatori calculati"
 NONFINANCIAL_SHEET = "Indicatori formular"
 HEADCOUNT = "Număr de angajați cu echivalent normă întreagă"
 
+# Company ids whose reported headcount is a data-entry error, checked against the workbook
+# itself. A generic threshold would quietly discard a genuinely large operator, so the guard
+# is this explicit table: each row is one company, one reported figure, and the reason it is
+# excluded. Excluded, not dropped — the entries travel in dataQuality, so a reader can see
+# what was removed and argue with it.
+HEADCOUNT_OUTLIERS = {
+    1217: {
+        "cui": 27811667,
+        "name": "UTILITĂŢI ŞI SERVICII PUBLICE MURIGHIOL SRL",
+        "reported": 10776,
+        "year": 2023,
+        "reason": "2019–2022 report no headcount; the 2023 figure exceeds the commune's "
+        "population several times over and is an entry error in the source.",
+    },
+}
+
 
 def sha256(path: Path) -> str:
     digest = hashlib.sha256()
@@ -73,7 +89,7 @@ def main() -> None:
             },
         )
         years = headcount.get(row["company_id"], {})
-        if years:
+        if years and row["company_id"] not in HEADCOUNT_OUTLIERS:
             company["employees"] = years[max(years)]
             company["employeesYear"] = max(years)
 
@@ -92,10 +108,16 @@ def main() -> None:
             "locator": "foaia Indicatori calculati (identitate, CAEN, status) și foaia "
             "Indicatori formular (Număr de angajați cu echivalent normă întreagă)",
             "confidence": "verbatim",
-            "note": "Angajații sunt ultimul an raportat de fiecare companie. Fișierul sursă este "
-            "reținut în sources/ cu amprenta SHA-256.",
+            "note": "Angajații sunt ultimul an raportat de fiecare companie, cu excepțiile "
+            "din dataQuality. Fișierul sursă este reținut în sources/ cu amprenta SHA-256.",
         },
         "sourceChecksum": {"sha256": sha256(SOURCE), "file": SOURCE.name},
+        "dataQuality": {
+            "headcountExcluded": [
+                {"companyId": company_id, **entry}
+                for company_id, entry in sorted(HEADCOUNT_OUTLIERS.items())
+            ],
+        },
         "summary": {
             "companies": len(rows),
             "withHeadcount": with_headcount,

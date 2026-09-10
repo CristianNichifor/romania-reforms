@@ -1756,7 +1756,11 @@ async function main(): Promise<void> {
        mai sus — dar nu se rezolvă la fel. Regiunile de dezvoltare sunt definite de Legea
        315/2004, iar a aronda un județ la sediul cel mai apropiat înseamnă a nu mai avea
        regiuni. Cifra arată prețul; alegerea dintre o geografie legală și un drum mai scurt nu
-       se face din date.</p>`;
+       se face din date.</p>
+     <p class="disagree">Aceleași opt regiuni, aplicate altor două straturi ale statului:
+       <a href="../deconcentrare/">serviciile deconcentrate</a> (549 de birouri la 117) și
+       <a href="../companii-stat/">utilitățile companiilor de stat</a> (659 de entități la
+       56).</p>`;
 
   const PARCHET_LABEL: Record<string, string> = {
     piccj: 'PÎCCJ + DNA, DIICOT',

@@ -8,15 +8,27 @@
   "source": "companii-stat-finnefin",
   "locator": "foaia Indicatori calculati (identitate, CAEN, status) și foaia Indicatori formular (Număr de angajați cu echivalent normă întreagă)",
   "confidence": "verbatim",
-  "note": "Angajații sunt ultimul an raportat de fiecare companie. Fișierul sursă este reținut în sources/ cu amprenta SHA-256."
+  "note": "Angajații sunt ultimul an raportat de fiecare companie, cu excepțiile din dataQuality. Fișierul sursă este reținut în sources/ cu amprenta SHA-256."
  },
  "sourceChecksum": {
   "sha256": "3a44f2c099fb711c3d0a83ddcd26941bac160f465680638fa2bc6dd8a52bbe27",
   "file": "companii-stat-finnefin.xlsx"
  },
+ "dataQuality": {
+  "headcountExcluded": [
+   {
+    "companyId": 1217,
+    "cui": 27811667,
+    "name": "UTILITĂŢI ŞI SERVICII PUBLICE MURIGHIOL SRL",
+    "reported": 10776,
+    "year": 2023,
+    "reason": "2019–2022 report no headcount; the 2023 figure exceeds the commune's population several times over and is an entry error in the source."
+   }
+  ]
+ },
  "summary": {
   "companies": 1247,
-  "withHeadcount": 699,
+  "withHeadcount": 698,
   "byStatus": {
    "funcţiune": 1162,
    "întrerupere temporară de activitate": 36,
@@ -11084,9 +11096,7 @@
    "name": "UTILITĂŢI ŞI SERVICII PUBLICE MURIGHIOL SRL",
    "registrationNumber": "J2010000420362",
    "caen": "3811",
-   "status": "funcţiune",
-   "employees": 10776,
-   "employeesYear": 2023
+   "status": "funcţiune"
   },
   {
    "id": 659,

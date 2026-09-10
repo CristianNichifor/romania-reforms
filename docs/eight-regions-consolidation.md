@@ -75,10 +75,26 @@ The EU/OECD comparison behind the strategy:
    the eight regional directorates; county prefects become deputies.
 4. **Consolidate the network utilities to one regional operator each** (`companii-stat`), and
    absorb or liquidate the micro companies.
-5. **Cut ministries 18 → 13–15** by mission: Finance absorbs EU funds; Economy merges with
-   Energy; Transport absorbs the infrastructure side of development; Agriculture merges with
-   Environment, Water and Forests; Labour re-absorbs Family and Youth; Education absorbs
-   Research; Culture absorbs Sport.
+5. **Cut ministries 18 → 13–15** by mission, not by sector lobby:
+
+   | # | Keep | Change | Rationale |
+   | --- | --- | --- | --- |
+   | 1 | Finance | absorb Investments & European Projects | EU funds are a financial instrument |
+   | 2 | Internal Affairs | keep | sovereignty |
+   | 3 | Foreign Affairs | keep | sovereignty |
+   | 4 | Justice | keep | sovereignty |
+   | 5 | National Defence | keep | sovereignty |
+   | 6 | Economy & Energy | merge Economy, Entrepreneurship & Tourism + Energy | energy is a branch of economy; tourism → subordinate agency |
+   | 7 | Transport & Infrastructure | absorb the infrastructure side of Development, Public Works & Administration | one infrastructure ministry |
+   | 8 | Agriculture, Environment, Water & Forests | merge Agriculture + Environment, Water & Forests | land/water/forest nexus |
+   | 9 | Administration & Regional Development | remainder of Development (local-administration side) | keeps deconcentration oversight |
+   | 10 | Labour, Family & Social Solidarity | re-absorb Family, Youth & Equality of Opportunity | split in 2023; re-merge |
+   | 11 | Health | keep | |
+   | 12 | Education | absorb Research | research sits with universities |
+   | 13 | Culture | absorb Sport | sport is a cultural programme |
+   | — | Digitalisation | move to a Government Digital Agency under the PM | cross-cutting, not a ministry |
+
+   Net effect: **five fewer ministries**, no loss of sovereign or regulatory functions.
 6. **Merge central agencies by market** — a single transport authority, a single health and food
    authority, a single social-benefits agency, a single cadastre and land agency — keeping the
    regulators (ANRE, ANCOM, ANPC, ASF and peers) legally independent.
