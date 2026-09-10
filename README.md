@@ -22,9 +22,10 @@ thing in all of them.
 
 ## What gets shared, and what does not
 
-**Shared:** the vocabulary above, and the clients for sources more than one simulator
-needs — budget execution, INS Tempo, Eurostat, Danmarks Statistik, the SIRUTA registry.
-A second copy of an importer is a second thing to drift.
+**Shared:** the vocabulary above, and the clients or marts for sources more than one
+simulator needs — budget execution, INS Tempo, Eurostat, Danmarks Statistik, the SIRUTA
+registry, health access and public-enterprise aggregates. A second copy of an importer is a
+second thing to drift.
 
 **Not shared:** the engines. A pay engine and a court-consolidation engine have nothing in
 common but the ethos, and forcing them into one abstraction would cost more than it saves.
@@ -35,20 +36,22 @@ argument. This repository is an index, not a monolith.
 
 ## Shared data status
 
-The first shared-data wave is complete. Three datasets are now shared inputs rather than
-simulator-local one-offs:
+The first shared-data wave is complete. Four dataset families are now shared inputs rather
+than simulator-local one-offs:
 
 - `packages/uat_registry`: the SIRUTA/UAT/CUI registry and population join vocabulary.
 - `packages/local_finance`: 2023-2025 local budget execution and fiscal-stress bases,
   with large national history published as a release asset.
 - `packages/health_access`: UAT health access, accepted provider points, road-proxy point
   access and explicit maintenance queues for providers that still lack source evidence.
+- `packages/public_enterprise_governance`: aggregate public-enterprise footprint and pay
+  comparison payloads from the documented companiidestat.ro API, with CC BY 4.0 attribution
+  and no company/person rows in browser payloads.
 
 Current follow-up work is maintenance. New consumers should reuse these shared packages or
 document why they cannot. Health point expansion is paused until new evidence exists;
 finance dimensions such as arrears or funding-source dependence wait for a consuming UI;
-new source families such as AMEPIP/public-company data should begin as reconnaissance, not
-as a blocker for the completed wave.
+public-enterprise work waits for a consumer-specific question.
 
 ## Simulators
 
@@ -57,18 +60,20 @@ as a blocker for the completed wave.
 | **justitie** | The judicial reform | migrated to the 2025 report |
 | **salarizare** | Public-sector pay | migrated |
 | **administrativ** | Consolidation of the 3 186 UATs | migrated |
+| **transport** | County public transport and rail access | built and published |
 | **impozit-teren** | Taxing land on its value | 32 counties read, 10 estimated, nothing excluded; 22 readers |
 
-Both live simulators now live here, with their history, on project paths under one Pages
-site: `/romania-reforms/salarizare/` and `/romania-reforms/administrativ/`. Their old
-repositories become one-page redirects that carry `location.hash` across, so a scenario
-someone has already pasted into an argument still opens the scenario.
+The live apps now live here, with their history, on project paths under one Pages site:
+`/romania-reforms/salarizare/`, `/romania-reforms/administrativ/`,
+`/romania-reforms/justitie/`, `/romania-reforms/transport/` and
+`/romania-reforms/impozit-teren/`. Old standalone repositories stay as redirect stubs where
+links with `location.hash` need to keep opening the same scenario.
 
-**The code moved; the abstraction has not.** They are three apps in one repository, not
-three consumers of a shared UI package. `packages/provenance` is shared because a second
-simulator genuinely needed the same vocabulary; there is no `packages/ui` because
-`justitie` has no interface yet, and extracting one from a single real consumer is how
-shared packages end up wrong. That extraction waits for `justitie` to need it.
+**The code moved; the abstraction has not.** They are separate apps in one repository, not
+skins over one framework. `packages/provenance` is shared because multiple simulators need the
+same caveat vocabulary; shared data packages exist where real consumers reuse the same source
+or key space. There is still no `packages/ui`: interface reuse waits for repeated, stable
+patterns rather than being guessed from one app.
 
 ### justitie
 
@@ -1086,44 +1091,36 @@ neither published nor constant between counties. They rank places against each o
 better than they measure any of them, and that limitation is carried as `blocking` so it
 reaches every figure derived from it.
 
-## Decided: how the migration goes
+## Deployment shape
 
-No custom domain. URLs will be plain GitHub Pages project paths, one Pages site for the
-whole repository:
+No custom domain. URLs are plain GitHub Pages project paths, one Pages site for the whole
+repository:
 
 ```
 cristiannichifor.github.io/romania-reforms/              the index
 cristiannichifor.github.io/romania-reforms/justitie/
 cristiannichifor.github.io/romania-reforms/salarizare/
 cristiannichifor.github.io/romania-reforms/administrativ/
+cristiannichifor.github.io/romania-reforms/transport/
+cristiannichifor.github.io/romania-reforms/impozit-teren/
 ```
 
-That breaks the links people already have, and for `salarizare` that matters more than it
-looks: its whole design premise is that a scenario *is* a link, hash and all. So each old
-repository stays alive as a one-page redirect that carries `location.hash` across, then
-gets archived. Nothing shared before the move stops working.
+That broke the old standalone project paths, and for scenario-driven apps that matters: a
+scenario *is* a link, hash and all. Redirect stubs carry `location.hash` across where old
+repositories existed, so links shared before the move keep opening the same scenario.
 
 A domain would remove the problem rather than absorb it, and the stubs are compatible with
 adding one later — they would simply point somewhere else. Not needed now.
 
-**Order, each step independently verifiable — after each, both old and new sites work:**
+**Build:** each app reads `VITE_BASE` from the environment instead of hardcoding a path. The
+deploy builds each simulator with `VITE_BASE=/romania-reforms/<name>/`, assembles the outputs
+into one Pages artifact with the index, and checks for required app payloads before publishing.
+One deploy for the repository means one broken build can block every simulator, so the
+assembly step fails loudly rather than publish a site with a dead tile.
 
-1. Move `salarizare`. Most tests, best understood, proves the layout under real load.
-2. Extract `packages/ui` (`money.ts`, the dataviz primitives, the nav shell) only once
-   `justitie` has an app that actually wants them — a second real consumer, not a guess.
-3. Move `administrativ`, renaming `pipeline/` → `scripts/` and `web/` → `app/` to match.
-4. Replace both old repositories with redirect stubs and archive them.
-
-**Build:** both apps already read `VITE_BASE` from the environment instead of hardcoding a
-path, so each is built with `VITE_BASE=/romania-reforms/<name>/` and the outputs are
-assembled into one Pages artifact with the index. One deploy for the repository means one
-broken build can block every simulator, so the assembly step should fail loudly and leave
-the previous deployment standing rather than publish a site with a dead tile.
-
-**Packaging:** a `uv` workspace with `members = ["simulators/*", "packages/*"]`, so each
-simulator declares only the dependencies it uses — the flat list in the root
-`pyproject.toml` is a placeholder for the single simulator that exists today. npm
-workspaces over `simulators/*/app` and `packages/ui` on the Node side.
+**Packaging:** the Python side is a `uv` workspace with `members = ["simulators/*",
+"packages/*"]`, so each simulator declares only the dependencies it uses. Node dependencies
+stay app-local because the frontend stacks are still deliberately separate.
 
 ## Layout
 

@@ -1,8 +1,8 @@
 """Build an administrative aggregate from public-enterprise reference sources.
 
 This deliberately emits UAT/authority/county aggregates, not company rows. The source layer is
-currently companiidestat.ro's documented API, treated as a comparison/reference source with
-CC BY 4.0 attribution. The output is small enough to commit and safe for consumer apps to load.
+the documented companiidestat.ro API, attributed under CC BY 4.0, so the app-facing closeout
+uses machine-readable data instead of blocking on AMEPIP PDF extraction.
 
 Usage:
     uv run python packages/public_enterprise_governance/scripts/\
@@ -25,7 +25,7 @@ PACKAGE_ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = PACKAGE_ROOT.parents[1]
 
 DOCUMENT_ID: Final[str] = "public-enterprise-administrative-footprint-2024-2026"
-TRANSFORM_VERSION: Final[int] = 1
+TRANSFORM_VERSION: Final[int] = 2
 BASE_URL: Final[str] = "https://companiidestat.ro/date/v1/"
 ANEXA3_URL: Final[str] = f"{BASE_URL}anexa3_summary.json"
 MFIN_URL: Final[str] = f"{BASE_URL}mfin_bilanturi_2025.json"
@@ -411,6 +411,13 @@ def build_document(
     for _siruta, metrics in uat_metrics.items():
         metrics["subsidiesRon"] = round(metrics["subsidiesRon"], 2)
 
+    row_source_id = "companiidestat-anexa3-mfin"
+    row_source_locator = f"{ANEXA3_URL}; {MFIN_URL}"
+    row_source_note = (
+        "Authority-level aggregate from companiidestat Anexa 3 local-company rows "
+        "joined to MFin financials by CUI."
+    )
+
     authorities = []
     for authority_key, metrics in sorted(authority_metrics.items()):
         siruta, label_key = authority_key
@@ -433,13 +440,10 @@ def build_document(
                 "subsidyRows": subsidy_rows_for_uat,
             },
             "provenance": {
-                "source": "companiidestat-anexa3-mfin",
-                "locator": f"{ANEXA3_URL}; {MFIN_URL}",
+                "source": row_source_id,
+                "locator": row_source_locator,
                 "confidence": "derived",
-                "note": (
-                    "Authority-level aggregate from companiidestat Anexa 3 local-company "
-                    "rows joined to MFin financials by CUI."
-                ),
+                "note": row_source_note,
             },
         }
         authorities.append(row)
@@ -540,38 +544,108 @@ def build_document(
         **public_metrics(summary_metrics),
     }
 
+    publisher = PUBLISHER
+    license_text = (
+        "CC BY 4.0 for companiidestat.ro API data; upstream public-source reuse limits "
+        "still apply."
+    )
+    attribution = "companiidestat.ro"
+    sources = [
+        source("companiidestat-anexa3-summary", ANEXA3_URL, "comparison", "CC BY 4.0"),
+        source("companiidestat-mfin-bilanturi-2025", MFIN_URL, "comparison", "CC BY 4.0"),
+        source("companiidestat-companii-search", SEARCH_URL, "comparison", "CC BY 4.0"),
+        source(
+            "companiidestat-subventii-locale",
+            SUBSIDIES_URL,
+            "comparison",
+            "CC BY 4.0",
+            "Partial large-UAT subsidy coverage; mapped by payer UAT CUI where available.",
+        ),
+        source(
+            "uat-registry-2026",
+            "https://data.gov.ro/dataset/721c9059-5f87-4c79-9854-a1d5c18f58d5",
+            "registry",
+            "Creative Commons Attribution 4.0",
+        ),
+    ]
+    provenance = {
+        "source": "companiidestat-api-v1",
+        "locator": BASE_URL,
+        "confidence": "derived",
+        "note": (
+            "Civic API snapshot aggregated to administrative authorities and joined "
+            "to the shared UAT registry; no company rows are emitted."
+        ),
+    }
+    limitations = [
+        limitation(
+            "companiidestat-derived-source",
+            "note",
+            ["all-metrics"],
+            (
+                "This aggregate is derived from the documented companiidestat.ro API "
+                "under CC BY 4.0 attribution. The API itself integrates AMEPIP, MFin, "
+                "INS and other public sources, and is intentionally used here as the "
+                "machine-readable source for the app closeout."
+            ),
+        )
+    ]
+    next_slice = {
+        "scope": "maintenance only",
+        "deliverable": (
+            "No active AMEPIP build queue remains for administrativ. Keep the aggregate "
+            "attributed to companiidestat.ro and add deeper public-source slices only "
+            "when a consumer needs them."
+        ),
+        "doneWhen": (
+            "Future AMEPIP work starts from a consumer-specific question and preserves "
+            "the same no-row-level-browser policy."
+        ),
+    }
+    limitations += [
+        limitation(
+            "authority-name-matching-conservative",
+            "material",
+            ["authority-join"],
+            (
+                "Authority labels are matched only through conservative aliases against "
+                "the shared UAT registry. Ambiguous or unmatched labels are reported as "
+                "exclusions."
+            ),
+        ),
+        limitation(
+            "subsidy-coverage-partial",
+            "material",
+            ["subsidiesRon"],
+            (
+                "Local subsidy data covers a partial set of larger UATs and is joined "
+                "by payer UAT CUI where available."
+            ),
+        ),
+        limitation(
+            "bucharest-municipality-not-administrativ-polygon",
+            "material",
+            ["administrativ-consumer"],
+            (
+                "Bucharest municipality-level rows use SIRUTA 179132; the administrativ "
+                "map carries the six sectors, so the browser adapter does not fan out "
+                "city-level rows to sectors."
+            ),
+        ),
+    ]
+
     return {
         "$schema": "../schema/public-enterprise-administrative-footprint.schema.json",
         "id": DOCUMENT_ID,
         "title": "Public-enterprise administrative footprint by authority, UAT and county",
-        "publisher": PUBLISHER,
+        "publisher": publisher,
         "scope": "administrative-aggregate",
         "periodStart": "2024",
         "periodEnd": "2026",
         "retrievedDate": retrieved_date,
-        "license": (
-            "CC BY 4.0 for companiidestat.ro API data; upstream official-source reuse "
-            "limits still apply."
-        ),
-        "attribution": "companiidestat.ro",
-        "sources": [
-            source("companiidestat-anexa3-summary", ANEXA3_URL, "comparison", "CC BY 4.0"),
-            source("companiidestat-mfin-bilanturi-2025", MFIN_URL, "comparison", "CC BY 4.0"),
-            source("companiidestat-companii-search", SEARCH_URL, "comparison", "CC BY 4.0"),
-            source(
-                "companiidestat-subventii-locale",
-                SUBSIDIES_URL,
-                "comparison",
-                "CC BY 4.0",
-                "Partial large-UAT subsidy coverage; mapped by payer UAT CUI where available.",
-            ),
-            source(
-                "uat-registry-2026",
-                "https://data.gov.ro/dataset/721c9059-5f87-4c79-9854-a1d5c18f58d5",
-                "registry",
-                "Creative Commons Attribution 4.0",
-            ),
-        ],
+        "license": license_text,
+        "attribution": attribution,
+        "sources": sources,
         "sourceHashes": hashes,
         "registry": {
             "uatRegistryId": registry["id"],
@@ -584,15 +658,7 @@ def build_document(
             ),
             "version": TRANSFORM_VERSION,
         },
-        "provenance": {
-            "source": "companiidestat-api-v1",
-            "locator": BASE_URL,
-            "confidence": "derived",
-            "note": (
-                "Civic API snapshot aggregated to administrative authorities and joined "
-                "to the shared UAT registry; no company rows are emitted."
-            ),
-        },
+        "provenance": provenance,
         "summary": summary,
         "authorities": authorities,
         "uats": uats,
@@ -600,64 +666,14 @@ def build_document(
         "exclusions": sorted(
             exclusions.values(), key=lambda row: (row["reason"], row["sourceAuthorityLabel"])
         ),
-        "limitations": [
-            limitation(
-                "companiidestat-reference-not-primary",
-                "material",
-                ["all-metrics"],
-                (
-                    "This aggregate is derived from the companiidestat.ro API as a "
-                    "reference layer; official AMEPIP and MFin files remain the preferred "
-                    "source of truth for future production imports."
-                ),
-            ),
-            limitation(
-                "authority-name-matching-conservative",
-                "material",
-                ["authority-join"],
-                (
-                    "Authority labels are matched only through conservative aliases against "
-                    "the shared UAT registry. Ambiguous or unmatched labels are reported as "
-                    "exclusions."
-                ),
-            ),
-            limitation(
-                "subsidy-coverage-partial",
-                "material",
-                ["subsidiesRon"],
-                (
-                    "Local subsidy data covers a partial set of larger UATs and is joined "
-                    "by payer UAT CUI where available."
-                ),
-            ),
-            limitation(
-                "bucharest-municipality-not-administrativ-polygon",
-                "material",
-                ["administrativ-consumer"],
-                (
-                    "Bucharest municipality-level rows use SIRUTA 179132; the administrativ "
-                    "map carries the six sectors, so the browser adapter does not fan out "
-                    "city-level rows to sectors."
-                ),
-            ),
-        ],
-        "nextSlice": {
-            "scope": "official-source replacement",
-            "deliverable": (
-                "Replace the comparison aggregate with the same contract built from official "
-                "AMEPIP annexes and MFin/data.gov.ro financial statements."
-            ),
-            "doneWhen": (
-                "The administrativ app consumes the same SIRUTA-aligned aggregate contract "
-                "with official-source hashes and a comparison-only companiidestat validation "
-                "report."
-            ),
-        },
+        "limitations": limitations,
+        "nextSlice": next_slice,
     }
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--source-mode", choices=["comparison"], default="comparison")
     parser.add_argument("--anexa3", default=ANEXA3_URL)
     parser.add_argument("--mfin", default=MFIN_URL)
     parser.add_argument("--search", default=SEARCH_URL)
@@ -668,11 +684,18 @@ def main() -> int:
     parser.add_argument("--subsidy-year", default="2025")
     args = parser.parse_args()
 
-    anexa3, anexa3_hash = read_json_with_hash(args.anexa3)
-    mfin, mfin_hash = read_json_with_hash(args.mfin)
     search, search_hash = read_json_with_hash(args.search)
     subsidies, subsidies_hash = read_json_with_hash(args.subsidies)
     registry, registry_hash = read_json_with_hash(args.registry)
+    anexa3, anexa3_hash = read_json_with_hash(args.anexa3)
+    mfin, mfin_hash = read_json_with_hash(args.mfin)
+    hashes = {
+        "anexa3SummarySha256": anexa3_hash,
+        "mfinBilanturiSha256": mfin_hash,
+        "companiiSearchSha256": search_hash,
+        "subventiiLocaleSha256": subsidies_hash,
+        "uatRegistrySha256": registry_hash,
+    }
 
     document = build_document(
         anexa3=anexa3,
@@ -680,13 +703,7 @@ def main() -> int:
         search=search,
         registry=registry,
         subsidies=subsidies,
-        hashes={
-            "anexa3SummarySha256": anexa3_hash,
-            "mfinBilanturiSha256": mfin_hash,
-            "companiiSearchSha256": search_hash,
-            "subventiiLocaleSha256": subsidies_hash,
-            "uatRegistrySha256": registry_hash,
-        },
+        hashes=hashes,
         retrieved_date=args.retrieved_date,
         subsidy_year=args.subsidy_year,
     )

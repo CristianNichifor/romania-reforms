@@ -1,0 +1,287 @@
+{
+  "$schema": "../../schema/fiscal.schema.json",
+  "id": "amepip-public-enterprise-compensation",
+  "title": "Companii de stat: scara agregata de compensatie manageriala",
+  "publisher": "companiidestat.ro",
+  "methodology": "Aggregate pay-scale rows from the documented companiidestat.ro API, attributed under CC BY 4.0. The source integrates public AMEPIP salary rows and reference benchmarks, but this document emits only aggregate tiers and ratios.",
+  "retrieved": "2026-09-10",
+  "query": {
+    "endpoint": "https://companiidestat.ro/date/v1/data.json",
+    "field": "pay_scale_rows"
+  },
+  "provenance": {
+    "source": "companiidestat-api-data-v1",
+    "locator": "https://companiidestat.ro/date/v1/data.json",
+    "confidence": "derived",
+    "note": "Compact aggregate derived from companiidestat.ro/date/v1/data.json."
+  },
+  "series": [
+    {
+      "id": "companiidestat-pay-scale-fixed-tier-count",
+      "label": "Companii de stat: numar de trepte fixe publicate",
+      "geo": "RO",
+      "unit": "COUNT",
+      "dims": {
+        "kind": "public-enterprise-compensation",
+        "scope": "companiidestat-pay-scale",
+        "statistic": "count",
+        "measure": "fixedTiers"
+      },
+      "observations": [
+        {
+          "period": "2025-08",
+          "value": 6
+        }
+      ],
+      "provenance": {
+        "source": "companiidestat-api-data-v1",
+        "locator": "pay_scale_rows",
+        "confidence": "derived",
+        "note": "Count of fixed monthly public-enterprise pay-scale tiers in the aggregate API row set."
+      }
+    },
+    {
+      "id": "companiidestat-pay-scale-fixed-median",
+      "label": "Companii de stat: mediana treptelor fixe publicate",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "public-enterprise-compensation",
+        "scope": "companiidestat-pay-scale",
+        "statistic": "median",
+        "measure": "fixedMonthlyGrossRon"
+      },
+      "observations": [
+        {
+          "period": "2025-08",
+          "value": 71149.5
+        }
+      ],
+      "provenance": {
+        "source": "companiidestat-api-data-v1",
+        "locator": "pay_scale_rows",
+        "confidence": "derived",
+        "note": "Median over the aggregate fixed monthly tiers; no company/person rows are emitted."
+      }
+    },
+    {
+      "id": "companiidestat-pay-scale-fixed-top",
+      "label": "Companii de stat: varful treptelor fixe publicate",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "public-enterprise-compensation",
+        "scope": "companiidestat-pay-scale",
+        "statistic": "max",
+        "measure": "fixedMonthlyGrossRon"
+      },
+      "observations": [
+        {
+          "period": "2025-08",
+          "value": 85644.0
+        }
+      ],
+      "provenance": {
+        "source": "companiidestat-api-data-v1",
+        "locator": "pay_scale_rows",
+        "confidence": "derived",
+        "note": "Highest fixed monthly tier from the aggregate API row set."
+      }
+    },
+    {
+      "id": "companiidestat-pay-scale-extreme-monthly-equivalent",
+      "label": "Companii de stat: varf cu bonus anual lunarizat",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "public-enterprise-compensation",
+        "scope": "companiidestat-pay-scale",
+        "statistic": "max",
+        "measure": "monthlyEquivalentWithAnnualBonusRon"
+      },
+      "observations": [
+        {
+          "period": "2025-08",
+          "value": 256932.0
+        }
+      ],
+      "provenance": {
+        "source": "companiidestat-api-data-v1",
+        "locator": "pay_scale_rows",
+        "confidence": "derived",
+        "note": "Highest monthly equivalent once the annual bonus row is divided across 12 months by the source API."
+      }
+    },
+    {
+      "id": "companiidestat-pay-scale-minimum-gross",
+      "label": "Referinta: salariul minim brut",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "public-enterprise-compensation",
+        "scope": "companiidestat-pay-scale",
+        "statistic": "reference",
+        "measure": "minimumGrossMonthlyRon"
+      },
+      "observations": [
+        {
+          "period": "2025-08",
+          "value": 4050.0
+        }
+      ],
+      "provenance": {
+        "source": "companiidestat-api-data-v1",
+        "locator": "pay_scale_rows",
+        "confidence": "derived",
+        "note": "Reference row carried by the source API."
+      }
+    },
+    {
+      "id": "companiidestat-pay-scale-average-gross",
+      "label": "Referinta: salariul mediu brut 2025",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "public-enterprise-compensation",
+        "scope": "companiidestat-pay-scale",
+        "statistic": "reference",
+        "measure": "averageGrossMonthlyRon"
+      },
+      "observations": [
+        {
+          "period": "2025-08",
+          "value": 9232.0
+        }
+      ],
+      "provenance": {
+        "source": "companiidestat-api-data-v1",
+        "locator": "pay_scale_rows",
+        "confidence": "derived",
+        "note": "Reference row carried by the source API."
+      }
+    },
+    {
+      "id": "companiidestat-pay-scale-president",
+      "label": "Referinta: Presedintele Romaniei",
+      "geo": "RO",
+      "unit": "CP_MNAC",
+      "dims": {
+        "kind": "public-enterprise-compensation",
+        "scope": "companiidestat-pay-scale",
+        "statistic": "reference",
+        "measure": "presidentMonthlyRon"
+      },
+      "observations": [
+        {
+          "period": "2025-08",
+          "value": 30833.0
+        }
+      ],
+      "provenance": {
+        "source": "companiidestat-api-data-v1",
+        "locator": "pay_scale_rows",
+        "confidence": "derived",
+        "note": "Reference row carried by the source API."
+      }
+    },
+    {
+      "id": "companiidestat-pay-scale-fixed-top-to-average-gross",
+      "label": "Companii de stat: varful fix fata de salariul mediu brut",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "public-enterprise-compensation",
+        "scope": "companiidestat-pay-scale",
+        "statistic": "ratio",
+        "measure": "fixedTopToAverageGross"
+      },
+      "observations": [
+        {
+          "period": "2025-08",
+          "value": 9.28
+        }
+      ],
+      "provenance": {
+        "source": "companiidestat-api-data-v1",
+        "locator": "pay_scale_rows",
+        "confidence": "derived",
+        "note": "Derived from aggregate API pay-scale rows."
+      }
+    },
+    {
+      "id": "companiidestat-pay-scale-extreme-to-average-gross",
+      "label": "Companii de stat: varful cu bonus fata de salariul mediu brut",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "public-enterprise-compensation",
+        "scope": "companiidestat-pay-scale",
+        "statistic": "ratio",
+        "measure": "extremeToAverageGross"
+      },
+      "observations": [
+        {
+          "period": "2025-08",
+          "value": 27.83
+        }
+      ],
+      "provenance": {
+        "source": "companiidestat-api-data-v1",
+        "locator": "pay_scale_rows",
+        "confidence": "derived",
+        "note": "Derived from aggregate API pay-scale rows."
+      }
+    },
+    {
+      "id": "companiidestat-pay-scale-fixed-top-to-president",
+      "label": "Companii de stat: varful fix fata de indemnizatia presedintelui",
+      "geo": "RO",
+      "unit": "RATE",
+      "dims": {
+        "kind": "public-enterprise-compensation",
+        "scope": "companiidestat-pay-scale",
+        "statistic": "ratio",
+        "measure": "fixedTopToPresident"
+      },
+      "observations": [
+        {
+          "period": "2025-08",
+          "value": 2.78
+        }
+      ],
+      "provenance": {
+        "source": "companiidestat-api-data-v1",
+        "locator": "pay_scale_rows",
+        "confidence": "derived",
+        "note": "Derived from aggregate API pay-scale rows."
+      }
+    }
+  ],
+  "limitations": [
+    {
+      "id": "aggregate-only-no-nominal-rows",
+      "severity": "material",
+      "affects": [
+        "browser-payload",
+        "comparison"
+      ],
+      "text": "This document intentionally emits only aggregate pay-scale statistics. It omits CUI, authority, person and company-name lists from salarizare."
+    },
+    {
+      "id": "companiidestat-derived-source",
+      "severity": "note",
+      "affects": [
+        "provenance"
+      ],
+      "text": "The source is the documented companiidestat.ro API under CC BY 4.0 attribution, not a direct AMEPIP PDF import in this repository."
+    },
+    {
+      "id": "governance-context-not-salary-grid",
+      "severity": "material",
+      "affects": [
+        "comparison"
+      ],
+      "text": "The pay-scale rows describe public-enterprise governance compensation context. They are not salary-grid coefficients or public-sector payroll entitlements."
+    }
+  ]
+}
