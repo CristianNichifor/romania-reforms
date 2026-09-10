@@ -492,7 +492,7 @@ async function main() {
   );
   $('counties').innerHTML = `
     <label class="field" for="county">Județul</label>
-    <select id="county" class="civic-select">
+    <select id="county" class="civic-select civic-select--native">
       <option value="${ALL}">Toate județele (${manifest.counties.length})</option>
       ${named
         .map((c) => `<option value="${c}">${COUNTY_NAMES[c] ?? c.toUpperCase()}</option>`)

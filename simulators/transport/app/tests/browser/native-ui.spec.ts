@@ -40,6 +40,8 @@ for (const width of [320, 390, 1440]) test(`native controls and map at ${width}p
   await expect(page.locator('#levels tbody tr').first()).toBeVisible();
   await checkMap(page, info);
   const select = page.locator('#level');
+  await expect(select).toHaveClass(/civic-select--native/);
+  await expect(select).toHaveCSS('appearance', 'auto');
   expect(await select.evaluate(el => !!el.closest('.civic-field') && !!(el as HTMLSelectElement).labels?.length)).toBe(true);
   expect((await select.boundingBox())!.height).toBeGreaterThanOrEqual(44);
   await select.focus();

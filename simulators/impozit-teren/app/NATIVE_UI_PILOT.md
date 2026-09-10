@@ -1,8 +1,8 @@
 # Native Civic UI Pilot
 
-This app remains vanilla TypeScript and MapLibre. The pilot tests whether the
-published Civic UI v0.2.0 CSS can support a small native-HTML surface without
-introducing React or changing the simulator's identity.
+This app remains vanilla TypeScript and MapLibre. Its native controls consume
+the published Civic UI v0.3.0 CSS-only archive without introducing React or
+changing the simulator's identity.
 
 ## Scope
 
@@ -17,21 +17,25 @@ Sliders, rate entry, segmented scenario/sort controls, map, tooltips, calculatio
 datasets and URL codec are not migrated. The inspected app has no search field;
 the earlier portfolio inventory's search reference was not an implementation target.
 
-This is an **experimental consumer-owned HTML mapping**, not a supported vanilla
-component API promised by Civic UI. Native selects deliberately restore browser
-appearance instead of requiring React/Lucide chevrons. Evaluate this pilot before
-promoting a shared native contract or expanding to other simulators.
+The narrow native HTML contract supplies select appearance and padding through
+`native.css` and `civic-select--native`. The earlier equivalent local rules were
+removed; theme, font, color-scheme and layout overrides remain host-owned.
 
 ## Distribution
 
-`src/vendor/civic-ui/` contains only the published CSS and MIT license, copied
+`src/vendor/civic-ui/` contains only published CSS, native contract documentation and the MIT license, copied
 verbatim from the pinned public GitHub release. `provenance.json` records archive
 and individual-file SHA-256 hashes. There is no React, Radix or Lucide runtime
 dependency, no npm publication requirement and no browser CDN request.
 
 - `npm run check:civic-css`: verify local vendored bytes without network access.
 - `npm run update:civic-css`: download the pinned archive, verify its checksum,
-  and regenerate the allowlisted CSS/license files. Requires Node with fetch and tar.
+  and regenerate the eight allowlisted archive files. Requires Node with fetch and tar.
+
+The [v0.3.0 release](https://github.com/CristianNichifor/civic-ui/releases/tag/v0.3.0)
+is public. The unmodified vendored `NATIVE.md` retains its historical
+"Unreleased 0.3.0 preparation" wording from the release artifact; this does not
+describe the current release status. Published bytes are retained for verification.
 
 Do not manually edit vendored CSS. Make host overrides in `src/native-ui-pilot.css`.
 A version change requires reviewing the upstream markup contract, updating the
