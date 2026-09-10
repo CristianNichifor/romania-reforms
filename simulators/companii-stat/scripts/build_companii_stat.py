@@ -32,6 +32,7 @@ ROOT = Path(__file__).resolve().parents[1]
 COMPANIES = ROOT / "data" / "companii-2025.json"
 REGION_MAP = ROOT.parents[1] / "simulators" / "justitie" / "data" / "curti-apel-regiuni.json"
 OUT = ROOT / "data" / "companii-stat.json"
+REGISTRY_OUT = ROOT / "data" / "companii-registry.json"
 
 REGIONS = 8
 MICRO = 20
@@ -140,6 +141,36 @@ def regionalization(caen: str, companies: list[dict]) -> list[dict]:
             }
         )
     return out
+
+
+def registry_rows(source: dict) -> list[dict]:
+    """One row per company, with the fields the card lists need and the tier of this scenario.
+
+    The row fields are copied verbatim from the source; ``cluster`` and ``tier`` carry the
+    same policy table the main payload marks ``assumed``. The app filters and groups these
+    rows to show the companies behind the summary numbers (loss, subsidy, micro, regional).
+    """
+    rows = []
+    for company in source["companies"]:
+        caen = (company.get("caen") or "")[:4] or "????"
+        rows.append(
+            {
+                "cui": company["cui"],
+                "name": company["name"],
+                "caen": caen,
+                "cluster": CAEN_NAMES.get(caen, f"CAEN {caen}"),
+                "tier": TIERS.get(caen, "other"),
+                "county": company.get("county"),
+                "owner": company.get("owner"),
+                "employees": company.get("employees"),
+                "revenueRon": company.get("revenueRon"),
+                "netResultRon": company.get("netResultRon"),
+                "debtRon": company.get("debtRon"),
+                "subsidyRon": company.get("subsidyRon"),
+                "status": company.get("status"),
+            }
+        )
+    return rows
 
 
 def main() -> None:
@@ -334,6 +365,43 @@ def main() -> None:
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(payload, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     print(json.dumps(payload["summary"], ensure_ascii=False, indent=1))
+
+    rows = registry_rows(source)
+    registry = {
+        "$schema": "../schema/companii-registry.schema.json",
+        "id": "companii-registry",
+        "title": "Companiile statului, rând cu rând",
+        "publisher": "Cristian Nichifor",
+        "period": "2019-2024",
+        "provenance": {
+            "source": "companii-stat-finnefin",
+            "locator": "rândurile din data/companii-2025.json, cu clusterul și nivelul din "
+            "tabelul de niveluri al acestui simulator",
+            "confidence": "derived",
+            "note": "Câmpurile de rând sunt copiate din sursă; cluster și tier sunt aceeași "
+            "judecată de politică publică marcată assumed în payload-ul principal.",
+        },
+        "summary": {
+            "companies": len(rows),
+            "withCounty": sum(1 for row in rows if row["county"]),
+            "withOwner": sum(1 for row in rows if row["owner"]),
+            "withEmployees": sum(1 for row in rows if row["employees"] is not None),
+            "microUnder20": sum(
+                1 for row in rows if row["employees"] is not None and row["employees"] < MICRO
+            ),
+            "lossMaking": sum(
+                1 for row in rows
+                if row["netResultRon"] is not None and row["netResultRon"] < 0
+            ),
+            "subsidised": sum(1 for row in rows if row["subsidyRon"] is not None),
+            "regional": sum(1 for row in rows if row["tier"] == "regional"),
+        },
+        "companies": rows,
+    }
+    REGISTRY_OUT.write_text(
+        json.dumps(registry, ensure_ascii=False, indent=1) + "\n", encoding="utf-8"
+    )
+    print(f"-> {REGISTRY_OUT} ({len(rows)} rows)")
 
 
 if __name__ == "__main__":

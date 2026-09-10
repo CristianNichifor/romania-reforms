@@ -93,6 +93,86 @@ h1 {
   border-radius: 10px;
   padding: 1rem 1.1rem;
 }
+.stat[data-list] {
+  cursor: pointer;
+}
+.stat[data-list]:hover {
+  border-color: var(--accent);
+}
+.stat[data-list].on {
+  border-color: var(--accent);
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+[data-list="micro"] {
+  cursor: pointer;
+  border-bottom: 1px dotted var(--link);
+}
+[data-list="micro"]:hover,
+[data-list="micro"].on {
+  color: var(--link);
+}
+
+#stat-list {
+  margin-top: 1rem;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.9rem 1.1rem;
+}
+.stat-list-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  justify-content: space-between;
+}
+.stat-list-head h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+.stat-list-close {
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  width: 28px;
+  height: 28px;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.stat-list-close:hover {
+  color: var(--fg);
+  border-color: var(--accent);
+}
+#stat-list-note {
+  margin: 0.4rem 0 0.7rem;
+}
+.stat-list-body {
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(auto-fill, minmax(21rem, 1fr));
+  align-items: start;
+}
+.stat-group-head {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 0.2rem;
+  margin-bottom: 0.3rem;
+}
+.stat-row {
+  font-size: 0.88rem;
+  padding: 0.15rem 0;
+}
+.stat-row-name {
+  font-weight: 600;
+}
+.stat-row .muted {
+  font-size: 0.82rem;
+}
 .big {
   display: block;
   font-size: 1.5rem;
@@ -207,33 +287,104 @@ h2 {
   margin: 1.75rem 0 0.4rem;
 }
 
-.regions {
+.region-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.6rem 0 0.4rem;
+}
+button.region {
+  font: inherit;
+  font-size: 0.88rem;
+  padding: 0.3rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--fg);
+  cursor: pointer;
+}
+button.region.on {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+#flux {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
-  gap: 0.6rem;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 0.35rem 1.1rem;
+  align-items: start;
   margin-top: 0.6rem;
 }
-.region-card {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 0.7rem 0.85rem;
+.flux-head {
+  grid-column: 1;
+  grid-row: 1;
+  font-size: 1rem;
+  margin: 0 0 0.4rem;
 }
-.region-card.empty {
+.flux-head--right {
+  grid-column: 3;
+}
+.county-group {
+  grid-column: 1;
+  margin-bottom: 0.5rem;
+}
+.county-head {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   color: var(--muted);
-  border-style: dashed;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 0.2rem;
+  margin-bottom: 0.25rem;
 }
-.region-name {
-  font-weight: 600;
+.company {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.3rem 0.6rem;
+  margin: 0.2rem 0;
+  font-size: 0.88rem;
 }
-.region-count {
+.company .owner {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.arrow {
+  grid-column: 2;
   color: var(--accent);
   font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  padding-top: 1.35rem;
 }
-.region-counties {
+.operator {
+  grid-column: 3;
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  padding: 0.8rem 1rem;
+  background: var(--card);
+}
+.operator .name {
+  font-weight: 700;
+}
+.operator .big {
+  font-size: 1.6rem;
+}
+.operator .small {
   color: var(--muted);
-  font-size: 0.82rem;
-  margin-top: 0.3rem;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+@media (max-width: 900px) {
+  #flux {
+    display: block;
+  }
+  .arrow {
+    display: none;
+  }
+  .operator {
+    margin-top: 0.8rem;
+  }
 }
 
 #caveat-list {
@@ -309,29 +460,4 @@ h2 {
   .reasons {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-}
-
-.region-seat {
-  color: var(--accent);
-  font-size: 0.85rem;
-  margin-top: 0.2rem;
-}
-.region-count {
-  color: var(--muted);
-  font-size: 0.85rem;
-}
-.absorbed-list {
-  margin-top: 0.4rem;
-  font-size: 0.85rem;
-}
-.absorbed-list summary {
-  cursor: pointer;
-  color: var(--link);
-}
-.absorbed-names {
-  margin: 0.4rem 0 0;
-  padding-left: 1.1rem;
-  display: grid;
-  gap: 0.15rem;
-  color: var(--muted);
 }

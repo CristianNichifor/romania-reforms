@@ -1,12 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import {
   TIER_LABELS,
+  absorbedOffices,
   filtered,
+  groupOfficesByFamily,
+  officeList,
+  proposedDirections,
   reduction,
   regionsOf,
   sortBy,
   type Document,
   type Family,
+  type OfficeRegistryDocument,
+  type OfficeRow,
 } from './model';
 
 const family = (over: Partial<Family>): Family => ({
@@ -122,5 +128,110 @@ describe('sortBy', () => {
   it('sorts by the computed reduction', () => {
     const byReduction = sortBy(list, 'reduction', 'desc').map((f) => f.code);
     expect(byReduction).toEqual(['b', 'a']);
+  });
+});
+
+const office = (over: Partial<OfficeRow>): OfficeRow => ({
+  name: 'Birou',
+  type: 'TERITORIAL - SERVICIU PUBLIC DECONCENTRAT',
+  county: 'AB',
+  locality: '',
+  family: 'cas',
+  familyName: 'Casa de Asigurări de Sănătate',
+  tier: 'regional',
+  ...over,
+});
+
+const officeRegistry = (offices: OfficeRow[]): OfficeRegistryDocument => ({
+  title: '',
+  period: '',
+  summary: { offices: offices.length, withCounty: 0, matched: 0, regional: 0, municipal: 0, unmatched: 0 },
+  offices,
+});
+
+describe('officeList', () => {
+  const doc = officeRegistry([
+    office({ name: 'CAS AB', tier: 'regional' }),
+    office({ name: 'DGRFP', family: 'dgfp', familyName: 'DGRFP', tier: 'regional-de-facto' }),
+    office({ name: 'Primăria', family: null, familyName: null, tier: 'municipal' }),
+  ]);
+
+  it('keeps regional rows only when asked', () => {
+    expect(officeList(doc, 'regional').map((o) => o.name)).toEqual(['CAS AB']);
+  });
+
+  it('returns everything for all, municipal included', () => {
+    expect(officeList(doc, 'all')).toHaveLength(3);
+  });
+});
+
+describe('groupOfficesByFamily', () => {
+  it('groups by family name and buckets municipal rows', () => {
+    const groups = groupOfficesByFamily([
+      office({ name: 'A' }),
+      office({ name: 'B', family: 'dgfp', familyName: 'DGRFP' }),
+      office({ name: 'C' }),
+      office({ name: 'M', family: null, familyName: null, tier: 'municipal' }),
+    ]);
+    expect(groups.map((g) => [g.label, g.offices.length])).toEqual([
+      ['Casa de Asigurări de Sănătate', 2],
+      ['DGRFP', 1],
+      ['servicii municipale (excluse)', 1],
+    ]);
+  });
+});
+
+describe('proposedDirections', () => {
+  it('lists one directorate per regional family per region it reaches', () => {
+    const doc: Document = {
+      title: '',
+      period: '',
+      summary: { deconcentratedOfficesTotal: 0, matchedOffices: 0, regionalFamilies: 1, officesTodayInRegionalFamilies: 0, officesProposedOnEightRegions: 0, reductionPercent: 0, municipalExcluded: 0, unmatched: 0 },
+      limitations: [],
+      families: [
+        family({ tier: 'regional' }),
+        family({ code: 'dgfp', tier: 'regional-de-facto', regions: [{ region: 'Vest', seat: 'AR', seatPopulation: 1, counties: ['AR'] }] }),
+      ],
+    };
+    expect(proposedDirections(doc)).toEqual([
+      { family: 'Casa de Asigurări de Sănătate', region: 'Centru', seat: 'AB' },
+      { family: 'Casa de Asigurări de Sănătate', region: 'Vest', seat: 'AR' },
+    ]);
+  });
+});
+
+describe('absorbedOffices', () => {
+  const doc: Document = {
+    title: '',
+    period: '',
+    summary: { deconcentratedOfficesTotal: 0, matchedOffices: 0, regionalFamilies: 1, officesTodayInRegionalFamilies: 0, officesProposedOnEightRegions: 0, reductionPercent: 0, municipalExcluded: 0, unmatched: 0 },
+    limitations: [],
+    families: [
+      family({
+        tier: 'regional',
+        regions: [
+          { region: 'Centru', seat: 'AB', seatPopulation: 1, counties: ['AB', 'BV'] },
+          { region: 'Vest', seat: 'AR', seatPopulation: 1, counties: ['AR'] },
+        ],
+      }),
+    ],
+  };
+
+  it('keeps exactly one office per seat county, absorbs the rest', () => {
+    const rows = absorbedOffices(doc, officeRegistry([
+      office({ name: 'AB 1', county: 'AB' }),
+      office({ name: 'AB 2', county: 'AB' }),
+      office({ name: 'BV', county: 'BV' }),
+      office({ name: 'AR', county: 'AR' }),
+    ]));
+    expect(rows.map((o) => o.name).sort()).toEqual(['AB 2', 'BV']);
+  });
+
+  it('ignores offices outside the regional families', () => {
+    const rows = absorbedOffices(doc, officeRegistry([
+      office({ name: 'X', county: 'BV', family: 'dgfp', familyName: 'DGRFP', tier: 'regional-de-facto' }),
+      office({ name: 'BV', county: 'BV' }),
+    ]));
+    expect(rows.map((o) => o.name)).toEqual(['BV']);
   });
 });

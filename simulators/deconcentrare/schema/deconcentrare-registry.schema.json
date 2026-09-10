@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/deconcentrare-registry.schema.json",
+  "title": "Deconcentrated offices, row by row, with the family of the main payload",
+  "description": "One row per ANFP row with TipInstitutie 'TERITORIAL - SERVICIU PUBLIC DECONCENTRAT': name, type, county, locality and the family the main payload's prefix table assigns — or the municipal/unmatched marker where the row is reported but not merged.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "id", "title", "publisher", "period", "provenance", "summary", "offices"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "const": "deconcentrare-registry" },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "period": { "type": "string" },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["offices", "withCounty", "matched", "regional", "municipal", "unmatched"],
+      "properties": {
+        "offices": { "type": "integer", "minimum": 0 },
+        "withCounty": { "type": "integer", "minimum": 0 },
+        "matched": { "type": "integer", "minimum": 0 },
+        "regional": { "type": "integer", "minimum": 0 },
+        "municipal": { "type": "integer", "minimum": 0 },
+        "unmatched": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "offices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "type", "county", "locality", "family", "familyName", "tier"],
+        "properties": {
+          "name": { "type": "string" },
+          "type": { "type": "string" },
+          "county": { "type": ["string", "null"] },
+          "locality": { "type": "string" },
+          "family": { "type": ["string", "null"] },
+          "familyName": { "type": ["string", "null"] },
+          "tier": {
+            "enum": ["regional", "regional-de-facto", "special", "municipal", "unmatched"]
+          }
+        }
+      }
+    }
+  }
+}

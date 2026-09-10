@@ -31,22 +31,31 @@
       <p class="loading" role="status">Se încarcă registrul…</p>
 
       <section id="stats" class="stats" aria-label="Numerele principale" hidden>
-        <div class="stat">
+        <div class="stat" role="button" tabindex="0" data-list="all">
           <span class="big" id="stat-total">—</span>
           <span class="small">birouri deconcentrate în registrul ANFP 2025</span>
         </div>
-        <div class="stat">
+        <div class="stat" role="button" tabindex="0" data-list="regional">
           <span class="big" id="stat-merge">—</span>
           <span class="small">în cele <span id="stat-families">—</span> familii regionalizabile</span>
         </div>
-        <div class="stat">
+        <div class="stat" role="button" tabindex="0" data-list="directions">
           <span class="big" id="stat-after">—</span>
           <span class="small">direcții pe opt regiuni, după comasare</span>
         </div>
-        <div class="stat">
+        <div class="stat" role="button" tabindex="0" data-list="absorbed">
           <span class="big" id="stat-cut">—</span>
           <span class="small">mai puține birouri</span>
         </div>
+      </section>
+
+      <section id="stat-list" aria-label="Lista din spatele numărului" hidden>
+        <div class="stat-list-head">
+          <h2 id="stat-list-title">—</h2>
+          <button id="stat-list-close" class="stat-list-close" aria-label="Închide lista">×</button>
+        </div>
+        <p class="hint" id="stat-list-note" hidden></p>
+        <div id="stat-list-body" class="stat-list-body"></div>
       </section>
 
       <p class="hint" id="stats-note" hidden>
@@ -88,9 +97,10 @@
       <section id="argument" aria-label="Raționamentul" hidden>
         <h2>Cum se alege ce se comasează</h2>
         <p>
-          Regula este într-un singur paragraf: <strong>o familie replicată în județe, care nu
-          este serviciu de urgență, primește o singură direcție pe fiecare regiune de
-          dezvoltare.</strong> Tot restul nu se atinge:
+          Regula este într-un singur paragraf: <strong>o familie replicată în județe primește
+          o singură direcție pe fiecare regiune de dezvoltare.</strong> Urgențele nu sunt în
+          acest registru (ANFP), dar regula li se aplică la fel: comanda poate fi regională,
+          punctele de lucru rămân pe loc. Tot restul nu se atinge:
         </p>
         <ul class="reasons">
           <li><strong>Regionalizabile</strong> — familiile replicate în județe, al căror teritoriu
@@ -125,16 +135,51 @@
           <li><strong>Lituania</strong> (2010): cele 10 județe administrative desființate.</li>
         </ul>
 
-        <h2>Ce rămâne pe județ</h2>
+        <h2>Comanda urcă la regiune, prezența rămâne locală</h2>
+        <p>
+          Regionalizarea nu șterge județul: îl taie în două niveluri. Conducerea și aparatul
+          — director, buget, achiziții, IT, arhivă — urcă la cele opt regiuni. Prezența
+          fizică rămâne acolo unde acoperirea o cere, ca punct de lucru cu un șef de punct,
+          nu un director cu aparat propriu.
+        </p>
+        <div class="two-layer" role="img" aria-label="Două niveluri: astăzi câte un aparat de conducere în fiecare județ; după comasare, opt conduceri regionale, fiecare cu puncte de lucru locale în județele ei">
+          <div class="layer">
+            <div class="layer-title">Astăzi — un aparat de conducere în fiecare județ</div>
+            <div class="layer-body" aria-hidden="true">
+              <span class="layer-count">42 ×</span>
+              <span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span><span class="apparatus"></span>
+            </div>
+          </div>
+          <div class="layer">
+            <div class="layer-title">După — opt conduceri regionale, cu puncte de lucru în județele lor</div>
+            <div class="layer-body" aria-hidden="true">
+              <div class="region-col"><span class="region-head"></span><span class="points"><i class="point"></i><i class="point"></i></span><span class="region-tag">B-IF</span></div>
+              <div class="region-col"><span class="region-head"></span><span class="points"><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i></span><span class="region-tag">Centru</span></div>
+              <div class="region-col"><span class="region-head"></span><span class="points"><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i></span><span class="region-tag">Nord-Est</span></div>
+              <div class="region-col"><span class="region-head"></span><span class="points"><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i></span><span class="region-tag">Nord-Vest</span></div>
+              <div class="region-col"><span class="region-head"></span><span class="points"><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i></span><span class="region-tag">Sud</span></div>
+              <div class="region-col"><span class="region-head"></span><span class="points"><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i></span><span class="region-tag">Sud-Est</span></div>
+              <div class="region-col"><span class="region-head"></span><span class="points"><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i></span><span class="region-tag">Sud-Vest</span></div>
+              <div class="region-col"><span class="region-head"></span><span class="points"><i class="point"></i><i class="point"></i><i class="point"></i><i class="point"></i></span><span class="region-tag">Vest</span></div>
+            </div>
+          </div>
+          <div class="layer-legend">
+            <span><span class="apparatus"></span> aparat de conducere</span>
+            <span><span class="point"></span> punct de lucru local — șef de punct, nu director</span>
+          </div>
+        </div>
         <ul class="reasons">
-          <li><strong>Urgențele</strong> — ISU, ambulanța, poliția, jandarmeria: timpul de răspuns
-          nu se negociază.</li>
-          <li><strong>Justiția</strong> — instanțele și parchetele: independența lor este un alt
-          motiv; comasarea lor este propunerea reformei judiciare, nu a acestei pagini.</li>
-          <li><strong>Instituția prefectului</strong> — reprezentantul guvernului rămâne, dar poate
-          împărți servicii cu birourile deconcentrate din același județ.</li>
-          <li><strong>DGASPC</strong> — protecția copilului este datorie locală, nu serviciu de
-          masă.</li>
+          <li><strong>Toată administrația poate fi regională</strong> — inclusiv DGASPC
+          (protecția copilului), ISU, ambulanța și poliția: o singură conducere, un buget,
+          un IT pe regiune, în loc de câte unul pe județ.</li>
+          <li><strong>Punctele de lucru rămân locale</strong> — stații de ambulanță, secții
+          de poliție, birouri de asistență socială: timpul de răspuns ține de prezență, iar
+          prezența se păstrează.</li>
+          <li><strong>Justiția are reforma ei</strong> — instanțele și parchetele nu intră
+          în această pagină: comasarea lor este propunerea
+          <a href="../justitie/">simulatorului de justiție</a>.</li>
+          <li><strong>Prefectul rămâne</strong> — reprezentantul guvernului în teritoriu poate
+          împărți servicii administrative cu punctele de lucru din același județ.</li>
         </ul>
 
         <h2>Și ministerele: 18 → 13</h2>
@@ -171,8 +216,9 @@
           <li><strong>Un singur capăt pe familie pe regiune</strong>: un director, un buget, un
           IT, un contract de achiziție — adică exact costurile fixe plătite azi de 41 de ori.</li>
           <li><strong>Punctele de lucru județene pot rămâne.</strong> Comasarea taie structurile
-          de comandă și costurile fixe, nu prezența locală. Niciun număr de aici nu spune câți
-          oameni ar pleca — și nu poate: registrul nu are efective.</li>
+          de comandă și costurile fixe, nu prezența locală: un punct de lucru are un șef de
+          punct, nu un director cu aparat. Niciun număr de aici nu spune câți oameni ar pleca —
+          și nu poate: registrul nu are efective.</li>
           <li><strong>Ordinea contează</strong>: întâi înghețul entităților noi și serviciile
           partajate (Slovacia a făcut-o fără să atingă vreo graniță), apoi legea de
           regionalizare.</li>
