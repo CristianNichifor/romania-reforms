@@ -46,6 +46,26 @@ body {
   backdrop-filter: blur(6px);
 }
 
+/* Keep the map and controls simultaneously available on narrow screens. */
+@media (max-width: 46rem) {
+  #map {
+    bottom: auto;
+    height: 48vh;
+    height: 48dvh;
+  }
+
+  #panel {
+    top: 48vh;
+    top: 48dvh;
+    width: 100%;
+    border-right: 0;
+    border-top: 1px solid var(--line);
+    background: var(--panel);
+    backdrop-filter: none;
+    overscroll-behavior-y: contain;
+  }
+}
+
 h1 {
   font-size: 1.1rem;
   margin: 0 0 0.3rem;

@@ -1,8 +1,8 @@
 # Justice Browser Baselines
 
 These checks exercise the built, separate statistics and MapLibre entry points.
-They do not migrate controls, change datasets or refactor the judicial or
-administrative models. The fixture inputs are committed public aggregates and
+They protect native control adoption and mobile map framing without changing
+datasets or refactoring the judicial or administrative models. The fixture inputs are committed public aggregates and
 court/boundary data. A single synthetic national case total distinguishes the
 authoritative national document from an accidental sum of court records. No case
 records, identities, credentials, private services or external map tiles are used.
@@ -43,26 +43,35 @@ per-test timeout and a 15-minute CI job budget. Evidence goes to
   views compared over reload/offline round trips. These are runtime comparisons,
   not a frozen snapshot that blesses changed public datasets automatically.
 - Statistics keyboard selection and labels, chart text invariance, screenshots
-  and page overflow at 320/390/1440px in both system color modes.
+  and page overflow at 320/390/1440px in both system color modes, plus scoped axe
+  checks for adopted fields, buttons and notices.
 - Real WebGL pixels, map mode controls, zoom/pan, staffing/ceiling changes, lazy
   commune outlines, missing optional roads and native reader focus/close behavior.
-- Map screenshots and exposed-canvas pixel probes at 320/390px; map remains dark
+- Map screenshots and exposed-canvas pixel probes at 320x700 and 390x844; map remains dark
   as designed, independent of statistics system theme.
 - External HTTP(S) requests blocked and reported; browser page errors fail tests.
   Local uncached resources are allowed until explicitly switching offline.
 
 ## Known Boundaries
 
-The inherited fixed sidebar covers approximately 92% of a 320px mobile viewport.
-The mobile checks prove controls fit and the narrow exposed map is not blank;
-they do **not** prove useful mobile map framing. A dedicated responsive map/panel
-design is still needed before claiming mobile map usability.
+On narrow screens the map occupies 48% of the dynamic viewport above a separate
+scrolling control panel. Tests require full map width, nonoverlapping map/panel
+bounds, at least 40% viewport height for each, stable map position during panel
+scrolling, actual mobile zoom/pan and nonblank pixels. The initial camera fits
+the public court bounds; desktop camera and controls retain their previous layout.
 
 This baseline does not certify accessibility, screen readers, real devices or
 all chart contrast. It does not cover every court/commune hover detail, successful
 optional roads geometry, every manual administrative pin, or cold offline reload
 with missing lazy resources. The reader's native containment, Escape and explicit
 close are tested; all disclosure contents are not individually audited.
+
+Set `JUSTICE_BASELINE` to a previous browser evidence directory to compare every
+recorded statistics snapshot against pre-adoption content, chart values and hash.
+Only whitespace between existing text nodes is normalized. Each expected snapshot
+must exist; missing baseline files fail rather than silently reducing coverage.
+
+Native CSS provenance and host mapping are described in [NATIVE_UI.md](NATIVE_UI.md).
 
 The current Vite/esbuild advisories and MapLibre bundle-size warning predate these
 tests. Build-tool upgrades remain separate from the baseline changes.

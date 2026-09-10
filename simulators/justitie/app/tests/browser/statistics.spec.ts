@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
 import { pool, type CourtsFile } from '../../src/aggregate';
 import { localOnly, publicData, scopeFacts, recordStatistics, formatCount } from './helpers';
 import { expectedProposal } from './proposal-fixture';
@@ -161,8 +162,20 @@ test('statistics keyboard, chart values and responsive light/dark layouts', asyn
         const box = (await control.boundingBox())!;
         expect(box.x).toBeGreaterThanOrEqual(0);
         expect(box.x + box.width).toBeLessThanOrEqual(width + 1);
+        expect(box.height).toBeGreaterThanOrEqual(44);
         if (id !== 'load-proposal') expect(await control.evaluate(node => (node as HTMLSelectElement).labels?.length)).toBeGreaterThan(0);
       }
+      await expect(page.locator('#scope')).toHaveCSS('appearance', 'auto');
+      await expect(page.locator('#scope')).toHaveCSS('padding-right', '12px');
+      await expect(page.locator('#scope')).toHaveClass(/civic-select--native/);
+      await expect(page.locator('#scope').locator('..')).toHaveClass('civic-field');
+      await expect(page.locator('#cohort-note')).toHaveClass(/civic-notice/);
+      await page.locator('#scope').focus();
+      await page.keyboard.press('Tab');
+      await expect(page.locator('#tier')).toHaveCSS('outline-width', '3px');
+      const accessibility = await new AxeBuilder({ page }).include('#filtre').include('.civic-notice')
+        .withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
+      expect(accessibility.violations.map(({ id, nodes }) => ({ id, targets: nodes.map(node => node.target) }))).toEqual([]);
       await page.screenshot({ path: info.outputPath(`statistics-${colorScheme}-${width}.png`), fullPage: true });
       await page.screenshot({ path: info.outputPath(`statistics-top-${colorScheme}-${width}.png`) });
       // Layout may change percentage widths; the chart labels, values and caveats must not.

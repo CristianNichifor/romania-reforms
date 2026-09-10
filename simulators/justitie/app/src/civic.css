@@ -1,0 +1,22 @@
+@import './vendor/civic-ui/native.css';
+
+.civic-justice {
+  --civic-bg: var(--surface-0);
+  --civic-surface: var(--surface-1);
+  --civic-raised: var(--surface-2);
+  --civic-text: var(--ink);
+  --civic-muted: var(--ink-dim);
+  --civic-border: var(--ink-faint);
+  --civic-action: var(--accent);
+  --civic-action-hover: color-mix(in srgb, var(--accent) 85%, var(--ink));
+  --civic-on-action: var(--accent-ink);
+  --civic-focus: var(--focus);
+  --civic-accent: var(--accent);
+  --civic-danger: var(--danger);
+  --civic-radius: var(--radius-md);
+}
+
+/* These notices are prose paragraphs, not icon/body flex rows. */
+.civic-justice .civic-notice {
+  display: block;
+}
