@@ -5,10 +5,10 @@ simulator-local code and into a shared data layer.
 
 ## Current status
 
-The first shared-data wave is complete. The shared registry, local-finance mart and health
-access mart are adopted by their current consumers, release-asset-backed where the payloads
-are too large for git, and covered by validation/tests that fail on unknown join keys or
-schema drift.
+The first shared-data wave is complete. The shared registry, local-finance mart, health
+access mart and public-enterprise aggregate payloads are adopted by their current consumers,
+release-asset-backed where the payloads are too large for git, and covered by validation/tests
+that fail on unknown join keys or schema drift.
 
 Remaining work is maintenance, not an active build queue:
 
@@ -17,14 +17,14 @@ Remaining work is maintenance, not an active build queue:
   when a consuming simulator needs the extra fiscal dimension.
 - Health access: pause point expansion; the remaining 72 no-point rows are a maintenance
   backlog and should stay named exclusions until explicit source evidence exists.
+- Public enterprises: keep the current `administrativ` footprint and `salarizare` pay-scale
+  comparison on attributed companiidestat.ro API data; add deeper AMEPIP/MFin, procurement or
+  local-finance fields only for a concrete consuming question.
 
 New source families should start as separate reconnaissance PRs and are not blockers for
-closing this wave. AMEPIP/public-company data now has the two app-facing pieces this project
-needed: `administrativ` consumes a public-enterprise footprint sidecar and `salarizare`
-consumes an aggregate pay-scale comparison. Both use attributed, machine-readable
-companiidestat.ro API data and avoid company/person rows in browser payloads.
+closing this wave.
 
-## Planned: AMEPIP public enterprises
+## Adopted: AMEPIP public enterprises
 
 AMEPIP data could connect public-enterprise performance, board/director compensation,
 ownership and fiscal-risk context across pay, procurement and local-finance work. The source
@@ -40,8 +40,8 @@ First slice:
   `packages/public_enterprise_governance/data/amepip-source-inventory-2025-2026.json`;
 - done: record file type, URLs, SHA-256 hashes, page counts, row estimates, identifiers and
   reuse limitations;
-- done: move the dataset from `candidate` to `planned` because six inspected PDFs expose
-  CUI-level row data;
+- done: promote the dataset beyond `candidate` because six inspected PDFs expose CUI-level
+  row data;
 - done: build `amepip-compensation-sample-august-2025`, a compact 50-row sample generated
   from all 833 parsed August 2025 nominal compensation rows, preserving CUI, APT, enterprise,
   person, role, raw amount strings and fixed/variable compensation fields;

@@ -1,4 +1,4 @@
-# AMEPIP public enterprise data reconnaissance
+# AMEPIP public enterprise data
 
 AMEPIP is a useful shared-data family, but app-facing payloads should use documented,
 machine-readable data with clear attribution rather than opaque dashboard internals. The current
@@ -80,7 +80,7 @@ This source family could serve more than one simulator:
 1. Done: inventory downloadable report/annex files from the KPI and indemnity pages.
 2. Done: record file type, source URLs, SHA-256 hashes, row estimates, available identifiers
    and visible license/reuse limitations.
-3. Done: decide that CUI-level PDFs justify moving the dataset to `planned`.
+3. Done: decide that CUI-level PDFs justify promoting the dataset beyond `candidate`.
 4. Done: build a small parser for the August 2025 nominal compensation PDF source. The
    committed sample keeps 50 rows and summary metrics over all 833 parsed source rows.
 5. Done: define the full mart schema, release-asset policy and `salarizare` consumer contract.
