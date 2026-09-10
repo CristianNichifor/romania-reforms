@@ -127,7 +127,12 @@ def regionalization(caen: str, companies: list[dict]) -> list[dict]:
                 "absorbedCount": len(absorbed),
                 "absorbed": sorted(
                     (
-                        {"cui": c["cui"], "name": c["name"], "county": c.get("county")}
+                        {
+                            "cui": c["cui"],
+                            "name": c["name"],
+                            "county": c.get("county"),
+                            "owner": c.get("owner"),
+                        }
                         for c in absorbed
                     ),
                     key=lambda c: c["name"],
@@ -155,6 +160,10 @@ def main() -> None:
                 "revenueRon": 0,
                 "lossCount": 0,
                 "debtRon": 0,
+                "distinctOwners": 0,
+                "subsidisedCount": 0,
+                "subsidyRon": 0,
+                "_owners": set(),
             },
         )
         cluster["companies"] += 1
@@ -173,12 +182,20 @@ def main() -> None:
         debt = company.get("debtRon")
         if debt is not None:
             cluster["debtRon"] += debt
+        owner = company.get("owner")
+        if owner:
+            cluster["_owners"].add(owner)
+        subsidy = company.get("subsidyRon")
+        if subsidy is not None:
+            cluster["subsidyRon"] += subsidy
+            cluster["subsidisedCount"] += 1
 
     out = []
     companies_by_caen: dict[str, list[dict]] = collections.defaultdict(list)
     for company in source["companies"]:
         companies_by_caen[(company.get("caen") or "")[:4] or "????"].append(company)
     for cluster in clusters.values():
+        cluster["distinctOwners"] = len(cluster.pop("_owners"))
         tier = TIERS.get(cluster["caen"], "other")
         cluster["tier"] = tier
         cluster["proposed"] = REGIONS if tier == "regional" else cluster["companies"]
@@ -246,9 +263,27 @@ def main() -> None:
             "headcountKnown": sum(c["headcountKnown"] for c in out),
             "revenueRon": sum(c["revenueRon"] for c in out),
             "lossMaking": sum(c["lossCount"] for c in out),
+            "subsidisedCount": sum(c["subsidisedCount"] for c in out),
+            "subsidyRon": sum(c["subsidyRon"] for c in out),
             "inFlightMergers": len(in_flight),
         },
         "limitations": [
+            {
+                "id": "owner-partial",
+                "text": "Proprietarul vine din lista AMEPIP Anexa 3 și lipsește pentru unele "
+                "companii; acestea rămân fără proprietar, iar numărul de proprietari distincți "
+                "este o limită inferioară.",
+                "severity": "material",
+                "affects": ["clusters", "regions"],
+            },
+            {
+                "id": "subsidy-scope",
+                "text": "Subvenția este cea raportată per firmă în Anexele SFA 2025. Lista "
+                "acoperă operatorii raportați; o companie poate primi subvenții care nu apar "
+                "aici, deci totalurile sunt limite inferioare.",
+                "severity": "material",
+                "affects": ["clusters", "summary"],
+            },
             {
                 "id": "financials-partial",
                 "text": "Cifrele financiare vin din bilanțurile MFin 2025 și acoperă o parte "

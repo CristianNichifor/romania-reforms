@@ -41,7 +41,7 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["caen", "name", "companies", "employees", "headcountKnown", "micro", "revenueRon", "lossCount", "debtRon", "tier", "proposed"],
+        "required": ["caen", "name", "companies", "employees", "headcountKnown", "micro", "revenueRon", "lossCount", "debtRon", "distinctOwners", "subsidisedCount", "subsidyRon", "tier", "proposed"],
         "properties": {
           "caen": { "type": "string" },
           "name": { "type": "string" },
@@ -52,6 +52,9 @@
           "revenueRon": { "type": "number", "minimum": 0 },
           "lossCount": { "type": "integer", "minimum": 0 },
           "debtRon": { "type": "number", "minimum": 0 },
+          "distinctOwners": { "type": "integer", "minimum": 0 },
+          "subsidisedCount": { "type": "integer", "minimum": 0 },
+          "subsidyRon": { "type": "number", "minimum": 0 },
           "tier": { "enum": ["regional", "local", "national", "other"] },
           "proposed": { "type": "integer", "minimum": 0 },
           "regions": {
@@ -79,11 +82,12 @@
                   "items": {
                     "type": "object",
                     "additionalProperties": false,
-                    "required": ["cui", "name", "county"],
+                    "required": ["cui", "name", "county", "owner"],
                     "properties": {
                       "cui": { "type": "integer" },
                       "name": { "type": "string" },
-                      "county": { "type": ["string", "null"] }
+                      "county": { "type": ["string", "null"] },
+                      "owner": { "type": ["string", "null"] }
                     }
                   }
                 }
@@ -107,6 +111,8 @@
         "headcountKnown",
         "revenueRon",
         "lossMaking",
+        "subsidisedCount",
+        "subsidyRon",
         "inFlightMergers"
       ],
       "properties": {
@@ -120,6 +126,8 @@
         "headcountKnown": { "type": "integer", "minimum": 0 },
         "revenueRon": { "type": "number", "minimum": 0 },
         "lossMaking": { "type": "integer", "minimum": 0 },
+        "subsidisedCount": { "type": "integer", "minimum": 0 },
+        "subsidyRon": { "type": "number", "minimum": 0 },
         "inFlightMergers": { "type": "integer", "minimum": 0 }
       }
     },

@@ -28,6 +28,8 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "sources" / "companii-stat-finnefin.xlsx"
 SEARCH = ROOT / "sources" / "companii-search-2026-09-10.json"
 BILANTURI = ROOT / "sources" / "mfin-bilanturi-2025.json"
+OWNERS = ROOT / "sources" / "anexa3-owner-extract.json"
+SUBVENTII = ROOT / "sources" / "subventii-locale-data.json"
 REGISTRY = ROOT.parents[1] / "packages" / "uat_registry" / "data" / "uat-registry-2026.json"
 OUT = ROOT / "data" / "companii-2025.json"
 
@@ -37,6 +39,8 @@ HEADCOUNT = "Număr de angajați cu echivalent normă întreagă"
 
 SEARCH_URL = "https://companiidestat.ro/date/v1/companii_search.json"
 BILANTURI_URL = "https://companiidestat.ro/date/v1/mfin_bilanturi_2025.json"
+OWNERS_URL = "https://companiidestat.ro/date/v1/anexa3_summary.json"
+SUBVENTII_URL = "https://companiidestat.ro/date/v1/subventii-locale-data.json"
 
 # Company ids whose reported headcount is a data-entry error, checked against the workbook
 # itself. A generic threshold would quietly discard a genuinely large operator, so the guard
@@ -104,6 +108,28 @@ def load_county_search() -> dict[str, dict]:
     )
 
 
+def load_owners() -> dict[str, dict]:
+    """CUI -> owning authority (apt, tip_apt), extracted from the AMEPIP anexa3 list.
+
+    The full anexa3 download is 8 MB; the committed extract keeps only identity and owner,
+    and carries the original file's SHA-256 so the extraction can be checked.
+    """
+    if not OWNERS.exists():
+        raise SystemExit(f"missing source {OWNERS}")
+    payload = json.loads(OWNERS.read_text(encoding="utf-8"))
+    return payload["companies"]
+
+
+def load_subventii() -> dict[str, float]:
+    """CUI -> reported subsidy (RON, 2025) from the committed subventii snapshot."""
+    if not SUBVENTII.exists():
+        raise SystemExit(f"missing source {SUBVENTII}")
+    payload = json.loads(SUBVENTII.read_text(encoding="utf-8"))
+    return {
+        str(row["cui"]): float(row.get("subv") or 0) for row in payload.get("operators_2025", [])
+    }
+
+
 def load_bilanturi() -> dict[str, dict]:
     """CUI -> MFin financial statements, from the committed bilanturi snapshot.
 
@@ -126,6 +152,8 @@ def main() -> None:
     county_by_name = load_county_by_name()
     search = load_county_search()
     bilanturi = load_bilanturi()
+    owners = load_owners()
+    subventii = load_subventii()
 
     headcount: dict[int, dict[int, float]] = collections.defaultdict(dict)
     for row in nonfinancial:
@@ -168,6 +196,7 @@ def main() -> None:
             company["debtRon"] = mfin.get("datorii")
 
     unmatched_counties: list[dict] = []
+    unmatched_owners: list[dict] = []
     for company in companies.values():
         match = search.get(str(company["cui"]))
         name = match.get("judet_nume") if match else None
@@ -179,6 +208,15 @@ def main() -> None:
         if county:
             company["county"] = county
             company["countySource"] = "companiidestat"
+        owner = owners.get(str(company["cui"]))
+        if owner:
+            company["owner"] = owner.get("apt")
+            company["ownerType"] = owner.get("tip_apt")
+        else:
+            unmatched_owners.append({"cui": company["cui"], "name": company["name"]})
+        subsidy = subventii.get(str(company["cui"]))
+        if subsidy is not None:
+            company["subsidyRon"] = subsidy
 
     rows = sorted(companies.values(), key=lambda c: c["name"])
     by_status = collections.Counter(c["status"] for c in rows)
@@ -220,6 +258,26 @@ def main() -> None:
             "formularului; unde nu are rând, compania rămâne fără cifre financiare.",
             "snapshotChecksum": {"sha256": sha256(BILANTURI), "file": BILANTURI.name},
         },
+        "ownerSource": {
+            "source": "amepip-anexa3",
+            "url": OWNERS_URL,
+            "license": "CC BY 4.0",
+            "confidence": "verbatim",
+            "note": "Proprietarul (apt) vine din lista AMEPIP Anexa 3, păstrată ca extras compact; "
+            "amprenta fișierului original este în extras. Companiile fără rând sunt listate în "
+            "dataQuality, nu ghicite.",
+            "snapshotChecksum": {"sha256": sha256(OWNERS), "file": OWNERS.name},
+        },
+        "subsidySource": {
+            "source": "subventii-locale-2025",
+            "url": SUBVENTII_URL,
+            "license": "CC BY 4.0",
+            "confidence": "derived",
+            "note": "Subvenția vine din raportarea per firmă 2025 (Anexe SFA 2025, col. Subvenții "
+            "și transferuri). Lista acoperă operatorii raportați, nu orice subvenție posibilă; "
+            "absența unui rând nu înseamnă că o companie nu primește subvenții.",
+            "snapshotChecksum": {"sha256": sha256(SUBVENTII), "file": SUBVENTII.name},
+        },
         "sourceChecksum": {"sha256": sha256(SOURCE), "file": SOURCE.name},
         "dataQuality": {
             "headcountExcluded": [
@@ -227,6 +285,7 @@ def main() -> None:
                 for company_id, entry in sorted(HEADCOUNT_OUTLIERS.items())
             ],
             "unmatchedCounties": sorted(unmatched_counties, key=lambda c: c["name"]),
+            "unmatchedOwners": sorted(unmatched_owners, key=lambda c: c["name"]),
         },
         "summary": {
             "companies": len(rows),

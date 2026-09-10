@@ -19,6 +19,9 @@ const cluster = (over: Partial<Cluster>): Cluster => ({
   revenueRon: 0,
   lossCount: 0,
   debtRon: 0,
+  distinctOwners: 0,
+  subsidisedCount: 0,
+  subsidyRon: 0,
   proposed: 8,
   ...over,
 });
@@ -60,6 +63,8 @@ describe('filtered', () => {
       headcountKnown: 0,
       revenueRon: 0,
       lossMaking: 0,
+      subsidisedCount: 0,
+      subsidyRon: 0,
       inFlightMergers: 0,
     },
     limitations: [],
