@@ -5,7 +5,7 @@
   "description": "One row per state company: identity, registration, CAEN activity, status, and the latest reported full-time-equivalent headcount. Financial ratios are dropped at import.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "title", "publisher", "period", "provenance", "countySource", "sourceChecksum", "dataQuality", "summary", "companies"],
+  "required": ["id", "title", "publisher", "period", "provenance", "countySource", "financialsSource", "sourceChecksum", "dataQuality", "summary", "companies"],
   "properties": {
     "$schema": { "type": "string" },
     "id": { "const": "companii-stat-2025" },
@@ -14,6 +14,27 @@
     "period": { "type": "string" },
     "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
     "countySource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "url", "license", "confidence", "note", "snapshotChecksum"],
+      "properties": {
+        "source": { "type": "string" },
+        "url": { "type": "string" },
+        "license": { "type": "string" },
+        "confidence": { "type": "string" },
+        "note": { "type": "string" },
+        "snapshotChecksum": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["sha256", "file"],
+          "properties": {
+            "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+            "file": { "type": "string" }
+          }
+        }
+      }
+    },
+    "financialsSource": {
       "type": "object",
       "additionalProperties": false,
       "required": ["source", "url", "license", "confidence", "note", "snapshotChecksum"],
@@ -104,8 +125,12 @@
           "status": { "type": "string" },
           "employees": { "type": "number" },
           "employeesYear": { "type": "integer" },
+          "employeesSource": { "type": "string" },
           "county": { "type": "string" },
-          "countySource": { "type": "string" }
+          "countySource": { "type": "string" },
+          "revenueRon": { "type": ["number", "null"] },
+          "netResultRon": { "type": ["number", "null"] },
+          "debtRon": { "type": ["number", "null"] }
         }
       }
     }

@@ -25,6 +25,9 @@ export interface Cluster {
   employees: number;
   headcountKnown: number;
   micro: number;
+  revenueRon: number;
+  lossCount: number;
+  debtRon: number;
   proposed: number;
   regions?: RegionOperator[];
 }
@@ -45,6 +48,8 @@ export interface Summary {
   reductionPercent: number;
   microUnder20: number;
   headcountKnown: number;
+  revenueRon: number;
+  lossMaking: number;
   inFlightMergers: number;
 }
 
@@ -86,12 +91,12 @@ export function filtered(doc: Document, tiers: Set<Tier>): Cluster[] {
 
 export function sortBy(
   clusters: Cluster[],
-  key: 'name' | 'companies' | 'employees' | 'reduction',
+  key: 'name' | 'companies' | 'employees' | 'revenue' | 'reduction',
   direction: 'asc' | 'desc',
 ): Cluster[] {
   const order = direction === 'asc' ? 1 : -1;
   const value = (c: Cluster): string | number =>
-    key === 'reduction' ? reduction(c) : key === 'name' ? c.name : c[key];
+    key === 'reduction' ? reduction(c) : key === 'name' ? c.name : key === 'revenue' ? c.revenueRon : c[key];
   return [...clusters].sort((a, b) => {
     const av = value(a);
     const bv = value(b);

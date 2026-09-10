@@ -50,12 +50,14 @@ electricity, weapons and airports must not be swept into regions.
 1 247 companies across 146 CAEN clusters
   659 of them in the 7 regional clusters        -> 56 regional operators (-91,5%)
   255 micro companies (under 20 employees)      -> candidates regardless of the rule
-  698 report a usable headcount                 -> all employee sums are lower bounds
+  1 107 carry a headcount                        -> MFin first, workbook as fallback
+  287 of those with financials are loss-making   -> absorb these first
 ```
 
-One reported headcount is excluded as an entry error and named in `dataQuality`:
+One workbook headcount is excluded as an entry error and named in `dataQuality`:
 *Utilități și Servicii Publice Murighiol SRL* — no headcount in 2019–2022, then 10 776 in 2023,
-in a commune of about 3 000 inhabitants.
+in a commune of about 3 000 inhabitants. The MFin statement for the same company reads 14, and
+that official figure stands.
 
 `sum(cluster.companies) == summary.companies` and the reduction recomputation are tests.
 

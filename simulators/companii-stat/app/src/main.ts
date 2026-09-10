@@ -19,7 +19,7 @@ const $ = <T extends HTMLElement>(selector: string): T => {
 
 let doc: Document;
 let selectedTiers = new Set<Tier>(['regional', 'local', 'national', 'other']);
-let sortKey: 'name' | 'companies' | 'employees' | 'reduction' = 'companies';
+let sortKey: 'name' | 'companies' | 'employees' | 'revenue' | 'reduction' = 'companies';
 let sortDirection: 'asc' | 'desc' = 'desc';
 
 function setText(id: string, value: string): void {
@@ -34,7 +34,7 @@ function renderStats(): void {
   setText('stat-after', s.operatorsProposedOnEightRegions.toLocaleString('ro-RO'));
   setText('stat-cut', `−${s.reductionPercent.toLocaleString('ro-RO')}%`);
   setText('stat-micro', s.microUnder20.toLocaleString('ro-RO'));
-  setText('stat-headcount', s.headcountKnown.toLocaleString('ro-RO'));
+  setText('stat-loss', s.lossMaking.toLocaleString('ro-RO'));
   $('#stats').hidden = false;
   $('#stats-note').hidden = false;
 }
@@ -65,6 +65,8 @@ function buildRows(): void {
       <td class="num">${cluster.proposed.toLocaleString('ro-RO')}</td>
       <td class="num">−${reduction(cluster).toLocaleString('ro-RO')}%</td>
       <td class="num">${cluster.employees.toLocaleString('ro-RO')}</td>
+      <td class="num">${cluster.revenueRon.toLocaleString('ro-RO')}</td>
+      <td class="num">${cluster.lossCount.toLocaleString('ro-RO')}</td>
       <td class="num">${microCell(cluster)}</td>`;
     tr.addEventListener('click', () => selectCluster(cluster));
     tr.addEventListener('keydown', (event) => {
@@ -94,7 +96,7 @@ function selectCluster(cluster: Cluster): void {
   grid.replaceChildren();
   if (cluster.tier === 'regional' && cluster.regions && cluster.regions.length > 0) {
     $('#detail-note').textContent =
-      `${cluster.name} (${cluster.caen}): ${cluster.companies.toLocaleString('ro-RO')} de entități, propuse ${cluster.proposed.toLocaleString('ro-RO')} — operatorii de mai jos. Regula de sediu și de nucleu este scrisă ca presupunere în datele paginii, nu este din sursă.`;
+      `${cluster.name} (${cluster.caen}): ${cluster.companies.toLocaleString('ro-RO')} de entități, propuse ${cluster.proposed.toLocaleString('ro-RO')} — operatorii de mai jos. Venituri agregate ${cluster.revenueRon.toLocaleString('ro-RO')} RON (MFin 2025), dintre care ${cluster.lossCount.toLocaleString('ro-RO')} companii în pierdere. Regula de sediu și de nucleu este scrisă ca presupunere în datele paginii, nu este din sursă.`;
     for (const group of cluster.regions) {
       const card = document.createElement('div');
       card.className = 'region-card';

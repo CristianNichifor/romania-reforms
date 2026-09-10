@@ -90,15 +90,15 @@ def test_the_import_carries_the_checksum_of_the_committed_source(data):
 
 
 def test_the_murighiol_headcount_is_excluded_and_named():
-    """A village waste utility reporting 10 776 employees is an entry error. The value must
-    not reach the cluster totals, and the exclusion must name the row so nobody has to
-    rediscover it."""
+    """The workbook's 10 776 is an entry error and stays excluded as a source; the official
+    MFin figure for the same company stands, so the guard cannot erase a real headcount."""
     if not COMPANIES.exists():
         pytest.skip("the state-company import is not built")
     source = json.loads(COMPANIES.read_text(encoding="utf-8"))
     murighiol = next((c for c in source["companies"] if c["id"] == 1217), None)
     assert murighiol is not None, "the outlier row disappeared instead of being excluded"
-    assert murighiol.get("employees") is None
+    assert murighiol.get("employees") == 14
+    assert murighiol.get("employeesSource") == "mfin"
     excluded = source["dataQuality"]["headcountExcluded"]
     assert len(excluded) == 1
     row = excluded[0]
@@ -106,6 +106,25 @@ def test_the_murighiol_headcount_is_excluded_and_named():
     assert row["reported"] == 10776
     assert row["year"] == 2023
     assert "MURIGHIOL" in row["name"]
+
+
+def test_mfin_headcount_takes_precedence_over_the_workbook(data):
+    if not COMPANIES.exists():
+        pytest.skip("the state-company import is not built")
+    source = json.loads(COMPANIES.read_text(encoding="utf-8"))
+    with_source = [c for c in source["companies"] if c.get("employeesSource")]
+    assert sum(1 for c in with_source if c["employeesSource"] == "mfin") > 0
+    assert all(c["employees"] is not None for c in with_source)
+
+
+def test_financial_totals_reconcile_and_stay_lower_bounds(data):
+    assert data["summary"]["lossMaking"] == sum(c["lossCount"] for c in data["clusters"])
+    assert data["summary"]["revenueRon"] == sum(c["revenueRon"] for c in data["clusters"])
+    assert "financials-partial" in {x["id"] for x in data["limitations"]}
+    # 287 of the companies with a financial row are loss-making, 91 of them water operators.
+    assert data["summary"]["lossMaking"] > 0
+    water = next(c for c in data["clusters"] if c["caen"] == "3600")
+    assert water["lossCount"] > 0
 
 
 def test_the_build_is_deterministic():
