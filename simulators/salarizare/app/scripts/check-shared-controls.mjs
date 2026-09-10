@@ -186,11 +186,26 @@ try {
   await tableLayouts('cap');
 
   await open('payslip?r=ro-draft-2026-08-20');
-  await page.locator('input[type=search]').fill('Părinte social');
   const positions = page.locator('select[size]');
   const code = '21.00303045.04';
   const position = positions.locator(`option[value="${code}"]`);
-  await expect(position).toHaveCount(1);
+  // `open` waits for `p.loading` to be gone, but its absence is vacuous when the
+  // element never rendered, and the payslip search filters a list the view may not
+  // hold yet. On WebKit the fill can also land before the controlled input has
+  // committed, leaving the query empty and the code outside the first 40 positions —
+  // it sits at index 228 of 1 061. Poll, and re-type while the option is missing,
+  // rather than photographing an empty filter.
+  await expect
+    .poll(
+      async () => {
+        if ((await position.count()) === 0) {
+          await page.locator('input[type=search]').fill('Părinte social');
+        }
+        return position.count();
+      },
+      { timeout: 20000 },
+    )
+    .toBe(1);
   await positions.selectOption(code);
   await snapshot('payslip-position');
   await page.locator('input[type=range]').last().fill('35');

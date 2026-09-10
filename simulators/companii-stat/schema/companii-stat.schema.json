@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/companii-stat.schema.json",
+  "title": "State companies by activity, with a regional-operator scenario",
+  "description": "Companies grouped by four-digit CAEN, with the network utilities proposed as one operator per development region. The tier assignment is a policy judgement, marked assumed.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "title", "publisher", "period", "provenance", "clusters", "summary", "limitations"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "const": "companii-stat" },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "period": { "type": "string" },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+    "clusters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["caen", "name", "companies", "employees", "headcountKnown", "micro", "tier", "proposed"],
+        "properties": {
+          "caen": { "type": "string" },
+          "name": { "type": "string" },
+          "companies": { "type": "integer", "minimum": 0 },
+          "employees": { "type": "number", "minimum": 0 },
+          "headcountKnown": { "type": "integer", "minimum": 0 },
+          "micro": { "type": "integer", "minimum": 0 },
+          "tier": { "enum": ["regional", "local", "national", "other"] },
+          "proposed": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "companies",
+        "clusters",
+        "regionalClusters",
+        "companiesInRegionalClusters",
+        "operatorsProposedOnEightRegions",
+        "reductionPercent",
+        "microUnder20",
+        "headcountKnown"
+      ],
+      "properties": {
+        "companies": { "type": "integer", "minimum": 0 },
+        "clusters": { "type": "integer", "minimum": 0 },
+        "regionalClusters": { "type": "integer", "minimum": 0 },
+        "companiesInRegionalClusters": { "type": "integer", "minimum": 0 },
+        "operatorsProposedOnEightRegions": { "type": "integer", "minimum": 0 },
+        "reductionPercent": { "type": "number" },
+        "microUnder20": { "type": "integer", "minimum": 0 },
+        "headcountKnown": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": { "$ref": "provenance.schema.json#/$defs/limitation" }
+    }
+  }
+}

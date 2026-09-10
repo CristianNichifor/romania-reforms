@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/companii.schema.json",
+  "title": "State-company identity and headcount",
+  "description": "One row per state company: identity, registration, CAEN activity, status, and the latest reported full-time-equivalent headcount. Financial ratios are dropped at import.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "title", "publisher", "period", "provenance", "sourceChecksum", "summary", "companies"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "const": "companii-stat-2025" },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "period": { "type": "string" },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+    "sourceChecksum": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sha256", "file"],
+      "properties": {
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "file": { "type": "string" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["companies", "withHeadcount", "byStatus"],
+      "properties": {
+        "companies": { "type": "integer", "minimum": 0 },
+        "withHeadcount": { "type": "integer", "minimum": 0 },
+        "byStatus": { "type": "object", "additionalProperties": { "type": "integer" } }
+      }
+    },
+    "companies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "cui", "name", "registrationNumber", "caen", "status"],
+        "properties": {
+          "id": { "type": "integer" },
+          "cui": { "type": "integer" },
+          "name": { "type": "string" },
+          "registrationNumber": { "type": "string" },
+          "caen": { "type": ["string", "null"] },
+          "status": { "type": "string" },
+          "employees": { "type": "number" },
+          "employeesYear": { "type": "integer" }
+        }
+      }
+    }
+  }
+}
