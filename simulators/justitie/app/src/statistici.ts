@@ -878,6 +878,14 @@ function wireFilter(stats: Stats, file: CourtsFile): void {
       addProposal.hidden = Boolean(ready);
       addProposal.disabled = false;
       if (ready) {
+        // A failed direct-link load has not selected its missing option yet.
+        // Read the current hash after retry so intervening filter changes win.
+        const wanted = new URLSearchParams(location.hash.replace(/^#/, '')).get(LOCATION);
+        if (wanted?.startsWith('p:')) {
+          readHash();
+          void apply();
+          return;
+        }
         state.textContent =
           `${count(ready.courts.length)} instanțe propuse, calculate din harta administrativă. ` +
           `${pct(ready.cotaInvariantaNationala)} din dosare ajung întregi la un sediu. ` +

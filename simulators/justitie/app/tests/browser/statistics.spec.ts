@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { pool, type CourtsFile } from '../../src/aggregate';
 import { localOnly, publicData, scopeFacts, recordStatistics, formatCount } from './helpers';
+import { expectedProposal } from './proposal-fixture';
 
 const stats = publicData('portal-stats.json');
 const courts: CourtsFile = publicData('portal-instante.json');
@@ -76,6 +77,9 @@ test('proposal lazy load failure, button retry and cached offline selection', as
   await page.locator('#scope').selectOption(value!);
   await expect(page.locator('#tier')).toBeDisabled();
   await expect(page.locator('#acoperire h2')).toContainText('(propusă)');
+  const expected = expectedProposal('#x=9000').courts.find(court => `p:${court.seat}` === value)!;
+  await scopeFacts(page, [expected.pooled.dosare, expected.pooled.amanari.termeneCuSolutie,
+    expected.populatie, Math.round(expected.pooled.dosare / expected.populatie * 1000)]);
   const baseline = await recordStatistics(page, info, 'proposed');
   const hash = new URL(page.url()).hash;
   await page.reload();
@@ -108,6 +112,21 @@ test('direct proposed URL retains selection after failed load and retry', async 
   await expect(page.locator('#tier')).toBeDisabled();
   await expect(page.locator('#acoperire h2')).toContainText('(propusă)');
   expect(new URLSearchParams(new URL(page.url()).hash.slice(1)).get('keep')).toBe('baseline');
+
+  fail = true;
+  await page.reload();
+  await expect(page.locator('#filter-state')).toContainText('instanțe colectate');
+  await page.locator('#scope').selectOption('j:TM');
+  await scopeFacts(page, sum(county));
+  fail = false;
+  await page.locator('#load-proposal').click();
+  await expect(page.locator('#load-proposal')).toBeHidden();
+  await expect(page.locator('#scope')).toHaveValue('j:TM');
+  await expect(page.locator('#tier')).toBeEnabled();
+  await scopeFacts(page, sum(county));
+  const latestHash = new URLSearchParams(new URL(page.url()).hash.slice(1));
+  expect(latestHash.get('loc')).toBe('j:TM');
+  expect(latestHash.get('keep')).toBe('baseline');
   expect(audit.external).toEqual([]);
   expect(audit.errors).toEqual([]);
 });
