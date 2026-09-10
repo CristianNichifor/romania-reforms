@@ -3,6 +3,13 @@
 
 export type Tier = 'regional' | 'regional-de-facto' | 'special';
 
+export interface RegionGroup {
+  region: string;
+  seat: string;
+  seatPopulation: number | null;
+  counties: string[];
+}
+
 export interface Family {
   code: string;
   name: string;
@@ -10,7 +17,7 @@ export interface Family {
   officesToday: number;
   officesProposed: number;
   counties: string[];
-  byRegion: Record<string, string[]>;
+  regions: RegionGroup[];
 }
 
 export interface Summary {
@@ -57,11 +64,11 @@ export function reduction(family: Family): number {
 export function regionsOf(doc: Document): string[] {
   const names = new Set<string>();
   for (const family of doc.families) {
-    for (const region of Object.keys(family.byRegion)) names.add(region);
+    for (const group of family.regions) names.add(group.region);
   }
   return [...names].sort((a, b) => {
     const size = (name: string) =>
-      Math.max(...doc.families.map((f) => f.byRegion[name]?.length ?? 0));
+      Math.max(...doc.families.map((f) => f.regions.find((g) => g.region === name)?.counties.length ?? 0));
     return size(b) - size(a) || a.localeCompare(b, 'ro');
   });
 }

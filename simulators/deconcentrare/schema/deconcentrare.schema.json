@@ -5,7 +5,7 @@
   "description": "The territorial deconcentrated services, grouped into families and reorganised from one office per county to one office per development region. The county to region map is reused from the justitie variant, not re-derived.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "title", "publisher", "period", "provenance", "families", "summary", "limitations"],
+  "required": ["id", "title", "publisher", "period", "provenance", "seatRule", "families", "summary", "limitations"],
   "properties": {
     "$schema": { "type": "string" },
     "id": { "const": "deconcentrare-2025" },
@@ -13,6 +13,15 @@
     "publisher": { "type": "string" },
     "period": { "type": "string" },
     "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+    "seatRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["confidence", "note"],
+      "properties": {
+        "confidence": { "const": "assumed" },
+        "note": { "type": "string" }
+      }
+    },
     "families": {
       "type": "array",
       "items": {
@@ -25,7 +34,7 @@
           "officesToday",
           "officesProposed",
           "counties",
-          "byRegion"
+          "regions"
         ],
         "properties": {
           "code": { "type": "string" },
@@ -37,9 +46,19 @@
           "officesToday": { "type": "integer", "minimum": 0 },
           "officesProposed": { "type": "integer", "minimum": 0 },
           "counties": { "type": "array", "items": { "type": "string" } },
-          "byRegion": {
-            "type": "object",
-            "additionalProperties": { "type": "array", "items": { "type": "string" } }
+          "regions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["region", "seat", "seatPopulation", "counties"],
+              "properties": {
+                "region": { "type": "string" },
+                "seat": { "type": "string" },
+                "seatPopulation": { "type": ["integer", "null"] },
+                "counties": { "type": "array", "items": { "type": "string" } }
+              }
+            }
           }
         }
       }

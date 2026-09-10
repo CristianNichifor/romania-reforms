@@ -85,6 +85,25 @@
 
         <h2 id="detail-title" hidden>Detalii</h2>
         <p class="hint" id="detail-note" hidden></p>
+        <div id="operator-grid" class="regions" hidden></div>
+
+        <h2 id="fusions-title" hidden>Deja în fuziune</h2>
+        <p class="hint" id="fusions-note" hidden>
+          Statusul „fuziune prin absorbție” vine din registru și spune că o fuziune este în
+          curs — nu cine absoarbe pe cine. Raportat ca atare.
+        </p>
+        <div class="table-scroll" id="fusions-scroll" hidden>
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Compania</th>
+                <th scope="col" class="num">CAEN</th>
+                <th scope="col">Status</th>
+              </tr>
+            </thead>
+            <tbody id="fusions-rows"></tbody>
+          </table>
+        </div>
       </section>
 
       <section id="argument" aria-label="Raționamentul" hidden>

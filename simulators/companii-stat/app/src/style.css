@@ -160,6 +160,7 @@ th.sortable:hover {
 tbody th,
 tbody td {
   padding: 0.55rem 0.9rem;
+  text-align: left;
   border-bottom: 1px solid var(--line);
   vertical-align: top;
 }
@@ -308,4 +309,29 @@ h2 {
   .reasons {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
+
+.region-seat {
+  color: var(--accent);
+  font-size: 0.85rem;
+  margin-top: 0.2rem;
+}
+.region-count {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.absorbed-list {
+  margin-top: 0.4rem;
+  font-size: 0.85rem;
+}
+.absorbed-list summary {
+  cursor: pointer;
+  color: var(--link);
+}
+.absorbed-names {
+  margin: 0.4rem 0 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.15rem;
+  color: var(--muted);
 }

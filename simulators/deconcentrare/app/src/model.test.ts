@@ -16,7 +16,10 @@ const family = (over: Partial<Family>): Family => ({
   officesToday: 42,
   officesProposed: 8,
   counties: ['AB', 'AR'],
-  byRegion: { Centru: ['AB'], Vest: ['AR'] },
+  regions: [
+    { region: 'Centru', seat: 'AB', seatPopulation: 363660, counties: ['AB'] },
+    { region: 'Vest', seat: 'AR', seatPopulation: 409000, counties: ['AR'] },
+  ],
   ...over,
 });
 
@@ -58,8 +61,16 @@ describe('regionsOf', () => {
       },
       limitations: [],
       families: [
-        family({ byRegion: { Centru: ['AB', 'BV'], 'Nord-Est': ['IS', 'BC'] } }),
-        family({ code: 'itm', byRegion: { Centru: ['AB'] } }),
+        family({
+          regions: [
+            { region: 'Centru', seat: 'BV', seatPopulation: 1, counties: ['AB', 'BV'] },
+            { region: 'Nord-Est', seat: 'IS', seatPopulation: 1, counties: ['IS', 'BC'] },
+          ],
+        }),
+        family({
+          code: 'itm',
+          regions: [{ region: 'Centru', seat: 'AB', seatPopulation: 1, counties: ['AB'] }],
+        }),
       ],
     };
     expect(regionsOf(doc)).toEqual(['Centru', 'Nord-Est']);

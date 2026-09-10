@@ -20,15 +20,21 @@ from __future__ import annotations
 import collections
 import hashlib
 import json
+import re
+import unicodedata
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "sources" / "companii-stat-finnefin.xlsx"
+SEARCH = ROOT / "sources" / "companii-search-2026-09-10.json"
+REGISTRY = ROOT.parents[1] / "packages" / "uat_registry" / "data" / "uat-registry-2026.json"
 OUT = ROOT / "data" / "companii-2025.json"
 
 FINANCIAL_SHEET = "Indicatori calculati"
 NONFINANCIAL_SHEET = "Indicatori formular"
 HEADCOUNT = "Număr de angajați cu echivalent normă întreagă"
+
+SEARCH_URL = "https://companiidestat.ro/date/v1/companii_search.json"
 
 # Company ids whose reported headcount is a data-entry error, checked against the workbook
 # itself. A generic threshold would quietly discard a genuinely large operator, so the guard
@@ -62,12 +68,48 @@ def load_sheet(name: str) -> list[dict]:
     return [dict(zip(header, row, strict=False)) for row in rows if row and row[0]]
 
 
+def fold(text: str) -> str:
+    text = unicodedata.normalize("NFD", text)
+    text = "".join(c for c in text if unicodedata.category(c) != "Mn")
+    text = text.upper().replace("Ş", "S").replace("Ţ", "T").replace("-", " ")
+    return re.sub(r"\s+", " ", re.sub(r"[^A-Z0-9 ]", "", text)).strip()
+
+
+def load_county_by_name() -> dict[str, str]:
+    """Folded county name -> county code, from the shared SIRUTA registry."""
+    units = json.loads(REGISTRY.read_text(encoding="utf-8"))["units"]
+    pairs = {}
+    for unit in units:
+        if unit.get("level") == "county" and unit.get("countyCode"):
+            pairs[fold(unit["countyName"])] = unit["countyCode"]
+    return pairs
+
+
+def load_county_search() -> dict[str, dict]:
+    """CUI -> row of the companiidestat.ro search snapshot, which carries the county name.
+
+    The snapshot is committed with the workbook so the import stays offline and reproducible;
+    refresh it with the documented API under CC BY 4.0 and re-pin the checksum below.
+    """
+    if not SEARCH.exists():
+        raise SystemExit(f"missing source {SEARCH}")
+    payload = json.loads(SEARCH.read_text(encoding="utf-8"))
+    rows = payload.get("companii", payload)
+    return (
+        {str(row["cui"]): row for row in rows.values()}
+        if isinstance(rows, dict)
+        else {str(row["cui"]): row for row in rows}
+    )
+
+
 def main() -> None:
     if not SOURCE.exists():
         raise SystemExit(f"missing source {SOURCE}")
 
     financial = load_sheet(FINANCIAL_SHEET)
     nonfinancial = load_sheet(NONFINANCIAL_SHEET)
+    county_by_name = load_county_by_name()
+    search = load_county_search()
 
     headcount: dict[int, dict[int, float]] = collections.defaultdict(dict)
     for row in nonfinancial:
@@ -93,6 +135,19 @@ def main() -> None:
             company["employees"] = years[max(years)]
             company["employeesYear"] = max(years)
 
+    unmatched_counties: list[dict] = []
+    for company in companies.values():
+        match = search.get(str(company["cui"]))
+        name = match.get("judet_nume") if match else None
+        county = county_by_name.get(fold(name or "")) if name else None
+        if match and not county:
+            unmatched_counties.append(
+                {"cui": company["cui"], "name": company["name"], "reportedCounty": name}
+            )
+        if county:
+            company["county"] = county
+            company["countySource"] = "companiidestat"
+
     rows = sorted(companies.values(), key=lambda c: c["name"])
     by_status = collections.Counter(c["status"] for c in rows)
     with_headcount = sum(1 for c in rows if c.get("employees") is not None)
@@ -111,12 +166,24 @@ def main() -> None:
             "note": "Angajații sunt ultimul an raportat de fiecare companie, cu excepțiile "
             "din dataQuality. Fișierul sursă este reținut în sources/ cu amprenta SHA-256.",
         },
+        "countySource": {
+            "source": "companiidestat-search",
+            "url": SEARCH_URL,
+            "license": "CC BY 4.0",
+            "confidence": "derived",
+            "note": "Județul vine din snapshotul committed al companiidestat.ro "
+            "companii_search.json, potrivit pe CUI. Este județul de înregistrare a "
+            "companiei (sediul), nu teritoriul de servire. Nepotrivirile sunt listate în "
+            "dataQuality, nu ghicite.",
+            "snapshotChecksum": {"sha256": sha256(SEARCH), "file": SEARCH.name},
+        },
         "sourceChecksum": {"sha256": sha256(SOURCE), "file": SOURCE.name},
         "dataQuality": {
             "headcountExcluded": [
                 {"companyId": company_id, **entry}
                 for company_id, entry in sorted(HEADCOUNT_OUTLIERS.items())
             ],
+            "unmatchedCounties": sorted(unmatched_counties, key=lambda c: c["name"]),
         },
         "summary": {
             "companies": len(rows),

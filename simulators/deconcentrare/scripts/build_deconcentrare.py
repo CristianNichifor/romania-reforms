@@ -175,6 +175,16 @@ def load_county_codes() -> dict[str, str]:
     return pairs
 
 
+def load_county_population() -> dict[str, int]:
+    """County code -> population, from the shared SIRUTA registry."""
+    units = json.loads(REGISTRY.read_text(encoding="utf-8"))["units"]
+    pairs = {}
+    for unit in units:
+        if unit.get("level") == "county" and unit.get("countyCode") and unit.get("population"):
+            pairs[unit["countyCode"]] = unit["population"]
+    return pairs
+
+
 def load_region_of_county() -> dict[str, str]:
     """County code -> development region, reused from the justitie variant."""
     regions = json.loads(REGION_MAP.read_text(encoding="utf-8"))["regions"]
@@ -201,10 +211,26 @@ def classify(folded: str) -> str | None:
     return None
 
 
+def seat_of(region: str, county_list: list[str], population: dict[str, int]) -> str:
+    """The region's seat: the county with the largest population. Tie-break by code.
+
+    This is a policy assumption, not a fact in the source — the register does not designate
+    seats. County populations are unchanged by the administrative consolidation, because the
+    administrative model never merges across a county line; when that simulator's reference
+    map is locked, the seat *city* should be upgraded from its absorber seats, which is the
+    one input this rule deliberately keeps a single function away from.
+    """
+    return max(
+        county_list,
+        key=lambda county: (population.get(county, 0), county),
+    )
+
+
 def main() -> None:
     source = json.loads(INSTITUTIONS.read_text(encoding="utf-8"))
     county_codes = load_county_codes()
     region_of_county = load_region_of_county()
+    population = load_county_population()
     counties = sorted(county_codes, key=len, reverse=True)
 
     families = {code: {"counties": set(), "count": 0} for code, *_ in FAMILIES}
@@ -251,7 +277,17 @@ def main() -> None:
                 "officesToday": count,
                 "officesProposed": proposed,
                 "counties": present,
-                "byRegion": {k: sorted(v) for k, v in sorted(by_region.items())},
+                "regions": [
+                    {
+                        "region": region,
+                        "seat": seat_of(region, sorted(county_list), population),
+                        "seatPopulation": population.get(
+                            seat_of(region, sorted(county_list), population)
+                        ),
+                        "counties": sorted(county_list),
+                    }
+                    for region, county_list in sorted(by_region.items())
+                ],
             }
         )
 
@@ -268,6 +304,15 @@ def main() -> None:
             "confidence": "derived",
             "note": "Regruparea pe familii folosește un tabel explicit de prefixe, nu potrivire "
             "fuzzy. Serviciile municipale (București, sectoare) sunt excluse și raportate separat.",
+        },
+        "seatRule": {
+            "confidence": "assumed",
+            "note": "Sediul unei direcții regionale nu este în sursă. Regula de aici: județul cu "
+            "cea mai mare populație din regiune, din registrul SIRUTA partajat. Populațiile "
+            "județene sunt neschimbate de comasarea administrativă — modelul administrativ nu "
+            "unește niciodată peste granița de județ — iar când harta de referință a acelui "
+            "simulator va fi blocată, sediul se poate rafina de la județ la orașul-absorbant "
+            "din el, fără a atinge altceva.",
         },
         "families": out_families,
         "summary": {
@@ -303,11 +348,12 @@ def main() -> None:
                 "affects": ["families"],
             },
             {
-                "id": "regional-seat-unknown",
-                "text": "Sursa nu spune care va fi sediul unei direcții regionale. Modelul numără "
-                "birourile, nu le așază pe hartă.",
+                "id": "seat-is-assumed",
+                "text": "Sursa nu desemnează sediile regionale. Regula de aici — județul cel mai "
+                "populat din regiune — este o presupunere de politică publică, nu un fapt din "
+                "sursă; este scrisă în seatRule și poate fi contrazisă.",
                 "severity": "material",
-                "affects": ["summary"],
+                "affects": ["families"],
             },
             {
                 "id": "municipal-excluded",

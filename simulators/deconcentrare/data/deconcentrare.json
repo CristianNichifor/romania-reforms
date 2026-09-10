@@ -10,6 +10,10 @@
   "confidence": "derived",
   "note": "Regruparea pe familii folosește un tabel explicit de prefixe, nu potrivire fuzzy. Serviciile municipale (București, sectoare) sunt excluse și raportate separat."
  },
+ "seatRule": {
+  "confidence": "assumed",
+  "note": "Sediul unei direcții regionale nu este în sursă. Regula de aici: județul cu cea mai mare populație din regiune, din registrul SIRUTA partajat. Populațiile județene sunt neschimbate de comasarea administrativă — modelul administrativ nu unește niciodată peste granița de județ — iar când harta de referință a acelui simulator va fi blocată, sediul se poate rafina de la județ la orașul-absorbant din el, fără a atinge altceva."
+ },
  "families": [
   {
    "code": "cas",
@@ -61,66 +65,106 @@
     "VN",
     "VS"
    ],
-   "byRegion": {
-    "București-Ilfov": [
-     "B",
-     "IF"
-    ],
-    "Centru": [
-     "AB",
-     "BV",
-     "CV",
-     "HR",
-     "MS",
-     "SB"
-    ],
-    "Nord-Est": [
-     "BC",
-     "BT",
-     "IS",
-     "NT",
-     "SV",
-     "VS"
-    ],
-    "Nord-Vest": [
-     "BH",
-     "BN",
-     "CJ",
-     "MM",
-     "SJ",
-     "SM"
-    ],
-    "Sud": [
-     "AG",
-     "CL",
-     "DB",
-     "GR",
-     "IL",
-     "PH",
-     "TR"
-    ],
-    "Sud-Est": [
-     "BR",
-     "BZ",
-     "CT",
-     "GL",
-     "TL",
-     "VN"
-    ],
-    "Sud-Vest": [
-     "DJ",
-     "GJ",
-     "MH",
-     "OT",
-     "VL"
-    ],
-    "Vest": [
-     "AR",
-     "CS",
-     "HD",
-     "TM"
-    ]
-   }
+   "regions": [
+    {
+     "region": "București-Ilfov",
+     "seat": "B",
+     "seatPopulation": 2143578,
+     "counties": [
+      "B",
+      "IF"
+     ]
+    },
+    {
+     "region": "Centru",
+     "seat": "BV",
+     "seatPopulation": 641572,
+     "counties": [
+      "AB",
+      "BV",
+      "CV",
+      "HR",
+      "MS",
+      "SB"
+     ]
+    },
+    {
+     "region": "Nord-Est",
+     "seat": "IS",
+     "seatPopulation": 993235,
+     "counties": [
+      "BC",
+      "BT",
+      "IS",
+      "NT",
+      "SV",
+      "VS"
+     ]
+    },
+    {
+     "region": "Nord-Vest",
+     "seat": "CJ",
+     "seatPopulation": 744031,
+     "counties": [
+      "BH",
+      "BN",
+      "CJ",
+      "MM",
+      "SJ",
+      "SM"
+     ]
+    },
+    {
+     "region": "Sud",
+     "seat": "PH",
+     "seatPopulation": 757213,
+     "counties": [
+      "AG",
+      "CL",
+      "DB",
+      "GR",
+      "IL",
+      "PH",
+      "TR"
+     ]
+    },
+    {
+     "region": "Sud-Est",
+     "seat": "CT",
+     "seatPopulation": 748860,
+     "counties": [
+      "BR",
+      "BZ",
+      "CT",
+      "GL",
+      "TL",
+      "VN"
+     ]
+    },
+    {
+     "region": "Sud-Vest",
+     "seat": "DJ",
+     "seatPopulation": 667708,
+     "counties": [
+      "DJ",
+      "GJ",
+      "MH",
+      "OT",
+      "VL"
+     ]
+    },
+    {
+     "region": "Vest",
+     "seat": "TM",
+     "seatPopulation": 762776,
+     "counties": [
+      "AR",
+      "CS",
+      "HD",
+      "TM"
+     ]
+    }
+   ]
   },
   {
    "code": "itm",
@@ -172,66 +216,106 @@
     "VN",
     "VS"
    ],
-   "byRegion": {
-    "București-Ilfov": [
-     "B",
-     "IF"
-    ],
-    "Centru": [
-     "AB",
-     "BV",
-     "CV",
-     "HR",
-     "MS",
-     "SB"
-    ],
-    "Nord-Est": [
-     "BC",
-     "BT",
-     "IS",
-     "NT",
-     "SV",
-     "VS"
-    ],
-    "Nord-Vest": [
-     "BH",
-     "BN",
-     "CJ",
-     "MM",
-     "SJ",
-     "SM"
-    ],
-    "Sud": [
-     "AG",
-     "CL",
-     "DB",
-     "GR",
-     "IL",
-     "PH",
-     "TR"
-    ],
-    "Sud-Est": [
-     "BR",
-     "BZ",
-     "CT",
-     "GL",
-     "TL",
-     "VN"
-    ],
-    "Sud-Vest": [
-     "DJ",
-     "GJ",
-     "MH",
-     "OT",
-     "VL"
-    ],
-    "Vest": [
-     "AR",
-     "CS",
-     "HD",
-     "TM"
-    ]
-   }
+   "regions": [
+    {
+     "region": "București-Ilfov",
+     "seat": "B",
+     "seatPopulation": 2143578,
+     "counties": [
+      "B",
+      "IF"
+     ]
+    },
+    {
+     "region": "Centru",
+     "seat": "BV",
+     "seatPopulation": 641572,
+     "counties": [
+      "AB",
+      "BV",
+      "CV",
+      "HR",
+      "MS",
+      "SB"
+     ]
+    },
+    {
+     "region": "Nord-Est",
+     "seat": "IS",
+     "seatPopulation": 993235,
+     "counties": [
+      "BC",
+      "BT",
+      "IS",
+      "NT",
+      "SV",
+      "VS"
+     ]
+    },
+    {
+     "region": "Nord-Vest",
+     "seat": "CJ",
+     "seatPopulation": 744031,
+     "counties": [
+      "BH",
+      "BN",
+      "CJ",
+      "MM",
+      "SJ",
+      "SM"
+     ]
+    },
+    {
+     "region": "Sud",
+     "seat": "PH",
+     "seatPopulation": 757213,
+     "counties": [
+      "AG",
+      "CL",
+      "DB",
+      "GR",
+      "IL",
+      "PH",
+      "TR"
+     ]
+    },
+    {
+     "region": "Sud-Est",
+     "seat": "CT",
+     "seatPopulation": 748860,
+     "counties": [
+      "BR",
+      "BZ",
+      "CT",
+      "GL",
+      "TL",
+      "VN"
+     ]
+    },
+    {
+     "region": "Sud-Vest",
+     "seat": "DJ",
+     "seatPopulation": 667708,
+     "counties": [
+      "DJ",
+      "GJ",
+      "MH",
+      "OT",
+      "VL"
+     ]
+    },
+    {
+     "region": "Vest",
+     "seat": "TM",
+     "seatPopulation": 762776,
+     "counties": [
+      "AR",
+      "CS",
+      "HD",
+      "TM"
+     ]
+    }
+   ]
   },
   {
    "code": "ajofm",
@@ -282,65 +366,105 @@
     "VN",
     "VS"
    ],
-   "byRegion": {
-    "București-Ilfov": [
-     "IF"
-    ],
-    "Centru": [
-     "AB",
-     "BV",
-     "CV",
-     "HR",
-     "MS",
-     "SB"
-    ],
-    "Nord-Est": [
-     "BC",
-     "BT",
-     "IS",
-     "NT",
-     "SV",
-     "VS"
-    ],
-    "Nord-Vest": [
-     "BH",
-     "BN",
-     "CJ",
-     "MM",
-     "SJ",
-     "SM"
-    ],
-    "Sud": [
-     "AG",
-     "CL",
-     "DB",
-     "GR",
-     "IL",
-     "PH",
-     "TR"
-    ],
-    "Sud-Est": [
-     "BR",
-     "BZ",
-     "CT",
-     "GL",
-     "TL",
-     "VN"
-    ],
-    "Sud-Vest": [
-     "DJ",
-     "GJ",
-     "MH",
-     "OT",
-     "VL"
-    ],
-    "Vest": [
-     "AR",
-     "CS",
-     "HD",
-     "TM"
-    ]
-   }
+   "regions": [
+    {
+     "region": "București-Ilfov",
+     "seat": "IF",
+     "seatPopulation": 513905,
+     "counties": [
+      "IF"
+     ]
+    },
+    {
+     "region": "Centru",
+     "seat": "BV",
+     "seatPopulation": 641572,
+     "counties": [
+      "AB",
+      "BV",
+      "CV",
+      "HR",
+      "MS",
+      "SB"
+     ]
+    },
+    {
+     "region": "Nord-Est",
+     "seat": "IS",
+     "seatPopulation": 993235,
+     "counties": [
+      "BC",
+      "BT",
+      "IS",
+      "NT",
+      "SV",
+      "VS"
+     ]
+    },
+    {
+     "region": "Nord-Vest",
+     "seat": "CJ",
+     "seatPopulation": 744031,
+     "counties": [
+      "BH",
+      "BN",
+      "CJ",
+      "MM",
+      "SJ",
+      "SM"
+     ]
+    },
+    {
+     "region": "Sud",
+     "seat": "PH",
+     "seatPopulation": 757213,
+     "counties": [
+      "AG",
+      "CL",
+      "DB",
+      "GR",
+      "IL",
+      "PH",
+      "TR"
+     ]
+    },
+    {
+     "region": "Sud-Est",
+     "seat": "CT",
+     "seatPopulation": 748860,
+     "counties": [
+      "BR",
+      "BZ",
+      "CT",
+      "GL",
+      "TL",
+      "VN"
+     ]
+    },
+    {
+     "region": "Sud-Vest",
+     "seat": "DJ",
+     "seatPopulation": 667708,
+     "counties": [
+      "DJ",
+      "GJ",
+      "MH",
+      "OT",
+      "VL"
+     ]
+    },
+    {
+     "region": "Vest",
+     "seat": "TM",
+     "seatPopulation": 762776,
+     "counties": [
+      "AR",
+      "CS",
+      "HD",
+      "TM"
+     ]
+    }
+   ]
   },
   {
    "code": "ajps",
@@ -391,65 +515,105 @@
     "VN",
     "VS"
    ],
-   "byRegion": {
-    "București-Ilfov": [
-     "IF"
-    ],
-    "Centru": [
-     "AB",
-     "BV",
-     "CV",
-     "HR",
-     "MS",
-     "SB"
-    ],
-    "Nord-Est": [
-     "BC",
-     "BT",
-     "IS",
-     "NT",
-     "SV",
-     "VS"
-    ],
-    "Nord-Vest": [
-     "BH",
-     "BN",
-     "CJ",
-     "MM",
-     "SJ",
-     "SM"
-    ],
-    "Sud": [
-     "AG",
-     "CL",
-     "DB",
-     "GR",
-     "IL",
-     "PH",
-     "TR"
-    ],
-    "Sud-Est": [
-     "BR",
-     "BZ",
-     "CT",
-     "GL",
-     "TL",
-     "VN"
-    ],
-    "Sud-Vest": [
-     "DJ",
-     "GJ",
-     "MH",
-     "OT",
-     "VL"
-    ],
-    "Vest": [
-     "AR",
-     "CS",
-     "HD",
-     "TM"
-    ]
-   }
+   "regions": [
+    {
+     "region": "București-Ilfov",
+     "seat": "IF",
+     "seatPopulation": 513905,
+     "counties": [
+      "IF"
+     ]
+    },
+    {
+     "region": "Centru",
+     "seat": "BV",
+     "seatPopulation": 641572,
+     "counties": [
+      "AB",
+      "BV",
+      "CV",
+      "HR",
+      "MS",
+      "SB"
+     ]
+    },
+    {
+     "region": "Nord-Est",
+     "seat": "IS",
+     "seatPopulation": 993235,
+     "counties": [
+      "BC",
+      "BT",
+      "IS",
+      "NT",
+      "SV",
+      "VS"
+     ]
+    },
+    {
+     "region": "Nord-Vest",
+     "seat": "CJ",
+     "seatPopulation": 744031,
+     "counties": [
+      "BH",
+      "BN",
+      "CJ",
+      "MM",
+      "SJ",
+      "SM"
+     ]
+    },
+    {
+     "region": "Sud",
+     "seat": "PH",
+     "seatPopulation": 757213,
+     "counties": [
+      "AG",
+      "CL",
+      "DB",
+      "GR",
+      "IL",
+      "PH",
+      "TR"
+     ]
+    },
+    {
+     "region": "Sud-Est",
+     "seat": "CT",
+     "seatPopulation": 748860,
+     "counties": [
+      "BR",
+      "BZ",
+      "CT",
+      "GL",
+      "TL",
+      "VN"
+     ]
+    },
+    {
+     "region": "Sud-Vest",
+     "seat": "DJ",
+     "seatPopulation": 667708,
+     "counties": [
+      "DJ",
+      "GJ",
+      "MH",
+      "OT",
+      "VL"
+     ]
+    },
+    {
+     "region": "Vest",
+     "seat": "TM",
+     "seatPopulation": 762776,
+     "counties": [
+      "AR",
+      "CS",
+      "HD",
+      "TM"
+     ]
+    }
+   ]
   },
   {
    "code": "apia",
@@ -500,65 +664,105 @@
     "VN",
     "VS"
    ],
-   "byRegion": {
-    "București-Ilfov": [
-     "IF"
-    ],
-    "Centru": [
-     "AB",
-     "BV",
-     "CV",
-     "HR",
-     "MS",
-     "SB"
-    ],
-    "Nord-Est": [
-     "BC",
-     "BT",
-     "IS",
-     "NT",
-     "SV",
-     "VS"
-    ],
-    "Nord-Vest": [
-     "BH",
-     "BN",
-     "CJ",
-     "MM",
-     "SJ",
-     "SM"
-    ],
-    "Sud": [
-     "AG",
-     "CL",
-     "DB",
-     "GR",
-     "IL",
-     "PH",
-     "TR"
-    ],
-    "Sud-Est": [
-     "BR",
-     "BZ",
-     "CT",
-     "GL",
-     "TL",
-     "VN"
-    ],
-    "Sud-Vest": [
-     "DJ",
-     "GJ",
-     "MH",
-     "OT",
-     "VL"
-    ],
-    "Vest": [
-     "AR",
-     "CS",
-     "HD",
-     "TM"
-    ]
-   }
+   "regions": [
+    {
+     "region": "București-Ilfov",
+     "seat": "IF",
+     "seatPopulation": 513905,
+     "counties": [
+      "IF"
+     ]
+    },
+    {
+     "region": "Centru",
+     "seat": "BV",
+     "seatPopulation": 641572,
+     "counties": [
+      "AB",
+      "BV",
+      "CV",
+      "HR",
+      "MS",
+      "SB"
+     ]
+    },
+    {
+     "region": "Nord-Est",
+     "seat": "IS",
+     "seatPopulation": 993235,
+     "counties": [
+      "BC",
+      "BT",
+      "IS",
+      "NT",
+      "SV",
+      "VS"
+     ]
+    },
+    {
+     "region": "Nord-Vest",
+     "seat": "CJ",
+     "seatPopulation": 744031,
+     "counties": [
+      "BH",
+      "BN",
+      "CJ",
+      "MM",
+      "SJ",
+      "SM"
+     ]
+    },
+    {
+     "region": "Sud",
+     "seat": "PH",
+     "seatPopulation": 757213,
+     "counties": [
+      "AG",
+      "CL",
+      "DB",
+      "GR",
+      "IL",
+      "PH",
+      "TR"
+     ]
+    },
+    {
+     "region": "Sud-Est",
+     "seat": "CT",
+     "seatPopulation": 748860,
+     "counties": [
+      "BR",
+      "BZ",
+      "CT",
+      "GL",
+      "TL",
+      "VN"
+     ]
+    },
+    {
+     "region": "Sud-Vest",
+     "seat": "DJ",
+     "seatPopulation": 667708,
+     "counties": [
+      "DJ",
+      "GJ",
+      "MH",
+      "OT",
+      "VL"
+     ]
+    },
+    {
+     "region": "Vest",
+     "seat": "TM",
+     "seatPopulation": 762776,
+     "counties": [
+      "AR",
+      "CS",
+      "HD",
+      "TM"
+     ]
+    }
+   ]
   },
   {
    "code": "dsp",
@@ -609,65 +813,105 @@
     "VN",
     "VS"
    ],
-   "byRegion": {
-    "București-Ilfov": [
-     "IF"
-    ],
-    "Centru": [
-     "AB",
-     "BV",
-     "CV",
-     "HR",
-     "MS",
-     "SB"
-    ],
-    "Nord-Est": [
-     "BC",
-     "BT",
-     "IS",
-     "NT",
-     "SV",
-     "VS"
-    ],
-    "Nord-Vest": [
-     "BH",
-     "BN",
-     "CJ",
-     "MM",
-     "SJ",
-     "SM"
-    ],
-    "Sud": [
-     "AG",
-     "CL",
-     "DB",
-     "GR",
-     "IL",
-     "PH",
-     "TR"
-    ],
-    "Sud-Est": [
-     "BR",
-     "BZ",
-     "CT",
-     "GL",
-     "TL",
-     "VN"
-    ],
-    "Sud-Vest": [
-     "DJ",
-     "GJ",
-     "MH",
-     "OT",
-     "VL"
-    ],
-    "Vest": [
-     "AR",
-     "CS",
-     "HD",
-     "TM"
-    ]
-   }
+   "regions": [
+    {
+     "region": "București-Ilfov",
+     "seat": "IF",
+     "seatPopulation": 513905,
+     "counties": [
+      "IF"
+     ]
+    },
+    {
+     "region": "Centru",
+     "seat": "BV",
+     "seatPopulation": 641572,
+     "counties": [
+      "AB",
+      "BV",
+      "CV",
+      "HR",
+      "MS",
+      "SB"
+     ]
+    },
+    {
+     "region": "Nord-Est",
+     "seat": "IS",
+     "seatPopulation": 993235,
+     "counties": [
+      "BC",
+      "BT",
+      "IS",
+      "NT",
+      "SV",
+      "VS"
+     ]
+    },
+    {
+     "region": "Nord-Vest",
+     "seat": "CJ",
+     "seatPopulation": 744031,
+     "counties": [
+      "BH",
+      "BN",
+      "CJ",
+      "MM",
+      "SJ",
+      "SM"
+     ]
+    },
+    {
+     "region": "Sud",
+     "seat": "PH",
+     "seatPopulation": 757213,
+     "counties": [
+      "AG",
+      "CL",
+      "DB",
+      "GR",
+      "IL",
+      "PH",
+      "TR"
+     ]
+    },
+    {
+     "region": "Sud-Est",
+     "seat": "CT",
+     "seatPopulation": 748860,
+     "counties": [
+      "BR",
+      "BZ",
+      "CT",
+      "GL",
+      "TL",
+      "VN"
+     ]
+    },
+    {
+     "region": "Sud-Vest",
+     "seat": "DJ",
+     "seatPopulation": 667708,
+     "counties": [
+      "DJ",
+      "GJ",
+      "MH",
+      "OT",
+      "VL"
+     ]
+    },
+    {
+     "region": "Vest",
+     "seat": "TM",
+     "seatPopulation": 762776,
+     "counties": [
+      "AR",
+      "CS",
+      "HD",
+      "TM"
+     ]
+    }
+   ]
   },
   {
    "code": "djc",
@@ -718,65 +962,105 @@
     "VN",
     "VS"
    ],
-   "byRegion": {
-    "București-Ilfov": [
-     "IF"
-    ],
-    "Centru": [
-     "AB",
-     "BV",
-     "CV",
-     "HR",
-     "MS",
-     "SB"
-    ],
-    "Nord-Est": [
-     "BC",
-     "BT",
-     "IS",
-     "NT",
-     "SV",
-     "VS"
-    ],
-    "Nord-Vest": [
-     "BH",
-     "BN",
-     "CJ",
-     "MM",
-     "SJ",
-     "SM"
-    ],
-    "Sud": [
-     "AG",
-     "CL",
-     "DB",
-     "GR",
-     "IL",
-     "PH",
-     "TR"
-    ],
-    "Sud-Est": [
-     "BR",
-     "BZ",
-     "CT",
-     "GL",
-     "TL",
-     "VN"
-    ],
-    "Sud-Vest": [
-     "DJ",
-     "GJ",
-     "MH",
-     "OT",
-     "VL"
-    ],
-    "Vest": [
-     "AR",
-     "CS",
-     "HD",
-     "TM"
-    ]
-   }
+   "regions": [
+    {
+     "region": "București-Ilfov",
+     "seat": "IF",
+     "seatPopulation": 513905,
+     "counties": [
+      "IF"
+     ]
+    },
+    {
+     "region": "Centru",
+     "seat": "BV",
+     "seatPopulation": 641572,
+     "counties": [
+      "AB",
+      "BV",
+      "CV",
+      "HR",
+      "MS",
+      "SB"
+     ]
+    },
+    {
+     "region": "Nord-Est",
+     "seat": "IS",
+     "seatPopulation": 993235,
+     "counties": [
+      "BC",
+      "BT",
+      "IS",
+      "NT",
+      "SV",
+      "VS"
+     ]
+    },
+    {
+     "region": "Nord-Vest",
+     "seat": "CJ",
+     "seatPopulation": 744031,
+     "counties": [
+      "BH",
+      "BN",
+      "CJ",
+      "MM",
+      "SJ",
+      "SM"
+     ]
+    },
+    {
+     "region": "Sud",
+     "seat": "PH",
+     "seatPopulation": 757213,
+     "counties": [
+      "AG",
+      "CL",
+      "DB",
+      "GR",
+      "IL",
+      "PH",
+      "TR"
+     ]
+    },
+    {
+     "region": "Sud-Est",
+     "seat": "CT",
+     "seatPopulation": 748860,
+     "counties": [
+      "BR",
+      "BZ",
+      "CT",
+      "GL",
+      "TL",
+      "VN"
+     ]
+    },
+    {
+     "region": "Sud-Vest",
+     "seat": "DJ",
+     "seatPopulation": 667708,
+     "counties": [
+      "DJ",
+      "GJ",
+      "MH",
+      "OT",
+      "VL"
+     ]
+    },
+    {
+     "region": "Vest",
+     "seat": "TM",
+     "seatPopulation": 762776,
+     "counties": [
+      "AR",
+      "CS",
+      "HD",
+      "TM"
+     ]
+    }
+   ]
   },
   {
    "code": "daj",
@@ -827,65 +1111,105 @@
     "VN",
     "VS"
    ],
-   "byRegion": {
-    "București-Ilfov": [
-     "IF"
-    ],
-    "Centru": [
-     "AB",
-     "BV",
-     "CV",
-     "HR",
-     "MS",
-     "SB"
-    ],
-    "Nord-Est": [
-     "BC",
-     "BT",
-     "IS",
-     "NT",
-     "SV",
-     "VS"
-    ],
-    "Nord-Vest": [
-     "BH",
-     "BN",
-     "CJ",
-     "MM",
-     "SJ",
-     "SM"
-    ],
-    "Sud": [
-     "AG",
-     "CL",
-     "DB",
-     "GR",
-     "IL",
-     "PH",
-     "TR"
-    ],
-    "Sud-Est": [
-     "BR",
-     "BZ",
-     "CT",
-     "GL",
-     "TL",
-     "VN"
-    ],
-    "Sud-Vest": [
-     "DJ",
-     "GJ",
-     "MH",
-     "OT",
-     "VL"
-    ],
-    "Vest": [
-     "AR",
-     "CS",
-     "HD",
-     "TM"
-    ]
-   }
+   "regions": [
+    {
+     "region": "București-Ilfov",
+     "seat": "IF",
+     "seatPopulation": 513905,
+     "counties": [
+      "IF"
+     ]
+    },
+    {
+     "region": "Centru",
+     "seat": "BV",
+     "seatPopulation": 641572,
+     "counties": [
+      "AB",
+      "BV",
+      "CV",
+      "HR",
+      "MS",
+      "SB"
+     ]
+    },
+    {
+     "region": "Nord-Est",
+     "seat": "IS",
+     "seatPopulation": 993235,
+     "counties": [
+      "BC",
+      "BT",
+      "IS",
+      "NT",
+      "SV",
+      "VS"
+     ]
+    },
+    {
+     "region": "Nord-Vest",
+     "seat": "CJ",
+     "seatPopulation": 744031,
+     "counties": [
+      "BH",
+      "BN",
+      "CJ",
+      "MM",
+      "SJ",
+      "SM"
+     ]
+    },
+    {
+     "region": "Sud",
+     "seat": "PH",
+     "seatPopulation": 757213,
+     "counties": [
+      "AG",
+      "CL",
+      "DB",
+      "GR",
+      "IL",
+      "PH",
+      "TR"
+     ]
+    },
+    {
+     "region": "Sud-Est",
+     "seat": "CT",
+     "seatPopulation": 748860,
+     "counties": [
+      "BR",
+      "BZ",
+      "CT",
+      "GL",
+      "TL",
+      "VN"
+     ]
+    },
+    {
+     "region": "Sud-Vest",
+     "seat": "DJ",
+     "seatPopulation": 667708,
+     "counties": [
+      "DJ",
+      "GJ",
+      "MH",
+      "OT",
+      "VL"
+     ]
+    },
+    {
+     "region": "Vest",
+     "seat": "TM",
+     "seatPopulation": 762776,
+     "counties": [
+      "AR",
+      "CS",
+      "HD",
+      "TM"
+     ]
+    }
+   ]
   },
   {
    "code": "cjp",
@@ -936,65 +1260,105 @@
     "VN",
     "VS"
    ],
-   "byRegion": {
-    "București-Ilfov": [
-     "IF"
-    ],
-    "Centru": [
-     "AB",
-     "BV",
-     "CV",
-     "HR",
-     "MS",
-     "SB"
-    ],
-    "Nord-Est": [
-     "BC",
-     "BT",
-     "IS",
-     "NT",
-     "SV",
-     "VS"
-    ],
-    "Nord-Vest": [
-     "BH",
-     "BN",
-     "CJ",
-     "MM",
-     "SJ",
-     "SM"
-    ],
-    "Sud": [
-     "AG",
-     "CL",
-     "DB",
-     "GR",
-     "IL",
-     "PH",
-     "TR"
-    ],
-    "Sud-Est": [
-     "BR",
-     "BZ",
-     "CT",
-     "GL",
-     "TL",
-     "VN"
-    ],
-    "Sud-Vest": [
-     "DJ",
-     "GJ",
-     "MH",
-     "OT",
-     "VL"
-    ],
-    "Vest": [
-     "AR",
-     "CS",
-     "HD",
-     "TM"
-    ]
-   }
+   "regions": [
+    {
+     "region": "București-Ilfov",
+     "seat": "IF",
+     "seatPopulation": 513905,
+     "counties": [
+      "IF"
+     ]
+    },
+    {
+     "region": "Centru",
+     "seat": "BV",
+     "seatPopulation": 641572,
+     "counties": [
+      "AB",
+      "BV",
+      "CV",
+      "HR",
+      "MS",
+      "SB"
+     ]
+    },
+    {
+     "region": "Nord-Est",
+     "seat": "IS",
+     "seatPopulation": 993235,
+     "counties": [
+      "BC",
+      "BT",
+      "IS",
+      "NT",
+      "SV",
+      "VS"
+     ]
+    },
+    {
+     "region": "Nord-Vest",
+     "seat": "CJ",
+     "seatPopulation": 744031,
+     "counties": [
+      "BH",
+      "BN",
+      "CJ",
+      "MM",
+      "SJ",
+      "SM"
+     ]
+    },
+    {
+     "region": "Sud",
+     "seat": "PH",
+     "seatPopulation": 757213,
+     "counties": [
+      "AG",
+      "CL",
+      "DB",
+      "GR",
+      "IL",
+      "PH",
+      "TR"
+     ]
+    },
+    {
+     "region": "Sud-Est",
+     "seat": "CT",
+     "seatPopulation": 748860,
+     "counties": [
+      "BR",
+      "BZ",
+      "CT",
+      "GL",
+      "TL",
+      "VN"
+     ]
+    },
+    {
+     "region": "Sud-Vest",
+     "seat": "DJ",
+     "seatPopulation": 667708,
+     "counties": [
+      "DJ",
+      "GJ",
+      "MH",
+      "OT",
+      "VL"
+     ]
+    },
+    {
+     "region": "Vest",
+     "seat": "TM",
+     "seatPopulation": 762776,
+     "counties": [
+      "AR",
+      "CS",
+      "HD",
+      "TM"
+     ]
+    }
+   ]
   },
   {
    "code": "statistica",
@@ -1045,65 +1409,105 @@
     "VN",
     "VS"
    ],
-   "byRegion": {
-    "București-Ilfov": [
-     "IF"
-    ],
-    "Centru": [
-     "AB",
-     "BV",
-     "CV",
-     "HR",
-     "MS",
-     "SB"
-    ],
-    "Nord-Est": [
-     "BC",
-     "BT",
-     "IS",
-     "NT",
-     "SV",
-     "VS"
-    ],
-    "Nord-Vest": [
-     "BH",
-     "BN",
-     "CJ",
-     "MM",
-     "SJ",
-     "SM"
-    ],
-    "Sud": [
-     "AG",
-     "CL",
-     "DB",
-     "GR",
-     "IL",
-     "PH",
-     "TR"
-    ],
-    "Sud-Est": [
-     "BR",
-     "BZ",
-     "CT",
-     "GL",
-     "TL",
-     "VN"
-    ],
-    "Sud-Vest": [
-     "DJ",
-     "GJ",
-     "MH",
-     "OT",
-     "VL"
-    ],
-    "Vest": [
-     "AR",
-     "CS",
-     "HD",
-     "TM"
-    ]
-   }
+   "regions": [
+    {
+     "region": "București-Ilfov",
+     "seat": "IF",
+     "seatPopulation": 513905,
+     "counties": [
+      "IF"
+     ]
+    },
+    {
+     "region": "Centru",
+     "seat": "BV",
+     "seatPopulation": 641572,
+     "counties": [
+      "AB",
+      "BV",
+      "CV",
+      "HR",
+      "MS",
+      "SB"
+     ]
+    },
+    {
+     "region": "Nord-Est",
+     "seat": "IS",
+     "seatPopulation": 993235,
+     "counties": [
+      "BC",
+      "BT",
+      "IS",
+      "NT",
+      "SV",
+      "VS"
+     ]
+    },
+    {
+     "region": "Nord-Vest",
+     "seat": "CJ",
+     "seatPopulation": 744031,
+     "counties": [
+      "BH",
+      "BN",
+      "CJ",
+      "MM",
+      "SJ",
+      "SM"
+     ]
+    },
+    {
+     "region": "Sud",
+     "seat": "PH",
+     "seatPopulation": 757213,
+     "counties": [
+      "AG",
+      "CL",
+      "DB",
+      "GR",
+      "IL",
+      "PH",
+      "TR"
+     ]
+    },
+    {
+     "region": "Sud-Est",
+     "seat": "CT",
+     "seatPopulation": 748860,
+     "counties": [
+      "BR",
+      "BZ",
+      "CT",
+      "GL",
+      "TL",
+      "VN"
+     ]
+    },
+    {
+     "region": "Sud-Vest",
+     "seat": "DJ",
+     "seatPopulation": 667708,
+     "counties": [
+      "DJ",
+      "GJ",
+      "MH",
+      "OT",
+      "VL"
+     ]
+    },
+    {
+     "region": "Vest",
+     "seat": "TM",
+     "seatPopulation": 762776,
+     "counties": [
+      "AR",
+      "CS",
+      "HD",
+      "TM"
+     ]
+    }
+   ]
   },
   {
    "code": "sport",
@@ -1154,65 +1558,105 @@
     "VN",
     "VS"
    ],
-   "byRegion": {
-    "București-Ilfov": [
-     "IF"
-    ],
-    "Centru": [
-     "AB",
-     "BV",
-     "CV",
-     "HR",
-     "MS",
-     "SB"
-    ],
-    "Nord-Est": [
-     "BC",
-     "BT",
-     "IS",
-     "NT",
-     "SV",
-     "VS"
-    ],
-    "Nord-Vest": [
-     "BH",
-     "BN",
-     "CJ",
-     "MM",
-     "SJ",
-     "SM"
-    ],
-    "Sud": [
-     "AG",
-     "CL",
-     "DB",
-     "GR",
-     "IL",
-     "PH",
-     "TR"
-    ],
-    "Sud-Est": [
-     "BR",
-     "BZ",
-     "CT",
-     "GL",
-     "TL",
-     "VN"
-    ],
-    "Sud-Vest": [
-     "DJ",
-     "GJ",
-     "MH",
-     "OT",
-     "VL"
-    ],
-    "Vest": [
-     "AR",
-     "CS",
-     "HD",
-     "TM"
-    ]
-   }
+   "regions": [
+    {
+     "region": "București-Ilfov",
+     "seat": "IF",
+     "seatPopulation": 513905,
+     "counties": [
+      "IF"
+     ]
+    },
+    {
+     "region": "Centru",
+     "seat": "BV",
+     "seatPopulation": 641572,
+     "counties": [
+      "AB",
+      "BV",
+      "CV",
+      "HR",
+      "MS",
+      "SB"
+     ]
+    },
+    {
+     "region": "Nord-Est",
+     "seat": "IS",
+     "seatPopulation": 993235,
+     "counties": [
+      "BC",
+      "BT",
+      "IS",
+      "NT",
+      "SV",
+      "VS"
+     ]
+    },
+    {
+     "region": "Nord-Vest",
+     "seat": "CJ",
+     "seatPopulation": 744031,
+     "counties": [
+      "BH",
+      "BN",
+      "CJ",
+      "MM",
+      "SJ",
+      "SM"
+     ]
+    },
+    {
+     "region": "Sud",
+     "seat": "PH",
+     "seatPopulation": 757213,
+     "counties": [
+      "AG",
+      "CL",
+      "DB",
+      "GR",
+      "IL",
+      "PH",
+      "TR"
+     ]
+    },
+    {
+     "region": "Sud-Est",
+     "seat": "CT",
+     "seatPopulation": 748860,
+     "counties": [
+      "BR",
+      "BZ",
+      "CT",
+      "GL",
+      "TL",
+      "VN"
+     ]
+    },
+    {
+     "region": "Sud-Vest",
+     "seat": "DJ",
+     "seatPopulation": 667708,
+     "counties": [
+      "DJ",
+      "GJ",
+      "MH",
+      "OT",
+      "VL"
+     ]
+    },
+    {
+     "region": "Vest",
+     "seat": "TM",
+     "seatPopulation": 762776,
+     "counties": [
+      "AR",
+      "CS",
+      "HD",
+      "TM"
+     ]
+    }
+   ]
   },
   {
    "code": "dsv",
@@ -1264,66 +1708,106 @@
     "VN",
     "VS"
    ],
-   "byRegion": {
-    "București-Ilfov": [
-     "B",
-     "IF"
-    ],
-    "Centru": [
-     "AB",
-     "BV",
-     "CV",
-     "HR",
-     "MS",
-     "SB"
-    ],
-    "Nord-Est": [
-     "BC",
-     "BT",
-     "IS",
-     "NT",
-     "SV",
-     "VS"
-    ],
-    "Nord-Vest": [
-     "BH",
-     "BN",
-     "CJ",
-     "MM",
-     "SJ",
-     "SM"
-    ],
-    "Sud": [
-     "AG",
-     "CL",
-     "DB",
-     "GR",
-     "IL",
-     "PH",
-     "TR"
-    ],
-    "Sud-Est": [
-     "BR",
-     "BZ",
-     "CT",
-     "GL",
-     "TL",
-     "VN"
-    ],
-    "Sud-Vest": [
-     "DJ",
-     "GJ",
-     "MH",
-     "OT",
-     "VL"
-    ],
-    "Vest": [
-     "AR",
-     "CS",
-     "HD",
-     "TM"
-    ]
-   }
+   "regions": [
+    {
+     "region": "București-Ilfov",
+     "seat": "B",
+     "seatPopulation": 2143578,
+     "counties": [
+      "B",
+      "IF"
+     ]
+    },
+    {
+     "region": "Centru",
+     "seat": "BV",
+     "seatPopulation": 641572,
+     "counties": [
+      "AB",
+      "BV",
+      "CV",
+      "HR",
+      "MS",
+      "SB"
+     ]
+    },
+    {
+     "region": "Nord-Est",
+     "seat": "IS",
+     "seatPopulation": 993235,
+     "counties": [
+      "BC",
+      "BT",
+      "IS",
+      "NT",
+      "SV",
+      "VS"
+     ]
+    },
+    {
+     "region": "Nord-Vest",
+     "seat": "CJ",
+     "seatPopulation": 744031,
+     "counties": [
+      "BH",
+      "BN",
+      "CJ",
+      "MM",
+      "SJ",
+      "SM"
+     ]
+    },
+    {
+     "region": "Sud",
+     "seat": "PH",
+     "seatPopulation": 757213,
+     "counties": [
+      "AG",
+      "CL",
+      "DB",
+      "GR",
+      "IL",
+      "PH",
+      "TR"
+     ]
+    },
+    {
+     "region": "Sud-Est",
+     "seat": "CT",
+     "seatPopulation": 748860,
+     "counties": [
+      "BR",
+      "BZ",
+      "CT",
+      "GL",
+      "TL",
+      "VN"
+     ]
+    },
+    {
+     "region": "Sud-Vest",
+     "seat": "DJ",
+     "seatPopulation": 667708,
+     "counties": [
+      "DJ",
+      "GJ",
+      "MH",
+      "OT",
+      "VL"
+     ]
+    },
+    {
+     "region": "Vest",
+     "seat": "TM",
+     "seatPopulation": 762776,
+     "counties": [
+      "AR",
+      "CS",
+      "HD",
+      "TM"
+     ]
+    }
+   ]
   },
   {
    "code": "itcsms",
@@ -1363,52 +1847,87 @@
     "VN",
     "VS"
    ],
-   "byRegion": {
-    "Centru": [
-     "AB",
-     "BV",
-     "HR",
-     "MS"
-    ],
-    "Nord-Est": [
-     "BT",
-     "IS",
-     "NT",
-     "SV",
-     "VS"
-    ],
-    "Nord-Vest": [
-     "BH",
-     "CJ",
-     "SM"
-    ],
-    "Sud": [
-     "AG",
-     "CL",
-     "DB",
-     "GR",
-     "IL",
-     "PH",
-     "TR"
-    ],
-    "Sud-Est": [
-     "BR",
-     "BZ",
-     "CT",
-     "GL",
-     "TL",
-     "VN"
-    ],
-    "Sud-Vest": [
-     "DJ",
-     "MH",
-     "OT"
-    ],
-    "Vest": [
-     "AR",
-     "TM"
-    ]
-   }
+   "regions": [
+    {
+     "region": "Centru",
+     "seat": "BV",
+     "seatPopulation": 641572,
+     "counties": [
+      "AB",
+      "BV",
+      "HR",
+      "MS"
+     ]
+    },
+    {
+     "region": "Nord-Est",
+     "seat": "IS",
+     "seatPopulation": 993235,
+     "counties": [
+      "BT",
+      "IS",
+      "NT",
+      "SV",
+      "VS"
+     ]
+    },
+    {
+     "region": "Nord-Vest",
+     "seat": "CJ",
+     "seatPopulation": 744031,
+     "counties": [
+      "BH",
+      "CJ",
+      "SM"
+     ]
+    },
+    {
+     "region": "Sud",
+     "seat": "PH",
+     "seatPopulation": 757213,
+     "counties": [
+      "AG",
+      "CL",
+      "DB",
+      "GR",
+      "IL",
+      "PH",
+      "TR"
+     ]
+    },
+    {
+     "region": "Sud-Est",
+     "seat": "CT",
+     "seatPopulation": 748860,
+     "counties": [
+      "BR",
+      "BZ",
+      "CT",
+      "GL",
+      "TL",
+      "VN"
+     ]
+    },
+    {
+     "region": "Sud-Vest",
+     "seat": "DJ",
+     "seatPopulation": 667708,
+     "counties": [
+      "DJ",
+      "MH",
+      "OT"
+     ]
+    },
+    {
+     "region": "Vest",
+     "seat": "TM",
+     "seatPopulation": 762776,
+     "counties": [
+      "AR",
+      "TM"
+     ]
+    }
+   ]
   },
   {
    "code": "apm",
@@ -1432,34 +1951,64 @@
     "TR",
     "VN"
    ],
-   "byRegion": {
-    "Centru": [
-     "BV",
-     "MS"
-    ],
-    "Nord-Est": [
-     "BC",
-     "IS",
-     "NT",
-     "SV"
-    ],
-    "Nord-Vest": [
-     "BN",
-     "CJ",
-     "MM"
-    ],
-    "Sud": [
-     "PH",
-     "TR"
-    ],
-    "Sud-Est": [
-     "TL",
-     "VN"
-    ],
-    "Sud-Vest": [
-     "DJ"
-    ]
-   }
+   "regions": [
+    {
+     "region": "Centru",
+     "seat": "BV",
+     "seatPopulation": 641572,
+     "counties": [
+      "BV",
+      "MS"
+     ]
+    },
+    {
+     "region": "Nord-Est",
+     "seat": "IS",
+     "seatPopulation": 993235,
+     "counties": [
+      "BC",
+      "IS",
+      "NT",
+      "SV"
+     ]
+    },
+    {
+     "region": "Nord-Vest",
+     "seat": "CJ",
+     "seatPopulation": 744031,
+     "counties": [
+      "BN",
+      "CJ",
+      "MM"
+     ]
+    },
+    {
+     "region": "Sud",
+     "seat": "PH",
+     "seatPopulation": 757213,
+     "counties": [
+      "PH",
+      "TR"
+     ]
+    },
+    {
+     "region": "Sud-Est",
+     "seat": "VN",
+     "seatPopulation": 371065,
+     "counties": [
+      "TL",
+      "VN"
+     ]
+    },
+    {
+     "region": "Sud-Vest",
+     "seat": "DJ",
+     "seatPopulation": 667708,
+     "counties": [
+      "DJ"
+     ]
+    }
+   ]
   },
   {
    "code": "djt",
@@ -1476,25 +2025,50 @@
     "SB",
     "VL"
    ],
-   "byRegion": {
-    "Centru": [
-     "SB"
-    ],
-    "Sud": [
-     "DB",
-     "PH"
-    ],
-    "Sud-Est": [
-     "BZ"
-    ],
-    "Sud-Vest": [
-     "GJ",
-     "VL"
-    ],
-    "Vest": [
-     "CS"
-    ]
-   }
+   "regions": [
+    {
+     "region": "Centru",
+     "seat": "SB",
+     "seatPopulation": 467877,
+     "counties": [
+      "SB"
+     ]
+    },
+    {
+     "region": "Sud",
+     "seat": "PH",
+     "seatPopulation": 757213,
+     "counties": [
+      "DB",
+      "PH"
+     ]
+    },
+    {
+     "region": "Sud-Est",
+     "seat": "BZ",
+     "seatPopulation": 440313,
+     "counties": [
+      "BZ"
+     ]
+    },
+    {
+     "region": "Sud-Vest",
+     "seat": "VL",
+     "seatPopulation": 384967,
+     "counties": [
+      "GJ",
+      "VL"
+     ]
+    },
+    {
+     "region": "Vest",
+     "seat": "CS",
+     "seatPopulation": 300931,
+     "counties": [
+      "CS"
+     ]
+    }
+   ]
   },
   {
    "code": "imm",
@@ -1507,17 +2081,32 @@
     "CT",
     "PH"
    ],
-   "byRegion": {
-    "Centru": [
-     "BV"
-    ],
-    "Sud": [
-     "PH"
-    ],
-    "Sud-Est": [
-     "CT"
-    ]
-   }
+   "regions": [
+    {
+     "region": "Centru",
+     "seat": "BV",
+     "seatPopulation": 641572,
+     "counties": [
+      "BV"
+     ]
+    },
+    {
+     "region": "Sud",
+     "seat": "PH",
+     "seatPopulation": 757213,
+     "counties": [
+      "PH"
+     ]
+    },
+    {
+     "region": "Sud-Est",
+     "seat": "CT",
+     "seatPopulation": 748860,
+     "counties": [
+      "CT"
+     ]
+    }
+   ]
   },
   {
    "code": "anpc",
@@ -1528,11 +2117,16 @@
    "counties": [
     "BV"
    ],
-   "byRegion": {
-    "Centru": [
-     "BV"
-    ]
-   }
+   "regions": [
+    {
+     "region": "Centru",
+     "seat": "BV",
+     "seatPopulation": 641572,
+     "counties": [
+      "BV"
+     ]
+    }
+   ]
   },
   {
    "code": "dgfp",
@@ -1550,32 +2144,72 @@
     "PH",
     "TM"
    ],
-   "byRegion": {
-    "București-Ilfov": [
-     "B"
-    ],
-    "Centru": [
-     "BV"
-    ],
-    "Nord-Est": [
-     "IS"
-    ],
-    "Nord-Vest": [
-     "CJ"
-    ],
-    "Sud": [
-     "PH"
-    ],
-    "Sud-Est": [
-     "GL"
-    ],
-    "Sud-Vest": [
-     "DJ"
-    ],
-    "Vest": [
-     "TM"
-    ]
-   }
+   "regions": [
+    {
+     "region": "București-Ilfov",
+     "seat": "B",
+     "seatPopulation": 2143578,
+     "counties": [
+      "B"
+     ]
+    },
+    {
+     "region": "Centru",
+     "seat": "BV",
+     "seatPopulation": 641572,
+     "counties": [
+      "BV"
+     ]
+    },
+    {
+     "region": "Nord-Est",
+     "seat": "IS",
+     "seatPopulation": 993235,
+     "counties": [
+      "IS"
+     ]
+    },
+    {
+     "region": "Nord-Vest",
+     "seat": "CJ",
+     "seatPopulation": 744031,
+     "counties": [
+      "CJ"
+     ]
+    },
+    {
+     "region": "Sud",
+     "seat": "PH",
+     "seatPopulation": 757213,
+     "counties": [
+      "PH"
+     ]
+    },
+    {
+     "region": "Sud-Est",
+     "seat": "GL",
+     "seatPopulation": 625067,
+     "counties": [
+      "GL"
+     ]
+    },
+    {
+     "region": "Sud-Vest",
+     "seat": "DJ",
+     "seatPopulation": 667708,
+     "counties": [
+      "DJ"
+     ]
+    },
+    {
+     "region": "Vest",
+     "seat": "TM",
+     "seatPopulation": 762776,
+     "counties": [
+      "TM"
+     ]
+    }
+   ]
   },
   {
    "code": "garda-forestiera",
@@ -1594,33 +2228,73 @@
     "VL",
     "VN"
    ],
-   "byRegion": {
-    "București-Ilfov": [
-     "B"
-    ],
-    "Centru": [
-     "BV"
-    ],
-    "Nord-Est": [
-     "SV"
-    ],
-    "Nord-Vest": [
-     "BH",
-     "CJ"
-    ],
-    "Sud": [
-     "PH"
-    ],
-    "Sud-Est": [
-     "VN"
-    ],
-    "Sud-Vest": [
-     "VL"
-    ],
-    "Vest": [
-     "TM"
-    ]
-   }
+   "regions": [
+    {
+     "region": "București-Ilfov",
+     "seat": "B",
+     "seatPopulation": 2143578,
+     "counties": [
+      "B"
+     ]
+    },
+    {
+     "region": "Centru",
+     "seat": "BV",
+     "seatPopulation": 641572,
+     "counties": [
+      "BV"
+     ]
+    },
+    {
+     "region": "Nord-Est",
+     "seat": "SV",
+     "seatPopulation": 764726,
+     "counties": [
+      "SV"
+     ]
+    },
+    {
+     "region": "Nord-Vest",
+     "seat": "CJ",
+     "seatPopulation": 744031,
+     "counties": [
+      "BH",
+      "CJ"
+     ]
+    },
+    {
+     "region": "Sud",
+     "seat": "PH",
+     "seatPopulation": 757213,
+     "counties": [
+      "PH"
+     ]
+    },
+    {
+     "region": "Sud-Est",
+     "seat": "VN",
+     "seatPopulation": 371065,
+     "counties": [
+      "VN"
+     ]
+    },
+    {
+     "region": "Sud-Vest",
+     "seat": "VL",
+     "seatPopulation": 384967,
+     "counties": [
+      "VL"
+     ]
+    },
+    {
+     "region": "Vest",
+     "seat": "TM",
+     "seatPopulation": 762776,
+     "counties": [
+      "TM"
+     ]
+    }
+   ]
   },
   {
    "code": "anrsps",
@@ -1645,39 +2319,79 @@
     "SJ",
     "VL"
    ],
-   "byRegion": {
-    "București-Ilfov": [
-     "B",
-     "IF"
-    ],
-    "Centru": [
-     "BV",
-     "SB"
-    ],
-    "Nord-Est": [
-     "BC",
-     "BT",
-     "NT"
-    ],
-    "Nord-Vest": [
-     "SJ"
-    ],
-    "Sud": [
-     "AG",
-     "DB",
-     "PH"
-    ],
-    "Sud-Est": [
-     "BZ"
-    ],
-    "Sud-Vest": [
-     "GJ",
-     "VL"
-    ],
-    "Vest": [
-     "CS"
-    ]
-   }
+   "regions": [
+    {
+     "region": "București-Ilfov",
+     "seat": "B",
+     "seatPopulation": 2143578,
+     "counties": [
+      "B",
+      "IF"
+     ]
+    },
+    {
+     "region": "Centru",
+     "seat": "BV",
+     "seatPopulation": 641572,
+     "counties": [
+      "BV",
+      "SB"
+     ]
+    },
+    {
+     "region": "Nord-Est",
+     "seat": "BC",
+     "seatPopulation": 717335,
+     "counties": [
+      "BC",
+      "BT",
+      "NT"
+     ]
+    },
+    {
+     "region": "Nord-Vest",
+     "seat": "SJ",
+     "seatPopulation": 238045,
+     "counties": [
+      "SJ"
+     ]
+    },
+    {
+     "region": "Sud",
+     "seat": "PH",
+     "seatPopulation": 757213,
+     "counties": [
+      "AG",
+      "DB",
+      "PH"
+     ]
+    },
+    {
+     "region": "Sud-Est",
+     "seat": "BZ",
+     "seatPopulation": 440313,
+     "counties": [
+      "BZ"
+     ]
+    },
+    {
+     "region": "Sud-Vest",
+     "seat": "VL",
+     "seatPopulation": 384967,
+     "counties": [
+      "GJ",
+      "VL"
+     ]
+    },
+    {
+     "region": "Vest",
+     "seat": "CS",
+     "seatPopulation": 300931,
+     "counties": [
+      "CS"
+     ]
+    }
+   ]
   },
   {
    "code": "delta",
@@ -1688,11 +2402,16 @@
    "counties": [
     "TL"
    ],
-   "byRegion": {
-    "Sud-Est": [
-     "TL"
-    ]
-   }
+   "regions": [
+    {
+     "region": "Sud-Est",
+     "seat": "TL",
+     "seatPopulation": 222505,
+     "counties": [
+      "TL"
+     ]
+    }
+   ]
   },
   {
    "code": "cas-mai",
@@ -1703,11 +2422,16 @@
    "counties": [
     "B"
    ],
-   "byRegion": {
-    "București-Ilfov": [
-     "B"
-    ]
-   }
+   "regions": [
+    {
+     "region": "București-Ilfov",
+     "seat": "B",
+     "seatPopulation": 2143578,
+     "counties": [
+      "B"
+     ]
+    }
+   ]
   },
   {
    "code": "anofm-centru",
@@ -1718,11 +2442,16 @@
    "counties": [
     "BV"
    ],
-   "byRegion": {
-    "Centru": [
-     "BV"
-    ]
-   }
+   "regions": [
+    {
+     "region": "Centru",
+     "seat": "BV",
+     "seatPopulation": 641572,
+     "counties": [
+      "BV"
+     ]
+    }
+   ]
   }
  ],
  "summary": {
@@ -1766,11 +2495,11 @@
    ]
   },
   {
-   "id": "regional-seat-unknown",
-   "text": "Sursa nu spune care va fi sediul unei direcții regionale. Modelul numără birourile, nu le așază pe hartă.",
+   "id": "seat-is-assumed",
+   "text": "Sursa nu desemnează sediile regionale. Regula de aici — județul cel mai populat din regiune — este o presupunere de politică publică, nu un fapt din sursă; este scrisă în seatRule și poate fi contrazisă.",
    "severity": "material",
    "affects": [
-    "summary"
+    "families"
    ]
   },
   {

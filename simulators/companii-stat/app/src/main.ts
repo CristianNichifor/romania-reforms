@@ -90,12 +90,66 @@ function selectCluster(cluster: Cluster): void {
   }
   $('#detail-title').hidden = false;
   $('#detail-note').hidden = false;
-  const headcount = cluster.headcountKnown > 0
-    ? `; efectivul este raportat doar de ${cluster.headcountKnown.toLocaleString('ro-RO')} dintre ele, deci cei ${cluster.employees.toLocaleString('ro-RO')} de angajați sunt o limită inferioară`
-    : '';
-  $('#detail-note').textContent = cluster.tier === 'regional'
-    ? `${cluster.name} (${cluster.caen}): ${cluster.companies.toLocaleString('ro-RO')} de entități, propuse ${cluster.proposed.toLocaleString('ro-RO')} — câte un operator pe fiecare regiune de dezvoltare${headcount}. Dintre ele, ${cluster.micro.toLocaleString('ro-RO')} au sub 20 de angajați și sunt candidate la absorbție sau lichidare indiferent de regulă.`
-    : `${cluster.name} (${cluster.caen}): ${cluster.companies.toLocaleString('ro-RO')} de entități, lăsate nemodificate — nivelul „${TIER_LABELS[cluster.tier]}”${headcount}.`;
+  const grid = $('#operator-grid');
+  grid.replaceChildren();
+  if (cluster.tier === 'regional' && cluster.regions && cluster.regions.length > 0) {
+    $('#detail-note').textContent =
+      `${cluster.name} (${cluster.caen}): ${cluster.companies.toLocaleString('ro-RO')} de entități, propuse ${cluster.proposed.toLocaleString('ro-RO')} — operatorii de mai jos. Regula de sediu și de nucleu este scrisă ca presupunere în datele paginii, nu este din sursă.`;
+    for (const group of cluster.regions) {
+      const card = document.createElement('div');
+      card.className = 'region-card';
+      const title = document.createElement('div');
+      title.className = 'region-name';
+      title.textContent = group.region;
+      const seat = document.createElement('div');
+      seat.className = 'region-seat';
+      seat.textContent = group.absorber
+        ? `nucleu: ${group.absorber.name} (${group.absorber.employees.toLocaleString('ro-RO')} ang.) — județul ${group.seatCounty}`
+        : `județul ${group.seatCounty} — niciun efectiv raportat, nucleul rămâne nenumit`;
+      const count = document.createElement('div');
+      count.className = 'region-count';
+      count.textContent = `absoarbe ${group.absorbedCount.toLocaleString('ro-RO')} entități`;
+      const details = document.createElement('details');
+      details.className = 'absorbed-list';
+      const summary = document.createElement('summary');
+      summary.textContent = 'Lista celor absorbite';
+      const list = document.createElement('ul');
+      list.className = 'absorbed-names';
+      for (const company of group.absorbed) {
+        const li = document.createElement('li');
+        li.textContent = company.county ? `${company.name} (${company.county})` : company.name;
+        list.appendChild(li);
+      }
+      details.append(summary, list);
+      card.append(title, seat, count, details);
+      grid.appendChild(card);
+    }
+    grid.hidden = false;
+  } else {
+    grid.hidden = true;
+    const headcount = cluster.headcountKnown > 0
+      ? `; efectivul este raportat doar de ${cluster.headcountKnown.toLocaleString('ro-RO')} dintre ele, deci cei ${cluster.employees.toLocaleString('ro-RO')} de angajați sunt o limită inferioară`
+      : '';
+    $('#detail-note').textContent =
+      `${cluster.name} (${cluster.caen}): ${cluster.companies.toLocaleString('ro-RO')} de entități, lăsate nemodificate — nivelul „${TIER_LABELS[cluster.tier]}”${headcount}.`;
+  }
+}
+
+function renderFusions(): void {
+  if (doc.inFlightMergers.length === 0) return;
+  $('#fusions-title').hidden = false;
+  $('#fusions-note').hidden = false;
+  $('#fusions-scroll').hidden = false;
+  const tbody = $('#fusions-rows');
+  tbody.replaceChildren();
+  for (const merger of doc.inFlightMergers) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <th scope="row">${merger.name}</th>
+      <td class="num">${merger.caen ?? '—'}</td>
+      <td>${merger.status}</td>`;
+    tbody.appendChild(tr);
+  }
 }
 
 function renderCaveats(): void {
@@ -156,6 +210,7 @@ async function main(): Promise<void> {
   wireControls();
   buildRows();
   renderCaveats();
+  renderFusions();
   $('#argument').hidden = false;
 }
 
