@@ -46,13 +46,16 @@ First slice:
   person, role, raw amount strings and fixed/variable compensation fields;
 - done: define the full mart schema, release-asset policy and `salarizare` consumer contract
   without committing the generated row-level mart;
-- done: build `public-enterprise-administrative-footprint-2024-2026`, a committed
+- done: build `public-enterprise-administrative-footprint-2024-2026`, a release-asset-backed
   authority/UAT/county aggregate from companiidestat.ro reference endpoints, matched
   conservatively to `uat-registry-2026` and carrying explicit unmatched/ambiguous authority
   exclusions;
 - done: wire that aggregate into `administrativ` as `public-enterprise-footprint.json`, a
   SIRUTA-aligned numeric sidecar for the merged-unit detail panel with no CUI, enterprise or
   person rows in the browser payload;
+- done: move the full package aggregate to `data-v1` release assets because the tracked tree
+  has less than 1 MB of size-gate headroom; the compact `administrativ` sidecar remains
+  committed;
 - next: replace the comparison aggregate with the same contract built from official AMEPIP
   annexes and MFin/data.gov.ro financial statements, keeping companiidestat.ro as a validation
   source rather than the primary provenance.

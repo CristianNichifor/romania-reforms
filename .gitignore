@@ -74,6 +74,11 @@ packages/health_access/data/health-provider-point-capesaro-candidates-2024-2026.
 # sample in git; publish generated full marts as checksum-pinned release assets before use.
 packages/public_enterprise_governance/data/amepip-compensation-mart-*.json
 
+# The full public-enterprise administrative footprint is a derived aggregate and now exceeds
+# the tracked-tree headroom. Keep the compact administrativ sidecar in git; fetch or rebuild
+# this package-level validation payload when needed.
+packages/public_enterprise_governance/data/public-enterprise-administrative-footprint-2024-2026.json
+
 # The Romanian language pack for tesseract, fetched by hand for ocr_cache.py.
 # 2.3 MB of model weights that belong to the tesseract project, not to this repository.
 simulators/impozit-teren/tessdata/

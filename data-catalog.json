@@ -323,10 +323,10 @@
         "Compare AMEPIP financial indicators against Ministry of Finance/company finance totals where a CUI/year overlap exists.",
         "Reject dashboard aggregate-only snapshots as simulator inputs unless row-level export and provenance are available."
       ],
-      "storagePolicy": "Commit only small source notes, schemas and aggregate payloads; raw dashboard exports, workbooks and derived row-level marts should be release assets.",
+      "storagePolicy": "Commit only small source notes, schemas and compact app payloads; raw dashboard exports, workbooks, full aggregates and derived row-level marts should be release assets.",
       "nextSlice": {
         "scope": "Official-source administrative footprint",
-        "deliverable": "Replace the committed companiidestat.ro comparison aggregate with the same authority/UAT/county contract built from official AMEPIP annexes and MFin/data.gov.ro financial statements.",
+        "deliverable": "Replace the release-asset-backed companiidestat.ro comparison aggregate with the same authority/UAT/county contract built from official AMEPIP annexes and MFin/data.gov.ro financial statements.",
         "doneWhen": "administrativ consumes the same SIRUTA-aligned public-enterprise footprint with official-source hashes, named authority-match exclusions and no row-level company data in the browser."
       },
       "notes": [
@@ -334,7 +334,7 @@
         "amepip-source-inventory-2025-2026 inspected 10 AMEPIP PDFs from the KPI/report and CA/CS compensation pages: 8 KPI documents and 2 compensation documents. Six expose CUI-level rows; Annexes 1, 2 and 3 expose 170, 170 and 1212 company indicator blocks respectively.",
         "amepip-compensation-sample-august-2025 parses the August 2025 nominal compensation PDF into 833 CUI rows and commits a 50-row sample with CUI, APT, enterprise, person, role and fixed/variable compensation fields.",
         "amepip-compensation-mart.schema.json now defines the full row-level mart, release-asset policy and salarizare consumer contract; the generated full mart remains out of git until it is uploaded and checksum-pinned.",
-        "public-enterprise-administrative-footprint-2024-2026 commits an authority/UAT/county aggregate from companiidestat.ro reference endpoints, matched conservatively to uat-registry-2026 and consumed by administrativ through public-enterprise-footprint.json. The browser payload contains aligned numeric arrays only and no CUI, enterprise or person rows.",
+        "public-enterprise-administrative-footprint-2024-2026 is a data-v1 release asset with an authority/UAT/county aggregate from companiidestat.ro reference endpoints, matched conservatively to uat-registry-2026 and consumed by administrativ through committed public-enterprise-footprint.json. The browser payload contains aligned numeric arrays only and no CUI, enterprise or person rows.",
         "companiidestat.ro publishes a documented read-only API over public-company data under CC BY 4.0. It is useful for cross-checks and discovery, but this package still imports official AMEPIP PDFs directly for first-party provenance.",
         "Do not scrape opaque Power BI internals as a source of truth. Use official PDF/report attachments or a documented export/API path before importing dashboard-derived data."
       ]

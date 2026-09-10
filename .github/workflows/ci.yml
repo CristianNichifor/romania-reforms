@@ -15,7 +15,11 @@ jobs:
       - name: Repository size
         run: uv run python scripts/check_repo_size.py
       - name: Fetch release data
-        run: uv run python scripts/fetch_release_data.py --require local-finance-mart-2023-2025 --require salarizare-ro-draft-2026-07-16
+        run: >-
+          uv run python scripts/fetch_release_data.py
+          --require local-finance-mart-2023-2025
+          --require salarizare-ro-draft-2026-07-16
+          --require public-enterprise-administrative-footprint-2024-2026
       - name: Validate every simulator's data against its schema
         run: uv run --with referencing python scripts/validate_data.py
       - name: Pay grades and costs are reproducible

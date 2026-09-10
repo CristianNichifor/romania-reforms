@@ -83,17 +83,19 @@ This source family could serve more than one simulator:
    committed sample keeps 50 rows and summary metrics over all 833 parsed source rows.
 5. Done: define the full mart schema, release-asset policy and `salarizare` consumer contract.
    The importer can generate the full mart, but the generated row-level file stays out of git.
-6. Done: build `public-enterprise-administrative-footprint-2024-2026`, a compact
+6. Done: build `public-enterprise-administrative-footprint-2024-2026`, a release-asset-backed
    authority/UAT/county aggregate from the documented companiidestat.ro API. This is a
    comparison/reference layer under CC BY 4.0 attribution, not a replacement for official
    AMEPIP/MFin provenance.
 7. Done: expose the aggregate in `administrativ` through `public-enterprise-footprint.json`,
    aligned to the browser UAT index and containing only numeric arrays and summary metadata.
    The app does not load company, CUI or person rows.
-8. Next: rebuild the same administrative footprint contract from official AMEPIP annexes and
+8. Done: keep the full package aggregate out of git as a checksum-pinned `data-v1` release
+   asset; keep the compact `administrativ` sidecar committed because it is the app payload.
+9. Next: rebuild the same administrative footprint contract from official AMEPIP annexes and
    MFin/data.gov.ro statements, using companiidestat.ro as validation/discovery instead of
    primary source.
-9. Later: publish the compensation mart as a checksum-pinned release asset only when a compact
+10. Later: publish the compensation mart as a checksum-pinned release asset only when a compact
    `salarizare` comparison payload is ready to consume it without loading nominal rows in the
    browser.
 
