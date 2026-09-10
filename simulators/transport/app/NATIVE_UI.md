@@ -48,5 +48,18 @@ run the changed revision with only `NATIVE_UI_BASELINE` set. Baselines are local
 not committed data copies. CI continuously runs behavior and layout checks.
 This targeted suite is not whole-app accessibility certification.
 
-The existing Vite/esbuild development-tool advisories are a separate upgrade,
-not suppressed or fixed by this CSS adoption.
+## Development toolchain
+
+Use Node 22.12 or newer (CI uses Node 22). Vite is pinned to 7.3.6, matching the
+land-tax app; the existing explicit ES2022 build target remains unchanged.
+The upgrade removes the Vite 5/esbuild advisories without changing runtime
+dependencies: all 23 non-development lock entries remain identical.
+`npm audit` reported zero findings for this lockfile on 2026-09-10; this is a
+point-in-time result, not a future security guarantee. No audit suppression or
+forced dependency override is used.
+
+The [Vite 6](https://v6.vite.dev/guide/migration) and
+[Vite 7](https://v7.vite.dev/guide/migration) migration guidance was checked.
+The app uses no removed Sass API or custom plugin hooks. Browser comparisons
+retain all 18 pre-upgrade domain states across the three engines, alongside
+the existing offline map/worker and native-control checks.
