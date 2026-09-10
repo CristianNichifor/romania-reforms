@@ -189,3 +189,26 @@ def test_in_flight_mergers_are_reported_as_status_only(data):
         assert "fuziune" in merger["status"] or "absorb" in merger["status"].lower()
     assert data["summary"]["inFlightMergers"] == len(data["inFlightMergers"])
     assert "in-flight-status-only" in {x["id"] for x in data["limitations"]}
+
+
+def test_owners_join_and_stay_honest_about_the_gap(data):
+    """The owning authority comes from the AMEPIP anexa3 list; companies without a row are
+    listed, never guessed."""
+    if not COMPANIES.exists():
+        pytest.skip("the state-company import is not built")
+    source = json.loads(COMPANIES.read_text(encoding="utf-8"))
+    with_owner = [c for c in source["companies"] if c.get("owner")]
+    assert len(with_owner) > 1000
+    missing = source["dataQuality"]["unmatchedOwners"]
+    assert len(missing) + len(with_owner) == source["summary"]["companies"]
+    assert "owner-partial" in {x["id"] for x in data["limitations"]}
+    # the water portfolio is owned by more than a hundred distinct authorities
+    water = next(c for c in data["clusters"] if c["caen"] == "3600")
+    assert water["distinctOwners"] > 100
+
+
+def test_subsidies_reconcile_and_cover_the_reported_operators(data):
+    assert data["summary"]["subsidisedCount"] == sum(c["subsidisedCount"] for c in data["clusters"])
+    assert data["summary"]["subsidyRon"] == sum(c["subsidyRon"] for c in data["clusters"])
+    assert data["summary"]["subsidisedCount"] == 164
+    assert "subsidy-scope" in {x["id"] for x in data["limitations"]}

@@ -7,6 +7,7 @@ export interface AbsorbedCompany {
   cui: number;
   name: string;
   county: string | null;
+  owner: string | null;
 }
 
 export interface RegionOperator {
@@ -28,6 +29,9 @@ export interface Cluster {
   revenueRon: number;
   lossCount: number;
   debtRon: number;
+  distinctOwners: number;
+  subsidisedCount: number;
+  subsidyRon: number;
   proposed: number;
   regions?: RegionOperator[];
 }
@@ -50,6 +54,8 @@ export interface Summary {
   headcountKnown: number;
   revenueRon: number;
   lossMaking: number;
+  subsidisedCount: number;
+  subsidyRon: number;
   inFlightMergers: number;
 }
 
@@ -91,12 +97,12 @@ export function filtered(doc: Document, tiers: Set<Tier>): Cluster[] {
 
 export function sortBy(
   clusters: Cluster[],
-  key: 'name' | 'companies' | 'employees' | 'revenue' | 'reduction',
+  key: 'name' | 'companies' | 'employees' | 'revenue' | 'subsidy' | 'reduction',
   direction: 'asc' | 'desc',
 ): Cluster[] {
   const order = direction === 'asc' ? 1 : -1;
   const value = (c: Cluster): string | number =>
-    key === 'reduction' ? reduction(c) : key === 'name' ? c.name : key === 'revenue' ? c.revenueRon : c[key];
+    key === 'reduction' ? reduction(c) : key === 'name' ? c.name : key === 'revenue' ? c.revenueRon : key === 'subsidy' ? c.subsidyRon : c[key];
   return [...clusters].sort((a, b) => {
     const av = value(a);
     const bv = value(b);
