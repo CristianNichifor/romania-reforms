@@ -90,6 +90,22 @@ jobs:
           npm test
           npm run build
 
+      - name: Build deconcentrare
+        working-directory: simulators/deconcentrare/app
+        env:
+          VITE_BASE: /${{ github.event.repository.name }}/deconcentrare/
+        run: |
+          npm ci
+          npm run build
+
+      - name: Build companii-stat
+        working-directory: simulators/companii-stat/app
+        env:
+          VITE_BASE: /${{ github.event.repository.name }}/companii-stat/
+        run: |
+          npm ci
+          npm run build
+
       - name: Assemble the site
         run: |
           mkdir -p dist
@@ -100,6 +116,8 @@ jobs:
           cp -r simulators/justitie/app/dist dist/justitie
           cp -r simulators/impozit-teren/app/dist dist/impozit-teren
           cp -r simulators/transport/app/dist dist/transport
+          cp -r simulators/deconcentrare/app/dist dist/deconcentrare
+          cp -r simulators/companii-stat/app/dist dist/companii-stat
 
       # One deploy for the whole repository means a simulator that failed to build would
       # otherwise be published as a dead tile on the landing page — a link to a 404. Checked
@@ -117,7 +135,8 @@ jobs:
             echo "note speed-limit layer absent — the transport toggle will disable itself"
           fi
           for path in index.html salarizare/index.html administrativ/index.html \
-                      justitie/index.html transport/index.html impozit-teren/index.html; do
+                      justitie/index.html transport/index.html impozit-teren/index.html \
+                      deconcentrare/index.html companii-stat/index.html; do
             if [ -s "dist/$path" ]; then
               echo "ok   dist/$path"
             else
@@ -168,6 +187,15 @@ jobs:
               echo "MISSING dist/transport/data/$name"; fail=1
             fi
           done
+          # The two tabular simulators are one payload each: every number on their pages comes
+          # from the copy step, so a page without its payload would render a loading hint and
+          # nothing to argue with. Checked so a failed copy fails the deploy, not the reader.
+          if [ ! -s "dist/deconcentrare/data/deconcentrare.json" ]; then
+            echo "MISSING dist/deconcentrare/data/deconcentrare.json"; fail=1
+          fi
+          if [ ! -s "dist/companii-stat/data/companii-stat.json" ]; then
+            echo "MISSING dist/companii-stat/data/companii-stat.json"; fail=1
+          fi
           # Every simulator must offer a way back to the index. Without it each one is a
           # dead end: reachable from the landing page and never returning, which is how a
           # repository of simulators ends up behaving like a set of unrelated sites.
@@ -176,7 +204,8 @@ jobs:
           # survives minification as `className:"up"` and never as `class="up"`, so a check on
           # the attribute passed for three apps and failed for the one whose link is built by a
           # framework. The words a reader clicks are the thing being guaranteed anyway.
-          for sim in salarizare administrativ justitie transport impozit-teren; do
+          for sim in salarizare administrativ justitie transport impozit-teren \
+                     deconcentrare companii-stat; do
             if grep -rqs 'Toate simulatoarele' "dist/$sim/index.html" dist/$sim/assets/*.js; then
               echo "ok   dist/$sim has a link back"
             else
@@ -200,7 +229,8 @@ jobs:
           [ "$copies" = 1 ] || { echo "favicon copies have drifted apart"; fail=1; }
           for path in favicon.svg salarizare/favicon.svg administrativ/favicon.svg \
                       justitie/favicon.svg transport/favicon.svg \
-                      impozit-teren/favicon.svg; do
+                      impozit-teren/favicon.svg deconcentrare/favicon.svg \
+                      companii-stat/favicon.svg; do
             [ -s "dist/$path" ] || { echo "MISSING dist/$path"; fail=1; }
           done
           exit $fail

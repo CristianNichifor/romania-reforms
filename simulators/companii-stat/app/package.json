@@ -1,0 +1,21 @@
+{
+  "name": "companii-stat-app",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22.12.0" },
+  "scripts": {
+    "predev": "node scripts/copy-data.mjs",
+    "dev": "vite",
+    "prebuild": "node scripts/copy-data.mjs",
+    "build": "tsc --noEmit && vitest run src && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run src"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.0",
+    "typescript": "^5.6.3",
+    "vite": "7.3.6",
+    "vitest": "^4.1.11"
+  }
+}

@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ro">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <title>Serviciile deconcentrate — de la 41 de județe la opt regiuni</title>
+    <meta
+      name="description"
+      content="Statul ține câte un birou în aproape fiecare județ pentru aceeași familie de servicii: inspectorat de muncă, direcție de sănătate publică, casă de pensii. Ce ar însemna o singură direcție pe fiecare regiune de dezvoltare."
+    />
+  </head>
+  <body>
+    <main class="wrap">
+      <a class="up" href="../">← Toate simulatoarele</a>
+      <header class="masthead">
+        <h1>Serviciile deconcentrate, pe opt regiuni</h1>
+        <p class="lede">
+          Un singur birou pe județ, de 41 de ori: inspectoratul de muncă, direcția de sănătate
+          publică, casa de pensii, agenția de ocupare, centrul de plăți agricole. Întrebarea de
+          aici este ce s-ar schimba dacă fiecare familie ar avea <em>o singură direcție pe fiecare
+          regiune de dezvoltare</em> — opt în loc de 41, aceleași opt regiuni pe care simulatorul
+          de justiție le folosește pentru curțile de apel.
+        </p>
+      </header>
+
+      <p class="loading" role="status">Se încarcă registrul…</p>
+
+      <section id="stats" class="stats" aria-label="Numerele principale" hidden>
+        <div class="stat">
+          <span class="big" id="stat-total">—</span>
+          <span class="small">birouri deconcentrate în registrul ANFP 2025</span>
+        </div>
+        <div class="stat">
+          <span class="big" id="stat-merge">—</span>
+          <span class="small">în cele <span id="stat-families">—</span> familii regionalizabile</span>
+        </div>
+        <div class="stat">
+          <span class="big" id="stat-after">—</span>
+          <span class="small">direcții pe opt regiuni, după comasare</span>
+        </div>
+        <div class="stat">
+          <span class="big" id="stat-cut">—</span>
+          <span class="small">mai puține birouri</span>
+        </div>
+      </section>
+
+      <p class="hint" id="stats-note" hidden>
+        Restul registrului: birouri deja regionale sau speciale, serviciile municipale ale
+        Bucureștiului și sectoarelor. Lista ANFP acoperă instituțiile care gestionează
+        <em>funcții publice</em>; serviciile cu personal contractual apar incomplet, deci
+        numărul real de birouri de comasat este mai mare, nu mai mic.
+      </p>
+
+      <section id="families" aria-label="Familiile de servicii" hidden>
+        <div class="filters" role="group" aria-label="Filtru pe niveluri">
+          <button class="tier on" data-tier="all">toate</button>
+          <button class="tier" data-tier="regional">regionalizabile</button>
+          <button class="tier" data-tier="regional-de-facto">deja regionale</button>
+          <button class="tier" data-tier="special">speciale</button>
+        </div>
+
+        <div class="table-scroll" role="region" aria-label="Familiile de servicii deconcentrate" tabindex="0">
+          <table id="family-table">
+            <thead>
+              <tr>
+                <th scope="col" class="sortable" data-key="name">Familia</th>
+                <th scope="col">Nivel</th>
+                <th scope="col" class="sortable num" data-key="officesToday">Birouri azi</th>
+                <th scope="col" class="sortable num" data-key="officesProposed">Propuse</th>
+                <th scope="col" class="sortable num" data-key="reduction">Reducere</th>
+                <th scope="col" class="num">Regiuni atinse</th>
+              </tr>
+            </thead>
+            <tbody id="family-rows"></tbody>
+          </table>
+        </div>
+
+        <h2 id="detail-title" hidden>Pe regiuni</h2>
+        <p class="hint" id="detail-note" hidden></p>
+        <div id="region-grid" class="regions" hidden></div>
+      </section>
+
+      <section id="caveats" aria-label="Limitele datelor" hidden>
+        <h2>Ce nu spune această pagină</h2>
+        <ul id="caveat-list"></ul>
+      </section>
+
+      <p class="foot">
+        Un instrument pentru dezbatere publică, nu o propunere. Sursa: lista ANFP a instituțiilor
+        care raportează funcții publice, 2025, data.gov.ro; împărțirea pe regiuni este aceeași cu
+        varianta <em>curti-apel-regiuni</em> din simulatorul de justiție.
+      </p>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

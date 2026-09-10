@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ro">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <title>Companiile statului, pe activități</title>
+    <meta
+      name="description"
+      content="Statul nu deține un singur portofoliu, ci sute de operatori de apă, deșeuri, spații verzi — câte unul pe comună, oraș sau județ. Ce ar însemna un singur operator pe regiune pentru utilitățile de rețea."
+    />
+  </head>
+  <body>
+    <main class="wrap">
+      <a class="up" href="../">← Toate simulatoarele</a>
+      <header class="masthead">
+        <h1>Companiile statului, pe activități</h1>
+        <p class="lede">
+          Statul nu deține un singur portofoliu. Deține sute de operatori de apă, deșeuri,
+          spații verzi și termie — câte unul pe comună, oraș sau județ — iar lângă ele
+          deținerile strategice naționale: energie, armament, aeroporturi. Întrebarea de aici
+          este ce s-ar schimba dacă <em>utilitățile de rețea</em>, al căror teritoriu natural
+          este o regiune sau un bazin, ar avea câte <em>un singur operator pe fiecare regiune de
+          dezvoltare</em> — opt în loc de câte există.
+        </p>
+      </header>
+
+      <p class="loading" role="status">Se încarcă registrul…</p>
+
+      <section id="stats" class="stats" aria-label="Numerele principale" hidden>
+        <div class="stat">
+          <span class="big" id="stat-total">—</span>
+          <span class="small">companii în evidență</span>
+        </div>
+        <div class="stat">
+          <span class="big" id="stat-merge">—</span>
+          <span class="small">în cele <span id="stat-clusters">—</span> activități de rețea regionalizabile</span>
+        </div>
+        <div class="stat">
+          <span class="big" id="stat-after">—</span>
+          <span class="small">operatori pe opt regiuni, după comasare</span>
+        </div>
+        <div class="stat">
+          <span class="big" id="stat-cut">—</span>
+          <span class="small">mai puține entități</span>
+        </div>
+      </section>
+
+      <p class="hint" id="stats-note" hidden>
+        <span id="stat-micro">—</span> de companii au sub 20 de angajați, indiferent de regulă.
+        Efectivul de personal este raportat doar de <span id="stat-headcount">—</span> companii,
+        deci orice total de angajați de aici este o <em>limită inferioară</em>, nu o estimare.
+      </p>
+
+      <section id="clusters" aria-label="Activitățile companiilor de stat" hidden>
+        <div class="filters" role="group" aria-label="Filtru pe niveluri">
+          <button class="tier on" data-tier="all">toate</button>
+          <button class="tier" data-tier="regional">de rețea</button>
+          <button class="tier" data-tier="national">naționale</button>
+          <button class="tier" data-tier="local">locale</button>
+          <button class="tier" data-tier="other">altele</button>
+        </div>
+
+        <div class="table-scroll" role="region" aria-label="Companiile de stat pe activități" tabindex="0">
+          <table id="cluster-table">
+            <thead>
+              <tr>
+                <th scope="col" class="num">CAEN</th>
+                <th scope="col" class="sortable" data-key="name">Activitatea</th>
+                <th scope="col">Nivel</th>
+                <th scope="col" class="sortable num" data-key="companies">Companii azi</th>
+                <th scope="col" class="num">Propuse</th>
+                <th scope="col" class="sortable num" data-key="reduction">Reducere</th>
+                <th scope="col" class="sortable num" data-key="employees">Angajați (min.)</th>
+                <th scope="col" class="num">Sub 20</th>
+              </tr>
+            </thead>
+            <tbody id="cluster-rows"></tbody>
+          </table>
+        </div>
+
+        <h2 id="detail-title" hidden>Detalii</h2>
+        <p class="hint" id="detail-note" hidden></p>
+      </section>
+
+      <section id="caveats" aria-label="Limitele datelor" hidden>
+        <h2>Ce nu spune această pagină</h2>
+        <ul id="caveat-list"></ul>
+      </section>
+
+      <p class="foot">
+        Un instrument pentru dezbatere publică, nu o propunere. Sursa: registrul companiilor de
+        stat cu indicatori financiari și nefinanciari (finnefin / companiidestat.ro), 2019–2024.
+        Care activități se regionalizează este o judecată de politică publică, nu un fapt din
+        sursă.
+      </p>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

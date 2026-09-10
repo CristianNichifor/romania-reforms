@@ -342,3 +342,45 @@ jobs:
           path: ${{ runner.temp }}/land-tax-ui-results
           if-no-files-found: ignore
           retention-days: 7
+
+  deconcentrare:
+    name: deconcentrare
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Pipeline lint
+        run: |
+          uvx ruff check simulators/deconcentrare
+          uvx ruff format --check simulators/deconcentrare
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: App
+        working-directory: simulators/deconcentrare/app
+        run: |
+          npm ci
+          npm run build
+
+  companii-stat:
+    name: companii-stat
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Pipeline lint
+        run: |
+          uvx ruff check simulators/companii-stat
+          uvx ruff format --check simulators/companii-stat
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: App
+        working-directory: simulators/companii-stat/app
+        run: |
+          npm ci
+          npm run build
