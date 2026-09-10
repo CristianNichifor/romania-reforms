@@ -110,6 +110,7 @@ jobs:
         run: |
           mkdir -p dist
           cp site/index.html dist/index.html
+          cp site/brief.html dist/brief.html
           cp site/favicon.svg dist/favicon.svg
           cp -r simulators/salarizare/app/dist dist/salarizare
           cp -r simulators/administrativ/web/dist dist/administrativ
@@ -134,7 +135,7 @@ jobs:
           else
             echo "note speed-limit layer absent — the transport toggle will disable itself"
           fi
-          for path in index.html salarizare/index.html administrativ/index.html \
+          for path in index.html brief.html salarizare/index.html administrativ/index.html \
                       justitie/index.html transport/index.html impozit-teren/index.html \
                       deconcentrare/index.html companii-stat/index.html; do
             if [ -s "dist/$path" ]; then
