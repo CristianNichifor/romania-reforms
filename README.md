@@ -1129,7 +1129,9 @@ Five edits, deliberately by hand:
 4. A line in that workflow's assembly step, and its path in the check below it — the check is
    what stops a simulator that failed to build appearing on the landing page as a link to a
    404.
-5. A card in `site/index.html`.
+5. A card in `site/index.html`, in the **Simulatoare** section. The **Monitoare** section below it
+   holds tools that read the public record rather than model a proposal, and they live in their own
+   repositories — they are absolute links, deliberately outside the deploy check.
 
 **Not a registry, and not a shared build.** Three simulators have three shapes: one React, one
 not, one with no interface at all; `app/` in one and `web/` in another; different test

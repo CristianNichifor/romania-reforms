@@ -4,10 +4,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-    <title>Simulatoare de reformă — România</title>
+    <title>Simulatoare și monitoare — România</title>
     <meta
       name="description"
-      content="Simulatoare deterministe pentru reforme publice din România: administrativă, salarizare, justiție, transport."
+      content="Simulatoare deterministe pentru reforme publice din România — administrativă, salarizare, justiție, transport, impozit pe teren — și monitoare care citesc ce există deja: legislație și achiziții publice."
     />
     <style>
       :root {
@@ -51,6 +51,20 @@
       .lede {
         color: var(--muted);
         margin: 0 0 2.5rem;
+        max-width: 34rem;
+      }
+      h2 {
+        font-size: 1.15rem;
+        margin: 0 0 0.35rem;
+        letter-spacing: -0.01em;
+      }
+      section + section {
+        margin-top: 2.75rem;
+      }
+      .section-lede {
+        color: var(--muted);
+        font-size: 0.95rem;
+        margin: 0 0 1.1rem;
         max-width: 34rem;
       }
       ul {
@@ -102,10 +116,18 @@
   </head>
   <body>
     <main>
-      <h1>Simulatoare de reformă</h1>
+      <h1>Simulatoare și monitoare</h1>
       <p class="lede">
-        Fiecare simulator ia o propunere publicată, modelează ce spune de fapt, și te lasă să o
-        contrazici. Determinist, explicabil, rulează integral în browser.
+        Instrumente deterministe despre statul român, rulând integral în browser. Unele modelează
+        o propunere care încă nu s-a întâmplat; altele citesc ce s-a întâmplat deja. Distincția
+        contează, așa că paginile stau separat.
+      </p>
+
+      <section>
+      <h2>Simulatoare</h2>
+      <p class="section-lede">
+        Ce s-ar întâmpla dacă. Fiecare ia o propunere publicată, modelează ce spune de fapt, și te
+        lasă să o contrazici. Niciun număr de aici nu este o măsurătoare.
       </p>
 
       <ul>
@@ -154,10 +176,48 @@
           </a>
         </li>
       </ul>
+      </section>
+
+      <!--
+        The monitors live in their own repositories and deploy on their own schedule, so these
+        are absolute links rather than paths into dist/. The deploy check below the assembly step
+        only validates relative hrefs on purpose: a monitor's Pages build being briefly down is
+        not a reason to fail this repository's deploy.
+      -->
+      <section>
+      <h2>Monitoare</h2>
+      <p class="section-lede">
+        Ce există, de fapt. Acestea nu modelează nimic — citesc înregistrarea publică și o fac
+        interogabilă, cu sursa fiecărui rând.
+      </p>
+
+      <ul>
+        <li>
+          <a href="https://cristiannichifor.github.io/legislativ/">
+            <div class="name">Linter legislativ</div>
+            <div class="what">
+              Ce spune legea în vigoare despre un proiect de act normativ: termene legale
+              neîndeplinite, termeni care s-au schimbat pe drum și contradicții candidate — fiecare
+              constatare cu articolul din care vine.
+            </div>
+          </a>
+        </li>
+        <li>
+          <a href="https://cristiannichifor.github.io/achizitii-deschise/">
+            <div class="name">Achiziții publice</div>
+            <div class="what">
+              Prețurile unitare plătite de instituțiile din România, comparabile între autorități
+              și interogabile direct în browser. Format OCDS, date deschise.
+            </div>
+          </a>
+        </li>
+      </ul>
+      </section>
 
       <footer>
-        Instrumente pentru dezbatere publică, nu calculatoare de drepturi. Calculează ce spune un
-        document, nu ce primește cineva. ·
+        Instrumente pentru dezbatere publică, nu calculatoare de drepturi. Simulatoarele calculează
+        ce spune un document, nu ce primește cineva. Monitoarele raportează ce a fost publicat, nu
+        ce este corect. Unde datele nu ajung, pagina o spune. ·
         <a href="https://github.com/CristianNichifor/romania-reforms">Cod și metodologie</a>
       </footer>
     </main>
