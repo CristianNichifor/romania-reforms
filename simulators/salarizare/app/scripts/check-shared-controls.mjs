@@ -169,11 +169,11 @@ try {
   await tableLayouts('cap');
 
   await open('payslip?r=ro-draft-2026-08-20');
-  await page.locator('input[type=search]').fill('21.00303045.04');
+  await page.locator('input[type=search]').fill('Părinte social');
   const positions = page.locator('select[size]');
-  const position = positions.locator('option').filter({ hasText: /21\.00303045\.04/ });
+  const code = '21.00303045.04';
+  const position = positions.locator(`option[value="${code}"]`);
   await expect(position).toHaveCount(1);
-  const code = await position.first().getAttribute('value');
   await positions.selectOption(code);
   await snapshot('payslip-position');
   await page.locator('input[type=range]').last().fill('35');
