@@ -16,6 +16,9 @@ IMPORTER = (
     / "scripts"
     / "import_amepip_compensation.py"
 )
+COMPARISON_BUILDER = (
+    ROOT / "simulators" / "salarizare" / "scripts" / "build_amepip_compensation_comparison.py"
+)
 DATA = ROOT / "packages" / "public_enterprise_governance" / "data"
 INVENTORY = DATA / "amepip-source-inventory-2025-2026.json"
 SAMPLE = DATA / "amepip-compensation-sample-august-2025.json"
@@ -26,11 +29,20 @@ MART_SCHEMA = (
     / "schema"
     / "amepip-compensation-mart.schema.json"
 )
+FISCAL_SCHEMA = ROOT / "simulators" / "salarizare" / "schema" / "fiscal.schema.json"
 
 spec = importlib.util.spec_from_file_location("import_amepip_compensation", IMPORTER)
 assert spec and spec.loader
 import_amepip_compensation = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(import_amepip_compensation)
+
+comparison_spec = importlib.util.spec_from_file_location(
+    "build_amepip_compensation_comparison",
+    COMPARISON_BUILDER,
+)
+assert comparison_spec and comparison_spec.loader
+build_amepip_compensation_comparison = importlib.util.module_from_spec(comparison_spec)
+comparison_spec.loader.exec_module(build_amepip_compensation_comparison)
 
 sys.path.insert(0, str(ROOT / "scripts"))
 from validate_data import registry  # noqa: E402
@@ -190,6 +202,60 @@ def test_build_mart_document_declares_release_policy_and_salarizare_contract():
     limitation_ids = {limitation["id"] for limitation in document["limitations"]}
     assert "amepip-mart-release-required" in limitation_ids
     assert "amepip-sample-not-full-mart" not in limitation_ids
+
+
+def test_compensation_comparison_emits_aggregate_fiscal_series_without_nominal_keys():
+    source = {
+        "pay_scale_rows": [
+            {"kind": "ref", "label": "Salariu minim brut", "value": 4000},
+            {"kind": "ref", "label": "Salariu mediu brut 2025", "value": 10000},
+            {"kind": "ref", "label": "Președintele României", "value": 30000},
+            {"kind": "tier", "label": "COMPANIA A", "value": 50000},
+            {"kind": "tier", "label": "COMPANIA B", "value": 70000},
+            {"kind": "tier-top", "label": "COMPANIA C", "value": 90000},
+            {"kind": "extreme", "label": "COMPANIA C (cu bonus anual)", "value": 270000},
+        ]
+    }
+
+    document = build_amepip_compensation_comparison.build_comparison_document(
+        source,
+        retrieved_date="2026-09-10",
+    )
+
+    schema = json.loads(FISCAL_SCHEMA.read_text(encoding="utf-8"))
+    schema_document = dict(document)
+    schema_document.pop("$schema", None)
+    validator = Draft202012Validator(schema)
+    errors = sorted(validator.iter_errors(schema_document), key=lambda error: list(error.path))
+    assert errors == []
+
+    by_id = {series["id"]: series for series in document["series"]}
+    assert by_id["companiidestat-pay-scale-fixed-tier-count"]["observations"][0]["value"] == 3
+    assert by_id["companiidestat-pay-scale-fixed-median"]["observations"][0]["value"] == 70000
+    assert by_id["companiidestat-pay-scale-fixed-top"]["observations"][0]["value"] == 90000
+    assert (
+        by_id["companiidestat-pay-scale-extreme-monthly-equivalent"]["observations"][0]["value"]
+        == 270000
+    )
+    assert by_id["companiidestat-pay-scale-fixed-top-to-average-gross"]["unit"] == "RATE"
+
+    forbidden = {"cui", "enterpriseName", "authorityName", "personName"}
+
+    def walk(value: object) -> None:
+        if isinstance(value, dict):
+            assert forbidden.isdisjoint(value.keys())
+            for child in value.values():
+                walk(child)
+        elif isinstance(value, list):
+            for child in value:
+                walk(child)
+        elif isinstance(value, str):
+            assert "COMPANIA" not in value
+            assert "Ana Pop" not in value
+            assert "Ion Pop" not in value
+            assert "COMPANIA A" not in value
+
+    walk(document)
 
 
 def test_generated_full_mart_destination_is_gitignored():

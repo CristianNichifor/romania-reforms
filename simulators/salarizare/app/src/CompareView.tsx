@@ -62,6 +62,15 @@ interface Row {
   cells: Record<Col, Cell>;
 }
 
+export interface PublicEnterpriseCompensationDoc {
+  retrieved: string;
+  series: Array<{
+    id: string;
+    unit: string;
+    observations: Array<{ period: string; value: number | null }>;
+  }>;
+}
+
 /**
  * The proposal's subtitle counts its own patches. Written by hand it said "cinci
  * reparații + o schimbare" while the file held six repairs and one change, and the
@@ -117,6 +126,7 @@ export default function CompareView({
   rates,
   capSeries,
   period,
+  amepipCompensation,
 }: {
   ministry: Regime;
   /** Law 153/2017 — what people are paid under today. */
@@ -129,6 +139,7 @@ export default function CompareView({
   rates: Rates;
   capSeries: CapSeries[] | null;
   period: string | null;
+  amepipCompensation: PublicEnterpriseCompensationDoc | null;
 }) {
   const COLUMNS = useMemo(() => columnsFor(proposal), [proposal]);
 
@@ -183,6 +194,25 @@ export default function CompareView({
     () => resolveSeries(ministry.reference.amount, ministry.reference.baseDate),
     [ministry],
   );
+  const amepip = useMemo(() => {
+    if (!amepipCompensation) return null;
+    const value = (id: string) =>
+      amepipCompensation.series.find((s) => s.id === id)?.observations.at(-1)?.value ?? null;
+    const fixedMedian = value('companiidestat-pay-scale-fixed-median');
+    const fixedTop = value('companiidestat-pay-scale-fixed-top');
+    const extreme = value('companiidestat-pay-scale-extreme-monthly-equivalent');
+    if (fixedMedian === null || fixedTop === null || extreme === null) return null;
+    return {
+      retrieved: amepipCompensation.retrieved,
+      fixedMedian,
+      fixedTop,
+      extreme,
+      fixedTierCount: value('companiidestat-pay-scale-fixed-tier-count') ?? 0,
+      fixedTopToAvg: value('companiidestat-pay-scale-fixed-top-to-average-gross') ?? 0,
+      extremeToAvg: value('companiidestat-pay-scale-extreme-to-average-gross') ?? 0,
+      fixedTopToPresident: value('companiidestat-pay-scale-fixed-top-to-president') ?? 0,
+    };
+  }, [amepipCompensation]);
 
   /** How much of the base wage bill already sits above the 20% ceiling, if measured. */
   const overCapWeight = useMemo(() => {
@@ -366,6 +396,47 @@ export default function CompareView({
           </div>
         </div>
       </section>
+
+      {amepip && (
+        <section>
+          <h2>Companii publice AMEPIP</h2>
+          <p className="lede">
+            Scara publicată de companiidestat.ro pentru companiile de stat stă lângă grila publică
+            doar ca reper de guvernanță. Datele de aici sunt agregate: fără rânduri nominale,
+            CUI-uri sau liste de companii.
+          </p>
+          <div className="brief">
+            <div className="brief-card">
+              <span className="brief-num">{amountLine(amepip.fixedMedian, 'RON', rates)}</span>
+              <strong>Mediana treptelor fixe</strong>
+              <p>
+                Calculată peste {ro(amepip.fixedTierCount)} trepte fixe agregate. Nu spune cine ia
+                suma, ci unde se așază scara publicată față de grila salarială.
+              </p>
+            </div>
+            <div className="brief-card">
+              <span className="brief-num">{amountLine(amepip.fixedTop, 'RON', rates)}</span>
+              <strong>Vârful fix publicat</strong>
+              <p>
+                {num(amepip.fixedTopToAvg)}× salariul mediu brut 2025 și{' '}
+                {num(amepip.fixedTopToPresident)}× indemnizația Președintelui României.
+              </p>
+            </div>
+            <div className="brief-card">
+              <span className="brief-num">{amountLine(amepip.extreme, 'RON', rates)}</span>
+              <strong>Cu bonus anual lunarizat</strong>
+              <p>
+                Reper extrem lunarizat de sursă: {num(amepip.extremeToAvg)}× salariul mediu brut
+                2025. Este context de guvernanță, nu coeficient de salarizare publică.
+              </p>
+            </div>
+          </div>
+          <p className="src">
+            Sursă: API-ul public companiidestat.ro, transformat în serii agregate pentru
+            <code> salarizare/data/fiscal/amepip-public-enterprise-compensation.json</code>.
+          </p>
+        </section>
+      )}
 
       <section className="hero">
         <div className="hero-figure">
