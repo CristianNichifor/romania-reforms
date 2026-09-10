@@ -1,16 +1,25 @@
 import './style.css';
 import {
   TIER_LABELS,
+  absorbedOffices,
   filtered,
+  groupOfficesByFamily,
+  officeList,
+  proposedDirections,
   reduction,
   regionsOf,
   sortBy,
   type Document,
   type Family,
+  type OfficeKind,
+  type OfficeRegistryDocument,
+  type OfficeRow,
+  type ProposedDirection,
   type Tier,
 } from './model';
 
 const DOC_URL = 'data/deconcentrare.json';
+const REGISTRY_URL = 'data/deconcentrare-registry.json';
 
 const $ = <T extends HTMLElement>(selector: string): T => {
   const el = document.querySelector<T>(selector);
@@ -18,10 +27,39 @@ const $ = <T extends HTMLElement>(selector: string): T => {
   return el;
 };
 
+/** Fetch JSON, but fail with a readable hint when the server answers with an HTML page —
+ *  the usual symptom of starting vite without the predev data copy (npx vite) or serving a
+ *  dist without its data/ folder. */
+async function fetchJSON<T>(url: string): Promise<T> {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`HTTP ${response.status} pentru ${url}`);
+  const contentType = response.headers.get('content-type') ?? '';
+  if (contentType.includes('text/html')) {
+    throw new Error(
+      `Serverul a întors o pagină în loc de date (${url} lipsește). Pornește cu \`npm run dev\` din simulators/deconcentrare/app — pasul predev copiază datele în public/data.`,
+    );
+  }
+  return response.json() as Promise<T>;
+}
+
 let doc: Document;
 let selectedTiers = new Set<Tier>(['regional', 'regional-de-facto', 'special']);
 let sortKey: 'name' | 'officesToday' | 'officesProposed' | 'reduction' = 'officesToday';
 let sortDirection: 'asc' | 'desc' = 'desc';
+
+type ListKey = 'all' | 'regional' | 'directions' | 'absorbed';
+let registryDoc: OfficeRegistryDocument | null = null;
+let registryPromise: Promise<OfficeRegistryDocument> | null = null;
+let openList: ListKey | null = null;
+
+const loadRegistry = (): Promise<OfficeRegistryDocument> => {
+  registryPromise ??= fetchJSON<OfficeRegistryDocument>(REGISTRY_URL)
+    .then((payload) => {
+      registryDoc = payload;
+      return payload;
+    });
+  return registryPromise;
+};
 
 function setText(id: string, value: string): void {
   $(`#${id}`).textContent = value;
@@ -87,7 +125,7 @@ function renderRegionGrid(family: Family): void {
   $('#detail-title').hidden = false;
   $('#detail-note').hidden = false;
   $('#detail-note').textContent = family.tier === 'regional'
-    ? `${family.name}: ${family.officesToday.toLocaleString('ro-RO')} birouri în ${family.counties.length} județe, propuse ${family.officesProposed.toLocaleString('ro-RO')} — biroul din județul cel mai populat al fiecărei regiuni devine direcția regională, iar restul sunt absorbite. Sediile nu sunt în sursă; regula este scrisă ca presupunere în datele paginii.`
+    ? `${family.name}: ${family.officesToday.toLocaleString('ro-RO')} birouri în ${family.counties.length} județe, propuse ${family.officesProposed.toLocaleString('ro-RO')} — biroul din județul cel mai populat al fiecărei regiuni devine direcția regională, iar restul sunt absorbite. Birourile absorbite pot rămâne puncte de lucru, cu un șef de punct, nu un director cu aparat. Sediile nu sunt în sursă; regula este scrisă ca presupunere în datele paginii.`
     : `${family.name} nu se regionalizează prin această regulă; județele în care există:`;
   const groups = new Map(family.regions.map((g) => [g.region, g]));
   for (const region of regionsOf(doc)) {
@@ -130,6 +168,121 @@ function renderCaveats(): void {
   $('#caveats').hidden = false;
 }
 
+function statRow(text: string, meta: string): HTMLElement {
+  const row = document.createElement('div');
+  row.className = 'stat-row';
+  const name = document.createElement('span');
+  name.className = 'stat-row-name';
+  name.textContent = text;
+  row.appendChild(name);
+  if (meta) {
+    const muted = document.createElement('span');
+    muted.className = 'muted';
+    muted.textContent = meta;
+    row.appendChild(muted);
+  }
+  return row;
+}
+
+function statGroup(label: string, rows: HTMLElement[]): HTMLElement {
+  const group = document.createElement('div');
+  group.className = 'stat-group';
+  const head = document.createElement('div');
+  head.className = 'stat-group-head';
+  head.textContent = label;
+  group.appendChild(head);
+  group.append(...rows);
+  return group;
+}
+
+const officeMeta = (office: OfficeRow): string =>
+  ` — ${office.county ?? 'fără județ'}${office.locality ? ` · ${office.locality}` : ''}`;
+
+/** The list behind one summary card. Directions come from the payload; the office lists
+ *  come from the lazy row-by-row registry. */
+async function renderStatList(key: ListKey): Promise<void> {
+  const body = $('#stat-list-body');
+  body.replaceChildren();
+  const titleEl = $('#stat-list-title');
+  const noteEl = $('#stat-list-note');
+
+  if (key === 'directions') {
+    const rows = proposedDirections(doc);
+    titleEl.textContent = `${rows.length.toLocaleString('ro-RO')} direcții propuse pe cele opt regiuni`;
+    noteEl.textContent = 'Sediul este județul cel mai populat al fiecărei regiuni — o presupunere scrisă în datele paginii, nu un fapt din sursă.';
+    noteEl.hidden = false;
+    const byFamily = new Map<string, ProposedDirection[]>();
+    for (const row of rows) {
+      byFamily.set(row.family, [...(byFamily.get(row.family) ?? []), row]);
+    }
+    for (const [familyName, list] of byFamily) {
+      const rowsEl = list.map((row) => statRow(row.region, ` — sediu: ${row.seat}`));
+      body.appendChild(statGroup(familyName, rowsEl));
+    }
+  } else {
+    await loadRegistry();
+    const rows =
+      key === 'absorbed'
+        ? absorbedOffices(doc, registryDoc!)
+        : officeList(registryDoc!, key as OfficeKind);
+    titleEl.textContent = {
+      all: `${rows.length.toLocaleString('ro-RO')} birouri deconcentrate în registrul ANFP 2025`,
+      regional: `${rows.length.toLocaleString('ro-RO')} de birouri în familiile regionalizabile`,
+      absorbed: `${rows.length.toLocaleString('ro-RO')} de birouri absorbite în direcțiile regionale`,
+    }[key];
+    noteEl.textContent = {
+      all: 'Toate rândurile deconcentrate din registru, grupate pe familie. Serviciile municipale sunt raportate, nu comasate.',
+      regional: 'Birourile familiilor regionalizabile, grupate pe familie — acestea sunt cele comasate.',
+      absorbed: 'Birourile din afara județului-sediu. Punctele de lucru județene pot rămâne: comasarea taie structurile de comandă și costurile fixe, nu prezența locală.',
+    }[key];
+    noteEl.hidden = false;
+    for (const group of groupOfficesByFamily(rows)) {
+      const rowsEl = group.offices.map((office) => statRow(office.name, officeMeta(office)));
+      body.appendChild(statGroup(`${group.label} (${group.offices.length.toLocaleString('ro-RO')})`, rowsEl));
+    }
+  }
+  $('#stat-list').hidden = false;
+}
+
+function closeStatList(): void {
+  openList = null;
+  $('#stat-list').hidden = true;
+  for (const el of document.querySelectorAll<HTMLElement>('[data-list]')) {
+    el.classList.remove('on');
+  }
+}
+
+function toggleStatList(key: ListKey): void {
+  if (openList === key) {
+    closeStatList();
+    return;
+  }
+  openList = key;
+  for (const el of document.querySelectorAll<HTMLElement>('[data-list]')) {
+    el.classList.toggle('on', el.dataset.list === key);
+  }
+  void renderStatList(key).catch((error: unknown) => {
+    $('#stat-list-title').textContent = 'Lista nu s-a putut încărca';
+    $('#stat-list-note').textContent = error instanceof Error ? error.message : String(error);
+    $('#stat-list-note').hidden = false;
+    $('#stat-list').hidden = false;
+  });
+}
+
+function wireStatLists(): void {
+  for (const el of document.querySelectorAll<HTMLElement>('[data-list]')) {
+    const key = el.dataset.list as ListKey;
+    el.addEventListener('click', () => toggleStatList(key));
+    el.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        toggleStatList(key);
+      }
+    });
+  }
+  $('#stat-list-close').addEventListener('click', closeStatList);
+}
+
 function wireControls(): void {
   for (const button of document.querySelectorAll<HTMLButtonElement>('button.tier')) {
     button.addEventListener('click', () => {
@@ -163,9 +316,7 @@ function wireControls(): void {
 
 async function main(): Promise<void> {
   try {
-    const response = await fetch(DOC_URL);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    doc = (await response.json()) as Document;
+    doc = await fetchJSON<Document>(DOC_URL);
   } catch (error) {
     const loading = $('.loading');
     loading.textContent = `Nu s-au putut încărca datele: ${error instanceof Error ? error.message : String(error)}`;
@@ -176,6 +327,7 @@ async function main(): Promise<void> {
   $('#families').hidden = false;
   renderStats();
   wireControls();
+  wireStatLists();
   buildRows();
   renderCaveats();
   $('#argument').hidden = false;

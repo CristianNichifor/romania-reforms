@@ -18,6 +18,7 @@ import pytest
 ROOT = Path(__file__).resolve().parent.parent
 SIM = ROOT / "simulators" / "companii-stat"
 DATA = SIM / "data" / "companii-stat.json"
+REGISTRY = SIM / "data" / "companii-registry.json"
 COMPANIES = SIM / "data" / "companii-2025.json"
 BUILD = SIM / "scripts" / "build_companii_stat.py"
 
@@ -212,3 +213,58 @@ def test_subsidies_reconcile_and_cover_the_reported_operators(data):
     assert data["summary"]["subsidyRon"] == sum(c["subsidyRon"] for c in data["clusters"])
     assert data["summary"]["subsidisedCount"] == 164
     assert "subsidy-scope" in {x["id"] for x in data["limitations"]}
+
+
+@pytest.fixture(scope="module")
+def registry() -> dict:
+    if not REGISTRY.exists():
+        pytest.skip("the row-by-row registry is not built")
+    return json.loads(REGISTRY.read_text(encoding="utf-8"))
+
+
+def test_the_registry_has_one_row_per_company(registry, data):
+    assert len(registry["companies"]) == data["summary"]["companies"]
+    assert len({row["cui"] for row in registry["companies"]}) == len(registry["companies"])
+    assert registry["summary"]["companies"] == len(registry["companies"])
+
+
+def test_the_registry_counts_rebuild_the_headline_numbers(registry, data):
+    """The lists behind the summary cards must count exactly what the cards show."""
+    summary = data["summary"]
+    rows = registry["companies"]
+    assert (
+        registry["summary"]["lossMaking"]
+        == sum(1 for row in rows if row["netResultRon"] is not None and row["netResultRon"] < 0)
+        == summary["lossMaking"]
+    )
+    assert (
+        registry["summary"]["subsidised"]
+        == sum(1 for row in rows if row["subsidyRon"] is not None)
+        == summary["subsidisedCount"]
+    )
+    assert (
+        registry["summary"]["microUnder20"]
+        == sum(1 for row in rows if row["employees"] is not None and row["employees"] < 20)
+        == summary["microUnder20"]
+    )
+    assert (
+        registry["summary"]["regional"]
+        == sum(1 for row in rows if row["tier"] == "regional")
+        == summary["companiesInRegionalClusters"]
+    )
+
+
+def test_the_registry_carries_the_scenario_tier_per_row(registry, data):
+    tiers = {row["tier"] for row in registry["companies"]}
+    assert tiers <= {"regional", "local", "national", "other"}
+    by_caen = {row["caen"]: row["tier"] for row in registry["companies"]}
+    for cluster in data["clusters"]:
+        assert by_caen[cluster["caen"]] == cluster["tier"]
+
+
+def test_the_registry_is_deterministic(registry):
+    if not COMPANIES.exists():
+        pytest.skip("the state-company import is not built")
+    first = REGISTRY.read_bytes()
+    subprocess.run([sys.executable, str(BUILD)], check=True, capture_output=True)
+    assert REGISTRY.read_bytes() == first

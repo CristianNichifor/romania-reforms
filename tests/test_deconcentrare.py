@@ -22,6 +22,7 @@ import pytest
 ROOT = Path(__file__).resolve().parent.parent
 SIM = ROOT / "simulators" / "deconcentrare"
 DATA = SIM / "data" / "deconcentrare.json"
+OFFICES = SIM / "data" / "deconcentrare-registry.json"
 INSTITUTIONS = SIM / "data" / "institutii-2025.json"
 BUILD = SIM / "scripts" / "build_deconcentrare.py"
 REGIONS = ROOT / "simulators" / "justitie" / "data" / "curti-apel-regiuni.json"
@@ -130,3 +131,42 @@ def test_the_build_is_deterministic():
     first = DATA.read_bytes()
     subprocess.run([sys.executable, str(BUILD)], check=True, capture_output=True)
     assert DATA.read_bytes() == first
+
+
+@pytest.fixture(scope="module")
+def offices() -> dict:
+    if not OFFICES.exists():
+        pytest.skip("the row-by-row office registry is not built")
+    return json.loads(OFFICES.read_text(encoding="utf-8"))
+
+
+def test_the_office_registry_has_one_row_per_deconcentrated_office(data, offices):
+    assert offices["summary"]["offices"] == data["summary"]["deconcentratedOfficesTotal"]
+    assert len(offices["offices"]) == offices["summary"]["offices"]
+
+
+def test_the_office_registry_rebuilds_the_family_counts(data, offices):
+    """Every family's officesToday must be the same count the row list rebuilds."""
+    by_family: dict[str, int] = {}
+    for row in offices["offices"]:
+        if row["family"]:
+            by_family[row["family"]] = by_family.get(row["family"], 0) + 1
+    for family in data["families"]:
+        assert by_family.get(family["code"], 0) == family["officesToday"]
+    assert offices["summary"]["municipal"] == data["summary"]["municipalExcluded"] == 9
+    assert offices["summary"]["unmatched"] == data["summary"]["unmatched"] == 0
+
+
+def test_the_office_registry_regional_rows_match_the_reduction(data, offices):
+    rows = [row for row in offices["offices"] if row["tier"] == "regional"]
+    assert len(rows) == data["summary"]["officesTodayInRegionalFamilies"]
+    # every row the scenario keeps or absorbs must carry a resolvable county
+    assert all(row["county"] for row in rows)
+
+
+def test_the_office_registry_is_deterministic(offices):
+    if not INSTITUTIONS.exists():
+        pytest.skip("the ANFP import is not built")
+    first = OFFICES.read_bytes()
+    subprocess.run([sys.executable, str(BUILD)], check=True, capture_output=True)
+    assert OFFICES.read_bytes() == first

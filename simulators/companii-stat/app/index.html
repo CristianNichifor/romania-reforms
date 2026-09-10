@@ -32,30 +32,39 @@
       <p class="loading" role="status">Se încarcă registrul…</p>
 
       <section id="stats" class="stats" aria-label="Numerele principale" hidden>
-        <div class="stat">
+        <div class="stat" role="button" tabindex="0" data-list="all">
           <span class="big" id="stat-total">—</span>
           <span class="small">companii în evidență</span>
         </div>
-        <div class="stat">
+        <div class="stat" role="button" tabindex="0" data-list="regional">
           <span class="big" id="stat-merge">—</span>
           <span class="small">în cele <span id="stat-clusters">—</span> activități de rețea regionalizabile</span>
         </div>
-        <div class="stat">
+        <div class="stat" role="button" tabindex="0" data-list="operators">
           <span class="big" id="stat-after">—</span>
           <span class="small">operatori pe opt regiuni, după comasare</span>
         </div>
-        <div class="stat">
+        <div class="stat" role="button" tabindex="0" data-list="absorbed">
           <span class="big" id="stat-cut">—</span>
           <span class="small">mai puține entități</span>
         </div>
-        <div class="stat">
+        <div class="stat" role="button" tabindex="0" data-list="loss">
           <span class="big" id="stat-loss">—</span>
           <span class="small">companii cu rând financiar în pierdere (MFin 2025)</span>
         </div>
-        <div class="stat">
+        <div class="stat" role="button" tabindex="0" data-list="subsidised">
           <span class="big" id="stat-subsidy">—</span>
           <span class="small">companii subvenționate, cu <span id="stat-subsidy-ron">—</span> RON raportați (2025)</span>
         </div>
+      </section>
+
+      <section id="stat-list" aria-label="Lista din spatele numărului" hidden>
+        <div class="stat-list-head">
+          <h2 id="stat-list-title">—</h2>
+          <button id="stat-list-close" class="stat-list-close" aria-label="Închide lista">×</button>
+        </div>
+        <p class="hint" id="stat-list-note" hidden></p>
+        <div id="stat-list-body" class="stat-list-body"></div>
       </section>
 
       <p class="hint" id="stats-note" hidden>
@@ -97,7 +106,10 @@
 
         <h2 id="detail-title" hidden>Detalii</h2>
         <p class="hint" id="detail-note" hidden></p>
-        <div id="operator-grid" class="regions" hidden></div>
+        <div id="operator-detail" hidden>
+          <div id="region-picker" class="region-picker" role="group" aria-label="Regiuni"></div>
+          <div id="flux"></div>
+        </div>
 
         <h2 id="fusions-title" hidden>Deja în fuziune</h2>
         <p class="hint" id="fusions-note" hidden>
@@ -148,9 +160,10 @@
           sunt o hartă inventată de această pagină.
         </p>
         <p>
-          Cele 255 de companii cu sub 20 de angajați sunt candidate la absorbție sau lichidare
-          <em>indiferent</em> de regulă: o entitate mai mică decât un atelier de lucru nu
-          justifică un consiliu de administrație, un contabil și un audit separat.
+          Cele <span class="micro-count">—</span> de companii cu sub 20 de angajați sunt
+          candidate la absorbție sau lichidare <em>indiferent</em> de regulă: o entitate mai
+          mică decât un atelier de lucru nu justifică un consiliu de administrație, un contabil
+          și un audit separat.
         </p>
 
         <h2>Ce rămâne național și de ce</h2>
@@ -179,8 +192,8 @@
           <li><strong>Proprietatea este fragmentată:</strong> tabelul de apă are peste o sută de
           proprietari — consilii locale, consilii județene, alte companii. Un operator pe
           regiune înseamnă și un singur proprietar de întrebat când serviciul nu merge.</li>
-          <li><strong>Micro-companiile ies din calcul</strong>: 255 de entități sub 20 de
-          angajați devin sucursale sau dispar, fără a atinge serviciul.</li>
+          <li><strong>Micro-companiile ies din calcul</strong>: <span class="micro-count">—</span>
+          de entități sub 20 de angajați devin sucursale sau dispar, fără a atinge serviciul.</li>
           <li><strong>Ce nu se poate spune:</strong> economiile exacte în lei. Cifrele MFin dau
           venituri, rezultat și datorii, nu costurile de administrare per companie — deci pagina
           numără entități, angajați și pierderi, nu bugete. Unde datele nu ajung, pagina o

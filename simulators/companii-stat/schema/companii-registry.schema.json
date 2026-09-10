@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/companii-registry.schema.json",
+  "title": "State companies, row by row, with the merge tier of the main payload",
+  "description": "One row per state company with the fields the app's summary-card lists need: identity, CAEN activity and its cluster name, the scenario tier (the same policy table the main payload marks assumed), registration county, owner, headcount, financials and the reported 2025 subsidy.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "id", "title", "publisher", "period", "provenance", "summary", "companies"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "const": "companii-registry" },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "period": { "type": "string" },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "companies",
+        "withCounty",
+        "withOwner",
+        "withEmployees",
+        "microUnder20",
+        "lossMaking",
+        "subsidised",
+        "regional"
+      ],
+      "properties": {
+        "companies": { "type": "integer", "minimum": 0 },
+        "withCounty": { "type": "integer", "minimum": 0 },
+        "withOwner": { "type": "integer", "minimum": 0 },
+        "withEmployees": { "type": "integer", "minimum": 0 },
+        "microUnder20": { "type": "integer", "minimum": 0 },
+        "lossMaking": { "type": "integer", "minimum": 0 },
+        "subsidised": { "type": "integer", "minimum": 0 },
+        "regional": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "companies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["cui", "name", "caen", "cluster", "tier", "status"],
+        "properties": {
+          "cui": { "type": "integer" },
+          "name": { "type": "string" },
+          "caen": { "type": "string" },
+          "cluster": { "type": "string" },
+          "tier": { "enum": ["regional", "local", "national", "other"] },
+          "status": { "type": "string" },
+          "county": { "type": ["string", "null"] },
+          "owner": { "type": ["string", "null"] },
+          "employees": { "type": ["number", "null"] },
+          "revenueRon": { "type": ["number", "null"] },
+          "netResultRon": { "type": ["number", "null"] },
+          "debtRon": { "type": ["number", "null"] },
+          "subsidyRon": { "type": ["number", "null"] }
+        }
+      }
+    }
+  }
+}

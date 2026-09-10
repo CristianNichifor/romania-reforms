@@ -36,6 +36,7 @@ INSTITUTIONS = ROOT / "data" / "institutii-2025.json"
 REGISTRY = REPO / "packages" / "uat_registry" / "data" / "uat-registry-2026.json"
 REGION_MAP = REPO / "simulators" / "justitie" / "data" / "curti-apel-regiuni.json"
 OUT = ROOT / "data" / "deconcentrare.json"
+REGISTRY_OUT = ROOT / "data" / "deconcentrare-registry.json"
 
 DECONCENTRATED = "TERITORIAL - SERVICIU PUBLIC DECONCENTRAT"
 
@@ -238,22 +239,56 @@ def main() -> None:
     unmatched: list[str] = []
     municipal: list[str] = []
     deconcentrated_total = 0
+    registry_rows: list[dict] = []
 
     for row in source["institutions"]:
         if not row["type"].startswith(DECONCENTRATED):
             continue
         deconcentrated_total += 1
         code = classify(strip_county(row["name"], counties))
+        county = county_codes.get(fold(row["county"]))
         if code == MUNICIPAL_SENTINEL:
             municipal.append(row["name"])
+            registry_rows.append(
+                {
+                    "name": row["name"],
+                    "type": row["type"],
+                    "county": county,
+                    "locality": row.get("locality") or "",
+                    "family": None,
+                    "familyName": None,
+                    "tier": "municipal",
+                }
+            )
             continue
         if code is None:
             unmatched.append(row["name"])
+            registry_rows.append(
+                {
+                    "name": row["name"],
+                    "type": row["type"],
+                    "county": county,
+                    "locality": row.get("locality") or "",
+                    "family": None,
+                    "familyName": None,
+                    "tier": "unmatched",
+                }
+            )
             continue
-        county = county_codes.get(fold(row["county"]))
         if county:
             families[code]["counties"].add(county)
         families[code]["count"] += 1
+        registry_rows.append(
+            {
+                "name": row["name"],
+                "type": row["type"],
+                "county": county,
+                "locality": row.get("locality") or "",
+                "family": code,
+                "familyName": meta[code][0],
+                "tier": meta[code][1],
+            }
+        )
 
     out_families = []
     offices_today = offices_proposed = matched_offices = 0
@@ -370,6 +405,35 @@ def main() -> None:
     s = payload["summary"]
     print(json.dumps(s, ensure_ascii=False, indent=1))
     print(f"-> {OUT} ({OUT.stat().st_size // 1024} KB)")
+
+    registry = {
+        "$schema": "../schema/deconcentrare-registry.schema.json",
+        "id": "deconcentrare-registry",
+        "title": "Birourile deconcentrate, rând cu rând",
+        "publisher": "Cristian Nichifor",
+        "period": "2025",
+        "provenance": {
+            "source": "anfp-institutii-2025",
+            "locator": "rândurile cu TipInstitutie „TERITORIAL - SERVICIU PUBLIC DECONCENTRAT”, "
+            "cu familia din tabelul de prefixe al acestui simulator",
+            "confidence": "derived",
+            "note": "Câmpurile de rând sunt copiate din sursă; familia și nivelul vin din același "
+            "tabel de prefixe ca payload-ul principal.",
+        },
+        "summary": {
+            "offices": deconcentrated_total,
+            "withCounty": sum(1 for row in registry_rows if row["county"]),
+            "matched": matched_offices,
+            "regional": offices_today,
+            "municipal": len(municipal),
+            "unmatched": len(unmatched),
+        },
+        "offices": registry_rows,
+    }
+    REGISTRY_OUT.write_text(
+        json.dumps(registry, ensure_ascii=False, indent=1) + "\n", encoding="utf-8"
+    )
+    print(f"-> {REGISTRY_OUT} ({len(registry_rows)} rows)")
 
 
 if __name__ == "__main__":
