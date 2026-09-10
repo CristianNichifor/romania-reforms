@@ -46,7 +46,8 @@ source's, not ours.
 It has one scope limit that matters: ANFP lists institutions managing **public functions**, so
 services with contractual staff appear incompletely — 14 environment agencies and a single
 consumer-protection commissariat, where the county structure is larger. **The real number of
-offices to merge is higher, not lower.**
+offices to merge is higher, not lower.** What exactly is missing, counted family by family, and
+which sources would complete it: [`docs/coverage-gap.md`](docs/coverage-gap.md).
 
 ## The rule, in a paragraph
 
