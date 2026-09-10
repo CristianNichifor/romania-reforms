@@ -89,6 +89,25 @@ def test_the_import_carries_the_checksum_of_the_committed_source(data):
     assert source["summary"]["companies"] == data["summary"]["companies"]
 
 
+def test_the_murighiol_headcount_is_excluded_and_named():
+    """A village waste utility reporting 10 776 employees is an entry error. The value must
+    not reach the cluster totals, and the exclusion must name the row so nobody has to
+    rediscover it."""
+    if not COMPANIES.exists():
+        pytest.skip("the state-company import is not built")
+    source = json.loads(COMPANIES.read_text(encoding="utf-8"))
+    murighiol = next((c for c in source["companies"] if c["id"] == 1217), None)
+    assert murighiol is not None, "the outlier row disappeared instead of being excluded"
+    assert murighiol.get("employees") is None
+    excluded = source["dataQuality"]["headcountExcluded"]
+    assert len(excluded) == 1
+    row = excluded[0]
+    assert row["companyId"] == 1217
+    assert row["reported"] == 10776
+    assert row["year"] == 2023
+    assert "MURIGHIOL" in row["name"]
+
+
 def test_the_build_is_deterministic():
     if not COMPANIES.exists():
         pytest.skip("the state-company import is not built")
