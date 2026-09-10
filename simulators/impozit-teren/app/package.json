@@ -8,7 +8,7 @@
   "scripts": {
     "predev": "node scripts/copy-data.mjs",
     "dev": "vite",
-    "prebuild": "node scripts/copy-data.mjs",
+    "prebuild": "node scripts/vendor-civic-css.mjs && node scripts/copy-data.mjs",
     "build": "tsc --noEmit && vite build",
     "postbuild": "node scripts/check-map-worker.mjs",
     "preview": "vite preview",
