@@ -390,8 +390,7 @@ def main() -> None:
                 1 for row in rows if row["employees"] is not None and row["employees"] < MICRO
             ),
             "lossMaking": sum(
-                1 for row in rows
-                if row["netResultRon"] is not None and row["netResultRon"] < 0
+                1 for row in rows if row["netResultRon"] is not None and row["netResultRon"] < 0
             ),
             "subsidised": sum(1 for row in rows if row["subsidyRon"] is not None),
             "regional": sum(1 for row in rows if row["tier"] == "regional"),

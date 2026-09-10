@@ -232,18 +232,26 @@ def test_the_registry_counts_rebuild_the_headline_numbers(registry, data):
     """The lists behind the summary cards must count exactly what the cards show."""
     summary = data["summary"]
     rows = registry["companies"]
-    assert registry["summary"]["lossMaking"] == sum(
-        1 for row in rows if row["netResultRon"] is not None and row["netResultRon"] < 0
-    ) == summary["lossMaking"]
-    assert registry["summary"]["subsidised"] == sum(
-        1 for row in rows if row["subsidyRon"] is not None
-    ) == summary["subsidisedCount"]
-    assert registry["summary"]["microUnder20"] == sum(
-        1 for row in rows if row["employees"] is not None and row["employees"] < 20
-    ) == summary["microUnder20"]
-    assert registry["summary"]["regional"] == sum(
-        1 for row in rows if row["tier"] == "regional"
-    ) == summary["companiesInRegionalClusters"]
+    assert (
+        registry["summary"]["lossMaking"]
+        == sum(1 for row in rows if row["netResultRon"] is not None and row["netResultRon"] < 0)
+        == summary["lossMaking"]
+    )
+    assert (
+        registry["summary"]["subsidised"]
+        == sum(1 for row in rows if row["subsidyRon"] is not None)
+        == summary["subsidisedCount"]
+    )
+    assert (
+        registry["summary"]["microUnder20"]
+        == sum(1 for row in rows if row["employees"] is not None and row["employees"] < 20)
+        == summary["microUnder20"]
+    )
+    assert (
+        registry["summary"]["regional"]
+        == sum(1 for row in rows if row["tier"] == "regional")
+        == summary["companiesInRegionalClusters"]
+    )
 
 
 def test_the_registry_carries_the_scenario_tier_per_row(registry, data):
