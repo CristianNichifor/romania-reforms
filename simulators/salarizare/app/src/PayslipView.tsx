@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Checkbox, Field, Input, NativeSelect, Table } from '@cristiannichifor/civic-ui';
+import { Checkbox, Field, Input, NativeSelect, RangeSlider, Table } from '@cristiannichifor/civic-ui';
 
 import { ineligibility, payslip } from '../../engine/payslip';
 import type { Payslip, Person } from '../../engine/payslip';
@@ -219,16 +219,14 @@ export default function PayslipView({
             </select>
           </div>
 
-          <label className="field">
-            <span>Vechime în muncă: {scenario.seniorityYears ?? 0} ani</span>
-            <input
-              type="range"
-              min={0}
-              max={40}
-              value={scenario.seniorityYears ?? 0}
-              onChange={(e) => set({ seniorityYears: Number(e.target.value) })}
-            />
-          </label>
+          <RangeSlider
+            className="field"
+            label="Vechime în muncă (ani)"
+            min={0}
+            max={40}
+            value={scenario.seniorityYears ?? 0}
+            onValueChange={(value) => set({ seniorityYears: value })}
+          />
 
           {wasCalled && (
             <div className="was-called">

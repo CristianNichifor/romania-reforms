@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Checkbox } from '@cristiannichifor/civic-ui';
+import { Button, Checkbox, RangeSlider } from '@cristiannichifor/civic-ui';
 
 import { payslip } from '../../engine/payslip';
 import { applyProposal } from '../../engine/proposal';
@@ -465,28 +465,21 @@ export default function App() {
 
       {PHASED_VIEWS.includes(scenario.view) && years.length > 1 && (
         <div className="phase">
-          <label htmlFor="phase-year">
-            <strong>Grila din anul</strong>
-            <span>
-              proiectul se aplică eșalonat: coeficienții de vârf urcă an de an până în{' '}
-              {years[years.length - 1]}
-            </span>
-          </label>
-          <input
-            id="phase-year"
-            type="range"
+          <RangeSlider
+            label="Grila din anul"
             min={years[0]}
             max={years[years.length - 1]}
             step={1}
             value={year}
-            onChange={(e) =>
-              setScenario({ ...scenario, asOf: asOfForYear(Number(e.target.value)) })
+            onValueChange={(value) =>
+              setScenario({ ...scenario, asOf: asOfForYear(value) })
             }
           />
-          <output htmlFor="phase-year">
-            <b>{year}</b>
-            {period && <span>coloana „{period}"</span>}
-          </output>
+          <p className="phase-note">
+            proiectul se aplică eșalonat: coeficienții de vârf urcă an de an până în{' '}
+            {years[years.length - 1]}
+            {period && <>; coloana „{period}"</>}
+          </p>
         </div>
       )}
 

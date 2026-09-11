@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Field, NativeSelect } from '@cristiannichifor/civic-ui';
+import { Field, NativeSelect, RangeSlider } from '@cristiannichifor/civic-ui';
 
 import { payslip } from '../../engine/payslip';
 import { amountLine } from './money';
@@ -128,16 +128,14 @@ export default function EquivalenceView({
               <option value="floor">pragul de jos</option>
             </NativeSelect>}
           </Field>
-          <label className="field">
-            <span>Vechime presupusă: {seniority} ani</span>
-            <input
-              type="range"
-              min={0}
-              max={35}
-              value={seniority}
-              onChange={(e) => setSeniority(Number(e.target.value))}
-            />
-          </label>
+          <RangeSlider
+            className="field"
+            label="Vechime presupusă (ani)"
+            min={0}
+            max={35}
+            value={seniority}
+            onValueChange={setSeniority}
+          />
           <div className="field anchors">
             <span>Reperele folosite</span>
             <p>
