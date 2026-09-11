@@ -12,6 +12,11 @@ From `sources/companii-stat-finnefin.xlsx`:
 One row per company. The ratio columns (ROA, ROE, leverage, …) are dropped: a consolidation
 argument is about how many operators exist, not about their returns.
 
+The workbook is then complemented with documented companiidestat.ro/API-derived sources already
+committed in `sources/`: MFin 2025 statement rows for headcount and financials, AMEPIP Anexa 3
+ownership rows, SFA subsidy rows and in-flight merger statuses. These joins are carried into the
+browser payload as lower bounds; missing rows stay explicit gaps rather than guessed values.
+
 ## 2. Clustering
 
 Companies are grouped by the first four digits of `CAEN(ONRC)`. A company with no CAEN falls into
@@ -49,9 +54,10 @@ electricity, weapons and airports must not be swept into regions.
 ```
 1 247 companies across 146 CAEN clusters
   659 of them in the 7 regional clusters        -> 56 regional operators (-91,5%)
-  255 micro companies (under 20 employees)      -> candidates regardless of the rule
+  561 micro companies (under 20 employees)      -> candidates regardless of the rule
   1 107 carry a headcount                        -> MFin first, workbook as fallback
   287 of those with financials are loss-making   -> absorb these first
+  164 report an SFA subsidy                      -> subsidy totals are lower bounds
 ```
 
 One workbook headcount is excluded as an entry error and named in `dataQuality`:
@@ -63,12 +69,14 @@ that official figure stands.
 
 ## 5. What this cannot say
 
-- **No geography.** The source has no county per company; the scenario counts operators, it does
-  not site them. A company may already be a de-facto regional operator and still be counted as a
-  separate entity here.
+- **County is registration geography.** The companiidestat.ro registry gives every company a
+  county, and the scenario uses it to group companies by development region. That is the seat
+  county, not proven service territory; a company may already serve a wider area and still be
+  counted as a separate entity here.
 - **Headcount is partial**, so employee totals understate the workforce and cannot support a
   cost or redundancy figure.
 - **CAEN is the registered activity**, not necessarily what the company does today; dormant
   companies with a live status are counted.
-- **Ownership and subsidy are not modelled.** The workbook is a portfolio of state companies; it
-  does not say which are profitable, which are subsidised, or which are already in a merger.
+- **Ownership, subsidy, financial and merger fields are partial joins.** They expose useful
+  prioritisation signals, but missing rows remain missing and totals over those fields are lower
+  bounds.

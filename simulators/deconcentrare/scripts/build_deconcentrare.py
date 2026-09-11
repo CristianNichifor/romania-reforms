@@ -4,9 +4,10 @@ The state's deconcentrated services are the layer no other simulator in this rep
 touches. `administrativ` consolidates the 3 186 UATs but leaves the county line absolute;
 `justitie` regionalises courts and prosecutors to the eight development regions but nothing
 else; `transport` builds county networks. The 601 territorial services that report to ANFP in
-2025 — a labour inspectorate, a public-health directorate, an employment agency, a pension
-house, an agricultural payments centre in almost every county — are still organised on the
-county map, one office per county per family.
+2025 are complemented with 318 offices from the MFin portal list of public entities: police,
+ambulance, ISU, school inspectorates, OCPI, DGASPC, OSPA and gendarmerie rows that ANFP's
+public-function scope misses. The combined evidence still shows the same county pattern, one
+office per county per family.
 
 This models the same move `curti-apel-regiuni` makes for courts: **one office per family per
 development region, eight instead of forty-one.** The regions are not typed here either — the

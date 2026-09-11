@@ -94,11 +94,14 @@ public-enterprise work waits for a consumer-specific question.
 | **administrativ** | Consolidation of the 3 186 UATs | migrated |
 | **transport** | County public transport and rail access | built and published |
 | **impozit-teren** | Taxing land on its value | 32 counties read, 10 estimated, nothing excluded; 22 readers |
+| **deconcentrare** | County offices of the central state | 919 offices in evidence; 820 regionalisable offices → 179 |
+| **companii-stat** | State companies by activity | 1 247 companies; 659 network utilities → 56; 561 micro companies |
 
 The live apps now live here, with their history, on project paths under one Pages site:
 `/romania-reforms/salarizare/`, `/romania-reforms/administrativ/`,
-`/romania-reforms/justitie/`, `/romania-reforms/transport/` and
-`/romania-reforms/impozit-teren/`. Old standalone repositories stay as redirect stubs where
+`/romania-reforms/justitie/`, `/romania-reforms/transport/`,
+`/romania-reforms/impozit-teren/`, `/romania-reforms/deconcentrare/` and
+`/romania-reforms/companii-stat/`. Old standalone repositories stay as redirect stubs where
 links with `location.hash` need to keep opening the same scenario.
 
 **The code moved; the abstraction has not.** They are separate apps in one repository, not
