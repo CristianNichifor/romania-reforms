@@ -214,33 +214,36 @@ def convert(xls: Path, xls_sha256: str | None) -> None:
     if not all(name in header for name in wanted):
         raise SystemExit(f"missing expected columns; found: {header!r}")
     index = {name: header.index(name) for name in wanted}
-    with gzip.open(SOURCE_GZ, "wt", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(COLUMNS))
-        writer.writeheader()
-        for r in range(1, sheet.nrows):
-            writer.writerow(
-                {
-                    "judet": str(sheet.cell_value(r, index["Judet"])).strip(),
-                    "cif": str(sheet.cell_value(r, index["CIF Entitate Publica"])).strip(),
-                    "denumire": str(
-                        sheet.cell_value(r, index["Denumire Entitate Publica"])
-                    ).strip(),
-                    "uat": str(
-                        sheet.cell_value(
-                            r, index["Denumire UAT pe raza careia isi desfasoara activitatea"]
-                        )
-                    ).strip(),
-                    "cif_ordonator_1": str(
-                        sheet.cell_value(r, index["CIF Ordonator  principal  de credite (1)"])
-                    ).strip(),
-                    "denumire_ordonator_1": str(
-                        sheet.cell_value(r, index["Denumire ordonator  principal de credite (1)"])
-                    ).strip(),
-                    "denumire_ordonator_2": str(
-                        sheet.cell_value(r, index["Denumire ordonator  principal de credite (2)"])
-                    ).strip(),
-                }
-            )
+    import io  # noqa: PLC0415
+
+    buffer = io.StringIO()
+    writer = csv.DictWriter(buffer, fieldnames=list(COLUMNS), lineterminator="\n")
+    writer.writeheader()
+    for r in range(1, sheet.nrows):
+        writer.writerow(
+            {
+                "judet": str(sheet.cell_value(r, index["Judet"])).strip(),
+                "cif": str(sheet.cell_value(r, index["CIF Entitate Publica"])).strip(),
+                "denumire": str(sheet.cell_value(r, index["Denumire Entitate Publica"])).strip(),
+                "uat": str(
+                    sheet.cell_value(
+                        r, index["Denumire UAT pe raza careia isi desfasoara activitatea"]
+                    )
+                ).strip(),
+                "cif_ordonator_1": str(
+                    sheet.cell_value(r, index["CIF Ordonator  principal  de credite (1)"])
+                ).strip(),
+                "denumire_ordonator_1": str(
+                    sheet.cell_value(r, index["Denumire ordonator  principal de credite (1)"])
+                ).strip(),
+                "denumire_ordonator_2": str(
+                    sheet.cell_value(r, index["Denumire ordonator  principal de credite (2)"])
+                ).strip(),
+            }
+        )
+    # mtime=0: the gz is a committed artifact and must be byte-reproducible.
+    with gzip.GzipFile(filename=SOURCE_GZ, mode="wb", mtime=0) as handle:
+        handle.write(buffer.getvalue().encode("utf-8"))
     print(
         f"{sheet.nrows - 1} rows -> {SOURCE_GZ} "
         f"({SOURCE_GZ.stat().st_size // 1024} KB)"
