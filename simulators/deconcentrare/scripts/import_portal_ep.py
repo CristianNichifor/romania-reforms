@@ -35,6 +35,7 @@ from build_deconcentrare import fold, load_county_codes, strip_county
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE_GZ = ROOT / "sources" / "lista-ep-portal-2026.csv.gz"
+XLS_SHA = ROOT / "sources" / "lista-ep-portal-2026.xls.sha256"
 OUT = ROOT / "data" / "portal-ep-2026.json"
 
 COLUMNS = (
@@ -245,6 +246,11 @@ def convert(xls: Path, xls_sha256: str | None) -> None:
         f"({SOURCE_GZ.stat().st_size // 1024} KB)"
         + (f"; xls sha256 {xls_sha256}" if xls_sha256 else "")
     )
+    if xls_sha256:
+        XLS_SHA.write_text(xls_sha256 + "\n", encoding="utf-8")
+        print(f"-> {XLS_SHA}")
+    else:
+        print("note: pass --xls-sha256 to record the original file's fingerprint")
 
 
 def main() -> None:
@@ -319,9 +325,11 @@ def main() -> None:
         "sourceChecksum": {"sha256": sha256(SOURCE_GZ), "file": SOURCE_GZ.name},
         "originalXls": {
             "file": "lista_ep_portal_01072026.xls",
-            "sha256": None,
-            "note": "Amprenta fișierului original de pe portal; completată la fiecare "
-            "conversie cu --xls-sha256.",
+            "sha256": XLS_SHA.read_text(encoding="utf-8").strip() if XLS_SHA.exists() else None,
+            "note": "Amprenta fișierului original de pe portal, păstrată în "
+            "sources/lista-ep-portal-2026.xls.sha256; fișierul XLS în sine nu este reținut "
+            "în repository (limita de dimensiune), dar amprenta îl face verificabil dacă "
+            "snapshot-ul este re-obținut de pe portal.",
         },
         "summary": {
             "total": len(offices) + len(municipal) + len(unmatched),
