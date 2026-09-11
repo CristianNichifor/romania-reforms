@@ -1,6 +1,12 @@
 name: Native consumer UI
 on: [push, pull_request]
 jobs:
+  provenance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify pinned Civic UI archives
+        run: python scripts/verify_civic_ui_provenance.py
   browsers:
     runs-on: ubuntu-latest
     strategy:
