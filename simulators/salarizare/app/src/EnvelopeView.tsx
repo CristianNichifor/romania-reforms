@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Field, Input } from '@cristiannichifor/civic-ui';
+import { Field, Input, RangeSlider } from '@cristiannichifor/civic-ui';
 
 import type { CapSeries } from '../../engine/cap';
 import type { Scenario } from '../../engine/scenario';
@@ -145,20 +145,19 @@ export default function EnvelopeView({
       <section>
         <h2>Ținta</h2>
         <div className="card controls">
-          <label className="field">
-            <span>
-              Cheltuiala totală de personal: {pctText(targetPct)} față de {bn(baseline.total)} lei
-              {targetPct === 0 && ' — plic închis, tot ce crește undeva scade altundeva'}
-            </span>
-            <input
-              type="range"
-              min={-15}
-              max={15}
-              step={0.5}
-              value={targetPct * 100}
-              onChange={(e) => setTargetPct(Number(e.target.value) / 100)}
-            />
-          </label>
+          <RangeSlider
+            className="field"
+            label="Cheltuiala totală de personal (%)"
+            min={-15}
+            max={15}
+            step={0.5}
+            value={targetPct * 100}
+            onValueChange={(value) => setTargetPct(value / 100)}
+          />
+          <p className="field-note">
+            {pctText(targetPct)} față de {bn(baseline.total)} lei
+            {targetPct === 0 && ' — plic închis, tot ce crește undeva scade altundeva'}
+          </p>
           <p className="src">
             Art. 38 alin. (5) cere o reducere de cel puțin 1,5 puncte din PIB între 2024 și 2031.
             De la {dec(result.shareOfGdp.before * 100)}% asta ar însemna{' '}
@@ -192,13 +191,13 @@ export default function EnvelopeView({
                     )}
                   </span>
                 </div>
-                <input
-                  type="range"
+                <RangeSlider
+                  label={`${FAMILY_LABELS[f.family] ?? f.label} (%)`}
                   min={-25}
                   max={25}
                   step={0.5}
                   value={state.pct * 100}
-                  onChange={(e) => set(f.family, { pct: Number(e.target.value) / 100 })}
+                  onValueChange={(value) => set(f.family, { pct: value / 100 })}
                 />
                 {state.pct !== 0 && (
                   <Field id={`move-why-${f.family}`} label="Motivul mutării">
