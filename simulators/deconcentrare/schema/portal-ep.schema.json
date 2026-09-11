@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cristiannichifor.github.io/romania-reforms/schema/portal-ep.schema.json",
+  "title": "MFin portal public entities, classified into deconcentrated families",
+  "description": "The complement to the ANFP register: rows of the MFin 'Lista entităților publice' snapshot that belong to county-replicated service families (police, ambulance, ISU, OCPI, DGASPC, school inspectorates, OSPA and the ANFP families the portal also covers). Classified by an explicit prefix table, not by the source.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "id", "title", "publisher", "period", "provenance", "sourceChecksum", "originalXls", "summary", "municipalNames", "unmatchedNames", "offices"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "id": { "const": "portal-ep-2026" },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "period": { "type": "string" },
+    "provenance": { "$ref": "provenance.schema.json#/$defs/provenance" },
+    "sourceChecksum": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sha256", "file"],
+      "properties": {
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "file": { "type": "string" }
+      }
+    },
+    "originalXls": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file", "sha256", "note"],
+      "properties": {
+        "file": { "type": "string" },
+        "sha256": { "type": ["string", "null"] },
+        "note": { "type": "string" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total", "matched", "municipalExcluded", "unmatched", "byFamily"],
+      "properties": {
+        "total": { "type": "integer", "minimum": 0 },
+        "matched": { "type": "integer", "minimum": 0 },
+        "municipalExcluded": { "type": "integer", "minimum": 0 },
+        "unmatched": { "type": "integer", "minimum": 0 },
+        "byFamily": { "type": "object", "additionalProperties": { "type": "integer" } }
+      }
+    },
+    "municipalNames": { "type": "array", "items": { "type": "string" } },
+    "unmatchedNames": { "type": "array", "items": { "type": "string" } },
+    "offices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["cui", "name", "county", "locality", "ordonator", "family", "familyName", "tier"],
+        "properties": {
+          "cui": { "type": "string" },
+          "name": { "type": "string" },
+          "county": { "type": ["string", "null"] },
+          "locality": { "type": "string" },
+          "ordonator": { "type": "string" },
+          "family": { "type": "string" },
+          "familyName": { "type": "string" },
+          "tier": { "enum": ["regional", "regional-de-facto", "special"] }
+        }
+      }
+    }
+  }
+}

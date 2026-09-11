@@ -16,6 +16,7 @@ export interface Family {
   tier: Tier;
   officesToday: number;
   officesProposed: number;
+  sources: { anfp: number; portal: number };
   counties: string[];
   regions: RegionGroup[];
 }
@@ -29,6 +30,20 @@ export interface Summary {
   reductionPercent: number;
   municipalExcluded: number;
   unmatched: number;
+  anfp: {
+    deconcentratedOfficesTotal: number;
+    matchedOffices: number;
+    regionalFamilies: number;
+    officesTodayInRegionalFamilies: number;
+    officesProposedOnEightRegions: number;
+  };
+  portal: {
+    matched: number;
+    kept: number;
+    droppedDuplicate: number;
+    municipalExcluded: number;
+    unmatched: number;
+  };
 }
 
 export interface Limitation {
@@ -54,6 +69,8 @@ export interface OfficeRow {
   family: string | null;
   familyName: string | null;
   tier: 'regional' | 'regional-de-facto' | 'special' | 'municipal' | 'unmatched';
+  source: 'anfp' | 'portal';
+  ordonator?: string | null;
 }
 
 export interface OfficeRegistryDocument {
@@ -66,6 +83,7 @@ export interface OfficeRegistryDocument {
     regional: number;
     municipal: number;
     unmatched: number;
+    sources: { anfp: number; portal: number };
   };
   offices: OfficeRow[];
 }
