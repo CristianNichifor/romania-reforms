@@ -1758,7 +1758,7 @@ async function main(): Promise<void> {
        regiuni. Cifra arată prețul; alegerea dintre o geografie legală și un drum mai scurt nu
        se face din date.</p>
      <p class="disagree">Aceleași opt regiuni, aplicate altor două straturi ale statului:
-       <a href="../deconcentrare/">serviciile deconcentrate</a> (549 de birouri la 117) și
+       <a href="../deconcentrare/">serviciile deconcentrate</a> (820 de birouri la 179) și
        <a href="../companii-stat/">utilitățile companiilor de stat</a> (659 de entități la
        56).</p>`;
 
