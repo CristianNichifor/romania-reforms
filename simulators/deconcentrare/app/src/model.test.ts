@@ -21,6 +21,7 @@ const family = (over: Partial<Family>): Family => ({
   tier: 'regional',
   officesToday: 42,
   officesProposed: 8,
+  sources: { anfp: 42, portal: 0 },
   counties: ['AB', 'AR'],
   regions: [
     { region: 'Centru', seat: 'AB', seatPopulation: 363660, counties: ['AB'] },
@@ -64,6 +65,8 @@ describe('regionsOf', () => {
         reductionPercent: 0,
         municipalExcluded: 0,
         unmatched: 0,
+        anfp: { deconcentratedOfficesTotal: 0, matchedOffices: 0, regionalFamilies: 0, officesTodayInRegionalFamilies: 0, officesProposedOnEightRegions: 0 },
+        portal: { matched: 0, kept: 0, droppedDuplicate: 0, municipalExcluded: 0, unmatched: 0 },
       },
       limitations: [],
       families: [
@@ -96,6 +99,8 @@ describe('filtered', () => {
       reductionPercent: 0,
       municipalExcluded: 0,
       unmatched: 0,
+      anfp: { deconcentratedOfficesTotal: 0, matchedOffices: 0, regionalFamilies: 0, officesTodayInRegionalFamilies: 0, officesProposedOnEightRegions: 0 },
+      portal: { matched: 0, kept: 0, droppedDuplicate: 0, municipalExcluded: 0, unmatched: 0 },
     },
     limitations: [],
     families: [
@@ -139,13 +144,14 @@ const office = (over: Partial<OfficeRow>): OfficeRow => ({
   family: 'cas',
   familyName: 'Casa de Asigurări de Sănătate',
   tier: 'regional',
+  source: 'anfp',
   ...over,
 });
 
 const officeRegistry = (offices: OfficeRow[]): OfficeRegistryDocument => ({
   title: '',
   period: '',
-  summary: { offices: offices.length, withCounty: 0, matched: 0, regional: 0, municipal: 0, unmatched: 0 },
+  summary: { offices: offices.length, withCounty: 0, matched: 0, regional: 0, municipal: 0, unmatched: 0, sources: { anfp: 0, portal: 0 } },
   offices,
 });
 
@@ -186,7 +192,7 @@ describe('proposedDirections', () => {
     const doc: Document = {
       title: '',
       period: '',
-      summary: { deconcentratedOfficesTotal: 0, matchedOffices: 0, regionalFamilies: 1, officesTodayInRegionalFamilies: 0, officesProposedOnEightRegions: 0, reductionPercent: 0, municipalExcluded: 0, unmatched: 0 },
+      summary: { deconcentratedOfficesTotal: 0, matchedOffices: 0, regionalFamilies: 1, officesTodayInRegionalFamilies: 0, officesProposedOnEightRegions: 0, reductionPercent: 0, municipalExcluded: 0, unmatched: 0, anfp: { deconcentratedOfficesTotal: 0, matchedOffices: 0, regionalFamilies: 0, officesTodayInRegionalFamilies: 0, officesProposedOnEightRegions: 0 }, portal: { matched: 0, kept: 0, droppedDuplicate: 0, municipalExcluded: 0, unmatched: 0 } },
       limitations: [],
       families: [
         family({ tier: 'regional' }),
@@ -204,7 +210,7 @@ describe('absorbedOffices', () => {
   const doc: Document = {
     title: '',
     period: '',
-    summary: { deconcentratedOfficesTotal: 0, matchedOffices: 0, regionalFamilies: 1, officesTodayInRegionalFamilies: 0, officesProposedOnEightRegions: 0, reductionPercent: 0, municipalExcluded: 0, unmatched: 0 },
+    summary: { deconcentratedOfficesTotal: 0, matchedOffices: 0, regionalFamilies: 1, officesTodayInRegionalFamilies: 0, officesProposedOnEightRegions: 0, reductionPercent: 0, municipalExcluded: 0, unmatched: 0, anfp: { deconcentratedOfficesTotal: 0, matchedOffices: 0, regionalFamilies: 0, officesTodayInRegionalFamilies: 0, officesProposedOnEightRegions: 0 }, portal: { matched: 0, kept: 0, droppedDuplicate: 0, municipalExcluded: 0, unmatched: 0 } },
     limitations: [],
     families: [
       family({

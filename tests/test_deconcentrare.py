@@ -24,7 +24,9 @@ SIM = ROOT / "simulators" / "deconcentrare"
 DATA = SIM / "data" / "deconcentrare.json"
 OFFICES = SIM / "data" / "deconcentrare-registry.json"
 INSTITUTIONS = SIM / "data" / "institutii-2025.json"
+PORTAL = SIM / "data" / "portal-ep-2026.json"
 BUILD = SIM / "scripts" / "build_deconcentrare.py"
+PORTAL_IMPORT = SIM / "scripts" / "import_portal_ep.py"
 REGIONS = ROOT / "simulators" / "justitie" / "data" / "curti-apel-regiuni.json"
 REGISTRY = ROOT / "packages" / "uat_registry" / "data" / "uat-registry-2026.json"
 
@@ -97,7 +99,8 @@ def test_the_seat_is_the_largest_present_county_by_population(data):
 
 
 def test_the_headline_reconciles_with_the_source_rows(data):
-    """592 matched + 9 municipal = 601 deconcentrated, and the reduction is recomputable."""
+    """Matched offices (both sources) plus ANFP municipal = the total, and the reduction is
+    recomputable. The ANFP-only baseline survives in summary.anfp."""
     summary = data["summary"]
     matched = summary["matchedOffices"] + summary["municipalExcluded"]
     assert matched == summary["deconcentratedOfficesTotal"]
@@ -108,6 +111,10 @@ def test_the_headline_reconciles_with_the_source_rows(data):
         f["officesProposed"] for f in data["families"] if f["tier"] == "regional"
     )
     assert summary["reductionPercent"] == pytest.approx(round(100 * (today - proposed) / today, 1))
+    anfp = summary["anfp"]
+    assert anfp["matchedOffices"] + summary["municipalExcluded"] == anfp["deconcentratedOfficesTotal"]
+    assert anfp["officesTodayInRegionalFamilies"] == 549
+    assert anfp["officesProposedOnEightRegions"] == 117
 
 
 def test_no_source_name_is_silently_dropped(data):
@@ -116,12 +123,52 @@ def test_no_source_name_is_silently_dropped(data):
     assert data["unmatchedNames"] == []
 
 
+def test_every_family_counts_its_two_sources_separately(data):
+    """sources.anfp + sources.portal must rebuild officesToday exactly — the reader can tell
+    which source each office came from without opening the registry."""
+    for family in data["families"]:
+        assert family["sources"]["anfp"] + family["sources"]["portal"] == family["officesToday"]
+    assert sum(f["sources"]["portal"] for f in data["families"]) == data["summary"]["portal"]["kept"]
+
+
+def test_the_portal_complement_adds_the_services_anfp_lacks(data):
+    """The blocked families from coverage-gap.md are now counted, from the portal source."""
+    by_code = {f["code"]: f for f in data["families"]}
+    for code in ("ocpi", "politie", "ambulanta", "isu", "dgaspc", "scolar", "ospa", "jandarmerie"):
+        family = by_code[code]
+        assert family["sources"]["anfp"] == 0
+        assert family["sources"]["portal"] > 0
+        assert family["tier"] == "regional"
+    # the prefect stays a reported county office, not a merged one
+    assert by_code["prefectura"]["tier"] == "special"
+
+
+def test_the_dedupe_drops_portal_rows_the_anfp_source_already_covers(data):
+    """A portal row for a (family, county) ANFP already carries is not a complement."""
+    assert data["summary"]["portal"]["droppedDuplicate"] > 0
+    dsv = next(f for f in data["families"] if f["code"] == "dsv")
+    assert dsv["sources"]["portal"] == 0
+
+
 def test_the_import_carries_the_checksum_of_the_committed_source(data):
     if not INSTITUTIONS.exists():
         pytest.skip("the ANFP import is not built")
     source = json.loads(INSTITUTIONS.read_text(encoding="utf-8"))
     assert len(source["sourceChecksum"]["sha256"]) == 64
     assert source["provenance"]["confidence"] == "verbatim"
+
+
+def test_the_portal_import_is_committed_and_deterministic():
+    if not PORTAL.exists():
+        pytest.skip("the portal complement is not built")
+    portal = json.loads(PORTAL.read_text(encoding="utf-8"))
+    assert len(portal["sourceChecksum"]["sha256"]) == 64
+    assert portal["summary"]["matched"] > 300
+    first = PORTAL.read_bytes()
+    subprocess.run(
+        [sys.executable, str(PORTAL_IMPORT)], check=True, capture_output=True, cwd=SIM / "scripts"
+    )
+    assert PORTAL.read_bytes() == first
 
 
 def test_the_build_is_deterministic():

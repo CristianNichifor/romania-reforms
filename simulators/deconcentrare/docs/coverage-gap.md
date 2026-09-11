@@ -1,55 +1,63 @@
-# Deconcentrated coverage — what ANFP does not list, and where to get it
+# Deconcentrated coverage — what the two sources together still do not list
 
-The ANFP 2025 register lists institutions that manage **public functions**. Several
-deconcentrated families whose staff are largely contractual appear incomplete or absent. This
-documents the gap with numbers from the imported register itself, the sources checked, and the
-decision on when an import becomes worth building. It is the data question behind the
-`anfp-scope` limitation that travels with `deconcentrare.json`.
+The evidence now runs on **two sources**: the ANFP 2025 register (public functions) and the
+MFin portal list of public entities (snapshot 01.07.2026, the `portal` scope on every family).
+This documents what remains missing even after the complement, and how the complement was
+built. It is the data question behind the `anfp-scope` and `portal-scope` limitations that
+travel with `deconcentrare.json`.
 
-## What is missing, counted
+## What the portal complement added
+
+| Family | portal rows | note |
+| --- | ---: | --- |
+| Poliția județeană | 39 | county inspectorates; the 5 border-police inspectorates are reported as already regional |
+| Serviciul de ambulanță | 40 | |
+| ISU | 38 | the portal lists fewer than one per county |
+| Inspectoratul școlar | 41 | |
+| OCPI | 41 | entirely absent from ANFP |
+| DGASPC | 40 | sector rows excluded as municipal |
+| OSPA | 24 | |
+| Jandarmeria județeană | 8 | only the inspectorates, not the mobile groupings |
+| Instituția prefectului | 42 | reported as special — the prefect stays |
+
+Rows for families ANFP already covers (DSV, forest guards, regional finance) are deduplicated
+per (family, county): 54 portal rows dropped as duplicates of ANFP offices, never counted twice.
+
+## What is still missing from both sources
 
 Families present in the 2009–2010 snapshot of the *Registrul Național al Instituțiilor Publice*
-in 20–41 counties, against their presence in ANFP 2025:
+in 20–41 counties, against their presence in ANFP 2025 **and** in the MFin portal:
 
-| Family | 2010 snapshot | ANFP 2025 | Note |
+| Family | ANFP 2025 | portal 2026 | Note |
 | --- | ---: | ---: | --- |
-| Agenția pentru Protecția Mediului (APM) | 33 counties | **14** | the biggest undercount; APM staff are largely contractual |
-| Comisariatele județene pentru protecția consumatorilor (ANPC) | 22 counties | **1** regional commissariat | only the regional Centru unit appears |
-| Garda Națională de Mediu — comisariate județene | 23 counties | **0** | only the central institution appears |
-| Oficiul de Cadastru și Publicitate Imobiliară (OCPI) | 40 counties | **0** | entirely absent |
-| Agenția Națională de Îmbunătățiri Funciare (ANIF) | 33 counties | **0** | entirely absent |
-| Oficiile de ameliorare și reproducție în zootehnie | 33 counties | **0** | entirely absent |
-| Administrația Națională Apele Române — sisteme județene | ~40 | **0** | entirely absent |
+| Agenția pentru Protecția Mediului (APM) | 14 | **0** | county agencies absent from both; only the national agency appears |
+| Comisariatele județene ANPC | 1 | **0** | only central/regional units appear |
+| Garda Națională de Mediu — comisariate județene | 0 | **0** | only the central institution appears |
+| Oficiul de Cadastru (OCPI) | 0 | **41** | resolved by the complement |
+| Agenția Națională de Îmbunătățiri Funciare (ANIF) | 0 | **0** | only the central agency appears |
+| Oficiile de ameliorare și reproducție în zootehnie | 0 | **0** | entirely absent |
+| Apele Române — sisteme județene | 0 | **0** | only the basin administrations appear |
 
-The 601 offices counted in `deconcentrare.json` are therefore a **lower bound on the structure,
-not on the argument**: the missing families are county-replicated like the counted ones, so the
-real number of offices that a regionalisation would close is larger, not smaller.
+The 919 offices counted in `deconcentrare.json` are therefore still a **lower bound on the
+structure, not on the argument**: the missing families are county-replicated like the counted
+ones, so the real number of offices that a regionalisation would close is larger, not smaller.
 
 ## Sources checked
 
 | Source | Status |
 | --- | --- |
-| ANFP register, data.gov.ro (XLSX, updated Feb 2026) | adopted — the current source of truth for public-function institutions |
-| anpm.ro — county agencies list | unreachable from this session; the site also has no documented machine-readable list. Checked as a candidate, not adopted. |
-| anpc.ro — county commissariats | same: HTML only, no stable export. Candidate. |
-| MFin register of public institutions (buget) | candidate; the definitive source would be the Ministry of Finance list of budget-funded institutions, which includes contractual-staff services. Needs a stable, attributable export before it can feed an importer. |
-| MMSC / MADR subordination lists (ministerial sites) | candidate per family; scattered, so only worth it once a consumer question needs one family. |
+| ANFP register, data.gov.ro (XLSX, updated Feb 2026) | adopted — public-function institutions |
+| MFin portal, „Lista entităților publice” (XLS, 01.07.2026) | adopted — the complement; committed as a converted csv.gz with the original's SHA-256 recorded |
+| gov.ro — institutions list | central institutions only; not a row-level source |
+| Wikipedia list of institutions under the Government | uncited; background only |
+| firme-on-line.ro | third-party directory; not attributable |
+| anpm.ro / anpc.ro county lists | HTML only, no stable export — still not adopted |
 
 ## Decision
 
-Do not build a complement importer yet. The current register is internally consistent, carries
-its scope limit as a `material` limitation on every consumer, and the missing families would
-have to be scraped one by one from sources with no stable export — a fragile pipeline that
-would quietly rot, which is worse than a declared gap.
-
-Build the complement when one of these is true:
-
-- a **row-level, attributable export** appears (MFin list with CUI per territorial unit, or a
-  data.gov.ro dataset per family); then import it as a second source with its own provenance
-  and a `sourceScope` field, so totals distinguish ANFP-covered from complemented rows rather
-  than mixing them;
-- a **consumer question** needs one specific family (e.g., what regionalising the 42 OCPI
-  offices would save), in which case that family alone is worth the ministerial-site import.
-
-Until then, the honest statement is the one the simulator already makes: *the real number of
-offices to merge is higher, not lower.*
+The complement is built, as this file's original decision prescribed: a second source with its
+own provenance and a `sourceScope` per family (`sources.anfp` / `sources.portal`), so totals
+distinguish ANFP-covered from complemented rows. The remaining five families (APM, ANPC, GNM,
+ANIF county units, ANAR county systems, zootehnie) still lack any row-level, attributable
+export — each is a small ministerial-site list, and the honest statement stays the one the
+simulator already makes: *the real number of offices to merge is higher, not lower.*

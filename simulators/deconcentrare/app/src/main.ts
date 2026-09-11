@@ -96,7 +96,8 @@ function buildRows(): void {
       <td class="num">${family.officesToday.toLocaleString('ro-RO')}</td>
       <td class="num">${family.officesProposed.toLocaleString('ro-RO')}</td>
       <td class="num">−${reduction(family).toLocaleString('ro-RO')}%</td>
-      <td class="num">${family.regions.length}</td>`;
+      <td class="num">${family.regions.length}</td>
+      <td class="num">${family.sources.portal > 0 ? family.sources.portal.toLocaleString('ro-RO') : '—'}</td>`;
     tr.addEventListener('click', () => selectFamily(family));
     tr.addEventListener('keydown', (event) => {
       if (event.key === 'Enter' || event.key === ' ') {
@@ -125,7 +126,7 @@ function renderRegionGrid(family: Family): void {
   $('#detail-title').hidden = false;
   $('#detail-note').hidden = false;
   $('#detail-note').textContent = family.tier === 'regional'
-    ? `${family.name}: ${family.officesToday.toLocaleString('ro-RO')} birouri în ${family.counties.length} județe, propuse ${family.officesProposed.toLocaleString('ro-RO')} — biroul din județul cel mai populat al fiecărei regiuni devine direcția regională, iar restul sunt absorbite. Birourile absorbite pot rămâne puncte de lucru, cu un șef de punct, nu un director cu aparat. Sediile nu sunt în sursă; regula este scrisă ca presupunere în datele paginii.`
+    ? `${family.name}: ${family.officesToday.toLocaleString('ro-RO')} birouri în ${family.counties.length} județe, propuse ${family.officesProposed.toLocaleString('ro-RO')} — biroul din județul cel mai populat al fiecărei regiuni devine direcția regională, iar restul sunt absorbite. Birourile absorbite pot rămâne puncte de lucru, cu un șef de punct, nu un director cu aparat. Sediile nu sunt în sursă; regula este scrisă ca presupunere în datele paginii.${family.sources.portal > 0 ? ` Sursele: ${family.sources.anfp.toLocaleString('ro-RO')} din registrul ANFP, ${family.sources.portal.toLocaleString('ro-RO')} din lista MFin a entităților publice.` : ''}`
     : `${family.name} nu se regionalizează prin această regulă; județele în care există:`;
   const groups = new Map(family.regions.map((g) => [g.region, g]));
   for (const region of regionsOf(doc)) {
@@ -196,7 +197,7 @@ function statGroup(label: string, rows: HTMLElement[]): HTMLElement {
 }
 
 const officeMeta = (office: OfficeRow): string =>
-  ` — ${office.county ?? 'fără județ'}${office.locality ? ` · ${office.locality}` : ''}`;
+  ` — ${office.county ?? 'fără județ'}${office.locality ? ` · ${office.locality}` : ''}${office.source === 'portal' ? ' · din portal' : ''}`;
 
 /** The list behind one summary card. Directions come from the payload; the office lists
  *  come from the lazy row-by-row registry. */
@@ -226,12 +227,12 @@ async function renderStatList(key: ListKey): Promise<void> {
         ? absorbedOffices(doc, registryDoc!)
         : officeList(registryDoc!, key as OfficeKind);
     titleEl.textContent = {
-      all: `${rows.length.toLocaleString('ro-RO')} birouri deconcentrate în registrul ANFP 2025`,
+      all: `${rows.length.toLocaleString('ro-RO')} birouri deconcentrate în evidență (ANFP + MFin)`,
       regional: `${rows.length.toLocaleString('ro-RO')} de birouri în familiile regionalizabile`,
       absorbed: `${rows.length.toLocaleString('ro-RO')} de birouri absorbite în direcțiile regionale`,
     }[key];
     noteEl.textContent = {
-      all: 'Toate rândurile deconcentrate din registru, grupate pe familie. Serviciile municipale sunt raportate, nu comasate.',
+      all: 'Toate rândurile deconcentrate din evidență, grupate pe familie: registrul ANFP plus complementul MFin, marcat „din portal”. Serviciile municipale sunt raportate, nu comasate.',
       regional: 'Birourile familiilor regionalizabile, grupate pe familie — acestea sunt cele comasate.',
       absorbed: 'Birourile din afara județului-sediu. Punctele de lucru județene pot rămâne: comasarea taie structurile de comandă și costurile fixe, nu prezența locală.',
     }[key];

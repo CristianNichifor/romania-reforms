@@ -26,9 +26,15 @@ from __future__ import annotations
 
 import collections
 import json
-import re
-import unicodedata
 from pathlib import Path
+
+from common import (
+    fold,
+    load_county_codes,
+    load_county_population,
+    load_region_of_county,
+    strip_county,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 REPO = ROOT.parents[1]
@@ -37,6 +43,7 @@ REGISTRY = REPO / "packages" / "uat_registry" / "data" / "uat-registry-2026.json
 REGION_MAP = REPO / "simulators" / "justitie" / "data" / "curti-apel-regiuni.json"
 OUT = ROOT / "data" / "deconcentrare.json"
 REGISTRY_OUT = ROOT / "data" / "deconcentrare-registry.json"
+PORTAL = ROOT / "data" / "portal-ep-2026.json"
 
 DECONCENTRATED = "TERITORIAL - SERVICIU PUBLIC DECONCENTRAT"
 
@@ -159,49 +166,6 @@ MUNICIPAL = ("MUNICIPAL", "MUNICIPIULUI", "SECTOR")
 MUNICIPAL_SENTINEL = "MUNICIPAL"
 
 
-def fold(text: str) -> str:
-    text = unicodedata.normalize("NFD", text)
-    text = "".join(c for c in text if unicodedata.category(c) != "Mn")
-    text = text.upper().replace("Ş", "S").replace("Ţ", "T").replace("-", " ")
-    return re.sub(r"\s+", " ", re.sub(r"[^A-Z0-9 ]", "", text)).strip()
-
-
-def load_county_codes() -> dict[str, str]:
-    """Folded county name -> county code, from the shared SIRUTA registry."""
-    units = json.loads(REGISTRY.read_text(encoding="utf-8"))["units"]
-    pairs = {}
-    for unit in units:
-        if unit.get("level") == "county" and unit.get("countyCode"):
-            pairs[fold(unit["countyName"])] = unit["countyCode"]
-    return pairs
-
-
-def load_county_population() -> dict[str, int]:
-    """County code -> population, from the shared SIRUTA registry."""
-    units = json.loads(REGISTRY.read_text(encoding="utf-8"))["units"]
-    pairs = {}
-    for unit in units:
-        if unit.get("level") == "county" and unit.get("countyCode") and unit.get("population"):
-            pairs[unit["countyCode"]] = unit["population"]
-    return pairs
-
-
-def load_region_of_county() -> dict[str, str]:
-    """County code -> development region, reused from the justitie variant."""
-    regions = json.loads(REGION_MAP.read_text(encoding="utf-8"))["regions"]
-    return {code: region["region"] for region in regions for code in region["counties"]}
-
-
-def strip_county(name: str, counties: list[str]) -> str:
-    folded = fold(name)
-    for county in counties:
-        if folded.endswith(" " + county):
-            return folded[: -(len(county) + 1)].strip()
-    folded = re.sub(r"\s*[- ]*UT\s*\d+$", "", folded)
-    folded = re.sub(r"\s*UNITATEA TERITORIALA\s*\d+$", "", folded)
-    return re.sub(r"\s*\d+$", "", folded).strip()
-
-
 def classify(folded: str) -> str | None:
     """Canonical family code, the sentinel ``MUNICIPAL``, or ``None`` if unmatched."""
     if any(token in folded for token in MUNICIPAL):
@@ -258,6 +222,7 @@ def main() -> None:
                     "family": None,
                     "familyName": None,
                     "tier": "municipal",
+                    "source": "anfp",
                 }
             )
             continue
@@ -272,6 +237,7 @@ def main() -> None:
                     "family": None,
                     "familyName": None,
                     "tier": "unmatched",
+                    "source": "anfp",
                 }
             )
             continue
@@ -287,15 +253,62 @@ def main() -> None:
                 "family": code,
                 "familyName": meta[code][0],
                 "tier": meta[code][1],
+                "source": "anfp",
             }
         )
 
     out_families = []
     offices_today = offices_proposed = matched_offices = 0
+    portal_matched = portal_kept = 0
+    portal_by_family: dict[str, dict] = collections.defaultdict(
+        lambda: {"counties": set(), "count": 0, "name": "", "tier": ""}
+    )
+    portal_regionals = collections.defaultdict(int)
+
+    if PORTAL.exists():
+        portal = json.loads(PORTAL.read_text(encoding="utf-8"))
+        for office in portal["offices"]:
+            code = office["family"]
+            portal_matched += 1
+            info = portal_by_family[code]
+            info["name"] = office["familyName"]
+            info["tier"] = office["tier"]
+            # A row the ANFP source already covers in the same family and county is not a
+            # complement — counting it again would double-count the same office. The
+            # (family, county) pair is the conservative dedupe key.
+            if code in families and office["county"] in families[code]["counties"]:
+                continue
+            portal_kept += 1
+            if office["county"]:
+                info["counties"].add(office["county"])
+            info["count"] += 1
+            registry_rows.append(
+                {
+                    "name": office["name"],
+                    "type": "",
+                    "county": office["county"],
+                    "locality": office["locality"],
+                    "family": code,
+                    "familyName": office["familyName"],
+                    "tier": office["tier"],
+                    "source": "portal",
+                    "ordonator": office["ordonator"],
+                }
+            )
+        portal_municipal = portal["summary"]["municipalExcluded"]
+        portal_unmatched = portal["summary"]["unmatched"]
+    else:
+        portal_municipal = portal_unmatched = 0
+
     for code, *_ in FAMILIES:
         name, tier = meta[code]
-        present = sorted(families[code]["counties"])
-        count = families[code]["count"]
+        anfp_count = families[code]["count"]
+        portal_info = portal_by_family.get(code)
+        portal_count = portal_info["count"] if portal_info else 0
+        present = sorted(
+            families[code]["counties"] | (portal_info["counties"] if portal_info else set())
+        )
+        count = anfp_count + portal_count
         matched_offices += count
         by_region = collections.defaultdict(list)
         for county in present:
@@ -311,6 +324,52 @@ def main() -> None:
                 "tier": tier,
                 "officesToday": count,
                 "officesProposed": proposed,
+                "sources": {"anfp": anfp_count, "portal": portal_count},
+                "counties": present,
+                "regions": [
+                    {
+                        "region": region,
+                        "seat": seat_of(region, sorted(county_list), population),
+                        "seatPopulation": population.get(
+                            seat_of(region, sorted(county_list), population)
+                        ),
+                        "counties": sorted(county_list),
+                    }
+                    for region, county_list in sorted(by_region.items())
+                ],
+            }
+        )
+
+    # Portal-only families: services the ANFP register does not carry at all. Their office
+    # counts come entirely from the complement source; the rule applies to them unchanged.
+    anfp_codes = {code for code, *_ in FAMILIES}
+    portal_order = [code for code in portal_by_family if code not in anfp_codes]
+    for code in portal_order:
+        info = portal_by_family.get(code)
+        if not info or info["count"] == 0:
+            continue
+        name, tier = info["name"], info["tier"]
+        anfp_count = 0
+        portal_count = info["count"]
+        present = sorted(info["counties"])
+        count = portal_count
+        matched_offices += count
+        by_region = collections.defaultdict(list)
+        for county in present:
+            by_region[region_of_county.get(county, "?").strip()].append(county)
+        proposed = len(by_region) if tier == "regional" else count
+        if tier == "regional":
+            offices_today += count
+            offices_proposed += proposed
+            portal_regionals[code] = count
+        out_families.append(
+            {
+                "code": code,
+                "name": name,
+                "tier": tier,
+                "officesToday": count,
+                "officesProposed": proposed,
+                "sources": {"anfp": anfp_count, "portal": portal_count},
                 "counties": present,
                 "regions": [
                     {
@@ -351,7 +410,7 @@ def main() -> None:
         },
         "families": out_families,
         "summary": {
-            "deconcentratedOfficesTotal": deconcentrated_total,
+            "deconcentratedOfficesTotal": deconcentrated_total + portal_kept,
             "matchedOffices": matched_offices,
             "regionalFamilies": sum(1 for f in out_families if f["tier"] == "regional"),
             "officesTodayInRegionalFamilies": offices_today,
@@ -361,16 +420,52 @@ def main() -> None:
             else 0,
             "municipalExcluded": len(municipal),
             "unmatched": len(unmatched),
+            "anfp": {
+                "deconcentratedOfficesTotal": deconcentrated_total,
+                "matchedOffices": deconcentrated_total - len(municipal) - len(unmatched),
+                "regionalFamilies": sum(
+                    1 for f in out_families if f["tier"] == "regional" and f["sources"]["anfp"] > 0
+                ),
+                "officesTodayInRegionalFamilies": sum(
+                    f["sources"]["anfp"] for f in out_families if f["tier"] == "regional"
+                ),
+                "officesProposedOnEightRegions": sum(
+                    f["officesProposed"]
+                    for f in out_families
+                    if f["tier"] == "regional" and f["sources"]["portal"] == 0
+                ),
+            },
+            "portal": {
+                "matched": portal_matched,
+                "kept": portal_kept,
+                "droppedDuplicate": portal_matched - portal_kept,
+                "municipalExcluded": portal_municipal,
+                "unmatched": portal_unmatched,
+            },
         },
         "municipalNames": sorted(municipal),
         "unmatchedNames": sorted(unmatched),
         "limitations": [
             {
                 "id": "anfp-scope",
-                "text": "Lista ANFP cuprinde instituțiile care gestionează funcții publice. Unele "
-                "servicii deconcentrate cu personal contractual apar incomplet — de exemplu doar "
-                "14 agenții de mediu și un singur comisariat pentru protecția consumatorilor. "
-                "Numărul real de birouri de închis poate fi mai mare, nu mai mic.",
+                "text": "Lista ANFP cuprinde instituțiile care gestionează funcții publice. "
+                "Serviciile deconcentrate cu personal contractual sunt complementate din lista "
+                "MFin a entităților publice (câmpul sources pe fiecare familie); chiar și "
+                "împreună, agențiile județene de mediu, comisariatele județene ANPC și GNM, "
+                "unitățile ANIF, sistemele județene ANAR și oficiile de zootehnie rămân absente "
+                "din ambele surse. Numărul real de birouri de închis poate fi mai mare, nu "
+                "mai mic.",
+                "severity": "material",
+                "affects": ["families", "summary"],
+            },
+            {
+                "id": "portal-scope",
+                "text": "Complementul vine din lista MFin a entităților publice (snapshot "
+                "01.07.2026): entități cu CIF și ordonator de credite, fără efective de personal. "
+                "O filială fără CIF propriu sau finanțată prin altă structură nu apare; "
+                "duplicarea cu ANFP este tăiată per perechea (familie, județ), deci un birou "
+                "listat diferit în cele două surse poate rămâne numărat o singură dată, nu de "
+                "două ori.",
                 "severity": "material",
                 "affects": ["families", "summary"],
             },
@@ -413,20 +508,22 @@ def main() -> None:
         "publisher": "Cristian Nichifor",
         "period": "2025",
         "provenance": {
-            "source": "anfp-institutii-2025",
-            "locator": "rândurile cu TipInstitutie „TERITORIAL - SERVICIU PUBLIC DECONCENTRAT”, "
-            "cu familia din tabelul de prefixe al acestui simulator",
+            "source": "anfp-institutii-2025 + mfin-portal-entitati-publice",
+            "locator": "rândurile cu TipInstitutie „TERITORIAL - SERVICIU PUBLIC DECONCENTRAT” din "
+            "ANFP, plus rândurile complementate din portalul MFin; familia din tabelul de prefixe "
+            "al acestui simulator, câmpul source distinge sursa fiecărui rând",
             "confidence": "derived",
             "note": "Câmpurile de rând sunt copiate din sursă; familia și nivelul vin din același "
             "tabel de prefixe ca payload-ul principal.",
         },
         "summary": {
-            "offices": deconcentrated_total,
+            "offices": deconcentrated_total + portal_kept,
             "withCounty": sum(1 for row in registry_rows if row["county"]),
             "matched": matched_offices,
             "regional": offices_today,
             "municipal": len(municipal),
             "unmatched": len(unmatched),
+            "sources": {"anfp": deconcentrated_total, "portal": portal_kept},
         },
         "offices": registry_rows,
     }

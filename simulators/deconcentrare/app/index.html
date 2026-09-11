@@ -33,7 +33,7 @@
       <section id="stats" class="stats" aria-label="Numerele principale" hidden>
         <div class="stat" role="button" tabindex="0" data-list="all">
           <span class="big" id="stat-total">—</span>
-          <span class="small">birouri deconcentrate în registrul ANFP 2025</span>
+          <span class="small">birouri deconcentrate în evidență — registrul ANFP 2025 + lista MFin a entităților publice</span>
         </div>
         <div class="stat" role="button" tabindex="0" data-list="regional">
           <span class="big" id="stat-merge">—</span>
@@ -59,10 +59,12 @@
       </section>
 
       <p class="hint" id="stats-note" hidden>
-        Restul registrului: birouri deja regionale sau speciale, serviciile municipale ale
-        Bucureștiului și sectoarelor. Lista ANFP acoperă instituțiile care gestionează
-        <em>funcții publice</em>; serviciile cu personal contractual apar incomplet, deci
-        numărul real de birouri de comasat este mai mare, nu mai mic.
+        Două surse, marcate ca atare: registrul ANFP acoperă instituțiile cu funcții publice,
+        lista MFin a entităților publice (01.07.2026) completează serviciile județene pe care
+        ANFP nu le poartă — poliția, ambulanța, ISU, OCPI, DGASPC, inspectoratele școlare,
+        OSPA. Chiar și împreună, agențiile de mediu, comisariatele ANPC și GNM, unitățile ANIF
+        și sistemele județene ANAR rămân absente, deci numărul real de birouri de comasat este
+        o <em>limită inferioară</em>.
       </p>
 
       <section id="families" aria-label="Familiile de servicii" hidden>
@@ -83,6 +85,7 @@
                 <th scope="col" class="sortable num" data-key="officesProposed">Propuse</th>
                 <th scope="col" class="sortable num" data-key="reduction">Reducere</th>
                 <th scope="col" class="num">Regiuni atinse</th>
+                <th scope="col" class="num">din portal</th>
               </tr>
             </thead>
             <tbody id="family-rows"></tbody>
