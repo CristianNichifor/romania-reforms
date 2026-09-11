@@ -1,6 +1,6 @@
 # Native Civic UI Adoption
 
-The statistics entry imports the CSS-only Civic UI v0.3.0 artifact, not React or
+The statistics entry imports the CSS-only Civic UI v0.4.0 artifact, not React or
 the React package. Map controls stay local. The two Vite entries remain separate,
 so reading statistics does not download MapLibre and opening the map does not
 import Civic UI CSS.
@@ -11,9 +11,9 @@ documentation. Normal builds verify those local bytes with no network request.
 `src/vendor/civic-ui/provenance.json` records the release and per-file checksums.
 No npm account, remote font or external runtime service is required.
 
-Release: `https://github.com/CristianNichifor/civic-ui/releases/download/v0.3.0/civic-ui-css-0.3.0.tgz`
+Release: `https://github.com/CristianNichifor/civic-ui/releases/download/v0.4.0/civic-ui-css-0.4.0.tgz`
 
-SHA-256: `644b181b1a061516ddfe7cbcbba9d94101e7e0b4f97f4a52c085cccba1f27226`
+SHA-256: `269dc6d01f4da09707521229111ac55011f78f55518a7c8d73d660503ed84de7`
 
 ## Adopted
 

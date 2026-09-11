@@ -7,7 +7,7 @@ paint and worker implementation are unchanged.
 ## Dependency and offline use
 
 `src/vendor/civic-ui` contains the eight unmodified CSS, documentation and license
-files from the published v0.3.0 CSS-only archive. `provenance.json` records release URL, archive SHA-256 and
+files from the published v0.4.0 CSS-only archive. `provenance.json` records release URL, archive SHA-256 and
 file hashes. `npm run check:civic-css` verifies those local files offline.
 `node scripts/vendor-civic-css.mjs --update` fetches only that exact release and
 verifies its archive before extracting selected files. Builds and the UI do not
@@ -16,9 +16,8 @@ fetch styles remotely or require React/npm publishing credentials.
 `native-ui.css` imports the released `native.css`; equivalent temporary select
 appearance/padding overrides have been removed. Existing host colors, font sizes,
 color-scheme and layout remain local rather than importing a party theme.
-The [v0.3.0 release](https://github.com/CristianNichifor/civic-ui/releases/tag/v0.3.0)
-is public. Its vendored `NATIVE.md` retains historical "Unreleased 0.3.0
-preparation" wording; the published artifact stays unmodified for verification.
+The [v0.4.0 release](https://github.com/CristianNichifor/civic-ui/releases/tag/v0.4.0)
+is public. The published artifact stays unmodified for verification.
 
 ## Adopted controls
 
