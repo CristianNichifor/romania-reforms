@@ -26,7 +26,7 @@ service area is a region or a basin**, one operator per development region.
 | **7 regional clusters** | **659** | → | **56** |
 
 A **91,5%** reduction in the number of operating entities in those seven activities. Separately,
-**255 companies have under 20 employees** and are candidates for absorption or liquidation
+**561 companies have under 20 employees** and are candidates for absorption or liquidation
 regardless of the regional rule.
 
 ## What stays out
@@ -45,7 +45,7 @@ The workbook (`datecompanii_ind-finnefin.xlsx`) has three sheets: financial rati
 and year (2019–2024), non-financial indicators, and the KPI dictionary. This simulator keeps
 identity, CAEN, status and **headcount**; the ratios are dropped.
 
-Two limitations travel with every number:
+The key limitations travel with every number:
 
 - **Headcount and financials are official-first, lower bounds still.** The headcount comes
   first from the MFin 2025 statements (via the documented companiidestat.ro API, CC BY 4.0),
@@ -55,8 +55,13 @@ Two limitations travel with every number:
   data's `dataQuality` section: *Utilități și Servicii Publice Murighiol SRL* reports 10 776
   employees in 2023 and none in the four years before, in a commune of about 3 000 inhabitants —
   the MFin statement for the same company reads 14, and that official figure stands.
-- **There is no geography.** The source gives no county per company, so the scenario counts
-  regional operators, it does not place them on a map.
+- **County is registration geography, not service geography.** The companiidestat.ro registry
+  carries a county for every company, and the regional operator lists use it to group companies
+  by development region. That county is the registered seat, not necessarily the service area,
+  so the grouping remains a policy approximation rather than a map of infrastructure.
+- **Owner, subsidy and financial joins are partial.** Owners come from AMEPIP Anexa 3; subsidies
+  come from the SFA annexes; financials come from MFin 2025 statements. Missing rows stay missing
+  and totals over those fields are lower bounds.
 
 ## Layout
 
