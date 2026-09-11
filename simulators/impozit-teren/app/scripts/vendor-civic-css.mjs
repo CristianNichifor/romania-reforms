@@ -5,8 +5,8 @@ import { mkdtemp, readFile, mkdir, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-const release = 'https://github.com/CristianNichifor/civic-ui/releases/download/v0.3.0/civic-ui-css-0.3.0.tgz';
-const sha256 = '644b181b1a061516ddfe7cbcbba9d94101e7e0b4f97f4a52c085cccba1f27226';
+const release = 'https://github.com/CristianNichifor/civic-ui/releases/download/v0.4.0/civic-ui-css-0.4.0.tgz';
+const sha256 = '269dc6d01f4da09707521229111ac55011f78f55518a7c8d73d660503ed84de7';
 const files = ['styles.css', 'foundations.css', 'controls.css', 'native.css', 'themes/neutral.css', 'themes/usr.css', 'NATIVE.md', 'LICENSE'];
 const destination = new URL('../src/vendor/civic-ui/', import.meta.url);
 const digest = data => createHash('sha256').update(data).digest('hex');

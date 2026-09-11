@@ -1,7 +1,7 @@
 # Native Civic UI Pilot
 
 This app remains vanilla TypeScript and MapLibre. Its native controls consume
-the published Civic UI v0.3.0 CSS-only archive without introducing React or
+the published Civic UI v0.4.0 CSS-only archive without introducing React or
 changing the simulator's identity.
 
 ## Scope
@@ -32,10 +32,8 @@ dependency, no npm publication requirement and no browser CDN request.
 - `npm run update:civic-css`: download the pinned archive, verify its checksum,
   and regenerate the eight allowlisted archive files. Requires Node with fetch and tar.
 
-The [v0.3.0 release](https://github.com/CristianNichifor/civic-ui/releases/tag/v0.3.0)
-is public. The unmodified vendored `NATIVE.md` retains its historical
-"Unreleased 0.3.0 preparation" wording from the release artifact; this does not
-describe the current release status. Published bytes are retained for verification.
+The [v0.4.0 release](https://github.com/CristianNichifor/civic-ui/releases/tag/v0.4.0)
+is public. Published bytes are retained for verification.
 
 Do not manually edit vendored CSS. Make host overrides in `src/native-ui-pilot.css`.
 A version change requires reviewing the upstream markup contract, updating the

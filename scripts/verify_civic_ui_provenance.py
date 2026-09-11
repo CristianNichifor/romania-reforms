@@ -7,8 +7,8 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-RELEASE = "https://github.com/CristianNichifor/civic-ui/releases/download/v0.3.0/civic-ui-css-0.3.0.tgz"
-SHA256 = "644b181b1a061516ddfe7cbcbba9d94101e7e0b4f97f4a52c085cccba1f27226"
+RELEASE = "https://github.com/CristianNichifor/civic-ui/releases/download/v0.4.0/civic-ui-css-0.4.0.tgz"
+SHA256 = "269dc6d01f4da09707521229111ac55011f78f55518a7c8d73d660503ed84de7"
 
 
 def main() -> None:
