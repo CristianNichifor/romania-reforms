@@ -1198,3 +1198,11 @@ uv run python scripts/validate_data.py                          # the gate
 
 Importers download their sources on first run and keep them, so a re-import does not
 depend on a government website being up.
+
+## Licence
+
+The code in this repository is MIT — see [`LICENSE`](LICENSE).
+
+The data is a separate question. Each simulator ships figures derived from published Romanian
+sources, recorded per dataset in `data-catalog.json` under `upstreamSources`. Those sources keep
+their own terms; the grant here covers this repository's code, not the documents it reads.
