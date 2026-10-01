@@ -12,11 +12,15 @@ for exact commands and CI owners. Each simulator has its own dependency environm
   engine tests and reproducible pinned-regime checks. A scenario is not pay entitlement.
 - Administration: preserve canonical UAT ordering, connectivity, deterministic tie-breaking
   and Python/TypeScript parity. Missing national pipeline artifacts are a blocked test,
-  not evidence of equivalence.
+  not evidence of equivalence. PR CI selects bounded fixtures with `-m "not full_data"`;
+  the original national assertions remain fail-closed under `-m full_data`.
 - Transport: positional joins must match administration's UATs; preserve route, speed,
   access and cost caveats. Do not replace absent routing artifacts with plausible defaults.
 - Land tax: follow the existing CI/rebuild dependency order. Pin the exchange rate for
-  byte comparisons; separate grid value, asking price, yield and tax assumptions.
+  byte comparisons; separate grid value, asking price, yield and tax assumptions. The
+  bounded rebuild uses `--pinned --committed-built-yield`; live source comparisons and
+  notarial yield extraction remain required in `land-source-verification.yml` before
+  related publication. Never describe the committed-yield input as freshly extracted.
 - Deconcentration and state companies: retain source-specific institution/perimeter and
   staffing/cost definitions, plus provenance and limitations in shared sidecars.
 - Shared Civic UI sources are vendored: never edit them in place. Verify their pinned

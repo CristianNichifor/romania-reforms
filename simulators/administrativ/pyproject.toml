@@ -34,6 +34,7 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = ["full_data: national pipeline verification requiring all processed artifacts"]
 # The pipeline is a plain source tree, not an installed package (see [tool.uv] below),
 # so the repo root has to be importable for `from pipeline import ...` to resolve.
 pythonpath = ["."]

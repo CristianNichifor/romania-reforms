@@ -11,12 +11,14 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and the per-domain verification
 - `uv sync --all-groups`
 - `uv run python scripts/check_repo_size.py`
 - `uv run python scripts/validate_data.py` (fetch required release assets first)
-- `uv run --with geopandas python -m pytest tests/ -q --junitxml=/tmp/reforms-tests.xml`
+- `uv run --with geopandas python -m pytest tests/ -q -m "not full_data" --junitxml=/tmp/reforms-tests.xml`
 - `python3 scripts/check_test_report.py /tmp/reforms-tests.xml`
 - `python3 scripts/verify_civic_ui_provenance.py`
 
 This is a pytest suite: unittest discovery is not a substitute. Missing artifacts and
-skipped tests are incomplete verification, even when pytest returns zero.
+skipped tests are incomplete verification, even when pytest returns zero. The explicit
+`full_data` marker identifies national certification outside bounded PR checks; run
+`-m full_data` for those fail-closed checks. See CONTRIBUTING.md for their missing inputs.
 
 ## Delivery boundaries
 
@@ -30,7 +32,9 @@ skipped tests are incomplete verification, even when pytest returns zero.
   must succeed. The separate scheduled portal collector and Pages deployment are not
   PR correctness gates. Remote required-check settings are managed separately.
 - `main` is production; its Pages workflow publishes the site. Do not trigger deployment,
-  releases or collection as part of development verification.
+  releases or collection as part of development verification. Related data/pipeline
+  publication requires the applicable full-data and full-source checks in CONTRIBUTING;
+  bounded `verify` does not certify missing national inputs or live source refreshes.
 
 ## Working rules
 
