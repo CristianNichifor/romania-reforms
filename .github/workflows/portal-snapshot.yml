@@ -110,22 +110,36 @@ jobs:
           set -e
 
       - name: Report coverage
+        if: ${{ !cancelled() }}
         run: |
+          shopt -s nullglob
+          coverage=(out/coverage-*.json)
+          if [ "${#coverage[@]}" -eq 0 ]; then
+            echo '::error::No coverage produced; inspect the Crawl step for the original error.'
+            echo 'No coverage produced; the crawler failed before writing a report. See the Crawl log (for example WSDL HTTP 403).' >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
           {
             echo "### Shard ${{ matrix.shard }}"
             if [ "${IMPORT_EXIT:-0}" != "0" ]; then
               echo ':warning: **Incomplete** — some windows failed or stayed truncated.'
             fi
             echo '```json'
-            cat out/coverage-*.json
+            cat "${coverage[@]}"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
       - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
         with:
           name: portal-shard-${{ matrix.shard }}
           path: out/
+          if-no-files-found: error
           retention-days: 7
+
+      - name: Preserve crawler failure after uploading partial output
+        if: ${{ !cancelled() }}
+        run: test "${IMPORT_EXIT:-1}" -eq 0
 
   publish:
     needs: crawl
@@ -166,10 +180,12 @@ jobs:
           fi
           echo "stamp=$stamp" >> "$GITHUB_OUTPUT"
           expected=12
-          shards=$(ls out/coverage-*.json 2>/dev/null | wc -l)
+          shopt -s nullglob
+          coverage=(out/coverage-*.json)
+          shards=${#coverage[@]}
           echo "Collected $shards of $expected shards"
           if [ "$shards" -eq 0 ]; then
-            echo "No shard produced output; nothing to publish." >&2
+            echo "No shard produced output; nothing to publish." | tee -a "$GITHUB_STEP_SUMMARY" >&2
             exit 1
           fi
           # Which ones, not just how many. A missing shard is roughly twenty courts, and the
