@@ -1,29 +1,49 @@
 # romania-reforms
 
-Simulators for Romanian public-policy reforms. Deterministic, explainable, browser-only. Instruments for public debate, not calculators of entitlement.
+Simulators for Romanian public-policy reforms. Deterministic, explainable, browser-only.
+Instruments for public debate, not calculators of entitlement.
 
-## Commands
+## Commands and verification
 
-| Task | Command |
-|---|---|
-| test | `python3 -m unittest discover -s tests` |
+Use Python 3.12+, uv and Node 22.12+; there is no root npm workspace.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and the per-domain verification map.
 
-## How this repo is gated
+- `uv sync --all-groups`
+- `uv run python scripts/check_repo_size.py`
+- `uv run python scripts/validate_data.py` (fetch required release assets first)
+- `uv run --with geopandas python -m pytest tests/ -q --junitxml=/tmp/reforms-tests.xml`
+- `python3 scripts/check_test_report.py /tmp/reforms-tests.xml`
+- `python3 scripts/verify_civic_ui_provenance.py`
 
-- `dev` is the default branch and where work lands. Pull requests are required, and **no status check is required yet**.
-- `main` is production. It is restricted: only an admin can advance it, so an agent can open a pull request against it but cannot merge one.
-- This repo ships GitHub Pages. That fires on a merge to `main`, which is the restricted branch — so an agent's work reaching `dev` deploys nothing.
+This is a pytest suite: unittest discovery is not a substitute. Missing artifacts and
+skipped tests are incomplete verification, even when pytest returns zero.
+
+## Delivery boundaries
+
+- Branch from fetched `origin/dev` with `feat/`, `fix/`, `chore/`, `docs/`, `sec/`, or
+  `adr/`; open a PR back to `dev`. **Agents must never merge any PR or deploy**, including
+  with administrator credentials. GitHub restrictions do not enforce agent intent.
+- Maintainers use `wt new <branch> origin/dev` at the repository root; worktrees belong
+  at `<repo>/.worktrees/<branch>`. Preserve dirty/ahead checkouts. Contributors without
+  `wt` can use a separate standard clone (see CONTRIBUTING).
+- CI's aggregate status is `verify`: all simulator, shared, provenance and browser jobs
+  must succeed. The separate scheduled portal collector and Pages deployment are not
+  PR correctness gates. Remote required-check settings are managed separately.
+- `main` is production; its Pages workflow publishes the site. Do not trigger deployment,
+  releases or collection as part of development verification.
 
 ## Working rules
 
-- Branch from `dev` with an approved prefix: `feat/`, `fix/`, `chore/`, `docs/`,
-  `sec/`, `adr/`. Land back into `dev` through a pull request.
-- Conventional Commits. Imperative subject, lower case, no trailing full stop,
-  72 characters hard limit. The body explains *why*; the diff already shows what.
-- Never modify vendored third-party sources. Fix the environment instead.
-- Secrets come from 1Password at runtime via `op run` and `op://` references.
-  Never write a credential into a file, a commit, or a shell history line.
-- Verify before claiming completion. A merged pull request is not a deployment,
-  and a git tag is not a publication.
-
-Cross-repo policy lives in `cnw-platform-handbook/docs/engineering-operating-model.md`.
+- Conventional Commits: imperative lower-case subject, no trailing full stop, at most
+  72 characters; one coherent change per commit. Body explains why; diff shows what.
+- Never modify vendored third-party sources. Fix the environment or update through the
+  documented vendoring process with provenance evidence.
+- Every figure needs source and locator; preserve provenance confidence and limitations.
+- Preserve tracked baseline data, especially `simulators/{justitie,impozit-teren}/data`:
+  CI rebuilds and byte-diffs it. Do not move it to releases to satisfy size checks.
+  Large generated payloads follow `data-assets.json` and `.gitignore`; never commit
+  portal parquet, raw personal data, build output or downloaded caches.
+- Public setup and tests require no private handbook, 1Password or secrets. Maintainer
+  publishing credentials may use `op run` / `op://`; never store or print credentials.
+- Verify before claiming completion; report failed/skipped checks and missing inputs.
+  A merge is not a deployment, and a tag is not a publication.
