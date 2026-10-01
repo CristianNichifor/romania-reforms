@@ -1,8 +1,8 @@
 """Property and snapshot tests for the reference model (brief §7).
 
-These run against the real built artefacts, so they are skipped when the pipeline has not
-been run. That is deliberate: a property test on synthetic geometry would pass while the
-national map was wrong.
+These require the real built artefacts and fail closed when they are absent. Select
+``-m full_data`` to certify the national model; PR CI explicitly selects
+``-m "not full_data"`` and runs the separate bounded pipeline fixture tests.
 """
 
 from __future__ import annotations
@@ -31,13 +31,11 @@ REQUIRED = [
     PROCESSED_DIR / "uat_seats.gpkg",
     PROCESSED_DIR / "adjacency.parquet",
     PROCESSED_DIR / "candidacy.parquet",
+    PROCESSED_DIR / "road_distance.parquet",
     PROCESSED_DIR / "finance.parquet",
 ]
 
-pytestmark = pytest.mark.skipif(
-    not all(p.exists() for p in REQUIRED),
-    reason="pipeline artefacts not built; run the pipeline first",
-)
+pytestmark = pytest.mark.full_data
 
 # The default scenario, pinned. Brief §7: any change to the region count is a deliberate
 # decision, never an accident. If this fails, work out which rule changed before updating it.
@@ -51,6 +49,8 @@ SNAPSHOT_DEFAULT_UATS = 3186
 
 @pytest.fixture(scope="module")
 def data():
+    missing = [str(path) for path in REQUIRED if not path.is_file()]
+    assert not missing, "National pipeline inputs unavailable: " + ", ".join(missing)
     return load_data()
 
 
