@@ -1,5 +1,6 @@
 name: Justice browser baselines
-on: [push, pull_request]
+on:
+  workflow_call:
 permissions:
   contents: read
 jobs:
@@ -35,5 +36,5 @@ jobs:
         with:
           name: justitie-browser-baselines
           path: ${{ runner.temp }}/justitie-browser-baselines
-          if-no-files-found: ignore
+          if-no-files-found: error
           retention-days: 7

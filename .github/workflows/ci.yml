@@ -1,5 +1,7 @@
 name: CI
 on: [push, pull_request]
+permissions:
+  contents: read
 
 # One job per simulator, run in parallel rather than filtered by path. Filtering would save
 # a few minutes and cost a dependency and a class of mistake — a shared package changing
@@ -39,7 +41,10 @@ jobs:
           done
           git diff --exit-code simulators/justitie/data/
       - name: Tests
-        run: uv run --with referencing python -m pytest tests/ -q
+        run: uv run --with referencing --with geopandas python -m pytest tests/ -q --junitxml=reports/shared.xml
+      - name: Require executed test evidence
+        if: ${{ !cancelled() }}
+        run: python scripts/check_test_report.py reports/shared.xml
 
   salarizare:
     name: salarizare
@@ -60,7 +65,10 @@ jobs:
       - name: Validate every regime, crosswalk and fiscal series
         run: uv run --with jsonschema python scripts/validate_data.py
       - name: Importer tests
-        run: uv run --with openpyxl --with pytest --with jsonschema pytest tests/ -q
+        run: uv run --with openpyxl --with pytest --with jsonschema pytest tests/ -q --junitxml=reports/importers.xml
+      - name: Require executed importer evidence
+        if: ${{ !cancelled() }}
+        run: python ../../scripts/check_test_report.py reports/importers.xml
       - name: Import is reproducible
         run: |
           sha256sum data/regimes/ro-draft-2026-07-16.json > "$RUNNER_TEMP/salary-july.sha256"
@@ -83,7 +91,7 @@ jobs:
         with:
           name: pay-browser-checks
           path: /tmp/pay-civic-ui-*
-          if-no-files-found: ignore
+          if-no-files-found: error
           retention-days: 7
 
   justitie:
@@ -122,10 +130,11 @@ jobs:
           cache-dependency-path: simulators/administrativ/web/package-lock.json
       # The reference model's own tests need the built pipeline artefacts, which are not in
       # the repository — they skip here, exactly as they did in the standalone repo. What
-      # does run in CI is the web side: `web/public/data` *is* tracked, so the parity
+      # does run without those files is the web side: `web/public/data` *is* tracked, so the parity
       # fixtures compare the TypeScript port against the Python reference by hash, and a
       # single commune out of 3,186 landing in the wrong unit fails the build.
-      - name: Reference model (lint; tests skip without built artefacts)
+      # The evidence guard below makes absent pipeline artefacts a verification failure.
+      - name: Reference model
         working-directory: simulators/administrativ
         env:
           PYTHONHASHSEED: '0'
@@ -133,7 +142,7 @@ jobs:
           uv sync --all-groups
           uv run ruff check pipeline tests
           uv run ruff format --check pipeline tests
-          uv run pytest -q
+          uv run pytest -q --junitxml=reports/pipeline.xml
       - name: Web
         working-directory: simulators/administrativ/web
         run: |
@@ -141,6 +150,10 @@ jobs:
           npm run lint
           npm run typecheck
           npm test
+
+      - name: Require executed reference-model evidence
+        if: ${{ !cancelled() }}
+        run: python scripts/check_test_report.py simulators/administrativ/reports/pipeline.xml
 
   transport:
     name: transport
@@ -174,7 +187,10 @@ jobs:
           uv sync --all-groups
           uv run ruff check scripts tests
           uv run ruff format --check scripts tests
-          uv run pytest -q
+          uv run pytest -q --junitxml=reports/pipeline.xml
+      - name: Require executed pipeline evidence
+        if: ${{ !cancelled() }}
+        run: python scripts/check_test_report.py simulators/transport/reports/pipeline.xml
       # The app joins journey times to polygons by position, and copy-data.mjs fails loudly
       # when that join matches nothing — which is the check worth having in CI, because a
       # silently empty join renders a plausible grey map.
@@ -334,13 +350,13 @@ jobs:
           -v "$RUNNER_TEMP/land-tax-ui-results:/tmp/land-tax-ui-results"
           mcr.microsoft.com/playwright:v1.63.0-noble
           xvfb-run -a npm run check:ui -- --reporter=list
-      - name: Native UI failure evidence
-        if: failure()
+      - name: Native UI evidence
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: land-tax-ui-failure
+          name: land-tax-ui-results
           path: ${{ runner.temp }}/land-tax-ui-results
-          if-no-files-found: ignore
+          if-no-files-found: error
           retention-days: 7
 
   deconcentrare:
@@ -384,3 +400,29 @@ jobs:
         run: |
           npm ci
           npm run build
+
+  justice-browser:
+    uses: ./.github/workflows/justice-browser.yml
+
+  native-consumers:
+    uses: ./.github/workflows/native-consumers.yml
+
+  verify:
+    name: verify
+    if: ${{ always() }}
+    needs: [shared, salarizare, justitie, administrativ, transport, impozit-teren, deconcentrare, companii-stat, justice-browser, native-consumers]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every correctness job to succeed
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          python - <<'PYCODE'
+          import json, os, sys
+          results = json.loads(os.environ["RESULTS"])
+          failed = {job: value["result"] for job, value in results.items()
+                    if value["result"] != "success"}
+          for job, result in failed.items():
+              print(f"::error::{job}: {result}")
+          sys.exit(1 if failed or not results else 0)
+          PYCODE
