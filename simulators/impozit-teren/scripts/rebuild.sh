@@ -27,6 +27,9 @@
 # Usage:
 #   simulators/impozit-teren/scripts/rebuild.sh              # today's exchange rate
 #   simulators/impozit-teren/scripts/rebuild.sh --pinned     # the rate the datasets carry
+#   simulators/impozit-teren/scripts/rebuild.sh --pinned --committed-built-yield
+# The last profile uses the tracked built-land yield as an input instead of extracting
+# its four notarial PDF caches. Full source verification must still rebuild that yield.
 set -euo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -47,7 +50,14 @@ if [ -z "$counties" ]; then
 fi
 
 pinned=""
-[ "${1:-}" = "--pinned" ] && pinned="--reuse-exchange-rate"
+committed_built_yield=false
+for option in "$@"; do
+  case "$option" in
+    --pinned) pinned="--reuse-exchange-rate" ;;
+    --committed-built-yield) committed_built_yield=true ;;
+    *) echo "unknown rebuild option: $option" >&2; exit 2 ;;
+  esac
+done
 
 step() { printf '\n=== %s\n' "$1"; }
 run() { uv run python "simulators/impozit-teren/scripts/$@" >/dev/null; }
@@ -57,11 +67,16 @@ for county in $counties; do run build_valoare_teren.py --county "$county" $pinne
 
 step "yields, which read the value files above"
 run build_multiplu_piata.py
-run build_randament_construit.py
+if "$committed_built_yield"; then
+  test -s simulators/impozit-teren/data/randament-teren-construit-2026.json
+  echo 'Using committed built-land yield; PDF extraction is verified separately.'
+else
+  run build_randament_construit.py
+fi
 run build_randament_padure.py
 
 step "tax and rent, which read the yields"
-for county in $counties; do run build_impozit.py --county "$county"; done
+for county in $counties; do run build_impozit.py --county "$county" $pinned; done
 for county in $counties; do run build_renta.py --county "$county"; done
 
 step "the national estimate, fitted on all of it"
