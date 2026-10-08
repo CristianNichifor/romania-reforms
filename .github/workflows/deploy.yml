@@ -48,7 +48,7 @@ jobs:
       - name: Build salarizare
         working-directory: simulators/salarizare/app
         env:
-          VITE_BASE: /${{ github.event.repository.name }}/salarizare/
+          VITE_BASE: /${{ github.event.repository.name }}/public-pay/
         run: |
           npm ci
           npm run build
@@ -56,7 +56,7 @@ jobs:
       - name: Build administrativ
         working-directory: simulators/administrativ/web
         env:
-          VITE_BASE: /${{ github.event.repository.name }}/administrativ/
+          VITE_BASE: /${{ github.event.repository.name }}/administrative-reform/
         run: |
           npm ci
           npm run lint
@@ -112,8 +112,8 @@ jobs:
           cp site/index.html dist/index.html
           cp site/brief.html dist/brief.html
           cp site/favicon.svg dist/favicon.svg
-          cp -r simulators/salarizare/app/dist dist/salarizare
-          cp -r simulators/administrativ/web/dist dist/administrativ
+          cp -r simulators/salarizare/app/dist dist/public-pay
+          cp -r simulators/administrativ/web/dist dist/administrative-reform
           cp -r simulators/justitie/app/dist dist/justitie
           cp -r simulators/impozit-teren/app/dist dist/impozit-teren
           cp -r simulators/transport/app/dist dist/transport
@@ -135,7 +135,7 @@ jobs:
           else
             echo "note speed-limit layer absent — the transport toggle will disable itself"
           fi
-          for path in index.html brief.html salarizare/index.html administrativ/index.html \
+          for path in index.html brief.html public-pay/index.html administrative-reform/index.html \
                       justitie/index.html transport/index.html impozit-teren/index.html \
                       deconcentrare/index.html companii-stat/index.html; do
             if [ -s "dist/$path" ]; then
@@ -147,8 +147,8 @@ jobs:
           # The administrative map is useless without its payload, and the payload is copied
           # by Vite from public/ rather than produced by the bundler, so it can go missing
           # without the build failing.
-          if [ ! -s dist/administrativ/data/manifest.json ]; then
-            echo "MISSING dist/administrativ/data/manifest.json"; fail=1
+          if [ ! -s dist/administrative-reform/data/manifest.json ]; then
+            echo "MISSING dist/administrative-reform/data/manifest.json"; fail=1
           fi
           # Same trap for justitie: its court map and county outlines are copied into public/
           # by a prebuild step, so a failed copy leaves a map with nothing on it.
@@ -205,7 +205,7 @@ jobs:
           # survives minification as `className:"up"` and never as `class="up"`, so a check on
           # the attribute passed for three apps and failed for the one whose link is built by a
           # framework. The words a reader clicks are the thing being guaranteed anyway.
-          for sim in salarizare administrativ justitie transport impozit-teren \
+          for sim in public-pay administrative-reform justitie transport impozit-teren \
                      deconcentrare companii-stat; do
             if grep -rqs 'Toate simulatoarele' "dist/$sim/index.html" dist/$sim/assets/*.js; then
               echo "ok   dist/$sim has a link back"
@@ -228,7 +228,7 @@ jobs:
           # root, which a project site cannot serve, and the request fails on every visit.
           copies=$(sha256sum site/favicon.svg simulators/*/*/public/favicon.svg | cut -d' ' -f1 | sort -u | wc -l)
           [ "$copies" = 1 ] || { echo "favicon copies have drifted apart"; fail=1; }
-          for path in favicon.svg salarizare/favicon.svg administrativ/favicon.svg \
+          for path in favicon.svg public-pay/favicon.svg administrative-reform/favicon.svg \
                       justitie/favicon.svg transport/favicon.svg \
                       impozit-teren/favicon.svg deconcentrare/favicon.svg \
                       companii-stat/favicon.svg; do
