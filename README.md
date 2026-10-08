@@ -90,15 +90,15 @@ public-enterprise work waits for a consumer-specific question.
 | | | |
 | --- | --- | --- |
 | **justitie** | The judicial reform | migrated to the 2025 report |
-| **salarizare** | Public-sector pay | migrated |
-| **administrativ** | Consolidation of the 3 186 UATs | migrated |
+| **salarizare** (`/public-pay/`) | Public-sector pay | migrated |
+| **administrativ** (`/administrative-reform/`) | Consolidation of the 3 186 UATs | migrated |
 | **transport** | County public transport and rail access | built and published |
 | **impozit-teren** | Taxing land on its value | 32 counties read, 10 estimated, nothing excluded; 22 readers |
 | **deconcentrare** | County offices of the central state | 919 offices in evidence; 820 regionalisable offices → 179 |
 | **companii-stat** | State companies by activity | 1 247 companies; 659 network utilities → 56; 561 micro companies |
 
 The live apps now live here, with their history, on project paths under one Pages site:
-`/romania-reforms/salarizare/`, `/romania-reforms/administrativ/`,
+`/romania-reforms/public-pay/`, `/romania-reforms/administrative-reform/`,
 `/romania-reforms/justitie/`, `/romania-reforms/transport/`,
 `/romania-reforms/impozit-teren/`, `/romania-reforms/deconcentrare/` and
 `/romania-reforms/companii-stat/`. Old standalone repositories stay as redirect stubs where
@@ -1134,8 +1134,8 @@ repository:
 ```
 cristiannichifor.github.io/romania-reforms/              the index
 cristiannichifor.github.io/romania-reforms/justitie/
-cristiannichifor.github.io/romania-reforms/salarizare/
-cristiannichifor.github.io/romania-reforms/administrativ/
+cristiannichifor.github.io/romania-reforms/public-pay/
+cristiannichifor.github.io/romania-reforms/administrative-reform/
 cristiannichifor.github.io/romania-reforms/transport/
 cristiannichifor.github.io/romania-reforms/impozit-teren/
 ```
