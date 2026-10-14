@@ -70,3 +70,26 @@ def test_privacy_page_states_what_the_code_shows_in_both_languages():
 def test_romanian_text_uses_comma_below(page):
     html = read(page)
     assert not re.search("[şţŞŢ]", html)
+
+
+@pytest.mark.parametrize(
+    ("page", "prefix", "argument", "for_you"),
+    [
+        ("index.html", "", "Opt regiuni, nu 41", "Ce înseamnă pentru tine"),
+        ("en/index.html", "../", "Eight regions, not 41", "What it means for you"),
+    ],
+)
+def test_landing_leads_with_the_argument_then_what_it_means_for_you(
+    page, prefix, argument, for_you
+):
+    """UX review: the argument and three headline numbers first, then the reader's own case,
+    then every simulator."""
+    html = read(page)
+    lead = html.index(f"<h2>{argument}</h2>")
+    you = html.index(f"<h2>{for_you}</h2>")
+    simulators = html.index('<section class="simulators">')
+    assert lead < you < simulators
+    assert html[lead:you].count('<div class="headline-number">') == 3
+    assert f'href="{prefix}brief.html"' in html[lead:you]
+    for target in ("public-pay/#/payslip", "transport/", "impozit-teren/"):
+        assert f'href="{prefix}{target}"' in html[you:simulators]
