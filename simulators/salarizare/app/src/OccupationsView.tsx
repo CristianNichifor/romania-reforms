@@ -23,6 +23,7 @@ export interface OccupationBenchmarks {
 }
 
 export default function OccupationsView({
+  menu,
   regime,
   groups,
   danish,
@@ -34,6 +35,8 @@ export default function OccupationsView({
   measured,
   inForce,
 }: {
+  /** The section menu, drawn under the title so the page says what it is first. */
+  menu?: ReactNode;
   regime: Regime;
   groups: GroupsDocument;
   danish: DkOccupation[];
@@ -97,6 +100,7 @@ export default function OccupationsView({
           propriului sistem, deci se pot compara direct.
         </p>
       </header>
+      {menu}
 
       <div className="disclaimer">
         <strong>Cifra daneză include sporurile. Cea românească, doar dacă bifezi.</strong> Pentru

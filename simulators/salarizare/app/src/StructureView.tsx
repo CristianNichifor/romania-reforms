@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import type { ReactNode } from 'react';
 import { Table } from '@cristiannichifor/civic-ui';
 
 import { structure } from '../../engine/structure';
@@ -18,9 +19,12 @@ function pct(n: number): string {
 }
 
 export default function StructureView({
+  menu,
   regime,
   period,
 }: {
+  /** The section menu, drawn under the title so the page says what it is first. */
+  menu?: ReactNode;
   regime: Regime;
   /** The annual column in force, or null when the regime phases nothing. */
   period: string | null;
@@ -92,6 +96,7 @@ export default function StructureView({
           <code>Proiect-COEFICIENTI-1-8-20-august-2026.xlsx</code>, 49 de foi.
         </p>
       </header>
+      {menu}
 
       <div className="disclaimer">
         <strong>Instrument pentru dezbatere publică, nu calculator de salarii.</strong> Arată ce

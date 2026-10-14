@@ -49,6 +49,7 @@ function dimText(dims: Readonly<Record<string, string>> | undefined): string {
 }
 
 export default function PayslipView({
+  menu,
   regimes,
   scenario,
   onChange,
@@ -56,6 +57,8 @@ export default function PayslipView({
   assimilation,
   inForce,
 }: {
+  /** The section menu, drawn under the title so the page says what it is first. */
+  menu?: ReactNode;
   regimes: Regime[];
   scenario: Scenario;
   onChange: (next: Scenario) => void;
@@ -173,6 +176,7 @@ export default function PayslipView({
           scenariul stă în adresa paginii — linkul <em>este</em> scenariul.
         </p>
       </header>
+      {menu}
 
       <div className="disclaimer">
         <strong>Cifrele sunt ce spune legea, nu ce încasează cineva.</strong> Orice sumă de aici e

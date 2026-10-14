@@ -93,11 +93,14 @@ const QUESTIONS: Array<{ ask: string; lead: string; entries: Entry[] }> = [
  * loaded, so nothing here can go stale against the data behind it.
  */
 export default function HomeView({
+  menu,
   ministry,
   inForce,
   denmark,
   onOpen,
 }: {
+  /** The section menu, drawn after the search so the question people arrive with comes first. */
+  menu?: ReactNode;
   ministry: Regime | null;
   inForce: Regime | null;
   denmark: Regime | null;
@@ -133,13 +136,6 @@ export default function HomeView({
         </p>
       </header>
 
-      <div className="disclaimer">
-        <strong>Instrument de dezbatere, nu calculator de salarii.</strong> Calculează ce spune un
-        text de lege, nu ce încasează cineva. Nicio cifră de aici nu e un drept al nimănui, și
-        niciun scenariu nu e o recomandare. Fiecare număr își poartă documentul și articolul din
-        care provine, iar unde datele nu ajung, scrie asta pe pagină în loc să fie completat cu o
-        presupunere.
-      </div>
 
       <section>
         <h2>Caută-ți funcția</h2>
@@ -185,6 +181,16 @@ export default function HomeView({
           )}
         </div>
       </section>
+
+      {menu}
+
+      <div className="disclaimer">
+        <strong>Instrument de dezbatere, nu calculator de salarii.</strong> Calculează ce spune un
+        text de lege, nu ce încasează cineva. Nicio cifră de aici nu e un drept al nimănui, și
+        niciun scenariu nu e o recomandare. Fiecare număr își poartă documentul și articolul din
+        care provine, iar unde datele nu ajung, scrie asta pe pagină în loc să fie completat cu o
+        presupunere.
+      </div>
 
       {QUESTIONS.map((q) => (
         <section key={q.ask}>

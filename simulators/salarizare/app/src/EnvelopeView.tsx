@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import type { ReactNode } from 'react';
 import { Field, Input, RangeSlider } from '@cristiannichifor/civic-ui';
 
 import type { CapSeries } from '../../engine/cap';
@@ -37,12 +38,15 @@ function pctText(n: number): string {
 }
 
 export default function EnvelopeView({
+  menu,
   baseline,
   rates,
   capSeries,
   scenario,
   onScenario,
 }: {
+  /** The section menu, drawn under the title so the page says what it is first. */
+  menu?: ReactNode;
   baseline: EnvelopeBaseline | null;
   rates: Rates;
   /** The ceiling, measured per ordonator and per funding source. */
@@ -119,6 +123,7 @@ export default function EnvelopeView({
           reducere pe care o scrii aici și care apare în dreptul creșterii.
         </p>
       </header>
+      {menu}
 
       <section className="hero envelope-hero">
         <div className="hero-figure">

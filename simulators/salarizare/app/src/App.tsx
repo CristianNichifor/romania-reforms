@@ -25,6 +25,7 @@ import PayslipView from './PayslipView';
 import ProposalView from './ProposalView';
 import StructureView from './StructureView';
 import { STRINGS, langOf, withLang } from './i18n';
+import { regimeLabel } from './names';
 
 const ACTIVE_DRAFT_ID = 'ro-draft-2026-08-20';
 const LEGACY_DRAFT_ID = 'ro-draft-2026-07-16';
@@ -405,6 +406,55 @@ export default function App() {
     setScenario({ ...scenario, regimeIds: next.length ? next : [AVAILABLE[0]] });
   };
 
+  // The menu used to open every page: eleven cards before the title said what the tool is.
+  // Every view now draws it under its own H1 and lead, so the page introduces itself first.
+  const menu = (
+    <nav className="tabs" aria-label={t.sections}>
+      {NAV_GROUPS.map((group) => (
+        <div className="tabgroup" key={group.key}>
+          <span className="tabgroup-title">{t.groups[group.key].title}</span>
+          <span className="tabgroup-ask">{t.groups[group.key].ask}</span>
+          {group.views.map((id) => (
+            <button
+              key={id}
+              // Which view is on screen, readable from the DOM. The `on` class already said
+              // *a* view is active; it could not say *which*, so a check waiting for the
+              // route it asked for had nothing to wait on and settled for a signal the
+              // previous route already satisfied.
+              data-view={id}
+              className={scenario.view === id ? 'on' : ''}
+              onClick={() => setScenario({ ...scenario, view: id })}
+            >
+              <strong>{t.views[id].label}</strong>
+              <small>{t.views[id].blurb}</small>
+            </button>
+          ))}
+        </div>
+      ))}
+      {scenario.view === 'payslip' && (
+        <div className="tabgroup regimes">
+          {AVAILABLE.map((id) => (
+            <Checkbox
+              key={id}
+              className="regime-toggle"
+              checked={wanted.includes(id)}
+              value={id}
+              onChange={() => toggleRegime(id)}
+              label={
+                <>
+                  {regimeLabel(id, regimes)} <small className="regime-id">{id}</small>
+                </>
+              }
+            />
+          ))}
+          <Button className="share" onClick={share}>
+            {copied ? t.copied : t.share}
+          </Button>
+        </div>
+      )}
+    </nav>
+  );
+
   return (
     <div className="wrap civic-scope civic-pay" lang={lang}>
       <p className="lang-switch">
@@ -420,45 +470,6 @@ export default function App() {
           {t.switchTo.label}
         </a>
       </p>
-      <nav className="tabs" aria-label={t.sections}>
-        {NAV_GROUPS.map((group) => (
-          <div className="tabgroup" key={group.key}>
-            <span className="tabgroup-title">{t.groups[group.key].title}</span>
-            <span className="tabgroup-ask">{t.groups[group.key].ask}</span>
-            {group.views.map((id) => (
-              <button
-                key={id}
-                // Which view is on screen, readable from the DOM. The `on` class already said
-                // *a* view is active; it could not say *which*, so a check waiting for the
-                // route it asked for had nothing to wait on and settled for a signal the
-                // previous route already satisfied.
-                data-view={id}
-                className={scenario.view === id ? 'on' : ''}
-                onClick={() => setScenario({ ...scenario, view: id })}
-              >
-                <strong>{t.views[id].label}</strong>
-                <small>{t.views[id].blurb}</small>
-              </button>
-            ))}
-          </div>
-        ))}
-        {scenario.view === 'payslip' && (
-          <div className="tabgroup regimes">
-            {AVAILABLE.map((id) => (
-              <Checkbox
-                key={id}
-                className="regime-toggle"
-                checked={wanted.includes(id)}
-                onChange={() => toggleRegime(id)}
-                label={id}
-              />
-            ))}
-            <Button className="share" onClick={share}>
-              {copied ? t.copied : t.share}
-            </Button>
-          </div>
-        )}
-      </nav>
 
       {PHASED_VIEWS.includes(scenario.view) && years.length > 1 && (
         <div className="phase">
@@ -480,11 +491,15 @@ export default function App() {
       )}
 
       {t.viewsInRomanian && <p className="lang-note">{t.viewsInRomanian}</p>}
+      {/* Until a view can draw itself, the menu is the page: a reader stuck on an error
+          or a slow load can still go somewhere else. The first screen draws its own. */}
+      {scenario.view !== 'acasa' && (error || loaded.length === 0) && menu}
       {error && <p className="loading">{t.loadError(error)}</p>}
       {!error && loaded.length === 0 && <p className="loading">{t.loading}</p>}
 
       {scenario.view === 'acasa' && (
         <HomeView
+          menu={menu}
           ministry={ministry ?? null}
           inForce={regimes['ro-153-2017'] ?? null}
           denmark={regimes['dk-stat-2026'] ?? null}
@@ -493,6 +508,7 @@ export default function App() {
       )}
       {scenario.view === 'compare' && ministry && ours && active && fx && (
         <CompareView
+          menu={menu}
           ministry={ministry}
           ours={ours.regime}
           inForce={regimes['ro-153-2017'] ?? null}
@@ -508,6 +524,7 @@ export default function App() {
       )}
       {scenario.view === 'propunere' && ministry && proposal && (
         <ProposalView
+          menu={menu}
           ministry={ministry}
           proposal={proposal}
           scenario={scenario}
@@ -517,6 +534,7 @@ export default function App() {
       )}
       {scenario.view === 'distributie' && ministry && assimilation && (
         <DistributionView
+          menu={menu}
           inForce={regimes['ro-153-2017'] ?? null}
           draft={ministry}
           crosswalk={assimilation}
@@ -524,6 +542,7 @@ export default function App() {
       )}
       {scenario.view === 'functii' && ministry && fx && (
         <MergesView
+          menu={menu}
           draft={ministry}
           ours={ours?.regime ?? null}
           inForce={regimes['ro-153-2017'] ?? null}
@@ -537,6 +556,7 @@ export default function App() {
       )}
       {scenario.view === 'domenii' && ministry && ours && occGroups && dkOcc && fx && benchmarks && (
         <DomainsView
+          menu={menu}
           inForce={regimes['ro-153-2017'] ?? null}
           draft={ministry}
           proposal={ours.regime}
@@ -556,6 +576,7 @@ export default function App() {
       )}
       {scenario.view === 'meserii' && ministry && occGroups && dkOcc && occBench && fx && (
         <OccupationsView
+          menu={menu}
           regime={ministry}
           groups={occGroups}
           danish={dkOcc}
@@ -575,6 +596,7 @@ export default function App() {
         fx &&
         benchmarks && (
           <EquivalenceView
+          menu={menu}
             ro={ministry}
             dk={regimes['dk-stat-2026']}
             crosswalk={crosswalk}
@@ -583,10 +605,11 @@ export default function App() {
           />
       )}
       {loaded.length > 0 && scenario.view === 'structure' && (
-        <StructureView regime={regimes[ACTIVE_DRAFT_ID] ?? loaded[0]} period={period} />
+        <StructureView menu={menu} regime={regimes[ACTIVE_DRAFT_ID] ?? loaded[0]} period={period} />
       )}
       {scenario.view === 'envelope' && fx && (
         <EnvelopeView
+          menu={menu}
           baseline={envelopeBaseline}
           rates={fx}
           capSeries={capSeries}
@@ -596,6 +619,7 @@ export default function App() {
       )}
       {loaded.length > 0 && scenario.view === 'payslip' && fx && (
         <PayslipView
+          menu={menu}
           regimes={ours ? [...loaded, ours.regime] : loaded}
           scenario={scenario}
           onChange={setScenario}

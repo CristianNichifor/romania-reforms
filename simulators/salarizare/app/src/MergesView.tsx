@@ -30,6 +30,7 @@ import type { Rates } from './money';
  * reaches a job only through the occupation groups. Neither absence is filled in.
  */
 export default function MergesView({
+  menu,
   draft,
   ours,
   inForce,
@@ -40,6 +41,8 @@ export default function MergesView({
   scenario,
   onScenario,
 }: {
+  /** The section menu, drawn under the title so the page says what it is first. */
+  menu?: ReactNode;
   draft: Regime;
   ours: Regime | null;
   inForce: Regime | null;
@@ -113,6 +116,7 @@ export default function MergesView({
           absorbit și cu banii pe care fiecare sistem îi pune pe aceeași muncă.
         </p>
       </header>
+      {menu}
 
       <div className="kpis">
         <div className="kpi">
@@ -222,7 +226,8 @@ function Card({ card, rates }: { card: MergeCard; rates: Rates }) {
       </header>
       <p className="merge-meta">
         {card.family}
-        {card.chapter && <> · {card.chapter}</>} · {card.code}
+        {card.chapter && <> · {card.chapter}</>} ·{' '}
+        <code title="codul poziției în anexa sursă">{card.code}</code>
       </p>
 
       <Table className="data" label={`Comparație salarială: ${card.name}`}>
