@@ -32,6 +32,19 @@
       * {
         box-sizing: border-box;
       }
+      /* UX-10: the family bar leads the page, so it loses the footer rule. */
+      body > .rr-nav {
+        max-width: 46rem;
+        margin: 0 auto 2rem;
+        padding: 0 0 0.75rem;
+        border-top: 0;
+        border-bottom: 1px solid var(--line);
+      }
+      body > .rr-nav a {
+        display: inline-block;
+        min-height: 24px;
+        line-height: 24px;
+      }
       body {
         margin: 0;
         padding: 3rem 1.25rem 4rem;
@@ -166,6 +179,7 @@
     <style>.rr-nav{margin:1.5rem 0 0;padding-top:.75rem;border-top:1px solid;border-color:color-mix(in srgb,currentColor 20%,transparent);font-size:.8rem;line-height:1.6}.rr-nav ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:.2rem .9rem}.rr-nav a{color:inherit}.rr-nav a[aria-current="page"]{font-weight:600;text-decoration:none}</style>
   </head>
   <body>
+    <nav class="rr-nav" aria-label="Simulators"><ul><li><a href="../" aria-current="page">All simulators</a></li><li><a href="../administrative-reform/">Administrative reform</a></li><li><a href="../public-pay/">Public pay</a></li><li><a href="../transport/">Public transport</a></li><li><a href="../justitie/">Justice reform</a></li><li><a href="../impozit-teren/">Land tax</a></li><li><a href="../deconcentrare/">Deconcentrated services</a></li><li><a href="../companii-stat/">State companies</a></li></ul></nav>
     <!-- English translation of ../index.html: needs human review. The simulators themselves
          are in Romanian, except the administrative reform, which has an English toggle. -->
     <main>
@@ -311,7 +325,6 @@
         <a href="../privacy.html#en">Privacy</a> ·
         <a href="../index.html" hreflang="ro" lang="ro">Română</a>
       </footer>
-      <nav class="rr-nav" aria-label="Simulators"><ul><li><a href="../" aria-current="page">All simulators</a></li><li><a href="../administrative-reform/">Administrative reform</a></li><li><a href="../public-pay/">Public pay</a></li><li><a href="../transport/">Public transport</a></li><li><a href="../justitie/">Justice reform</a></li><li><a href="../impozit-teren/">Land tax</a></li><li><a href="../deconcentrare/">Deconcentrated services</a></li><li><a href="../companii-stat/">State companies</a></li></ul></nav>
     </main>
   </body>
 </html>
