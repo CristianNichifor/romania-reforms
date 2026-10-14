@@ -1,0 +1,144 @@
+<!doctype html><html lang="ro"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Impozitul pe teren — machetă</title><style>
+:root{color-scheme:light;
+--civic-font-sans:system-ui,-apple-system,"Segoe UI",sans-serif;
+--civic-bg:#f4f6f6;--civic-surface:#ffffff;--civic-raised:#e7eeee;--civic-text:#182b2c;--civic-muted:#475d60;
+--civic-border:#718588;--civic-action:#006b60;--civic-action-hover:#00564d;--civic-on-action:#ffffff;--civic-focus:#006b60;--civic-danger:#a31b34;
+--civic-radius:6px;
+--space-1:.25rem;--space-2:.5rem;--space-3:.75rem;--space-4:1.1rem;--space-5:1.6rem;--space-6:2.4rem;
+--text-xs:.78rem;--text-sm:.86rem;--text-base:1rem;--text-lg:1.15rem;--text-xl:1.45rem;--text-2xl:2rem;
+/* viz: Okabe–Ito, the same blue→orange pair the justitie ramp test certifies */
+--viz-1:#0072b2;--viz-2:#e69f00;--viz-3:#009e73;--viz-4:#cc79a7;--viz-5:#56b4e9;
+--ramp-1:#deebf7;--ramp-2:#9ecae1;--ramp-3:#4292c6;--ramp-4:#08519c;
+/* map canvas: the permitted dark deviation, map only */
+--map-bg:#142323;--map-surface:#203332;--map-text:#f0f6f5;--map-muted:#c0d3cf;--map-border:#8ca8a1;--map-action:#b5e8dc;}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--civic-bg:#142323;--civic-surface:#203332;--civic-raised:#304845;--civic-text:#f0f6f5;--civic-muted:#c0d3cf;--civic-border:#8ca8a1;--civic-action:#b5e8dc;--civic-action-hover:#d2f5eb;--civic-on-action:#142323;--civic-focus:#b5e8dc;--civic-danger:#ffb9c5;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--civic-bg);color:var(--civic-text);font:16px/1.55 var(--civic-font-sans)}
+a{color:var(--civic-action)}
+:focus-visible{outline:3px solid var(--civic-focus);outline-offset:2px}
+.wrap{max-width:72rem;margin:0 auto;padding:0 var(--space-4)}
+.family{background:var(--civic-surface);border-bottom:1px solid var(--civic-border);font-size:var(--text-sm)}
+.family .wrap{display:flex;align-items:center;gap:var(--space-4);min-height:44px;flex-wrap:wrap}
+.family .hub{font-weight:600;text-decoration:none;color:var(--civic-text);min-height:24px;display:inline-flex;align-items:center}
+.family ul{list-style:none;margin:0;padding:0;display:flex;gap:var(--space-3);flex-wrap:wrap;overflow-x:auto}
+.family a{min-height:24px;display:inline-flex;align-items:center;padding:0 var(--space-1);text-decoration:none;color:var(--civic-text)}
+.family a[aria-current=page]{font-weight:600;border-bottom:2px solid var(--civic-action)}
+.family .spacer{flex:1}
+.badge{display:inline-flex;align-items:center;gap:.35em;border:1px solid var(--civic-border);border-radius:999px;padding:.1em .7em;font-size:var(--text-xs);white-space:nowrap}
+.badge::before{content:"";width:.55em;height:.55em;border-radius:50%;background:var(--viz-3)}
+.badge.demo::before{background:var(--viz-2)}
+.badge.proto::before{background:var(--viz-1)}
+h1{font-size:var(--text-2xl);line-height:1.2;margin:var(--space-5) 0 var(--space-2);letter-spacing:-.01em}
+.purpose{margin:0 0 var(--space-1);max-width:40rem;font-size:var(--text-lg)}
+.data-line{margin:0 0 var(--space-4);font-size:var(--text-sm);color:var(--civic-muted)}
+h2{font-size:var(--text-xl);margin:var(--space-6) 0 var(--space-2)}
+h3{font-size:var(--text-lg);margin:var(--space-4) 0 var(--space-2)}
+.card{background:var(--civic-surface);border:1px solid color-mix(in srgb,var(--civic-border) 45%,transparent);border-radius:var(--civic-radius);padding:var(--space-4)}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 var(--space-4);border-radius:var(--civic-radius);border:1px solid var(--civic-action);background:var(--civic-action);color:var(--civic-on-action);font:inherit;font-weight:600;text-decoration:none;cursor:pointer}
+.btn.secondary{background:transparent;color:var(--civic-action)}
+label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(--space-1)}
+input,select{font:inherit;min-height:44px;width:100%;padding:0 var(--space-3);border:1px solid var(--civic-border);border-radius:var(--civic-radius);background:var(--civic-surface);color:var(--civic-text)}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:var(--space-2) var(--space-3);border-bottom:1px solid color-mix(in srgb,var(--civic-border) 40%,transparent);vertical-align:top}
+th{font-size:var(--text-sm);color:var(--civic-muted);font-weight:600}
+td.num,th.num{text-align:right}
+.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.table-scroll th:first-child,.table-scroll td:first-child{position:sticky;left:0;background:var(--civic-surface)}
+.source{font-size:var(--text-xs);color:var(--civic-muted);margin:var(--space-2) 0 0}
+.state{display:flex;gap:var(--space-3);align-items:center;padding:var(--space-3) var(--space-4);border-radius:var(--civic-radius);border:1px solid color-mix(in srgb,var(--civic-border) 45%,transparent);background:var(--civic-surface);font-size:var(--text-sm)}
+.state.error{border-color:var(--civic-danger)}
+.state .btn{min-height:36px}
+.skeleton{background:linear-gradient(90deg,var(--civic-raised),var(--civic-surface),var(--civic-raised));border-radius:var(--civic-radius);min-height:1.2em}
+footer.site{margin-top:var(--space-6);padding:var(--space-5) 0;border-top:1px solid color-mix(in srgb,var(--civic-border) 45%,transparent);font-size:var(--text-sm);color:var(--civic-muted)}
+footer.site ul{list-style:none;padding:0;margin:0 0 var(--space-2);display:flex;gap:var(--space-4);flex-wrap:wrap}
+footer.site a{min-height:24px;display:inline-flex;align-items:center}
+.note{position:sticky;top:0;z-index:9;background:#fff8e1;color:#4a3b00;border-bottom:1px solid #e0c200;font-size:var(--text-xs);padding:var(--space-1) var(--space-4)}
+.states-row{display:grid;gap:var(--space-3);grid-template-columns:repeat(auto-fit,minmax(16rem,1fr));margin-top:var(--space-4)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+.frames{display:grid;grid-template-columns:repeat(auto-fit,minmax(390px,1fr));gap:var(--space-5);padding:var(--space-5) 0;justify-items:center}
+.phone{width:390px;min-height:844px;border:1px solid var(--civic-border);border-radius:20px;overflow:hidden;background:var(--civic-bg);display:flex;flex-direction:column}
+.phone .family .wrap{min-height:44px}
+.phone .family ul{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;max-width:60vw}
+.phone main{padding:0 var(--space-4) var(--space-5)}
+.phone h1{font-size:var(--text-xl);margin-top:var(--space-4)}
+.phone .purpose{font-size:var(--text-base)}
+.est{background:var(--civic-surface);border:1px solid color-mix(in srgb,var(--civic-border) 45%,transparent);border-radius:var(--civic-radius);padding:var(--space-4);margin:var(--space-3) 0}
+.est strong{display:block;font-size:var(--text-2xl);line-height:1.1;font-variant-numeric:tabular-nums}
+.est .eq{display:grid;grid-template-columns:1fr auto 1fr;gap:var(--space-2);align-items:center;text-align:center;margin-top:var(--space-3);font-size:var(--text-sm)}
+.est .eq b{display:block;font-size:var(--text-lg)}
+.minimap{height:150px;border-radius:var(--civic-radius);background:var(--map-bg);color:var(--map-text);display:grid;place-items:center;position:relative;color-scheme:dark}
+.minimap .dot{position:absolute;width:14px;height:14px;border-radius:50%;background:var(--viz-2);border:2px solid #fff;left:36%;top:44%}
+.minimap .lab{position:absolute;left:40%;top:36%;font-size:var(--text-xs);background:var(--map-surface);padding:0 .4em;border-radius:3px}
+.caption{font-size:var(--text-xs);color:var(--civic-muted);margin:var(--space-1) 0 0}
+.phone .frame-title{font-size:var(--text-xs);color:var(--civic-muted);text-align:center;padding:var(--space-1)}
+.zones{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--space-1);margin:var(--space-2) 0}
+.zones button{font:inherit;min-height:44px;border:1px solid var(--civic-border);border-radius:var(--civic-radius);background:var(--civic-surface);color:var(--civic-text)}
+.zones button[aria-pressed=true]{background:var(--civic-action);color:var(--civic-on-action);border-color:var(--civic-action)}
+</style></head><body>
+<div class="note">Machetă statică (04-impozit-teren-mobile). Text în română scris de agent: necesită verificare umană. Valorile „—” sunt substituenți, nu cifre.</div>
+
+<div class="frames">
+<div class="phone"><div class="frame-title">390 × 844 · pasul 1: alegerea</div>
+<header class="family"><div class="wrap">
+<a class="hub" href="../">Simulatoare · Toate simulatoarele</a>
+<nav aria-label="Simulatoare"><ul>
+<li><a href="../administrative-reform/">Reforma administrativă</a></li>
+<li><a href="../public-pay/">Salarizarea publică</a></li>
+<li><a href="../transport/">Transport public</a></li>
+<li><a href="../justitie/">Reforma justiției</a></li>
+<li><a href="../impozit-teren/" aria-current="page">Impozitul pe teren</a></li>
+<li><a href="../deconcentrare/">Serviciile deconcentrate</a></li>
+<li><a href="../companii-stat/">Companiile statului</a></li>
+</ul></nav><span class="spacer"></span><span class="badge">Date reale</span></div></header>
+<main>
+<h1>Impozitul pe teren</h1>
+<p class="purpose">Alege județul și zona, vezi cât valorează terenul și ce cotă pe valoare ar aduce aceiași bani.</p>
+<p class="data-line">Date: Codul fiscal, 2026; ghidurile notariale, 2026</p>
+<label for="jud">Județul</label><select id="jud"><option>Alba</option><option>Arad</option><option>Argeș</option><option>…</option></select>
+<label for="loc" style="margin-top:var(--space-3)">Localitatea</label><input id="loc" type="search" placeholder="Scrie numele comunei sau orașului">
+<p style="margin:var(--space-3) 0 0"><label>Zona (rangul localității)</label></p>
+<div class="zones" role="group" aria-label="Zona"><button aria-pressed="true">A</button><button aria-pressed="false">B</button><button aria-pressed="false">C</button><button aria-pressed="false">D</button></div>
+<label for="ha" style="margin-top:var(--space-3)">Suprafața (ha)</label><input id="ha" type="number" inputmode="decimal" value="1">
+<p><button class="btn" style="width:100%">Calculează</button></p>
+<div class="state"><span class="skeleton" style="width:1.5em;height:1.5em;border-radius:50%"></span>Se încarcă grila notarială pentru Alba…</div>
+</main></div>
+
+<div class="phone"><div class="frame-title">390 × 844 · pasul 2: estimarea (primul ecran, înainte de hărți)</div>
+<header class="family"><div class="wrap">
+<a class="hub" href="../">Simulatoare · Toate simulatoarele</a>
+<nav aria-label="Simulatoare"><ul>
+<li><a href="../administrative-reform/">Reforma administrativă</a></li>
+<li><a href="../public-pay/">Salarizarea publică</a></li>
+<li><a href="../transport/">Transport public</a></li>
+<li><a href="../justitie/">Reforma justiției</a></li>
+<li><a href="../impozit-teren/" aria-current="page">Impozitul pe teren</a></li>
+<li><a href="../deconcentrare/">Serviciile deconcentrate</a></li>
+<li><a href="../companii-stat/">Companiile statului</a></li>
+</ul></nav><span class="spacer"></span><span class="badge">Date reale</span></div></header>
+<main>
+<h1>Impozitul pe teren</h1>
+<p class="data-line">Date: Codul fiscal, 2026; ghidurile notariale, 2026</p>
+<p class="source">Județul Alba · zona A · 1 ha · <a href="#schimba">Schimbă</a></p>
+<div class="est" aria-live="polite">
+ <span class="source">Impozitul de azi, pe hectar (Codul fiscal 2026, zona A)</span>
+ <strong>— lei / an</strong>
+ <div class="eq"><div><span class="source">Valoarea terenului<br>(ghid notarial Alba 2026)</span><b>— lei</b></div><div aria-hidden="true">→</div><div><span class="source">Cota pe valoare care ar aduce exact aceiași bani</span><b>— %</b></div></div>
+ <p class="caption">Sursă: Studiu de piață — terenuri, județul Alba, 2026 (UNNPR, CNP Alba Iulia); Codul fiscal 2026, tabelele de teren.</p>
+</div>
+<div class="minimap" role="img" aria-label="Harta județului Alba cu localitatea aleasă"><span class="dot"></span><span class="lab">—</span><span class="source" style="position:absolute;bottom:4px;left:8px;color:var(--map-muted)">Harta: după estimare, nu înainte</span></div>
+<details style="margin-top:var(--space-3)"><summary style="min-height:44px;display:flex;align-items:center;font-weight:600">Vezi tabelul pe zone</summary>
+<div class="table-scroll"><table><thead><tr><th>Zona</th><th class="num">Impozit azi (lei/ha)</th><th class="num">Valoare (lei/ha)</th><th class="num">Cota echivalentă</th></tr></thead>
+<tbody><tr><td>A</td><td class="num">—</td><td class="num">—</td><td class="num">— %</td></tr><tr><td>B</td><td class="num">—</td><td class="num">—</td><td class="num">— %</td></tr><tr><td>C</td><td class="num">—</td><td class="num">—</td><td class="num">— %</td></tr><tr><td>D</td><td class="num">—</td><td class="num">—</td><td class="num">— %</td></tr></tbody></table></div>
+<p class="source">Unitatea o singură dată, în antet; prima coloană rămâne lipită la derulare.</p></details>
+<div class="state error" style="margin-top:var(--space-3)"><span>Ghidul notarial pentru Alba nu s-a putut încărca.</span><button class="btn">Reîncearcă</button></div>
+<div class="state" style="margin-top:var(--space-2)"><span>Nicio localitate „Blajj” în Alba; încearcă „Blaj” sau alege de pe hartă.</span></div>
+</main></div>
+</div>
+<main class="wrap"><p class="source">Ordinea pe telefon: titlu → date → alegere → estimare → hartă → tabel → metodă. Pe desktop (1440) aceleași blocuri stau pe două coloane: formular și estimare la stânga, hartă la dreapta; fără spațiu gol sub panou.</p></main>
+<footer class="site"><div class="wrap"><ul>
+<li><a href="#metoda">Metodă</a></li><li><a href="../privacy.html">Confidențialitate</a></li>
+<li><a href="https://github.com/CristianNichifor/romania-reforms">Codul sursă</a></li><li><a href="#contact">Contact</a></li></ul>
+<p>Instrument pentru dezbatere publică, nu calculator de drepturi. Fiecare cifră are sursă și locator.</p></div></footer></body></html>

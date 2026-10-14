@@ -1,0 +1,149 @@
+<!doctype html><html lang="ro"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reforma administrativă — machetă</title><style>
+:root{color-scheme:light;
+--civic-font-sans:system-ui,-apple-system,"Segoe UI",sans-serif;
+--civic-bg:#f4f6f6;--civic-surface:#ffffff;--civic-raised:#e7eeee;--civic-text:#182b2c;--civic-muted:#475d60;
+--civic-border:#718588;--civic-action:#006b60;--civic-action-hover:#00564d;--civic-on-action:#ffffff;--civic-focus:#006b60;--civic-danger:#a31b34;
+--civic-radius:6px;
+--space-1:.25rem;--space-2:.5rem;--space-3:.75rem;--space-4:1.1rem;--space-5:1.6rem;--space-6:2.4rem;
+--text-xs:.78rem;--text-sm:.86rem;--text-base:1rem;--text-lg:1.15rem;--text-xl:1.45rem;--text-2xl:2rem;
+/* viz: Okabe–Ito, the same blue→orange pair the justitie ramp test certifies */
+--viz-1:#0072b2;--viz-2:#e69f00;--viz-3:#009e73;--viz-4:#cc79a7;--viz-5:#56b4e9;
+--ramp-1:#deebf7;--ramp-2:#9ecae1;--ramp-3:#4292c6;--ramp-4:#08519c;
+/* map canvas: the permitted dark deviation, map only */
+--map-bg:#142323;--map-surface:#203332;--map-text:#f0f6f5;--map-muted:#c0d3cf;--map-border:#8ca8a1;--map-action:#b5e8dc;}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--civic-bg:#142323;--civic-surface:#203332;--civic-raised:#304845;--civic-text:#f0f6f5;--civic-muted:#c0d3cf;--civic-border:#8ca8a1;--civic-action:#b5e8dc;--civic-action-hover:#d2f5eb;--civic-on-action:#142323;--civic-focus:#b5e8dc;--civic-danger:#ffb9c5;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--civic-bg);color:var(--civic-text);font:16px/1.55 var(--civic-font-sans)}
+a{color:var(--civic-action)}
+:focus-visible{outline:3px solid var(--civic-focus);outline-offset:2px}
+.wrap{max-width:72rem;margin:0 auto;padding:0 var(--space-4)}
+.family{background:var(--civic-surface);border-bottom:1px solid var(--civic-border);font-size:var(--text-sm)}
+.family .wrap{display:flex;align-items:center;gap:var(--space-4);min-height:44px;flex-wrap:wrap}
+.family .hub{font-weight:600;text-decoration:none;color:var(--civic-text);min-height:24px;display:inline-flex;align-items:center}
+.family ul{list-style:none;margin:0;padding:0;display:flex;gap:var(--space-3);flex-wrap:wrap;overflow-x:auto}
+.family a{min-height:24px;display:inline-flex;align-items:center;padding:0 var(--space-1);text-decoration:none;color:var(--civic-text)}
+.family a[aria-current=page]{font-weight:600;border-bottom:2px solid var(--civic-action)}
+.family .spacer{flex:1}
+.badge{display:inline-flex;align-items:center;gap:.35em;border:1px solid var(--civic-border);border-radius:999px;padding:.1em .7em;font-size:var(--text-xs);white-space:nowrap}
+.badge::before{content:"";width:.55em;height:.55em;border-radius:50%;background:var(--viz-3)}
+.badge.demo::before{background:var(--viz-2)}
+.badge.proto::before{background:var(--viz-1)}
+h1{font-size:var(--text-2xl);line-height:1.2;margin:var(--space-5) 0 var(--space-2);letter-spacing:-.01em}
+.purpose{margin:0 0 var(--space-1);max-width:40rem;font-size:var(--text-lg)}
+.data-line{margin:0 0 var(--space-4);font-size:var(--text-sm);color:var(--civic-muted)}
+h2{font-size:var(--text-xl);margin:var(--space-6) 0 var(--space-2)}
+h3{font-size:var(--text-lg);margin:var(--space-4) 0 var(--space-2)}
+.card{background:var(--civic-surface);border:1px solid color-mix(in srgb,var(--civic-border) 45%,transparent);border-radius:var(--civic-radius);padding:var(--space-4)}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 var(--space-4);border-radius:var(--civic-radius);border:1px solid var(--civic-action);background:var(--civic-action);color:var(--civic-on-action);font:inherit;font-weight:600;text-decoration:none;cursor:pointer}
+.btn.secondary{background:transparent;color:var(--civic-action)}
+label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(--space-1)}
+input,select{font:inherit;min-height:44px;width:100%;padding:0 var(--space-3);border:1px solid var(--civic-border);border-radius:var(--civic-radius);background:var(--civic-surface);color:var(--civic-text)}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:var(--space-2) var(--space-3);border-bottom:1px solid color-mix(in srgb,var(--civic-border) 40%,transparent);vertical-align:top}
+th{font-size:var(--text-sm);color:var(--civic-muted);font-weight:600}
+td.num,th.num{text-align:right}
+.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.table-scroll th:first-child,.table-scroll td:first-child{position:sticky;left:0;background:var(--civic-surface)}
+.source{font-size:var(--text-xs);color:var(--civic-muted);margin:var(--space-2) 0 0}
+.state{display:flex;gap:var(--space-3);align-items:center;padding:var(--space-3) var(--space-4);border-radius:var(--civic-radius);border:1px solid color-mix(in srgb,var(--civic-border) 45%,transparent);background:var(--civic-surface);font-size:var(--text-sm)}
+.state.error{border-color:var(--civic-danger)}
+.state .btn{min-height:36px}
+.skeleton{background:linear-gradient(90deg,var(--civic-raised),var(--civic-surface),var(--civic-raised));border-radius:var(--civic-radius);min-height:1.2em}
+footer.site{margin-top:var(--space-6);padding:var(--space-5) 0;border-top:1px solid color-mix(in srgb,var(--civic-border) 45%,transparent);font-size:var(--text-sm);color:var(--civic-muted)}
+footer.site ul{list-style:none;padding:0;margin:0 0 var(--space-2);display:flex;gap:var(--space-4);flex-wrap:wrap}
+footer.site a{min-height:24px;display:inline-flex;align-items:center}
+.note{position:sticky;top:0;z-index:9;background:#fff8e1;color:#4a3b00;border-bottom:1px solid #e0c200;font-size:var(--text-xs);padding:var(--space-1) var(--space-4)}
+.states-row{display:grid;gap:var(--space-3);grid-template-columns:repeat(auto-fit,minmax(16rem,1fr));margin-top:var(--space-4)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+.app{display:grid;grid-template-columns:minmax(20rem,26rem) 1fr;min-height:calc(100vh - 44px)}
+.panel{background:var(--civic-surface);border-right:1px solid color-mix(in srgb,var(--civic-border) 45%,transparent);padding:0 var(--space-4) var(--space-5);overflow:auto}
+.panel h1{font-size:var(--text-xl);margin-top:var(--space-4)}
+.map{position:relative;background:var(--map-bg);color:var(--map-text);color-scheme:dark;min-height:32rem}
+.map .canvas{position:absolute;inset:0;background:
+ radial-gradient(ellipse at 38% 42%,#2a4a46 0 7%,transparent 7.5%),
+ radial-gradient(ellipse at 62% 36%,#3d6a5e 0 9%,transparent 9.5%),
+ radial-gradient(ellipse at 52% 62%,#355a52 0 10%,transparent 10.5%),
+ radial-gradient(ellipse at 28% 66%,#4a7f70 0 6%,transparent 6.5%),
+ radial-gradient(ellipse at 72% 68%,#2f5047 0 8%,transparent 8.5%),
+ var(--map-bg)}
+.legend{position:absolute;left:var(--space-4);bottom:var(--space-4);background:var(--map-surface);border:1px solid var(--map-border);border-radius:var(--civic-radius);padding:var(--space-3);font-size:var(--text-sm);max-width:18rem}
+.legend ol{list-style:none;margin:var(--space-2) 0 0;padding:0;display:grid;gap:var(--space-1)}
+.legend li{display:flex;gap:var(--space-2);align-items:center}
+.sw{width:1.1em;height:1.1em;border-radius:3px;border:1px solid var(--map-border);flex:none}
+.legend .src{color:var(--map-muted);font-size:var(--text-xs);margin-top:var(--space-2)}
+.map .toolbar{position:absolute;top:var(--space-3);right:var(--space-3);display:flex;gap:var(--space-2)}
+.map .toolbar .btn{background:var(--map-surface);color:var(--map-text);border-color:var(--map-border);min-height:44px;min-width:44px}
+.map .overlay{position:absolute;inset:0;display:grid;place-items:center;background:color-mix(in srgb,var(--map-bg) 70%,transparent)}
+.map .overlay .state{background:var(--map-surface);color:var(--map-text);border-color:var(--map-border)}
+.kpi{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-2);margin:var(--space-3) 0}
+.kpi .card{padding:var(--space-3)}
+.kpi strong{display:block;font-size:var(--text-xl);line-height:1.1;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.kpi span{font-size:var(--text-xs);color:var(--civic-muted)}
+.field{margin:var(--space-3) 0}
+.range{display:flex;align-items:center;gap:var(--space-2)}
+.range input[type=range]{min-height:24px;padding:0;border:0;background:transparent;accent-color:var(--civic-action)}
+details summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:600}
+@media (max-width:760px){.app{grid-template-columns:1fr}.map{min-height:56vh;order:0}.panel{order:1;border-right:0;border-top:1px solid color-mix(in srgb,var(--civic-border) 45%,transparent)}.panel.head{order:-1;padding-bottom:var(--space-3)}.legend{position:static;max-width:none;border-radius:0;border-width:1px 0 0}.kpi{grid-template-columns:1fr 1fr}}
+</style></head><body>
+<div class="note">Machetă statică (02-map-simulator-administrative-reform). Text în română scris de agent: necesită verificare umană. Valorile „—” sunt substituenți, nu cifre.</div>
+<header class="family"><div class="wrap">
+<a class="hub" href="../">Simulatoare · Toate simulatoarele</a>
+<nav aria-label="Simulatoare"><ul>
+<li><a href="../administrative-reform/" aria-current="page">Reforma administrativă</a></li>
+<li><a href="../public-pay/">Salarizarea publică</a></li>
+<li><a href="../transport/">Transport public</a></li>
+<li><a href="../justitie/">Reforma justiției</a></li>
+<li><a href="../impozit-teren/">Impozitul pe teren</a></li>
+<li><a href="../deconcentrare/">Serviciile deconcentrate</a></li>
+<li><a href="../companii-stat/">Companiile statului</a></li>
+</ul></nav><span class="spacer"></span><span class="badge">Date reale</span></div></header>
+<div class="app">
+ <aside class="panel">
+  <h1>Reforma administrativă</h1>
+  <p class="purpose" style="font-size:var(--text-base)">Vezi cum ar arăta harta dacă unitățile mici s-ar comasa, și de ce fiecare unitate ajunge unde ajunge.</p>
+  <p class="data-line">Date: INS, Recensământ 2021; Ministerul Finanțelor, execuții bugetare 2024</p>
+  <div class="field"><label for="sc">Scenariu</label><select id="sc"><option>Opt regiuni (propunerea)</option><option>Județele de azi</option><option>Praguri proprii</option></select></div>
+  <div class="field"><label for="prag">Prag minim de locuitori: <output>—</output></label><div class="range"><span class="source">1.000</span><input id="prag" type="range" min="1000" max="10000" step="500" value="5000"><span class="source">10.000</span></div></div>
+  <div class="kpi" aria-label="Rezumat scenariu">
+   <div class="card"><strong>3.186 → —</strong><span>unități administrativ-teritoriale (UAT)</span></div>
+   <div class="card"><strong>41 → 8</strong><span>județe → regiuni</span></div>
+   <div class="card"><strong>— %</strong><span>populație în unități comasate</span></div>
+   <div class="card"><strong>— km</strong><span>distanța mediană până la noul sediu</span></div>
+  </div>
+  <p><a class="btn secondary" href="../transport/#opt-regiuni">Deschide în Transport →</a></p>
+  <details><summary>Vezi tabelul unităților</summary>
+   <div class="table-scroll"><table><caption class="sr-only">Unități și motivul comasării</caption><thead><tr><th>Unitate</th><th class="num">Locuitori (2021)</th><th>Motiv</th></tr></thead>
+   <tbody><tr><td>— (județul —)</td><td class="num">—</td><td>sub prag</td></tr><tr><td>—</td><td class="num">—</td><td>venituri proprii sub medie</td></tr><tr><td>—</td><td class="num">—</td><td>rămâne</td></tr></tbody></table></div>
+   <p class="source">Sursă: INS, Recensământ 2021; Ministerul Finanțelor, 2024. Tabelul este alternativa hărții pentru cititorii de ecran.</p>
+  </details>
+  <details><summary>Metodă și limite</summary><p class="source">Praguri, formula de atribuire și ce nu modelăm. Fiecare unitate are motivul afișat la atingere.</p></details>
+ </aside>
+ <section class="map" aria-label="Harta scenariului">
+  <div class="canvas" role="img" aria-label="Harta României cu unitățile colorate după starea lor în scenariu"></div>
+  <div class="toolbar"><button class="btn" aria-label="Mărește">+</button><button class="btn" aria-label="Micșorează">−</button><button class="btn" aria-label="Recentrează">⌂</button></div>
+  <div class="legend"><strong>Unități în scenariu</strong>
+   <ol>
+    <li><span class="sw" style="background:#4a7f70"></span>Rămâne așa cum este</li>
+    <li><span class="sw" style="background:#3d6a5e;background-image:repeating-linear-gradient(45deg,transparent 0 3px,#142323 3px 4px)"></span>Se comasează (sub prag) — hașurat</li>
+    <li><span class="sw" style="background:#2a4a46;border-style:dashed"></span>Primește unități — contur întrerupt</li>
+    <li><span class="sw" style="background:#e69f00"></span>Reședință de regiune</li>
+   </ol>
+   <p class="src">Culoarea nu este singurul canal: hașură, contur și etichetă. Sursă: INS 2021 · MF 2024. Atinge o unitate pentru motiv.</p>
+  </div>
+ </section>
+</div>
+<main class="wrap">
+<h2>Stări ale hărții</h2>
+<div class="states-row">
+ <div class="card" style="background:var(--map-bg);color:var(--map-text)"><div class="state" style="background:var(--map-surface);color:inherit;border-color:var(--map-border)"><span class="skeleton" style="width:1.5em;height:1.5em;border-radius:50%"></span>Se încarcă harta… <span class="source" style="color:var(--map-muted)">apoi: Se calculează scenariul…</span></div><p class="source" style="color:var(--map-muted)">Încărcare în trepte: mesaj imediat, al doilea pas după 2 s.</p></div>
+ <div class="card" style="background:var(--map-bg);color:var(--map-text)"><div class="state error" style="background:var(--map-surface);color:inherit"><span>Harta nu s-a putut încărca (fișierul cu limitele unităților).</span><button class="btn" style="background:var(--map-action);color:var(--map-bg);border-color:var(--map-action)">Reîncearcă</button></div><p class="source" style="color:var(--map-muted)">Niciodată hartă goală; tabelul rămâne disponibil.</p></div>
+ <div class="card" style="background:var(--map-bg);color:var(--map-text)"><div class="state" style="background:var(--map-surface);color:inherit;border-color:var(--map-border)"><span class="badge demo" style="color:inherit">Date demonstrative</span><span>Praguri proprii, fără calibrare pe venituri: cifrele sunt orientative.</span></div><p class="source" style="color:var(--map-muted)">Eticheta stă pe hartă, nu doar în pagina de metodă.</p></div>
+ <div class="card"><div class="state"><span>Niciun rezultat pentru „—”; încearcă alt județ sau un prag mai mic.</span></div><p class="source">Starea goală spune de ce și ce să încerci.</p></div>
+</div>
+</main><footer class="site"><div class="wrap"><ul>
+<li><a href="#metoda">Metodă</a></li><li><a href="../privacy.html">Confidențialitate</a></li>
+<li><a href="https://github.com/CristianNichifor/romania-reforms">Codul sursă</a></li><li><a href="#contact">Contact</a></li></ul>
+<p>Instrument pentru dezbatere publică, nu calculator de drepturi. Fiecare cifră are sursă și locator.</p></div></footer></body></html>
