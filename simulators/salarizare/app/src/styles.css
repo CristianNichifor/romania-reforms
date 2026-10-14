@@ -992,3 +992,8 @@ button.more {
   line-height: 20px;
   opacity: 0.75;
 }
+
+/* Error state: the message and a retry button, side by side when there is room. */
+.load-error { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 16px 0; }
+.load-error .loading { margin: 0; }
+.load-error-retry { min-height: 44px; }

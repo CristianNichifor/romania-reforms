@@ -16,6 +16,7 @@ import type { Crosswalk, Regime } from '../../engine/types';
 import CompareView, { type PublicEnterpriseCompensationDoc } from './CompareView';
 import DomainsView from './DomainsView';
 import HomeView from './HomeView';
+import LoadError from './LoadError';
 import DistributionView from './DistributionView';
 import EnvelopeView from './EnvelopeView';
 import MergesView from './MergesView';
@@ -494,7 +495,9 @@ export default function App() {
       {/* Until a view can draw itself, the menu is the page: a reader stuck on an error
           or a slow load can still go somewhere else. The first screen draws its own. */}
       {scenario.view !== 'acasa' && (error || loaded.length === 0) && menu}
-      {error && <p className="loading">{t.loadError(error)}</p>}
+      {error && (
+        <LoadError message={t.loadError(error)} retryLabel={t.retry} onRetry={() => location.reload()} />
+      )}
       {!error && loaded.length === 0 && <p className="loading">{t.loading}</p>}
 
       {scenario.view === 'acasa' && (
