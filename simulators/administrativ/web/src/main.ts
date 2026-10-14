@@ -8,6 +8,7 @@
 
 import './style.css';
 import './native-ui.css';
+import './map-source.css';
 
 import { buildChain, edgeKey, indexShard } from './app/chain';
 import {

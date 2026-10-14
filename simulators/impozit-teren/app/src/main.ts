@@ -404,6 +404,9 @@ async function main() {
   const newestGuide = Object.values(guideYears).sort().at(-1);
   const lineEl = document.getElementById('data-line');
   if (lineEl) lineEl.textContent = dataLineFor(code, guideYears);
+  // The same line under the map legend (UX-20): the map carries its own source.
+  const mapSource = document.getElementById('map-source');
+  if (mapSource) mapSource.textContent = dataLineFor(code, guideYears);
 
   let state = readHash();
   if (state.county !== ALL && !manifest.counties.includes(state.county)) {

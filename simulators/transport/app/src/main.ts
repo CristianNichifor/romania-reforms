@@ -10,6 +10,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 maplibregl.setWorkerUrl(workerUrl);
 import './style.css';
 import './native-ui.css';
+import './map-source.css';
 import { buildNetwork, changedParams, loadCoupling, readScenario } from './consolidare';
 import {
   DAY_PROFILE,
@@ -104,6 +105,9 @@ async function main() {
   const line = dataLineFor(summary);
   const lineEl = document.getElementById('data-line');
   if (lineEl) lineEl.textContent = line ?? '';
+  // The same line under the legend (UX-20): the map carries its own source.
+  const mapSource = document.getElementById('map-source');
+  if (mapSource) mapSource.textContent = line ?? '';
 
   const { params, pins } = readScenario(location.hash);
   const moved = changedParams(params);

@@ -187,6 +187,16 @@ landing `tests/test_site_pages.py::test_landing_names_its_data_under_the_h1`.
 
 Test: `simulators/salarizare/app/tests/layout.test.tsx`.
 
+### UX-20 Source line under every map — done
+
+- Given `/administrativ/`, `/transport/` and `/impozit-teren/`, then a `p.map-source` sits
+  right under the map legend and reads the page's data line („Date: <sursă>, <an>”; EN
+  „Data: …” in administrativ), so the map carries its source where the eye is (design criterion
+  6; ux-guidelines § 9 item 8). Charts have theirs from #175.
+
+Tests: administrativ `tests/map-source.test.ts`, transport and impozit-teren
+`src/map-source.test.ts` (markup after the legend, main.ts fills it).
+
 ### UX-6 Maps and readability — done (Romanian UI strings: needs human review)
 
 - Given courts that share a courthouse (the appellate court, tribunal and judecătorie of a
