@@ -156,7 +156,7 @@ flight* belong to another session; do not start them in parallel.
    mobile stats clipping; transport loader; impozit-teren gap under the sidebar and mobile
    ordering; companii-stat mobile table clipping — *in flight* (#161).
 5. public-pay layout: menu below the H1, search after the lead, humanised codes, `*1)`
-   markers — *in flight* (rr theme C).
+   markers — done (UX-7, #162).
 6. English mode: public-pay view prose is still Romanian (RR-10).
 7. No status badge on any page. Agree the status per simulator with the owner (most
    use real data, so "Date reale"), then add the badge.
