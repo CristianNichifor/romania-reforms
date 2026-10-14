@@ -127,3 +127,29 @@ def test_landing_names_its_data_under_the_h1(page, word):
     footer = data / "salarizare/app/src/i18n.ts"
     package_date = re.search(r"MMFTSS din (\d\d\.\d\d\.\d{4})", footer.read_text("utf-8")).group(1)
     assert f"MMFTSS, {package_date}" in line
+
+
+CIVIC_LIGHT = {
+    "--bg": "#f4f6f6",
+    "--fg": "#182b2c",
+    "--muted": "#475d60",
+    "--card": "#ffffff",
+    "--line": "#718588",
+    "--link": "#006b60",
+}
+
+
+@pytest.mark.parametrize("page", ["index.html", "en/index.html", "brief.html", "privacy.html"])
+def test_static_pages_are_light_first_on_civic_ui_roles(page):
+    """UX-9: the plain `:root` block is the civic-ui light palette; dark is the opt-in."""
+    html = read(page)
+    style = re.search(r"<style>(.*?)</style>", html, re.S).group(1)
+    media = list(re.finditer(r"@media\s*\(prefers-color-scheme:\s*(\w+)\)\s*\{", style))
+    assert [m.group(1) for m in media] == ["dark"], "only a dark override is allowed"
+    base = style[: media[0].start()]
+    root = re.search(r":root\s*\{(.*?)\}", base, re.S).group(1)
+    assert "color-scheme: light;" in root
+    for name, value in CIVIC_LIGHT.items():
+        assert f"{name}: {value};" in root, f"{page}: {name} is not the civic-ui light value"
+    dark = style[media[0].end() :]
+    assert "--bg: #142323;" in dark and "--fg: #f0f6f5;" in dark

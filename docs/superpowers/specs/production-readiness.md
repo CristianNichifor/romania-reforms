@@ -186,3 +186,13 @@ landing `tests/test_site_pages.py::test_landing_names_its_data_under_the_h1`.
   toggles on the payslip read the law's name ("Legea-cadru 153/2017") with the file id secondary.
 
 Test: `simulators/salarizare/app/tests/layout.test.tsx`.
+
+### UX-9 Static pages light-first on civic-ui roles — done
+
+- Given `site/index.html`, `site/en/index.html`, `site/brief.html` and `site/privacy.html`,
+  then the unconditional `:root` block carries the civic-ui `neutral` light values
+  (`--bg: #f4f6f6`, `--fg: #182b2c`, `--muted: #475d60`, `--card: #ffffff`,
+  `--link: #006b60`) and `color-scheme: light`; the dark values appear only under
+  `@media (prefers-color-scheme: dark)` (ux-guidelines § 6 and § 9.1; design screen 01).
+
+Test: `tests/test_site_pages.py::test_static_pages_are_light_first_on_civic_ui_roles`.
