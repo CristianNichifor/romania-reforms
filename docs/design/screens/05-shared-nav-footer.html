@@ -1,0 +1,138 @@
+<!doctype html><html lang="ro"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bara familiei și subsolul — machetă</title><style>
+:root{color-scheme:light;
+--civic-font-sans:system-ui,-apple-system,"Segoe UI",sans-serif;
+--civic-bg:#f4f6f6;--civic-surface:#ffffff;--civic-raised:#e7eeee;--civic-text:#182b2c;--civic-muted:#475d60;
+--civic-border:#718588;--civic-action:#006b60;--civic-action-hover:#00564d;--civic-on-action:#ffffff;--civic-focus:#006b60;--civic-danger:#a31b34;
+--civic-radius:6px;
+--space-1:.25rem;--space-2:.5rem;--space-3:.75rem;--space-4:1.1rem;--space-5:1.6rem;--space-6:2.4rem;
+--text-xs:.78rem;--text-sm:.86rem;--text-base:1rem;--text-lg:1.15rem;--text-xl:1.45rem;--text-2xl:2rem;
+/* viz: Okabe–Ito, the same blue→orange pair the justitie ramp test certifies */
+--viz-1:#0072b2;--viz-2:#e69f00;--viz-3:#009e73;--viz-4:#cc79a7;--viz-5:#56b4e9;
+--ramp-1:#deebf7;--ramp-2:#9ecae1;--ramp-3:#4292c6;--ramp-4:#08519c;
+/* map canvas: the permitted dark deviation, map only */
+--map-bg:#142323;--map-surface:#203332;--map-text:#f0f6f5;--map-muted:#c0d3cf;--map-border:#8ca8a1;--map-action:#b5e8dc;}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--civic-bg:#142323;--civic-surface:#203332;--civic-raised:#304845;--civic-text:#f0f6f5;--civic-muted:#c0d3cf;--civic-border:#8ca8a1;--civic-action:#b5e8dc;--civic-action-hover:#d2f5eb;--civic-on-action:#142323;--civic-focus:#b5e8dc;--civic-danger:#ffb9c5;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--civic-bg);color:var(--civic-text);font:16px/1.55 var(--civic-font-sans)}
+a{color:var(--civic-action)}
+:focus-visible{outline:3px solid var(--civic-focus);outline-offset:2px}
+.wrap{max-width:72rem;margin:0 auto;padding:0 var(--space-4)}
+.family{background:var(--civic-surface);border-bottom:1px solid var(--civic-border);font-size:var(--text-sm)}
+.family .wrap{display:flex;align-items:center;gap:var(--space-4);min-height:44px;flex-wrap:wrap}
+.family .hub{font-weight:600;text-decoration:none;color:var(--civic-text);min-height:24px;display:inline-flex;align-items:center}
+.family ul{list-style:none;margin:0;padding:0;display:flex;gap:var(--space-3);flex-wrap:wrap;overflow-x:auto}
+.family a{min-height:24px;display:inline-flex;align-items:center;padding:0 var(--space-1);text-decoration:none;color:var(--civic-text)}
+.family a[aria-current=page]{font-weight:600;border-bottom:2px solid var(--civic-action)}
+.family .spacer{flex:1}
+.badge{display:inline-flex;align-items:center;gap:.35em;border:1px solid var(--civic-border);border-radius:999px;padding:.1em .7em;font-size:var(--text-xs);white-space:nowrap}
+.badge::before{content:"";width:.55em;height:.55em;border-radius:50%;background:var(--viz-3)}
+.badge.demo::before{background:var(--viz-2)}
+.badge.proto::before{background:var(--viz-1)}
+h1{font-size:var(--text-2xl);line-height:1.2;margin:var(--space-5) 0 var(--space-2);letter-spacing:-.01em}
+.purpose{margin:0 0 var(--space-1);max-width:40rem;font-size:var(--text-lg)}
+.data-line{margin:0 0 var(--space-4);font-size:var(--text-sm);color:var(--civic-muted)}
+h2{font-size:var(--text-xl);margin:var(--space-6) 0 var(--space-2)}
+h3{font-size:var(--text-lg);margin:var(--space-4) 0 var(--space-2)}
+.card{background:var(--civic-surface);border:1px solid color-mix(in srgb,var(--civic-border) 45%,transparent);border-radius:var(--civic-radius);padding:var(--space-4)}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 var(--space-4);border-radius:var(--civic-radius);border:1px solid var(--civic-action);background:var(--civic-action);color:var(--civic-on-action);font:inherit;font-weight:600;text-decoration:none;cursor:pointer}
+.btn.secondary{background:transparent;color:var(--civic-action)}
+label{display:block;font-size:var(--text-sm);font-weight:600;margin-bottom:var(--space-1)}
+input,select{font:inherit;min-height:44px;width:100%;padding:0 var(--space-3);border:1px solid var(--civic-border);border-radius:var(--civic-radius);background:var(--civic-surface);color:var(--civic-text)}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:var(--space-2) var(--space-3);border-bottom:1px solid color-mix(in srgb,var(--civic-border) 40%,transparent);vertical-align:top}
+th{font-size:var(--text-sm);color:var(--civic-muted);font-weight:600}
+td.num,th.num{text-align:right}
+.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.table-scroll th:first-child,.table-scroll td:first-child{position:sticky;left:0;background:var(--civic-surface)}
+.source{font-size:var(--text-xs);color:var(--civic-muted);margin:var(--space-2) 0 0}
+.state{display:flex;gap:var(--space-3);align-items:center;padding:var(--space-3) var(--space-4);border-radius:var(--civic-radius);border:1px solid color-mix(in srgb,var(--civic-border) 45%,transparent);background:var(--civic-surface);font-size:var(--text-sm)}
+.state.error{border-color:var(--civic-danger)}
+.state .btn{min-height:36px}
+.skeleton{background:linear-gradient(90deg,var(--civic-raised),var(--civic-surface),var(--civic-raised));border-radius:var(--civic-radius);min-height:1.2em}
+footer.site{margin-top:var(--space-6);padding:var(--space-5) 0;border-top:1px solid color-mix(in srgb,var(--civic-border) 45%,transparent);font-size:var(--text-sm);color:var(--civic-muted)}
+footer.site ul{list-style:none;padding:0;margin:0 0 var(--space-2);display:flex;gap:var(--space-4);flex-wrap:wrap}
+footer.site a{min-height:24px;display:inline-flex;align-items:center}
+.note{position:sticky;top:0;z-index:9;background:#fff8e1;color:#4a3b00;border-bottom:1px solid #e0c200;font-size:var(--text-xs);padding:var(--space-1) var(--space-4)}
+.states-row{display:grid;gap:var(--space-3);grid-template-columns:repeat(auto-fit,minmax(16rem,1fr));margin-top:var(--space-4)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+.spec{display:grid;gap:var(--space-4);margin:var(--space-4) 0}
+.spec .card{padding:0;overflow:hidden}
+.spec .cap{padding:var(--space-2) var(--space-4);font-size:var(--text-sm);color:var(--civic-muted);border-bottom:1px solid color-mix(in srgb,var(--civic-border) 45%,transparent)}
+.narrow{width:390px;max-width:100%;border:1px solid var(--civic-border);border-radius:12px;overflow:hidden;margin:0 auto}
+.narrow .family ul{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;max-width:50vw}
+.measure{display:grid;grid-template-columns:repeat(auto-fit,minmax(14rem,1fr));gap:var(--space-3)}
+code{font-size:var(--text-sm);background:var(--civic-raised);padding:0 .3em;border-radius:3px}
+</style></head><body>
+<div class="note">Machetă statică (05-shared-nav-footer). Text în română scris de agent: necesită verificare umană. Valorile „—” sunt substituenți, nu cifre.</div>
+
+<main class="wrap">
+<h1>Bara familiei și subsolul</h1>
+<p class="purpose">Un singur șir de elemente comune pe toate cele opt pagini: bara către hub, titlul cu scopul, linia de date, eticheta de stare, subsolul.</p>
+<p class="data-line">Date: machetă de sistem; nu afișează cifre</p>
+<div class="spec">
+ <div class="card"><div class="cap">1440 px · pagina unui simulator (Reforma justiției, Date reale)</div><header class="family"><div class="wrap">
+<a class="hub" href="../">Simulatoare · Toate simulatoarele</a>
+<nav aria-label="Simulatoare"><ul>
+<li><a href="../administrative-reform/">Reforma administrativă</a></li>
+<li><a href="../public-pay/">Salarizarea publică</a></li>
+<li><a href="../transport/">Transport public</a></li>
+<li><a href="../justitie/" aria-current="page">Reforma justiției</a></li>
+<li><a href="../impozit-teren/">Impozitul pe teren</a></li>
+<li><a href="../deconcentrare/">Serviciile deconcentrate</a></li>
+<li><a href="../companii-stat/">Companiile statului</a></li>
+</ul></nav><span class="spacer"></span><span class="badge">Date reale</span></div></header>
+ <div style="padding:0 var(--space-4) var(--space-4)"><h1 style="font-size:var(--text-xl)">Reforma justiției</h1><p class="purpose" style="font-size:var(--text-base)">Vezi la ce instanță ar ajunge o localitate după comasare și cât de încărcat ar fi fiecare judecător.</p><p class="data-line">Date: CSM, 2025</p></div></div>
+ <div class="card"><div class="cap">1440 px · pagină cu date demonstrative</div><header class="family"><div class="wrap">
+<a class="hub" href="../">Simulatoare · Toate simulatoarele</a>
+<nav aria-label="Simulatoare"><ul>
+<li><a href="../administrative-reform/">Reforma administrativă</a></li>
+<li><a href="../public-pay/">Salarizarea publică</a></li>
+<li><a href="../transport/">Transport public</a></li>
+<li><a href="../justitie/">Reforma justiției</a></li>
+<li><a href="../impozit-teren/">Impozitul pe teren</a></li>
+<li><a href="../deconcentrare/">Serviciile deconcentrate</a></li>
+<li><a href="../companii-stat/">Companiile statului</a></li>
+</ul></nav><span class="spacer"></span><span class="badge demo">Date demonstrative</span></div></header><div style="padding:var(--space-3) var(--space-4)"><p class="source">Eticheta explică motivul în pagină: „eșantion din 3 județe până la publicarea setului național”.</p></div></div>
+ <div class="card"><div class="cap">1440 px · prototip (interacțiunea e scopul; datele se declară separat)</div><header class="family"><div class="wrap">
+<a class="hub" href="../">Simulatoare · Toate simulatoarele</a>
+<nav aria-label="Simulatoare"><ul>
+<li><a href="../administrative-reform/">Reforma administrativă</a></li>
+<li><a href="../public-pay/">Salarizarea publică</a></li>
+<li><a href="../transport/">Transport public</a></li>
+<li><a href="../justitie/">Reforma justiției</a></li>
+<li><a href="../impozit-teren/">Impozitul pe teren</a></li>
+<li><a href="../deconcentrare/">Serviciile deconcentrate</a></li>
+<li><a href="../companii-stat/">Companiile statului</a></li>
+</ul></nav><span class="spacer"></span><span class="badge proto">Prototip</span></div></header></div>
+ <div class="card"><div class="cap">390 px · bara se derulează orizontal în interiorul ei; „Simulatoare” rămâne fix; nu există derulare orizontală a paginii</div><div class="narrow"><header class="family"><div class="wrap">
+<a class="hub" href="../">Simulatoare · Toate simulatoarele</a>
+<nav aria-label="Simulatoare"><ul>
+<li><a href="../administrative-reform/" aria-current="page">Reforma administrativă</a></li>
+<li><a href="../public-pay/">Salarizarea publică</a></li>
+<li><a href="../transport/">Transport public</a></li>
+<li><a href="../justitie/">Reforma justiției</a></li>
+<li><a href="../impozit-teren/">Impozitul pe teren</a></li>
+<li><a href="../deconcentrare/">Serviciile deconcentrate</a></li>
+<li><a href="../companii-stat/">Companiile statului</a></li>
+</ul></nav><span class="spacer"></span><span class="badge">Date reale</span></div></header><div style="padding:var(--space-3) var(--space-4)"><h1 style="font-size:var(--text-xl);margin-top:var(--space-2)">Reforma administrativă</h1><p class="data-line">Date: INS, 2021; MF, 2024</p></div></div></div>
+ <div class="card"><div class="cap">Subsol comun (toate paginile)</div><footer class="site"><div class="wrap"><ul>
+<li><a href="#metoda">Metodă</a></li><li><a href="../privacy.html">Confidențialitate</a></li>
+<li><a href="https://github.com/CristianNichifor/romania-reforms">Codul sursă</a></li><li><a href="#contact">Contact</a></li></ul>
+<p>Instrument pentru dezbatere publică, nu calculator de drepturi. Fiecare cifră are sursă și locator.</p></div></footer></div>
+</div>
+<h2>Măsuri</h2>
+<div class="measure">
+ <div class="card"><strong>Bara</strong><p class="source">înălțime min. 44 px; linkuri min. 24 px înălțime, 44 px pe ecran tactil; element curent: îngroșat + linie 2 px <code>--civic-action</code>; fundal <code>--civic-surface</code>, chenar jos <code>--civic-border</code>.</p></div>
+ <div class="card"><strong>Titlu și scop</strong><p class="source">H1 <code>--text-2xl</code> (xl în panouri de hartă și pe telefon); scopul o propoziție, max. 40 rem; linia de date <code>--text-sm</code>, <code>--civic-muted</code>, formă fixă „Date: sursă, an”.</p></div>
+ <div class="card"><strong>Eticheta de stare</strong><p class="source">Un singur badge per aplicație, din vocabularul civic-ui: Date reale · Date demonstrative · Prototip · Arhivat. Punct colorat + text; textul poartă sensul.</p></div>
+ <div class="card"><strong>Culori viz</strong><p class="source">Okabe–Ito: <span class="sw" style="display:inline-block;width:1em;height:1em;background:#0072b2;vertical-align:middle"></span> #0072b2 · <span style="display:inline-block;width:1em;height:1em;background:#e69f00;vertical-align:middle"></span> #e69f00 · <span style="display:inline-block;width:1em;height:1em;background:#009e73;vertical-align:middle"></span> #009e73 · <span style="display:inline-block;width:1em;height:1em;background:#cc79a7;vertical-align:middle"></span> #cc79a7. Rampă secvențială albastră într-o singură nuanță. Fără verde→roșu, fără axe duble.</p></div>
+ <div class="card"><strong>Contrast</strong><p class="source">Text <code>#182b2c</code> pe <code>#f4f6f6</code> ≈ 14:1; muted <code>#475d60</code> pe alb ≈ 7:1; acțiune <code>#006b60</code> pe alb ≈ 6:1; pe hartă <code>#f0f6f5</code> pe <code>#142323</code> ≈ 15:1. Toate peste AA 4,5:1.</p></div>
+ <div class="card"><strong>Mișcare și contrast forțat</strong><p class="source"><code>prefers-reduced-motion</code>: fără tranziții de hartă. <code>forced-colors</code>: chenare și inel de focus vizibile (chenar 1 px pe fiecare control).</p></div>
+</div>
+</main><footer class="site"><div class="wrap"><ul>
+<li><a href="#metoda">Metodă</a></li><li><a href="../privacy.html">Confidențialitate</a></li>
+<li><a href="https://github.com/CristianNichifor/romania-reforms">Codul sursă</a></li><li><a href="#contact">Contact</a></li></ul>
+<p>Instrument pentru dezbatere publică, nu calculator de drepturi. Fiecare cifră are sursă și locator.</p></div></footer></body></html>
