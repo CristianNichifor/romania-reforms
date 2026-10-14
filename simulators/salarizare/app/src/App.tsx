@@ -16,6 +16,7 @@ import type { Crosswalk, Regime } from '../../engine/types';
 import CompareView, { type PublicEnterpriseCompensationDoc } from './CompareView';
 import DomainsView from './DomainsView';
 import HomeView from './HomeView';
+import Loader from './Loader';
 import DistributionView from './DistributionView';
 import EnvelopeView from './EnvelopeView';
 import MergesView from './MergesView';
@@ -495,7 +496,7 @@ export default function App() {
           or a slow load can still go somewhere else. The first screen draws its own. */}
       {scenario.view !== 'acasa' && (error || loaded.length === 0) && menu}
       {error && <p className="loading">{t.loadError(error)}</p>}
-      {!error && loaded.length === 0 && <p className="loading">{t.loading}</p>}
+      {!error && loaded.length === 0 && <Loader first={t.loading} later={t.loadingLater} />}
 
       {scenario.view === 'acasa' && (
         <HomeView
