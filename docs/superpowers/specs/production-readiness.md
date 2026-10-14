@@ -186,3 +186,13 @@ landing `tests/test_site_pages.py::test_landing_names_its_data_under_the_h1`.
   toggles on the payslip read the law's name ("Legea-cadru 153/2017") with the file id secondary.
 
 Test: `simulators/salarizare/app/tests/layout.test.tsx`.
+
+### UX-15 Document pages: slow loader and retry — done (Romanian: needs human review)
+
+- Given `/deconcentrare/` or `/companii-stat/` while the document still loads, then the
+  loader (`role="status"`) reads "Se încarcă datele…" and after 2 s "… durează mai mult decât
+  de obicei."; given the load fails, then the same element becomes `role="alert"`, names the
+  failure and offers a 44 px "Reîncearcă" button that reloads the page (ux-guidelines § 5;
+  design screens 01 and 05, acceptance criterion 7).
+
+Tests: `simulators/deconcentrare/app/src/states.test.ts`, `simulators/companii-stat/app/src/states.test.ts`.

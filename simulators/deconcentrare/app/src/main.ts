@@ -1,4 +1,5 @@
 import './style.css';
+import './states.css';
 import {
   SEVERITY_LABELS,
   TIER_LABELS,
@@ -19,6 +20,7 @@ import {
   type Tier,
 } from './model';
 import { dataLineFor } from './data-line';
+import { LOADING, LOADING_SLOW, SLOW_AFTER_MS, loadErrorMarkup, messageOf } from './states';
 
 const DOC_URL = 'data/deconcentrare.json';
 const REGISTRY_URL = 'data/deconcentrare-registry.json';
@@ -318,16 +320,25 @@ function wireControls(): void {
 }
 
 async function main(): Promise<void> {
+  const loading = $('.loading');
+  loading.setAttribute('role', 'status');
+  loading.textContent = LOADING;
+  const slow = window.setTimeout(() => {
+    loading.textContent = LOADING_SLOW;
+  }, SLOW_AFTER_MS);
   try {
     doc = await fetchJSON<Document>(DOC_URL);
     $('#data-line').textContent = dataLineFor(doc);
   } catch (error) {
-    const loading = $('.loading');
-    loading.textContent = `Nu s-au putut încărca datele: ${error instanceof Error ? error.message : String(error)}`;
+    window.clearTimeout(slow);
+    loading.setAttribute('role', 'alert');
+    loading.innerHTML = loadErrorMarkup(messageOf(error));
     loading.classList.add('error');
+    loading.querySelector('button.retry')?.addEventListener('click', () => window.location.reload());
     return;
   }
-  $('.loading').hidden = true;
+  window.clearTimeout(slow);
+  loading.hidden = true;
   $('#families').hidden = false;
   renderStats();
   wireControls();
