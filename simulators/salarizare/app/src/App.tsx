@@ -556,7 +556,6 @@ export default function App() {
             draft={ministry}
             crosswalk={assimilation}
           />
-          <ViewSource text={t.dataLine} />
         </>
       )}
       {scenario.view === 'functii' && ministry && fx && (
@@ -595,7 +594,6 @@ export default function App() {
             scenario={scenario}
             onScenario={setScenario}
           />
-          <ViewSource text={t.dataLine} />
         </>
       )}
       {scenario.view === 'meserii' && ministry && occGroups && dkOcc && occBench && fx && (
@@ -655,6 +653,11 @@ export default function App() {
           inForce={regimes['ro-153-2017'] ?? null}
         />
       )}
+
+      {/* Every secondary view ends with the short data line the first screen prints (UX-35,
+          ux-guidelines § 2.5, § 4): no view ships a figure without its source and as-of. The
+          first screen carries the line under its H1, and a view that has not drawn has no figure. */}
+      {scenario.view !== 'acasa' && !error && loaded.length > 0 && <ViewSource text={t.dataLine} />}
 
       <footer>
         {t.footerSource}{' '}

@@ -450,6 +450,18 @@ Test: `tests/test_site_pages.py::test_every_simulator_card_names_its_own_data`.
   `status-badge.css`), in the card's muted ink, under the data line.
 
 Test: `tests/test_site_pages.py::test_every_simulator_card_carries_the_status_badge`.
+
+### UX-35 Source line under every public-pay view — done
+
+- Given any view of `/public-pay/` other than Acasă, once its data have drawn, then the view
+  ends with the short data line the first screen prints under its H1 („Date: MMFTSS,
+  20.08.2026”; en „Data: …”), in one place in `App.tsx` after the last view and before the
+  footer, so a view added later cannot forget it. Before, only Distribuție and Domenii carried
+  it (#175); Ce se schimbă, Propunerea, Funcție cu funcție, Meserii, Echivalențe, Structură,
+  Cât costă tot and Fluturaș drew figures with no source line of their own (ux-guidelines § 2.5,
+  § 4; § 9 item 8). While a view is loading or failed there is no figure, so no line.
+
+Test: salarizare `tests/states.test.tsx` › "closes every secondary view once it has drawn".
 ### UX-12 Public-pay error and empty states — done (Romanian: needs human review)
 
 - Given a data file that fails to load, then the page shows the failure in the reader's
