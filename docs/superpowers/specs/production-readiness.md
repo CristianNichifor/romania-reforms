@@ -496,6 +496,22 @@ Test: deconcentrare and companii-stat `src/table-source.test.ts` (markup under t
   stay with the live pages' suites; the screens are documents.
 
 Test: `tests/test_design_screens.py`.
+
+### UX-39 The design screens' remaining static criteria — done
+
+- Given `docs/design/screens/05-shared-nav-footer.html`, then every token pair listed under
+  „Măsuri › Contrast” is recomputed (WCAG relative luminance) and stays at or above AA 4.5:1,
+  and the ratio written beside it is the measured one (criterion 8, the part a browser is not
+  needed for).
+- Given `03-public-pay.html`, then the search input precedes the section menu, every source
+  mark is a `sup` with a `title`, and no position code sits inside a heading (criterion 10).
+- Given `04-impozit-teren-mobile.html`, then in the phone frame the estimate block precedes
+  the map and the zone table, the table scrolls inside `.table-scroll` and its first column is
+  sticky (criterion 9, the DOM part).
+- What still needs a browser (bar height, overflow, targets, axe, loader timing) stays with the
+  live pages' suites.
+
+Test: `tests/test_design_screens.py` (the three criterion tests appended under UX-39).
 ### UX-33 Public-pay page check on every view — done
 
 - Given each of the eleven views of `/public-pay/` (`#/acasa` … `#/functii`) at 390 × 844,
