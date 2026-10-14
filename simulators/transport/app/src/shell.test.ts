@@ -26,7 +26,10 @@ describe.each(['index.html'])('%s', (page) => {
   });
 
   it('names its data right under the H1 (UX-5)', () => {
-    expect(html).toMatch(/<h1[^>]*>[^<]*<\/h1>\s*<p class="data-line" id="data-line"><\/p>/);
+    expect(html).toMatch(
+      /<h1[^>]*>[^<]*<\/h1>\s*<p class="data-line"><span id="data-line"><\/span> <span class="badge status">Date reale<\/span><\/p>/,
+    );
+    expect(html.match(/class="badge[ "]/g)).toHaveLength(1);
   });
 
   it('carries the Content Security Policy in the built page only', () => {
