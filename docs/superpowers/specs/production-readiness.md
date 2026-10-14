@@ -186,3 +186,13 @@ landing `tests/test_site_pages.py::test_landing_names_its_data_under_the_h1`.
   toggles on the payslip read the law's name ("Legea-cadru 153/2017") with the file id secondary.
 
 Test: `simulators/salarizare/app/tests/layout.test.tsx`.
+
+### UX-12 Public-pay error and empty states — done (Romanian: needs human review)
+
+- Given a data file that fails to load, then the page shows the failure in the reader's
+  language with `role="alert"` and a button "Reîncearcă" (en "Try again") that reloads the
+  page; the scenario survives in the hash (design screen 03; ux-guidelines § 5).
+- Given a search with no hits, then the empty state names what was typed („…") and says
+  what to try, with `role="status"`.
+
+Test: `simulators/salarizare/app/tests/states.test.tsx`.

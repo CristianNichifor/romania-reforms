@@ -14,6 +14,7 @@ import type { Shares } from '../../engine/composition';
 import type { DkOccupation, GroupsDocument } from '../../engine/occupations';
 import type { Crosswalk, Regime } from '../../engine/types';
 import CompareView, { type PublicEnterpriseCompensationDoc } from './CompareView';
+import LoadError from './LoadError';
 import DomainsView from './DomainsView';
 import HomeView from './HomeView';
 import DistributionView from './DistributionView';
@@ -494,7 +495,7 @@ export default function App() {
       {/* Until a view can draw itself, the menu is the page: a reader stuck on an error
           or a slow load can still go somewhere else. The first screen draws its own. */}
       {scenario.view !== 'acasa' && (error || loaded.length === 0) && menu}
-      {error && <p className="loading">{t.loadError(error)}</p>}
+      {error && <LoadError message={t.loadError(error)} retry={t.retry} />}
       {!error && loaded.length === 0 && <p className="loading">{t.loading}</p>}
 
       {scenario.view === 'acasa' && (

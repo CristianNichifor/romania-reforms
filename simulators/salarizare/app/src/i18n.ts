@@ -20,6 +20,8 @@ export interface Strings {
   phaseNote: (until: number) => string;
   phaseColumn: (period: string) => string;
   loadError: (message: string) => string;
+  /** The action next to a load error (UX-12). */
+  retry: string;
   loading: string;
   footerSource: string;
   /** "Date: <sursă>, <an>" under the home H1 (UX-5): the same package the footer cites. */
@@ -68,6 +70,7 @@ const ro: Strings = {
     `proiectul se aplică eșalonat: coeficienții de vârf urcă an de an până în ${until}`,
   phaseColumn: (period) => `; coloana „${period}"`,
   loadError: (message) => `Nu s-au putut încărca datele: ${message}`,
+  retry: 'Reîncearcă',
   loading: 'Se încarcă grila…',
   dataLine: 'Date: MMFTSS, pachetul public din 20.08.2026; IDA (Danemarca), 01.04.2026',
   footerSource:
@@ -115,6 +118,7 @@ const en: Strings = {
   phaseNote: (until) => `the draft is phased in: the top coefficients rise year by year until ${until}`,
   phaseColumn: (period) => `; column "${period}"`,
   loadError: (message) => `The data could not be loaded: ${message}`,
+  retry: 'Try again',
   loading: 'Loading the grid…',
   dataLine: 'Data: MMFTSS, public package of 20.08.2026; IDA (Denmark), 01.04.2026',
   footerSource:
