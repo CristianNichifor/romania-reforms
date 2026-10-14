@@ -186,3 +186,12 @@ landing `tests/test_site_pages.py::test_landing_names_its_data_under_the_h1`.
   toggles on the payslip read the law's name ("Legea-cadru 153/2017") with the file id secondary.
 
 Test: `simulators/salarizare/app/tests/layout.test.tsx`.
+
+### UX-10 Static pages lead with the family bar — done
+
+- Given the four static pages, then the shared `rr-nav` is the first element in `<body>`,
+  before the `h1`, its first link goes to the hub, and the page restyles it as a header
+  (border below, 24 px link targets) instead of the shell's footer rule (ux-guidelines § 2;
+  design screens 01 and 05, acceptance criterion 1).
+
+Test: `tests/test_site_pages.py::test_static_pages_lead_with_the_family_bar`.

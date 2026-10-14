@@ -127,3 +127,16 @@ def test_landing_names_its_data_under_the_h1(page, word):
     footer = data / "salarizare/app/src/i18n.ts"
     package_date = re.search(r"MMFTSS din (\d\d\.\d\d\.\d{4})", footer.read_text("utf-8")).group(1)
     assert f"MMFTSS, {package_date}" in line
+
+
+@pytest.mark.parametrize("page", ["index.html", "en/index.html", "brief.html", "privacy.html"])
+def test_static_pages_lead_with_the_family_bar(page):
+    """UX-10: the shared navigation is the first thing in the body, before the H1, with a
+    link back to the hub first; the page styles it as a header, not a footer."""
+    html = read(page)
+    body = html[html.index("<body>") :]
+    nav = re.search(r"<nav class=\"rr-nav\"[^>]*>(.*?)</nav>", body, re.S)
+    assert nav and body.index("<nav") < body.index("<h1"), f"{page}: nav is not first"
+    first_link = re.search(r"<a href=\"([^\"]+)\"", nav.group(1)).group(1)
+    assert first_link in {"./", "../"}, "the first link is not the hub"
+    assert "body > .rr-nav" in html
