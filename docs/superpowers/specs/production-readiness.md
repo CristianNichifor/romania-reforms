@@ -267,6 +267,20 @@ Test: `tests/test_site_pages.py::test_static_pages_lead_with_the_family_bar`.
   (design screen 01; ux-guidelines § 2.3).
 
 Test: `tests/test_site_pages.py::test_every_simulator_card_names_its_own_data`.
+### UX-12 Public-pay error and empty states — done (Romanian: needs human review)
+
+- Given a data file that fails to load, then the page shows the failure in the reader's
+  language with `role="alert"` and a button "Reîncearcă" (en "Try again") that reloads the
+  page; the scenario survives in the hash (design screen 03; ux-guidelines § 5).
+- Given a search with no hits, then the empty state names what was typed („…") and says
+  what to try, with `role="status"`.
+
+Test: `simulators/salarizare/app/tests/states.test.tsx`.
+- Given the Distribution and Domains views, which draw figures without a source line, then
+  each ends with the app's short data line ("Date: MMFTSS, pachetul public din 20.08.2026;
+  IDA (Danemarca), 01.04.2026") in a `view-source` paragraph (ux-guidelines § 2.5, § 4).
+- Given a load still running after two seconds, then the loader (`role="status"`) changes to a
+  second stage that says it is slow, in the reader's language.
 ### UX-8 Target-state design screens — docs only (Romanian copy: needs human review)
 
 - Given `docs/design/screens/01..05*.html`, then each is a self-contained static page (no

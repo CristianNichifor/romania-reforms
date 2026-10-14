@@ -95,6 +95,12 @@ const QUESTIONS: Array<{ ask: string; lead: string; entries: Entry[] }> = [
  * The page is deliberately short and mostly navigation. Counts come from the regimes as
  * loaded, so nothing here can go stale against the data behind it.
  */
+/** The empty state of the search (UX-12): it names what was typed and says what to try. */
+export const noHit = (query: string): string =>
+  `Nicio funcție pentru „${query.trim()}" în grila proiectului. Denumirile sunt cele din anexe, ` +
+  'iar multe posturi reale sunt comasate sub un titlu care nu le conține: caută cuvântul ' +
+  'cel mai general din meserie.';
+
 export default function HomeView({
   menu,
   ministry,
