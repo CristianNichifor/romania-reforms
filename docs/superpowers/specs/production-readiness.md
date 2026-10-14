@@ -186,3 +186,13 @@ landing `tests/test_site_pages.py::test_landing_names_its_data_under_the_h1`.
   toggles on the payslip read the law's name ("Legea-cadru 153/2017") with the file id secondary.
 
 Test: `simulators/salarizare/app/tests/layout.test.tsx`.
+
+### UX-13 Deconcentrare light-first on civic-ui roles — done
+
+- Given `simulators/deconcentrare/app/src/style.css`, then the unconditional `:root` block
+  carries the civic-ui `neutral` light values (`--bg: #f4f6f6`, `--fg: #182b2c`, `--muted:
+  #475d60`, `--card: #ffffff`, `--link: #006b60`) and `color-scheme: light`; the dark values
+  appear only under `@media (prefers-color-scheme: dark)` (ux-guidelines § 6, § 9.1).
+  companii-stat follows once #161 (which edits its stylesheet) has merged.
+
+Test: `simulators/deconcentrare/app/src/theme.test.ts`.
