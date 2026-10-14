@@ -570,6 +570,7 @@ export default function App() {
           rates={fx}
           scenario={scenario}
           onScenario={setScenario}
+          lang={lang}
         />
       )}
       {scenario.view === 'domenii' && ministry && ours && occGroups && dkOcc && fx && benchmarks && (
