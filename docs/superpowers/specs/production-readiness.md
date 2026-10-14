@@ -183,6 +183,18 @@ Test: `simulators/salarizare/app/tests/layout.test.tsx`.
 Test: salarizare `tests/domains-strings.test.ts` (same keys, no Romanian letters in English,
 comma-below in Romanian, formatters).
 
+### UX-22 Public pay in English, second slice: the Structură view — done (English copy: needs human review)
+
+- Given `/salarizare/#/structura?lang=en`, then every word the view prints (title, lead, the
+  source line, the disclaimer, the five KPIs, the four analysis sections with their chart axes,
+  source lines, table captions and column heads, the tooltips and the limits) is English, and
+  counts, ratios and shares use the `en-GB` locale; in Romanian nothing changes. Sentences that
+  embed glossary terms are render functions in the same per-language table
+  (`STRUCTURE_STRINGS` in `src/StructureView.tsx`), the pattern of UX-21.
+
+Test: salarizare `tests/structure-strings.test.ts` (same keys, no Romanian letters in English,
+comma-below in Romanian, the phase-in sentence and formatters).
+
 ### UX-16 impozit-teren page check — done
 
 - Given `/impozit-teren/#j=bc` at 390 × 844, when the county table has rendered, then the
