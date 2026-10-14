@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
 import { Field, Input } from '@cristiannichifor/civic-ui';
 
 import type { Scenario, ViewId } from '../../engine/scenario';
 import type { Regime } from '../../engine/types';
 import { GlossaryList } from './Glossary';
+import { PositionName } from './names';
 
 const ro = (n: number) => n.toLocaleString('ro-RO');
 
@@ -162,10 +164,12 @@ export default function HomeView({
               {hits.map((p) => (
                 <li key={p.code}>
                   <button onClick={() => onOpen('payslip', { positionCode: p.code, dims: undefined })}>
-                    <strong>{p.name}</strong>
+                    <strong>
+                      <PositionName name={p.name} />
+                    </strong>
                     <span>
                       {p.titles && p.titles.length > 1 && `+${p.titles.length - 1} denumiri · `}
-                      <code>{p.code}</code>
+                      <code title="codul poziției în anexa sursă">{p.code}</code>
                     </span>
                   </button>
                 </li>

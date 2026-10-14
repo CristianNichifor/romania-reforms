@@ -1,4 +1,6 @@
 import { useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
+import { PositionName } from './names';
 import { Checkbox, Field, Input, NativeSelect, RangeSlider, Table } from '@cristiannichifor/civic-ui';
 
 import { ineligibility, payslip } from '../../engine/payslip';
@@ -463,7 +465,7 @@ function PayslipCard({
     <div className="card slip">
       <h3>{regime.name.split('(')[0].trim()}</h3>
       <p className="slip-meta">
-        {position.name} · {slip.currency} {PERIOD_LABEL[slip.period]}
+        <PositionName name={position.name} /> · {slip.currency} {PERIOD_LABEL[slip.period]}
       </p>
 
       <Composition slip={slip} />

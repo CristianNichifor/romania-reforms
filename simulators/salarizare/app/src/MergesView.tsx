@@ -1,4 +1,6 @@
 import { useMemo } from 'react';
+import type { ReactNode } from 'react';
+import { PositionName } from './names';
 import { Button, Checkbox, Field, Input, NativeSelect, Table } from '@cristiannichifor/civic-ui';
 
 import { byFanIn, mergeCards } from '../../engine/merges';
@@ -217,7 +219,9 @@ function Card({ card, rates }: { card: MergeCard; rates: Rates }) {
   return (
     <article className="card merge-card">
       <header>
-        <h3>{card.name}</h3>
+        <h3>
+          <PositionName name={card.name} />
+        </h3>
         {card.fanIn > 1 && (
           <span className="badge" title="câte denumiri s-au strâns în această funcție">
             {card.fanIn} denumiri
