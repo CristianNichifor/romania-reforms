@@ -139,11 +139,12 @@ interface is "Date reale" with an honest method page.
 | Every public-pay view renders | `simulators/salarizare/app/tests/views.test.tsx` |
 | Status badge on every app page and on its hub card | `tests/test_site_pages.py::test_every_simulator_card_carries_the_status_badge`, `tests/test_site_pages.py::test_every_simulator_card_names_its_own_data` |
 | Light-first static pages on civic-ui roles | `tests/test_site_pages.py::test_static_pages_are_light_first_on_civic_ui_roles` |
-| No sideways scroll at 390 px and no serious axe issue | `simulators/administrativ/web/tests/browser/page-checks.spec.ts`, `simulators/transport/app/tests/browser/page-checks.spec.ts`, `simulators/impozit-teren/app/tests/browser/page-checks.spec.ts`, `simulators/justitie/app/tests/browser/page-checks.spec.ts` |
+| No sideways scroll at 390 px and no serious axe issue | `simulators/administrativ/web/tests/browser/page-checks.spec.ts`, `simulators/transport/app/tests/browser/page-checks.spec.ts`, `simulators/impozit-teren/app/tests/browser/page-checks.spec.ts`, `simulators/justitie/app/tests/browser/page-checks.spec.ts`, `simulators/salarizare/app/scripts/check-page.mjs` |
 | This guideline covers every simulator and cites real tests | `tests/test_ux_guidelines.py` |
 
 Not yet enforced by a test: the as-of date on charts and maps (§ 9 item 8); axe and the 390 px
-check on the public-pay, deconcentrare and companii-stat pages, which have no browser suite.
+check on the deconcentrare and companii-stat pages, which have no browser suite, and on the
+public-pay views other than Acasă.
 
 ## 9. Known deviations backlog
 
@@ -170,5 +171,6 @@ flight* belong to another session; do not start them in parallel.
    status itself is still the agent's reading of the data; the owner may change one.
 8. No as-of date on charts and maps beyond the provenance line.
 9. No page-level axe or 390 px overflow check; add to the browser suites — done for the four
-   suites (`page-checks.spec.ts` in administrativ, transport, impozit-teren, justitie); the
-   public-pay, deconcentrare and companii-stat pages still have no browser suite.
+   suites (`page-checks.spec.ts` in administrativ, transport, impozit-teren, justitie) and for
+   the public-pay first screen (`scripts/check-page.mjs`); the deconcentrare and companii-stat
+   pages still have no browser suite.
