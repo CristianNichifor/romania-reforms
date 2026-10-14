@@ -1,11 +1,14 @@
 import { defineConfig } from 'vite';
 
+import { siteShell } from '../../../site/shell.mjs';
+
 // GitHub Pages serves a project site from /<repo>/, so assets need that prefix. It is
 // supplied by CI rather than hardcoded, so `npm run dev` and a user fork both work without
 // editing this file.
 const base = process.env.VITE_BASE ?? '/';
 
 export default defineConfig({
+  plugins: [siteShell('administrative-reform')],
   base,
   build: {
     outDir: 'dist',
