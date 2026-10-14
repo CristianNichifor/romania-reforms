@@ -12,6 +12,7 @@ import { applyProposal } from '../../engine/proposal';
 import type { Proposal } from '../../engine/proposal';
 import { DEFAULT_SCENARIO } from '../../engine/scenario';
 import type { Crosswalk, Regime } from '../../engine/types';
+import HomeView from '../src/HomeView';
 import MergesView from '../src/MergesView';
 import PayslipView from '../src/PayslipView';
 import ProposalView from '../src/ProposalView';
@@ -78,5 +79,20 @@ describe('views render from the committed data', () => {
       />,
     );
     expect(html).toMatch(/<h3>[^<]+<\/h3>/);
+  });
+});
+
+describe('the data line under the H1 (UX-5)', () => {
+  it('follows the home H1 and names the MMFTSS package the footer cites', () => {
+    const html = renderToStaticMarkup(
+      <HomeView
+        ministry={draft}
+        inForce={inForce}
+        denmark={null}
+        dataLine="Date: MMFTSS, pachetul public din 20.08.2026; IDA (Danemarca), 01.04.2026"
+        onOpen={noop}
+      />,
+    );
+    expect(html).toMatch(/<\/h1><p class="data-line">Date: MMFTSS, pachetul public din 20\.08\.2026/);
   });
 });

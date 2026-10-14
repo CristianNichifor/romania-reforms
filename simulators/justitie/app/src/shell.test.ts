@@ -30,3 +30,8 @@ describe.each(['index.html', 'statistici.html'])('%s', (page) => {
     expect(shell!.transformIndexHtml(html, { server: {} })).not.toContain('Content-Security-Policy');
   });
 });
+
+it('index.html names its data right under the H1 (UX-5)', () => {
+  const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  expect(html).toMatch(/<h1[^>]*>[^<]*<\/h1>\s*<p class="data-line" id="data-line"><\/p>/);
+});
