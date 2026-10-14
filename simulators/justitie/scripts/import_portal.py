@@ -278,15 +278,31 @@ def call(body: str, action: str) -> str:
             "User-Agent": USER_AGENT,
         },
     )
+    return fetch(request, action)
+
+
+def fetch(request: urllib.request.Request, what: str) -> str:
+    """Read one response, retrying server and transport errors with exponential backoff.
+
+    A 5xx (the portal's proxy answers 520 when the service behind it stalls) and a dropped
+    connection are transient: runs 38130733364 and 37919050016 each lost a whole shard to one
+    of them at the WSDL bootstrap. A 4xx is a refusal and is raised at once; repeating it only
+    looks more like abuse.
+    """
     last: Exception | None = None
     for attempt in range(MAX_RETRIES):
+        if attempt:
+            time.sleep(2 ** (attempt - 1))
         try:
             with urllib.request.urlopen(request, timeout=TIMEOUT_SECONDS) as response:
                 return response.read().decode("utf-8", "replace")
+        except urllib.error.HTTPError as exc:
+            if exc.code < 500:
+                raise PortalError(f"{what} refused: HTTP {exc.code}") from exc
+            last = exc
         except (urllib.error.URLError, TimeoutError, OSError) as exc:
             last = exc
-            time.sleep(2**attempt)
-    raise PortalError(f"{action} failed after {MAX_RETRIES} attempts: {last!r}")
+    raise PortalError(f"{what} failed after {MAX_RETRIES} attempts: {last!r}")
 
 
 # XML 1.0 forbids most control characters, and ECRIS free text contains them — clerks paste from
@@ -557,8 +573,7 @@ def load_courts() -> list:
     # The WSDL endpoint rejects Python's default agent with 403; identify the same
     # public research client used for SOAP calls, rather than impersonating a browser.
     request = urllib.request.Request(f"{ENDPOINT}?wsdl", headers={"User-Agent": USER_AGENT})
-    with urllib.request.urlopen(request, timeout=TIMEOUT_SECONDS) as response:
-        wsdl = response.read().decode("utf-8", "replace")
+    wsdl = fetch(request, "WSDL")
     block = re.search(r'<s:simpleType name="Institutie">(.*?)</s:simpleType>', wsdl, re.S)
     if not block:
         raise PortalError("Institutie enum not found in WSDL")

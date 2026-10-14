@@ -33,7 +33,7 @@ in the PR body (needs-human).
 
 ## B. Reliability and coverage
 
-### RR-7 Portal snapshot retries 5xx — todo
+### RR-7 Portal snapshot retries 5xx — done
 
 - Given the portal answers HTTP 5xx (520 seen in runs 38130733364 and 37919050016),
   when the importer makes a request,
