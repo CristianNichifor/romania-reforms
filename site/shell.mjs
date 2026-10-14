@@ -28,7 +28,9 @@ export const CSP = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob:",
   "font-src 'self' data:",
-  "connect-src 'self'",
+  // data: and blob: so a page can read back an image it made itself (the browser checks
+  // decode their own map canvases this way); neither reaches the network.
+  "connect-src 'self' data: blob:",
   "worker-src 'self' blob:",
   "object-src 'none'",
   "base-uri 'self'",
