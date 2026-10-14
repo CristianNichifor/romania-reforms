@@ -36,6 +36,22 @@ describe('the first screen', () => {
     expect(html.match(/<nav class="tabs"/g)).toHaveLength(1);
   });
 
+  it('reads title, purpose, data line with one status badge, then the search (screen 03)', () => {
+    at('#/acasa');
+    const html = renderToStaticMarkup(<App />);
+    const [h1, purpose, line, badge, search] = order(
+      html, '<h1', 'class="purpose"', 'class="data-line"', 'class="badge status"', 'id="home-search"',
+    );
+    expect(h1).toBeGreaterThan(-1);
+    expect(purpose).toBeGreaterThan(h1);
+    expect(line).toBeGreaterThan(purpose);
+    expect(badge).toBeGreaterThan(line);
+    expect(search).toBeGreaterThan(badge);
+    expect(html.match(/class="badge[ "]/g)).toHaveLength(1);
+    expect(html).toMatch(/class="data-line">Date: .+, (19|20)\d\d/);
+    expect(html).toContain('>Date reale<');
+  });
+
   it('puts the menu under the title of every other view', () => {
     const html = renderToStaticMarkup(
       <StructureView regime={inForce} period={null} menu={<nav className="tabs" />} />,
