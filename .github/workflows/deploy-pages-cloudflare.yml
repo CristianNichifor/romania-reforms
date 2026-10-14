@@ -114,9 +114,11 @@ jobs:
 
       - name: Assemble the site
         run: |
-          mkdir -p dist
+          mkdir -p dist/en
           cp site/index.html dist/index.html
           cp site/brief.html dist/brief.html
+          cp site/privacy.html dist/privacy.html
+          cp site/en/index.html dist/en/index.html
           cp site/favicon.svg dist/favicon.svg
           cp -r simulators/salarizare/app/dist dist/public-pay
           cp -r simulators/administrativ/web/dist dist/administrative-reform
@@ -240,6 +242,8 @@ jobs:
                       companii-stat/favicon.svg; do
             [ -s "dist/$path" ] || { echo "MISSING dist/$path"; fail=1; }
           done
+          # Every page carries the simulator navigation and the CSP (site/shell.mjs).
+          python3 scripts/check_site_shell.py dist || fail=1
           exit $fail
 
       # Served at /romania-reforms/, the path every existing link already uses. cf-site,
@@ -249,6 +253,7 @@ jobs:
           mkdir -p cf-site/romania-reforms
           cp -r dist/. cf-site/romania-reforms/
           printf '/ /romania-reforms/ 302\n' > cf-site/_redirects
+          python3 scripts/redirect_stubs.py cf-site
 
       - name: Cloudflare token from the CN Webify broker
         run: |
