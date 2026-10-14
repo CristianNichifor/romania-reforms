@@ -187,6 +187,17 @@ landing `tests/test_site_pages.py::test_landing_names_its_data_under_the_h1`.
 
 Test: `simulators/salarizare/app/tests/layout.test.tsx`.
 
+### UX-17 Companii-stat light-first on civic-ui roles — done
+
+- Given `simulators/companii-stat/app/src/style.css`, then the unconditional `:root` block
+  carries the civic-ui `neutral` light values (`--bg: #f4f6f6`, `--fg: #182b2c`, `--muted:
+  #475d60`, `--card: #ffffff`, `--link: #006b60`) and `color-scheme: light`; the dark values
+  appear only under `@media (prefers-color-scheme: dark)` (ux-guidelines § 6, § 9.1; design
+  criterion 2). The national tier tag takes a `--danger` role in both themes instead of two
+  hard-coded reds.
+
+Test: `simulators/companii-stat/app/src/theme.test.ts`.
+
 ### UX-6 Maps and readability — done (Romanian UI strings: needs human review)
 
 - Given courts that share a courthouse (the appellate court, tribunal and judecătorie of a
