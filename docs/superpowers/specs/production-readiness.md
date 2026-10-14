@@ -195,6 +195,17 @@ Test: impozit-teren `tests/browser/page-checks.spec.ts`.
 Tests: administrativ `tests/data-line.test.ts`, transport and impozit-teren `src/shell.test.ts`
 (order and exactly one badge).
 
+### UX-19 Staged loader and retry on the map simulators — done
+
+- Given `/administrativ/`, `/transport/` and `/impozit-teren/`, then the loader is a
+  `role="status"` that reads „Se încarcă …” at once and, after two seconds, says it is taking
+  longer than usual; a failed load becomes a `role="alert"` reading „Nu s-au putut încărca
+  datele: <motiv>” with a 44 px „Reîncearcă” button that reloads the page (ux-guidelines § 5;
+  design criterion 7). Administrativ translates the three strings with its chrome.
+- Markup comes from a small escaped-string module per app (`src/states.ts`), so the states are
+  unit-tested without a DOM, as the document pages do (UX-15).
+
+Tests: administrativ `tests/states.test.ts`, transport and impozit-teren `src/states.test.ts`.
 ### UX-17 Companii-stat light-first on civic-ui roles — done
 
 - Given `simulators/companii-stat/app/src/style.css`, then the unconditional `:root` block
