@@ -12,7 +12,10 @@
   --border: #d8d8d4;
   --text-primary: #0b0b0b;
   --text-secondary: #52514e;
-  --text-muted: #78776f;
+  /* Darkened from #78776f: muted ink is body-size text in many places (sources, notes,
+     glossary marks) and read 4.1:1 on the page, 4.4:1 on a card; this value reads 4.9:1 and
+     5.3:1, over the 4.5:1 AA floor, while staying the warmest of the three inks. */
+  --text-muted: #6b6a62;
   --series-1: #2a78d6;
   --selected: #1f5fb0;
   --accent: #eb6834;
@@ -149,9 +152,8 @@ footer a { color: var(--text-secondary); }
         gap: 18px 26px; align-items: start; margin-bottom: 34px;
         padding-bottom: 28px; border-bottom: 1px solid var(--border); }
 .tabgroup { display: grid; gap: 8px; align-content: start; }
-/* Secondary, not muted: 11 px text needs 4.5:1 and muted ink reads 4.1:1 on the page. */
 .tabgroup-title { font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase;
-                  color: var(--text-secondary); font-weight: 600; }
+                  color: var(--text-muted); font-weight: 600; }
 .tabgroup-ask { font-size: 15px; font-weight: 600; color: var(--text-primary);
                 margin: 0 0 2px; }
 .tabs button {
