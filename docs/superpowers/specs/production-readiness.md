@@ -470,6 +470,20 @@ Test: `tests/test_site_pages.py::test_every_simulator_card_names_its_own_data`.
 
 Test: `tests/test_site_pages.py::test_every_simulator_card_carries_the_status_badge`.
 
+### UX-37 The design screens keep their own contract — done
+
+- Given every `docs/design/screens/*.html`, then it is self-contained (no scripts, no fetched
+  assets), uses comma-below diacritics only, is light-first on civic-ui roles with dark as the
+  only colour-scheme override (criterion 2), and in every frame that has an `h1` the family bar
+  (`nav[aria-label="Simulatoare"]`, hub link first) precedes it, the data line „Date: <sursă>,
+  <an>” follows it and the purpose line, where present, sits between (criteria 1 and 3); every
+  badge reads from the § 7 vocabulary, a simulator's bar carries exactly one and the hub shows
+  one on every card (criterion 4). The public-pay screen's data line is reworded to the
+  „Date: <sursă>, <an>” shape it had strayed from.
+- Criteria that need a browser (bar height, 390 px overflow, targets, axe, loader timing)
+  stay with the live pages' suites; the screens are documents.
+
+Test: `tests/test_design_screens.py`.
 ### UX-33 Public-pay page check on every view — done
 
 - Given each of the eleven views of `/public-pay/` (`#/acasa` … `#/functii`) at 390 × 844,
@@ -559,5 +573,5 @@ Test: `simulators/salarizare/app/tests/theme.test.ts`.
   the change versus today and acceptance criteria 1–10 that later items turn into tests.
 - No PNG screenshots in this round (no local browser runs allowed); a follow-up adds them.
 
-Test: none yet (documentation); `tests/test_site_pages.py::test_romanian_text_uses_comma_below`
-is the model for a future check over `docs/design/screens/*.html`.
+Test: `tests/test_design_screens.py` (UX-37) checks the static criteria over
+`docs/design/screens/*.html`.
