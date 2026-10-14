@@ -219,8 +219,17 @@ h3 {
   cursor: default;
 }
 
-.bar.muted {
+/* A muted row steps back without losing its text: fading the whole row took the label and
+   the figure to about 3.4:1 on the card, under the 4.5:1 small text needs (WCAG 1.4.3). The
+   fill fades, the text takes the dim ink. */
+.bar.muted .bar-fill {
   opacity: 0.55;
+}
+
+.bar.muted .bar-label,
+.bar.muted .bar-value,
+.bar.muted .bar-note {
+  color: var(--ink-dim);
 }
 
 .bar-label {
