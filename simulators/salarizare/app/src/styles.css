@@ -914,12 +914,13 @@ i.k-measured { background: var(--series-1); border-radius: 50% !important; }
   font-size: 0.76rem;
   letter-spacing: 0.01em;
   text-decoration: none;
-  color: inherit;
-  opacity: 0.62;
+  /* Secondary ink, no opacity: the civic text ink at 0.62 read 3.6:1 on the page, under AA for
+     12 px text, and the page check (UX-16) flags it; secondary ink on its own reads 7:1. */
+  color: var(--text-secondary);
 }
 .up:hover,
 .up:focus-visible {
-  opacity: 1;
+  color: var(--text-primary);
   text-decoration: underline;
 }
 
