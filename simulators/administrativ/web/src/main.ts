@@ -8,6 +8,9 @@
 
 import './style.css';
 import './native-ui.css';
+import './states.css';
+import { loadErrorMarkup, stageLoader } from './states';
+import './map-source.css';
 import './status-badge.css';
 
 import { buildChain, edgeKey, indexShard } from './app/chain';
@@ -2117,11 +2120,17 @@ async function boot(): Promise<void> {
     });
   };
 
+  // Past two seconds the loader says it is slow (UX-19); cleared when the worker is ready.
+  const slow = stageLoader(el('#loading').querySelector('span'), strings.loadingSlow);
   worker.onmessage = (event: MessageEvent<Outgoing>) => {
     const message = event.data;
 
     if (message.type === 'error') {
-      el('#loading').innerHTML = `<span>${message.message}</span>`;
+      clearTimeout(slow);
+      const loading = el<HTMLElement>('#loading');
+      loading.setAttribute('role', 'alert');
+      loading.innerHTML = loadErrorMarkup(message.message, { failed: strings.loadFailed, retry: strings.retry });
+      loading.querySelector<HTMLButtonElement>('.retry')?.addEventListener('click', () => location.reload());
       return;
     }
 
@@ -2262,6 +2271,7 @@ async function boot(): Promise<void> {
     renderCandidates();
     requestCandidacy();
     renderAudit();
+    clearTimeout(slow);
     el<HTMLElement>('#loading').hidden = true;
   };
 

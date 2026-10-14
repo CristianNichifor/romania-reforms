@@ -14,6 +14,8 @@ import type { Shares } from '../../engine/composition';
 import type { DkOccupation, GroupsDocument } from '../../engine/occupations';
 import type { Crosswalk, Regime } from '../../engine/types';
 import CompareView, { type PublicEnterpriseCompensationDoc } from './CompareView';
+import LoadError from './LoadError';
+import ViewSource from './ViewSource';
 import DomainsView from './DomainsView';
 import HomeView from './HomeView';
 import DistributionView from './DistributionView';
@@ -118,6 +120,12 @@ export default function App() {
   }, [lang]);
   const [regimes, setRegimes] = useState<Record<string, Regime>>({});
   const [error, setError] = useState<string | null>(null);
+  // Staged loading (UX-12): after two seconds the loader says it is slow, not stuck.
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    const id = window.setTimeout(() => setSlow(true), 2000);
+    return () => window.clearTimeout(id);
+  }, []);
   const [copied, setCopied] = useState(false);
   const [proposal, setProposal] = useState<Proposal | null>(null);
   const [crosswalk, setCrosswalk] = useState<Crosswalk | null>(null);
@@ -494,8 +502,10 @@ export default function App() {
       {/* Until a view can draw itself, the menu is the page: a reader stuck on an error
           or a slow load can still go somewhere else. The first screen draws its own. */}
       {scenario.view !== 'acasa' && (error || loaded.length === 0) && menu}
-      {error && <p className="loading">{t.loadError(error)}</p>}
-      {!error && loaded.length === 0 && <p className="loading">{t.loading}</p>}
+      {error && <LoadError message={t.loadError(error)} retry={t.retry} />}
+      {!error && loaded.length === 0 && (
+        <p className="loading" role="status">{slow ? t.loadingSlow : t.loading}</p>
+      )}
 
       {scenario.view === 'acasa' && (
         <HomeView
@@ -535,12 +545,15 @@ export default function App() {
         />
       )}
       {scenario.view === 'distributie' && ministry && assimilation && (
-        <DistributionView
-          menu={menu}
-          inForce={regimes['ro-153-2017'] ?? null}
-          draft={ministry}
-          crosswalk={assimilation}
-        />
+        <>
+          <DistributionView
+            menu={menu}
+            inForce={regimes['ro-153-2017'] ?? null}
+            draft={ministry}
+            crosswalk={assimilation}
+          />
+          <ViewSource text={t.dataLine} />
+        </>
       )}
       {scenario.view === 'functii' && ministry && fx && (
         <MergesView
@@ -557,24 +570,27 @@ export default function App() {
         />
       )}
       {scenario.view === 'domenii' && ministry && ours && occGroups && dkOcc && fx && benchmarks && (
-        <DomainsView
-          menu={menu}
-          inForce={regimes['ro-153-2017'] ?? null}
-          draft={ministry}
-          proposal={ours.regime}
-          groups={occGroups}
-          danish={dkOcc}
-          rates={fx}
-          benchmarks={{
-            avgRo: benchmarks.avgRo,
-            avgDk: benchmarks.avgDk,
-            floorRo: benchmarks.floorRo,
-            floorDk: benchmarks.floorDk,
-            year: benchmarks.year,
-          }}
-          scenario={scenario}
-          onScenario={setScenario}
-        />
+        <>
+          <DomainsView
+            menu={menu}
+            inForce={regimes['ro-153-2017'] ?? null}
+            draft={ministry}
+            proposal={ours.regime}
+            groups={occGroups}
+            danish={dkOcc}
+            rates={fx}
+            benchmarks={{
+              avgRo: benchmarks.avgRo,
+              avgDk: benchmarks.avgDk,
+              floorRo: benchmarks.floorRo,
+              floorDk: benchmarks.floorDk,
+              year: benchmarks.year,
+            }}
+            scenario={scenario}
+            onScenario={setScenario}
+          />
+          <ViewSource text={t.dataLine} />
+        </>
       )}
       {scenario.view === 'meserii' && ministry && occGroups && dkOcc && occBench && fx && (
         <OccupationsView

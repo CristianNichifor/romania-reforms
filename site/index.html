@@ -10,27 +10,42 @@
       content="Simulatoare deterministe pentru reforme publice din România — administrativă, salarizare, justiție, transport, impozit pe teren, servicii deconcentrate, companii de stat — și monitoare care citesc ce există deja: legislație și achiziții publice."
     />
     <style>
+      /* civic-ui neutral roles (UX-9): light first, dark only when the system asks. */
       :root {
-        color-scheme: light dark;
-        --bg: #0b0d10;
-        --fg: #e8eaed;
-        --muted: #9aa3ad;
-        --card: #14181d;
-        --line: #232a31;
-        --link: #7fb3ff;
+        color-scheme: light;
+        --bg: #f4f6f6;
+        --fg: #182b2c;
+        --muted: #475d60;
+        --card: #ffffff;
+        --line: #718588;
+        --link: #006b60;
       }
-      @media (prefers-color-scheme: light) {
+      @media (prefers-color-scheme: dark) {
         :root {
-          --bg: #f7f8fa;
-          --fg: #14181d;
-          --muted: #5b6570;
-          --card: #ffffff;
-          --line: #dfe3e8;
-          --link: #1a5fd0;
+          color-scheme: dark;
+          --bg: #142323;
+          --fg: #f0f6f5;
+          --muted: #c0d3cf;
+          --card: #203332;
+          --line: #8ca8a1;
+          --link: #b5e8dc;
         }
       }
       * {
         box-sizing: border-box;
+      }
+      /* UX-10: the family bar leads the page, so it loses the footer rule. */
+      body > .rr-nav {
+        max-width: 46rem;
+        margin: 0 auto 2rem;
+        padding: 0 0 0.75rem;
+        border-top: 0;
+        border-bottom: 1px solid var(--line);
+      }
+      body > .rr-nav a {
+        display: inline-block;
+        min-height: 24px;
+        line-height: 24px;
       }
       body {
         margin: 0;
@@ -91,6 +106,11 @@
       .name {
         font-weight: 600;
         margin-bottom: 0.25rem;
+      }
+      .card-data {
+        color: var(--muted);
+        font-size: 0.85rem;
+        margin-top: 0.4rem;
       }
       .what {
         color: var(--muted);
@@ -167,6 +187,7 @@
     <style>.rr-nav{margin:1.5rem 0 0;padding-top:.75rem;border-top:1px solid;border-color:color-mix(in srgb,currentColor 20%,transparent);font-size:.8rem;line-height:1.6}.rr-nav ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:.2rem .9rem}.rr-nav a{color:inherit;display:inline-flex;align-items:center;min-height:24px;min-width:24px}.rr-nav a[aria-current="page"]{font-weight:600;text-decoration:none}</style>
   </head>
   <body>
+    <nav class="rr-nav" aria-label="Simulatoare"><ul><li><a href="./" aria-current="page">Toate simulatoarele</a></li><li><a href="administrative-reform/">Reforma administrativă</a></li><li><a href="public-pay/">Salarizarea publică</a></li><li><a href="transport/">Transport public</a></li><li><a href="justitie/">Reforma justiției</a></li><li><a href="impozit-teren/">Impozitul pe teren</a></li><li><a href="deconcentrare/">Serviciile deconcentrate</a></li><li><a href="companii-stat/">Companiile statului</a></li></ul></nav>
     <main>
       <h1>Simulatoare și monitoare</h1>
       <p class="data-line">
@@ -220,6 +241,7 @@
               Comasarea celor 3.186 de UAT-uri. Hartă interactivă, praguri reglabile, fiecare unitate
               cu motivul pentru care arată așa.
             </div>
+            <div class="card-data">Date: INS, Recensământ 2021</div>
           </a>
         </li>
         <li>
@@ -228,6 +250,7 @@
             <div class="what">
               Grila de salarizare față de ce se plătește în realitate, cu sursa fiecărei cifre.
             </div>
+            <div class="card-data">Date: MMFTSS, 20.08.2026</div>
           </a>
         </li>
         <li>
@@ -237,6 +260,7 @@
               Cât ar dura să ajungi la reședința ta de județ cu autobuzul, dacă fiecare UAT ar
               avea orar — și ce costă asta pe an, față de economia pe care o revendică comasarea.
             </div>
+            <div class="card-data">Date: OpenStreetMap, 2026</div>
           </a>
         </li>
         <li>
@@ -246,6 +270,7 @@
               241 de instanțe, dosarele fiecăreia și încărcătura pe judecător — și ce ar însemna
               comasarea în 42 de tribunale și 15 curți de apel.
             </div>
+            <div class="card-data">Date: CSM, 2025</div>
           </a>
         </li>
         <li>
@@ -255,6 +280,7 @@
               Cât valorează pământul după grilele notarilor, cât se impozitează azi pe hectar, și
               ce cotă pe valoare ar aduce exact aceiași bani.
             </div>
+            <div class="card-data">Date: Codul fiscal, 2026</div>
           </a>
         </li>
         <li>
@@ -265,6 +291,7 @@
               dezvoltare: 820 de birouri regionalizabile la 179, familie cu familie, pe aceleași
               opt regiuni ca reforma justiției.
             </div>
+            <div class="card-data">Date: ANFP, 2025</div>
           </a>
         </li>
         <li>
@@ -274,6 +301,7 @@
               1.247 de companii pe activități: utilitățile de rețea, de la 659 de entități la
               56 de operatori regionali, și cine rămâne național, local sau neatingibil.
             </div>
+            <div class="card-data">Date: Ministerul Finanțelor, 2019–2024</div>
           </a>
         </li>
       </ul>
@@ -324,7 +352,6 @@
         <a href="privacy.html">Confidențialitate</a> ·
         <a href="en/index.html" hreflang="en" lang="en">English</a>
       </footer>
-      <nav class="rr-nav" aria-label="Simulatoare"><ul><li><a href="./" aria-current="page">Toate simulatoarele</a></li><li><a href="administrative-reform/">Reforma administrativă</a></li><li><a href="public-pay/">Salarizarea publică</a></li><li><a href="transport/">Transport public</a></li><li><a href="justitie/">Reforma justiției</a></li><li><a href="impozit-teren/">Impozitul pe teren</a></li><li><a href="deconcentrare/">Serviciile deconcentrate</a></li><li><a href="companii-stat/">Companiile statului</a></li></ul></nav>
     </main>
   </body>
 </html>

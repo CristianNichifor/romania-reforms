@@ -195,6 +195,26 @@ Test: impozit-teren `tests/browser/page-checks.spec.ts`.
 Tests: administrativ `tests/data-line.test.ts`, transport and impozit-teren `src/shell.test.ts`
 (order and exactly one badge).
 
+### UX-19 Staged loader and retry on the map simulators — done
+
+- Given `/administrativ/`, `/transport/` and `/impozit-teren/`, then the loader is a
+  `role="status"` that reads „Se încarcă …” at once and, after two seconds, says it is taking
+  longer than usual; a failed load becomes a `role="alert"` reading „Nu s-au putut încărca
+  datele: <motiv>” with a 44 px „Reîncearcă” button that reloads the page (ux-guidelines § 5;
+  design criterion 7). Administrativ translates the three strings with its chrome.
+- Markup comes from a small escaped-string module per app (`src/states.ts`), so the states are
+  unit-tested without a DOM, as the document pages do (UX-15).
+
+Tests: administrativ `tests/states.test.ts`, transport and impozit-teren `src/states.test.ts`.
+### UX-20 Source line under every map — done
+
+- Given `/administrativ/`, `/transport/` and `/impozit-teren/`, then a `p.map-source` sits
+  right under the map legend and reads the page's data line („Date: <sursă>, <an>”; EN
+  „Data: …” in administrativ), so the map carries its source where the eye is (design criterion
+  6; ux-guidelines § 9 item 8). Charts have theirs from #175.
+
+Tests: administrativ `tests/map-source.test.ts`, transport and impozit-teren
+`src/map-source.test.ts` (markup after the legend, main.ts fills it).
 ### UX-17 Companii-stat light-first on civic-ui roles — done
 
 - Given `simulators/companii-stat/app/src/style.css`, then the unconditional `:root` block
@@ -228,6 +248,79 @@ Tests: justitie `src/spread.test.ts`; administrativ `tests/legend-mobile.test.ts
 `src/map-status.test.ts`; impozit-teren `src/layout.test.ts`; companii-stat
 `src/table-mobile.test.ts`. The CSS tests read the stylesheet; the layouts themselves were not
 screenshot-checked on a phone: needs human review.
+## F. Family UX guideline (uxg-b, 2026-10-14)
+
+### UXG-1 One guideline for the landing and the seven simulators
+
+- Given `docs/ux-guidelines.md`, then it fixes one visual style for the family (light by
+  default, following the reader's system setting for dark; dark map canvases allowed), lists
+  each simulator's permitted deviation, and covers page anatomy, content, data-viz, states,
+  mobile and accessibility rules, status vocabulary, a conformance checklist and a backlog of
+  known deviations.
+- Given any simulator in `site/shell.mjs`, then the guideline names its path.
+- Given a test the conformance checklist cites, then that test file exists.
+- Romanian wording in the guideline is agent-written: needs human review.
+
+Test: `tests/test_ux_guidelines.py`.
+### UX-9 Static pages light-first on civic-ui roles — done
+
+- Given `site/index.html`, `site/en/index.html`, `site/brief.html` and `site/privacy.html`,
+  then the unconditional `:root` block carries the civic-ui `neutral` light values
+  (`--bg: #f4f6f6`, `--fg: #182b2c`, `--muted: #475d60`, `--card: #ffffff`,
+  `--link: #006b60`) and `color-scheme: light`; the dark values appear only under
+  `@media (prefers-color-scheme: dark)` (ux-guidelines § 6 and § 9.1; design screen 01).
+
+Test: `tests/test_site_pages.py::test_static_pages_are_light_first_on_civic_ui_roles`.
+### UX-10 Static pages lead with the family bar — done
+
+- Given the four static pages, then the shared `rr-nav` is the first element in `<body>`,
+  before the `h1`, its first link goes to the hub, and the page restyles it as a header
+  (border below, 24 px link targets) instead of the shell's footer rule (ux-guidelines § 2;
+  design screens 01 and 05, acceptance criterion 1).
+
+Test: `tests/test_site_pages.py::test_static_pages_lead_with_the_family_bar`.
+### UX-11 Every landing card names its own data — done
+
+- Given the seven simulator cards on `site/index.html` and `site/en/index.html`, then each
+  carries a `card-data` line "Date: <sursă>, <an>" (en "Data: …") whose source and year are
+  the ones the H1 data line already states for that simulator; nothing new is asserted
+  (design screen 01; ux-guidelines § 2.3).
+
+Test: `tests/test_site_pages.py::test_every_simulator_card_names_its_own_data`.
+### UX-12 Public-pay error and empty states — done (Romanian: needs human review)
+
+- Given a data file that fails to load, then the page shows the failure in the reader's
+  language with `role="alert"` and a button "Reîncearcă" (en "Try again") that reloads the
+  page; the scenario survives in the hash (design screen 03; ux-guidelines § 5).
+- Given a search with no hits, then the empty state names what was typed („…") and says
+  what to try, with `role="status"`.
+
+Test: `simulators/salarizare/app/tests/states.test.tsx`.
+- Given the Distribution and Domains views, which draw figures without a source line, then
+  each ends with the app's short data line ("Date: MMFTSS, pachetul public din 20.08.2026;
+  IDA (Danemarca), 01.04.2026") in a `view-source` paragraph (ux-guidelines § 2.5, § 4).
+- Given a load still running after two seconds, then the loader (`role="status"`) changes to a
+  second stage that says it is slow, in the reader's language.
+### UX-13 Deconcentrare light-first on civic-ui roles — done
+
+- Given `simulators/deconcentrare/app/src/style.css`, then the unconditional `:root` block
+  carries the civic-ui `neutral` light values (`--bg: #f4f6f6`, `--fg: #182b2c`, `--muted:
+  #475d60`, `--card: #ffffff`, `--link: #006b60`) and `color-scheme: light`; the dark values
+  appear only under `@media (prefers-color-scheme: dark)` (ux-guidelines § 6, § 9.1).
+  companii-stat follows once #161 (which edits its stylesheet) has merged.
+
+Test: `simulators/deconcentrare/app/src/theme.test.ts`.
+### UX-14 Public-pay chrome on civic-ui roles — done
+
+- Given `simulators/salarizare/app/src/styles.css`, then the chrome tokens (`--surface-0/1/2`,
+  `--text-primary/secondary`, `--border-strong`, `--action`) carry the civic-ui `neutral`
+  light values by default and the dark values under `prefers-color-scheme: dark` and
+  `data-theme="dark"`; the series colours (`--series-1` blue and the validated viz palettes)
+  stay the app's own (ux-guidelines § 6 permitted deviation; design screen 03).
+- Given `civic-pilot.css`, then civic-ui controls take `--civic-action` from `--action` and
+  `--civic-border` from `--border-strong`, not from the text colour.
+
+Test: `simulators/salarizare/app/tests/theme.test.ts`.
 ### UX-8 Target-state design screens — docs only (Romanian copy: needs human review)
 
 - Given `docs/design/screens/01..05*.html`, then each is a self-contained static page (no
