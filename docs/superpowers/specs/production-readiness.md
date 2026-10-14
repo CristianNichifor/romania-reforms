@@ -195,6 +195,18 @@ comma-below in Romanian, formatters).
 Test: salarizare `tests/structure-strings.test.ts` (same keys, no Romanian letters in English,
 comma-below in Romanian, the phase-in sentence and formatters).
 
+### UX-23 Public pay in English, third slice: the Distribuție view — done (English copy: needs human review)
+
+- Given `/salarizare/#/distributie?lang=en`, then every word the view prints (title, lead, the
+  summary, the band chart tooltips, the family rows with their counts and caveats, the moves
+  table, the Art. 33 section and the three "what this page does not say" notes) is English,
+  the occupational family labels included, and counts and shares use the `en-GB` locale; in
+  Romanian nothing changes. The strings and the family labels live in per-language tables in
+  `src/DistributionView.tsx` (`DISTRIBUTION_STRINGS`), the pattern of UX-21 and UX-22.
+
+Test: salarizare `tests/distribution-strings.test.ts` (same keys, no Romanian letters in
+English, comma-below in Romanian, counts and the transition sentence).
+
 ### UX-16 impozit-teren page check — done
 
 - Given `/impozit-teren/#j=bc` at 390 × 844, when the county table has rendered, then the
