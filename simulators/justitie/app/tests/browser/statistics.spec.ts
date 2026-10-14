@@ -186,3 +186,26 @@ test('statistics keyboard, chart values and responsive light/dark layouts', asyn
   expect(audit.external).toEqual([]);
   expect(audit.errors).toEqual([]);
 });
+
+test('every chart names its source and as-of', async ({ page }) => {
+  // UX-34 (ux-guidelines § 4): each chart section carries the "Date: <sursă>, <an>" line of the
+  // document it was drawn from, so a quoted chart carries its own provenance.
+  const audit = await localOnly(page);
+  await page.goto('/statistici.html');
+  await expect(page.locator('#filtre')).toBeVisible();
+  await expect(page.locator('#data-line')).toContainText('Date:');
+  const header = (await page.locator('#data-line').textContent())!.trim();
+  const captions = page.locator('.chart-source:not([hidden])');
+  await expect(captions).toHaveCount(9);
+  for (const text of await captions.allTextContents()) expect(text).toMatch(/^Date: .+, \d{4}/);
+  await expect(page.locator('.chart-source[data-source="portal"]').first()).toHaveText(header);
+  await expect(page.locator('.chart-source[data-source="editions"]')).toContainText('2022–2025');
+  // Every section that draws a chart has its caption.
+  // The chart primitives render `.chart` (bars) and `.quart` (quartiles); the survival rows
+  // live under #durata. A section that draws any of them must name its source.
+  const sections = page.locator('main section.card').filter({ has: page.locator('.chart, .quart, #durata') });
+  const count = await sections.count();
+  expect(count).toBeGreaterThanOrEqual(9);
+  for (let i = 0; i < count; i++) await expect(sections.nth(i).locator('.chart-source:not([hidden])')).toHaveCount(1);
+  expect(audit.errors).toEqual([]);
+});
