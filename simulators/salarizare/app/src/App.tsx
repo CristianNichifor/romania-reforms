@@ -543,6 +543,7 @@ export default function App() {
           scenario={scenario}
           onScenario={setScenario}
           onOpen={(view) => setScenario({ ...scenario, view })}
+          lang={lang}
         />
       )}
       {scenario.view === 'distributie' && ministry && assimilation && (
@@ -569,6 +570,7 @@ export default function App() {
           rates={fx}
           scenario={scenario}
           onScenario={setScenario}
+          lang={lang}
         />
       )}
       {scenario.view === 'domenii' && ministry && ours && occGroups && dkOcc && fx && benchmarks && (
