@@ -109,14 +109,18 @@ transitions) and `forced-colors` (borders and focus stay visible).
 
 ## 7. Status vocabulary
 
-One badge per page, same words everywhere:
+One badge per app, in the family bar, from civic-ui's list (`StatusBadge`), and the hub
+card must agree:
 
 | Status | ro | Meaning |
 |---|---|---|
-| Live data | Date reale | Published sources, refreshed on a known schedule |
-| Demo data | Date demonstrative | Illustrative values; the badge says why |
-| Prototype | Prototip | Real data, unfinished method or interface |
-| Archived | Arhivat | Kept for reference, no longer maintained |
+| Live data | Date reale | Real data with a stated as-of date, refreshed on a documented schedule |
+| Demo data | Date demonstrative | Synthetic, partial or sample data; nothing on the page is a measurement |
+| Prototype | Prototip | The interaction is the point; say whether the data are real or demo |
+| Archived | Arhivat | No longer updated; the as-of date is final |
+
+"Prototip" describes the app, never the data: a simulator with real data and an unfinished
+interface is "Date reale" with an honest method page.
 
 ## 8. Conformance
 
@@ -154,7 +158,7 @@ flight* belong to another session; do not start them in parallel.
 5. public-pay layout: menu below the H1, search after the lead, humanised codes, `*1)`
    markers — *in flight* (rr theme C).
 6. English mode: public-pay view prose is still Romanian (RR-10).
-7. No status badge on any page; all are effectively "Prototip". Agree the status per
-   simulator with the owner, then add the badge.
+7. No status badge on any page. Agree the status per simulator with the owner (most
+   use real data, so "Date reale"), then add the badge.
 8. No as-of date on charts and maps beyond the provenance line.
 9. No page-level axe or 390 px overflow check; add to the browser suites.
