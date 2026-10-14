@@ -180,7 +180,7 @@ M2_PER_HA = 10_000
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from build_valoare_teren import exchange_rate, strip_rank  # noqa: E402
+from build_valoare_teren import exchange_rate, pinned_exchange_rate, strip_rank  # noqa: E402
 from import_ghid import key_of  # noqa: E402
 
 
@@ -292,6 +292,10 @@ def main() -> int:
             "published — see the module docstring."
         ),
     )
+    parser.add_argument(
+        "--reuse-exchange-rate", action="store_true",
+        help="use this tax baseline's recorded rate without contacting the ECB",
+    )
     args = parser.parse_args()
     if not 0 < args.collection_rate <= 1:
         raise SystemExit("--collection-rate is a share between 0 and 1")
@@ -301,7 +305,12 @@ def main() -> int:
     areas = load(f"fond-funciar-{county.lower()}-{AREA_YEAR}.json")
     value = edition(f"valoare-teren-{county.lower()}-*.json")
     grid_year = int(value["period"])
-    ron_per_eur, fx_date = exchange_rate()
+    if args.reuse_exchange_rate:
+        ron_per_eur, fx_date = pinned_exchange_rate(
+            ROOT / "data" / f"impozit-{county.lower()}-{grid_year}.json"
+        )
+    else:
+        ron_per_eur, fx_date = exchange_rate()
 
     agri_yield, agri_source = measured(county)
     # Carried for the page, same as the general band above: the browser recomputes the rent

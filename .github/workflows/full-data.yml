@@ -1,0 +1,46 @@
+name: Full national data verification
+# Explicit certification, separate from bounded PR CI. This workflow never collects or
+# publishes data. Until the national inputs are published with trusted checksums, its
+# administration job deliberately fails rather than substituting synthetic geography.
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  national-reference:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Verify every national reference assertion
+        working-directory: simulators/administrativ
+        env:
+          PYTHONHASHSEED: '0'
+        run: |
+          uv sync --all-groups
+          uv run pytest tests/ -m full_data -q --junitxml=reports/full-data.xml
+      - name: Require complete national evidence
+        if: ${{ !cancelled() }}
+        run: python scripts/check_test_report.py simulators/administrativ/reports/full-data.xml
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: national-reference-evidence
+          path: simulators/administrativ/reports/full-data.xml
+          if-no-files-found: error
+  source-year-coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Verify real-source price plausibility
+        run: uv run python -m pytest tests/ -m full_data -q --junitxml=reports/full-data.xml
+      - name: Require complete source evidence
+        if: ${{ !cancelled() }}
+        run: python scripts/check_test_report.py reports/full-data.xml
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: source-year-evidence
+          path: reports/full-data.xml
+          if-no-files-found: error

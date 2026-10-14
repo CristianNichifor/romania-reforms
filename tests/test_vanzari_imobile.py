@@ -107,15 +107,14 @@ def test_it_joins_to_the_transfer_tax(sales):
     assert theirs <= ours, f"transfer tax names counties this dataset lacks: {theirs - ours}"
 
 
+@pytest.mark.full_data
 def test_a_price_would_land_in_a_plausible_band(sales):
-    """An order-of-magnitude guard on the arithmetic this dataset exists to enable.
+    """Real-data plausibility remains a separate, fail-closed certification."""
+    assert_plausible_price(sales, latest("transfer-imobiliar"))
 
-    Skipped when the two sources cover different years, which they currently do — the tax is
-    filed for the year just gone and ANCPI publishes with a lag. It runs the moment they meet,
-    and is here so that the first time they do, a factor-of-ten error is caught rather than
-    published.
-    """
-    transfers = latest("transfer-imobiliar")
+
+def assert_plausible_price(sales, transfers):
+    """The same arithmetic serves the national assertion and bounded fixtures."""
     year = int(transfers["period"])
     counts = 0
     for county in sales["counties"]:
@@ -124,10 +123,40 @@ def test_a_price_would_land_in_a_plausible_band(sales):
                 counts += row["sales"].get("withoutBuildings", 0) + row["sales"].get(
                     "withBuildings", 0
                 )
-    if counts == 0:
-        pytest.skip(f"no ANCPI counts for {year}; the sources do not overlap yet")
+    assert counts > 0, f"no ANCPI counts for {year}; the sources do not overlap yet"
     tax = transfers["summary"]["taxRon"]
     low = tax / (transfers["assumptions"]["rateMaxPercent"] / 100) / counts
     high = tax / (transfers["assumptions"]["rateMinPercent"] / 100) / counts
     assert 10_000 < low, f"average declared price {low:,.0f} lei is implausibly small"
     assert high < 3_000_000, f"average declared price {high:,.0f} lei is implausibly large"
+
+
+def price_fixture(year=2025, tax=200000):
+    # Synthetic values only: 100 sales, 200k tax, 1–3% => 66,667–200,000 lei.
+    return (
+        {
+            "counties": [
+                {"series": [{"year": year, "sales": {"withoutBuildings": 60, "withBuildings": 40}}]}
+            ]
+        },
+        {
+            "period": "2025",
+            "summary": {"taxRon": tax},
+            "assumptions": {"rateMaxPercent": 3, "rateMinPercent": 1},
+        },
+    )
+
+
+def test_price_arithmetic_with_bounded_overlapping_sources():
+    assert_plausible_price(*price_fixture())
+
+
+@pytest.mark.parametrize("tax", [2000, 20000000])
+def test_price_arithmetic_rejects_order_of_magnitude_errors(tax):
+    with pytest.raises(AssertionError, match="implausibly"):
+        assert_plausible_price(*price_fixture(tax=tax))
+
+
+def test_non_overlapping_sources_cannot_certify_a_price():
+    with pytest.raises(AssertionError, match="no ANCPI counts for 2025"):
+        assert_plausible_price(*price_fixture(year=2024))

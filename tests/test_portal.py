@@ -230,3 +230,33 @@ def test_the_window_never_leaves_its_bounds() -> None:
 
     assert portal.next_window(1, timedelta(days=365)) <= portal.MAX_WINDOW
     assert portal.next_window(100000, timedelta(days=1)) >= portal.MIN_WINDOW
+
+
+def test_wsdl_bootstrap_identifies_the_same_client_as_soap(monkeypatch):
+    """The official endpoint returns 403 for Python's default user agent (run 36698358372)."""
+    import io
+    import urllib.error
+    import urllib.request
+
+    requests = []
+
+    def public_endpoint(request, timeout):
+        if not isinstance(request, urllib.request.Request) or not request.get_header("User-agent"):
+            raise urllib.error.HTTPError(str(request), 403, "Forbidden", {}, None)
+        requests.append(request)
+        assert timeout == portal.TIMEOUT_SECONDS
+        if request.get_method() == "GET":
+            assert request.full_url == portal.ENDPOINT + "?wsdl"
+            return io.BytesIO(
+                b'<s:simpleType name="Institutie"><s:restriction>'
+                b'<s:enumeration value="JudecatoriaJIBOU"/>'
+                b"</s:restriction></s:simpleType>"
+            )
+        return io.BytesIO(b"<response/>")
+
+    monkeypatch.setattr(portal.urllib.request, "urlopen", public_endpoint)
+    assert portal.load_courts() == ["JudecatoriaJIBOU"]
+    assert portal.call("<probe/>", "Probe") == "<response/>"
+    agent = requests[0].get_header("User-agent")
+    assert agent == requests[1].get_header("User-agent")
+    assert "romania-reforms" in agent and "https://github.com/" in agent

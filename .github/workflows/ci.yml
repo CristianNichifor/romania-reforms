@@ -1,5 +1,7 @@
 name: CI
 on: [push, pull_request]
+permissions:
+  contents: read
 
 # One job per simulator, run in parallel rather than filtered by path. Filtering would save
 # a few minutes and cost a dependency and a class of mistake — a shared package changing
@@ -38,8 +40,16 @@ jobs:
             uv run python simulators/justitie/scripts/locate_instante.py --year "$year"
           done
           git diff --exit-code simulators/justitie/data/
+      - name: Declare separate full-data scope
+        run: |
+          echo '### Shared bounded verification' >> "$GITHUB_STEP_SUMMARY"
+          echo 'The following real-source assertions are NOT certified by this PR check; use full-data.yml.' >> "$GITHUB_STEP_SUMMARY"
+          uv run --with geopandas python -m pytest tests/ --collect-only -q -m full_data >> "$GITHUB_STEP_SUMMARY"
       - name: Tests
-        run: uv run --with referencing python -m pytest tests/ -q
+        run: uv run --with referencing --with geopandas python -m pytest tests/ -q -m "not full_data" --junitxml=reports/shared.xml
+      - name: Require executed test evidence
+        if: ${{ !cancelled() }}
+        run: python scripts/check_test_report.py reports/shared.xml
 
   salarizare:
     name: salarizare
@@ -60,7 +70,10 @@ jobs:
       - name: Validate every regime, crosswalk and fiscal series
         run: uv run --with jsonschema python scripts/validate_data.py
       - name: Importer tests
-        run: uv run --with openpyxl --with pytest --with jsonschema pytest tests/ -q
+        run: uv run --with openpyxl --with pytest --with jsonschema pytest tests/ -q --junitxml=reports/importers.xml
+      - name: Require executed importer evidence
+        if: ${{ !cancelled() }}
+        run: python ../../scripts/check_test_report.py reports/importers.xml
       - name: Import is reproducible
         run: |
           sha256sum data/regimes/ro-draft-2026-07-16.json > "$RUNNER_TEMP/salary-july.sha256"
@@ -83,7 +96,7 @@ jobs:
         with:
           name: pay-browser-checks
           path: /tmp/pay-civic-ui-*
-          if-no-files-found: ignore
+          if-no-files-found: error
           retention-days: 7
 
   justitie:
@@ -120,12 +133,16 @@ jobs:
           node-version: '22'
           cache: npm
           cache-dependency-path: simulators/administrativ/web/package-lock.json
-      # The reference model's own tests need the built pipeline artefacts, which are not in
-      # the repository — they skip here, exactly as they did in the standalone repo. What
-      # does run in CI is the web side: `web/public/data` *is* tracked, so the parity
-      # fixtures compare the TypeScript port against the Python reference by hash, and a
-      # single commune out of 3,186 landing in the wrong unit fails the build.
-      - name: Reference model (lint; tests skip without built artefacts)
+      # Bounded pipeline-to-model fixtures run without national processed files. The
+      # 50 national assertions remain fail-closed in full-data.yml, not skipped here.
+      # The web side separately checks the tracked national parity fixture by hash.
+      - name: Declare separate national scope
+        working-directory: simulators/administrativ
+        run: |
+          echo '### National reference assertions outside bounded PR verification' >> "$GITHUB_STEP_SUMMARY"
+          echo 'These require the six processed pipeline inputs. Full-data verification fails closed when they are absent.' >> "$GITHUB_STEP_SUMMARY"
+          uv run pytest tests/ --collect-only -q -m full_data >> "$GITHUB_STEP_SUMMARY"
+      - name: Reference model (bounded fixtures)
         working-directory: simulators/administrativ
         env:
           PYTHONHASHSEED: '0'
@@ -133,7 +150,7 @@ jobs:
           uv sync --all-groups
           uv run ruff check pipeline tests
           uv run ruff format --check pipeline tests
-          uv run pytest -q
+          uv run pytest -q -m "not full_data" --junitxml=reports/pipeline.xml
       - name: Web
         working-directory: simulators/administrativ/web
         run: |
@@ -141,6 +158,10 @@ jobs:
           npm run lint
           npm run typecheck
           npm test
+
+      - name: Require executed reference-model evidence
+        if: ${{ !cancelled() }}
+        run: python scripts/check_test_report.py simulators/administrativ/reports/pipeline.xml
 
   transport:
     name: transport
@@ -151,7 +172,7 @@ jobs:
         with:
           enable-cache: true
       # The travel-time build needs administrativ's road graph and a 1 GB OSM extract, so it
-      # does not run here — the same reason administrativ's reference-model tests skip. What
+      # does not run here — like administration's separate national-data certification. What
       # runs is everything that does not need the artefacts: the speed table, the
       # accumulation, and the gate's own logic.
       #
@@ -166,6 +187,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Fetch required speed-limit verification input
+        run: uv run python scripts/fetch_release_data.py --require transport-road-speeds
       - name: Pipeline
         working-directory: simulators/transport
         env:
@@ -174,7 +197,10 @@ jobs:
           uv sync --all-groups
           uv run ruff check scripts tests
           uv run ruff format --check scripts tests
-          uv run pytest -q
+          uv run pytest -q --junitxml=reports/pipeline.xml
+      - name: Require executed pipeline evidence
+        if: ${{ !cancelled() }}
+        run: python scripts/check_test_report.py simulators/transport/reports/pipeline.xml
       # The app joins journey times to polygons by position, and copy-data.mjs fails loudly
       # when that join matches nothing — which is the check worth having in CI, because a
       # silently empty join renders a plausible grey map.
@@ -187,139 +213,31 @@ jobs:
   impozit-teren:
     name: impozit-teren
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
           cache-dependency-path: simulators/impozit-teren/app/package-lock.json
-      # The extracted tables, cached between runs.
-      #
-      # The readers work from `cache/`, not from the PDFs, and the whole country extracts to
-      # 25 MB. The PDFs it is derived from are 2,5 GB, of which the București chamber alone is
-      # 2 GB — mostly embedded raster maps that carry no data. Without this the job re-fetches
-      # all of it every run, which cost eight minutes and made every build depend on a
-      # notaries' file server serving two gigabytes without faltering.
-      #
-      # `restore-keys` is what makes this safe rather than brittle: a stale cache still
-      # restores, and `prime_cache` then downloads only the studies that are missing from it.
-      # Adding a chamber costs one document, not the whole country.
-      - name: Restore the extracted studies
-        uses: actions/cache@v4
-        with:
-          path: simulators/impozit-teren/cache
-          key: >-
-            impozit-teren-cache-${{ hashFiles(
-              'simulators/impozit-teren/scripts/import_ghid.py',
-              'simulators/impozit-teren/scripts/extract_cache.py'
-            ) }}
-          restore-keys: impozit-teren-cache-
-
-      # Imported before the grids: the register is the roster each grid is checked against,
-      # so a grid cannot be verified before its county's areas exist.
-      #
-      # INS TEMPO is a separate service from unnpr.ro and fails differently: over its cell
-      # budget it answers 200 with an empty body rather than an error, so "it ran" is not
-      # evidence it worked. The importer's own check — the register's categories against the
-      # register's total — is what turns that into a failure.
-      # `scripts/ins_step.sh` turns retea.UNREACHABLE — the source was not there — into a skip
-      # with a warning, and leaves every other exit code alone. The diff still runs after it:
-      # an unreachable import writes nothing, so there is nothing to diff and the check is
-      # vacuous rather than either failing or being quietly dropped.
-      - name: The land areas are reproducible
+      - name: Declare source verification boundary
         run: |
-          scripts/ins_step.sh uv run python \
-            simulators/impozit-teren/scripts/import_fond_funciar.py --all
-          git diff --exit-code simulators/impozit-teren/data/
-      - name: The land grids are reproducible
-        run: |
-          for chamber in bacau neamt alba iasi sibiu constanta tulcea prahova mures harghita \
-                         vrancea dambovita buzau hunedoara bistrita maramures salaj \
-                         timis cluj bihor satumare vaslui bucuresti ilfov calarasi giurgiu ialomita teleorman suceava botosani brasov covasna arad carasseverin galati dolj gorj mehedinti olt braila arges valcea; do
-            uv run --with pypdf python simulators/impozit-teren/scripts/import_ghid.py \
-              --chamber "$chamber"
-          done
-          git diff --exit-code simulators/impozit-teren/data/
-      # Rebuilt at the rate the committed datasets were built with, not today's. Everything
-      # downstream is published in euro and most chambers price in lei, so without pinning the
-      # rate this output moves in the fourth significant figure of every locality whenever the
-      # euro does — which is not a regression and cannot be told apart from one. Pinned, the
-      # diff tests what it was meant to test: the parsing and the arithmetic. The live rate is
-      # exercised by the steps below, which are not diffed for exactly this reason.
-      - name: The land value is reproducible
-        run: |
-          for county in AB AG AR B BC BH BR BN BT BV BZ CJ CL CS CT CV DB DJ GJ GL GR HD HR IF IL IS MH MM MS NT OT PH SB SJ SM SV TL TM TR VL VN VS; do
-            uv run python simulators/impozit-teren/scripts/build_valoare_teren.py \
-              --county "$county" --reuse-exchange-rate
-          done
-          git diff --exit-code simulators/impozit-teren/data/
-      # The asking-price barometer is someone else's aggregate under CC BY 4.0, so it is
-      # cached in sources/ and the importer reads the cache by default. --refresh is what
-      # goes back to verifi.ro, and CI does not: a build should not depend on a third party
-      # being up, and the comparison is only meaningful against the grid edition beside it.
-      #
-      # This step must stay ahead of "The comparison runs": build_impozit.py and
-      # build_renta.py both read the INS survey for the measured agricultural yield, and
-      # without it they fall back to the single assumed band and write different numbers.
-      - name: The market comparison is reproducible
+          echo '### Bounded land verification' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Rebuilds use committed inputs and recorded exchange rates. Live INS/notary/ECB and national geometry certification remains required before related publication: land-source-verification.yml.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Fetch required browser inputs
+        run: uv run python scripts/fetch_release_data.py --require local-finance-mart-2023-2025 --require impozit-teren-uat-map
+      - name: Cached source parsers remain reproducible
         run: |
           uv run python simulators/impozit-teren/scripts/import_pret_cerut.py
           uv run python simulators/impozit-teren/scripts/import_teren_agricol_ins.py
-          scripts/ins_step.sh uv run python \
-            simulators/impozit-teren/scripts/import_lemn_recoltat.py
-          uv run python simulators/impozit-teren/scripts/build_multiplu_piata.py
-          uv run python simulators/impozit-teren/scripts/build_randament_construit.py
-          uv run python simulators/impozit-teren/scripts/build_randament_padure.py
-          git diff --exit-code simulators/impozit-teren/data/
-      # What this checks, and what it stopped being able to check.
-      #
-      # It parses the Code's five tables and refuses to write one whose shape no longer
-      # matches the article, so a change to the *parser* still fails here. It does not notice
-      # a change to the *Code*, which is what it was written for — two of the five tables were
-      # replaced with effect from 1 January 2026 — because legislatie.just.ro refuses GitHub
-      # Actions runners outright: four attempts in one run, each closed before a byte arrived,
-      # while the same request succeeds from a laptop. The source is committed instead, so
-      # this reads a fixed copy. Noticing a new edition needs `--refresh` from a network the
-      # portal answers, and until that runs the Code here is the one that was fetched.
-      - name: The Fiscal Code tables are reproducible
-        run: |
           uv run python simulators/impozit-teren/scripts/import_cod_fiscal.py
-          git diff --exit-code simulators/impozit-teren/data/cod-fiscal-teren-2026.json
-      # Not diffed: the comparison carries the day's ECB reference rate, so it changes when
-      # the euro does and a byte-identical rerun would only prove the cache was warm. The
-      # tests check the claim instead of the bytes.
-      - name: The comparison runs
+          git diff --exit-code simulators/impozit-teren/data/
+      - name: Rebuild every county from committed parsed sources
         run: |
-          for county in AB AG AR B BC BH BR BN BT BV BZ CJ CL CS CT CV DB DJ GJ GL GR HD HR IF IL IS MH MM MS NT OT PH SB SJ SM SV TL TM TR VL VN VS; do
-            uv run python simulators/impozit-teren/scripts/build_impozit.py --county "$county"
-            uv run python simulators/impozit-teren/scripts/build_renta.py --county "$county"
-          done
-      # The page redoes both taxes in the browser as the reader moves the assumptions, so it
-      # is a second implementation of the two builders. `npm test` is the parity check
-      # between them: at the Python's own settings the two must agree to the rounding, or the
-      # page keeps rendering confident numbers that no longer match the files behind them.
-      # The map borrows administrativ's boundaries rather than fetching a second copy, so it
-      # only builds where that pipeline's output exists. Not diffed: geopandas versions move
-      # the last decimal of a simplified vertex, and a byte-identical polygon is not the claim.
-      # The national estimate closes the half of the country no chamber publishes. It has to
-      # run after every county's value is built, because it is fitted on them — and after the
-      # population import, because the fit's only predictor is the size of the county seat.
-      # Not diffed: it consumes the tax files, which carry the day's ECB rate.
-      - name: The national estimate runs
-        run: |
-          scripts/ins_step.sh uv run python \
-            simulators/impozit-teren/scripts/import_populatie.py --all
-          uv run python simulators/impozit-teren/scripts/build_valoare_nationala.py
-      - name: The map's shapes build
-        run: |
-          uv run --with geopandas python simulators/impozit-teren/scripts/build_harta.py \
-            --allow-missing-boundaries
-      - name: Fetch release payloads
-        run: uv run python scripts/fetch_release_data.py --require local-finance-mart-2023-2025
+          simulators/impozit-teren/scripts/rebuild.sh --pinned --committed-built-yield
+          git diff --exit-code simulators/impozit-teren/data/
       - name: App
         working-directory: simulators/impozit-teren/app
         run: |
@@ -334,13 +252,13 @@ jobs:
           -v "$RUNNER_TEMP/land-tax-ui-results:/tmp/land-tax-ui-results"
           mcr.microsoft.com/playwright:v1.63.0-noble
           xvfb-run -a npm run check:ui -- --reporter=list
-      - name: Native UI failure evidence
-        if: failure()
+      - name: Native UI evidence
+        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@v4
         with:
-          name: land-tax-ui-failure
+          name: land-tax-ui-results
           path: ${{ runner.temp }}/land-tax-ui-results
-          if-no-files-found: ignore
+          if-no-files-found: error
           retention-days: 7
 
   deconcentrare:
@@ -384,3 +302,29 @@ jobs:
         run: |
           npm ci
           npm run build
+
+  justice-browser:
+    uses: ./.github/workflows/justice-browser.yml
+
+  native-consumers:
+    uses: ./.github/workflows/native-consumers.yml
+
+  verify:
+    name: verify
+    if: ${{ always() }}
+    needs: [shared, salarizare, justitie, administrativ, transport, impozit-teren, deconcentrare, companii-stat, justice-browser, native-consumers]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every correctness job to succeed
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          python - <<'PYCODE'
+          import json, os, sys
+          results = json.loads(os.environ["RESULTS"])
+          failed = {job: value["result"] for job, value in results.items()
+                    if value["result"] != "success"}
+          for job, result in failed.items():
+              print(f"::error::{job}: {result}")
+          sys.exit(1 if failed or not results else 0)
+          PYCODE

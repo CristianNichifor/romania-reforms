@@ -100,6 +100,10 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT_DIR = ROOT / "data" / "portal"
 WSDL_NS = "portalquery.just.ro"
 ENDPOINT = "http://portalquery.just.ro/Query.asmx"
+USER_AGENT = (
+    "romania-reforms/0.1 (+https://github.com/CristianNichifor/romania-reforms) "
+    "statistical research crawler"
+)
 
 # Documented by the Ministry on portal.just.ro/SitePages/acces.aspx and confirmed by probe.
 RESULT_CAP = 1000
@@ -271,10 +275,7 @@ def call(body: str, action: str) -> str:
             # An honest agent string. The service is public and the crawl is not hiding; if the
             # Ministry wants to rate-limit or contact whoever is doing this, they should be able
             # to tell it apart from a browser.
-            "User-Agent": (
-                "romania-reforms/0.1 (+https://github.com/CristianNichifor/romania-reforms) "
-                "statistical research crawler"
-            ),
+            "User-Agent": USER_AGENT,
         },
     )
     last: Exception | None = None
@@ -553,7 +554,10 @@ def crawl_court(
 
 def load_courts() -> list:
     """The 246 `Institutie` enum values, read from the live WSDL so the list cannot drift."""
-    with urllib.request.urlopen(f"{ENDPOINT}?wsdl", timeout=TIMEOUT_SECONDS) as response:
+    # The WSDL endpoint rejects Python's default agent with 403; identify the same
+    # public research client used for SOAP calls, rather than impersonating a browser.
+    request = urllib.request.Request(f"{ENDPOINT}?wsdl", headers={"User-Agent": USER_AGENT})
+    with urllib.request.urlopen(request, timeout=TIMEOUT_SECONDS) as response:
         wsdl = response.read().decode("utf-8", "replace")
     block = re.search(r'<s:simpleType name="Institutie">(.*?)</s:simpleType>', wsdl, re.S)
     if not block:

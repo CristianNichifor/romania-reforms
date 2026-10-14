@@ -127,6 +127,14 @@ ECB_URL = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"
 UA = "romania-reforms/0.1 (+https://github.com/CristianNichifor)"
 
 
+def pinned_exchange_rate(path: Path) -> tuple[float, str]:
+    """A reproducibility baseline is required; never fall back to a live rate."""
+    if not path.is_file():
+        raise SystemExit(f"missing pinned exchange-rate baseline: {path}")
+    previous = json.loads(path.read_text(encoding="utf-8"))["assumptions"]
+    return previous["ronPerEur"], previous["exchangeRateDate"]
+
+
 def exchange_rate() -> tuple[float, str]:
     """RON per EUR, with the date it was published, because the answer moves with it.
 
@@ -258,9 +266,8 @@ def main() -> int:
     # was built at, so the comparison tests the parsing and the arithmetic — which is what it
     # was meant to test — and leaves the rate to the steps that are not diffed.
     out_path = ROOT / "data" / f"valoare-teren-{county.lower()}-{grid_year}.json"
-    if args.reuse_exchange_rate and out_path.exists():
-        previous = json.loads(out_path.read_text(encoding="utf-8"))["assumptions"]
-        ron_per_eur, fx_date = previous["ronPerEur"], previous["exchangeRateDate"]
+    if args.reuse_exchange_rate:
+        ron_per_eur, fx_date = pinned_exchange_rate(out_path)
     else:
         ron_per_eur, fx_date = exchange_rate()
     to_eur = (1 / ron_per_eur) if grid["currency"] == "RON" else 1.0
@@ -332,7 +339,9 @@ def main() -> int:
             if code == INTRAVILAN_CATEGORY:
                 continue
             hectares = (
-                record["forestHa"] if code == FOREST_CATEGORY else record["byCategory"].get(code, 0.0)
+                record["forestHa"]
+                if code == FOREST_CATEGORY
+                else record["byCategory"].get(code, 0.0)
             )
             if hectares and extra.get(key, {}).get(code) is None:
                 unpriced[code] = round(hectares, 2)

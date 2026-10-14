@@ -541,7 +541,7 @@ async function main() {
       moved.length === 0
         ? `Ești pe parametrii impliciți ai reformei administrative: ` +
           `${fmt.format(net.centres.length)} de centre. ` +
-          `<a href="../administrativ/">Construiește altă hartă</a> și adu linkul înapoi aici — ` +
+          `<a href="../administrative-reform/">Construiește altă hartă</a> și adu linkul înapoi aici — ` +
           `pagina îl citește și recalculează toate traseele.`
         : `Scenariu adus din reforma administrativă: ${fmt.format(net.centres.length)} de ` +
           `centre, ${moved.length} parametri mutați. Traseele și timpii de mai sus sunt ` +

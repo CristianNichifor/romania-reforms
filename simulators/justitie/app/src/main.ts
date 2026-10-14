@@ -2397,7 +2397,7 @@ async function main(): Promise<void> {
                           }`
                         : ''
                     } — harta de mai jos e a ta, nu cea implicită.`
-                  : `Ești pe setările implicite. <a href="../administrativ/">Construiește o
+                  : `Ești pe setările implicite. <a href="../administrative-reform/">Construiește o
                      hartă administrativă</a>, apoi adu linkul înapoi aici: pagina îl citește
                      din adresă și reface arondarea după el.`
               }</p>`
