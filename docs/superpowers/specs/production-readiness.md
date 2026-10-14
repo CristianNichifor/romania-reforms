@@ -51,12 +51,16 @@ raises after the configured attempts; 403 is not retried).
 
 Test: `simulators/salarizare/app/tests/views.test.tsx`, run by `npm test` and by `npm run build` (CI builds the app but does not run its `npm test`).
 
-### RR-8 Land tax shows each county's source year — todo
+### RR-8 Land tax shows each county's source year — done
 
 - Given a county's notarial guide year, when the table renders, then the year is shown for
-  that county, and the counties whose values are estimated carry an "estimat" badge.
+  that county (and in the county picker when older than the newest guide: BR, BZ, DB, PH, VN
+  are 2025, VL is 2024), and a county the national estimate values carries an "estimat" badge.
+- The brief's "10 estimated counties" is out of date: `valoare-nationala-2026.json` now has
+  all 42 counties `measured`, so the badge renders for none today and returns if a chamber
+  stops publishing.
 
-Test: vitest in `simulators/impozit-teren/app/src`.
+Test: `simulators/impozit-teren/app/src/sources.test.ts`.
 
 ## C. Shared shell
 
