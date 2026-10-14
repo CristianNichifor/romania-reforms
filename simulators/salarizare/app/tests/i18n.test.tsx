@@ -53,7 +53,7 @@ describe('the app shell', () => {
     expect(html).toContain('>Română<');
     const nav = /<nav class="tabs".*?<\/nav>/s.exec(html)?.[0] ?? '';
     expect(nav).not.toContain('Ce se schimbă');
-    expect(html).toContain('the views themselves are in Romanian for now');
+    expect(html).toContain('remain in Romanian');
   });
 });
 
