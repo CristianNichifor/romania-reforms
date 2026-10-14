@@ -893,3 +893,15 @@ export function formatPercentagePoints(value: number, lang: Lang): string {
     maximumFractionDigits: 1,
   }).format(value * 100)} pp`;
 }
+
+export function formatDecimal(value: number, digits: number, lang: Lang): string {
+  return new Intl.NumberFormat(lang === 'ro' ? 'ro-RO' : 'en-GB', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: digits,
+  }).format(value);
+}
+
+/** Metres as kilometres to one decimal, in the reader's notation. */
+export function formatKm(metres: number, lang: Lang): string {
+  return `${formatDecimal(metres / 1000, 1, lang)} km`;
+}
