@@ -573,6 +573,7 @@ export default function App() {
         <>
           <DomainsView
             menu={menu}
+            lang={lang}
             inForce={regimes['ro-153-2017'] ?? null}
             draft={ministry}
             proposal={ours.regime}
