@@ -103,4 +103,10 @@ describe('the empty state of the search', () => {
     expect(html).toContain('„farmacist primr”');
     expect(html).toMatch(/încearcă .*sau alege o secțiune din meniu/);
   });
+
+  it('speaks English when the page does (RR-10)', () => {
+    const html = renderToStaticMarkup(<NoHit query="farmacist" lang="en" />);
+    expect(html).toContain('No post for &quot;farmacist&quot;');
+    expect(html).toMatch(/or pick a section from the menu/);
+  });
 });
