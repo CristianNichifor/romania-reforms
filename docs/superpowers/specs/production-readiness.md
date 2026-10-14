@@ -111,3 +111,46 @@ Tests: as RR-3.
   note says the views are still Romanian. Translating them is a separate, reviewable piece.
 
 Test: `simulators/salarizare/app/tests/i18n.test.tsx`.
+
+## E. UX review (coordinator, 2026-10-14)
+
+### UX-1 Landing leads with the argument — done
+
+- Given the landing page (RO and EN), then "Opt regiuni, nu 41" with three headline numbers
+  already stated on the page (41 → 8, 820 → 179, 659 → 56) and a link to the brief comes first,
+  then "Ce înseamnă pentru tine" (salary, bus, land tax), then every simulator.
+
+Test: `tests/test_site_pages.py::test_landing_leads_with_the_argument_then_what_it_means_for_you`.
+
+### UX-2 Romanian on the page — done
+
+- Severities print as "blocant / important / de reținut", not the data's English keys
+  (impozit-teren, companii-stat, deconcentrare, salarizare payslip); "alta" → "altă"; lei
+  amounts in companii-stat as "1,23 mld" / "45,6 mil".
+- administrativ prints decimals in the reader's language ("92,2 %", "21,7 km").
+
+Tests: `labels.test.ts` (companii-stat, deconcentrare, impozit-teren), salarizare
+`tests/i18n.test.tsx`, administrativ `tests/format.test.ts`.
+
+### UX-3 Accessibility fixes — done
+
+- justitie grades blue → orange; the ramp is simulated under protanopia and deuteranopia and
+  every step stays apart (the old green → red ramp fails the same test).
+- justitie's map hint says "Atinge …" on touchscreens.
+- transport: panel links readable on the dark panel (was the browser's default blue).
+
+Tests: justitie `src/ramp.test.ts`, `src/touch.test.ts`; transport is CSS only.
+
+### UX-4 Carry the scenario to transport — done
+
+- Given the administrative map, then "Deschide în Transport →" opens the transport map on the
+  same hash (both read it).
+
+Test: administrativ `tests/transport-link.test.ts`.
+
+### Not done from the review (needs a follow-up)
+
+"Date: <sursă>, <an>" under every H1; overlapping Bucharest circles (justitie); a legend for
+the administrative unit colours and mobile stats clipping; public-pay layout (menu below the H1,
+search after the lead, humanised codes and "*1)" markers); transport loader; impozit-teren gap
+under the sidebar and mobile ordering; companii-stat mobile table clipping.
