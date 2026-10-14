@@ -171,6 +171,16 @@ under the sidebar and mobile ordering; companii-stat mobile table clipping.
   toggles on the payslip read the law's name ("Legea-cadru 153/2017") with the file id secondary.
 
 Test: `simulators/salarizare/app/tests/layout.test.tsx`.
+### UX-16 impozit-teren page check — done
+
+- Given `/impozit-teren/#j=bc` at 390 × 844, when the county table has rendered, then the
+  document does not scroll sideways (`scrollWidth <= clientWidth + 1`), axe-core (wcag2a,
+  wcag2aa, wcag21aa) reports no serious or critical issue, and the page raises no JS error.
+  Same contract as the administrativ, transport, justitie and salarizare page checks
+  (ux guideline § 9 item 9; design criteria 1 and 8).
+
+Test: impozit-teren `tests/browser/page-checks.spec.ts`.
+
 
 ### UX-6 Maps and readability — done (Romanian UI strings: needs human review)
 
