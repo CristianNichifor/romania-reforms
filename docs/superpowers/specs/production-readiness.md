@@ -242,6 +242,15 @@ screenshot-checked on a phone: needs human review.
 - Romanian wording in the guideline is agent-written: needs human review.
 
 Test: `tests/test_ux_guidelines.py`.
+### UX-9 Static pages light-first on civic-ui roles — done
+
+- Given `site/index.html`, `site/en/index.html`, `site/brief.html` and `site/privacy.html`,
+  then the unconditional `:root` block carries the civic-ui `neutral` light values
+  (`--bg: #f4f6f6`, `--fg: #182b2c`, `--muted: #475d60`, `--card: #ffffff`,
+  `--link: #006b60`) and `color-scheme: light`; the dark values appear only under
+  `@media (prefers-color-scheme: dark)` (ux-guidelines § 6 and § 9.1; design screen 01).
+
+Test: `tests/test_site_pages.py::test_static_pages_are_light_first_on_civic_ui_roles`.
 ### UX-8 Target-state design screens — docs only (Romanian copy: needs human review)
 
 - Given `docs/design/screens/01..05*.html`, then each is a self-contained static page (no
