@@ -485,6 +485,10 @@ async function main(): Promise<void> {
   try {
     doc = await fetchJSON<Document>(DOC_URL);
     $('#data-line').textContent = dataLineFor(doc);
+    // The same line under the table (UX-38, ux-guidelines § 2.5): the figures carry their
+    // source where they are read, and the two lines cannot disagree because both read `doc`.
+    $('#table-source').textContent = dataLineFor(doc);
+    $('#table-source').hidden = false;
   } catch (error) {
     cancelStage();
     showError($('.loading'), error instanceof Error ? error.message : String(error));

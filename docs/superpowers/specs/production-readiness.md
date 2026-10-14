@@ -470,6 +470,18 @@ Test: `tests/test_site_pages.py::test_every_simulator_card_names_its_own_data`.
 
 Test: `tests/test_site_pages.py::test_every_simulator_card_carries_the_status_badge`.
 
+### UX-38 Source line under the data tables of the document pages — done
+
+- Given `/deconcentrare/` and `/companii-stat/`, then the main data table (the service
+  families, the activity clusters) ends with a `p.table-source` reading the page's data line
+  („Date: <sursă>, <an>”), filled from the same loaded document as the line under the H1, so
+  the figures carry their source where they are read and the two lines cannot disagree
+  (ux-guidelines § 2.5; § 9 item 8, last pages). The proposal tables (ministries, fusions) are
+  prose and registry status, not figures, and keep the page line.
+
+Test: deconcentrare and companii-stat `src/table-source.test.ts` (markup under the table,
+`main.ts` fills it).
+
 ### UX-37 The design screens keep their own contract — done
 
 - Given every `docs/design/screens/*.html`, then it is self-contained (no scripts, no fetched
