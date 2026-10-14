@@ -135,7 +135,7 @@ const en: Strings = {
   footerLicence: 'Apache-2.0 licence.',
   switchTo: { lang: 'ro', label: 'Română' },
   viewsInRomanian:
-    'The navigation is in English; the views themselves are in Romanian for now, as are the documents they read.',
+    'The navigation and the views are in English; the documents they read — position titles, patch texts, group notes — remain in Romanian.',
 };
 
 export const STRINGS: Record<Lang, Strings> = { ro, en };
