@@ -102,3 +102,59 @@ def test_every_badge_uses_the_status_vocabulary(screen):
             assert cards and all('class="badge' in card for card in cards), f"{screen.name}: a hub card has no badge"
         else:
             assert in_bar == 1, f"{screen.name}: a simulator bar carries {in_bar} badges, not one"
+
+
+def luminance(hex_colour: str) -> float:
+    r, g, b = (int(hex_colour.lstrip("#")[i : i + 2], 16) / 255 for i in (0, 2, 4))
+
+    def linear(c: float) -> float:
+        return c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
+
+    return 0.2126 * linear(r) + 0.7152 * linear(g) + 0.0722 * linear(b)
+
+
+def contrast(fg: str, bg: str) -> float:
+    hi, lo = sorted((luminance(fg), luminance(bg)), reverse=True)
+    return (hi + 0.05) / (lo + 0.05)
+
+
+def test_the_measured_token_pairs_keep_their_contrast():
+    """Criterion 8: the pairs the shared-nav screen lists under „Măsuri” are recomputed; each
+    stays at or above AA 4.5:1 and the ratio written beside it is the one measured."""
+    html = read(ROOT / "docs/design/screens/05-shared-nav-footer.html")
+    card = re.search(r"<strong>Contrast</strong><p class=\"source\">(.*?)</p>", html, re.S).group(1)
+    pairs = re.findall(
+        r"<code>(#[0-9a-f]{6})</code> pe (?:<code>(#[0-9a-f]{6})</code>|(alb)) ≈ (\d+):1", card
+    )
+    assert len(pairs) >= 4, card
+    for fg, bg, white, claimed in pairs:
+        ratio = contrast(fg, "#ffffff" if white else bg)
+        assert ratio >= 4.5, f"{fg} on {bg or 'white'} is {ratio:.2f}:1"
+        assert abs(ratio - int(claimed)) <= 1, f"{fg} on {bg or 'white'}: measured {ratio:.2f}, written {claimed}"
+
+
+def test_public_pay_screen_orders_search_before_menu_and_keeps_codes_out_of_headings():
+    """Criterion 10: the search input precedes the section menu, every source mark is a `sup`
+    with a title, and no position code sits inside a heading."""
+    html = read(ROOT / "docs/design/screens/03-public-pay.html")
+    search = re.search(r'<input id="q" type="search"', html)
+    menu = re.search(r'<ul class="menu">', html)
+    assert search and menu and search.start() < menu.start(), "the search does not precede the menu"
+    marks = re.findall(r'<sup class="mark"([^>]*)>', html)
+    assert marks and all('title="' in attrs for attrs in marks), "a source mark has no title"
+    headings = re.findall(r"<h[1-3][^>]*>(.*?)</h[1-3]>", html, re.S)
+    assert headings and not any('class="code"' in h for h in headings), "a position code sits inside a heading"
+
+
+def test_impozit_teren_phone_frame_puts_the_estimate_before_the_map_and_pins_the_zone_column():
+    """Criterion 9 (the DOM part): at 390 px the estimate block comes before the map and the
+    zone table; the table scrolls inside `.table-scroll` with a sticky first column."""
+    html = read(ROOT / "docs/design/screens/04-impozit-teren-mobile.html")
+    phone = html[html.index("pasul 2: estimarea") :]
+    estimate = phone.find('<div class="est"')
+    minimap = phone.find('<div class="minimap"')
+    table = phone.find('<div class="table-scroll">')
+    assert 0 < estimate < minimap < table, "the phone frame is not estimate → map → table"
+    style = re.search(r"<style>(.*?)</style>", html, re.S).group(1)
+    assert re.search(r"\.table-scroll\{[^}]*overflow-x:auto", style)
+    assert re.search(r"\.table-scroll th:first-child,\.table-scroll td:first-child\{[^}]*position:sticky;left:0", style)
