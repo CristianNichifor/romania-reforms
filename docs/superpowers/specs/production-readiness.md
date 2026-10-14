@@ -171,6 +171,18 @@ under the sidebar and mobile ordering; companii-stat mobile table clipping.
   toggles on the payslip read the law's name ("Legea-cadru 153/2017") with the file id secondary.
 
 Test: `simulators/salarizare/app/tests/layout.test.tsx`.
+### UX-21 Public pay in English, first slice: the Domenii view — done (English copy: needs human review)
+
+- Given `/salarizare/#/domenii?lang=en`, then every word the view prints (title, lead, the
+  three context notes, both disclaimers, the filter, the legend, the badges, the side cards and
+  the "what enters the comparison" note) is English, and counts and movements use the `en-GB`
+  locale; in Romanian nothing changes. The strings live in one table per language in
+  `src/DomainsView.tsx`, keyed alike, so the other four views can follow the same pattern
+  (ux-guidelines § 9 item 6, RR-10). The "views are in Romanian" footer note stays until they do.
+
+Test: salarizare `tests/domains-strings.test.ts` (same keys, no Romanian letters in English,
+comma-below in Romanian, formatters).
+
 ### UX-16 impozit-teren page check — done
 
 - Given `/impozit-teren/#j=bc` at 390 × 844, when the county table has rendered, then the
