@@ -155,21 +155,6 @@ the administrative unit colours and mobile stats clipping; public-pay layout (me
 search after the lead, humanised codes and "*1)" markers); transport loader; impozit-teren gap
 under the sidebar and mobile ordering; companii-stat mobile table clipping.
 
-### UX-5 "Date: <sursă>, <an>" under every H1 — done
-
-- Given each simulator page and the landing (RO and EN), then a `p.data-line` immediately
-  follows the H1 and reads "Date: <sursă>, <an>" (EN: "Data: …"). Source and year come from the
-  data each page already loads, never from the markup alone: justitie prints the document's
-  `publisher` and `period`; companii-stat, deconcentrare, transport and impozit-teren print their
-  documents' `period` (transport's summary now carries it); administrativ names the census and
-  the local-finance year of the file it fetches; salarizare names the MMFTSS package date already
-  in the footer; the landing lists every simulator's source and year and a test checks them
-  against the data files. Romanian wording: needs human review.
-
-Tests: `data-line.test.ts` and `shell.test.ts` in companii-stat, deconcentrare, justitie, transport,
-impozit-teren; administrativ `tests/data-line.test.ts`; salarizare `tests/views.test.tsx`;
-landing `tests/test_site_pages.py::test_landing_names_its_data_under_the_h1`.
-
 ### UX-7 Public-pay layout — done (Romanian labels: needs human review)
 
 - Given the salary app's first screen, then the H1 and its lead come first, the function
@@ -223,3 +208,16 @@ screenshot-checked on a phone: needs human review.
 - Romanian wording in the guideline is agent-written: needs human review.
 
 Test: `tests/test_ux_guidelines.py`.
+### UX-8 Target-state design screens — docs only (Romanian copy: needs human review)
+
+- Given `docs/design/screens/01..05*.html`, then each is a self-contained static page (no
+  external requests, no scripts) with a desktop and a 390 px layout, built on the civic-ui
+  `neutral` token values, with a family bar, `h1`, purpose line and `Date: <sursă>, <an>`
+  line, a status badge from the vocabulary in `docs/ux-guidelines.md` § 7, and comma-below
+  diacritics only.
+- Given `docs/design/README.md`, then every screen maps to a user task, guideline sections,
+  the change versus today and acceptance criteria 1–10 that later items turn into tests.
+- No PNG screenshots in this round (no local browser runs allowed); a follow-up adds them.
+
+Test: none yet (documentation); `tests/test_site_pages.py::test_romanian_text_uses_comma_below`
+is the model for a future check over `docs/design/screens/*.html`.
