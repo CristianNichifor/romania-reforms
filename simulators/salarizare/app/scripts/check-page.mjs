@@ -62,7 +62,11 @@ try {
     const serious = violations
       .filter(v => v.impact === 'serious' || v.impact === 'critical')
       .map(({ id, impact, nodes }) => ({ id, impact, targets: nodes.slice(0, 5).map(node => node.target) }));
-    await page.screenshot({ path: join(output, `${view}-390.png`), fullPage: true });
+    // Evidence, not a check: Firefox refuses full-page captures taller than 32767 px, and the
+    // card lists (Funcție cu funcție) run past that at phone width, so very tall views keep the
+    // first screen only and a capture failure never fails the measurement.
+    const height = await page.evaluate(() => document.documentElement.scrollHeight);
+    await page.screenshot({ path: join(output, `${view}-390.png`), fullPage: height < 30_000 }).catch(() => {});
     results.push({ view, overflow, serious, errors: errors.slice(before) });
   }
   await writeFile(join(output, 'results.json'), JSON.stringify({ browserName, results }, null, 2));
