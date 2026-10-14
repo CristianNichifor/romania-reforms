@@ -11,6 +11,7 @@ maplibregl.setWorkerUrl(workerUrl);
 import './style.css';
 import './native-ui.css';
 import './map-source.css';
+import './status-badge.css';
 import { buildNetwork, changedParams, loadCoupling, readScenario } from './consolidare';
 import {
   DAY_PROFILE,

@@ -155,21 +155,6 @@ the administrative unit colours and mobile stats clipping; public-pay layout (me
 search after the lead, humanised codes and "*1)" markers); transport loader; impozit-teren gap
 under the sidebar and mobile ordering; companii-stat mobile table clipping.
 
-### UX-5 "Date: <sursă>, <an>" under every H1 — done
-
-- Given each simulator page and the landing (RO and EN), then a `p.data-line` immediately
-  follows the H1 and reads "Date: <sursă>, <an>" (EN: "Data: …"). Source and year come from the
-  data each page already loads, never from the markup alone: justitie prints the document's
-  `publisher` and `period`; companii-stat, deconcentrare, transport and impozit-teren print their
-  documents' `period` (transport's summary now carries it); administrativ names the census and
-  the local-finance year of the file it fetches; salarizare names the MMFTSS package date already
-  in the footer; the landing lists every simulator's source and year and a test checks them
-  against the data files. Romanian wording: needs human review.
-
-Tests: `data-line.test.ts` and `shell.test.ts` in companii-stat, deconcentrare, justitie, transport,
-impozit-teren; administrativ `tests/data-line.test.ts`; salarizare `tests/views.test.tsx`;
-landing `tests/test_site_pages.py::test_landing_names_its_data_under_the_h1`.
-
 ### UX-7 Public-pay layout — done (Romanian labels: needs human review)
 
 - Given the salary app's first screen, then the H1 and its lead come first, the function
@@ -186,6 +171,29 @@ landing `tests/test_site_pages.py::test_landing_names_its_data_under_the_h1`.
   toggles on the payslip read the law's name ("Legea-cadru 153/2017") with the file id secondary.
 
 Test: `simulators/salarizare/app/tests/layout.test.tsx`.
+### UX-16 impozit-teren page check — done
+
+- Given `/impozit-teren/#j=bc` at 390 × 844, when the county table has rendered, then the
+  document does not scroll sideways (`scrollWidth <= clientWidth + 1`), axe-core (wcag2a,
+  wcag2aa, wcag21aa) reports no serious or critical issue, and the page raises no JS error.
+  Same contract as the administrativ, transport, justitie and salarizare page checks
+  (ux guideline § 9 item 9; design criteria 1 and 8).
+
+Test: impozit-teren `tests/browser/page-checks.spec.ts`.
+
+
+### UX-18 Status badge on the map simulators — done
+
+- Given `/administrativ/`, `/transport/` and `/impozit-teren/`, then the data line under the H1
+  ends with exactly one `.badge.status` reading „Date reale” (EN „Live data” in administrativ,
+  whose chrome is translated); the badge is a sibling span, so the script that fills the data
+  line never overwrites it (design criterion 4; ux-guidelines § 9 item 7). The other five pages
+  carry theirs from #169, #176 and #179.
+- The status word is the agent's reading of the sources (real registries and statistics, not
+  fixtures): needs the owner's confirmation per simulator.
+
+Tests: administrativ `tests/data-line.test.ts`, transport and impozit-teren `src/shell.test.ts`
+(order and exactly one badge).
 
 ### UX-20 Source line under every map — done
 
@@ -219,3 +227,16 @@ Tests: justitie `src/spread.test.ts`; administrativ `tests/legend-mobile.test.ts
 `src/map-status.test.ts`; impozit-teren `src/layout.test.ts`; companii-stat
 `src/table-mobile.test.ts`. The CSS tests read the stylesheet; the layouts themselves were not
 screenshot-checked on a phone: needs human review.
+### UX-8 Target-state design screens — docs only (Romanian copy: needs human review)
+
+- Given `docs/design/screens/01..05*.html`, then each is a self-contained static page (no
+  external requests, no scripts) with a desktop and a 390 px layout, built on the civic-ui
+  `neutral` token values, with a family bar, `h1`, purpose line and `Date: <sursă>, <an>`
+  line, a status badge from the vocabulary in `docs/ux-guidelines.md` § 7, and comma-below
+  diacritics only.
+- Given `docs/design/README.md`, then every screen maps to a user task, guideline sections,
+  the change versus today and acceptance criteria 1–10 that later items turn into tests.
+- No PNG screenshots in this round (no local browser runs allowed); a follow-up adds them.
+
+Test: none yet (documentation); `tests/test_site_pages.py::test_romanian_text_uses_comma_below`
+is the model for a future check over `docs/design/screens/*.html`.
