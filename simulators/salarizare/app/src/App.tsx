@@ -623,6 +623,7 @@ export default function App() {
             crosswalk={crosswalk}
             fx={fx}
             benchmarks={benchmarks}
+            lang={lang}
           />
       )}
       {loaded.length > 0 && scenario.view === 'structure' && (

@@ -256,6 +256,22 @@ letters in English, comma-below in Romanian, count formatters and the empty stat
 Test: salarizare `tests/envelope-strings.test.ts` (same keys, no Romanian letters in English,
 comma-below in Romanian, sentence formatters, money in the reader's locale).
 
+### UX-27 Public pay in English, seventh slice: the Echivalențe view — done (English copy: needs human review)
+
+- Given `/salarizare/#/echivalente?lang=en`, then every word the view prints (title and purpose,
+  the anchor select and its options, the seniority slider, the benchmark lines, the country
+  labels, the three badges, the "no published post" and "no Danish counterpart" fallbacks, the
+  renamed-title tag, the evidence summary and the two "how to read it" notes) is English, and
+  ratios, rates and money use the `en-GB` locale; in Romanian nothing changes. The strings live
+  in a per-language table in `src/EquivalenceView.tsx` (`EQUIVALENCE_STRINGS`), the pattern of
+  UX-21 to UX-26. Position names, proposed titles, evidence and notes come from the crosswalk and
+  are data.
+- The views Ce se schimbă, Meserii, Funcție cu funcție and Propunerea noastră remain Romanian in
+  English mode; the "views are in Romanian" footer note stays until they are done.
+
+Test: salarizare `tests/equivalence-strings.test.ts` (same keys, no Romanian letters in English,
+comma-below in Romanian, anchor names agree between the select and the benchmark line).
+
 ### UX-16 impozit-teren page check — done
 
 - Given `/impozit-teren/#j=bc` at 390 × 844, when the county table has rendered, then the
