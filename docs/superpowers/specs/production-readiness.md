@@ -43,13 +43,13 @@ in the PR body (needs-human).
 Test: `tests/test_portal_retry.py` (520 then 200 succeeds after one retry; persistent 520
 raises after the configured attempts; 403 is not retried).
 
-### RR-6 Salary app tests every view — todo
+### RR-6 Salary app tests every view — done
 
 - Given `simulators/salarizare/app`, when `npm test` runs, then it fails if there are no
   tests (`--passWithNoTests` removed) and at least one test renders each of Payslip,
   Structure, Proposal and Merges.
 
-Test: `simulators/salarizare/app/src/views/*.test.tsx`.
+Test: `simulators/salarizare/app/tests/views.test.tsx`, run by `npm test` and by `npm run build` (CI builds the app but does not run its `npm test`).
 
 ### RR-8 Land tax shows each county's source year — todo
 
