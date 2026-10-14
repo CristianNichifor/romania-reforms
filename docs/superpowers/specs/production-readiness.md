@@ -206,6 +206,16 @@ Tests: administrativ `tests/data-line.test.ts`, transport and impozit-teren `src
   unit-tested without a DOM, as the document pages do (UX-15).
 
 Tests: administrativ `tests/states.test.ts`, transport and impozit-teren `src/states.test.ts`.
+### UX-17 Companii-stat light-first on civic-ui roles — done
+
+- Given `simulators/companii-stat/app/src/style.css`, then the unconditional `:root` block
+  carries the civic-ui `neutral` light values (`--bg: #f4f6f6`, `--fg: #182b2c`, `--muted:
+  #475d60`, `--card: #ffffff`, `--link: #006b60`) and `color-scheme: light`; the dark values
+  appear only under `@media (prefers-color-scheme: dark)` (ux-guidelines § 6, § 9.1; design
+  criterion 2). The national tier tag takes a `--danger` role in both themes instead of two
+  hard-coded reds.
+
+Test: `simulators/companii-stat/app/src/theme.test.ts`.
 
 ### UX-6 Maps and readability — done (Romanian UI strings: needs human review)
 
