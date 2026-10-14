@@ -39,6 +39,22 @@ body {
   grid-template-columns: min(24rem, 92vw) 1fr;
 }
 
+/* The sidebar is sticky and one viewport tall, so under it the page's own background showed
+   as a black gap whenever the results ran longer than the screen. The column is painted by
+   the body instead: panel colour and its border line up to the sidebar's width, page colour
+   beyond. */
+@media (min-width: 60.01rem) {
+  body {
+    background:
+      linear-gradient(
+        90deg,
+        var(--panel) 0 min(24rem, 92vw),
+        var(--line) min(24rem, 92vw) calc(min(24rem, 92vw) + 1px),
+        var(--bg) calc(min(24rem, 92vw) + 1px)
+      );
+  }
+}
+
 #panel {
   padding: 1.25rem 1.1rem 1.5rem;
   background: var(--panel);
@@ -384,6 +400,24 @@ th {
   margin-left: 0.45rem;
 }
 
+.source-year,
+.badge-estimated {
+  font-size: 0.72rem;
+  font-weight: 500;
+  margin-left: 0.45rem;
+  padding: 0.05rem 0.4rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.source-year.older,
+.badge-estimated {
+  color: var(--fg);
+  border-color: currentColor;
+}
+
 .fold {
   border-top: 1px solid var(--line);
   padding-top: 0.9rem;
@@ -445,6 +479,12 @@ footer {
     min-height: 0;
     border-right: none;
     border-bottom: 1px solid var(--line);
+  }
+  /* The fold and the sources arrive here from the sidebar (src/layout.ts), after the table. */
+  #main > .fold {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
   }
   .headline {
     grid-template-columns: 1fr;
@@ -643,4 +683,12 @@ footer {
   margin: 0;
   text-align: right;
   font-variant-numeric: tabular-nums;
+}
+
+/* Whole pixels: a fractional margin here shifted the controls below by a sub-pixel in Firefox. */
+.data-line {
+  margin: 2px 0 10px;
+  font-size: 13px;
+  line-height: 20px;
+  opacity: 0.75;
 }

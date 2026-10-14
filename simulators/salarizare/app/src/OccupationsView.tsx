@@ -1,4 +1,6 @@
 import { useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
+import { PositionName } from './names';
 import { Checkbox, Table } from '@cristiannichifor/civic-ui';
 
 import { COMPONENT_LABELS, COMPONENTS, compareComposition } from '../../engine/composition';
@@ -23,6 +25,7 @@ export interface OccupationBenchmarks {
 }
 
 export default function OccupationsView({
+  menu,
   regime,
   groups,
   danish,
@@ -34,6 +37,8 @@ export default function OccupationsView({
   measured,
   inForce,
 }: {
+  /** The section menu, drawn under the title so the page says what it is first. */
+  menu?: ReactNode;
   regime: Regime;
   groups: GroupsDocument;
   danish: DkOccupation[];
@@ -97,6 +102,7 @@ export default function OccupationsView({
           propriului sistem, deci se pot compara direct.
         </p>
       </header>
+      {menu}
 
       <div className="disclaimer">
         <strong>Cifra daneză include sporurile. Cea românească, doar dacă bifezi.</strong> Pentru
@@ -344,7 +350,7 @@ function OccupationRow({
         <ul className="matched">
           {row.matched.slice(0, 14).map((m) => (
             <li key={m.code}>
-              {m.name} <code>{m.code}</code>
+              <PositionName name={m.name} code={m.code} />
             </li>
           ))}
           {row.matched.length > 14 && <li className="more">…și încă {row.matched.length - 14}</li>}

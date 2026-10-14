@@ -24,6 +24,8 @@ import EquivalenceView from './EquivalenceView';
 import PayslipView from './PayslipView';
 import ProposalView from './ProposalView';
 import StructureView from './StructureView';
+import { STRINGS, langOf, withLang } from './i18n';
+import { regimeLabel } from './names';
 
 const ACTIVE_DRAFT_ID = 'ro-draft-2026-08-20';
 const LEGACY_DRAFT_ID = 'ro-draft-2026-07-16';
@@ -72,38 +74,16 @@ async function loadJson<T>(path: string): Promise<T> {
  * that says what it will show. The grouping is the navigation: a citizen wants to know
  * what changes, what people are paid, and whether it is affordable — in that order.
  */
-const VIEW_META: Record<ViewId, { label: string; blurb: string }> = {
-  acasa: { label: 'Despre proiect', blurb: 'ce este, pe ce date stă, ce nu poate spune' },
-  compare: { label: 'Ce se schimbă', blurb: 'proiectul, propunerea și Danemarca, față în față' },
-  propunere: { label: 'Propunerea noastră', blurb: 'nouă corecturi, fiecare cu întrerupătorul ei' },
-  structure: { label: 'Cum e construită grila', blurb: 'zecimalele, golurile, funcțiile comasate' },
-  distributie: {
-    label: 'Cine urcă, cine coboară',
-    blurb: 'cum se mișcă fiecare post față de legea de azi',
-  },
-  domenii: {
-    label: 'Domenii publice',
-    blurb: 'educație, sănătate, justiție, ordine, apărare, administrație',
-  },
-  meserii: { label: 'Meserii, RO vs DK', blurb: 'cât ia aceeași meserie în fiecare țară' },
-  payslip: { label: 'Un salariu, calculat', blurb: 'un om anume, sub fiecare regim' },
-  echivalente: { label: 'Echivalențe de post', blurb: 'ce denumire daneză corespunde fiecărei funcții' },
-  envelope: { label: 'Cât costă tot', blurb: 'plicul, plafonul de 20% și cine trece de el' },
-  functii: {
-    label: 'Funcție cu funcție',
-    blurb: 'ce denumiri a înghițit fiecare post, și cât ia în trei sisteme',
-  },
-};
 
 /** Views whose numbers move as the draft phases itself in. */
 const PHASED_VIEWS: ViewId[] = ['compare', 'structure', 'payslip'];
 
-const NAV_GROUPS: Array<{ title: string; ask: string; views: ViewId[] }> = [
-  { title: 'Începe aici', ask: 'Ce e asta?', views: ['acasa'] },
-  { title: 'Reforma', ask: 'Ce se schimbă?', views: ['compare', 'distributie', 'structure'] },
-  { title: 'Alternativa', ask: 'Se poate altfel?', views: ['propunere'] },
-  { title: 'Oamenii', ask: 'Cine cât ia?', views: ['domenii', 'functii', 'meserii', 'payslip', 'echivalente'] },
-  { title: 'Banii', ask: 'Ne permitem?', views: ['envelope'] },
+const NAV_GROUPS: Array<{ key: keyof (typeof STRINGS)['ro']['groups']; views: ViewId[] }> = [
+  { key: 'start', views: ['acasa'] },
+  { key: 'reform', views: ['compare', 'distributie', 'structure'] },
+  { key: 'alternative', views: ['propunere'] },
+  { key: 'people', views: ['domenii', 'functii', 'meserii', 'payslip', 'echivalente'] },
+  { key: 'money', views: ['envelope'] },
 ];
 
 /**
@@ -131,6 +111,11 @@ function useHashScenario(): [Scenario, (next: Scenario) => void] {
 
 export default function App() {
   const [scenario, setScenario] = useHashScenario();
+  const lang = langOf(scenario);
+  const t = STRINGS[lang];
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
   const [regimes, setRegimes] = useState<Record<string, Regime>>({});
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -421,52 +406,75 @@ export default function App() {
     setScenario({ ...scenario, regimeIds: next.length ? next : [AVAILABLE[0]] });
   };
 
+  // The menu used to open every page: eleven cards before the title said what the tool is.
+  // Every view now draws it under its own H1 and lead, so the page introduces itself first.
+  const menu = (
+    <nav className="tabs" aria-label={t.sections}>
+      {NAV_GROUPS.map((group) => (
+        <div className="tabgroup" key={group.key}>
+          <span className="tabgroup-title">{t.groups[group.key].title}</span>
+          <span className="tabgroup-ask">{t.groups[group.key].ask}</span>
+          {group.views.map((id) => (
+            <button
+              key={id}
+              // Which view is on screen, readable from the DOM. The `on` class already said
+              // *a* view is active; it could not say *which*, so a check waiting for the
+              // route it asked for had nothing to wait on and settled for a signal the
+              // previous route already satisfied.
+              data-view={id}
+              className={scenario.view === id ? 'on' : ''}
+              onClick={() => setScenario({ ...scenario, view: id })}
+            >
+              <strong>{t.views[id].label}</strong>
+              <small>{t.views[id].blurb}</small>
+            </button>
+          ))}
+        </div>
+      ))}
+      {scenario.view === 'payslip' && (
+        <div className="tabgroup regimes">
+          {AVAILABLE.map((id) => (
+            <Checkbox
+              key={id}
+              className="regime-toggle"
+              checked={wanted.includes(id)}
+              value={id}
+              onChange={() => toggleRegime(id)}
+              label={
+                <>
+                  {regimeLabel(id, regimes)} <small className="regime-id">{id}</small>
+                </>
+              }
+            />
+          ))}
+          <Button className="share" onClick={share}>
+            {copied ? t.copied : t.share}
+          </Button>
+        </div>
+      )}
+    </nav>
+  );
+
   return (
-    <div className="wrap civic-scope civic-pay">
-      <nav className="tabs" aria-label="Secțiunile instrumentului">
-        {NAV_GROUPS.map((group) => (
-          <div className="tabgroup" key={group.title}>
-            <span className="tabgroup-title">{group.title}</span>
-            <span className="tabgroup-ask">{group.ask}</span>
-            {group.views.map((id) => (
-              <button
-                key={id}
-                // Which view is on screen, readable from the DOM. The `on` class already said
-                // *a* view is active; it could not say *which*, so a check waiting for the
-                // route it asked for had nothing to wait on and settled for a signal the
-                // previous route already satisfied.
-                data-view={id}
-                className={scenario.view === id ? 'on' : ''}
-                onClick={() => setScenario({ ...scenario, view: id })}
-              >
-                <strong>{VIEW_META[id].label}</strong>
-                <small>{VIEW_META[id].blurb}</small>
-              </button>
-            ))}
-          </div>
-        ))}
-        {scenario.view === 'payslip' && (
-          <div className="tabgroup regimes">
-            {AVAILABLE.map((id) => (
-              <Checkbox
-                key={id}
-                className="regime-toggle"
-                checked={wanted.includes(id)}
-                onChange={() => toggleRegime(id)}
-                label={id}
-              />
-            ))}
-            <Button className="share" onClick={share}>
-              {copied ? 'link copiat' : 'copiază linkul scenariului'}
-            </Button>
-          </div>
-        )}
-      </nav>
+    <div className="wrap civic-scope civic-pay" lang={lang}>
+      <p className="lang-switch">
+        <a
+          href={encodeScenario(withLang(scenario, t.switchTo.lang))}
+          hrefLang={t.switchTo.lang}
+          lang={t.switchTo.lang}
+          onClick={(event) => {
+            event.preventDefault();
+            setScenario(withLang(scenario, t.switchTo.lang));
+          }}
+        >
+          {t.switchTo.label}
+        </a>
+      </p>
 
       {PHASED_VIEWS.includes(scenario.view) && years.length > 1 && (
         <div className="phase">
           <RangeSlider
-            label="Grila din anul"
+            label={t.phaseLabel}
             min={years[0]}
             max={years[years.length - 1]}
             step={1}
@@ -476,26 +484,33 @@ export default function App() {
             }
           />
           <p className="phase-note">
-            proiectul se aplică eșalonat: coeficienții de vârf urcă an de an până în{' '}
-            {years[years.length - 1]}
-            {period && <>; coloana „{period}"</>}
+            {t.phaseNote(years[years.length - 1])}
+            {period && t.phaseColumn(period)}
           </p>
         </div>
       )}
 
-      {error && <p className="loading">Nu s-au putut încărca datele: {error}</p>}
-      {!error && loaded.length === 0 && <p className="loading">Se încarcă grila…</p>}
+      {t.viewsInRomanian && <p className="lang-note">{t.viewsInRomanian}</p>}
+      {/* Until a view can draw itself, the menu is the page: a reader stuck on an error
+          or a slow load can still go somewhere else. The first screen draws its own. */}
+      {scenario.view !== 'acasa' && (error || loaded.length === 0) && menu}
+      {error && <p className="loading">{t.loadError(error)}</p>}
+      {!error && loaded.length === 0 && <p className="loading">{t.loading}</p>}
 
       {scenario.view === 'acasa' && (
         <HomeView
+          menu={menu}
           ministry={ministry ?? null}
           inForce={regimes['ro-153-2017'] ?? null}
           denmark={regimes['dk-stat-2026'] ?? null}
+          dataLine={t.dataLine}
+          statusBadge={t.statusBadge}
           onOpen={(view, patch) => setScenario({ ...scenario, view, ...patch })}
         />
       )}
       {scenario.view === 'compare' && ministry && ours && active && fx && (
         <CompareView
+          menu={menu}
           ministry={ministry}
           ours={ours.regime}
           inForce={regimes['ro-153-2017'] ?? null}
@@ -511,6 +526,7 @@ export default function App() {
       )}
       {scenario.view === 'propunere' && ministry && proposal && (
         <ProposalView
+          menu={menu}
           ministry={ministry}
           proposal={proposal}
           scenario={scenario}
@@ -520,6 +536,7 @@ export default function App() {
       )}
       {scenario.view === 'distributie' && ministry && assimilation && (
         <DistributionView
+          menu={menu}
           inForce={regimes['ro-153-2017'] ?? null}
           draft={ministry}
           crosswalk={assimilation}
@@ -527,6 +544,7 @@ export default function App() {
       )}
       {scenario.view === 'functii' && ministry && fx && (
         <MergesView
+          menu={menu}
           draft={ministry}
           ours={ours?.regime ?? null}
           inForce={regimes['ro-153-2017'] ?? null}
@@ -540,6 +558,7 @@ export default function App() {
       )}
       {scenario.view === 'domenii' && ministry && ours && occGroups && dkOcc && fx && benchmarks && (
         <DomainsView
+          menu={menu}
           inForce={regimes['ro-153-2017'] ?? null}
           draft={ministry}
           proposal={ours.regime}
@@ -559,6 +578,7 @@ export default function App() {
       )}
       {scenario.view === 'meserii' && ministry && occGroups && dkOcc && occBench && fx && (
         <OccupationsView
+          menu={menu}
           regime={ministry}
           groups={occGroups}
           danish={dkOcc}
@@ -578,6 +598,7 @@ export default function App() {
         fx &&
         benchmarks && (
           <EquivalenceView
+          menu={menu}
             ro={ministry}
             dk={regimes['dk-stat-2026']}
             crosswalk={crosswalk}
@@ -586,10 +607,11 @@ export default function App() {
           />
       )}
       {loaded.length > 0 && scenario.view === 'structure' && (
-        <StructureView regime={regimes[ACTIVE_DRAFT_ID] ?? loaded[0]} period={period} />
+        <StructureView menu={menu} regime={regimes[ACTIVE_DRAFT_ID] ?? loaded[0]} period={period} />
       )}
       {scenario.view === 'envelope' && fx && (
         <EnvelopeView
+          menu={menu}
           baseline={envelopeBaseline}
           rates={fx}
           capSeries={capSeries}
@@ -599,6 +621,7 @@ export default function App() {
       )}
       {loaded.length > 0 && scenario.view === 'payslip' && fx && (
         <PayslipView
+          menu={menu}
           regimes={ours ? [...loaded, ours.regime] : loaded}
           scenario={scenario}
           onChange={setScenario}
@@ -609,12 +632,11 @@ export default function App() {
       )}
 
       <footer>
-        Sursă: pachetul public MMFTSS din 20.08.2026 și anexele de coeficienți; pentru
-        Danemarca, tabelele IDA din 01.04.2026. Fiecare număr din <code>data/</code> poartă
-        documentul și articolul sau celula din care provine.{' '}
+        {t.footerSource}{' '}
         <a href="https://github.com/CristianNichifor/romania-reforms/tree/main/simulators/salarizare">
-          Cod și date
-        </a>. Licență Apache-2.0.
+          {t.footerCode}
+        </a>
+        . {t.footerLicence}
       </footer>
     </div>
   );

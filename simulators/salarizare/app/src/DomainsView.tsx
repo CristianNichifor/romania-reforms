@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import type { ReactNode } from 'react';
 
 import { resolveDomainShowcase } from '../../engine/domainShowcase';
 import type { DomainBand, DomainSide } from '../../engine/domainShowcase';
@@ -46,6 +47,7 @@ export interface SocietyBenchmarks {
 }
 
 export default function DomainsView({
+  menu,
   inForce,
   draft,
   proposal,
@@ -56,6 +58,8 @@ export default function DomainsView({
   scenario,
   onScenario,
 }: {
+  /** The section menu, drawn under the title so the page says what it is first. */
+  menu?: ReactNode;
   inForce: Regime | null;
   draft: Regime;
   proposal: Regime;
@@ -96,6 +100,7 @@ export default function DomainsView({
           sector public.
         </p>
       </header>
+      {menu}
 
       <div className="domain-context">
         <div>

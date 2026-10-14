@@ -7,9 +7,13 @@
  */
 import 'maplibre-gl/dist/maplibre-gl.css';
 
+import { followViewport } from './layout';
 import { ValueMap, legend } from './map';
 import type { Metric } from './map';
 import { combine, evaluate } from './model';
+import { countySourceBadges, estimatedCounties, severityLabel } from './sources';
+import type { GuideYears } from './sources';
+import { dataLineFor } from './data-line';
 import type { BandKey, FiscalCode, Locality, Settings } from './model';
 
 type ValueFile = {
@@ -380,10 +384,26 @@ async function renderNational(): Promise<void> {
 }
 
 async function main() {
+  // The fold and the sources trail the sidebar; on a phone they trail the results instead.
+  followViewport({
+    trailing: Array.from(document.querySelectorAll('#panel > .fold, #panel > footer')),
+    sidebar: $('panel'),
+    results: $('main'),
+  });
   const code: FiscalCode = await fetch(`${base}data/cod-fiscal.json`).then((r) => r.json());
-  const manifest: { counties: string[] } = await fetch(`${base}data/manifest.json`).then((r) =>
-    r.json(),
+  const manifest: { counties: string[]; guideYears?: GuideYears } = await fetch(
+    `${base}data/manifest.json`,
+  ).then((r) => r.json());
+  const guideYears = manifest.guideYears ?? {};
+  const estimated = estimatedCounties(
+    await fetch(`${base}data/national.json`)
+      .then((r) => (r.ok ? r.json() : null))
+      .catch(() => null),
   );
+  const sourceOf = (county: string) => countySourceBadges(county, guideYears, estimated);
+  const newestGuide = Object.values(guideYears).sort().at(-1);
+  const lineEl = document.getElementById('data-line');
+  if (lineEl) lineEl.textContent = dataLineFor(code, guideYears);
 
   let state = readHash();
   if (state.county !== ALL && !manifest.counties.includes(state.county)) {
@@ -495,7 +515,11 @@ async function main() {
     <select id="county" class="civic-select civic-select--native">
       <option value="${ALL}">Toate județele (${manifest.counties.length})</option>
       ${named
-        .map((c) => `<option value="${c}">${COUNTY_NAMES[c] ?? c.toUpperCase()}</option>`)
+        .map((c) => {
+          const year = guideYears[c];
+          const note = year && year !== newestGuide ? ` (grila ${year})` : '';
+          return `<option value="${c}">${COUNTY_NAMES[c] ?? c.toUpperCase()}${note}</option>`;
+        })
         .join('')}
     </select>`;
 
@@ -827,9 +851,11 @@ async function main() {
     const page = Math.min(Math.max(1, state.page), pages);
     const from = (page - 1) * PAGE_SIZE;
     const shown = sorted.slice(from, from + PAGE_SIZE);
-    $('table-title').textContent = all
+    $('table-title').innerHTML = all
       ? `${money.format(sorted.length)} localități din ${cache.size} județe`
-      : `${sorted.length} localități din județul ${COUNTY_NAMES[state.county] ?? state.county}`;
+      : `${sorted.length} localități din județul ${
+          COUNTY_NAMES[state.county] ?? state.county
+        }${sourceOf(state.county)}`;
 
     const cell = (row: (typeof sorted)[number]) => `<tr>
           <td>${row.name}<span class="rank">${
@@ -860,7 +886,7 @@ async function main() {
           const delta = group.reduce((sum, row) => sum + row.deltaRon, 0);
           return `<tr class="county-head"><th colspan="2">${
             COUNTY_NAMES[county] ?? county.toUpperCase()
-          }<span class="rank">${group.length} ${
+          }${sourceOf(county)}<span class="rank">${group.length} ${
             group.length === 1 ? 'localitate' : 'localități'
           }</span></th>
             <th class="num">${scaled(value)}</th><th></th><th></th>
@@ -908,7 +934,7 @@ async function main() {
     $('limits').innerHTML = limits
       .map(
         (limit) =>
-          `<p class="limit ${limit.severity}"><span class="sev">${limit.severity}</span>${limit.text}</p>`,
+          `<p class="limit ${limit.severity}"><span class="sev">${severityLabel(limit.severity)}</span>${limit.text}</p>`,
       )
       .join('');
     $('sources').textContent = all

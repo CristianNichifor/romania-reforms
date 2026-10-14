@@ -211,3 +211,10 @@ export function absorbedOffices(doc: Document, registry: OfficeRegistryDocument)
   }
   return rows;
 }
+
+/** The data's severity keys, as the page prints them. */
+export const SEVERITY_LABELS: Record<'blocking' | 'material' | 'note', string> = {
+  blocking: 'blocant',
+  material: 'important',
+  note: 'de reținut',
+};

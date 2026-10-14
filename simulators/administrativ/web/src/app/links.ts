@@ -24,3 +24,11 @@ export function budgetUrlFor(code: string | undefined | null): string | null {
   if (!/^\d+$/.test(trimmed)) return null;
   return `${TRANSPARENTA_ENTITY_BASE}${trimmed}`;
 }
+
+/**
+ * The transport simulator on the scenario on screen. Transport reads the same hash this map
+ * writes, so the link is its page plus the hash as it stands.
+ */
+export function transportUrlFor(hash: string): string {
+  return `../transport/${hash}`;
+}

@@ -1,9 +1,12 @@
 import { useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
 import { Field, Input } from '@cristiannichifor/civic-ui';
 
 import type { Scenario, ViewId } from '../../engine/scenario';
 import type { Regime } from '../../engine/types';
 import { GlossaryList } from './Glossary';
+import { PositionName } from './names';
+import NoHit from './NoHit';
 
 const ro = (n: number) => n.toLocaleString('ro-RO');
 
@@ -93,14 +96,23 @@ const QUESTIONS: Array<{ ask: string; lead: string; entries: Entry[] }> = [
  * loaded, so nothing here can go stale against the data behind it.
  */
 export default function HomeView({
+  menu,
   ministry,
   inForce,
   denmark,
   onOpen,
+  dataLine,
+  statusBadge,
 }: {
+  /** The section menu, drawn after the search so the question people arrive with comes first. */
+  menu?: ReactNode;
   ministry: Regime | null;
   inForce: Regime | null;
   denmark: Regime | null;
+  /** "Date: <sursă>, <an>", rendered right under the H1 (UX-5). */
+  dataLine: string;
+  /** "Date reale": the one status badge on the page (design screen 03, criterion 4). */
+  statusBadge: string;
   onOpen: (view: ViewId, patch?: Partial<Scenario>) => void;
 }) {
   const positions = (regime: Regime | null) => (regime ? regime.positions.length : null);
@@ -125,21 +137,17 @@ export default function HomeView({
           ← Toate simulatoarele
         </a>
         <h1>Cum își plătește România angajații publici</h1>
-        <p>
+        <p className="purpose">
           Un instrument pentru dezbaterea publică despre proiectul de lege al salarizării din 20
           august 2026: ce schimbă față de legea care plătește oamenii azi, cine urcă și cine
           coboară în ierarhie, cât costă și cum arată aceleași întrebări într-o țară care a
           rezolvat altfel problema.
         </p>
+        <p className="data-line">
+          {dataLine} <span className="badge status">{statusBadge}</span>
+        </p>
       </header>
 
-      <div className="disclaimer">
-        <strong>Instrument de dezbatere, nu calculator de salarii.</strong> Calculează ce spune un
-        text de lege, nu ce încasează cineva. Nicio cifră de aici nu e un drept al nimănui, și
-        niciun scenariu nu e o recomandare. Fiecare număr își poartă documentul și articolul din
-        care provine, iar unde datele nu ajung, scrie asta pe pagină în loc să fie completat cu o
-        presupunere.
-      </div>
 
       <section>
         <h2>Caută-ți funcția</h2>
@@ -166,25 +174,31 @@ export default function HomeView({
               {hits.map((p) => (
                 <li key={p.code}>
                   <button onClick={() => onOpen('payslip', { positionCode: p.code, dims: undefined })}>
-                    <strong>{p.name}</strong>
+                    <strong>
+                      <PositionName name={p.name} />
+                    </strong>
                     <span>
                       {p.titles && p.titles.length > 1 && `+${p.titles.length - 1} denumiri · `}
-                      <code>{p.code}</code>
+                      <code title="codul poziției în anexa sursă">{p.code}</code>
                     </span>
                   </button>
                 </li>
               ))}
             </ul>
           )}
-          {query.trim().length >= 2 && hits.length === 0 && (
-            <p className="home-nohit">
-              Nicio funcție cu numele ăsta în grila proiectului. Denumirile sunt cele din anexe,
-              iar multe posturi reale sunt comasate sub un titlu care nu le conține: caută cuvântul
-              cel mai general din meserie.
-            </p>
-          )}
+          {query.trim().length >= 2 && hits.length === 0 && <NoHit query={query} />}
         </div>
       </section>
+
+      {menu}
+
+      <div className="disclaimer">
+        <strong>Instrument de dezbatere, nu calculator de salarii.</strong> Calculează ce spune un
+        text de lege, nu ce încasează cineva. Nicio cifră de aici nu e un drept al nimănui, și
+        niciun scenariu nu e o recomandare. Fiecare număr își poartă documentul și articolul din
+        care provine, iar unde datele nu ajung, scrie asta pe pagină în loc să fie completat cu o
+        presupunere.
+      </div>
 
       {QUESTIONS.map((q) => (
         <section key={q.ask}>

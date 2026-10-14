@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="ro">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <title>Confidențialitate — simulatoare de reformă</title>
+    <meta
+      name="description"
+      content="Ce date folosesc simulatoarele de reformă: niciun cookie, nicio analiză de trafic, nimic trimis altundeva."
+    />
+    <link rel="canonical" href="https://projects.cristian-nichifor.com/romania-reforms/privacy.html" />
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #0b0d10;
+        --fg: #e8eaed;
+        --muted: #9aa3ad;
+        --card: #14181d;
+        --line: #232a31;
+        --link: #7fb3ff;
+      }
+      @media (prefers-color-scheme: light) {
+        :root {
+          --bg: #f7f8fa;
+          --fg: #14181d;
+          --muted: #5b6570;
+          --card: #ffffff;
+          --line: #dfe3e8;
+          --link: #1a5fd0;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 1.5rem 1.25rem 4rem;
+        background: var(--bg);
+        color: var(--fg);
+        font: 16px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      }
+      main {
+        max-width: 46rem;
+        margin: 0 auto;
+      }
+      a {
+        color: var(--link);
+      }
+      .up {
+        text-decoration: none;
+        font-size: 0.95rem;
+      }
+      h1 {
+        font-size: 1.8rem;
+        margin: 0.75rem 0 0.5rem;
+        letter-spacing: -0.01em;
+        line-height: 1.25;
+      }
+      .sub {
+        color: var(--muted);
+        margin: 0 0 2.5rem;
+        font-size: 0.95rem;
+      }
+      h2 {
+        font-size: 1.25rem;
+        margin: 2.25rem 0 0.5rem;
+        letter-spacing: -0.01em;
+      }
+      p,
+      li {
+        max-width: 40rem;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0.75rem 0;
+        font-size: 0.95rem;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 0.5rem 0.8rem;
+        border-bottom: 1px solid var(--line);
+        vertical-align: top;
+      }
+      thead th {
+        color: var(--muted);
+        font-weight: 600;
+      }
+      td.num,
+      th.num {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+      }
+      .foot {
+        margin-top: 3rem;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      .note {
+        border-left: 3px solid var(--link);
+        padding-left: 0.9rem;
+        color: var(--muted);
+      }
+    </style>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+    <style>.rr-nav{margin:1.5rem 0 0;padding-top:.75rem;border-top:1px solid;border-color:color-mix(in srgb,currentColor 20%,transparent);font-size:.8rem;line-height:1.6}.rr-nav ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:.2rem .9rem}.rr-nav a{color:inherit;display:inline-flex;align-items:center;min-height:24px;min-width:24px}.rr-nav a[aria-current="page"]{font-weight:600;text-decoration:none}</style>
+  </head>
+  <body>
+    <main>
+      <p><a href="./">← Toate simulatoarele</a> · <a href="#en" lang="en">English</a></p>
+      <h1>Confidențialitate</h1>
+
+      <p>
+        Aceste pagini sunt publicate de Cristian Nichifor. Pentru orice întrebare despre ele,
+        deschide un subiect pe <a href="https://github.com/CristianNichifor/romania-reforms/issues">https://github.com/CristianNichifor/romania-reforms/issues</a>.
+      </p>
+
+      <h2>Ce nu facem</h2>
+      <ul>
+        <li>Nu setăm niciun cookie.</li>
+        <li>Nu folosim analiză de trafic (analytics), pixeli de urmărire sau reclame.</li>
+        <li>Nu există conturi, formulare sau autentificare.</li>
+        <li>
+          Paginile nu încarcă scripturi, fonturi sau date de pe alte domenii; politica de securitate
+          a conținutului a fiecărei pagini le interzice.
+        </li>
+      </ul>
+
+      <h2>Ce rămâne în browserul tău</h2>
+      <ul>
+        <li>
+          Scenariul ales stă în partea adresei de după <code>#</code>. Browserul nu trimite
+          această parte serverului.
+        </li>
+        <li>
+          Simulatorul reformei administrative păstrează în <code>localStorage</code>, în browserul
+          tău, lățimea panourilor, versiunile pe care le salvezi și ultimul rezultat al hărții,
+          ca alte pagini de pe același domeniu să îl poată afișa. Nu sunt trimise nicăieri și le
+          poți șterge din setările browserului.
+        </li>
+      </ul>
+
+      <h2>Găzduire</h2>
+      <p>
+        Site-ul este găzduit pe Cloudflare Pages și servit prin
+        <code>projects.cristian-nichifor.com</code>. Ca orice server web, gazda primește datele
+        tehnice ale fiecărei cereri (de exemplu adresa IP, browserul și pagina cerută) ca să
+        livreze pagina, și le prelucrează după propria politică:
+        <a href="https://www.cloudflare.com/privacypolicy/">politica de confidențialitate Cloudflare</a>.
+      </p>
+      <p>
+        Linkurile către GitHub, către monitoare și către surse duc pe alte site-uri, cu propriile
+        lor reguli.
+      </p>
+
+      <section id="en" lang="en">
+        <h2>Privacy (English)</h2>
+        <!-- Translation: needs human review. -->
+        <p>
+          These pages are published by Cristian Nichifor. For any question about them, open an
+          issue at <a href="https://github.com/CristianNichifor/romania-reforms/issues">https://github.com/CristianNichifor/romania-reforms/issues</a>.
+        </p>
+        <h3>What we do not do</h3>
+        <ul>
+          <li>We set no cookie.</li>
+          <li>We use no analytics, tracking pixels or advertising.</li>
+          <li>There are no accounts, forms or sign-in.</li>
+          <li>
+            The pages load no scripts, fonts or data from other domains; each page's Content
+            Security Policy forbids it.
+          </li>
+        </ul>
+        <h3>What stays in your browser</h3>
+        <ul>
+          <li>
+            The scenario you choose lives in the part of the address after <code>#</code>, which
+            the browser does not send to the server.
+          </li>
+          <li>
+            The administrative-reform simulator keeps the panel widths, the versions you save and
+            the map's latest result in your browser's <code>localStorage</code>, so other pages on
+            the same domain can show it. Nothing is sent anywhere, and you can clear it in your
+            browser settings.
+          </li>
+        </ul>
+        <h3>Hosting</h3>
+        <p>
+          The site is hosted on Cloudflare Pages and served through
+          <code>projects.cristian-nichifor.com</code>. Like any web server, the host receives the
+          technical data of each request (such as the IP address, the browser and the page
+          requested) to deliver the page, and processes it under its own policy:
+          <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare privacy policy</a>.
+        </p>
+        <p>
+          Links to GitHub, to the monitors and to sources lead to other sites, with their own
+          rules.
+        </p>
+      </section>
+      <nav class="rr-nav" aria-label="Simulatoare"><ul><li><a href="./">Toate simulatoarele</a></li><li><a href="administrative-reform/">Reforma administrativă</a></li><li><a href="public-pay/">Salarizarea publică</a></li><li><a href="transport/">Transport public</a></li><li><a href="justitie/">Reforma justiției</a></li><li><a href="impozit-teren/">Impozitul pe teren</a></li><li><a href="deconcentrare/">Serviciile deconcentrate</a></li><li><a href="companii-stat/">Companiile statului</a></li></ul></nav>
+    </main>
+  </body>
+</html>

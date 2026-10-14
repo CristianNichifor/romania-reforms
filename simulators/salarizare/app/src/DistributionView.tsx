@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import type { ReactNode } from 'react';
 import { Table } from '@cristiannichifor/civic-ui';
 
 import { distribution } from '../../engine/distribution';
@@ -35,10 +36,13 @@ const move = (ratio: number) =>
  * trend.
  */
 export default function DistributionView({
+  menu,
   inForce,
   draft,
   crosswalk,
 }: {
+  /** The section menu, drawn under the title so the page says what it is first. */
+  menu?: ReactNode;
   inForce: Regime | null;
   draft: Regime;
   crosswalk: Crosswalk;
@@ -69,6 +73,7 @@ export default function DistributionView({
           lei la 4.100 lei, deci coeficienții spun cine urcă față de ceilalți, nu cât ia cineva.
         </p>
       </header>
+      {menu}
 
       <div className="disclaimer">
         <strong>Media aproape nu se mișcă. Aproape toată lumea se mișcă.</strong> Postul din mijloc

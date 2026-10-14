@@ -3,10 +3,10 @@ name: Deploy to Cloudflare Pages
 # main is public behind projects.cristian-nichifor.com/romania-reforms/; dev is the protected
 # preview behind projects-dev.cristian-nichifor.com/romania-reforms/, reachable only through the
 # CN Webify preview gate (ADR-022), which functions/_middleware.js enforces on preview hosts.
-# The site is laid out at /romania-reforms/ exactly as on GitHub Pages, so the hub proxies the
-# path 1:1. The build, assembly and checks repeat deploy.yml until the hub switches over and the
-# GitHub Pages workflow is removed. The CN Webify token broker accepts this exact file, on main
-# and dev, for push and workflow_dispatch; no secret lives in the repository.
+# This is the only build of the site. The site is laid out under /romania-reforms/, so the hub
+# proxies the path 1:1; deploy.yml now publishes only a GitHub Pages redirect to it. The CN Webify
+# token broker accepts this exact file, on main and dev, for push and workflow_dispatch; no
+# secret lives in the repository.
 
 on:
   push:
@@ -114,9 +114,11 @@ jobs:
 
       - name: Assemble the site
         run: |
-          mkdir -p dist
+          mkdir -p dist/en
           cp site/index.html dist/index.html
           cp site/brief.html dist/brief.html
+          cp site/privacy.html dist/privacy.html
+          cp site/en/index.html dist/en/index.html
           cp site/favicon.svg dist/favicon.svg
           cp -r simulators/salarizare/app/dist dist/public-pay
           cp -r simulators/administrativ/web/dist dist/administrative-reform
@@ -240,15 +242,18 @@ jobs:
                       companii-stat/favicon.svg; do
             [ -s "dist/$path" ] || { echo "MISSING dist/$path"; fail=1; }
           done
+          # Every page carries the simulator navigation and the CSP (site/shell.mjs).
+          python3 scripts/check_site_shell.py dist || fail=1
           exit $fail
 
-      # Served at /romania-reforms/ like the GitHub Pages project site. cf-site, because site/
-      # is the landing page's source.
+      # Served at /romania-reforms/, the path every existing link already uses. cf-site,
+      # because site/ is the landing page's source.
       - name: Stage the site at its project path
         run: |
           mkdir -p cf-site/romania-reforms
           cp -r dist/. cf-site/romania-reforms/
           printf '/ /romania-reforms/ 302\n' > cf-site/_redirects
+          python3 scripts/redirect_stubs.py cf-site
 
       - name: Cloudflare token from the CN Webify broker
         run: |

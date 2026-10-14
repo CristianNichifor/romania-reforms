@@ -65,6 +65,15 @@ button {
   margin-top: 12px;
 }
 
+/* The transport link is an anchor dressed as the buttons around it. */
+a.ghost {
+  display: block;
+  box-sizing: border-box;
+  text-align: center;
+  text-decoration: none;
+  color: inherit;
+}
+
 /* --- top bar ------------------------------------------------------------------------ */
 .topbar {
   position: absolute;
@@ -186,6 +195,14 @@ button {
      is what the old fixed 360 px reservation was doing once the panels became resizable. */
   max-width: calc(100vw - 32px);
   overflow-x: auto;
+}
+
+/* The bar scrolls sideways when the statistics outgrow a phone screen, so it is in the tab
+   order (tabindex="0" in index.html) for keyboard users to reach the clipped ones; axe's
+   scrollable-region-focusable rule asks for exactly that. */
+.summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .summary .stat {
@@ -640,6 +657,19 @@ button {
   flex: none;
 }
 
+/* The eleven unit colours as one striped swatch: the map paints each unit in its own hue, and
+   the legend used to explain every colour but that one. */
+.legend .swatch.units {
+  display: flex;
+  width: 44px;
+  overflow: hidden;
+}
+
+.legend .swatch.units i {
+  flex: 1;
+  height: 12px;
+}
+
 .legend .swatch.dot {
   width: 10px;
   height: 10px;
@@ -1085,10 +1115,24 @@ button {
   .summary {
     top: auto;
     bottom: calc(var(--disclaimer-h, 40px) + 96px);
-    gap: 14px;
+    gap: 8px 14px;
     padding: 8px 12px;
-    overflow-x: auto;
-    max-width: calc(100vw - 32px);
+    /* Wrapped, not scrolled: a scrolling bar clipped the last statistic ("8,73 mld RON") off
+       the edge with nothing to say more followed. Each value stays on one line; the labels
+       may wrap under it. */
+    flex-wrap: wrap;
+    justify-content: center;
+    white-space: normal;
+    left: 16px;
+    right: 16px;
+    transform: none;
+    max-width: none;
+    overflow: visible;
+  }
+
+  .summary .value {
+    font-size: 16px;
+    white-space: nowrap;
   }
 
   /* Sheets, not columns.
@@ -1200,10 +1244,6 @@ button {
     right: 12px;
   }
 
-
-  .legend {
-    display: none;
-  }
 }
 
 /* --- manual overrides and the audit list --------------------------------------------- */
@@ -1600,6 +1640,7 @@ button.link:hover {
   .version-actions,
   #save-version,
   #copy-link,
+  #open-transport,
   #methodology-btn,
   .maplibregl-control-container,
   .hovercard,
@@ -1885,4 +1926,12 @@ button.link:hover {
   margin: 8px 0 0;
   font-size: 11px;
   line-height: 1.45;
+}
+
+/* Whole pixels: a fractional margin here shifted the controls below by a sub-pixel in Firefox. */
+.data-line {
+  margin: 2px 0 10px;
+  font-size: 13px;
+  line-height: 20px;
+  opacity: 0.75;
 }

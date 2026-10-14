@@ -3,6 +3,8 @@ import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig, type Plugin } from 'vite';
 
+import { siteShell } from '../../../site/shell.mjs';
+
 // A project site is served from /<repo>/<simulator>/, so the base carries that prefix in CI.
 // Unset locally, so `npm run dev` and a fork both work without editing this file.
 
@@ -39,5 +41,5 @@ function serveData(): Plugin {
 export default defineConfig({
   base: process.env.VITE_BASE ?? '/',
   build: { outDir: 'dist', assetsInlineLimit: 0, target: 'es2022' },
-  plugins: [serveData()],
+  plugins: [siteShell('companii-stat'), serveData()],
 });

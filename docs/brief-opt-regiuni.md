@@ -2,7 +2,7 @@
 
 *Un scurt argument pentru comasarea serviciilor deconcentrate și a utilităților de stat pe cele
 opt regiuni de dezvoltare. Toate cifrele provin din registrele oficiale, pot fi verificate una
-câte una în simulatoarele de la <https://cristiannichifor.github.io/romania-reforms/>, iar
+câte una în simulatoarele de la <https://projects.cristian-nichifor.com/romania-reforms/>, iar
 limitele lor sunt scrise lângă ele.*
 
 ## Ce există

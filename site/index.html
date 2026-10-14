@@ -48,6 +48,7 @@
         margin: 0 0 0.5rem;
         letter-spacing: -0.01em;
       }
+      .data-line { margin: 2px 0 10px; font-size: 13px; line-height: 20px; opacity: 0.75; }
       .lede {
         color: var(--muted);
         margin: 0 0 2.5rem;
@@ -112,11 +113,67 @@
       footer a {
         color: var(--link);
       }
+      .headline-numbers {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+        gap: 0.75rem;
+        margin: 0 0 1rem;
+      }
+      .headline-number,
+      .you a {
+        padding: 1rem 1.1rem;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+      }
+      .headline-number strong {
+        display: block;
+        font-size: 1.5rem;
+        letter-spacing: -0.01em;
+      }
+      .headline-number span {
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      .you {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+        gap: 0.75rem;
+      }
+      .you a {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+      }
+      .you a:hover {
+        border-color: var(--link);
+      }
+      .more {
+        margin: 0;
+      }
+      .more a {
+        color: var(--link);
+      }
     </style>
+    <link rel="canonical" href="https://projects.cristian-nichifor.com/romania-reforms/" />
+    <link rel="alternate" hreflang="ro" href="https://projects.cristian-nichifor.com/romania-reforms/" />
+    <link rel="alternate" hreflang="en" href="https://projects.cristian-nichifor.com/romania-reforms/en/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="ro_RO" />
+    <meta property="og:url" content="https://projects.cristian-nichifor.com/romania-reforms/" />
+    <meta property="og:title" content="Simulatoare și monitoare — România" />
+    <meta property="og:description" content="Simulatoare deterministe pentru reforme publice din România și monitoare care citesc ce există deja, cu sursa fiecărei cifre." />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'" />
+    <style>.rr-nav{margin:1.5rem 0 0;padding-top:.75rem;border-top:1px solid;border-color:color-mix(in srgb,currentColor 20%,transparent);font-size:.8rem;line-height:1.6}.rr-nav ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:.2rem .9rem}.rr-nav a{color:inherit;display:inline-flex;align-items:center;min-height:24px;min-width:24px}.rr-nav a[aria-current="page"]{font-weight:600;text-decoration:none}</style>
   </head>
   <body>
     <main>
       <h1>Simulatoare și monitoare</h1>
+      <p class="data-line">
+        Date: CSM, 2025 (justiție) · ANFP, 2025 (deconcentrare) · Ministerul Finanțelor, 2019–2024
+        (companii de stat) · Codul fiscal, 2026 (teren) · MMFTSS, 20.08.2026 (salarizare) · INS,
+        Recensământ 2021 (reforma administrativă) · OpenStreetMap, 2026 (transport)
+      </p>
       <p class="lede">
         Instrumente deterministe despre statul român, rulând integral în browser. Unele modelează
         o propunere care încă nu s-a întâmplat; altele citesc ce s-a întâmplat deja. Distincția
@@ -124,6 +181,31 @@
       </p>
 
       <section>
+      <h2>Opt regiuni, nu 41</h2>
+      <p class="section-lede">
+        România are opt regiuni de dezvoltare din 2004 și le folosește doar pentru statistică și
+        fonduri europene. Statul ține în schimb câte un birou în aproape fiecare județ, pentru
+        fiecare funcție. Cifrele vin din registre oficiale și pot fi verificate în simulatoare.
+      </p>
+      <div class="headline-numbers">
+        <div class="headline-number"><strong>41 → 8</strong><span>județe, comasate pe cele opt regiuni de dezvoltare</span></div>
+        <div class="headline-number"><strong>820 → 179</strong><span>birouri teritoriale ale statului, familie cu familie</span></div>
+        <div class="headline-number"><strong>659 → 56</strong><span>companii de utilități, devenite operatori regionali</span></div>
+      </div>
+      <p class="more"><a href="brief.html">Argumentul pe scurt →</a></p>
+      </section>
+
+      <section>
+      <h2>Ce înseamnă pentru tine</h2>
+      <p class="section-lede">Trei întrebări pe care și le pune oricine, fiecare cu simulatorul ei.</p>
+      <div class="you">
+        <a href="public-pay/#/payslip"><div class="name">Salariul tău</div><div class="what">Cât ar lua un post anume sub grila propusă, față de legea de azi.</div></a>
+        <a href="transport/"><div class="name">Autobuzul tău</div><div class="what">Cât ai face până la reședința de județ dacă fiecare comună ar avea orar.</div></a>
+        <a href="impozit-teren/"><div class="name">Impozitul tău pe teren</div><div class="what">Cât valorează terenul din comuna ta și ce impozit ar aduce o cotă pe valoare.</div></a>
+      </div>
+      </section>
+
+      <section class="simulators">
       <h2>Simulatoare</h2>
       <p class="section-lede">
         Ce s-ar întâmpla dacă. Fiecare ia o propunere publicată, modelează ce spune de fapt, și te
@@ -238,8 +320,11 @@
         ce spune un document, nu ce primește cineva. Monitoarele raportează ce a fost publicat, nu
         ce este corect. Unde datele nu ajung, pagina o spune. ·
         <a href="https://github.com/CristianNichifor/romania-reforms">Cod și metodologie</a> ·
-        <a href="brief.html">Argumentul pe scurt: opt regiuni, nu 41</a>
+        <a href="brief.html">Argumentul pe scurt: opt regiuni, nu 41</a> ·
+        <a href="privacy.html">Confidențialitate</a> ·
+        <a href="en/index.html" hreflang="en" lang="en">English</a>
       </footer>
+      <nav class="rr-nav" aria-label="Simulatoare"><ul><li><a href="./" aria-current="page">Toate simulatoarele</a></li><li><a href="administrative-reform/">Reforma administrativă</a></li><li><a href="public-pay/">Salarizarea publică</a></li><li><a href="transport/">Transport public</a></li><li><a href="justitie/">Reforma justiției</a></li><li><a href="impozit-teren/">Impozitul pe teren</a></li><li><a href="deconcentrare/">Serviciile deconcentrate</a></li><li><a href="companii-stat/">Companiile statului</a></li></ul></nav>
     </main>
   </body>
 </html>

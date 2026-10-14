@@ -153,5 +153,10 @@ for (const name of readdirSync(out)) {
   }
 }
 
-writeFileSync(resolve(out, 'manifest.json'), JSON.stringify({ counties }, null, 2));
+// The year of each county's guide, from the edition copied: a few chambers are a year or two
+// behind, and the page says so beside the county rather than mixing years silently.
+const guideYears = Object.fromEntries(
+  counties.map((county) => [county, /-(\d{4})\.json$/.exec(values.get(county))[1]]),
+);
+writeFileSync(resolve(out, 'manifest.json'), JSON.stringify({ counties, guideYears }, null, 2));
 console.log(`wrote manifest.json (${counties.length} counties: ${counties.join(' ')})`);

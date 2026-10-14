@@ -22,6 +22,7 @@ import {
   type MapGeoJSONFeature,
   type MapMouseEvent,
 } from 'maplibre-gl';
+import { dataLineFor } from './data-line';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import {
   assign,
@@ -32,6 +33,9 @@ import {
   type Coupled,
 } from './arondare';
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
+import { RAMP } from './ramp';
+import { spread } from './spread';
+import { pointHint } from './touch';
 
 // MapLibre 6 ships its worker as a separate file rather than inlining it, and a bundled app
 // has to say where that file ended up. Without this every source fails to load silently —
@@ -605,6 +609,7 @@ interface Proposal {
 }
 
 interface Document {
+  publisher: string;
   period: string;
   courts: Court[];
   nationalAverages: { byTier: { tier: string; perJudge: number; perPost: number }[] };
@@ -708,6 +713,7 @@ async function main(): Promise<void> {
   // The year comes from the document, not the markup. The CSM publishes annually and this
   // page had 2023 written into its subtitle while reading 2025 — a caption that disagrees
   // with its own figures is worse than none.
+  el('#data-line').textContent = dataLineFor(doc);
   el('#sub').textContent =
     `${ro.format(doc.courts.length)} de instanțe, dosarele pe care le-au avut de soluționat ` +
     `în ${doc.period} și încărcătura pe judecător.`;
@@ -796,7 +802,7 @@ async function main(): Promise<void> {
 
   const asFeatures = (courts: Court[], ratioOf: (c: Court) => number | null) => ({
     type: 'FeatureCollection' as const,
-    features: courts.map((c) => {
+    features: spread(courts).map((c) => {
       const ratio = ratioOf(c);
       return {
         type: 'Feature' as const,
@@ -940,15 +946,15 @@ async function main(): Promise<void> {
               [
                 'step',
                 ['feature-state', 'extra'],
-                '#2f7d4f',
+                RAMP[0],
                 1,
-                '#7fa86a',
+                RAMP[1],
                 10000,
-                '#d9c05a',
+                RAMP[2],
                 25000,
-                '#d98040',
+                RAMP[3],
                 50000,
-                '#c2453a',
+                RAMP[4],
               ],
             ] as unknown as ExpressionSpecification,
             'fill-opacity': 0.75,
@@ -1134,15 +1140,15 @@ async function main(): Promise<void> {
         ['linear'],
         ['get', 'ratio'],
         0.6,
-        '#2f7d4f',
+        RAMP[0],
         0.85,
-        '#7fa86a',
+        RAMP[1],
         1.0,
-        '#d9c05a',
+        RAMP[2],
         1.2,
-        '#d98040',
+        RAMP[3],
         1.6,
-        '#c2453a',
+        RAMP[4],
       ],
     ] as unknown as ExpressionSpecification;
 
@@ -1177,9 +1183,10 @@ async function main(): Promise<void> {
     });
 
     const detail = el('#detail');
+    if (mode !== 'arondare') detail.innerHTML = `<p class="hint">${pointHint('o instanță')}</p>`;
     const show = (f: MapGeoJSONFeature | null): void => {
       if (!f) {
-        detail.innerHTML = '<p class="hint">Treci cu mouse-ul peste o instanță.</p>';
+        detail.innerHTML = `<p class="hint">${pointHint('o instanță')}</p>`;
         return;
       }
       const p = f.properties as unknown as Court & { tierLabel: string; ratio: number };
@@ -1517,11 +1524,11 @@ async function main(): Promise<void> {
           <strong>${s.bucharestMultipleOfMean.toLocaleString('ro-RO')}×</strong> media unei
           instanțe și nu poate fi echilibrat: sectoarele lui nu pot merge în alt județ</div>
         <div class="steps">
-          ${band('nu se schimbă', '#2f7d4f')}
-          ${band('sub 10 km în plus', '#7fa86a')}
-          ${band('10–25 km', '#d9c05a')}
-          ${band('25–50 km', '#d98040')}
-          ${band('peste 50 km', '#c2453a')}
+          ${band('nu se schimbă', RAMP[0])}
+          ${band('sub 10 km în plus', RAMP[1])}
+          ${band('10–25 km', RAMP[2])}
+          ${band('25–50 km', RAMP[3])}
+          ${band('peste 50 km', RAMP[4])}
         </div>`;
     };
 
@@ -1567,7 +1574,7 @@ async function main(): Promise<void> {
       }
 
       if (mode === 'arondare') {
-        el('#detail').innerHTML = '<p class="hint">Treci cu mouse-ul peste o comună.</p>';
+        el('#detail').innerHTML = `<p class="hint">${pointHint('o comună')}</p>`;
         el('#summary').innerHTML = arondareForMap
           ? renderArondareSummary(arondareForMap)
           : '<div class="figure">Se încarcă modelul administrativ…</div>';

@@ -1,4 +1,6 @@
 import { useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
+import { PositionName } from './names';
 import { Checkbox, Field, Input, NativeSelect, RangeSlider, Table } from '@cristiannichifor/civic-ui';
 
 import { ineligibility, payslip } from '../../engine/payslip';
@@ -7,6 +9,7 @@ import type { Scenario } from '../../engine/scenario';
 import type { Crosswalk, Position, Regime } from '../../engine/types';
 import { amountLine } from './money';
 import type { Rates } from './money';
+import { SEVERITY_LABELS } from './i18n';
 function pct(n: number, digits = 1): string {
   return `${(n * 100).toLocaleString('ro-RO', { maximumFractionDigits: digits })}%`;
 }
@@ -48,6 +51,7 @@ function dimText(dims: Readonly<Record<string, string>> | undefined): string {
 }
 
 export default function PayslipView({
+  menu,
   regimes,
   scenario,
   onChange,
@@ -55,6 +59,8 @@ export default function PayslipView({
   assimilation,
   inForce,
 }: {
+  /** The section menu, drawn under the title so the page says what it is first. */
+  menu?: ReactNode;
   regimes: Regime[];
   scenario: Scenario;
   onChange: (next: Scenario) => void;
@@ -172,6 +178,7 @@ export default function PayslipView({
           scenariul stă în adresa paginii — linkul <em>este</em> scenariul.
         </p>
       </header>
+      {menu}
 
       <div className="disclaimer">
         <strong>Cifrele sunt ce spune legea, nu ce încasează cineva.</strong> Orice sumă de aici e
@@ -458,7 +465,7 @@ function PayslipCard({
     <div className="card slip">
       <h3>{regime.name.split('(')[0].trim()}</h3>
       <p className="slip-meta">
-        {position.name} · {slip.currency} {PERIOD_LABEL[slip.period]}
+        <PositionName name={position.name} /> · {slip.currency} {PERIOD_LABEL[slip.period]}
       </p>
 
       <Composition slip={slip} />
@@ -536,7 +543,7 @@ function PayslipCard({
           <ul>
             {slip.diagnostics.map((d, i) => (
               <li key={i} className={d.severity}>
-                <span className="sev">{d.severity}</span> {d.message}
+                <span className="sev">{SEVERITY_LABELS[d.severity]}</span> {d.message}
               </li>
             ))}
           </ul>

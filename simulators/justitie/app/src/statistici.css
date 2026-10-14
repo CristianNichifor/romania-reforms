@@ -219,8 +219,17 @@ h3 {
   cursor: default;
 }
 
-.bar.muted {
+/* A muted row steps back without losing its text: fading the whole row took the label and
+   the figure to about 3.4:1 on the card, under the 4.5:1 small text needs (WCAG 1.4.3). The
+   fill fades, the text takes the dim ink. */
+.bar.muted .bar-fill {
   opacity: 0.55;
+}
+
+.bar.muted .bar-label,
+.bar.muted .bar-value,
+.bar.muted .bar-note {
+  color: var(--ink-dim);
 }
 
 .bar-label {
@@ -259,10 +268,12 @@ h3 {
 }
 
 /* The axis. Ticks are absolutely placed against the same track width the bars use, so a
-   gridline and its label are the same x by construction. */
+   gridline and its label are the same x by construction. The labels are the smallest text on
+   the page, so they take the dim ink: faint ink reads at about 3:1 on the card surface, under
+   the 4.5:1 that small text needs (WCAG 1.4.3), and axe flags it as serious. */
 .chart-axis {
   margin-top: var(--space-1);
-  color: var(--ink-faint);
+  color: var(--ink-dim);
   font-size: var(--text-2xs);
 }
 
@@ -537,4 +548,24 @@ code {
   padding: 0.05rem 0.3rem;
   border-radius: var(--radius-sm);
   font-size: 0.85em;
+}
+
+/* Design screens, criteria 3-4: the data line under the purpose, with the page's one status badge. */
+.lede .data-line {
+  margin: 0 0 var(--space-3);
+  font-size: 13px;
+  line-height: 20px;
+  /* Dim ink, no opacity: the lede's ink at 0.8 fell to about 4:1 on the card, under AA for
+     13 px text, and the page check (UX-8/#180) flags it; dim ink on its own reads 5.6:1. */
+  color: var(--ink-dim);
+}
+.badge.status {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 8px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 12px;
+  line-height: 18px;
+  vertical-align: middle;
 }

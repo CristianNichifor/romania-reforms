@@ -1,24 +1,28 @@
+/* civic-ui neutral roles (UX-17): light first, dark only when the system asks. */
 :root {
-  color-scheme: light dark;
-  --bg: #0b0d10;
-  --fg: #e8eaed;
-  --muted: #9aa3ad;
-  --card: #14181d;
-  --line: #232a31;
-  --link: #7fb3ff;
-  --accent: #7fb3ff;
-  --warn: #e8c46b;
+  color-scheme: light;
+  --bg: #f4f6f6;
+  --fg: #182b2c;
+  --muted: #475d60;
+  --card: #ffffff;
+  --line: #718588;
+  --link: #006b60;
+  --accent: #006b60;
+  --warn: #8a6d1a;
+  --danger: #a31b34;
 }
-@media (prefers-color-scheme: light) {
+@media (prefers-color-scheme: dark) {
   :root {
-    --bg: #f7f8fa;
-    --fg: #14181d;
-    --muted: #5b6570;
-    --card: #ffffff;
-    --line: #dfe3e8;
-    --link: #1a5fd0;
-    --accent: #1a5fd0;
-    --warn: #8a6d1a;
+    color-scheme: dark;
+    --bg: #142323;
+    --fg: #f0f6f5;
+    --muted: #c0d3cf;
+    --card: #203332;
+    --line: #8ca8a1;
+    --link: #b5e8dc;
+    --accent: #b5e8dc;
+    --warn: #e8c46b;
+    --danger: #f2a4b0;
   }
 }
 
@@ -376,6 +380,29 @@ button.region.on {
   margin-top: 0.25rem;
 }
 @media (max-width: 900px) {
+  /* The table is eleven columns wide. On a phone it clipped at the card's edge and the numbers
+     were the part lost. Now the region scrolls sideways with the activity's name pinned, so a
+     number is always read against its row. */
+  .table-scroll table {
+    width: max-content;
+    min-width: 100%;
+  }
+  .table-scroll th[scope='row'],
+  .table-scroll th.sortable[data-key='name'] {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--card);
+    box-shadow: 1px 0 0 var(--line);
+    max-width: 11rem;
+    overflow-wrap: anywhere;
+  }
+  .table-scroll tbody th,
+  .table-scroll tbody td,
+  .table-scroll thead th {
+    padding: 0.5rem 0.6rem;
+    font-size: 0.88rem;
+  }
   #flux {
     display: block;
   }
@@ -420,14 +447,8 @@ button.region.on {
 }
 
 .tier-tag--national {
-  color: #e58f8f;
-  border-color: #e58f8f;
-}
-@media (prefers-color-scheme: light) {
-  .tier-tag--national {
-    color: #a33;
-    border-color: #a33;
-  }
+  color: var(--danger);
+  border-color: var(--danger);
 }
 .muted {
   color: var(--muted);
@@ -460,4 +481,12 @@ button.region.on {
   .reasons {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
+
+/* Whole pixels: a fractional margin here shifted the controls below by a sub-pixel in Firefox. */
+.data-line {
+  margin: 2px 0 10px;
+  font-size: 13px;
+  line-height: 20px;
+  opacity: 0.75;
 }

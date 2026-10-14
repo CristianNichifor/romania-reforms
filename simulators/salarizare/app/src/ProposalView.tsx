@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import type { ReactNode } from 'react';
 import { Button, Checkbox } from '@cristiannichifor/civic-ui';
 
 import { applyProposal } from '../../engine/proposal';
@@ -32,12 +33,15 @@ function ratio(n: number): string {
  * "your proposal minus the two I don't accept" is a link.
  */
 export default function ProposalView({
+  menu,
   ministry,
   proposal,
   scenario,
   onScenario,
   onOpen,
 }: {
+  /** The section menu, drawn under the title so the page says what it is first. */
+  menu?: ReactNode;
   ministry: Regime;
   proposal: Proposal;
   scenario: Scenario;
@@ -118,6 +122,7 @@ export default function ProposalView({
           pornite acum: {ro(proposal.patches.length - off.size)} din {ro(proposal.patches.length)}
         </p>
       </header>
+      {menu}
 
       <div className="disclaimer">
         <strong>Nu e un buget și nu e un proiect de lege.</strong> Este proiectul ministerului
