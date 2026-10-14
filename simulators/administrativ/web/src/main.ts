@@ -16,7 +16,7 @@ import {
   healthAccessTotals,
   type HealthAccessPayload,
 } from './app/health-access';
-import { budgetUrlFor } from './app/links';
+import { budgetUrlFor, transportUrlFor } from './app/links';
 import {
   localFinancePayloadAligned,
   localFinancePeriodLabel,
@@ -2413,6 +2413,16 @@ async function boot(): Promise<void> {
     renderSliders();
     schedule();
   });
+
+  // The hash changes without a hashchange (the map rewrites it in place), so the link is
+  // refreshed whenever the reader is about to use it.
+  const openTransport = el<HTMLAnchorElement>('#open-transport');
+  const refreshTransportLink = (): void => {
+    openTransport.href = transportUrlFor(location.hash);
+  };
+  for (const event of ['pointerenter', 'focus', 'click', 'contextmenu']) {
+    openTransport.addEventListener(event, refreshTransportLink);
+  }
 
   el('#copy-link').addEventListener('click', async () => {
     await navigator.clipboard.writeText(location.href);

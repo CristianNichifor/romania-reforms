@@ -164,6 +164,7 @@ export interface Strings {
   operatingCost: string;
   county: string;
   copyLink: string;
+  openTransport: string;
   linkCopied: string;
 
   candidatesHeading: string;
@@ -438,6 +439,7 @@ const ro: Strings = {
   operatingCost: 'Cheltuieli de funcționare',
   county: 'Județ',
   copyLink: 'Copiază link scenariu',
+  openTransport: 'Deschide în Transport →',
   linkCopied: 'Link copiat',
 
   candidatesHeading: 'Candidați la statutul de centru',
@@ -728,6 +730,7 @@ const en: Strings = {
   operatingCost: 'Operating spending',
   county: 'County',
   copyLink: 'Copy scenario link',
+  openTransport: 'Open in Transport →',
   linkCopied: 'Link copied',
 
   candidatesHeading: 'Candidates to be a centre',
