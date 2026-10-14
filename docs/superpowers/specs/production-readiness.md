@@ -221,6 +221,24 @@ English, comma-below in Romanian, counts and the transition sentence).
 Test: salarizare `tests/payslip-strings.test.ts` (same keys, no Romanian letters in English,
 comma-below in Romanian, label formatters).
 
+### UX-25 Public pay in English, fifth slice: the Acasă view — done (English copy: needs human review)
+
+- Given `/salarizare/?lang=en` (the Acasă view), then every word the view prints (title and
+  purpose, the search heading, lede, label and placeholder, the search hits' "+n titles" and
+  code tooltip, the empty state of the search, the disclaimer, the three questions with their
+  cards, the sources with their counts, the glossary heading and lede, and the three "what it
+  cannot say" notes) is English, and counts use the `en-GB` locale; in Romanian nothing changes.
+  The strings live in per-language tables in `src/HomeView.tsx` (`HOME_STRINGS`) and
+  `src/NoHit.tsx` (`NOHIT_STRINGS`), the pattern of UX-21 to UX-24. The example titles to type
+  into the search, the glossary entries and the position names are data and stay as printed in
+  the grid.
+- The views Ce se schimbă, Meserii, Echivalențe, Cât costă tot, Funcție cu funcție and
+  Propunerea noastră remain Romanian in English mode; the "views are in Romanian" footer note stays until they are done.
+
+Test: salarizare `tests/home-strings.test.ts` (same keys, same questions and views, no Romanian
+letters in English, comma-below in Romanian, count formatters and the empty state) and
+`tests/layout.test.tsx` (the English empty state renders).
+
 ### UX-16 impozit-teren page check — done
 
 - Given `/impozit-teren/#j=bc` at 390 × 844, when the county table has rendered, then the

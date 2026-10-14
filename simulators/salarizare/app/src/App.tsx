@@ -515,6 +515,7 @@ export default function App() {
           denmark={regimes['dk-stat-2026'] ?? null}
           dataLine={t.dataLine}
           statusBadge={t.statusBadge}
+          lang={lang}
           onOpen={(view, patch) => setScenario({ ...scenario, view, ...patch })}
         />
       )}
