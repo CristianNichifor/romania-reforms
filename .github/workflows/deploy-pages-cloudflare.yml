@@ -253,6 +253,7 @@ jobs:
           mkdir -p cf-site/romania-reforms
           cp -r dist/. cf-site/romania-reforms/
           printf '/ /romania-reforms/ 302\n' > cf-site/_redirects
+          python3 scripts/redirect_stubs.py cf-site
 
       - name: Cloudflare token from the CN Webify broker
         run: |
