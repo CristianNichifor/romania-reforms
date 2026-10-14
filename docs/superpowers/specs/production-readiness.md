@@ -228,6 +228,20 @@ Tests: justitie `src/spread.test.ts`; administrativ `tests/legend-mobile.test.ts
 `src/map-status.test.ts`; impozit-teren `src/layout.test.ts`; companii-stat
 `src/table-mobile.test.ts`. The CSS tests read the stylesheet; the layouts themselves were not
 screenshot-checked on a phone: needs human review.
+## F. Family UX guideline (uxg-b, 2026-10-14)
+
+### UXG-1 One guideline for the landing and the seven simulators
+
+- Given `docs/ux-guidelines.md`, then it fixes one visual style for the family (light by
+  default, following the reader's system setting for dark; dark map canvases allowed), lists
+  each simulator's permitted deviation, and covers page anatomy, content, data-viz, states,
+  mobile and accessibility rules, status vocabulary, a conformance checklist and a backlog of
+  known deviations.
+- Given any simulator in `site/shell.mjs`, then the guideline names its path.
+- Given a test the conformance checklist cites, then that test file exists.
+- Romanian wording in the guideline is agent-written: needs human review.
+
+Test: `tests/test_ux_guidelines.py`.
 ### UX-8 Target-state design screens — docs only (Romanian copy: needs human review)
 
 - Given `docs/design/screens/01..05*.html`, then each is a self-contained static page (no
