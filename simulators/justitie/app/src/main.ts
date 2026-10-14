@@ -32,6 +32,7 @@ import {
   type Coupled,
 } from './arondare';
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
+import { pointHint } from './touch';
 
 // MapLibre 6 ships its worker as a separate file rather than inlining it, and a bundled app
 // has to say where that file ended up. Without this every source fails to load silently —
@@ -1177,9 +1178,10 @@ async function main(): Promise<void> {
     });
 
     const detail = el('#detail');
+    if (mode !== 'arondare') detail.innerHTML = `<p class="hint">${pointHint('o instanță')}</p>`;
     const show = (f: MapGeoJSONFeature | null): void => {
       if (!f) {
-        detail.innerHTML = '<p class="hint">Treci cu mouse-ul peste o instanță.</p>';
+        detail.innerHTML = `<p class="hint">${pointHint('o instanță')}</p>`;
         return;
       }
       const p = f.properties as unknown as Court & { tierLabel: string; ratio: number };
@@ -1567,7 +1569,7 @@ async function main(): Promise<void> {
       }
 
       if (mode === 'arondare') {
-        el('#detail').innerHTML = '<p class="hint">Treci cu mouse-ul peste o comună.</p>';
+        el('#detail').innerHTML = `<p class="hint">${pointHint('o comună')}</p>`;
         el('#summary').innerHTML = arondareForMap
           ? renderArondareSummary(arondareForMap)
           : '<div class="figure">Se încarcă modelul administrativ…</div>';
