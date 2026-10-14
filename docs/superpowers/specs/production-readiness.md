@@ -239,6 +239,23 @@ Test: salarizare `tests/home-strings.test.ts` (same keys, same questions and vie
 letters in English, comma-below in Romanian, count formatters and the empty state) and
 `tests/layout.test.tsx` (the English empty state renders).
 
+### UX-26 Public pay in English, sixth slice: the Cât costă tot view — done (English copy: needs human review)
+
+- Given `/salarizare/#/envelope?lang=en`, then every word the view prints (title and purpose, the
+  loading line, the hero sentence and verdict, the target control with its note and the Art. 38
+  sentence, the moves with their family names, slider labels, reason field and placeholders, the
+  ledger, the cap section with its two controls, hero, split, bands, top list, table and
+  exclusions, the assumptions with their severities and the baseline note) is English, and
+  figures, including the money line from `src/money.ts`, use the `en-GB` locale; in Romanian
+  nothing changes. The strings live in per-language tables in `src/EnvelopeView.tsx`
+  (`ENVELOPE_STRINGS`) and `src/CapSection.tsx` (`CAP_STRINGS`), the pattern of UX-21 to UX-25.
+  Engine diagnostics messages, band labels and institution names are data.
+- The views Ce se schimbă, Meserii, Echivalențe, Funcție cu funcție and Propunerea noastră remain
+  Romanian in English mode; the "views are in Romanian" footer note stays until they are done.
+
+Test: salarizare `tests/envelope-strings.test.ts` (same keys, no Romanian letters in English,
+comma-below in Romanian, sentence formatters, money in the reader's locale).
+
 ### UX-16 impozit-teren page check — done
 
 - Given `/impozit-teren/#j=bc` at 390 × 844, when the county table has rendered, then the

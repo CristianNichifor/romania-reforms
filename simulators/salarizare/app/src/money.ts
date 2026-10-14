@@ -24,8 +24,8 @@ export interface Rates {
 
 const NBSP = ' ';
 
-function whole(value: number, currency: string): string {
-  return `${Math.round(value).toLocaleString('ro-RO')}${NBSP}${currency}`;
+function whole(value: number, currency: string, locale = 'ro-RO'): string {
+  return `${Math.round(value).toLocaleString(locale)}${NBSP}${currency}`;
 }
 
 /** Convert any supported currency into lei. */
@@ -47,15 +47,17 @@ export function amounts(
   currency: string,
   rates: Rates,
   emphasis: 'native' | 'ron' = 'native',
+  /** The reader's number locale (RR-10); Romanian unless a bilingual view passes its own. */
+  locale = 'ro-RO',
 ): string[] {
   const ron = toRon(value, currency, rates);
   const eur = ron / rates.eurToRon;
 
-  if (currency === 'RON') return [whole(value, 'RON'), whole(eur, 'EUR')];
+  if (currency === 'RON') return [whole(value, 'RON', locale), whole(eur, 'EUR', locale)];
 
-  const native = whole(value, currency);
-  const inRon = whole(ron, 'RON');
-  const inEur = whole(eur, 'EUR');
+  const native = whole(value, currency, locale);
+  const inRon = whole(ron, 'RON', locale);
+  const inEur = whole(eur, 'EUR', locale);
   return emphasis === 'native' ? [native, inRon, inEur] : [inRon, native, inEur];
 }
 
@@ -65,8 +67,9 @@ export function amountLine(
   currency: string,
   rates: Rates,
   emphasis: 'native' | 'ron' = 'native',
+  locale = 'ro-RO',
 ): string {
-  return amounts(value, currency, rates, emphasis).join(` ${NBSP}·${NBSP} `);
+  return amounts(value, currency, rates, emphasis, locale).join(` ${NBSP}·${NBSP} `);
 }
 
 /**
