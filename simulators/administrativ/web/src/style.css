@@ -197,6 +197,14 @@ a.ghost {
   overflow-x: auto;
 }
 
+/* The bar scrolls sideways when the statistics outgrow a phone screen, so it is in the tab
+   order (tabindex="0" in index.html) for keyboard users to reach the clipped ones; axe's
+   scrollable-region-focusable rule asks for exactly that. */
+.summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .summary .stat {
   display: flex;
   flex-direction: column;
