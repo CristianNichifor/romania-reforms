@@ -170,9 +170,10 @@ flight* belong to another session; do not start them in parallel.
    use real data, so "Date reale"), then add the badge — done: every app page carries
    "Date reale" (UX-18 and the family-look batch) and every hub card repeats it (UX-32). The
    status itself is still the agent's reading of the data; the owner may change one.
-8. No as-of date on charts and maps beyond the provenance line — all four map apps carry a
-   `map-source` line under the legend (UX-20, UX-36); the public-pay and justitie statistics
-   charts and the document pages follow.
+8. No as-of date on charts and maps beyond the provenance line — the three map apps (UX-20) and
+   the justitie map (UX-36) carry a `map-source` line under the legend, every public-pay view
+   ends with the data line (UX-35) and the justitie statistics charts carry a caption each
+   (UX-34); the document pages' data tables follow (UX-38).
 9. No page-level axe or 390 px overflow check; add to the browser suites — done for the four
    suites (`page-checks.spec.ts` in administrativ, transport, impozit-teren, justitie) and for
    the public-pay first screen (`scripts/check-page.mjs`); the deconcentrare and companii-stat
