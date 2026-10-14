@@ -138,8 +138,9 @@ def test_every_simulator_card_names_its_own_data(page, word):
     html = read(page)
     head = re.search(r"<h1>[^<]*</h1>\s*<p class=\"data-line\">\s*(.*?)\s*</p>", html, re.S)
     legend = re.sub(r"\s+", " ", head.group(1))
+    body = re.sub(r"<nav .*?</nav>", "", html, flags=re.S)  # the shell's list is not a card
     cards = re.findall(
-        r"<li>\s*<a href=\"(?:\.\./)?([a-z-]+)/\">(.*?)</a>\s*</li>", html, re.S
+        r"<li>\s*<a href=\"(?:\.\./)?([a-z-]+)/\">(.*?)</a>\s*</li>", body, re.S
     )
     simulators = [
         "administrative-reform", "public-pay", "transport", "justitie",
