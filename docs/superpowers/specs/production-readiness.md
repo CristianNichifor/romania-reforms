@@ -64,14 +64,20 @@ Test: `simulators/impozit-teren/app/src/sources.test.ts`.
 
 ## C. Shared shell
 
-### RR-3 Shared navigation — todo
+### RR-3 Shared navigation — done
 
 - Given the landing page or any simulator, when it renders, then it has
-  `<nav aria-label="Simulatoare">` linking the home page and all seven simulators.
+  `<nav aria-label="Simulatoare">` linking the home page and all seven simulators, marking
+  the current one with `aria-current="page"`.
+- One source, `site/shell.mjs`: the apps apply it with the `siteShell()` Vite plugin at their
+  `<!-- rr-nav -->` marker; the static pages in `site/` carry its output verbatim.
 
-Tests: a DOM test per simulator; `tests/test_built_site.py` over built `dist/*/index.html`.
+Tests: `src/shell.test.ts` (or `tests/shell.test.ts`) in every simulator runs the app's own
+Vite config over its HTML entries; `tests/test_site_shell.py` checks the static pages, every
+app's entries and `scripts/check_site_shell.py`, which checks an assembled `dist/` (the deploy
+runs it once the workflow line in the PR is added: needs-human).
 
-### RR-5 Landing metadata and privacy — todo
+### RR-5 Landing metadata and privacy — done (publishing `privacy.html` and `en/` needs the workflow line: needs-human)
 
 - Given `site/index.html`, then it has a meta description, Open Graph tags and a canonical
   link on `projects.cristian-nichifor.com/romania-reforms/`, links `privacy.html`, and offers
@@ -79,14 +85,19 @@ Tests: a DOM test per simulator; `tests/test_built_site.py` over built `dist/*/i
 - Given `site/privacy.html`, then it states, in Romanian and English, what the code shows: no
   cookies, no analytics, hosting on Cloudflare Pages, operator Cristian Nichifor, contact
   through the repository's GitHub issues. English text: needs human review.
+- Given `site/en/index.html`, then it is the landing page in English with the same simulator
+  list (needs human review), linked both ways with `hreflang` alternates.
 
 Test: `tests/test_site_pages.py`.
 
-### RR-9 Content Security Policy — todo
+### RR-9 Content Security Policy — done
 
-- Given every built page, then it carries a CSP `<meta http-equiv>`.
+- Given every built page, then it carries a CSP `<meta http-equiv>`: everything `'self'`,
+  inline styles allowed, `data:`/`blob:` images and workers, no objects. The dev server is
+  exempt because it injects inline scripts of its own.
+- Checked by loading every assembled page in Chromium: no CSP violations, no console errors.
 
-Test: `tests/test_built_site.py`.
+Tests: as RR-3.
 
 ## D. Locale
 
