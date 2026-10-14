@@ -69,7 +69,7 @@ workflows without claiming comparison against historical data.
 
 Tests block requests outside the local preview origin. This verifies a locally
 served build does not need the internet for these workflows, not that a cold
-GitHub Pages visit works offline. No service worker or caching feature is added.
+visit to the published site works offline. No service worker or caching feature is added.
 Automated checks are not a full accessibility or physical screen-reader audit.
 
 The follow-up toolchain upgrade pins Vite 7.3.6, matching the salary app, and

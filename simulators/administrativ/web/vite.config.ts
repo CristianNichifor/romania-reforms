@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 
-// GitHub Pages serves a project site from /<repo>/, so assets need that prefix. It is
+// Each simulator is served from a path under /<repo>/, so assets need that prefix. It is
 // supplied by CI rather than hardcoded, so `npm run dev` and a user fork both work without
 // editing this file.
 const base = process.env.VITE_BASE ?? '/';

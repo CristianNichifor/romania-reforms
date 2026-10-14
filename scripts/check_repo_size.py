@@ -1,6 +1,6 @@
 """Fail before the repository becomes a problem, rather than after.
 
-GitHub Pages publishes at most 1 GB, and a repository carrying generated payloads grows
+GitHub recommends keeping a repository under 1 GB, and a repository carrying generated payloads grows
 every time one is regenerated — the blob is stored again, and git never forgets it. The point
 of this check is that nobody notices the day it stops being true, because no single commit is
 ever the problem.
