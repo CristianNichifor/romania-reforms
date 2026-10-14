@@ -7,16 +7,140 @@ import type { PatchEffect, Proposal } from '../../engine/proposal';
 import { structure } from '../../engine/structure';
 import type { Scenario } from '../../engine/scenario';
 import type { Regime } from '../../engine/types';
+import type { Lang } from './i18n';
 
-function ro(n: number): string {
-  return n.toLocaleString('ro-RO');
+const LOCALE: Record<Lang, string> = { ro: 'ro-RO', en: 'en-GB' };
+
+/** Every word this view prints, per language (RR-10). English copy is agent-written: needs human review. */
+export interface ProposalStrings {
+  title: string;
+  /** Follows the proposal's own (data) summary sentence. */
+  purpose: string;
+  counts: (repairs: string, changes: string, on: string, total: string) => string;
+  disclaimer: ReactNode;
+  resultTitle: string;
+  kpis: {
+    positions: string;
+    distinct: string;
+    backSolved: string;
+    gaps: string;
+    span: string;
+  };
+  from: (value: string) => string;
+  moveMoney: (n: string) => ReactNode;
+  allOn: string;
+  allOff: string;
+  repairsOnly: string;
+  patchesTitle: string;
+  touched: { positions: string; variants: string; grades: string; supplements: string };
+  badgeChange: string;
+  badgeRepair: string;
+  on: string;
+  off: string;
+  why: string;
+  fixes: (limit: ReactNode) => ReactNode;
+  nextTitle: string;
+  next: Record<'compare' | 'distributie' | 'payslip', { title: string; body: string }>;
 }
-function pct(n: number): string {
-  return `${(n * 100).toLocaleString('ro-RO', { maximumFractionDigits: 1 })}%`;
-}
-function ratio(n: number): string {
-  return `1:${n.toLocaleString('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-}
+
+export const PROPOSAL_STRINGS: Record<Lang, ProposalStrings> = {
+  ro: {
+    title: 'Propunerea, corectură cu corectură',
+    purpose:
+      'Fiecare corectură are un întrerupător: stinge-o și restul se recalculează fără ea. Linkul păstrează ce ai stins, deci un dezacord se poate trimite mai departe ca atare — „propunerea voastră, fără cele două pe care nu le accept”.',
+    counts: (repairs, changes, on, total) =>
+      `${repairs} reparații · ${changes} schimbări de distribuție · pornite acum: ${on} din ${total}`,
+    disclaimer: (
+      <>
+        <strong>Nu e un buget și nu e un proiect de lege.</strong> Este proiectul ministerului cu un
+        număr de modificări numite, aplicate peste el. Cifrele de mai jos descriu forma grilei
+        rezultate, nu suma pe care ar încasa-o cineva.
+      </>
+    ),
+    resultTitle: 'Ce iese, cu ce e pornit acum',
+    kpis: {
+      positions: 'funcții denumite',
+      distinct: 'coeficienți distincți de decis',
+      backSolved: 'retro-calculați, cu 14+ zecimale',
+      gaps: 'variante fără grad salarial',
+      span: 'raportul între capete',
+    },
+    from: (value) => `de la ${value}`,
+    moveMoney: (n) => (
+      <>
+        <strong>Dintre corecturile pornite, {n} mută bani între oameni.</strong> Restul lasă
+        distribuția exact cum a propus-o ministerul și schimbă doar dacă regulile scrise în lege pot
+        fi aplicate. Stinge-le pe cele marcate „schimbă distribuția” ca să vezi propunerea strict ca
+        reparație.
+      </>
+    ),
+    allOn: 'pornește tot',
+    allOff: 'stinge tot',
+    repairsOnly: 'doar reparațiile',
+    patchesTitle: 'Corecturile',
+    touched: { positions: 'funcții', variants: 'variante', grades: 'grade', supplements: 'sporuri' },
+    badgeChange: 'schimbă distribuția',
+    badgeRepair: 'reparație',
+    on: 'pornită',
+    off: 'stinsă',
+    why: 'De ce',
+    fixes: (limit) => <>Repară limita declarată {limit} din regimul de bază.</>,
+    nextTitle: 'Mai departe',
+    next: {
+      compare: { title: 'Cele patru sisteme, față în față', body: 'Aceleași șapte întrebări puse fiecărui sistem' },
+      distributie: { title: 'Cine urcă, cine coboară', body: 'Fiecare post comparat cu el însuși sub legea de azi' },
+      payslip: { title: 'Un salariu, calculat', body: 'O funcție anume, sub fiecare regim' },
+    },
+  },
+  en: {
+    title: 'The proposal, one correction at a time',
+    purpose:
+      'Every correction has a switch: turn it off and the rest is recomputed without it. The link keeps what you turned off, so a disagreement can be passed on as such — "your proposal, without the two I do not accept".',
+    counts: (repairs, changes, on, total) =>
+      `${repairs} repairs · ${changes} distribution changes · on now: ${on} of ${total}`,
+    disclaimer: (
+      <>
+        <strong>Not a budget and not a bill.</strong> It is the ministry's draft with a number of named
+        changes applied on top of it. The figures below describe the shape of the resulting grid, not
+        the sum anyone would receive.
+      </>
+    ),
+    resultTitle: 'What comes out, with what is on now',
+    kpis: {
+      positions: 'named positions',
+      distinct: 'distinct coefficients to decide',
+      backSolved: 'back-solved, with 14+ decimals',
+      gaps: 'variants without a pay grade',
+      span: 'ratio between the ends',
+    },
+    from: (value) => `from ${value}`,
+    moveMoney: (n) => (
+      <>
+        <strong>Of the corrections that are on, {n} move money between people.</strong> The rest
+        leave the distribution exactly as the ministry proposed it and only change whether the rules
+        written in the law can be applied. Turn off the ones marked "changes the distribution" to see
+        the proposal strictly as a repair.
+      </>
+    ),
+    allOn: 'turn all on',
+    allOff: 'turn all off',
+    repairsOnly: 'repairs only',
+    patchesTitle: 'The corrections',
+    touched: { positions: 'positions', variants: 'variants', grades: 'grades', supplements: 'supplements' },
+    badgeChange: 'changes the distribution',
+    badgeRepair: 'repair',
+    on: 'on',
+    off: 'off',
+    why: 'Why',
+    fixes: (limit) => <>Repairs the declared limit {limit} of the base regime.</>,
+    nextTitle: 'Further',
+    next: {
+      compare: { title: 'The four systems, side by side', body: 'The same seven questions put to each system' },
+      distributie: { title: 'Who rises, who falls', body: "Every post compared with itself under today's law" },
+      payslip: { title: 'One salary, computed', body: 'One specific position, under each regime' },
+    },
+  },
+};
 
 /**
  * The proposal, one patch at a time.
@@ -39,6 +163,7 @@ export default function ProposalView({
   scenario,
   onScenario,
   onOpen,
+  lang = 'ro',
 }: {
   /** The section menu, drawn under the title so the page says what it is first. */
   menu?: ReactNode;
@@ -47,7 +172,16 @@ export default function ProposalView({
   scenario: Scenario;
   onScenario: (next: Scenario) => void;
   onOpen: (view: 'compare' | 'distributie' | 'payslip') => void;
+  /** The page language (RR-10): the view prints its own words in it, numbers follow its locale. */
+  lang?: Lang;
 }) {
+  const t = PROPOSAL_STRINGS[lang];
+  const locale = LOCALE[lang];
+  const n = (value: number) => value.toLocaleString(locale);
+  const pct = (value: number) => `${(value * 100).toLocaleString(locale, { maximumFractionDigits: 1 })}%`;
+  const ratio = (value: number) =>
+    `1:${value.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
   const off = useMemo(() => new Set(scenario.offPatches ?? []), [scenario.offPatches]);
 
   const active = useMemo(
@@ -79,59 +213,36 @@ export default function ProposalView({
   const activeChanges = changes.filter((p) => !off.has(p.id)).length;
 
   const KPIS: Array<{ v: string; k: string; from?: string }> = [
-    {
-      v: ro(now.positions),
-      k: 'funcții denumite',
-      from: `de la ${ro(base.positions)}`,
-    },
-    {
-      v: ro(now.distinctValues),
-      k: 'coeficienți distincți de decis',
-      from: `de la ${ro(base.distinctValues)}`,
-    },
-    {
-      v: pct(now.backSolvedShare),
-      k: 'retro-calculați, cu 14+ zecimale',
-      from: `de la ${pct(base.backSolvedShare)}`,
-    },
-    {
-      v: ro(now.variantsInGaps),
-      k: 'variante fără grad salarial',
-      from: `de la ${ro(base.variantsInGaps)}`,
-    },
+    { v: n(now.positions), k: t.kpis.positions, from: t.from(n(base.positions)) },
+    { v: n(now.distinctValues), k: t.kpis.distinct, from: t.from(n(base.distinctValues)) },
+    { v: pct(now.backSolvedShare), k: t.kpis.backSolved, from: t.from(pct(base.backSolvedShare)) },
+    { v: n(now.variantsInGaps), k: t.kpis.gaps, from: t.from(n(base.variantsInGaps)) },
     {
       // span, not spanByPeriod: one of the patches removes the annual schedule outright,
       // so the proposal has no periods to take a last one from and the row read "1:0,00".
       v: ratio(now.span.ratio),
-      k: 'raportul între capete',
-      from: `de la ${ratio(base.span.ratio)}`,
+      k: t.kpis.span,
+      from: t.from(ratio(base.span.ratio)),
     },
   ];
 
   return (
     <>
       <header className="masthead">
-        <h1>Propunerea, corectură cu corectură</h1>
+        <h1>{t.title}</h1>
         <p>
-          {proposal.summary} Fiecare corectură are un întrerupător: stinge-o și restul se
-          recalculează fără ea. Linkul păstrează ce ai stins, deci un dezacord se poate trimite
-          mai departe ca atare — „propunerea voastră, fără cele două pe care nu le accept”.
+          {proposal.summary} {t.purpose}
         </p>
         <p className="src">
-          {ro(repairs.length)} reparații · {ro(changes.length)} schimbări de distribuție ·
-          pornite acum: {ro(proposal.patches.length - off.size)} din {ro(proposal.patches.length)}
+          {t.counts(n(repairs.length), n(changes.length), n(proposal.patches.length - off.size), n(proposal.patches.length))}
         </p>
       </header>
       {menu}
 
-      <div className="disclaimer">
-        <strong>Nu e un buget și nu e un proiect de lege.</strong> Este proiectul ministerului
-        cu un număr de modificări numite, aplicate peste el. Cifrele de mai jos descriu forma
-        grilei rezultate, nu suma pe care ar încasa-o cineva.
-      </div>
+      <div className="disclaimer">{t.disclaimer}</div>
 
       <section>
-        <h2>Ce iese, cu ce e pornit acum</h2>
+        <h2>{t.resultTitle}</h2>
         <div className="kpis">
           {KPIS.map((kpi) => (
             <div className="kpi" key={kpi.k}>
@@ -143,33 +254,18 @@ export default function ProposalView({
             </div>
           ))}
         </div>
-        {activeChanges > 0 && (
-          <p className="lede">
-            <strong>Dintre corecturile pornite, {ro(activeChanges)} mută bani între oameni.</strong>{' '}
-            Restul lasă distribuția exact cum a propus-o ministerul și schimbă doar dacă regulile
-            scrise în lege pot fi aplicate. Stinge-le pe cele marcate „schimbă distribuția” ca să
-            vezi propunerea strict ca reparație.
-          </p>
-        )}
+        {activeChanges > 0 && <p className="lede">{t.moveMoney(n(activeChanges))}</p>}
         <div className="patch-actions civic-scope civic-pay">
-          <Button onClick={() => setAll(true)}>
-            pornește tot
-          </Button>
-          <Button onClick={() => setAll(false)}>
-            stinge tot
-          </Button>
-          <Button
-            onClick={() =>
-              onScenario({ ...scenario, offPatches: changes.map((p) => p.id) })
-            }
-          >
-            doar reparațiile
+          <Button onClick={() => setAll(true)}>{t.allOn}</Button>
+          <Button onClick={() => setAll(false)}>{t.allOff}</Button>
+          <Button onClick={() => onScenario({ ...scenario, offPatches: changes.map((p) => p.id) })}>
+            {t.repairsOnly}
           </Button>
         </div>
       </section>
 
       <section>
-        <h2>Corecturile</h2>
+        <h2>{t.patchesTitle}</h2>
         <p className="lede">{proposal.notPolicy}</p>
         <ol className="patches">
           {proposal.patches.map((patch) => {
@@ -177,10 +273,10 @@ export default function ProposalView({
             const effect = effectOf(patch.id);
             const touched = effect
               ? [
-                  effect.positionsTouched && `${ro(effect.positionsTouched)} funcții`,
-                  effect.variantsTouched && `${ro(effect.variantsTouched)} variante`,
-                  effect.gradesTouched && `${ro(effect.gradesTouched)} grade`,
-                  effect.supplementsTouched && `${ro(effect.supplementsTouched)} sporuri`,
+                  effect.positionsTouched && `${n(effect.positionsTouched)} ${t.touched.positions}`,
+                  effect.variantsTouched && `${n(effect.variantsTouched)} ${t.touched.variants}`,
+                  effect.gradesTouched && `${n(effect.gradesTouched)} ${t.touched.grades}`,
+                  effect.supplementsTouched && `${n(effect.supplementsTouched)} ${t.touched.supplements}`,
                 ]
                   .filter(Boolean)
                   .join(' · ')
@@ -191,30 +287,26 @@ export default function ProposalView({
                   <h3>{patch.title}</h3>
                   <span className="patch-tags">
                     {patch.policyChange ? (
-                      <span className="badge weak">schimbă distribuția</span>
+                      <span className="badge weak">{t.badgeChange}</span>
                     ) : (
-                      <span className="badge">reparație</span>
+                      <span className="badge">{t.badgeRepair}</span>
                     )}
                     {touched && <span className="touched">{touched}</span>}
                     <span className="patch-switch civic-scope civic-pay">
                       <Checkbox
                         checked={on}
                         onChange={() => toggle(patch.id)}
-                        label={on ? 'pornită' : 'stinsă'}
-                        aria-label={`${patch.title}: ${on ? 'pornită' : 'stinsă'}`}
+                        label={on ? t.on : t.off}
+                        aria-label={`${patch.title}: ${on ? t.on : t.off}`}
                       />
                     </span>
                   </span>
                 </div>
                 {patch.expectedEffect && <p className="effect">{patch.expectedEffect}</p>}
                 <details>
-                  <summary>De ce</summary>
+                  <summary>{t.why}</summary>
                   <p>{patch.rationale}</p>
-                  {patch.fixes && (
-                    <p className="src">
-                      Repară limita declarată <code>{patch.fixes}</code> din regimul de bază.
-                    </p>
-                  )}
+                  {patch.fixes && <p className="src">{t.fixes(<code>{patch.fixes}</code>)}</p>}
                 </details>
               </li>
             );
@@ -223,20 +315,14 @@ export default function ProposalView({
       </section>
 
       <section>
-        <h2>Mai departe</h2>
+        <h2>{t.nextTitle}</h2>
         <div className="next-grid">
-          <button className="next" onClick={() => onOpen('compare')}>
-            <strong>Cele patru sisteme, față în față</strong>
-            <span>Aceleași șapte întrebări puse fiecărui sistem</span>
-          </button>
-          <button className="next" onClick={() => onOpen('distributie')}>
-            <strong>Cine urcă, cine coboară</strong>
-            <span>Fiecare post comparat cu el însuși sub legea de azi</span>
-          </button>
-          <button className="next" onClick={() => onOpen('payslip')}>
-            <strong>Un salariu, calculat</strong>
-            <span>O funcție anume, sub fiecare regim</span>
-          </button>
+          {(['compare', 'distributie', 'payslip'] as const).map((view) => (
+            <button key={view} className="next" onClick={() => onOpen(view)}>
+              <strong>{t.next[view].title}</strong>
+              <span>{t.next[view].body}</span>
+            </button>
+          ))}
         </div>
       </section>
     </>

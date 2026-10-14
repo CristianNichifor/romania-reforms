@@ -543,6 +543,7 @@ export default function App() {
           scenario={scenario}
           onScenario={setScenario}
           onOpen={(view) => setScenario({ ...scenario, view })}
+          lang={lang}
         />
       )}
       {scenario.view === 'distributie' && ministry && assimilation && (
