@@ -611,6 +611,7 @@ export default function App() {
           onScenario={setScenario}
           measured={measured}
           inForce={regimes['ro-153-2017'] ?? null}
+          lang={lang}
         />
       )}
       {scenario.view === 'echivalente' &&

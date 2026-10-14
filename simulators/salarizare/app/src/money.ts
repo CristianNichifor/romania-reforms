@@ -84,8 +84,9 @@ export function amountRange(
   to: number,
   currency: string,
   rates: Rates,
+  locale = 'ro-RO',
 ): string {
-  const n = (v: number) => Math.round(v).toLocaleString('ro-RO');
+  const n = (v: number) => Math.round(v).toLocaleString(locale);
   if (currency === 'RON') {
     return `${n(from)}–${n(to)} RON (${n(from / rates.eurToRon)}–${n(to / rates.eurToRon)} EUR)`;
   }
