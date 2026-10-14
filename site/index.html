@@ -34,6 +34,19 @@
       * {
         box-sizing: border-box;
       }
+      /* UX-10: the family bar leads the page, so it loses the footer rule. */
+      body > .rr-nav {
+        max-width: 46rem;
+        margin: 0 auto 2rem;
+        padding: 0 0 0.75rem;
+        border-top: 0;
+        border-bottom: 1px solid var(--line);
+      }
+      body > .rr-nav a {
+        display: inline-block;
+        min-height: 24px;
+        line-height: 24px;
+      }
       body {
         margin: 0;
         padding: 3rem 1.25rem 4rem;
@@ -169,6 +182,7 @@
     <style>.rr-nav{margin:1.5rem 0 0;padding-top:.75rem;border-top:1px solid;border-color:color-mix(in srgb,currentColor 20%,transparent);font-size:.8rem;line-height:1.6}.rr-nav ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:.2rem .9rem}.rr-nav a{color:inherit;display:inline-flex;align-items:center;min-height:24px;min-width:24px}.rr-nav a[aria-current="page"]{font-weight:600;text-decoration:none}</style>
   </head>
   <body>
+    <nav class="rr-nav" aria-label="Simulatoare"><ul><li><a href="./" aria-current="page">Toate simulatoarele</a></li><li><a href="administrative-reform/">Reforma administrativă</a></li><li><a href="public-pay/">Salarizarea publică</a></li><li><a href="transport/">Transport public</a></li><li><a href="justitie/">Reforma justiției</a></li><li><a href="impozit-teren/">Impozitul pe teren</a></li><li><a href="deconcentrare/">Serviciile deconcentrate</a></li><li><a href="companii-stat/">Companiile statului</a></li></ul></nav>
     <main>
       <h1>Simulatoare și monitoare</h1>
       <p class="data-line">
@@ -326,7 +340,6 @@
         <a href="privacy.html">Confidențialitate</a> ·
         <a href="en/index.html" hreflang="en" lang="en">English</a>
       </footer>
-      <nav class="rr-nav" aria-label="Simulatoare"><ul><li><a href="./" aria-current="page">Toate simulatoarele</a></li><li><a href="administrative-reform/">Reforma administrativă</a></li><li><a href="public-pay/">Salarizarea publică</a></li><li><a href="transport/">Transport public</a></li><li><a href="justitie/">Reforma justiției</a></li><li><a href="impozit-teren/">Impozitul pe teren</a></li><li><a href="deconcentrare/">Serviciile deconcentrate</a></li><li><a href="companii-stat/">Companiile statului</a></li></ul></nav>
     </main>
   </body>
 </html>

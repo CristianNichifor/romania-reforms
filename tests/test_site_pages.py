@@ -153,3 +153,16 @@ def test_static_pages_are_light_first_on_civic_ui_roles(page):
         assert f"{name}: {value};" in root, f"{page}: {name} is not the civic-ui light value"
     dark = style[media[0].end() :]
     assert "--bg: #142323;" in dark and "--fg: #f0f6f5;" in dark
+
+
+@pytest.mark.parametrize("page", ["index.html", "en/index.html", "brief.html", "privacy.html"])
+def test_static_pages_lead_with_the_family_bar(page):
+    """UX-10: the shared navigation is the first thing in the body, before the H1, with a
+    link back to the hub first; the page styles it as a header, not a footer."""
+    html = read(page)
+    body = html[html.index("<body>") :]
+    nav = re.search(r"<nav class=\"rr-nav\"[^>]*>(.*?)</nav>", body, re.S)
+    assert nav and body.index("<nav") < body.index("<h1"), f"{page}: nav is not first"
+    first_link = re.search(r"<a href=\"([^\"]+)\"", nav.group(1)).group(1)
+    assert first_link in {"./", "../"}, "the first link is not the hub"
+    assert "body > .rr-nav" in html

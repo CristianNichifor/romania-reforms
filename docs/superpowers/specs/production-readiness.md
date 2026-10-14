@@ -251,6 +251,14 @@ Test: `tests/test_ux_guidelines.py`.
   `@media (prefers-color-scheme: dark)` (ux-guidelines § 6 and § 9.1; design screen 01).
 
 Test: `tests/test_site_pages.py::test_static_pages_are_light_first_on_civic_ui_roles`.
+### UX-10 Static pages lead with the family bar — done
+
+- Given the four static pages, then the shared `rr-nav` is the first element in `<body>`,
+  before the `h1`, its first link goes to the hub, and the page restyles it as a header
+  (border below, 24 px link targets) instead of the shell's footer rule (ux-guidelines § 2;
+  design screens 01 and 05, acceptance criterion 1).
+
+Test: `tests/test_site_pages.py::test_static_pages_lead_with_the_family_bar`.
 ### UX-8 Target-state design screens — docs only (Romanian copy: needs human review)
 
 - Given `docs/design/screens/01..05*.html`, then each is a self-contained static page (no
