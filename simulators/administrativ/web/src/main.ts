@@ -10,6 +10,7 @@ import './style.css';
 import './native-ui.css';
 import './states.css';
 import { loadErrorMarkup, stageLoader } from './states';
+import './status-badge.css';
 
 import { buildChain, edgeKey, indexShard } from './app/chain';
 import {

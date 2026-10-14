@@ -151,7 +151,7 @@ export default function StructureView({
           <ColumnChart
             bars={precisionBars}
             yLabel="valori distincte"
-            directLabel={(b) => b.value > 100}
+            source={`${regime.provenance.locator}; valorile distincte ale coeficienților din anexe`}
           />
         </div>
         <details className="table-view">
@@ -184,7 +184,11 @@ export default function StructureView({
           Anexa VIII, cu coeficient 7,3919.
         </p>
         <div className="card">
-          <SpanChart points={metrics.spanByPeriod} declared={metrics.declaredRatio} />
+          <SpanChart
+            points={metrics.spanByPeriod}
+            declared={metrics.declaredRatio}
+            source={`${regime.provenance.locator}; Art. 5 și coloanele anuale din anexe`}
+          />
           <p className="src" style={{ marginTop: 10, fontSize: 12.5, color: 'var(--text-secondary)' }}>
             Axa verticală este decupată în jurul intervalului 7,3–8,1, altfel eșalonarea ar fi o
             linie plată lipită de pragul din Art. 5.
@@ -203,7 +207,11 @@ export default function StructureView({
           aceste goluri de o sutime, desenate mai jos exact acolo unde se află — între bare.
         </p>
         <div className="card">
-          <GradeChart grades={metrics.gradeOccupancy} gaps={metrics.bandGaps} />
+          <GradeChart
+            grades={metrics.gradeOccupancy}
+            gaps={metrics.bandGaps}
+            source={`${regime.provenance.locator}; Art. 9 alin. (2) și coeficienții din anexe`}
+          />
         </div>
         <details className="table-view">
           <summary>Vezi golurile ca tabel</summary>
@@ -240,7 +248,7 @@ export default function StructureView({
           <ColumnChart
             bars={fanInBars}
             yLabel="funcții"
-            directLabel={(b) => b.value >= 5}
+            source={`${regime.provenance.locator}; denumirile anterioare listate la fiecare funcție`}
           />
           <p className="src" style={{ marginTop: 10, fontSize: 12.5, color: 'var(--text-secondary)' }}>
             Câte denumiri anterioare stau pe o singură funcție nouă. Restul de {ro(singles)} de

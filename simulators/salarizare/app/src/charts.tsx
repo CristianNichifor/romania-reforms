@@ -9,6 +9,12 @@
  * identity is never carried by colour alone.
  */
 import { useState } from 'react';
+import type { ReactNode } from 'react';
+
+/** The source line every chart carries under its marks (design screen 03, criterion 6). */
+function ChartSource({ source }: { source?: ReactNode }) {
+  return source ? <p className="chart-source">Sursă: {source}</p> : null;
+}
 
 export interface Bar {
   label: string;
@@ -59,13 +65,17 @@ export function ColumnChart({
   height = 240,
   yLabel,
   labelEvery = 1,
-  directLabel = () => false,
+  directLabel = () => true,
+  source,
 }: {
   bars: Bar[];
   height?: number;
   yLabel?: string;
   labelEvery?: number;
+  /** Which bars print their value; every bar by default (screen 03, criterion 6). */
   directLabel?: (bar: Bar, index: number) => boolean;
+  /** Where the numbers come from, printed under the chart. */
+  source?: ReactNode;
 }) {
   const { handlers, node } = useTooltip();
   const padL = 46;
@@ -105,7 +115,7 @@ export function ColumnChart({
               {/* Hit target larger than the mark. */}
               <rect x={padL + i * slot} y={padT} width={slot} height={plotH} fill="transparent" />
               <path d={barPath(x, y, w, h)} fill={fill} />
-              {directLabel(bar, i) && h > 14 && (
+              {directLabel(bar, i) && (
                 <text className="mark-label" x={x + w / 2} y={y - 5} textAnchor="middle">
                   {bar.value.toLocaleString('ro-RO')}
                 </text>
@@ -132,6 +142,7 @@ export function ColumnChart({
           </text>
         )}
       </svg>
+      <ChartSource source={source} />
       {node}
     </div>
   );
@@ -154,10 +165,12 @@ export function SpanChart({
   points,
   declared,
   height = 250,
+  source,
 }: {
   points: SpanPointView[];
   declared: number | null;
   height?: number;
+  source?: ReactNode;
 }) {
   const { handlers, node } = useTooltip();
   const padL = 46;
@@ -238,6 +251,7 @@ export function SpanChart({
         ))}
         <line x1={padL} x2={width - padR} y1={padT + plotH} y2={padT + plotH} stroke="var(--border)" strokeWidth={1} />
       </svg>
+      <ChartSource source={source} />
       {node}
     </div>
   );
@@ -263,7 +277,17 @@ export interface GapView {
  * in the space between the bars — where they actually sit. Putting them in their own
  * chart would lose the point: they are not a category, they are a gap.
  */
-export function GradeChart({ grades, gaps, height = 260 }: { grades: GradeBarView[]; gaps: GapView[]; height?: number }) {
+export function GradeChart({
+  grades,
+  gaps,
+  height = 260,
+  source,
+}: {
+  grades: GradeBarView[];
+  gaps: GapView[];
+  height?: number;
+  source?: ReactNode;
+}) {
   const { handlers, node } = useTooltip();
   const padL = 46;
   const padR = 14;
@@ -312,6 +336,9 @@ export function GradeChart({ grades, gaps, height = 260 }: { grades: GradeBarVie
               )}>
                 <rect x={padL + i * slot} y={padT} width={slot - 8} height={plotH} fill="transparent" />
                 <path d={barPath(x, y, w, h)} fill="var(--series-1)" />
+                <text className="mark-label" x={x + w / 2} y={y - 5} textAnchor="middle">
+                  {g.variants}
+                </text>
               </g>
 
               <text className="tick" x={x + w / 2} y={padT + plotH + 15} textAnchor="middle">
@@ -358,6 +385,7 @@ export function GradeChart({ grades, gaps, height = 260 }: { grades: GradeBarVie
           între grade
         </text>
       </svg>
+      <ChartSource source={source} />
       {node}
     </div>
   );

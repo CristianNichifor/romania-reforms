@@ -13,6 +13,7 @@ export interface Strings {
   subtitle: string;
   /** "Date: <sursă>, <an>" under the H1 (UX-5); the finance year is the file main.ts fetches. */
   dataLine: string;
+  statusBadge: string;
   disclaimer: string;
 
   parameters: string;
@@ -278,6 +279,7 @@ const ro: Strings = {
   title: 'Reformă administrativă — România',
   subtitle: 'Simulator de consolidare a UAT-urilor',
   dataLine: 'Date: INS, Recensământ 2021; Ministerul Finanțelor, execuții bugetare 2024',
+  statusBadge: 'Date reale',
   disclaimer:
     'Instrument de analiză pentru dezbatere publică. Nu este o propunere oficială și niciun scenariu nu reprezintă o recomandare.',
 
@@ -574,6 +576,7 @@ const en: Strings = {
   title: 'Administrative Reform — Romania',
   subtitle: 'A consolidation simulator for Romania’s UATs',
   dataLine: 'Data: INS, 2021 census; Ministry of Finance, 2024 budget execution',
+  statusBadge: 'Live data',
   disclaimer:
     'An analysis instrument for public debate. Not an official proposal, and no scenario here is a recommendation.',
 

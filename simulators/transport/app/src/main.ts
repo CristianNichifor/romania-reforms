@@ -12,6 +12,7 @@ import './style.css';
 import './native-ui.css';
 import './states.css';
 import { LOADING_SLOW, loadErrorMarkup, stageLoader } from './states';
+import './status-badge.css';
 import { buildNetwork, changedParams, loadCoupling, readScenario } from './consolidare';
 import {
   DAY_PROFILE,
