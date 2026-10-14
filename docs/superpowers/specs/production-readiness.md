@@ -196,3 +196,6 @@ Test: `simulators/salarizare/app/tests/layout.test.tsx`.
   what to try, with `role="status"`.
 
 Test: `simulators/salarizare/app/tests/states.test.tsx`.
+- Given the Distribution and Domains views, which draw figures without a source line, then
+  each ends with the app's short data line ("Date: MMFTSS, pachetul public din 20.08.2026;
+  IDA (Danemarca), 01.04.2026") in a `view-source` paragraph (ux-guidelines § 2.5, § 4).

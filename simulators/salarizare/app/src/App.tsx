@@ -15,6 +15,7 @@ import type { DkOccupation, GroupsDocument } from '../../engine/occupations';
 import type { Crosswalk, Regime } from '../../engine/types';
 import CompareView, { type PublicEnterpriseCompensationDoc } from './CompareView';
 import LoadError from './LoadError';
+import ViewSource from './ViewSource';
 import DomainsView from './DomainsView';
 import HomeView from './HomeView';
 import DistributionView from './DistributionView';
@@ -535,12 +536,15 @@ export default function App() {
         />
       )}
       {scenario.view === 'distributie' && ministry && assimilation && (
-        <DistributionView
-          menu={menu}
-          inForce={regimes['ro-153-2017'] ?? null}
-          draft={ministry}
-          crosswalk={assimilation}
-        />
+        <>
+          <DistributionView
+            menu={menu}
+            inForce={regimes['ro-153-2017'] ?? null}
+            draft={ministry}
+            crosswalk={assimilation}
+          />
+          <ViewSource text={t.dataLine} />
+        </>
       )}
       {scenario.view === 'functii' && ministry && fx && (
         <MergesView
@@ -557,24 +561,27 @@ export default function App() {
         />
       )}
       {scenario.view === 'domenii' && ministry && ours && occGroups && dkOcc && fx && benchmarks && (
-        <DomainsView
-          menu={menu}
-          inForce={regimes['ro-153-2017'] ?? null}
-          draft={ministry}
-          proposal={ours.regime}
-          groups={occGroups}
-          danish={dkOcc}
-          rates={fx}
-          benchmarks={{
-            avgRo: benchmarks.avgRo,
-            avgDk: benchmarks.avgDk,
-            floorRo: benchmarks.floorRo,
-            floorDk: benchmarks.floorDk,
-            year: benchmarks.year,
-          }}
-          scenario={scenario}
-          onScenario={setScenario}
-        />
+        <>
+          <DomainsView
+            menu={menu}
+            inForce={regimes['ro-153-2017'] ?? null}
+            draft={ministry}
+            proposal={ours.regime}
+            groups={occGroups}
+            danish={dkOcc}
+            rates={fx}
+            benchmarks={{
+              avgRo: benchmarks.avgRo,
+              avgDk: benchmarks.avgDk,
+              floorRo: benchmarks.floorRo,
+              floorDk: benchmarks.floorDk,
+              year: benchmarks.year,
+            }}
+            scenario={scenario}
+            onScenario={setScenario}
+          />
+          <ViewSource text={t.dataLine} />
+        </>
       )}
       {scenario.view === 'meserii' && ministry && occGroups && dkOcc && occBench && fx && (
         <OccupationsView
