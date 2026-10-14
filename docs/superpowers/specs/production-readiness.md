@@ -207,6 +207,20 @@ comma-below in Romanian, the phase-in sentence and formatters).
 Test: salarizare `tests/distribution-strings.test.ts` (same keys, no Romanian letters in
 English, comma-below in Romanian, counts and the transition sentence).
 
+### UX-24 Public pay in English, fourth slice: the Fluturaș view — done (English copy: needs human review)
+
+- Given `/salarizare/#/fluturas?lang=en`, then every word the view prints (title, lead, the
+  disclaimer and its "why", the person controls and their labels, the former-title block, the
+  variant dimension names, the claimed supplements and their notes, the per-regime cards with
+  their tables, caps, meters and diagnostics summary, the composition bar and the unit-free
+  comparison) is English, and shares use the `en-GB` locale; in Romanian nothing changes. The
+  strings and the dimension labels live in per-language tables in `src/PayslipView.tsx`
+  (`PAYSLIP_STRINGS`), the pattern of UX-21 to UX-23. Severity labels come from `i18n.ts` as
+  before; supplement names, diagnostics messages and ineligibility reasons are data.
+
+Test: salarizare `tests/payslip-strings.test.ts` (same keys, no Romanian letters in English,
+comma-below in Romanian, label formatters).
+
 ### UX-16 impozit-teren page check — done
 
 - Given `/impozit-teren/#j=bc` at 390 × 844, when the county table has rendered, then the

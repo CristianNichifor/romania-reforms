@@ -640,6 +640,7 @@ export default function App() {
       {loaded.length > 0 && scenario.view === 'payslip' && fx && (
         <PayslipView
           menu={menu}
+          lang={lang}
           regimes={ours ? [...loaded, ours.regime] : loaded}
           scenario={scenario}
           onChange={setScenario}
