@@ -101,9 +101,13 @@ Tests: as RR-3.
 
 ## D. Locale
 
-### RR-10 English for the salary simulator — todo
+### RR-10 English for the salary simulator — partial (shell done; view prose remains Romanian: needs-human)
 
-- Given the salary app, when the reader picks English, then the views render in English,
-  following administrativ's i18n pattern. Translations: needs human review.
+- Given the salary app, when the link carries `lang=en` (administrativ's rule: the hash decides,
+  Romanian by default), then the navigation, controls, messages and footer render in English,
+  a switch links the other language, and the scenario keeps its language through the round
+  trip. Translations: needs human review.
+- Not done: the prose inside the eleven views (about 5,000 lines of Romanian JSX). In English a
+  note says the views are still Romanian. Translating them is a separate, reviewable piece.
 
-Test: vitest in `simulators/salarizare/app`.
+Test: `simulators/salarizare/app/tests/i18n.test.tsx`.
