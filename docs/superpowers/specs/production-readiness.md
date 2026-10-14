@@ -482,6 +482,17 @@ Test: `tests/test_site_pages.py::test_every_simulator_card_carries_the_status_ba
 Test: deconcentrare and companii-stat `src/table-source.test.ts` (markup under the table,
 `main.ts` fills it).
 
+### UX-33 Public-pay page check on every view — done
+
+- Given each of the eleven views of `/public-pay/` (`#/acasa` … `#/functii`) at 390 × 844,
+  when its data have loaded (no `p.loading` left), then the document does not scroll sideways
+  (`scrollWidth <= clientWidth + 1`), axe-core (wcag2a, wcag2aa, wcag21aa) reports no serious
+  or critical issue, and the view raises no JS error — in Chromium, Firefox and WebKit. The
+  check used to cover the first screen only; a problem on any other view went unmeasured. Every
+  view is measured before anything is asserted, so one run lists every failing view
+  (ux guideline § 9 item 9; design criteria 1 and 8).
+
+Test: salarizare `scripts/check-page.mjs`, run by `npm run check:ui` in the salarizare CI job.
 ### UX-36 Source line under the justitie map — done
 
 - Given `/justitie/`, then the map legend ends with a `p.map-source` that reads the page's data

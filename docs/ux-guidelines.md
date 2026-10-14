@@ -176,5 +176,5 @@ flight* belong to another session; do not start them in parallel.
    caption each (UX-34) and the document pages' data tables end with the line (UX-38).
 9. No page-level axe or 390 px overflow check; add to the browser suites — done for the four
    suites (`page-checks.spec.ts` in administrativ, transport, impozit-teren, justitie) and for
-   the public-pay first screen (`scripts/check-page.mjs`); the deconcentrare and companii-stat
+   every public-pay view (`scripts/check-page.mjs`, UX-33); the deconcentrare and companii-stat
    pages still have no browser suite.
