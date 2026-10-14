@@ -388,6 +388,18 @@ Test: `tests/test_site_pages.py::test_static_pages_lead_with_the_family_bar`.
   (design screen 01; ux-guidelines § 2.3).
 
 Test: `tests/test_site_pages.py::test_every_simulator_card_names_its_own_data`.
+
+### UX-32 Every landing card carries the simulator's status badge — done
+
+- Given the seven simulator cards on `site/index.html` and `site/en/index.html`, then each
+  carries the one status badge from the vocabulary in ux-guidelines § 7 (`badge status`), and it
+  is the badge the linked page itself shows — read from the app's `index.html`, or from
+  `i18n.ts` for public-pay — in the hub's language (ro "Date reale", en "Real data"). The hub
+  and the app cannot disagree about what the data are.
+- The badge is drawn with the same ring the apps use (`.badge.status` in the apps'
+  `status-badge.css`), in the card's muted ink, under the data line.
+
+Test: `tests/test_site_pages.py::test_every_simulator_card_carries_the_status_badge`.
 ### UX-12 Public-pay error and empty states — done (Romanian: needs human review)
 
 - Given a data file that fails to load, then the page shows the failure in the reader's
