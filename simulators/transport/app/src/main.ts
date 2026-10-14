@@ -10,6 +10,9 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 maplibregl.setWorkerUrl(workerUrl);
 import './style.css';
 import './native-ui.css';
+import './states.css';
+import { LOADING_SLOW, loadErrorMarkup, stageLoader } from './states';
+import './map-source.css';
 import './status-badge.css';
 import { buildNetwork, changedParams, loadCoupling, readScenario } from './consolidare';
 import {
@@ -91,6 +94,8 @@ function writeHash(timetable: Timetable) {
 }
 
 async function main() {
+  // Past two seconds the loader says it is slow (UX-19); cleared when the data has landed.
+  const slow = stageLoader(document.getElementById('map-status'), LOADING_SLOW);
   // The consolidation is no longer chosen here. It is read from the URL — the same hash the
   // administrative simulator writes — and the whole network is recomputed from it. A reader
   // who moves those sliders is looking at a different country, and this map now follows.
@@ -105,6 +110,9 @@ async function main() {
   const line = dataLineFor(summary);
   const lineEl = document.getElementById('data-line');
   if (lineEl) lineEl.textContent = line ?? '';
+  // The same line under the legend (UX-20): the map carries its own source.
+  const mapSource = document.getElementById('map-source');
+  if (mapSource) mapSource.textContent = line ?? '';
 
   const { params, pins } = readScenario(location.hash);
   const moved = changedParams(params);
@@ -1080,6 +1088,7 @@ async function main() {
   // The geometry is several MB and the map is blank until it lands. `role="status"` means a
   // screen reader announces it without stealing focus; removing the node is what tells a
   // sighted reader the blank map is finished rather than broken.
+  clearTimeout(slow);
   el('loading').remove();
   document.getElementById('map-status')?.remove();
 }
@@ -1104,11 +1113,14 @@ function fail(title: string, detail: string) {
   // rejected by name — the map stayed blank and the page said nothing useful about why.
   document.getElementById('panel')!.innerHTML =
     '<a class="up" href="../">← Toate simulatoarele</a>' +
-    `<h1>${title}</h1><p class="lede">${detail}</p>`;
+    `<h1>${title}</h1><p class="lede">${detail}</p>` +
+    `<p role="alert">${loadErrorMarkup(title)}</p>`;
+  document.querySelector<HTMLButtonElement>('#panel .retry')?.addEventListener('click', () => location.reload());
   const status = document.getElementById('map-status');
   if (status) {
     status.textContent = title;
     status.classList.add('error');
+    status.setAttribute('role', 'alert');
   }
 }
 

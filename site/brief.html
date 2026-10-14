@@ -10,27 +10,42 @@
       content="De ce statul are de patru ori mai multe birouri decât harta pe care și-o tot promite: un scurt argument pentru comasarea serviciilor deconcentrate și a utilităților de stat pe cele opt regiuni de dezvoltare."
     />
     <style>
+      /* civic-ui neutral roles (UX-9): light first, dark only when the system asks. */
       :root {
-        color-scheme: light dark;
-        --bg: #0b0d10;
-        --fg: #e8eaed;
-        --muted: #9aa3ad;
-        --card: #14181d;
-        --line: #232a31;
-        --link: #7fb3ff;
+        color-scheme: light;
+        --bg: #f4f6f6;
+        --fg: #182b2c;
+        --muted: #475d60;
+        --card: #ffffff;
+        --line: #718588;
+        --link: #006b60;
       }
-      @media (prefers-color-scheme: light) {
+      @media (prefers-color-scheme: dark) {
         :root {
-          --bg: #f7f8fa;
-          --fg: #14181d;
-          --muted: #5b6570;
-          --card: #ffffff;
-          --line: #dfe3e8;
-          --link: #1a5fd0;
+          color-scheme: dark;
+          --bg: #142323;
+          --fg: #f0f6f5;
+          --muted: #c0d3cf;
+          --card: #203332;
+          --line: #8ca8a1;
+          --link: #b5e8dc;
         }
       }
       * {
         box-sizing: border-box;
+      }
+      /* UX-10: the family bar leads the page, so it loses the footer rule. */
+      body > .rr-nav {
+        max-width: 46rem;
+        margin: 0 auto 2rem;
+        padding: 0 0 0.75rem;
+        border-top: 0;
+        border-bottom: 1px solid var(--line);
+      }
+      body > .rr-nav a {
+        display: inline-block;
+        min-height: 24px;
+        line-height: 24px;
       }
       body {
         margin: 0;
@@ -112,6 +127,7 @@
     <style>.rr-nav{margin:1.5rem 0 0;padding-top:.75rem;border-top:1px solid;border-color:color-mix(in srgb,currentColor 20%,transparent);font-size:.8rem;line-height:1.6}.rr-nav ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:.2rem .9rem}.rr-nav a{color:inherit;display:inline-flex;align-items:center;min-height:24px;min-width:24px}.rr-nav a[aria-current="page"]{font-weight:600;text-decoration:none}</style>
   </head>
   <body>
+    <nav class="rr-nav" aria-label="Simulatoare"><ul><li><a href="./">Toate simulatoarele</a></li><li><a href="administrative-reform/">Reforma administrativă</a></li><li><a href="public-pay/">Salarizarea publică</a></li><li><a href="transport/">Transport public</a></li><li><a href="justitie/">Reforma justiției</a></li><li><a href="impozit-teren/">Impozitul pe teren</a></li><li><a href="deconcentrare/">Serviciile deconcentrate</a></li><li><a href="companii-stat/">Companiile statului</a></li></ul></nav>
     <main>
       <a class="up" href="./">← Toate simulatoarele</a>
       <h1>Opt regiuni, nu 41 — de ce statul are de patru ori mai multe birouri decât harta pe care și-o tot promite</h1>
@@ -257,7 +273,6 @@
         <a href="https://github.com/CristianNichifor/romania-reforms/blob/main/docs/eight-regions-consolidation.md"
           >docs/eight-regions-consolidation.md</a>.
       </p>
-      <nav class="rr-nav" aria-label="Simulatoare"><ul><li><a href="./">Toate simulatoarele</a></li><li><a href="administrative-reform/">Reforma administrativă</a></li><li><a href="public-pay/">Salarizarea publică</a></li><li><a href="transport/">Transport public</a></li><li><a href="justitie/">Reforma justiției</a></li><li><a href="impozit-teren/">Impozitul pe teren</a></li><li><a href="deconcentrare/">Serviciile deconcentrate</a></li><li><a href="companii-stat/">Companiile statului</a></li></ul></nav>
     </main>
   </body>
 </html>

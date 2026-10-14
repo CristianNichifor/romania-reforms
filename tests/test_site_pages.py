@@ -127,3 +127,70 @@ def test_landing_names_its_data_under_the_h1(page, word):
     footer = data / "salarizare/app/src/i18n.ts"
     package_date = re.search(r"MMFTSS din (\d\d\.\d\d\.\d{4})", footer.read_text("utf-8")).group(1)
     assert f"MMFTSS, {package_date}" in line
+
+
+CIVIC_LIGHT = {
+    "--bg": "#f4f6f6",
+    "--fg": "#182b2c",
+    "--muted": "#475d60",
+    "--card": "#ffffff",
+    "--line": "#718588",
+    "--link": "#006b60",
+}
+
+
+@pytest.mark.parametrize("page", ["index.html", "en/index.html", "brief.html", "privacy.html"])
+def test_static_pages_are_light_first_on_civic_ui_roles(page):
+    """UX-9: the plain `:root` block is the civic-ui light palette; dark is the opt-in."""
+    html = read(page)
+    style = re.search(r"<style>(.*?)</style>", html, re.S).group(1)
+    media = list(re.finditer(r"@media\s*\(prefers-color-scheme:\s*(\w+)\)\s*\{", style))
+    assert [m.group(1) for m in media] == ["dark"], "only a dark override is allowed"
+    base = style[: media[0].start()]
+    root = re.search(r":root\s*\{(.*?)\}", base, re.S).group(1)
+    assert "color-scheme: light;" in root
+    for name, value in CIVIC_LIGHT.items():
+        assert f"{name}: {value};" in root, f"{page}: {name} is not the civic-ui light value"
+    dark = style[media[0].end() :]
+    assert "--bg: #142323;" in dark and "--fg: #f0f6f5;" in dark
+
+
+@pytest.mark.parametrize("page", ["index.html", "en/index.html", "brief.html", "privacy.html"])
+def test_static_pages_lead_with_the_family_bar(page):
+    """UX-10: the shared navigation is the first thing in the body, before the H1, with a
+    link back to the hub first; the page styles it as a header, not a footer."""
+    html = read(page)
+    body = html[html.index("<body>") :]
+    nav = re.search(r"<nav class=\"rr-nav\"[^>]*>(.*?)</nav>", body, re.S)
+    assert nav and body.index("<nav") < body.index("<h1"), f"{page}: nav is not first"
+    first_link = re.search(r"<a href=\"([^\"]+)\"", nav.group(1)).group(1)
+    assert first_link in {"./", "../"}, "the first link is not the hub"
+    assert "body > .rr-nav" in html
+
+
+@pytest.mark.parametrize(
+    ("page", "word"), [("index.html", "Date:"), ("en/index.html", "Data:")]
+)
+def test_every_simulator_card_names_its_own_data(page, word):
+    """UX-11: each simulator card repeats the source and year the H1 data line already
+    states for it, so a reader scanning cards sees the as-of without the legend."""
+    html = read(page)
+    head = re.search(r"<h1>[^<]*</h1>\s*<p class=\"data-line\">\s*(.*?)\s*</p>", html, re.S)
+    legend = re.sub(r"\s+", " ", head.group(1))
+    body = re.sub(r"<nav .*?</nav>", "", html, flags=re.S)  # the shell's list is not a card
+    cards = re.findall(
+        r"<li>\s*<a href=\"(?:\.\./)?([a-z-]+)/\">(.*?)</a>\s*</li>", body, re.S
+    )
+    simulators = [
+        "administrative-reform", "public-pay", "transport", "justitie",
+        "impozit-teren", "deconcentrare", "companii-stat",
+    ]
+    by_path = dict(cards)
+    assert set(simulators) <= set(by_path), "a simulator card is missing"
+    for path in simulators:
+        card = by_path[path]
+        line = re.search(r"<div class=\"card-data\">\s*(.*?)\s*</div>", card, re.S)
+        assert line, f"{page}: {path} has no card data line"
+        text = re.sub(r"\s+", " ", line.group(1))
+        assert text.startswith(word), f"{page}: {path}: {text}"
+        assert text[len(word) :].strip() in legend, f"{page}: {path}: not in the H1 line"
