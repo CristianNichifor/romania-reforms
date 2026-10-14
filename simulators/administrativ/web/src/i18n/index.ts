@@ -268,6 +268,9 @@ export interface Strings {
 
   computing: string;
   loading: string;
+  loadingSlow: string;
+  loadFailed: string;
+  retry: string;
   recomputeTime: string;
 }
 
@@ -561,6 +564,9 @@ const ro: Strings = {
 
   computing: 'Se recalculează…',
   loading: 'Se încarcă datele…',
+  loadingSlow: 'Se încarcă datele… durează mai mult decât de obicei.',
+  loadFailed: 'Nu s-au putut încărca datele:',
+  retry: 'Reîncearcă',
   recomputeTime: 'recalculat în',
 };
 
@@ -854,6 +860,9 @@ const en: Strings = {
 
   computing: 'Recomputing…',
   loading: 'Loading data…',
+  loadingSlow: 'Loading data… this is taking longer than usual.',
+  loadFailed: 'Could not load the data:',
+  retry: 'Try again',
   recomputeTime: 'recomputed in',
 };
 

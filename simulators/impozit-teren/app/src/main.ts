@@ -14,6 +14,7 @@ import { combine, evaluate } from './model';
 import { countySourceBadges, estimatedCounties, severityLabel } from './sources';
 import type { GuideYears } from './sources';
 import { dataLineFor } from './data-line';
+import { LOADING_SLOW, loadErrorMarkup, messageOf, stageLoader } from './states';
 import type { BandKey, FiscalCode, Locality, Settings } from './model';
 
 type ValueFile = {
@@ -384,6 +385,8 @@ async function renderNational(): Promise<void> {
 }
 
 async function main() {
+  // Past two seconds the boot loader says it is slow (UX-19); render() replaces it.
+  const slow = stageLoader(document.getElementById('boot-status'), LOADING_SLOW);
   // The fold and the sources trail the sidebar; on a phone they trail the results instead.
   followViewport({
     trailing: Array.from(document.querySelectorAll('#panel > .fold, #panel > footer')),
@@ -1036,6 +1039,7 @@ async function main() {
     $('headline').innerHTML = '<p class="note">se încarcă cele 42 de județe…</p>';
     await everything;
   }
+  clearTimeout(slow);
   render();
   void renderNational();
   // Arriving *on* `#j=toate`, rather than switching to it. The dropdown's handler waits for
@@ -1045,5 +1049,6 @@ async function main() {
 }
 
 main().catch((error) => {
-  $('headline').innerHTML = `<p class="limit blocking">Datele nu s-au încărcat: ${error}</p>`;
+  $('headline').innerHTML = `<p class="limit blocking" role="alert">${loadErrorMarkup(messageOf(error))}</p>`;
+  $('headline').querySelector<HTMLButtonElement>('.retry')?.addEventListener('click', () => location.reload());
 });

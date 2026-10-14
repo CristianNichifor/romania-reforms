@@ -187,6 +187,18 @@ landing `tests/test_site_pages.py::test_landing_names_its_data_under_the_h1`.
 
 Test: `simulators/salarizare/app/tests/layout.test.tsx`.
 
+### UX-19 Staged loader and retry on the map simulators — done
+
+- Given `/administrativ/`, `/transport/` and `/impozit-teren/`, then the loader is a
+  `role="status"` that reads „Se încarcă …” at once and, after two seconds, says it is taking
+  longer than usual; a failed load becomes a `role="alert"` reading „Nu s-au putut încărca
+  datele: <motiv>” with a 44 px „Reîncearcă” button that reloads the page (ux-guidelines § 5;
+  design criterion 7). Administrativ translates the three strings with its chrome.
+- Markup comes from a small escaped-string module per app (`src/states.ts`), so the states are
+  unit-tested without a DOM, as the document pages do (UX-15).
+
+Tests: administrativ `tests/states.test.ts`, transport and impozit-teren `src/states.test.ts`.
+
 ### UX-6 Maps and readability — done (Romanian UI strings: needs human review)
 
 - Given courts that share a courthouse (the appellate court, tribunal and judecătorie of a
