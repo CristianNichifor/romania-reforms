@@ -194,3 +194,52 @@ def test_every_simulator_card_names_its_own_data(page, word):
         text = re.sub(r"\s+", " ", line.group(1))
         assert text.startswith(word), f"{page}: {path}: {text}"
         assert text[len(word) :].strip() in legend, f"{page}: {path}: not in the H1 line"
+
+
+STATUS_EN = {
+    "Date reale": "Real data",
+    "Date demonstrative": "Demo data",
+    "Prototip": "Prototype",
+    "Arhivat": "Archived",
+}
+
+APP_PAGES = {
+    "administrative-reform": "simulators/administrativ/web/index.html",
+    "transport": "simulators/transport/app/index.html",
+    "justitie": "simulators/justitie/app/index.html",
+    "impozit-teren": "simulators/impozit-teren/app/index.html",
+    "deconcentrare": "simulators/deconcentrare/app/index.html",
+    "companii-stat": "simulators/companii-stat/app/index.html",
+}
+
+
+def app_status(path: str) -> str:
+    """The status badge the simulator's own page shows (ux-guidelines § 7)."""
+    if path == "public-pay":
+        source = (ROOT / "simulators/salarizare/app/src/i18n.ts").read_text(encoding="utf-8")
+        return re.search(r"statusBadge: '([^']+)'", source).group(1)
+    html = (ROOT / APP_PAGES[path]).read_text(encoding="utf-8")
+    match = re.search(r'<span class="badge status"[^>]*>\s*([^<]+?)\s*</span>', html)
+    assert match, f"{APP_PAGES[path]} has no status badge"
+    return match.group(1)
+
+
+@pytest.mark.parametrize(("page", "lang"), [("index.html", "ro"), ("en/index.html", "en")])
+def test_every_simulator_card_carries_the_status_badge(page, lang):
+    """UX-32: each hub card carries the same status badge as the page it links to, in the
+    hub's language, so the hub and the app never disagree about what the data are
+    (ux-guidelines § 7)."""
+    html = read(page)
+    body = re.sub(r"<nav .*?</nav>", "", html, flags=re.S)
+    cards = dict(
+        re.findall(r"<li>\s*<a href=\"(?:\.\./)?([a-z-]+)/\">(.*?)</a>\s*</li>", body, re.S)
+    )
+    for path in ["administrative-reform", "public-pay", "transport", "justitie",
+                 "impozit-teren", "deconcentrare", "companii-stat"]:
+        badge = re.search(r'<span class="badge status">\s*([^<]+?)\s*</span>', cards[path])
+        assert badge, f"{page}: {path} has no status badge"
+        expected = app_status(path)
+        if lang == "en":
+            expected = STATUS_EN[expected]
+        assert badge.group(1) == expected, f"{page}: {path}: {badge.group(1)!r} != {expected!r}"
+        assert badge.group(1) in STATUS_EN.keys() | STATUS_EN.values(), badge.group(1)
