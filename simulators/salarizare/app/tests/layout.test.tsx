@@ -10,6 +10,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import type { Regime } from '../../engine/types';
 import App from '../src/App';
+import NoHit from '../src/NoHit';
 import StructureView from '../src/StructureView';
 import { PositionName, regimeLabel, splitFootnotes } from '../src/names';
 
@@ -76,5 +77,14 @@ describe('names from the source sheets', () => {
   it('names a regime by its law, not its file id', () => {
     expect(regimeLabel('ro-153-2017', { 'ro-153-2017': inForce })).toBe('Legea-cadru 153/2017');
     expect(regimeLabel('dk-stat-2026', {})).toBe('dk-stat-2026');
+  });
+});
+
+describe('the empty state of the search', () => {
+  it('names the query and suggests what to try (screen 03, criterion 7)', () => {
+    const html = renderToStaticMarkup(<NoHit query=" farmacist primr " />);
+    expect(html).toContain('role="status"');
+    expect(html).toContain('„farmacist primr”');
+    expect(html).toMatch(/încearcă .*sau alege o secțiune din meniu/);
   });
 });
