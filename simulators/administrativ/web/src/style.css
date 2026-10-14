@@ -649,6 +649,19 @@ a.ghost {
   flex: none;
 }
 
+/* The eleven unit colours as one striped swatch: the map paints each unit in its own hue, and
+   the legend used to explain every colour but that one. */
+.legend .swatch.units {
+  display: flex;
+  width: 44px;
+  overflow: hidden;
+}
+
+.legend .swatch.units i {
+  flex: 1;
+  height: 12px;
+}
+
 .legend .swatch.dot {
   width: 10px;
   height: 10px;
@@ -1094,10 +1107,24 @@ a.ghost {
   .summary {
     top: auto;
     bottom: calc(var(--disclaimer-h, 40px) + 96px);
-    gap: 14px;
+    gap: 8px 14px;
     padding: 8px 12px;
-    overflow-x: auto;
-    max-width: calc(100vw - 32px);
+    /* Wrapped, not scrolled: a scrolling bar clipped the last statistic ("8,73 mld RON") off
+       the edge with nothing to say more followed. Each value stays on one line; the labels
+       may wrap under it. */
+    flex-wrap: wrap;
+    justify-content: center;
+    white-space: normal;
+    left: 16px;
+    right: 16px;
+    transform: none;
+    max-width: none;
+    overflow: visible;
+  }
+
+  .summary .value {
+    font-size: 16px;
+    white-space: nowrap;
   }
 
   /* Sheets, not columns.
@@ -1209,10 +1236,6 @@ a.ghost {
     right: 12px;
   }
 
-
-  .legend {
-    display: none;
-  }
 }
 
 /* --- manual overrides and the audit list --------------------------------------------- */

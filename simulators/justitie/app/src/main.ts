@@ -34,6 +34,7 @@ import {
 } from './arondare';
 import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import { RAMP } from './ramp';
+import { spread } from './spread';
 import { pointHint } from './touch';
 
 // MapLibre 6 ships its worker as a separate file rather than inlining it, and a bundled app
@@ -801,7 +802,7 @@ async function main(): Promise<void> {
 
   const asFeatures = (courts: Court[], ratioOf: (c: Court) => number | null) => ({
     type: 'FeatureCollection' as const,
-    features: courts.map((c) => {
+    features: spread(courts).map((c) => {
       const ratio = ratioOf(c);
       return {
         type: 'Feature' as const,
