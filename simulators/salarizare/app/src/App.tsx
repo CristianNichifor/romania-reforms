@@ -24,6 +24,7 @@ import EquivalenceView from './EquivalenceView';
 import PayslipView from './PayslipView';
 import ProposalView from './ProposalView';
 import StructureView from './StructureView';
+import { STRINGS, langOf, withLang } from './i18n';
 
 const ACTIVE_DRAFT_ID = 'ro-draft-2026-08-20';
 const LEGACY_DRAFT_ID = 'ro-draft-2026-07-16';
@@ -72,38 +73,16 @@ async function loadJson<T>(path: string): Promise<T> {
  * that says what it will show. The grouping is the navigation: a citizen wants to know
  * what changes, what people are paid, and whether it is affordable — in that order.
  */
-const VIEW_META: Record<ViewId, { label: string; blurb: string }> = {
-  acasa: { label: 'Despre proiect', blurb: 'ce este, pe ce date stă, ce nu poate spune' },
-  compare: { label: 'Ce se schimbă', blurb: 'proiectul, propunerea și Danemarca, față în față' },
-  propunere: { label: 'Propunerea noastră', blurb: 'nouă corecturi, fiecare cu întrerupătorul ei' },
-  structure: { label: 'Cum e construită grila', blurb: 'zecimalele, golurile, funcțiile comasate' },
-  distributie: {
-    label: 'Cine urcă, cine coboară',
-    blurb: 'cum se mișcă fiecare post față de legea de azi',
-  },
-  domenii: {
-    label: 'Domenii publice',
-    blurb: 'educație, sănătate, justiție, ordine, apărare, administrație',
-  },
-  meserii: { label: 'Meserii, RO vs DK', blurb: 'cât ia aceeași meserie în fiecare țară' },
-  payslip: { label: 'Un salariu, calculat', blurb: 'un om anume, sub fiecare regim' },
-  echivalente: { label: 'Echivalențe de post', blurb: 'ce denumire daneză corespunde fiecărei funcții' },
-  envelope: { label: 'Cât costă tot', blurb: 'plicul, plafonul de 20% și cine trece de el' },
-  functii: {
-    label: 'Funcție cu funcție',
-    blurb: 'ce denumiri a înghițit fiecare post, și cât ia în trei sisteme',
-  },
-};
 
 /** Views whose numbers move as the draft phases itself in. */
 const PHASED_VIEWS: ViewId[] = ['compare', 'structure', 'payslip'];
 
-const NAV_GROUPS: Array<{ title: string; ask: string; views: ViewId[] }> = [
-  { title: 'Începe aici', ask: 'Ce e asta?', views: ['acasa'] },
-  { title: 'Reforma', ask: 'Ce se schimbă?', views: ['compare', 'distributie', 'structure'] },
-  { title: 'Alternativa', ask: 'Se poate altfel?', views: ['propunere'] },
-  { title: 'Oamenii', ask: 'Cine cât ia?', views: ['domenii', 'functii', 'meserii', 'payslip', 'echivalente'] },
-  { title: 'Banii', ask: 'Ne permitem?', views: ['envelope'] },
+const NAV_GROUPS: Array<{ key: keyof (typeof STRINGS)['ro']['groups']; views: ViewId[] }> = [
+  { key: 'start', views: ['acasa'] },
+  { key: 'reform', views: ['compare', 'distributie', 'structure'] },
+  { key: 'alternative', views: ['propunere'] },
+  { key: 'people', views: ['domenii', 'functii', 'meserii', 'payslip', 'echivalente'] },
+  { key: 'money', views: ['envelope'] },
 ];
 
 /**
@@ -131,6 +110,11 @@ function useHashScenario(): [Scenario, (next: Scenario) => void] {
 
 export default function App() {
   const [scenario, setScenario] = useHashScenario();
+  const lang = langOf(scenario);
+  const t = STRINGS[lang];
+  useEffect(() => {
+    document.documentElement.lang = lang;
+  }, [lang]);
   const [regimes, setRegimes] = useState<Record<string, Regime>>({});
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -422,12 +406,25 @@ export default function App() {
   };
 
   return (
-    <div className="wrap civic-scope civic-pay">
-      <nav className="tabs" aria-label="Secțiunile instrumentului">
+    <div className="wrap civic-scope civic-pay" lang={lang}>
+      <p className="lang-switch">
+        <a
+          href={encodeScenario(withLang(scenario, t.switchTo.lang))}
+          hrefLang={t.switchTo.lang}
+          lang={t.switchTo.lang}
+          onClick={(event) => {
+            event.preventDefault();
+            setScenario(withLang(scenario, t.switchTo.lang));
+          }}
+        >
+          {t.switchTo.label}
+        </a>
+      </p>
+      <nav className="tabs" aria-label={t.sections}>
         {NAV_GROUPS.map((group) => (
-          <div className="tabgroup" key={group.title}>
-            <span className="tabgroup-title">{group.title}</span>
-            <span className="tabgroup-ask">{group.ask}</span>
+          <div className="tabgroup" key={group.key}>
+            <span className="tabgroup-title">{t.groups[group.key].title}</span>
+            <span className="tabgroup-ask">{t.groups[group.key].ask}</span>
             {group.views.map((id) => (
               <button
                 key={id}
@@ -439,8 +436,8 @@ export default function App() {
                 className={scenario.view === id ? 'on' : ''}
                 onClick={() => setScenario({ ...scenario, view: id })}
               >
-                <strong>{VIEW_META[id].label}</strong>
-                <small>{VIEW_META[id].blurb}</small>
+                <strong>{t.views[id].label}</strong>
+                <small>{t.views[id].blurb}</small>
               </button>
             ))}
           </div>
@@ -457,7 +454,7 @@ export default function App() {
               />
             ))}
             <Button className="share" onClick={share}>
-              {copied ? 'link copiat' : 'copiază linkul scenariului'}
+              {copied ? t.copied : t.share}
             </Button>
           </div>
         )}
@@ -466,7 +463,7 @@ export default function App() {
       {PHASED_VIEWS.includes(scenario.view) && years.length > 1 && (
         <div className="phase">
           <RangeSlider
-            label="Grila din anul"
+            label={t.phaseLabel}
             min={years[0]}
             max={years[years.length - 1]}
             step={1}
@@ -476,15 +473,15 @@ export default function App() {
             }
           />
           <p className="phase-note">
-            proiectul se aplică eșalonat: coeficienții de vârf urcă an de an până în{' '}
-            {years[years.length - 1]}
-            {period && <>; coloana „{period}"</>}
+            {t.phaseNote(years[years.length - 1])}
+            {period && t.phaseColumn(period)}
           </p>
         </div>
       )}
 
-      {error && <p className="loading">Nu s-au putut încărca datele: {error}</p>}
-      {!error && loaded.length === 0 && <p className="loading">Se încarcă grila…</p>}
+      {t.viewsInRomanian && <p className="lang-note">{t.viewsInRomanian}</p>}
+      {error && <p className="loading">{t.loadError(error)}</p>}
+      {!error && loaded.length === 0 && <p className="loading">{t.loading}</p>}
 
       {scenario.view === 'acasa' && (
         <HomeView
@@ -609,12 +606,11 @@ export default function App() {
       )}
 
       <footer>
-        Sursă: pachetul public MMFTSS din 20.08.2026 și anexele de coeficienți; pentru
-        Danemarca, tabelele IDA din 01.04.2026. Fiecare număr din <code>data/</code> poartă
-        documentul și articolul sau celula din care provine.{' '}
+        {t.footerSource}{' '}
         <a href="https://github.com/CristianNichifor/romania-reforms/tree/main/simulators/salarizare">
-          Cod și date
-        </a>. Licență Apache-2.0.
+          {t.footerCode}
+        </a>
+        . {t.footerLicence}
       </footer>
     </div>
   );

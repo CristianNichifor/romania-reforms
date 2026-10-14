@@ -3,6 +3,8 @@ import path from 'node:path';
 import react from '@vitejs/plugin-react';
 import { defineConfig, type Plugin } from 'vite';
 
+import { siteShell } from '../../../site/shell.mjs';
+
 const base = process.env.VITE_BASE ?? '/';
 const basePath = base.endsWith('/') ? base : `${base}/`;
 
@@ -37,6 +39,6 @@ function dataFallbackPlugin(): Plugin {
 // A project site is served from /<repo>/, so the base must carry that prefix in CI.
 export default defineConfig({
   base,
-  plugins: [dataFallbackPlugin(), react()],
+  plugins: [siteShell('public-pay'), dataFallbackPlugin(), react()],
   build: { outDir: 'dist', sourcemap: false },
 });

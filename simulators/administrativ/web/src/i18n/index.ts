@@ -164,6 +164,7 @@ export interface Strings {
   operatingCost: string;
   county: string;
   copyLink: string;
+  openTransport: string;
   linkCopied: string;
 
   candidatesHeading: string;
@@ -438,6 +439,7 @@ const ro: Strings = {
   operatingCost: 'Cheltuieli de funcționare',
   county: 'Județ',
   copyLink: 'Copiază link scenariu',
+  openTransport: 'Deschide în Transport →',
   linkCopied: 'Link copiat',
 
   candidatesHeading: 'Candidați la statutul de centru',
@@ -728,6 +730,7 @@ const en: Strings = {
   operatingCost: 'Operating spending',
   county: 'County',
   copyLink: 'Copy scenario link',
+  openTransport: 'Open in Transport →',
   linkCopied: 'Link copied',
 
   candidatesHeading: 'Candidates to be a centre',
@@ -892,4 +895,16 @@ export function formatPercentagePoints(value: number, lang: Lang): string {
   return `${new Intl.NumberFormat(lang === 'ro' ? 'ro-RO' : 'en-GB', {
     maximumFractionDigits: 1,
   }).format(value * 100)} pp`;
+}
+
+export function formatDecimal(value: number, digits: number, lang: Lang): string {
+  return new Intl.NumberFormat(lang === 'ro' ? 'ro-RO' : 'en-GB', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: digits,
+  }).format(value);
+}
+
+/** Metres as kilometres to one decimal, in the reader's notation. */
+export function formatKm(metres: number, lang: Lang): string {
+  return `${formatDecimal(metres / 1000, 1, lang)} km`;
 }

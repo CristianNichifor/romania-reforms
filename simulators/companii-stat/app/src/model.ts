@@ -143,7 +143,7 @@ export const TIER_LABELS: Record<Tier, string> = {
   regional: 'de rețea — regionalizabilă',
   local: 'locală',
   national: 'națională',
-  other: 'alta',
+  other: 'altă',
 };
 
 /** Integer percent of operating entities a merge removes. Zero when the cluster is empty. */
@@ -273,4 +273,24 @@ export function absorbedRows(doc: Document): AbsorbedRow[] {
     }
   }
   return rows;
+}
+
+/** The data's severity keys, as the page prints them. */
+export const SEVERITY_LABELS: Record<'blocking' | 'material' | 'note', string> = {
+  blocking: 'blocant',
+  material: 'important',
+  note: 'de reținut',
+};
+
+/**
+ * A lei amount a reader can take in at a glance: "1,23 mld", "45,6 mil", "980.000". The unit
+ * (RON) stays in the sentence around it.
+ */
+export function compactRon(ron: number): string {
+  const abs = Math.abs(ron);
+  const fmt = (value: number, digits: number) =>
+    value.toLocaleString('ro-RO', { maximumFractionDigits: digits });
+  if (abs >= 1e9) return `${fmt(ron / 1e9, 2)} mld`;
+  if (abs >= 1e6) return `${fmt(ron / 1e6, 1)} mil`;
+  return fmt(ron, 0);
 }

@@ -75,13 +75,14 @@
   --shadow-1: 0 1px 2px rgb(16 24 40 / 6%);
   --shadow-2: 0 8px 24px -12px rgb(16 24 40 / 25%);
 
-  /* The sequential ramp, five stops, green through red. Used by the map's choropleth and by any
-     chart that grades a value rather than merely measuring it. */
-  --ramp-1: #2f7d4f;
-  --ramp-2: #7fa86a;
-  --ramp-3: #d9c05a;
-  --ramp-4: #d98040;
-  --ramp-5: #c2453a;
+  /* The ramp, five stops, blue through orange (src/ramp.ts, which the map reads; ramp.test.ts
+     keeps them equal and checks them under red-green colour blindness). Used by the map's
+     choropleth and by any chart that grades a value rather than merely measuring it. */
+  --ramp-1: #3b6fb6;
+  --ramp-2: #8fb8de;
+  --ramp-3: #e8e2c8;
+  --ramp-4: #e8a05a;
+  --ramp-5: #b35806;
 }
 
 /* Dark, from the system. */

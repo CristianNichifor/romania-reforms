@@ -4,7 +4,10 @@
    changed no pixel while looking exactly like the place to change the colours. */
 :root {
   --bg: #12141a; --panel: #1a1d26; --ink: #e8eaf0; --dim: #98a0b3; --line: #2a2f3d;
+  --link: #7aa2f7;
 }
+/* Links in the panel's prose: the browser's default blue read at about 2:1 on the dark panel. */
+.hint a, .hint a:visited { color: var(--link); }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink);
   font: 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }

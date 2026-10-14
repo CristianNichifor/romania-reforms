@@ -16,7 +16,7 @@ import {
   healthAccessTotals,
   type HealthAccessPayload,
 } from './app/health-access';
-import { budgetUrlFor } from './app/links';
+import { budgetUrlFor, transportUrlFor } from './app/links';
 import {
   localFinancePayloadAligned,
   localFinancePeriodLabel,
@@ -47,6 +47,8 @@ import {
 import {
   STRINGS,
   detectLang,
+  formatDecimal,
+  formatKm,
   formatMoney,
   formatNumber,
   formatPercent,
@@ -103,7 +105,7 @@ interface SliderSpec {
   format: (value: number, lang: Lang, s: Strings) => string;
 }
 
-const KM = (v: number): string => `${(v / 1000).toFixed(1).replace(/\.0$/, '')} km`;
+const KM = (v: number, lang: Lang): string => formatKm(v, lang);
 
 const SLIDERS: SliderSpec[] = [
   {
@@ -114,17 +116,17 @@ const SLIDERS: SliderSpec[] = [
   {
     key: 'rNationalM', labelKey: 'rNational', helpKey: 'rNationalHelp',
     min: 0, max: RADIUS_GRID.length - 1, step: 1,
-    format: (v) => KM(v),
+    format: (v, l) => KM(v, l),
   },
   {
     key: 'rCapM', labelKey: 'rCap', helpKey: 'rCapHelp',
     min: 0, max: RADIUS_GRID.length - 1, step: 1,
-    format: (v) => KM(v),
+    format: (v, l) => KM(v, l),
   },
   {
     key: 'rTownM', labelKey: 'rTown', helpKey: 'rTownHelp',
     min: 0, max: RADIUS_GRID.length - 1, step: 1,
-    format: (v) => KM(v),
+    format: (v, l) => KM(v, l),
   },
   {
     key: 'nMin', labelKey: 'nMin', helpKey: 'nMinHelp',
@@ -134,7 +136,7 @@ const SLIDERS: SliderSpec[] = [
   {
     key: 'rSepM', labelKey: 'rSep', helpKey: 'rSepHelp',
     min: 0, max: 30000, step: 1000,
-    format: (v) => KM(v),
+    format: (v, l) => KM(v, l),
   },
   {
     key: 'minOverlap', labelKey: 'minOverlap', helpKey: 'minOverlapHelp',
@@ -149,7 +151,7 @@ const SLIDERS: SliderSpec[] = [
   {
     key: 'maxRoadM', labelKey: 'maxRoad', helpKey: 'maxRoadHelp',
     min: 0, max: 80000, step: 5000,
-    format: (v, _l, s) => (v === 0 ? s.pTargetOff : KM(v)),
+    format: (v, l, s) => (v === 0 ? s.pTargetOff : KM(v, l)),
   },
   {
     key: 'pTarget', labelKey: 'pTarget', helpKey: 'pTargetHelp',
@@ -159,7 +161,7 @@ const SLIDERS: SliderSpec[] = [
   {
     key: 'minCompactness', labelKey: 'minCompactness', helpKey: 'minCompactnessHelp',
     min: 0, max: 0.35, step: 0.05,
-    format: (v, _l, s) => (v === 0 ? s.pTargetOff : v.toFixed(2)),
+    format: (v, l, s) => (v === 0 ? s.pTargetOff : formatDecimal(v, 2, l)),
   },
 ];
 
@@ -506,7 +508,7 @@ async function boot(): Promise<void> {
         `${formatNumber(latest.regions, scenario.lang)}`,
         `${strings.regions} / ${formatNumber(ready.uatCount, scenario.lang)}`,
       ),
-      stat(`${reduction.toFixed(1)}%`, strings.reduction, true),
+      stat(formatPercent(reduction / 100, scenario.lang), strings.reduction, true),
       stat(
         formatMoney(latest.savingsAdminRon, scenario.lang),
         strings.savings,
@@ -899,13 +901,13 @@ async function boot(): Promise<void> {
             (leg) =>
               `<div class="line${leg.real ? '' : ' schematic'}">` +
               `<span>${ready!.attributes.name[leg.to]}</span>` +
-              `<span>${(leg.metres / 1000).toFixed(1)} km${minutes(
+              `<span>${formatKm(leg.metres, scenario.lang)}${minutes(
                 secondsOf.get(`${leg.from}:${leg.to}`),
               )}</span></div>`,
           )
           .join('') +
         `<div class="line total"><span>${strings.chainTotal}</span>` +
-        `<span>${(totalMetres / 1000).toFixed(1)} km${minutes(totalSeconds)}</span></div>` +
+        `<span>${formatKm(totalMetres, scenario.lang)}${minutes(totalSeconds)}</span></div>` +
         (shard === undefined ? `<div class="chain-note">${strings.chainLoading}</div>` : '') +
         (anySchematic && shard !== undefined
           ? `<div class="chain-note">${strings.chainSchematic}</div>`
@@ -2144,7 +2146,7 @@ async function boot(): Promise<void> {
             (row) =>
               `<div class="line${row.own ? ' own' : ''}">` +
               `<span>${unitName(ready!, row.seat)}</span>` +
-              `<span>${(row.metres / 1000).toFixed(1)} km</span></div>`,
+              `<span>${formatKm(row.metres, scenario.lang)}</span></div>`,
           )
           .join('');
       return;
@@ -2164,7 +2166,7 @@ async function boot(): Promise<void> {
               : blocker.kind === 'county-minimum'
                 ? strings.auditWhyCountyMinimum.replace('{units}', String(blocker.units))
                 : strings.auditWhyCap
-                  .replace('{km}', (blocker.metres / 1000).toFixed(1))
+                  .replace('{km}', formatDecimal(blocker.metres / 1000, 1, scenario.lang))
                   .replace('{cap}', String(Math.round(scenario.params.maxRoadM / 1000)));
       }
       return;
@@ -2411,6 +2413,16 @@ async function boot(): Promise<void> {
     renderSliders();
     schedule();
   });
+
+  // The hash changes without a hashchange (the map rewrites it in place), so the link is
+  // refreshed whenever the reader is about to use it.
+  const openTransport = el<HTMLAnchorElement>('#open-transport');
+  const refreshTransportLink = (): void => {
+    openTransport.href = transportUrlFor(location.hash);
+  };
+  for (const event of ['pointerenter', 'focus', 'click', 'contextmenu']) {
+    openTransport.addEventListener(event, refreshTransportLink);
+  }
 
   el('#copy-link').addEventListener('click', async () => {
     await navigator.clipboard.writeText(location.href);

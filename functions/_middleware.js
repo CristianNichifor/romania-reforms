@@ -5,6 +5,8 @@
 // previews fail closed until the gate's deploy script has set it. Same rule as the hub's
 // functions/_middleware.ts (digital-public-administration-lab).
 
+import { renamedLocation } from "./renamed-paths.js";
+
 const PREVIEW_GATE_HEADER = "x-cnw-preview-gate";
 
 export const isPreviewHost = (hostname) => hostname.endsWith(".pages.dev") && hostname.split(".").length > 3;
@@ -25,6 +27,10 @@ export async function onRequest(context) {
   const hostname = new URL(context.request.url).hostname;
   if ((gate || isPreviewHost(hostname)) && !(gate && (await sameSecret(context.request.headers.get(PREVIEW_GATE_HEADER), gate)))) {
     return new Response("Not found", { status: 403, headers: { "X-Robots-Tag": "noindex, nofollow", "Cache-Control": "no-store" } });
+  }
+  const location = renamedLocation(context.request.url);
+  if (location !== null) {
+    return new Response(null, { status: 301, headers: { Location: location } });
   }
   return context.next();
 }
