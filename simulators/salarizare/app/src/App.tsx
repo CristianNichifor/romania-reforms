@@ -533,6 +533,7 @@ export default function App() {
           period={period}
           amepipCompensation={amepipCompensation}
           onOpen={(view) => setScenario({ ...scenario, view })}
+          lang={lang}
         />
       )}
       {scenario.view === 'propunere' && ministry && proposal && (
@@ -610,6 +611,7 @@ export default function App() {
           onScenario={setScenario}
           measured={measured}
           inForce={regimes['ro-153-2017'] ?? null}
+          lang={lang}
         />
       )}
       {scenario.view === 'echivalente' &&

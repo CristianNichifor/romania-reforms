@@ -101,7 +101,7 @@ Tests: as RR-3.
 
 ## D. Locale
 
-### RR-10 English for the salary simulator — partial (shell done; view prose remains Romanian: needs-human)
+### RR-10 English for the salary simulator — done (shell and all views bilingual, UX-21 to UX-31; English copy: needs human review)
 
 - Given the salary app, when the link carries `lang=en` (administrativ's rule: the hash decides,
   Romanian by default), then the navigation, controls, messages and footer render in English,
@@ -178,7 +178,7 @@ Test: `simulators/salarizare/app/tests/layout.test.tsx`.
   the "what enters the comparison" note) is English, and counts and movements use the `en-GB`
   locale; in Romanian nothing changes. The strings live in one table per language in
   `src/DomainsView.tsx`, keyed alike, so the other four views can follow the same pattern
-  (ux-guidelines § 9 item 6, RR-10). The "views are in Romanian" footer note stays until they do.
+  (ux-guidelines § 9 item 6, RR-10). They did, in UX-22 to UX-31; the footer note was reworded in UX-31.
 
 Test: salarizare `tests/domains-strings.test.ts` (same keys, no Romanian letters in English,
 comma-below in Romanian, formatters).
@@ -304,6 +304,42 @@ comma-below in Romanian, the counts line and the "from" formatter).
 
 Test: salarizare `tests/merges-strings.test.ts` (same keys, no Romanian letters in English,
 comma-below in Romanian, count and summary formatters).
+
+### UX-30 Public pay in English, tenth slice: the Ce se schimbă view — done (English copy: needs human review)
+
+- Given `/salarizare/#/compare?lang=en`, then every word the view prints (title and purpose, the
+  four brief cards, the AMEPIP section, the hero sentence, the four column heads with the counted
+  subtitle, the seven row labels and hints, every cell note and "not loaded" dash explanation, the
+  sampled-cell footnote, the proposed corrections with badges and touched counts, the trades
+  section with its table heads and source note, and the four onward cards) is English, and counts,
+  shares, ratios and money use the `en-GB` locale; in Romanian nothing changes. The strings and
+  the annex labels live in per-language tables in `src/CompareView.tsx` (`COMPARE_STRINGS`), the
+  pattern of UX-21 to UX-29. Patch titles, effects, rationales, duty names, position names and
+  the proposal's "not policy" lede are data.
+- The Meserii view remains Romanian in English mode; the "views are in Romanian" footer note
+  stays until it is done.
+
+Test: salarizare `tests/compare-strings.test.ts` (same shape at every level, no Romanian letters
+in English, comma-below in Romanian, the counted subtitle and sentence formatters).
+
+### UX-31 Public pay in English, eleventh slice: the Meserii view — done (English copy: needs human review)
+
+- Given `/salarizare/#/meserii?lang=en`, then every word the view prints (title and purpose, the
+  disclaimer and the folded cap explanation, the two controls and the key, the sector filter, each
+  occupation row's badges, country labels, no-comparator note, money hint, "why" fold with the
+  banded and outside-the-cap notes, the measured section with its verdicts, key and limits, the
+  composition section with its hero, bars, trend, table, component labels and exclusion texts,
+  and the "how the groups were made" notes) is English, and ratios, counts, shares and money use
+  the `en-GB` locale; in Romanian nothing changes. The strings, the component labels and the
+  exclusion texts live in per-language tables in `src/OccupationsView.tsx`
+  (`OCCUPATIONS_STRINGS`), the pattern of UX-21 to UX-30. Group labels, proposed names, bases,
+  sector names, Danish occupation names, INS occupation names and position names are data.
+- With this slice every public-pay view is bilingual. The English footer note in `i18n.ts` no
+  longer says the views are Romanian; it says the documents they read (position titles, patch
+  texts, group notes) remain in Romanian, which is true.
+
+Test: salarizare `tests/occupations-strings.test.ts` (same shape at every level, no Romanian
+letters in English, comma-below in Romanian, sentence formatters, the footer note).
 
 ### UX-16 impozit-teren page check — done
 
