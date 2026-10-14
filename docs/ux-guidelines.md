@@ -137,10 +137,14 @@ interface is "Date reale" with an honest method page.
 | Map legends | `simulators/transport/app/src/legend.test.ts` |
 | Browser checks (civic-ui native controls, map render) | `simulators/administrativ/web/tests/browser/native-ui.spec.ts`, `simulators/transport/app/tests/browser/native-ui.spec.ts`, `simulators/impozit-teren/app/tests/browser/native-ui.spec.ts`, `simulators/justitie/app/tests/browser/map.spec.ts` |
 | Every public-pay view renders | `simulators/salarizare/app/tests/views.test.tsx` |
+| Status badge on every app page and on its hub card | `tests/test_site_pages.py::test_every_simulator_card_carries_the_status_badge`, `tests/test_site_pages.py::test_every_simulator_card_names_its_own_data` |
+| Light-first static pages on civic-ui roles | `tests/test_site_pages.py::test_static_pages_are_light_first_on_civic_ui_roles` |
+| No sideways scroll at 390 px and no serious axe issue | `simulators/administrativ/web/tests/browser/page-checks.spec.ts`, `simulators/transport/app/tests/browser/page-checks.spec.ts`, `simulators/impozit-teren/app/tests/browser/page-checks.spec.ts`, `simulators/justitie/app/tests/browser/page-checks.spec.ts`, `simulators/salarizare/app/scripts/check-page.mjs` |
 | This guideline covers every simulator and cites real tests | `tests/test_ux_guidelines.py` |
 
-Not yet enforced by a test: provenance line (rr #160 adds it), axe on every page, 390 px
-no-horizontal-scroll, status badge vocabulary.
+Not yet enforced by a test: the as-of date on charts and maps (§ 9 item 8); axe and the 390 px
+check on the deconcentrare and companii-stat pages, which have no browser suite, and on the
+public-pay views other than Acasă.
 
 ## 9. Known deviations backlog
 
@@ -148,13 +152,14 @@ From the live review (2026-10-14) and a source audit of `origin/dev`. Items mark
 flight* belong to another session; do not start them in parallel.
 
 1. Landing, `/deconcentrare/`, `/companii-stat/` are dark-first: `:root` sets the dark
-   palette and light only under `prefers-color-scheme: light`. Flip to light-first.
+   palette and light only under `prefers-color-scheme: light`. Flip to light-first — done
+   (UX-13, UX-17, `test_static_pages_are_light_first_on_civic_ui_roles`).
 2. Three palettes for chrome (dark map apps, light pages, public-pay neutrals); move
    chrome to civic-ui roles so only the map canvases differ.
-3. No `Date: sursă, an` line under the H1 — *in flight* (#160).
+3. No `Date: sursă, an` line under the H1 — done (#160, UX-5, UX-11, UX-20).
 4. justitie: overlapping Bucharest circles; administrativ: no legend for unit colours,
    mobile stats clipping; transport loader; impozit-teren gap under the sidebar and mobile
-   ordering; companii-stat mobile table clipping — *in flight* (#161).
+   ordering; companii-stat mobile table clipping — done (#161).
 5. public-pay layout: menu below the H1, search after the lead, humanised codes, `*1)`
    markers — done (UX-7, #162).
 6. English mode: public-pay view prose is still Romanian (RR-10). *Acasă (UX-25), Domenii (UX-21),
@@ -162,6 +167,11 @@ flight* belong to another session; do not start them in parallel.
    (UX-27), Propunerea noastră (UX-28), Funcție cu funcție (UX-29) and Ce se schimbă (UX-30) are
    bilingual; Meserii follows.*
 7. No status badge on any page. Agree the status per simulator with the owner (most
-   use real data, so "Date reale"), then add the badge.
+   use real data, so "Date reale"), then add the badge — done: every app page carries
+   "Date reale" (UX-18 and the family-look batch) and every hub card repeats it (UX-32). The
+   status itself is still the agent's reading of the data; the owner may change one.
 8. No as-of date on charts and maps beyond the provenance line.
-9. No page-level axe or 390 px overflow check; add to the browser suites.
+9. No page-level axe or 390 px overflow check; add to the browser suites — done for the four
+   suites (`page-checks.spec.ts` in administrativ, transport, impozit-teren, justitie) and for
+   the public-pay first screen (`scripts/check-page.mjs`); the deconcentrare and companii-stat
+   pages still have no browser suite.
