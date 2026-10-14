@@ -6,6 +6,7 @@ import type { Scenario, ViewId } from '../../engine/scenario';
 import type { Regime } from '../../engine/types';
 import { GlossaryList } from './Glossary';
 import { PositionName } from './names';
+import NoHit from './NoHit';
 
 const ro = (n: number) => n.toLocaleString('ro-RO');
 
@@ -101,6 +102,7 @@ export default function HomeView({
   denmark,
   onOpen,
   dataLine,
+  statusBadge,
 }: {
   /** The section menu, drawn after the search so the question people arrive with comes first. */
   menu?: ReactNode;
@@ -109,6 +111,8 @@ export default function HomeView({
   denmark: Regime | null;
   /** "Date: <sursă>, <an>", rendered right under the H1 (UX-5). */
   dataLine: string;
+  /** "Date reale": the one status badge on the page (design screen 03, criterion 4). */
+  statusBadge: string;
   onOpen: (view: ViewId, patch?: Partial<Scenario>) => void;
 }) {
   const positions = (regime: Regime | null) => (regime ? regime.positions.length : null);
@@ -133,12 +137,14 @@ export default function HomeView({
           ← Toate simulatoarele
         </a>
         <h1>Cum își plătește România angajații publici</h1>
-        <p className="data-line">{dataLine}</p>
-        <p>
+        <p className="purpose">
           Un instrument pentru dezbaterea publică despre proiectul de lege al salarizării din 20
           august 2026: ce schimbă față de legea care plătește oamenii azi, cine urcă și cine
           coboară în ierarhie, cât costă și cum arată aceleași întrebări într-o țară care a
           rezolvat altfel problema.
+        </p>
+        <p className="data-line">
+          {dataLine} <span className="badge status">{statusBadge}</span>
         </p>
       </header>
 
@@ -180,13 +186,7 @@ export default function HomeView({
               ))}
             </ul>
           )}
-          {query.trim().length >= 2 && hits.length === 0 && (
-            <p className="home-nohit">
-              Nicio funcție cu numele ăsta în grila proiectului. Denumirile sunt cele din anexe,
-              iar multe posturi reale sunt comasate sub un titlu care nu le conține: caută cuvântul
-              cel mai general din meserie.
-            </p>
-          )}
+          {query.trim().length >= 2 && hits.length === 0 && <NoHit query={query} />}
         </div>
       </section>
 
