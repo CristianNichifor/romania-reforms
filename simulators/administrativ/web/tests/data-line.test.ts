@@ -11,7 +11,10 @@ const financeYear = /local-finance-(\d{4})\.json/.exec(main)?.[1];
 
 describe('the data line under the H1', () => {
   it('follows the H1 in the markup', () => {
-    expect(html).toMatch(/<h1 data-i18n="title"><\/h1>\s*<p class="data-line" data-i18n="dataLine">/);
+    expect(html).toMatch(
+      /<h1 data-i18n="title"><\/h1>\s*<p class="data-line"><span data-i18n="dataLine"><\/span> <span class="badge status" data-i18n="statusBadge">Date reale<\/span><\/p>/,
+    );
+    expect(html.match(/class="badge[ "]/g)).toHaveLength(1);
   });
 
   it('names the census and the local-finance year the app fetches, in both languages', () => {

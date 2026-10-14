@@ -187,6 +187,19 @@ landing `tests/test_site_pages.py::test_landing_names_its_data_under_the_h1`.
 
 Test: `simulators/salarizare/app/tests/layout.test.tsx`.
 
+### UX-18 Status badge on the map simulators — done
+
+- Given `/administrativ/`, `/transport/` and `/impozit-teren/`, then the data line under the H1
+  ends with exactly one `.badge.status` reading „Date reale” (EN „Live data” in administrativ,
+  whose chrome is translated); the badge is a sibling span, so the script that fills the data
+  line never overwrites it (design criterion 4; ux-guidelines § 9 item 7). The other five pages
+  carry theirs from #169, #176 and #179.
+- The status word is the agent's reading of the sources (real registries and statistics, not
+  fixtures): needs the owner's confirmation per simulator.
+
+Tests: administrativ `tests/data-line.test.ts`, transport and impozit-teren `src/shell.test.ts`
+(order and exactly one badge).
+
 ### UX-6 Maps and readability — done (Romanian UI strings: needs human review)
 
 - Given courts that share a courthouse (the appellate court, tribunal and judecătorie of a
