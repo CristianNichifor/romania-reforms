@@ -30,7 +30,12 @@ APPS = {
     "deconcentrare": ROOT / "simulators/deconcentrare/app",
     "companii-stat": ROOT / "simulators/companii-stat/app",
 }
-STATIC_PAGES = ["index.html", "brief.html", "privacy.html"]
+STATIC_PAGES = {
+    "index.html": ("''", "'ro'"),
+    "brief.html": ("''", "'ro'"),
+    "privacy.html": ("''", "'ro'"),
+    "en/index.html": ("'../'", "'en'"),
+}
 
 
 def shell(expression: str) -> str:
@@ -47,16 +52,17 @@ def built(app: str, page: Path) -> str:
 
 
 def test_the_simulator_list_matches_the_landing_page():
-    simulators = [path for path, _ in shell("s.SIMULATORS")]
+    simulators = [path for path, _, _ in shell("s.SIMULATORS")]
     landing = (ROOT / "site/index.html").read_text(encoding="utf-8")
     linked = re.findall(r'<li>\s*<a href="([a-z-]+)/">', landing)
     assert simulators == linked == list(APPS)
 
 
-@pytest.mark.parametrize("page", STATIC_PAGES)
+@pytest.mark.parametrize("page", list(STATIC_PAGES))
 def test_static_pages_carry_the_shell(page):
     html = (ROOT / "site" / page).read_text(encoding="utf-8")
-    assert shell("s.navHtml('', '')") in html
+    prefix, lang = STATIC_PAGES[page]
+    assert shell(f"s.navHtml('', {prefix}, {lang})") in html
     assert shell("s.CSP_META") in html
     assert problems(html) == []
 
