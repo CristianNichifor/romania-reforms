@@ -1,6 +1,9 @@
 /* Roles, not raw hex, so light and dark swap in one place.
    Palette values from the validated reference instance; the two categorical hues
-   used here pass every check in both modes (worst CVD ΔE 24.7 light / 26.8 dark). */
+   used here pass every check in both modes (worst CVD ΔE 24.7 light / 26.8 dark).
+   `--selected` is the fill behind white text on a chosen control: the series blue is a
+   chart hue and reads 4.4:1 light / 3.6:1 dark under white, below AA for body-size text;
+   this darker blue reads 6.3:1 in both themes. */
 :root {
   color-scheme: light;
   /* Chrome on civic-ui neutral roles (UX-14): bg, surface, raised, text, muted, border,
@@ -12,11 +15,14 @@
   --border: color-mix(in srgb, var(--border-strong) 40%, transparent);
   --text-primary: #182b2c;
   --text-secondary: #475d60;
-  --text-muted: color-mix(in srgb, var(--text-secondary) 80%, var(--surface-0));
+  /* Muted ink is body-size text in many places (sources, notes, glossary marks), so it must
+     clear 4.5:1 on the page (UX-16 page check): a 90 % mix reads about 5:1, an 80 % mix 4:1. */
+  --text-muted: color-mix(in srgb, var(--text-secondary) 90%, var(--surface-0));
   --action: #006b60;
   --action-hover: #00564d;
   --on-action: #ffffff;
   --series-1: #2a78d6;
+  --selected: #1f5fb0;
   --accent: #eb6834;
   --grid: #e4e4e0;
   --mark-quiet: #c4c4bd;
@@ -36,6 +42,7 @@
     --action-hover: #d2f5eb;
     --on-action: #142323;
     --series-1: #3987e5;
+    --selected: #1f5fb0;
     --accent: #d95926;
     --grid: #2a2a28;
     --mark-quiet: #4a4a45;
@@ -55,6 +62,7 @@
   --action-hover: #d2f5eb;
   --on-action: #142323;
   --series-1: #3987e5;
+  --selected: #1f5fb0;
   --accent: #d95926;
   --grid: #2a2a28;
   --mark-quiet: #4a4a45;
@@ -166,7 +174,7 @@ footer a { color: var(--text-secondary); }
 .tabs button strong { font-size: 14.5px; font-weight: 600; color: var(--text-primary); }
 .tabs button small { font-size: 12.5px; color: var(--text-muted); line-height: 1.35; }
 .tabs button:hover { border-color: var(--series-1); }
-.tabs button.on { background: var(--series-1); border-color: var(--series-1); }
+.tabs button.on { background: var(--selected); border-color: var(--selected); }
 .tabs button.on strong, .tabs button.on small { color: #fff; }
 .tabs button.on small { opacity: 0.85; }
 .tabs button.share { font-size: 13px; display: inline-block; }
@@ -760,7 +768,7 @@ td.num.rise { color: var(--dist-up-2); font-weight: 600; }
   background: var(--surface-1); color: var(--text-secondary);
   border: 1px solid var(--border); border-radius: 999px; }
 .sector-filter button:hover { border-color: var(--series-1); }
-.sector-filter button.on { background: var(--series-1); border-color: var(--series-1);
+.sector-filter button.on { background: var(--selected); border-color: var(--selected);
                            color: #fff; }
 
 /* Domain showcase ------------------------------------------------------------
@@ -1000,5 +1008,10 @@ button.more {
   margin: 2px 0 10px;
   font-size: 13px;
   line-height: 20px;
-  opacity: 0.75;
+  /* No opacity: the masthead's secondary ink at 0.75 fell to 4:1 against the page, under AA
+     for 13 px text; secondary ink on its own reads 7:1. */
 }
+
+/* Design screen 03: the head reads H1, purpose, then the data line with the page's one status badge. */
+.masthead .purpose { margin: 0 0 6px; }
+.badge.status { text-transform: none; letter-spacing: 0; font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text-secondary); margin-left: 6px; vertical-align: middle; }

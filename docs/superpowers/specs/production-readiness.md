@@ -187,6 +187,28 @@ landing `tests/test_site_pages.py::test_landing_names_its_data_under_the_h1`.
 
 Test: `simulators/salarizare/app/tests/layout.test.tsx`.
 
+### UX-6 Maps and readability — done (Romanian UI strings: needs human review)
+
+- Given courts that share a courthouse (the appellate court, tribunal and judecătorie of a
+  county seat; four in București), then each gets its own circle: the largest stays at the
+  courthouse and the others step onto a ring about 3 km across, ordered by volume. A
+  presentation offset, not a relocation.
+- Given the administrative map, then the legend explains the unit colours ("Fiecare unitate
+  propusă are culoarea ei; comunele poartă culoarea centrului lor", EN too) with the palette as
+  one striped swatch, and it is no longer hidden on phones. The summary bar on phones wraps
+  instead of scrolling, so "8,73 mld RON" is not clipped off its edge.
+- Given the transport map, then "Se încarcă harta…" sits over the map until the data lands,
+  and on a load failure it turns into the error title beside the panel's full message.
+- Given impozit-teren on a wide screen, then the sidebar column is painted to the bottom of
+  the page (no black gap under the sticky sidebar). On a phone the order is title and
+  controls, then figures, map and table, then "Ce nu putem calcula" and the sources.
+- Given companii-stat on a phone, then the clusters table scrolls sideways inside its region
+  with the activity name pinned, so every numeric column is reachable.
+
+Tests: justitie `src/spread.test.ts`; administrativ `tests/legend-mobile.test.ts`; transport
+`src/map-status.test.ts`; impozit-teren `src/layout.test.ts`; companii-stat
+`src/table-mobile.test.ts`. The CSS tests read the stylesheet; the layouts themselves were not
+screenshot-checked on a phone: needs human review.
 ### UX-14 Public-pay chrome on civic-ui roles — done
 
 - Given `simulators/salarizare/app/src/styles.css`, then the chrome tokens (`--surface-0/1/2`,
