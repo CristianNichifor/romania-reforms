@@ -186,3 +186,12 @@ landing `tests/test_site_pages.py::test_landing_names_its_data_under_the_h1`.
   toggles on the payslip read the law's name ("Legea-cadru 153/2017") with the file id secondary.
 
 Test: `simulators/salarizare/app/tests/layout.test.tsx`.
+
+### UXG-2 Document pages are light first
+
+- Given the landing pages (RO and EN), the privacy page, the brief and the deconcentrare app,
+  then the default palette is light and the dark palette applies only under
+  `prefers-color-scheme: dark` (was the reverse). companii-stat follows once
+  `fix/ux-maps-readability` lands; map canvases stay dark (docs/ux-guidelines.md §6).
+
+Test: `tests/test_light_first.py`.
