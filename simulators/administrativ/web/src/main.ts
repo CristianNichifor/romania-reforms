@@ -442,6 +442,7 @@ async function boot(): Promise<void> {
     ];
     el('#legend').innerHTML =
       `<h4>${strings.legend}</h4>` +
+      `<div class="row"><span class="swatch units">${PALETTE.map((c) => `<i style="background:${c}"></i>`).join('')}</span>${strings.legendUnits}</div>` +
       rows
         .map(
           ([colour, label, isDot]) =>
