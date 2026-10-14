@@ -6,16 +6,21 @@
    this darker blue reads 6.3:1 in both themes. */
 :root {
   color-scheme: light;
-  --surface-0: #f4f4f2;
-  --surface-1: #fcfcfb;
-  --surface-2: #ececea;
-  --border: #d8d8d4;
-  --text-primary: #0b0b0b;
-  --text-secondary: #52514e;
-  /* Darkened from #78776f: muted ink is body-size text in many places (sources, notes,
-     glossary marks) and read 4.1:1 on the page, 4.4:1 on a card; this value reads 4.9:1 and
-     5.3:1, over the 4.5:1 AA floor, while staying the warmest of the three inks. */
-  --text-muted: #6b6a62;
+  /* Chrome on civic-ui neutral roles (UX-14): bg, surface, raised, text, muted, border,
+     action. Only the series colours below are this app's own (ux-guidelines § 6). */
+  --surface-0: #f4f6f6;
+  --surface-1: #ffffff;
+  --surface-2: #e7eeee;
+  --border-strong: #718588;
+  --border: color-mix(in srgb, var(--border-strong) 40%, transparent);
+  --text-primary: #182b2c;
+  --text-secondary: #475d60;
+  /* Muted ink is body-size text in many places (sources, notes, glossary marks), so it must
+     clear 4.5:1 on the page (UX-16 page check): a 90 % mix reads about 5:1, an 80 % mix 4:1. */
+  --text-muted: color-mix(in srgb, var(--text-secondary) 90%, var(--surface-0));
+  --action: #006b60;
+  --action-hover: #00564d;
+  --on-action: #ffffff;
   --series-1: #2a78d6;
   --selected: #1f5fb0;
   --accent: #eb6834;
@@ -27,13 +32,15 @@
 @media (prefers-color-scheme: dark) {
   :root:where(:not([data-theme='light'])) {
     color-scheme: dark;
-    --surface-0: #121211;
-    --surface-1: #1a1a19;
-    --surface-2: #232322;
-    --border: #34342f;
-    --text-primary: #ffffff;
-    --text-secondary: #c3c2b7;
-    --text-muted: #93928a;
+    --surface-0: #142323;
+    --surface-1: #203332;
+    --surface-2: #304845;
+    --border-strong: #8ca8a1;
+    --text-primary: #f0f6f5;
+    --text-secondary: #c0d3cf;
+    --action: #b5e8dc;
+    --action-hover: #d2f5eb;
+    --on-action: #142323;
     --series-1: #3987e5;
     --selected: #1f5fb0;
     --accent: #d95926;
@@ -45,13 +52,15 @@
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --surface-0: #121211;
-  --surface-1: #1a1a19;
-  --surface-2: #232322;
-  --border: #34342f;
-  --text-primary: #ffffff;
-  --text-secondary: #c3c2b7;
-  --text-muted: #93928a;
+  --surface-0: #142323;
+  --surface-1: #203332;
+  --surface-2: #304845;
+  --border-strong: #8ca8a1;
+  --text-primary: #f0f6f5;
+  --text-secondary: #c0d3cf;
+  --action: #b5e8dc;
+  --action-hover: #d2f5eb;
+  --on-action: #142323;
   --series-1: #3987e5;
   --selected: #1f5fb0;
   --accent: #d95926;

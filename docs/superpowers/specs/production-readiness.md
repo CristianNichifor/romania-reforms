@@ -290,6 +290,17 @@ Test: `simulators/salarizare/app/tests/states.test.tsx`.
   companii-stat follows once #161 (which edits its stylesheet) has merged.
 
 Test: `simulators/deconcentrare/app/src/theme.test.ts`.
+### UX-14 Public-pay chrome on civic-ui roles — done
+
+- Given `simulators/salarizare/app/src/styles.css`, then the chrome tokens (`--surface-0/1/2`,
+  `--text-primary/secondary`, `--border-strong`, `--action`) carry the civic-ui `neutral`
+  light values by default and the dark values under `prefers-color-scheme: dark` and
+  `data-theme="dark"`; the series colours (`--series-1` blue and the validated viz palettes)
+  stay the app's own (ux-guidelines § 6 permitted deviation; design screen 03).
+- Given `civic-pilot.css`, then civic-ui controls take `--civic-action` from `--action` and
+  `--civic-border` from `--border-strong`, not from the text colour.
+
+Test: `simulators/salarizare/app/tests/theme.test.ts`.
 ### UX-8 Target-state design screens — docs only (Romanian copy: needs human review)
 
 - Given `docs/design/screens/01..05*.html`, then each is a self-contained static page (no
