@@ -12,6 +12,7 @@ import './style.css';
 import './native-ui.css';
 import './states.css';
 import { LOADING_SLOW, loadErrorMarkup, stageLoader } from './states';
+import './map-source.css';
 import './status-badge.css';
 import { buildNetwork, changedParams, loadCoupling, readScenario } from './consolidare';
 import {
@@ -109,6 +110,9 @@ async function main() {
   const line = dataLineFor(summary);
   const lineEl = document.getElementById('data-line');
   if (lineEl) lineEl.textContent = line ?? '';
+  // The same line under the legend (UX-20): the map carries its own source.
+  const mapSource = document.getElementById('map-source');
+  if (mapSource) mapSource.textContent = line ?? '';
 
   const { params, pins } = readScenario(location.hash);
   const moved = changedParams(params);

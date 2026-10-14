@@ -206,6 +206,15 @@ Tests: administrativ `tests/data-line.test.ts`, transport and impozit-teren `src
   unit-tested without a DOM, as the document pages do (UX-15).
 
 Tests: administrativ `tests/states.test.ts`, transport and impozit-teren `src/states.test.ts`.
+### UX-20 Source line under every map — done
+
+- Given `/administrativ/`, `/transport/` and `/impozit-teren/`, then a `p.map-source` sits
+  right under the map legend and reads the page's data line („Date: <sursă>, <an>”; EN
+  „Data: …” in administrativ), so the map carries its source where the eye is (design criterion
+  6; ux-guidelines § 9 item 8). Charts have theirs from #175.
+
+Tests: administrativ `tests/map-source.test.ts`, transport and impozit-teren
+`src/map-source.test.ts` (markup after the legend, main.ts fills it).
 ### UX-17 Companii-stat light-first on civic-ui roles — done
 
 - Given `simulators/companii-stat/app/src/style.css`, then the unconditional `:root` block
