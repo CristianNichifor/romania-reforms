@@ -143,9 +143,8 @@ interface is "Date reale" with an honest method page.
 | Source line under the justitie map | `simulators/justitie/app/src/map-source.test.ts` |
 | This guideline covers every simulator and cites real tests | `tests/test_ux_guidelines.py` |
 
-Not yet enforced by a test: the as-of date on charts and maps outside the justitie statistics
-page (§ 9 item 8); axe and the 390 px check on the deconcentrare and companii-stat pages, which
-have no browser suite, and on the public-pay views other than Acasă.
+Not yet enforced by a test: the as-of date on charts and maps (§ 9 item 8); axe and the 390 px
+check on the deconcentrare and companii-stat pages, which have no browser suite.
 
 ## 9. Known deviations backlog
 
@@ -176,5 +175,5 @@ flight* belong to another session; do not start them in parallel.
    (UX-34); the document pages' data tables follow (UX-38).
 9. No page-level axe or 390 px overflow check; add to the browser suites — done for the four
    suites (`page-checks.spec.ts` in administrativ, transport, impozit-teren, justitie) and for
-   the public-pay first screen (`scripts/check-page.mjs`); the deconcentrare and companii-stat
+   every public-pay view (`scripts/check-page.mjs`, UX-33); the deconcentrare and companii-stat
    pages still have no browser suite.

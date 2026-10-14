@@ -27,6 +27,15 @@
   --grid: #e4e4e0;
   --mark-quiet: #c4c4bd;
   --series-dk: #1baf7a;
+  /* Ink variants of the series colours for text (UX-33, axe colour-contrast): the series
+     colours are tuned for bars and fills and sit at 2,8–3,3:1 on white; text needs 4,5:1,
+     also on the raised surface (--surface-2) the renamed-title tag sits on. Fills keep the
+     series colour; words take the ink. */
+  --accent-ink: #a8421a;
+  --series-1-ink: #1f5fb0;
+  --series-dk-ink: #0f7a52;
+  --dist-up-ink: #1f5896;
+  --dist-down-ink: #a8421a;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -47,6 +56,11 @@
     --grid: #2a2a28;
     --mark-quiet: #4a4a45;
     --series-dk: #199e70;
+    --accent-ink: #f0865a;
+    --series-1-ink: #8bbcf0;
+    --series-dk-ink: #5cd6a3;
+    --dist-up-ink: #8bbcf0;
+    --dist-down-ink: #f0865a;
   }
 }
 
@@ -67,6 +81,11 @@
   --grid: #2a2a28;
   --mark-quiet: #4a4a45;
   --series-dk: #199e70;
+  --accent-ink: #f0865a;
+  --series-1-ink: #8bbcf0;
+  --series-dk-ink: #5cd6a3;
+  --dist-up-ink: #8bbcf0;
+  --dist-down-ink: #f0865a;
 }
 
 * { box-sizing: border-box; }
@@ -290,7 +309,7 @@ ol.patches li::before {
 .detail { margin: 3px 0 0; font-size: 12px; color: var(--text-muted); }
 .renamed { margin: 14px 0 0; padding: 10px 12px; background: var(--surface-2); border-radius: 6px; font-size: 14px; }
 .renamed-tag { display: block; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em;
-               color: var(--accent); margin-bottom: 3px; }
+               color: var(--accent-ink); margin-bottom: 3px; }
 .evidence { margin: 12px 0 0; padding-left: 18px; font-size: 12.5px; color: var(--text-secondary); }
 .evidence li { margin-bottom: 3px; }
 .equiv-note { margin: 10px 0 0; font-size: 12.5px; color: var(--text-muted); }
@@ -314,7 +333,7 @@ ul.needs span { font-size: 12.5px; color: var(--text-secondary); }
 .badges { display: flex; gap: 6px; flex-wrap: wrap; }
 .badge { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.05em; padding: 3px 7px; border-radius: 4px;
          background: var(--surface-2); color: var(--text-secondary); }
-.badge.rename { background: var(--accent); color: #fff; }
+.badge.rename { background: var(--accent-ink); color: #fff; }
 .badge.weak, .badge.none { background: var(--surface-2); color: var(--text-muted); }
 .patch .badge.weak { color: var(--text-secondary); }
 
@@ -349,6 +368,14 @@ section.hero { display: grid; grid-template-columns: auto 1fr; gap: 26px; align-
 .hero-figure .to { font-size: 54px; font-weight: 700; letter-spacing: -0.035em;
                    color: var(--accent); font-variant-numeric: tabular-nums; }
 .hero-text { margin: 0; font-size: 14px; color: var(--text-secondary); max-width: 62ch; }
+/* Three figures and two arrows at display size are wider than a phone (UX-33 measured 417 px
+   at 390): below 480 px the figures shrink and may wrap instead of widening the page. */
+@media (max-width: 480px) {
+  .hero-figure { flex-wrap: wrap; white-space: normal; gap: 4px 10px; }
+  .hero-figure .from { font-size: 30px; }
+  .hero-figure .arrow { font-size: 18px; }
+  .hero-figure .to { font-size: 38px; }
+}
 
 /* --- comparison grid: one bar per system per question --- */
 .cmp { display: grid; gap: 2px; margin-top: 20px; }
@@ -438,10 +465,10 @@ button.next span { font-size: 12.5px; color: var(--text-secondary); }
 .disclaimer details p { margin: 8px 0 0; font-size: 13px; }
 
 /* --- envelope --- */
-.envelope-hero .hero-figure .to { color: var(--series-dk); }
+.envelope-hero .hero-figure .to { color: var(--series-dk-ink); }
 .verdict { margin: 6px 0 0; font-size: 14px; font-weight: 600; }
-.verdict.ok { color: var(--series-dk); }
-.verdict.bad { color: var(--accent); }
+.verdict.ok { color: var(--series-dk-ink); }
+.verdict.bad { color: var(--accent-ink); }
 
 .moves { display: grid; gap: 10px; }
 .move-row { padding: 14px 16px; }
@@ -568,7 +595,7 @@ i.k-ro-cap { background: repeating-linear-gradient(135deg, var(--series-1) 0 3px
 .comp-hero { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
              margin: 4px 0 14px; }
 .comp-hero .big { font-size: clamp(2.1rem, 6vw, 3.2rem); font-weight: 650;
-                  letter-spacing: -0.02em; color: var(--accent); line-height: 1; }
+                  letter-spacing: -0.02em; color: var(--accent-ink); line-height: 1; }
 .comp-hero p { margin: 0; max-width: 46ch; color: var(--text-secondary); }
 .comp-excl { margin-top: 12px; font-size: 0.8rem; color: var(--text-muted); }
 .comp-excl li { margin: 3px 0; }
@@ -649,7 +676,7 @@ i.k-ro-cap { background: repeating-linear-gradient(135deg, var(--series-1) 0 3px
               border-radius: 10px; padding: 16px 16px 14px; display: grid;
               align-content: start; gap: 4px; }
 .brief-num { font-size: 1.32rem; font-weight: 650; letter-spacing: -0.01em;
-             color: var(--series-1); line-height: 1.15; }
+             color: var(--series-1-ink); line-height: 1.15; }
 .brief-card strong { font-size: 0.9rem; color: var(--text-primary); }
 .brief-card p { margin: 2px 0 0; font-size: 0.83rem; line-height: 1.45;
                 color: var(--text-secondary); }
@@ -750,9 +777,9 @@ i.k-ro-cap { background: repeating-linear-gradient(135deg, var(--series-1) 0 3px
 .fam-num { text-align: right; font-variant-numeric: tabular-nums; }
 .fam-num b { font-size: 14px; }
 .fam-num small { display: block; font-size: 11px; color: var(--text-muted); }
-.fam-num.down b { color: var(--dist-down-2); }
-.fam-num.up b { color: var(--dist-up-2); }
-td.num.fall { color: var(--dist-down-2); font-weight: 600; }
+.fam-num.down b { color: var(--dist-down-ink); }
+.fam-num.up b { color: var(--dist-up-ink); }
+td.num.fall { color: var(--dist-down-ink); font-weight: 600; }
 td.num.rise { color: var(--dist-up-2); font-weight: 600; }
 @media (max-width: 680px) {
   .fam-row { grid-template-columns: 1fr auto; }
@@ -856,7 +883,7 @@ td.num.rise { color: var(--dist-up-2); font-weight: 600; }
 .meas-head h3 { margin: 0; }
 .meas-verdict { font-size: 12.5px; color: var(--text-muted); }
 .meas-verdict b { color: var(--text-primary); font-variant-numeric: tabular-nums; }
-.meas-verdict b.fall { color: var(--accent); }
+.meas-verdict b.fall { color: var(--accent-ink); }
 .meas-rows { display: grid; gap: 3px; }
 .meas-row { display: grid; grid-template-columns: minmax(150px, 210px) 1fr 68px;
             gap: 12px; align-items: center; padding: 3px 0; }
@@ -981,8 +1008,8 @@ i.k-measured { background: var(--series-1); border-radius: 50% !important; }
 }
 /* The same two colours the distribution page uses for a post moving up or down, so
    "this went up" looks the same wherever the reader meets it. */
-.merge-card tr.more .num { color: var(--dist-up-2); }
-.merge-card tr.less .num { color: var(--dist-down-2); }
+.merge-card tr.more .num { color: var(--dist-up-ink); }
+.merge-card tr.less .num { color: var(--dist-down-ink); }
 .merge-titles { margin-top: 10px; font-size: 12.5px; }
 .merge-titles summary { cursor: pointer; color: var(--text-secondary); }
 .merge-titles ul { margin: 8px 0 0; padding-left: 18px; }

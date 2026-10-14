@@ -1,8 +1,9 @@
-// Page-level checks the ux guideline asks for (§9 item 9; design screens, criteria 1 and 8):
-// at phone width the first screen never scrolls sideways, axe reports no serious or critical
-// issue on the whole page, and the page raises no JS error. Same harness as the other
-// check-*.mjs scripts: one preview server, one browser engine per run, results written to a
-// temp folder whose path is printed as JSON for check-ui-browsers.mjs.
+// Page-level checks the ux guideline asks for (§9 item 9; design screens, criteria 1 and 8),
+// on every view, not only the first screen (UX-33): at phone width no view scrolls sideways,
+// axe reports no serious or critical issue on the whole page, and no view raises a JS error.
+// Same harness as the other check-*.mjs scripts: one preview server, one browser engine per
+// run, results written to a temp folder whose path is printed as JSON for check-ui-browsers.mjs.
+// Every view is measured before anything is asserted, so one run reports every problem.
 import { chromium, firefox, webkit, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import assert from 'node:assert/strict';
@@ -11,6 +12,12 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+
+/** Every view the hash router knows (engine/scenario.ts `ViewId`), first screen first. */
+const VIEWS = [
+  'acasa', 'compare', 'propunere', 'structure', 'distributie', 'domenii',
+  'meserii', 'payslip', 'echivalente', 'envelope', 'functii',
+];
 
 const browserName = process.env.CIVIC_BROWSER || 'chromium';
 const output = await mkdtemp(join(tmpdir(), 'pay-civic-ui-page-'));
@@ -37,26 +44,40 @@ try {
     if (url.startsWith('http') && new URL(url).origin !== origin) return route.abort();
     return route.continue();
   });
-  await page.goto(`${origin}/#/acasa`);
-  await expect(page.locator('nav button.on[data-view="acasa"]')).toHaveCount(1);
-  await expect(page.locator('p.loading')).toHaveCount(0);
-  await page.waitForLoadState('networkidle');
 
-  const overflow = await page.evaluate(() => ({
-    scrollWidth: document.documentElement.scrollWidth,
-    clientWidth: document.documentElement.clientWidth,
-  }));
-  const { violations } = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
-  const serious = violations
-    .filter(v => v.impact === 'serious' || v.impact === 'critical')
-    .map(({ id, impact, nodes }) => ({ id, impact, targets: nodes.slice(0, 5).map(node => node.target) }));
-  await page.screenshot({ path: join(output, 'acasa-390.png'), fullPage: true });
-  await writeFile(join(output, 'results.json'), JSON.stringify({ browserName, overflow, serious, errors }, null, 2));
+  const results = [];
+  for (const view of VIEWS) {
+    const before = errors.length;
+    await page.goto(`${origin}/#/${view}`);
+    await expect(page.locator(`nav button.on[data-view="${view}"]`)).toHaveCount(1);
+    // Data files load once and are then cached; a view that is still computing says so.
+    await expect(page.locator('p.loading')).toHaveCount(0, { timeout: 30_000 });
+    await page.waitForLoadState('networkidle');
 
-  assert.ok(overflow.scrollWidth <= overflow.clientWidth + 1, `document scrolls sideways at 390 px: ${JSON.stringify(overflow)}`);
-  assert.deepEqual(serious, [], 'axe reports serious or critical issues');
-  assert.deepEqual(errors, [], 'page errors');
-  console.log(JSON.stringify({ browserName, output, serious: 0, overflow: false }));
+    const overflow = await page.evaluate(() => ({
+      scrollWidth: document.documentElement.scrollWidth,
+      clientWidth: document.documentElement.clientWidth,
+    }));
+    const { violations } = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
+    const serious = violations
+      .filter(v => v.impact === 'serious' || v.impact === 'critical')
+      .map(({ id, impact, nodes }) => ({ id, impact, targets: nodes.slice(0, 5).map(node => node.target) }));
+    // Evidence, not a check: Firefox refuses full-page captures taller than 32767 px, and the
+    // card lists (Funcție cu funcție) run past that at phone width, so very tall views keep the
+    // first screen only and a capture failure never fails the measurement.
+    const height = await page.evaluate(() => document.documentElement.scrollHeight);
+    await page.screenshot({ path: join(output, `${view}-390.png`), fullPage: height < 30_000 }).catch(() => {});
+    results.push({ view, overflow, serious, errors: errors.slice(before) });
+  }
+  await writeFile(join(output, 'results.json'), JSON.stringify({ browserName, results }, null, 2));
+
+  const sideways = results.filter(r => r.overflow.scrollWidth > r.overflow.clientWidth + 1).map(r => `${r.view}: ${JSON.stringify(r.overflow)}`);
+  const issues = results.filter(r => r.serious.length).map(r => `${r.view}: ${JSON.stringify(r.serious)}`);
+  const thrown = results.filter(r => r.errors.length).map(r => `${r.view}: ${r.errors.join(' | ')}`);
+  assert.deepEqual(sideways, [], 'views scroll sideways at 390 px');
+  assert.deepEqual(issues, [], 'axe reports serious or critical issues');
+  assert.deepEqual(thrown, [], 'page errors');
+  console.log(JSON.stringify({ browserName, output, views: results.length, serious: 0, overflow: false }));
 } finally {
   if (browser) await browser.close();
   server.kill();
