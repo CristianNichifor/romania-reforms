@@ -450,6 +450,16 @@ Test: `tests/test_site_pages.py::test_every_simulator_card_names_its_own_data`.
   `status-badge.css`), in the card's muted ink, under the data line.
 
 Test: `tests/test_site_pages.py::test_every_simulator_card_carries_the_status_badge`.
+
+### UX-36 Source line under the justitie map — done
+
+- Given `/justitie/`, then the map legend ends with a `p.map-source` that reads the page's data
+  line („Date: Consiliul Superior al Magistraturii, <an>”), filled from the same loaded document
+  as the line under the H1, so the map carries its source where the eye is and the two lines
+  cannot disagree. Same contract as the administrativ, transport and impozit-teren maps (UX-20;
+  design criterion 6; ux-guidelines § 9 item 8).
+
+Test: justitie `src/map-source.test.ts` (markup at the end of the legend, `main.ts` fills it).
 ### UX-12 Public-pay error and empty states — done (Romanian: needs human review)
 
 - Given a data file that fails to load, then the page shows the failure in the reader's

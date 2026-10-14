@@ -714,6 +714,9 @@ async function main(): Promise<void> {
   // page had 2023 written into its subtitle while reading 2025 — a caption that disagrees
   // with its own figures is worse than none.
   el('#data-line').textContent = dataLineFor(doc);
+  // The same line under the map legend (UX-36, design criterion 6): the map carries its
+  // source where the eye is, and it cannot disagree with the header because both read `doc`.
+  el('#map-source').textContent = dataLineFor(doc);
   el('#sub').textContent =
     `${ro.format(doc.courts.length)} de instanțe, dosarele pe care le-au avut de soluționat ` +
     `în ${doc.period} și încărcătura pe judecător.`;
