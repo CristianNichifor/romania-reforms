@@ -469,6 +469,20 @@ Test: `tests/test_site_pages.py::test_every_simulator_card_names_its_own_data`.
   `status-badge.css`), in the card's muted ink, under the data line.
 
 Test: `tests/test_site_pages.py::test_every_simulator_card_carries_the_status_badge`.
+
+### UX-34 Source and as-of under every chart of the justitie statistics page — done
+
+- Given `/justitie/statistici.html`, then every section that draws a chart ends with a caption
+  "Date: <sursă>, <an>" in the header line's wording, read from the document the chart was
+  drawn from: the portal snapshot for the case types, durations, hearings, adjournments,
+  criminal breakdown, filers, age of pending cases and the archiving gradient; the CSM annual
+  reports, spanning their oldest to newest edition (2022–2025), for the volume trend. The markup
+  holds only empty `data-source` placeholders; the words come from the data, so a caption cannot
+  disagree with the figures above it (ux-guidelines § 4; § 9 item 8, first page).
+- The other simulators' charts and maps still carry only the page-level provenance line.
+
+Test: justitie `src/chart-source.test.ts` (wording, edition span, placeholder writing) and
+`tests/browser/statistics.spec.ts` › "every chart names its source and as-of".
 ### UX-12 Public-pay error and empty states — done (Romanian: needs human review)
 
 - Given a data file that fails to load, then the page shows the failure in the reader's
