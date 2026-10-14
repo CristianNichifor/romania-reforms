@@ -112,6 +112,47 @@
       footer a {
         color: var(--link);
       }
+      .headline-numbers {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+        gap: 0.75rem;
+        margin: 0 0 1rem;
+      }
+      .headline-number,
+      .you a {
+        padding: 1rem 1.1rem;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+      }
+      .headline-number strong {
+        display: block;
+        font-size: 1.5rem;
+        letter-spacing: -0.01em;
+      }
+      .headline-number span {
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      .you {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+        gap: 0.75rem;
+      }
+      .you a {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+      }
+      .you a:hover {
+        border-color: var(--link);
+      }
+      .more {
+        margin: 0;
+      }
+      .more a {
+        color: var(--link);
+      }
     </style>
     <link rel="canonical" href="https://projects.cristian-nichifor.com/romania-reforms/en/" />
     <link rel="alternate" hreflang="ro" href="https://projects.cristian-nichifor.com/romania-reforms/" />
@@ -136,6 +177,31 @@
       </p>
 
       <section>
+      <h2>Eight regions, not 41</h2>
+      <p class="section-lede">
+        Romania has had eight development regions since 2004 and uses them only for statistics
+        and EU funds. The state instead keeps an office in nearly every county for every function.
+        The figures come from official registers and can be checked in the simulators.
+      </p>
+      <div class="headline-numbers">
+        <div class="headline-number"><strong>41 → 8</strong><span>counties, merged into the eight development regions</span></div>
+        <div class="headline-number"><strong>820 → 179</strong><span>territorial offices of the state, family by family</span></div>
+        <div class="headline-number"><strong>659 → 56</strong><span>utility companies, becoming regional operators</span></div>
+      </div>
+      <p class="more"><a href="../brief.html" hreflang="ro">The argument in short (Romanian) →</a></p>
+      </section>
+
+      <section>
+      <h2>What it means for you</h2>
+      <p class="section-lede">Three questions anyone asks, each with its simulator (in Romanian).</p>
+      <div class="you">
+        <a href="../public-pay/#/payslip?lang=en"><div class="name">Your salary</div><div class="what">What a given post would earn under the proposed grid, against today's law.</div></a>
+        <a href="../transport/"><div class="name">Your bus</div><div class="what">How long the trip to your county seat would take if every commune had a timetable.</div></a>
+        <a href="../impozit-teren/"><div class="name">Your land tax</div><div class="what">What the land in your commune is worth and what a tax on value would raise.</div></a>
+      </div>
+      </section>
+
+      <section class="simulators">
       <h2>Simulators</h2>
       <p class="section-lede">
         What would happen if. Each takes a published proposal, models what it actually says, and

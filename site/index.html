@@ -112,6 +112,47 @@
       footer a {
         color: var(--link);
       }
+      .headline-numbers {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+        gap: 0.75rem;
+        margin: 0 0 1rem;
+      }
+      .headline-number,
+      .you a {
+        padding: 1rem 1.1rem;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+      }
+      .headline-number strong {
+        display: block;
+        font-size: 1.5rem;
+        letter-spacing: -0.01em;
+      }
+      .headline-number span {
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      .you {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+        gap: 0.75rem;
+      }
+      .you a {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+      }
+      .you a:hover {
+        border-color: var(--link);
+      }
+      .more {
+        margin: 0;
+      }
+      .more a {
+        color: var(--link);
+      }
     </style>
     <link rel="canonical" href="https://projects.cristian-nichifor.com/romania-reforms/" />
     <link rel="alternate" hreflang="ro" href="https://projects.cristian-nichifor.com/romania-reforms/" />
@@ -134,6 +175,31 @@
       </p>
 
       <section>
+      <h2>Opt regiuni, nu 41</h2>
+      <p class="section-lede">
+        România are opt regiuni de dezvoltare din 2004 și le folosește doar pentru statistică și
+        fonduri europene. Statul ține în schimb câte un birou în aproape fiecare județ, pentru
+        fiecare funcție. Cifrele vin din registre oficiale și pot fi verificate în simulatoare.
+      </p>
+      <div class="headline-numbers">
+        <div class="headline-number"><strong>41 → 8</strong><span>județe, comasate pe cele opt regiuni de dezvoltare</span></div>
+        <div class="headline-number"><strong>820 → 179</strong><span>birouri teritoriale ale statului, familie cu familie</span></div>
+        <div class="headline-number"><strong>659 → 56</strong><span>companii de utilități, devenite operatori regionali</span></div>
+      </div>
+      <p class="more"><a href="brief.html">Argumentul pe scurt →</a></p>
+      </section>
+
+      <section>
+      <h2>Ce înseamnă pentru tine</h2>
+      <p class="section-lede">Trei întrebări pe care și le pune oricine, fiecare cu simulatorul ei.</p>
+      <div class="you">
+        <a href="public-pay/#/payslip"><div class="name">Salariul tău</div><div class="what">Cât ar lua un post anume sub grila propusă, față de legea de azi.</div></a>
+        <a href="transport/"><div class="name">Autobuzul tău</div><div class="what">Cât ai face până la reședința de județ dacă fiecare comună ar avea orar.</div></a>
+        <a href="impozit-teren/"><div class="name">Impozitul tău pe teren</div><div class="what">Cât valorează terenul din comuna ta și ce impozit ar aduce o cotă pe valoare.</div></a>
+      </div>
+      </section>
+
+      <section class="simulators">
       <h2>Simulatoare</h2>
       <p class="section-lede">
         Ce s-ar întâmpla dacă. Fiecare ia o propunere publicată, modelează ce spune de fapt, și te
