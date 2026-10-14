@@ -99,3 +99,17 @@ def test_the_checker_reports_a_page_without_the_shell(tmp_path):
     assert result.returncode == 1
     assert "x/index.html: no Content Security Policy" in result.stdout
     assert "x/index.html: no simulator navigation" in result.stdout
+
+
+def test_nav_links_are_at_least_24_px_targets():
+    # docs/ux-guidelines.md section 6: touch targets of at least 24 px.
+    style = shell("s.NAV_STYLE")
+    rule = re.search(r"\.rr-nav a\{([^}]*)\}", style).group(1)
+    assert "min-height:24px" in rule and "min-width:24px" in rule
+    assert "inline-flex" in rule or "inline-block" in rule
+
+
+@pytest.mark.parametrize("page", list(STATIC_PAGES))
+def test_static_pages_carry_the_nav_style(page):
+    html = (ROOT / "site" / page).read_text(encoding="utf-8")
+    assert shell("s.NAV_STYLE") in html

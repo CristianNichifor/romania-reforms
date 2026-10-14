@@ -90,9 +90,10 @@ describe('the data line under the H1 (UX-5)', () => {
         inForce={inForce}
         denmark={null}
         dataLine="Date: MMFTSS, pachetul public din 20.08.2026; IDA (Danemarca), 01.04.2026"
+        statusBadge="Date reale"
         onOpen={noop}
       />,
     );
-    expect(html).toMatch(/<\/h1><p class="data-line">Date: MMFTSS, pachetul public din 20\.08\.2026/);
+    expect(html).toMatch(/<\/h1><p class="purpose">.*?<\/p><p class="data-line">Date: MMFTSS, pachetul public din 20\.08\.2026/);
   });
 });

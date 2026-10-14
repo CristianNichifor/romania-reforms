@@ -7,6 +7,7 @@
  */
 import 'maplibre-gl/dist/maplibre-gl.css';
 
+import { followViewport } from './layout';
 import { ValueMap, legend } from './map';
 import type { Metric } from './map';
 import { combine, evaluate } from './model';
@@ -383,6 +384,12 @@ async function renderNational(): Promise<void> {
 }
 
 async function main() {
+  // The fold and the sources trail the sidebar; on a phone they trail the results instead.
+  followViewport({
+    trailing: Array.from(document.querySelectorAll('#panel > .fold, #panel > footer')),
+    sidebar: $('panel'),
+    results: $('main'),
+  });
   const code: FiscalCode = await fetch(`${base}data/cod-fiscal.json`).then((r) => r.json());
   const manifest: { counties: string[]; guideYears?: GuideYears } = await fetch(
     `${base}data/manifest.json`,
