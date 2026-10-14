@@ -1,8 +1,10 @@
 name: Deploy to GitHub Pages
 
-# One Pages site for the repository, with each simulator on its own project path. Both apps
-# already read VITE_BASE, so the build side of the migration is nearly free — what this file
-# adds is the assembly, and the checks that stop it publishing a half-built site.
+# The site is built and published by deploy-pages-cloudflare.yml and served at
+# https://projects.cristian-nichifor.com/romania-reforms/. What GitHub Pages publishes now is
+# the redirect in redirect/: the same page as index.html and as 404.html, so every old
+# cristiannichifor.github.io/romania-reforms/<path>?<query>#<hash> link lands on the same path,
+# query and scenario hash at the new address. Nothing here builds the simulators any more.
 
 on:
   push:
@@ -24,221 +26,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-
-      - uses: astral-sh/setup-uv@v5
-
-      # The payloads that are published but not committed. check_repo_size.py caps the tracked
-      # tree and says the fix when that trips is to move derived payloads out rather than raise
-      # the ceiling; this is where they come back in. A missing asset is a warning and the
-      # build continues where the apps degrade on their own, but the shared local-finance mart
-      # is required because impozit-teren generates its budget denominator from it. The July
-      # salary regime is also required because the salary app imports it at build time. A
-      # payload whose checksum does not match the manifest is fatal, because publishing a
-      # plausible-but-wrong map is the failure nobody would notice.
-      - name: Fetch the derived payloads
-        run: uv run python scripts/fetch_release_data.py --require local-finance-mart-2023-2025 --require salarizare-ro-draft-2026-07-16
-
-      # Built separately rather than through a workspace: the two apps arrived with their own
-      # lockfiles and their own dependency trees (one React, one not), and `npm ci` against the
-      # lockfile each was tested with is the honest way to build them until there is a reason
-      # to unify.
-      - name: Build salarizare
-        working-directory: simulators/salarizare/app
-        env:
-          VITE_BASE: /${{ github.event.repository.name }}/public-pay/
+      # A redirect that points at nothing is worse than no redirect: it turns a working link
+      # into a loop through a 404. Checked here so the stub cannot go live before the site it
+      # forwards to.
+      - name: Check the destination is live
         run: |
-          npm ci
-          npm run build
+          url=https://projects.cristian-nichifor.com/romania-reforms/
+          code=$(curl -s -o /dev/null -w '%{http_code}' -L "$url")
+          echo "$url -> $code"
+          [ "$code" = "200" ] || { echo "destination is not serving; refusing to publish the redirect"; exit 1; }
 
-      - name: Build administrativ
-        working-directory: simulators/administrativ/web
-        env:
-          VITE_BASE: /${{ github.event.repository.name }}/administrative-reform/
-        run: |
-          npm ci
-          npm run lint
-          npm run typecheck
-          npm test
-          npm run build
-
-      - name: Build justitie
-        working-directory: simulators/justitie/app
-        env:
-          VITE_BASE: /${{ github.event.repository.name }}/justitie/
-        run: |
-          npm ci
-          npm run build
-          npm test
-
-      - name: Build transport
-        working-directory: simulators/transport/app
-        env:
-          VITE_BASE: /${{ github.event.repository.name }}/transport/
-        run: |
-          npm ci
-          npm run build
-
-      - name: Build impozit-teren
-        working-directory: simulators/impozit-teren/app
-        env:
-          VITE_BASE: /${{ github.event.repository.name }}/impozit-teren/
-        run: |
-          npm ci
-          npm test
-          npm run build
-
-      - name: Build deconcentrare
-        working-directory: simulators/deconcentrare/app
-        env:
-          VITE_BASE: /${{ github.event.repository.name }}/deconcentrare/
-        run: |
-          npm ci
-          npm run build
-
-      - name: Build companii-stat
-        working-directory: simulators/companii-stat/app
-        env:
-          VITE_BASE: /${{ github.event.repository.name }}/companii-stat/
-        run: |
-          npm ci
-          npm run build
-
-      - name: Assemble the site
-        run: |
-          mkdir -p dist
-          cp site/index.html dist/index.html
-          cp site/brief.html dist/brief.html
-          cp site/favicon.svg dist/favicon.svg
-          cp -r simulators/salarizare/app/dist dist/public-pay
-          cp -r simulators/administrativ/web/dist dist/administrative-reform
-          cp -r simulators/justitie/app/dist dist/justitie
-          cp -r simulators/impozit-teren/app/dist dist/impozit-teren
-          cp -r simulators/transport/app/dist dist/transport
-          cp -r simulators/deconcentrare/app/dist dist/deconcentrare
-          cp -r simulators/companii-stat/app/dist dist/companii-stat
-
-      # One deploy for the whole repository means a simulator that failed to build would
-      # otherwise be published as a dead tile on the landing page — a link to a 404. Checked
-      # explicitly so the deploy fails instead.
-      - name: Check every advertised path exists
-        run: |
-          fail=0
-          # Reported, not enforced: the speed-limit layer is fetched from a release and the
-          # map disables its toggle without it, so a missing payload is a degraded page rather
-          # than a broken one. Printed because a silent regression to "we stopped publishing
-          # it" would otherwise look exactly like a normal deploy.
-          if [ -s dist/transport/data/road-speeds.geojson ]; then
-            echo "ok   speed-limit layer published ($(du -h dist/transport/data/road-speeds.geojson | cut -f1))"
-          else
-            echo "note speed-limit layer absent — the transport toggle will disable itself"
-          fi
-          for path in index.html brief.html public-pay/index.html administrative-reform/index.html \
-                      justitie/index.html transport/index.html impozit-teren/index.html \
-                      deconcentrare/index.html companii-stat/index.html; do
-            if [ -s "dist/$path" ]; then
-              echo "ok   dist/$path"
-            else
-              echo "MISSING dist/$path"; fail=1
-            fi
-          done
-          # The administrative map is useless without its payload, and the payload is copied
-          # by Vite from public/ rather than produced by the bundler, so it can go missing
-          # without the build failing.
-          if [ ! -s dist/administrative-reform/data/manifest.json ]; then
-            echo "MISSING dist/administrative-reform/data/manifest.json"; fail=1
-          fi
-          # Same trap for justitie: its court map and county outlines are copied into public/
-          # by a prebuild step, so a failed copy leaves a map with nothing on it.
-          if [ ! -s dist/justitie/data/instante.json ]; then
-            echo "MISSING dist/justitie/data/instante.json"; fail=1
-          fi
-          # The judicial map re-runs the administrative merge in the browser, so justitie
-          # carries a copy of that model's payload and the court distance matrix. Without them
-          # the page still renders — it just silently loses the coupling, which is the kind of
-          # failure a deploy should catch rather than a reader.
-          for path in admin-attributes.bin admin-adjacency.bin admin-candidacy.bin \
-                      admin-manifest.json admin-attributes.json court-distance.bin; do
-            [ -s "dist/justitie/data/$path" ] || { echo "MISSING dist/justitie/data/$path"; fail=1; }
-          done
-          # And transport: its map is polygons coloured by a journey time joined at build
-          # time by polygon position. A failed copy leaves a map of uniform grey that still
-          # renders, which is worse than one that does not.
-          for name in journey.json health.json; do
-            if [ ! -s "dist/transport/data/$name" ]; then
-              echo "MISSING dist/transport/data/$name"; fail=1
-            fi
-          done
-          # The consolidation now arrives from the administrative simulator's own URL, so the
-          # payload that model needs must be present or the map has no country to draw.
-          for name in admin-manifest.json admin-attributes.bin admin-adjacency.bin \
-                      admin-candidacy.bin road-time.bin road-time.json cost-inputs.json; do
-            if [ ! -s "dist/transport/data/$name" ]; then
-              echo "MISSING dist/transport/data/$name"; fail=1
-            fi
-          done
-          # Rail and roads are fetched only when the reader ticks a box, so a missing file
-          # fails silently at click time rather than at load — the box would simply never fill
-          # in. The roads are copied from administrativ at build time and are not in git, which
-          # is exactly the kind of file that goes missing without anything noticing.
-          for name in rail-lines.geojson rail-stations.geojson roads.geojson roads-county.geojson; do
-            if [ ! -s "dist/transport/data/$name" ]; then
-              echo "MISSING dist/transport/data/$name"; fail=1
-            fi
-          done
-          # The two tabular simulators are one payload each: every number on their pages comes
-          # from the copy step, so a page without its payload would render a loading hint and
-          # nothing to argue with. Checked so a failed copy fails the deploy, not the reader.
-          if [ ! -s "dist/deconcentrare/data/deconcentrare.json" ]; then
-            echo "MISSING dist/deconcentrare/data/deconcentrare.json"; fail=1
-          fi
-          if [ ! -s "dist/companii-stat/data/companii-stat.json" ]; then
-            echo "MISSING dist/companii-stat/data/companii-stat.json"; fail=1
-          fi
-          # Every simulator must offer a way back to the index. Without it each one is a
-          # dead end: reachable from the landing page and never returning, which is how a
-          # repository of simulators ends up behaving like a set of unrelated sites.
-          #
-          # Matched on the visible text rather than the class. Salarizare is React: className
-          # survives minification as `className:"up"` and never as `class="up"`, so a check on
-          # the attribute passed for three apps and failed for the one whose link is built by a
-          # framework. The words a reader clicks are the thing being guaranteed anyway.
-          for sim in public-pay administrative-reform justitie transport impozit-teren \
-                     deconcentrare companii-stat; do
-            if grep -rqs 'Toate simulatoarele' "dist/$sim/index.html" dist/$sim/assets/*.js; then
-              echo "ok   dist/$sim has a link back"
-            else
-              echo "MISSING back link in dist/$sim"; fail=1
-            fi
-          done
-          # The land tax page computes from its data rather than displaying a finished
-          # answer, so without these files it renders an empty table instead of failing.
-          for path in cod-fiscal.json manifest.json valoare-bc.json impozit-bc.json pib.json; do
-            [ -s "dist/impozit-teren/data/$path" ] || {
-              echo "MISSING dist/impozit-teren/data/$path"; fail=1; }
-          done
-          # Every link on the landing page must resolve to something that was built.
-          for href in $(grep -o 'href="[a-z-]*/"' site/index.html | cut -d'"' -f2); do
-            [ -s "dist/${href}index.html" ] || { echo "landing page links to missing $href"; fail=1; }
-          done
-          # The icon is mirrored into each app's public/ so it resolves in dev and in preview
-          # too. Four copies drift silently; a page whose icon 404s falls back to the domain
-          # root, which a project site cannot serve, and the request fails on every visit.
-          copies=$(sha256sum site/favicon.svg simulators/*/*/public/favicon.svg | cut -d' ' -f1 | sort -u | wc -l)
-          [ "$copies" = 1 ] || { echo "favicon copies have drifted apart"; fail=1; }
-          for path in favicon.svg public-pay/favicon.svg administrative-reform/favicon.svg \
-                      justitie/favicon.svg transport/favicon.svg \
-                      impozit-teren/favicon.svg deconcentrare/favicon.svg \
-                      companii-stat/favicon.svg; do
-            [ -s "dist/$path" ] || { echo "MISSING dist/$path"; fail=1; }
-          done
-          exit $fail
+      - name: Check the redirect keeps path, query and hash
+        run: node --test tests/redirect.test.cjs
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: redirect
 
   deploy:
     needs: build
