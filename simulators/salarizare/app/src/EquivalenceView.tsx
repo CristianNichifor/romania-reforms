@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
 import { Field, NativeSelect, RangeSlider } from '@cristiannichifor/civic-ui';
 
 import { payslip } from '../../engine/payslip';
@@ -42,12 +43,15 @@ interface Pair {
 }
 
 export default function EquivalenceView({
+  menu,
   ro,
   dk,
   crosswalk,
   fx,
   benchmarks,
 }: {
+  /** The section menu, drawn under the title so the page says what it is first. */
+  menu?: ReactNode;
   ro: Regime;
   dk: Regime;
   crosswalk: Crosswalk;
@@ -118,6 +122,7 @@ export default function EquivalenceView({
           monedă și de prețuri.
         </p>
       </header>
+      {menu}
 
       <section>
         <div className="card controls anchor-controls civic-scope civic-pay">

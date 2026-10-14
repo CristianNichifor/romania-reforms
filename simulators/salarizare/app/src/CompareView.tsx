@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import type { ReactNode } from 'react';
 import { Table } from '@cristiannichifor/civic-ui';
 
 import { readCap } from '../../engine/cap';
@@ -116,6 +117,7 @@ function fusedCount(regime: Regime): number {
 }
 
 export default function CompareView({
+  menu,
   ministry,
   inForce,
   ours,
@@ -128,6 +130,8 @@ export default function CompareView({
   period,
   amepipCompensation,
 }: {
+  /** The section menu, drawn under the title so the page says what it is first. */
+  menu?: ReactNode;
   ministry: Regime;
   /** Law 153/2017 — what people are paid under today. */
   inForce: Regime | null;
@@ -343,6 +347,7 @@ export default function CompareView({
           {ro(rows.length)} întrebări puse tuturor.
         </p>
       </header>
+      {menu}
 
       {/* Before any structural metric, the four facts a reader needs to hold the rest in
           their head: what a salary is made of, how many there are, how far apart, and how

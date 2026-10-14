@@ -154,3 +154,20 @@ Test: administrativ `tests/transport-link.test.ts`.
 the administrative unit colours and mobile stats clipping; public-pay layout (menu below the H1,
 search after the lead, humanised codes and "*1)" markers); transport loader; impozit-teren gap
 under the sidebar and mobile ordering; companii-stat mobile table clipping.
+
+### UX-7 Public-pay layout — done (Romanian labels: needs human review)
+
+- Given the salary app's first screen, then the H1 and its lead come first, the function
+  search follows the lead, and the eleven-card section menu sits below them; every other view
+  draws the menu under its own H1 and lead. While a view's data is still loading or failed,
+  the menu is still on the page.
+- Given a position whose name carries a source mark ("Farmacist primar*1)", "Rector*)",
+  "Director unitate de învățământ*) **)"), then the mark renders as a superscript, in the place
+  the sheet put it, with an `aria-label` and title saying it is a note from the source table
+  whose text is not in this tool's data. No footnote text is invented: the regime files carry
+  none.
+- Given a position code ("153.II.31.18", "21.00303045.04"), then it appears only next to the
+  position's name, muted, with a title saying it is the code in the source annex. The regime
+  toggles on the payslip read the law's name ("Legea-cadru 153/2017") with the file id secondary.
+
+Test: `simulators/salarizare/app/tests/layout.test.tsx`.
