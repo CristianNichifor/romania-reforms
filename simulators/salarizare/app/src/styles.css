@@ -349,6 +349,14 @@ section.hero { display: grid; grid-template-columns: auto 1fr; gap: 26px; align-
 .hero-figure .to { font-size: 54px; font-weight: 700; letter-spacing: -0.035em;
                    color: var(--accent); font-variant-numeric: tabular-nums; }
 .hero-text { margin: 0; font-size: 14px; color: var(--text-secondary); max-width: 62ch; }
+/* Three figures and two arrows at display size are wider than a phone (UX-33 measured 417 px
+   at 390): below 480 px the figures shrink and may wrap instead of widening the page. */
+@media (max-width: 480px) {
+  .hero-figure { flex-wrap: wrap; white-space: normal; gap: 4px 10px; }
+  .hero-figure .from { font-size: 30px; }
+  .hero-figure .arrow { font-size: 18px; }
+  .hero-figure .to { font-size: 38px; }
+}
 
 /* --- comparison grid: one bar per system per question --- */
 .cmp { display: grid; gap: 2px; margin-top: 20px; }

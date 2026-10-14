@@ -518,7 +518,7 @@ export default function CompareView({
                   const isBest =
                     best !== null && cell.n !== null && cell.n === best && !cell.sampled;
                   return (
-                    <div key={c.key} className={`cmp-cell col-${c.key}`}>
+                    <div key={c.key} className={`cmp-cell col-${c.key}`} data-col={c.title}>
                       <div className="cmp-track">
                         <div
                           className={`cmp-fill fill-${c.key}`}
