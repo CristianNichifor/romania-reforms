@@ -259,10 +259,12 @@ h3 {
 }
 
 /* The axis. Ticks are absolutely placed against the same track width the bars use, so a
-   gridline and its label are the same x by construction. */
+   gridline and its label are the same x by construction. The labels are the smallest text on
+   the page, so they take the dim ink: faint ink reads at about 3:1 on the card surface, under
+   the 4.5:1 that small text needs (WCAG 1.4.3), and axe flags it as serious. */
 .chart-axis {
   margin-top: var(--space-1);
-  color: var(--ink-faint);
+  color: var(--ink-dim);
   font-size: var(--text-2xs);
 }
 
