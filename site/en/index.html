@@ -10,23 +10,25 @@
       content="Deterministic simulators of public reforms in Romania (administration, public pay, justice, transport, land tax, deconcentrated services, state companies) and monitors that read what already exists: legislation and public procurement."
     />
     <style>
+      /* civic-ui neutral roles (UX-9): light first, dark only when the system asks. */
       :root {
-        color-scheme: light dark;
-        --bg: #0b0d10;
-        --fg: #e8eaed;
-        --muted: #9aa3ad;
-        --card: #14181d;
-        --line: #232a31;
-        --link: #7fb3ff;
+        color-scheme: light;
+        --bg: #f4f6f6;
+        --fg: #182b2c;
+        --muted: #475d60;
+        --card: #ffffff;
+        --line: #718588;
+        --link: #006b60;
       }
-      @media (prefers-color-scheme: light) {
+      @media (prefers-color-scheme: dark) {
         :root {
-          --bg: #f7f8fa;
-          --fg: #14181d;
-          --muted: #5b6570;
-          --card: #ffffff;
-          --line: #dfe3e8;
-          --link: #1a5fd0;
+          color-scheme: dark;
+          --bg: #142323;
+          --fg: #f0f6f5;
+          --muted: #c0d3cf;
+          --card: #203332;
+          --line: #8ca8a1;
+          --link: #b5e8dc;
         }
       }
       * {
