@@ -186,7 +186,7 @@ landing `tests/test_site_pages.py::test_landing_names_its_data_under_the_h1`.
   toggles on the payslip read the law's name ("Legea-cadru 153/2017") with the file id secondary.
 
 Test: `simulators/salarizare/app/tests/layout.test.tsx`.
-### UX-16 impozit-teren page check — todo
+### UX-16 impozit-teren page check — done
 
 - Given `/impozit-teren/#j=bc` at 390 × 844, when the county table has rendered, then the
   document does not scroll sideways (`scrollWidth <= clientWidth + 1`), axe-core (wcag2a,
