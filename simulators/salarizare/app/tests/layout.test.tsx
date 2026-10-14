@@ -10,6 +10,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import type { Regime } from '../../engine/types';
 import App from '../src/App';
+import NoHit from '../src/NoHit';
 import StructureView from '../src/StructureView';
 import { PositionName, regimeLabel, splitFootnotes } from '../src/names';
 
@@ -34,6 +35,22 @@ describe('the first screen', () => {
     expect(search).toBeGreaterThan(h1);
     expect(nav).toBeGreaterThan(search);
     expect(html.match(/<nav class="tabs"/g)).toHaveLength(1);
+  });
+
+  it('reads title, purpose, data line with one status badge, then the search (screen 03)', () => {
+    at('#/acasa');
+    const html = renderToStaticMarkup(<App />);
+    const [h1, purpose, line, badge, search] = order(
+      html, '<h1', 'class="purpose"', 'class="data-line"', 'class="badge status"', 'id="home-search"',
+    );
+    expect(h1).toBeGreaterThan(-1);
+    expect(purpose).toBeGreaterThan(h1);
+    expect(line).toBeGreaterThan(purpose);
+    expect(badge).toBeGreaterThan(line);
+    expect(search).toBeGreaterThan(badge);
+    expect(html.match(/class="badge[ "]/g)).toHaveLength(1);
+    expect(html).toMatch(/class="data-line">Date: .+, (19|20)\d\d/);
+    expect(html).toContain('>Date reale<');
   });
 
   it('puts the menu under the title of every other view', () => {
@@ -76,5 +93,14 @@ describe('names from the source sheets', () => {
   it('names a regime by its law, not its file id', () => {
     expect(regimeLabel('ro-153-2017', { 'ro-153-2017': inForce })).toBe('Legea-cadru 153/2017');
     expect(regimeLabel('dk-stat-2026', {})).toBe('dk-stat-2026');
+  });
+});
+
+describe('the empty state of the search', () => {
+  it('names the query and suggests what to try (screen 03, criterion 7)', () => {
+    const html = renderToStaticMarkup(<NoHit query=" farmacist primr " />);
+    expect(html).toContain('role="status"');
+    expect(html).toContain('„farmacist primr”');
+    expect(html).toMatch(/încearcă .*sau alege o secțiune din meniu/);
   });
 });
