@@ -259,6 +259,14 @@ Test: `tests/test_site_pages.py::test_static_pages_are_light_first_on_civic_ui_r
   design screens 01 and 05, acceptance criterion 1).
 
 Test: `tests/test_site_pages.py::test_static_pages_lead_with_the_family_bar`.
+### UX-11 Every landing card names its own data — done
+
+- Given the seven simulator cards on `site/index.html` and `site/en/index.html`, then each
+  carries a `card-data` line "Date: <sursă>, <an>" (en "Data: …") whose source and year are
+  the ones the H1 data line already states for that simulator; nothing new is asserted
+  (design screen 01; ux-guidelines § 2.3).
+
+Test: `tests/test_site_pages.py::test_every_simulator_card_names_its_own_data`.
 ### UX-8 Target-state design screens — docs only (Romanian copy: needs human review)
 
 - Given `docs/design/screens/01..05*.html`, then each is a self-contained static page (no
