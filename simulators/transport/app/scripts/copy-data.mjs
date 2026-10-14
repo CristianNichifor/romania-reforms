@@ -93,6 +93,7 @@ for (const name of ['rail-lines.geojson', 'rail-stations.geojson', 'road-time.bi
 writeFileSync(
   join(out, 'summary.json'),
   JSON.stringify({
+    period: access.period,
     access: access.summary,
     cost: { annualRon: cost.annualRon, fleet: cost.fleet, perWeekday: cost.perWeekday },
     ledger: cost.ledgerRon,

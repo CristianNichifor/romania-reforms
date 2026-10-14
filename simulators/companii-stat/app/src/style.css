@@ -461,3 +461,11 @@ button.region.on {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* Whole pixels: a fractional margin here shifted the controls below by a sub-pixel in Firefox. */
+.data-line {
+  margin: 2px 0 10px;
+  font-size: 13px;
+  line-height: 20px;
+  opacity: 0.75;
+}

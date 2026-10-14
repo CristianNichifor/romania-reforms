@@ -22,6 +22,8 @@ export interface Strings {
   loadError: (message: string) => string;
   loading: string;
   footerSource: string;
+  /** "Date: <sursă>, <an>" under the home H1 (UX-5): the same package the footer cites. */
+  dataLine: string;
   footerCode: string;
   footerLicence: string;
   switchTo: { lang: Lang; label: string };
@@ -67,6 +69,7 @@ const ro: Strings = {
   phaseColumn: (period) => `; coloana „${period}"`,
   loadError: (message) => `Nu s-au putut încărca datele: ${message}`,
   loading: 'Se încarcă grila…',
+  dataLine: 'Date: MMFTSS, pachetul public din 20.08.2026; IDA (Danemarca), 01.04.2026',
   footerSource:
     'Sursă: pachetul public MMFTSS din 20.08.2026 și anexele de coeficienți; pentru Danemarca, tabelele IDA din 01.04.2026. Fiecare număr din data/ poartă documentul și articolul sau celula din care provine.',
   footerCode: 'Cod și date',
@@ -113,6 +116,7 @@ const en: Strings = {
   phaseColumn: (period) => `; column "${period}"`,
   loadError: (message) => `The data could not be loaded: ${message}`,
   loading: 'Loading the grid…',
+  dataLine: 'Data: MMFTSS, public package of 20.08.2026; IDA (Denmark), 01.04.2026',
   footerSource:
     'Source: the public MMFTSS package of 20.08.2026 and its coefficient annexes; for Denmark, the IDA tables of 01.04.2026. Every number in data/ carries the document and the article or cell it comes from.',
   footerCode: 'Code and data',

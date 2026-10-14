@@ -25,6 +25,10 @@ describe.each(['index.html'])('%s', (page) => {
     expect(nav).toContain('<a href="../deconcentrare/" aria-current="page">');
   });
 
+  it('names its data right under the H1 (UX-5)', () => {
+    expect(html).toMatch(/<h1[^>]*>[^<]*<\/h1>\s*<p class="data-line" id="data-line"><\/p>/);
+  });
+
   it('carries the Content Security Policy in the built page only', () => {
     expect(shell!.transformIndexHtml(html, {})).toContain('http-equiv="Content-Security-Policy"');
     expect(shell!.transformIndexHtml(html, { server: {} })).not.toContain('Content-Security-Policy');

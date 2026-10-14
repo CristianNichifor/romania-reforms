@@ -45,6 +45,7 @@ export type Locality = {
 };
 
 export type FiscalCode = {
+  period: string;
   zones: string[];
   ranks: string[];
   intravilanBuiltLeiPerHa: Record<string, Record<string, { min: number; max: number }>>;

@@ -12,6 +12,7 @@ import type { Metric } from './map';
 import { combine, evaluate } from './model';
 import { countySourceBadges, estimatedCounties, severityLabel } from './sources';
 import type { GuideYears } from './sources';
+import { dataLineFor } from './data-line';
 import type { BandKey, FiscalCode, Locality, Settings } from './model';
 
 type ValueFile = {
@@ -394,6 +395,8 @@ async function main() {
   );
   const sourceOf = (county: string) => countySourceBadges(county, guideYears, estimated);
   const newestGuide = Object.values(guideYears).sort().at(-1);
+  const lineEl = document.getElementById('data-line');
+  if (lineEl) lineEl.textContent = dataLineFor(code, guideYears);
 
   let state = readHash();
   if (state.county !== ALL && !manifest.counties.includes(state.county)) {
