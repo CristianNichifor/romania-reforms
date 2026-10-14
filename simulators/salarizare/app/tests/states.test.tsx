@@ -40,11 +40,18 @@ describe('the source line of a secondary view', () => {
     expect(html).toBe(`<p class="view-source">${STRINGS.ro.dataLine}</p>`);
   });
 
-  it('closes the distribution and domains views, which draw figures without one', () => {
+  it('closes every secondary view once it has drawn (UX-35)', () => {
     const app = readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), '../src/App.tsx'), 'utf8');
-    for (const view of ['DistributionView', 'DomainsView']) {
-      const after = app.slice(app.indexOf(`<${view}\n`));
-      expect(after.indexOf('<ViewSource text={t.dataLine} />')).toBeLessThan(after.indexOf('</>'));
+    // One line for all views, after the last of them and before the footer: a view added later
+    // cannot forget it, and the first screen keeps its own line under the H1.
+    const lines = app.split('<ViewSource ');
+    expect(lines).toHaveLength(2);
+    const [before, after] = lines;
+    expect(after.indexOf('<footer>')).toBeGreaterThan(0);
+    expect(before.lastIndexOf("scenario.view === '")).toBeLessThan(before.length);
+    expect(before.slice(before.lastIndexOf('\n'))).toContain("scenario.view !== 'acasa' && !error && loaded.length > 0 &&");
+    for (const view of ['compare', 'propunere', 'distributie', 'functii', 'domenii', 'meserii', 'echivalente', 'structure', 'envelope', 'payslip']) {
+      expect(before).toContain(`scenario.view === '${view}'`);
     }
   });
 });

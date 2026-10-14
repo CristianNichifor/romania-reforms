@@ -481,6 +481,17 @@ Test: `tests/test_site_pages.py::test_every_simulator_card_carries_the_status_ba
   (ux guideline § 9 item 9; design criteria 1 and 8).
 
 Test: salarizare `scripts/check-page.mjs`, run by `npm run check:ui` in the salarizare CI job.
+### UX-35 Source line under every public-pay view — done
+
+- Given any view of `/public-pay/` other than Acasă, once its data have drawn, then the view
+  ends with the short data line the first screen prints under its H1 („Date: MMFTSS,
+  20.08.2026”; en „Data: …”), in one place in `App.tsx` after the last view and before the
+  footer, so a view added later cannot forget it. Before, only Distribuție and Domenii carried
+  it (#175); Ce se schimbă, Propunerea, Funcție cu funcție, Meserii, Echivalențe, Structură,
+  Cât costă tot and Fluturaș drew figures with no source line of their own (ux-guidelines § 2.5,
+  § 4; § 9 item 8). While a view is loading or failed there is no figure, so no line.
+
+Test: salarizare `tests/states.test.tsx` › "closes every secondary view once it has drawn".
 ### UX-34 Source and as-of under every chart of the justitie statistics page — done
 
 - Given `/justitie/statistici.html`, then every section that draws a chart ends with a caption
