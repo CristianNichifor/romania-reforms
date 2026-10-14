@@ -46,8 +46,11 @@ def test_landing_pages_link_each_other_and_the_privacy_page():
 
 
 def test_english_landing_links_every_simulator():
-    ro_links = re.findall(r'<li>\s*<a href="([a-z-]+/)">', read("index.html"))
-    en_links = re.findall(r'<li>\s*<a href="\.\./([a-z-]+/)">', read("en/index.html"))
+    def main_list(page: str) -> str:
+        return re.sub(r"<nav .*?</nav>", "", read(page), flags=re.S)
+
+    ro_links = re.findall(r'<li>\s*<a href="([a-z-]+/)">', main_list("index.html"))
+    en_links = re.findall(r'<li>\s*<a href="\.\./([a-z-]+/)">', main_list("en/index.html"))
     assert en_links == ro_links
 
 

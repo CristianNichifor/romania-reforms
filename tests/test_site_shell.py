@@ -30,11 +30,12 @@ APPS = {
     "deconcentrare": ROOT / "simulators/deconcentrare/app",
     "companii-stat": ROOT / "simulators/companii-stat/app",
 }
+# page: (current, prefix, lang) as navHtml takes them; null marks no page as current.
 STATIC_PAGES = {
-    "index.html": ("''", "'ro'"),
-    "brief.html": ("''", "'ro'"),
-    "privacy.html": ("''", "'ro'"),
-    "en/index.html": ("'../'", "'en'"),
+    "index.html": ("''", "''", "'ro'"),
+    "brief.html": ("null", "''", "'ro'"),
+    "privacy.html": ("null", "''", "'ro'"),
+    "en/index.html": ("''", "'../'", "'en'"),
 }
 
 
@@ -54,6 +55,7 @@ def built(app: str, page: Path) -> str:
 def test_the_simulator_list_matches_the_landing_page():
     simulators = [path for path, _, _ in shell("s.SIMULATORS")]
     landing = (ROOT / "site/index.html").read_text(encoding="utf-8")
+    landing = re.sub(r"<nav .*?</nav>", "", landing, flags=re.S)
     linked = re.findall(r'<li>\s*<a href="([a-z-]+)/">', landing)
     assert simulators == linked == list(APPS)
 
@@ -61,8 +63,8 @@ def test_the_simulator_list_matches_the_landing_page():
 @pytest.mark.parametrize("page", list(STATIC_PAGES))
 def test_static_pages_carry_the_shell(page):
     html = (ROOT / "site" / page).read_text(encoding="utf-8")
-    prefix, lang = STATIC_PAGES[page]
-    assert shell(f"s.navHtml('', {prefix}, {lang})") in html
+    current, prefix, lang = STATIC_PAGES[page]
+    assert shell(f"s.navHtml({current}, {prefix}, {lang})") in html
     assert shell("s.CSP_META") in html
     assert problems(html) == []
 
