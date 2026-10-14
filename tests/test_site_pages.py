@@ -127,3 +127,30 @@ def test_landing_names_its_data_under_the_h1(page, word):
     footer = data / "salarizare/app/src/i18n.ts"
     package_date = re.search(r"MMFTSS din (\d\d\.\d\d\.\d{4})", footer.read_text("utf-8")).group(1)
     assert f"MMFTSS, {package_date}" in line
+
+
+@pytest.mark.parametrize(
+    ("page", "word"), [("index.html", "Date:"), ("en/index.html", "Data:")]
+)
+def test_every_simulator_card_names_its_own_data(page, word):
+    """UX-11: each simulator card repeats the source and year the H1 data line already
+    states for it, so a reader scanning cards sees the as-of without the legend."""
+    html = read(page)
+    head = re.search(r"<h1>[^<]*</h1>\s*<p class=\"data-line\">\s*(.*?)\s*</p>", html, re.S)
+    legend = re.sub(r"\s+", " ", head.group(1))
+    cards = re.findall(
+        r"<li>\s*<a href=\"(?:\.\./)?([a-z-]+)/\">(.*?)</a>\s*</li>", html, re.S
+    )
+    simulators = [
+        "administrative-reform", "public-pay", "transport", "justitie",
+        "impozit-teren", "deconcentrare", "companii-stat",
+    ]
+    by_path = dict(cards)
+    assert set(simulators) <= set(by_path), "a simulator card is missing"
+    for path in simulators:
+        card = by_path[path]
+        line = re.search(r"<div class=\"card-data\">\s*(.*?)\s*</div>", card, re.S)
+        assert line, f"{page}: {path} has no card data line"
+        text = re.sub(r"\s+", " ", line.group(1))
+        assert text.startswith(word), f"{page}: {path}: {text}"
+        assert text[len(word) :].strip() in legend, f"{page}: {path}: not in the H1 line"

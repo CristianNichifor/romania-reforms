@@ -186,3 +186,12 @@ landing `tests/test_site_pages.py::test_landing_names_its_data_under_the_h1`.
   toggles on the payslip read the law's name ("Legea-cadru 153/2017") with the file id secondary.
 
 Test: `simulators/salarizare/app/tests/layout.test.tsx`.
+
+### UX-11 Every landing card names its own data — done
+
+- Given the seven simulator cards on `site/index.html` and `site/en/index.html`, then each
+  carries a `card-data` line "Date: <sursă>, <an>" (en "Data: …") whose source and year are
+  the ones the H1 data line already states for that simulator; nothing new is asserted
+  (design screen 01; ux-guidelines § 2.3).
+
+Test: `tests/test_site_pages.py::test_every_simulator_card_names_its_own_data`.
