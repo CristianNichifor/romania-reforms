@@ -555,7 +555,9 @@ code {
   margin: 0 0 var(--space-3);
   font-size: 13px;
   line-height: 20px;
-  opacity: 0.8;
+  /* Dim ink, no opacity: the lede's ink at 0.8 fell to about 4:1 on the card, under AA for
+     13 px text, and the page check (UX-8/#180) flags it; dim ink on its own reads 5.6:1. */
+  color: var(--ink-dim);
 }
 .badge.status {
   display: inline-block;
