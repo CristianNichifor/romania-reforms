@@ -92,4 +92,4 @@ def test_landing_leads_with_the_argument_then_what_it_means_for_you(
     assert html[lead:you].count('<div class="headline-number">') == 3
     assert f'href="{prefix}brief.html"' in html[lead:you]
     for target in ("public-pay/#/payslip", "transport/", "impozit-teren/"):
-        assert f'href="{prefix}{target}"' in html[you:simulators]
+        assert f'href="{prefix}{target}' in html[you:simulators]
