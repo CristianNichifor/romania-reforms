@@ -272,6 +272,22 @@ comma-below in Romanian, sentence formatters, money in the reader's locale).
 Test: salarizare `tests/equivalence-strings.test.ts` (same keys, no Romanian letters in English,
 comma-below in Romanian, anchor names agree between the select and the benchmark line).
 
+### UX-28 Public pay in English, eighth slice: the Propunerea noastră view — done (English copy: needs human review)
+
+- Given `/salarizare/#/propunere?lang=en`, then every word the view prints (title, the sentence
+  after the proposal's own summary, the counts line, the disclaimer, the five headline figures
+  with their "from" values, the "move money" note, the three switch buttons, the patch badges,
+  touched counts, on/off switch labels, the "why" summary and the repaired-limit line, and the
+  three onward cards) is English, and counts, shares and the span ratio use the `en-GB` locale;
+  in Romanian nothing changes. The strings live in a per-language table in `src/ProposalView.tsx`
+  (`PROPOSAL_STRINGS`), the pattern of UX-21 to UX-27. The proposal's summary, its "not policy"
+  lede, patch titles, expected effects and rationales come from the proposal file and are data.
+- The views Ce se schimbă, Meserii and Funcție cu funcție remain Romanian in English mode; the
+  "views are in Romanian" footer note stays until they are done.
+
+Test: salarizare `tests/proposal-strings.test.ts` (same keys, no Romanian letters in English,
+comma-below in Romanian, the counts line and the "from" formatter).
+
 ### UX-16 impozit-teren page check — done
 
 - Given `/impozit-teren/#j=bc` at 390 × 844, when the county table has rendered, then the
