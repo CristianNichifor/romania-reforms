@@ -43,7 +43,7 @@ export const NAV_STYLE =
   '<style>.rr-nav{margin:1.5rem 0 0;padding-top:.75rem;border-top:1px solid;' +
   'border-color:color-mix(in srgb,currentColor 20%,transparent);font-size:.8rem;line-height:1.6}' +
   '.rr-nav ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:.2rem .9rem}' +
-  '.rr-nav a{color:inherit}.rr-nav a[aria-current="page"]{font-weight:600;text-decoration:none}</style>';
+  '.rr-nav a{color:inherit;display:inline-flex;align-items:center;min-height:24px;min-width:24px}.rr-nav a[aria-current="page"]{font-weight:600;text-decoration:none}</style>';
 
 const NAV_MARKER = '<!-- rr-nav -->';
 
