@@ -10,7 +10,7 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { ValueMap, legend } from './map';
 import type { Metric } from './map';
 import { combine, evaluate } from './model';
-import { countySourceBadges, estimatedCounties } from './sources';
+import { countySourceBadges, estimatedCounties, severityLabel } from './sources';
 import type { GuideYears } from './sources';
 import type { BandKey, FiscalCode, Locality, Settings } from './model';
 
@@ -924,7 +924,7 @@ async function main() {
     $('limits').innerHTML = limits
       .map(
         (limit) =>
-          `<p class="limit ${limit.severity}"><span class="sev">${limit.severity}</span>${limit.text}</p>`,
+          `<p class="limit ${limit.severity}"><span class="sev">${severityLabel(limit.severity)}</span>${limit.text}</p>`,
       )
       .join('');
     $('sources').textContent = all

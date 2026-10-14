@@ -54,3 +54,14 @@ export function countySourceBadges(
   }
   return parts.join('');
 }
+
+const SEVERITY_LABELS: Record<string, string> = {
+  blocking: 'blocant',
+  material: 'important',
+  note: 'de reținut',
+};
+
+/** A limitation's severity as the page prints it; the data keeps the English key. */
+export function severityLabel(severity: string): string {
+  return SEVERITY_LABELS[severity] ?? severity;
+}

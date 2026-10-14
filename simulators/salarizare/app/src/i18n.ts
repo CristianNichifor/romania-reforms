@@ -134,3 +134,10 @@ export function withLang(scenario: Scenario, lang: Lang): Scenario {
   const extra = lang === 'en' ? { ...rest, lang } : rest;
   return { ...scenario, extra: Object.keys(extra).length ? extra : undefined };
 }
+
+/** The engine's diagnostic severities as the (Romanian) views print them. */
+export const SEVERITY_LABELS: Record<'blocking' | 'material' | 'note', string> = {
+  blocking: 'blocant',
+  material: 'important',
+  note: 'de reținut',
+};

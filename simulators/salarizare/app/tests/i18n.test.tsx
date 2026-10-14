@@ -56,3 +56,10 @@ describe('the app shell', () => {
     expect(html).toContain('the views themselves are in Romanian for now');
   });
 });
+
+describe('severities', () => {
+  it('are printed in Romanian, not as the engine keys', async () => {
+    const { SEVERITY_LABELS } = await import('../src/i18n');
+    expect(SEVERITY_LABELS).toEqual({ blocking: 'blocant', material: 'important', note: 'de reținut' });
+  });
+});

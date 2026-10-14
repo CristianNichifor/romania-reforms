@@ -7,6 +7,7 @@ import type { Scenario } from '../../engine/scenario';
 import type { Crosswalk, Position, Regime } from '../../engine/types';
 import { amountLine } from './money';
 import type { Rates } from './money';
+import { SEVERITY_LABELS } from './i18n';
 function pct(n: number, digits = 1): string {
   return `${(n * 100).toLocaleString('ro-RO', { maximumFractionDigits: digits })}%`;
 }
@@ -536,7 +537,7 @@ function PayslipCard({
           <ul>
             {slip.diagnostics.map((d, i) => (
               <li key={i} className={d.severity}>
-                <span className="sev">{d.severity}</span> {d.message}
+                <span className="sev">{SEVERITY_LABELS[d.severity]}</span> {d.message}
               </li>
             ))}
           </ul>

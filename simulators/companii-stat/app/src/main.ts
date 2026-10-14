@@ -1,6 +1,8 @@
 import './style.css';
 import {
+  SEVERITY_LABELS,
   TIER_LABELS,
+  compactRon,
   absorbedRows,
   filtered,
   groupByCounty,
@@ -77,7 +79,7 @@ function renderStats(): void {
   setText('stat-micro', s.microUnder20.toLocaleString('ro-RO'));
   setText('stat-loss', s.lossMaking.toLocaleString('ro-RO'));
   setText('stat-subsidy', s.subsidisedCount.toLocaleString('ro-RO'));
-  setText('stat-subsidy-ron', s.subsidyRon.toLocaleString('ro-RO'));
+  setText('stat-subsidy-ron', compactRon(s.subsidyRon));
   for (const span of document.querySelectorAll('.micro-count')) {
     span.textContent = s.microUnder20.toLocaleString('ro-RO');
   }
@@ -111,8 +113,8 @@ function buildRows(): void {
       <td class="num">${cluster.proposed.toLocaleString('ro-RO')}</td>
       <td class="num">−${reduction(cluster).toLocaleString('ro-RO')}%</td>
       <td class="num">${cluster.employees.toLocaleString('ro-RO')}</td>
-      <td class="num">${cluster.revenueRon.toLocaleString('ro-RO')}</td>
-      <td class="num">${cluster.subsidyRon.toLocaleString('ro-RO')}</td>
+      <td class="num">${compactRon(cluster.revenueRon)}</td>
+      <td class="num">${compactRon(cluster.subsidyRon)}</td>
       <td class="num">${cluster.lossCount.toLocaleString('ro-RO')}</td>
       <td class="num">${microCell(cluster)}</td>`;
     tr.addEventListener('click', () => selectCluster(cluster));
@@ -142,7 +144,7 @@ function selectCluster(cluster: Cluster): void {
   const detail = $('#operator-detail');
   if (cluster.tier === 'regional' && cluster.regions && cluster.regions.length > 0) {
     $('#detail-note').textContent =
-      `${cluster.name} (${cluster.caen}): ${cluster.companies.toLocaleString('ro-RO')} de entități, propuse ${cluster.proposed.toLocaleString('ro-RO')} — comasarea pe regiuni, mai jos. Venituri agregate ${cluster.revenueRon.toLocaleString('ro-RO')} RON (MFin 2025), dintre care ${cluster.lossCount.toLocaleString('ro-RO')} companii în pierdere; ${cluster.subsidisedCount.toLocaleString('ro-RO')} sunt subvenționate, cu ${cluster.subsidyRon.toLocaleString('ro-RO')} RON raportați. ${cluster.distinctOwners.toLocaleString('ro-RO')} de proprietari distincți. Regula de sediu și de nucleu este scrisă ca presupunere în datele paginii, nu este din sursă.`;
+      `${cluster.name} (${cluster.caen}): ${cluster.companies.toLocaleString('ro-RO')} de entități, propuse ${cluster.proposed.toLocaleString('ro-RO')} — comasarea pe regiuni, mai jos. Venituri agregate ${compactRon(cluster.revenueRon)} RON (MFin 2025), dintre care ${cluster.lossCount.toLocaleString('ro-RO')} companii în pierdere; ${cluster.subsidisedCount.toLocaleString('ro-RO')} sunt subvenționate, cu ${compactRon(cluster.subsidyRon)} RON raportați. ${cluster.distinctOwners.toLocaleString('ro-RO')} de proprietari distincți. Regula de sediu și de nucleu este scrisă ca presupunere în datele paginii, nu este din sursă.`;
     detail.hidden = false;
     selectedRegion = 0;
     const picker = $('#region-picker');
@@ -254,7 +256,7 @@ function renderRegion(cluster: Cluster): void {
 }
 
 const ron = (value: number | null): string =>
-  value === null ? '—' : Math.abs(value).toLocaleString('ro-RO');
+  value === null ? '—' : compactRon(Math.abs(value));
 
 function statRow(text: string, meta: string): HTMLElement {
   const row = document.createElement('div');
@@ -439,7 +441,7 @@ function renderCaveats(): void {
   list.replaceChildren();
   for (const limitation of doc.limitations) {
     const li = document.createElement('li');
-    li.innerHTML = `<span class="severity severity--${limitation.severity}">${limitation.severity}</span> ${limitation.text}`;
+    li.innerHTML = `<span class="severity severity--${limitation.severity}">${SEVERITY_LABELS[limitation.severity] ?? limitation.severity}</span> ${limitation.text}`;
     list.appendChild(li);
   }
   $('#caveats').hidden = false;

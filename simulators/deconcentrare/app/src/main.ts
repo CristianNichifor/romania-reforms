@@ -1,5 +1,6 @@
 import './style.css';
 import {
+  SEVERITY_LABELS,
   TIER_LABELS,
   absorbedOffices,
   filtered,
@@ -163,7 +164,7 @@ function renderCaveats(): void {
   list.replaceChildren();
   for (const limitation of doc.limitations) {
     const li = document.createElement('li');
-    li.innerHTML = `<span class="severity severity--${limitation.severity}">${limitation.severity}</span> ${limitation.text}`;
+    li.innerHTML = `<span class="severity severity--${limitation.severity}">${SEVERITY_LABELS[limitation.severity] ?? limitation.severity}</span> ${limitation.text}`;
     list.appendChild(li);
   }
   $('#caveats').hidden = false;
