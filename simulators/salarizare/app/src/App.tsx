@@ -624,7 +624,7 @@ export default function App() {
           />
       )}
       {loaded.length > 0 && scenario.view === 'structure' && (
-        <StructureView menu={menu} regime={regimes[ACTIVE_DRAFT_ID] ?? loaded[0]} period={period} />
+        <StructureView menu={menu} lang={lang} regime={regimes[ACTIVE_DRAFT_ID] ?? loaded[0]} period={period} />
       )}
       {scenario.view === 'envelope' && fx && (
         <EnvelopeView
