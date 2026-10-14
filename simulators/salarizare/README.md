@@ -72,7 +72,7 @@ on the pages they affect, and are not work waiting to be done.
   and spans derived from it are marked as a sample on the landing page and do not win
   their row; the measured comparison on *Meserii RO–DK* is the one to trust.
 
-Live: <https://cristiannichifor.github.io/public-pay-simulator/>
+Live: <https://projects.cristian-nichifor.com/romania-reforms/public-pay/>
 
 ## Two constraints that shape everything
 
