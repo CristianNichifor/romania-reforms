@@ -49,7 +49,9 @@ def shell(expression: str) -> str:
 
 
 def built(app: str, page: Path) -> str:
-    return shell(f"s.applyShell({json.dumps(page.read_text(encoding='utf-8'))}, {{current: '{app}'}})")
+    return shell(
+        f"s.applyShell({json.dumps(page.read_text(encoding='utf-8'))}, {{current: '{app}'}})"
+    )
 
 
 def test_the_simulator_list_matches_the_landing_page():
