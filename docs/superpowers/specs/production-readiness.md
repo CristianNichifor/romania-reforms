@@ -199,3 +199,5 @@ Test: `simulators/salarizare/app/tests/states.test.tsx`.
 - Given the Distribution and Domains views, which draw figures without a source line, then
   each ends with the app's short data line ("Date: MMFTSS, pachetul public din 20.08.2026;
   IDA (Danemarca), 01.04.2026") in a `view-source` paragraph (ux-guidelines § 2.5, § 4).
+- Given a load still running after two seconds, then the loader (`role="status"`) changes to a
+  second stage that says it is slow, in the reader's language.

@@ -48,3 +48,17 @@ describe('the source line of a secondary view', () => {
     }
   });
 });
+
+describe('the loader', () => {
+  it.each(['ro', 'en'] as const)('in %s has a second stage that begins like the first', (lang) => {
+    const t = STRINGS[lang];
+    expect(t.loadingSlow).not.toBe(t.loading);
+    expect(t.loadingSlow.startsWith(t.loading)).toBe(true);
+  });
+
+  it('switches stages after two seconds', () => {
+    const app = readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), '../src/App.tsx'), 'utf8');
+    expect(app).toContain('setSlow(true), 2000)');
+    expect(app).toContain('{slow ? t.loadingSlow : t.loading}');
+  });
+});

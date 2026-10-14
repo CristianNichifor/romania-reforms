@@ -23,6 +23,8 @@ export interface Strings {
   /** The action next to a load error (UX-12). */
   retry: string;
   loading: string;
+  /** The loader after two seconds (UX-12): still loading, and said so. */
+  loadingSlow: string;
   footerSource: string;
   /** "Date: <sursă>, <an>" under the home H1 (UX-5): the same package the footer cites. */
   dataLine: string;
@@ -72,6 +74,7 @@ const ro: Strings = {
   loadError: (message) => `Nu s-au putut încărca datele: ${message}`,
   retry: 'Reîncearcă',
   loading: 'Se încarcă grila…',
+  loadingSlow: 'Se încarcă grila… durează mai mult decât de obicei.',
   dataLine: 'Date: MMFTSS, pachetul public din 20.08.2026; IDA (Danemarca), 01.04.2026',
   footerSource:
     'Sursă: pachetul public MMFTSS din 20.08.2026 și anexele de coeficienți; pentru Danemarca, tabelele IDA din 01.04.2026. Fiecare număr din data/ poartă documentul și articolul sau celula din care provine.',
@@ -120,6 +123,7 @@ const en: Strings = {
   loadError: (message) => `The data could not be loaded: ${message}`,
   retry: 'Try again',
   loading: 'Loading the grid…',
+  loadingSlow: 'Loading the grid… this is taking longer than usual.',
   dataLine: 'Data: MMFTSS, public package of 20.08.2026; IDA (Denmark), 01.04.2026',
   footerSource:
     'Source: the public MMFTSS package of 20.08.2026 and its coefficient annexes; for Denmark, the IDA tables of 01.04.2026. Every number in data/ carries the document and the article or cell it comes from.',

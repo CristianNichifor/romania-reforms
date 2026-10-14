@@ -120,6 +120,12 @@ export default function App() {
   }, [lang]);
   const [regimes, setRegimes] = useState<Record<string, Regime>>({});
   const [error, setError] = useState<string | null>(null);
+  // Staged loading (UX-12): after two seconds the loader says it is slow, not stuck.
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    const id = window.setTimeout(() => setSlow(true), 2000);
+    return () => window.clearTimeout(id);
+  }, []);
   const [copied, setCopied] = useState(false);
   const [proposal, setProposal] = useState<Proposal | null>(null);
   const [crosswalk, setCrosswalk] = useState<Crosswalk | null>(null);
@@ -497,7 +503,9 @@ export default function App() {
           or a slow load can still go somewhere else. The first screen draws its own. */}
       {scenario.view !== 'acasa' && (error || loaded.length === 0) && menu}
       {error && <LoadError message={t.loadError(error)} retry={t.retry} />}
-      {!error && loaded.length === 0 && <p className="loading">{t.loading}</p>}
+      {!error && loaded.length === 0 && (
+        <p className="loading" role="status">{slow ? t.loadingSlow : t.loading}</p>
+      )}
 
       {scenario.view === 'acasa' && (
         <HomeView
