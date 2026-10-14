@@ -281,6 +281,15 @@ Test: `simulators/salarizare/app/tests/states.test.tsx`.
   IDA (Danemarca), 01.04.2026") in a `view-source` paragraph (ux-guidelines § 2.5, § 4).
 - Given a load still running after two seconds, then the loader (`role="status"`) changes to a
   second stage that says it is slow, in the reader's language.
+### UX-13 Deconcentrare light-first on civic-ui roles — done
+
+- Given `simulators/deconcentrare/app/src/style.css`, then the unconditional `:root` block
+  carries the civic-ui `neutral` light values (`--bg: #f4f6f6`, `--fg: #182b2c`, `--muted:
+  #475d60`, `--card: #ffffff`, `--link: #006b60`) and `color-scheme: light`; the dark values
+  appear only under `@media (prefers-color-scheme: dark)` (ux-guidelines § 6, § 9.1).
+  companii-stat follows once #161 (which edits its stylesheet) has merged.
+
+Test: `simulators/deconcentrare/app/src/theme.test.ts`.
 ### UX-8 Target-state design screens — docs only (Romanian copy: needs human review)
 
 - Given `docs/design/screens/01..05*.html`, then each is a self-contained static page (no
