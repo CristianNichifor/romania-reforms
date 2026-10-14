@@ -1,4 +1,5 @@
 import './style.css';
+import './states.css';
 import {
   SEVERITY_LABELS,
   TIER_LABELS,
@@ -19,6 +20,7 @@ import {
   type Tier,
 } from './model';
 import { dataLineFor } from './data-line';
+import { showError, stageLoader } from './states';
 
 const DOC_URL = 'data/deconcentrare.json';
 const REGISTRY_URL = 'data/deconcentrare-registry.json';
@@ -318,15 +320,16 @@ function wireControls(): void {
 }
 
 async function main(): Promise<void> {
+  const cancelStage = stageLoader($('.loading'), 'Se calculează…');
   try {
     doc = await fetchJSON<Document>(DOC_URL);
     $('#data-line').textContent = dataLineFor(doc);
   } catch (error) {
-    const loading = $('.loading');
-    loading.textContent = `Nu s-au putut încărca datele: ${error instanceof Error ? error.message : String(error)}`;
-    loading.classList.add('error');
+    cancelStage();
+    showError($('.loading'), error instanceof Error ? error.message : String(error));
     return;
   }
+  cancelStage();
   $('.loading').hidden = true;
   $('#families').hidden = false;
   renderStats();
