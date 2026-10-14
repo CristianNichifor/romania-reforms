@@ -158,8 +158,8 @@ flight* belong to another session; do not start them in parallel.
 5. public-pay layout: menu below the H1, search after the lead, humanised codes, `*1)`
    markers — done (UX-7, #162).
 6. English mode: public-pay view prose is still Romanian (RR-10). *Acasă (UX-25), Domenii (UX-21),
-   Structură (UX-22), Distribuție (UX-23) and Fluturaș (UX-24) are bilingual; Ce se schimbă, Meserii,
-   Echivalențe, Cât costă tot, Funcție cu funcție and Propunerea noastră follow.*
+   Structură (UX-22), Distribuție (UX-23), Fluturaș (UX-24) and Cât costă tot (UX-26) are bilingual;
+   Ce se schimbă, Meserii, Echivalențe, Funcție cu funcție and Propunerea noastră follow.*
 7. No status badge on any page. Agree the status per simulator with the owner (most
    use real data, so "Date reale"), then add the badge.
 8. No as-of date on charts and maps beyond the provenance line.

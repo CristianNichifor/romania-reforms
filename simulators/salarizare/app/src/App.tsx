@@ -636,6 +636,7 @@ export default function App() {
           capSeries={capSeries}
           scenario={scenario}
           onScenario={setScenario}
+          lang={lang}
         />
       )}
       {loaded.length > 0 && scenario.view === 'payslip' && fx && (
