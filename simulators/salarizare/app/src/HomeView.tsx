@@ -6,6 +6,7 @@ import type { Scenario, ViewId } from '../../engine/scenario';
 import type { Regime } from '../../engine/types';
 import { GlossaryList } from './Glossary';
 import { PositionName } from './names';
+import NoHit from './NoHit';
 
 const ro = (n: number) => n.toLocaleString('ro-RO');
 
@@ -180,13 +181,7 @@ export default function HomeView({
               ))}
             </ul>
           )}
-          {query.trim().length >= 2 && hits.length === 0 && (
-            <p className="home-nohit">
-              Nicio funcție cu numele ăsta în grila proiectului. Denumirile sunt cele din anexe,
-              iar multe posturi reale sunt comasate sub un titlu care nu le conține: caută cuvântul
-              cel mai general din meserie.
-            </p>
-          )}
+          {query.trim().length >= 2 && hits.length === 0 && <NoHit query={query} />}
         </div>
       </section>
 
