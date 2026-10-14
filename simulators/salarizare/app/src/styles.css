@@ -1,6 +1,9 @@
 /* Roles, not raw hex, so light and dark swap in one place.
    Palette values from the validated reference instance; the two categorical hues
-   used here pass every check in both modes (worst CVD ΔE 24.7 light / 26.8 dark). */
+   used here pass every check in both modes (worst CVD ΔE 24.7 light / 26.8 dark).
+   `--selected` is the fill behind white text on a chosen control: the series blue is a
+   chart hue and reads 4.4:1 light / 3.6:1 dark under white, below AA for body-size text;
+   this darker blue reads 6.3:1 in both themes. */
 :root {
   color-scheme: light;
   --surface-0: #f4f4f2;
@@ -9,8 +12,12 @@
   --border: #d8d8d4;
   --text-primary: #0b0b0b;
   --text-secondary: #52514e;
-  --text-muted: #78776f;
+  /* Darkened from #78776f: muted ink is body-size text in many places (sources, notes,
+     glossary marks) and read 4.1:1 on the page, 4.4:1 on a card; this value reads 4.9:1 and
+     5.3:1, over the 4.5:1 AA floor, while staying the warmest of the three inks. */
+  --text-muted: #6b6a62;
   --series-1: #2a78d6;
+  --selected: #1f5fb0;
   --accent: #eb6834;
   --grid: #e4e4e0;
   --mark-quiet: #c4c4bd;
@@ -28,6 +35,7 @@
     --text-secondary: #c3c2b7;
     --text-muted: #93928a;
     --series-1: #3987e5;
+    --selected: #1f5fb0;
     --accent: #d95926;
     --grid: #2a2a28;
     --mark-quiet: #4a4a45;
@@ -45,6 +53,7 @@
   --text-secondary: #c3c2b7;
   --text-muted: #93928a;
   --series-1: #3987e5;
+  --selected: #1f5fb0;
   --accent: #d95926;
   --grid: #2a2a28;
   --mark-quiet: #4a4a45;
@@ -156,7 +165,7 @@ footer a { color: var(--text-secondary); }
 .tabs button strong { font-size: 14.5px; font-weight: 600; color: var(--text-primary); }
 .tabs button small { font-size: 12.5px; color: var(--text-muted); line-height: 1.35; }
 .tabs button:hover { border-color: var(--series-1); }
-.tabs button.on { background: var(--series-1); border-color: var(--series-1); }
+.tabs button.on { background: var(--selected); border-color: var(--selected); }
 .tabs button.on strong, .tabs button.on small { color: #fff; }
 .tabs button.on small { opacity: 0.85; }
 .tabs button.share { font-size: 13px; display: inline-block; }
@@ -750,7 +759,7 @@ td.num.rise { color: var(--dist-up-2); font-weight: 600; }
   background: var(--surface-1); color: var(--text-secondary);
   border: 1px solid var(--border); border-radius: 999px; }
 .sector-filter button:hover { border-color: var(--series-1); }
-.sector-filter button.on { background: var(--series-1); border-color: var(--series-1);
+.sector-filter button.on { background: var(--selected); border-color: var(--selected);
                            color: #fff; }
 
 /* Domain showcase ------------------------------------------------------------
@@ -985,3 +994,15 @@ button.more {
 .footnote-mark { font-size: 0.7em; color: var(--text-muted); margin-left: 1px; cursor: help; }
 .position-code { font-size: 12px; color: var(--text-muted); }
 .regime-id { font-size: 11.5px; color: var(--text-muted); font-family: ui-monospace, monospace; }
+/* Whole pixels: a fractional margin here shifted the controls below by a sub-pixel in Firefox. */
+.data-line {
+  margin: 2px 0 10px;
+  font-size: 13px;
+  line-height: 20px;
+  /* No opacity: the masthead's secondary ink at 0.75 fell to 4:1 against the page, under AA
+     for 13 px text; secondary ink on its own reads 7:1. */
+}
+
+/* Design screen 03: the head reads H1, purpose, then the data line with the page's one status badge. */
+.masthead .purpose { margin: 0 0 6px; }
+.badge.status { text-transform: none; letter-spacing: 0; font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text-secondary); margin-left: 6px; vertical-align: middle; }

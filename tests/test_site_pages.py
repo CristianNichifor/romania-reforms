@@ -93,3 +93,37 @@ def test_landing_leads_with_the_argument_then_what_it_means_for_you(
     assert f'href="{prefix}brief.html"' in html[lead:you]
     for target in ("public-pay/#/payslip", "transport/", "impozit-teren/"):
         assert f'href="{prefix}{target}' in html[you:simulators]
+
+
+@pytest.mark.parametrize(
+    ("page", "word"), [("index.html", "Date:"), ("en/index.html", "Data:")]
+)
+def test_landing_names_its_data_under_the_h1(page, word):
+    """UX-5: "Date: <sursă>, <an>" right under the H1, and every year is the one the data files
+    carry, so the landing cannot quietly age."""
+    import json
+
+    html = read(page)
+    match = re.search(r"<h1>[^<]*</h1>\s*<p class=\"data-line\">\s*(.*?)\s*</p>", html, re.S)
+    assert match, "no data line under the H1"
+    line = re.sub(r"\s+", " ", match.group(1))
+    assert line.startswith(word)
+    data = ROOT / "simulators"
+    periods = {
+        "CSM": json.loads((data / "justitie/data/instante-2025.json").read_text("utf-8"))["period"],
+        "ANFP": json.loads(
+            (data / "deconcentrare/data/deconcentrare.json").read_text("utf-8")
+        )["period"],
+        "Codul fiscal" if word == "Date:" else "Fiscal Code": json.loads(
+            (data / "impozit-teren/data/cod-fiscal-teren-2026.json").read_text("utf-8")
+        )["period"],
+    }
+    companii = json.loads((data / "companii-stat/data/companii-stat.json").read_text("utf-8"))
+    periods["Ministerul Finanțelor" if word == "Date:" else "Ministry of Finance"] = companii[
+        "period"
+    ].replace("-", "–")
+    for source, period in periods.items():
+        assert f"{source}, {period}" in line, (source, period, line)
+    footer = data / "salarizare/app/src/i18n.ts"
+    package_date = re.search(r"MMFTSS din (\d\d\.\d\d\.\d{4})", footer.read_text("utf-8")).group(1)
+    assert f"MMFTSS, {package_date}" in line

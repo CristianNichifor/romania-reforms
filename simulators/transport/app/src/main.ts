@@ -1,4 +1,5 @@
 import * as maplibregl from 'maplibre-gl';
+import { dataLineFor } from './data-line';
 // MapLibre 6 parses GeoJSON in a web worker that it loads as a SEPARATE file, resolved next to
 // the main script. Vite inlines the library into the app bundle and never emits that file, so
 // the worker 404s, dies silently, and no source ever finishes loading: a blank map, no
@@ -99,6 +100,10 @@ async function main() {
     fetch(asset('rail-access.bin')).then((r) => r.arrayBuffer()),
     fetch(asset('health.json')).then((r) => r.json() as Promise<HealthRow[]>),
   ]);
+
+  const line = dataLineFor(summary);
+  const lineEl = document.getElementById('data-line');
+  if (lineEl) lineEl.textContent = line ?? '';
 
   const { params, pins } = readScenario(location.hash);
   const moved = changedParams(params);
@@ -1075,6 +1080,7 @@ async function main() {
   // screen reader announces it without stealing focus; removing the node is what tells a
   // sighted reader the blank map is finished rather than broken.
   el('loading').remove();
+  document.getElementById('map-status')?.remove();
 }
 
 /** Is there a WebGL context at all? Without one MapLibre cannot draw and says so only in the
@@ -1098,6 +1104,11 @@ function fail(title: string, detail: string) {
   document.getElementById('panel')!.innerHTML =
     '<a class="up" href="../">← Toate simulatoarele</a>' +
     `<h1>${title}</h1><p class="lede">${detail}</p>`;
+  const status = document.getElementById('map-status');
+  if (status) {
+    status.textContent = title;
+    status.classList.add('error');
+  }
 }
 
 if (!webglAvailable()) {

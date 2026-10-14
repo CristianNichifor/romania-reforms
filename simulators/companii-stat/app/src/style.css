@@ -376,6 +376,29 @@ button.region.on {
   margin-top: 0.25rem;
 }
 @media (max-width: 900px) {
+  /* The table is eleven columns wide. On a phone it clipped at the card's edge and the numbers
+     were the part lost. Now the region scrolls sideways with the activity's name pinned, so a
+     number is always read against its row. */
+  .table-scroll table {
+    width: max-content;
+    min-width: 100%;
+  }
+  .table-scroll th[scope='row'],
+  .table-scroll th.sortable[data-key='name'] {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--card);
+    box-shadow: 1px 0 0 var(--line);
+    max-width: 11rem;
+    overflow-wrap: anywhere;
+  }
+  .table-scroll tbody th,
+  .table-scroll tbody td,
+  .table-scroll thead th {
+    padding: 0.5rem 0.6rem;
+    font-size: 0.88rem;
+  }
   #flux {
     display: block;
   }
@@ -460,4 +483,12 @@ button.region.on {
   .reasons {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
+
+/* Whole pixels: a fractional margin here shifted the controls below by a sub-pixel in Firefox. */
+.data-line {
+  margin: 2px 0 10px;
+  font-size: 13px;
+  line-height: 20px;
+  opacity: 0.75;
 }

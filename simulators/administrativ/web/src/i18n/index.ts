@@ -11,6 +11,8 @@ export type Lang = 'ro' | 'en';
 export interface Strings {
   title: string;
   subtitle: string;
+  /** "Date: <sursă>, <an>" under the H1 (UX-5); the finance year is the file main.ts fetches. */
+  dataLine: string;
   disclaimer: string;
 
   parameters: string;
@@ -83,6 +85,7 @@ export interface Strings {
   whyTargetMerge: string;
   whyCountyRule: string;
   legend: string;
+  legendUnits: string;
   legendCapital: string;
   legendAbsorber: string;
   legendOrphanSeat: string;
@@ -271,6 +274,7 @@ export interface Strings {
 const ro: Strings = {
   title: 'Reformă administrativă — România',
   subtitle: 'Simulator de consolidare a UAT-urilor',
+  dataLine: 'Date: INS, Recensământ 2021; Ministerul Finanțelor, execuții bugetare 2024',
   disclaimer:
     'Instrument de analiză pentru dezbatere publică. Nu este o propunere oficială și niciun scenariu nu reprezintă o recomandare.',
 
@@ -355,6 +359,7 @@ const ro: Strings = {
     'Unit după aplicarea pragului de populație minimă rezultată ({target} locuitori).',
   whyCountyRule: 'Toate comunele sunt din județul {county} — regiunile nu traversează limitele de județ.',
   legend: 'Legendă',
+  legendUnits: 'Fiecare unitate propusă are culoarea ei; comunele poartă culoarea centrului lor',
   legendCapital: 'Reședință de județ (centru)',
   legendAbsorber: 'Centru — primăria supraviețuiește',
   legendOrphanSeat: 'Rest — grupare de comune mici, nu un absorbant (cerc gol)',
@@ -562,6 +567,7 @@ const ro: Strings = {
 const en: Strings = {
   title: 'Administrative Reform — Romania',
   subtitle: 'A consolidation simulator for Romania’s UATs',
+  dataLine: 'Data: INS, 2021 census; Ministry of Finance, 2024 budget execution',
   disclaimer:
     'An analysis instrument for public debate. Not an official proposal, and no scenario here is a recommendation.',
 
@@ -646,6 +652,7 @@ const en: Strings = {
     'Merged after applying the minimum resulting population ({target} residents).',
   whyCountyRule: 'Every commune here is in {county} — regions never cross county boundaries.',
   legend: 'Legend',
+  legendUnits: 'Each proposed unit has its own colour; communes wear the colour of their centre',
   legendCapital: 'County capital (a centre)',
   legendAbsorber: 'Centre — its administration survives',
   legendOrphanSeat: 'Leftover — a small-commune cluster, not an absorber (hollow)',

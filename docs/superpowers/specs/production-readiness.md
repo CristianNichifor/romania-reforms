@@ -155,6 +155,21 @@ the administrative unit colours and mobile stats clipping; public-pay layout (me
 search after the lead, humanised codes and "*1)" markers); transport loader; impozit-teren gap
 under the sidebar and mobile ordering; companii-stat mobile table clipping.
 
+### UX-5 "Date: <sursă>, <an>" under every H1 — done
+
+- Given each simulator page and the landing (RO and EN), then a `p.data-line` immediately
+  follows the H1 and reads "Date: <sursă>, <an>" (EN: "Data: …"). Source and year come from the
+  data each page already loads, never from the markup alone: justitie prints the document's
+  `publisher` and `period`; companii-stat, deconcentrare, transport and impozit-teren print their
+  documents' `period` (transport's summary now carries it); administrativ names the census and
+  the local-finance year of the file it fetches; salarizare names the MMFTSS package date already
+  in the footer; the landing lists every simulator's source and year and a test checks them
+  against the data files. Romanian wording: needs human review.
+
+Tests: `data-line.test.ts` and `shell.test.ts` in companii-stat, deconcentrare, justitie, transport,
+impozit-teren; administrativ `tests/data-line.test.ts`; salarizare `tests/views.test.tsx`;
+landing `tests/test_site_pages.py::test_landing_names_its_data_under_the_h1`.
+
 ### UX-7 Public-pay layout — done (Romanian labels: needs human review)
 
 - Given the salary app's first screen, then the H1 and its lead come first, the function
@@ -172,6 +187,28 @@ under the sidebar and mobile ordering; companii-stat mobile table clipping.
 
 Test: `simulators/salarizare/app/tests/layout.test.tsx`.
 
+### UX-6 Maps and readability — done (Romanian UI strings: needs human review)
+
+- Given courts that share a courthouse (the appellate court, tribunal and judecătorie of a
+  county seat; four in București), then each gets its own circle: the largest stays at the
+  courthouse and the others step onto a ring about 3 km across, ordered by volume. A
+  presentation offset, not a relocation.
+- Given the administrative map, then the legend explains the unit colours ("Fiecare unitate
+  propusă are culoarea ei; comunele poartă culoarea centrului lor", EN too) with the palette as
+  one striped swatch, and it is no longer hidden on phones. The summary bar on phones wraps
+  instead of scrolling, so "8,73 mld RON" is not clipped off its edge.
+- Given the transport map, then "Se încarcă harta…" sits over the map until the data lands,
+  and on a load failure it turns into the error title beside the panel's full message.
+- Given impozit-teren on a wide screen, then the sidebar column is painted to the bottom of
+  the page (no black gap under the sticky sidebar). On a phone the order is title and
+  controls, then figures, map and table, then "Ce nu putem calcula" and the sources.
+- Given companii-stat on a phone, then the clusters table scrolls sideways inside its region
+  with the activity name pinned, so every numeric column is reachable.
+
+Tests: justitie `src/spread.test.ts`; administrativ `tests/legend-mobile.test.ts`; transport
+`src/map-status.test.ts`; impozit-teren `src/layout.test.ts`; companii-stat
+`src/table-mobile.test.ts`. The CSS tests read the stylesheet; the layouts themselves were not
+screenshot-checked on a phone: needs human review.
 ## F. Family UX guideline (uxg-b, 2026-10-14)
 
 ### UXG-1 One guideline for the landing and the seven simulators

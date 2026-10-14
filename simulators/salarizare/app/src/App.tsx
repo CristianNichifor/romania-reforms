@@ -503,6 +503,8 @@ export default function App() {
           ministry={ministry ?? null}
           inForce={regimes['ro-153-2017'] ?? null}
           denmark={regimes['dk-stat-2026'] ?? null}
+          dataLine={t.dataLine}
+          statusBadge={t.statusBadge}
           onOpen={(view, patch) => setScenario({ ...scenario, view, ...patch })}
         />
       )}

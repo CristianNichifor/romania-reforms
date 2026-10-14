@@ -30,3 +30,19 @@ describe.each(['index.html', 'statistici.html'])('%s', (page) => {
     expect(shell!.transformIndexHtml(html, { server: {} })).not.toContain('Content-Security-Policy');
   });
 });
+
+it('index.html reads title, purpose, then the data line with the one status badge (UX-5, screen criteria 3-4)', () => {
+  const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  expect(html).toMatch(
+    /<h1[^>]*>[^<]*<\/h1>\s*<p class="sub" id="sub"><\/p>\s*<p class="data-line"><span id="data-line"><\/span> <span class="badge status">Date reale<\/span><\/p>/,
+  );
+  expect(html.match(/class="badge[ "]/g)).toHaveLength(1);
+});
+
+it('statistici.html reads title, purpose, then the data line with the one status badge (screen criteria 3-4)', () => {
+  const html = readFileSync(new URL('../statistici.html', import.meta.url), 'utf8');
+  expect(html).toMatch(
+    /<h1>[^<]*<\/h1>\s*<p>[^]*?<\/p>\s*<p class="data-line"><span id="data-line"><\/span> <span class="badge status">Date reale<\/span><\/p>/,
+  );
+  expect(html.match(/class="badge[ "]/g)).toHaveLength(1);
+});
