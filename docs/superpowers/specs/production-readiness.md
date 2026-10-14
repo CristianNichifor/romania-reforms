@@ -288,6 +288,23 @@ comma-below in Romanian, anchor names agree between the select and the benchmark
 Test: salarizare `tests/proposal-strings.test.ts` (same keys, no Romanian letters in English,
 comma-below in Romanian, the counts line and the "from" formatter).
 
+### UX-29 Public pay in English, ninth slice: the Funcție cu funcție view — done (English copy: needs human review)
+
+- Given `/salarizare/#/functii?lang=en`, then every word the view prints (title and purpose, the
+  four headline figures with their notes, the search and family filters, the "only merging"
+  switch, the found/showing line and its note, the "more" button, and on each card the titles
+  badge, code tooltip, table label, the four system rows with their "missing" wording, the
+  occupation-median tag, the delta row and the two folded lists with their parse note) is
+  English, and counts, shares and money use the `en-GB` locale; in Romanian nothing changes. The
+  strings live in a per-language table in `src/MergesView.tsx` (`MERGES_STRINGS`), the pattern
+  of UX-21 to UX-28. Position names, former titles, families, chapters and Danish occupation
+  names are data; the search placeholder quotes grid titles and stays as they are written.
+- The views Ce se schimbă and Meserii remain Romanian in English mode; the "views are in
+  Romanian" footer note stays until they are done.
+
+Test: salarizare `tests/merges-strings.test.ts` (same keys, no Romanian letters in English,
+comma-below in Romanian, count and summary formatters).
+
 ### UX-16 impozit-teren page check — done
 
 - Given `/impozit-teren/#j=bc` at 390 × 844, when the county table has rendered, then the
