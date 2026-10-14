@@ -32,6 +32,7 @@ import {
   type Pooled,
 } from './aggregate';
 import { assign, changedParams, loadCoupling, readScenario } from './arondare';
+import { captionCharts, editionsPeriod } from './chart-source';
 import { dataLineFor } from './data-line';
 import { proposedCourts, type ArondareInstante, type Proposal } from './propuse';
 
@@ -125,6 +126,7 @@ interface Stats {
 
 interface Edition {
   period: string;
+  publisher: string;
   courts: { id: string; tier: string; volume: number; resolved: number }[];
 }
 
@@ -535,6 +537,12 @@ async function main(): Promise<void> {
     'ori încetineala — vezi ultima secțiune.';
 
   renderNational(stats, editions);
+  // Every chart names the document it was drawn from (UX-34): the portal snapshot for most,
+  // the CSM annual reports for the trend.
+  captionCharts(document, {
+    portal: stats,
+    editions: { publisher: editions[0]?.publisher ?? stats.publisher, period: editionsPeriod(editions.map((e) => e.period)) },
+  });
 
   if (!courts) {
     renderScope(viewFromStats(stats), '');

@@ -3,19 +3,435 @@ import type { ReactNode } from 'react';
 import { PositionName } from './names';
 import { Checkbox, Table } from '@cristiannichifor/civic-ui';
 
-import { COMPONENT_LABELS, COMPONENTS, compareComposition } from '../../engine/composition';
+import { COMPONENTS, compareComposition } from '../../engine/composition';
 import type { Component, Shares, Side } from '../../engine/composition';
 import { resolveGroups } from '../../engine/occupations';
 import type { DkOccupation, GroupsDocument, ResolvedGroup } from '../../engine/occupations';
 import type { Regime } from '../../engine/types';
+import type { Lang } from './i18n';
 import { amountLine, amountRange } from './money';
 import type { Rates } from './money';
 import type { Scenario } from '../../engine/scenario';
 import { checkAgainstMeasured, gridPay } from '../../engine/measured';
 import type { MeasuredSeries, SectorCheck } from '../../engine/measured';
 
-const times = (n: number) =>
-  `${n.toLocaleString('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}×`;
+const LOCALE: Record<Lang, string> = { ro: 'ro-RO', en: 'en-GB' };
+
+/** The pay components as the page names them; the engine's keys stay the same in both languages. */
+const COMPONENT_LABELS: Record<Lang, Record<Component, string>> = {
+  ro: {
+    basic: 'Salariu de bază',
+    seniority: 'Spor de vechime',
+    conditions: 'Sporuri de condiții',
+    overtime: 'Ore suplimentare',
+    irregular: 'Plăți neregulate',
+    fringe: 'Beneficii și hrană',
+  },
+  en: {
+    basic: 'Base salary',
+    seniority: 'Seniority supplement',
+    conditions: 'Conditions supplements',
+    overtime: 'Overtime',
+    irregular: 'Irregular payments',
+    fringe: 'Benefits and meals',
+  },
+};
+
+/** What was set aside before comparing, worded per language; the shares come from the engine. */
+const EXCLUSION_TEXT: Record<Lang, Record<'pension' | 'sickness' | 'other', { label: string; reason: string }>> = {
+  ro: {
+    pension: {
+      label: 'Pensie plătită de angajator',
+      reason:
+        'Contribuția angajatorului la pensie. Partea românească exclude titlul 10.03, corespondentul ei, ca ambele cifre să descrie plata, nu costul angajării.',
+    },
+    sickness: {
+      label: 'Zile de boală plătite',
+      reason:
+        'România plătește concediul medical din alt titlu bugetar, deci suma nu apare niciodată în numărătorul românesc.',
+    },
+    other: {
+      label: 'Delegare și detașare',
+      reason: 'Decontarea unei cheltuieli, nu plata unei munci — și fără corespondent danez.',
+    },
+  },
+  en: {
+    pension: {
+      label: 'Employer-paid pension',
+      reason:
+        "The employer's pension contribution. The Romanian side excludes title 10.03, its counterpart, so that both figures describe pay, not the cost of employment.",
+    },
+    sickness: {
+      label: 'Paid sick days',
+      reason:
+        'Romania pays sick leave from another budget title, so the amount never appears in the Romanian numerator.',
+    },
+    other: {
+      label: 'Travel and secondment',
+      reason: 'The reimbursement of an expense, not the payment of work — and with no Danish counterpart.',
+    },
+  },
+};
+
+/** Every word this view prints, per language (RR-10). English copy is agent-written: needs human review. */
+export interface OccupationsStrings {
+  title: string;
+  purpose: string;
+  disclaimer: ReactNode;
+  capSummary: string;
+  capDetail: ReactNode;
+  withCap: ReactNode;
+  showLegal: string;
+  keyBase: string;
+  keyCap: string;
+  keyLegal: string;
+  keyDk: string;
+  keyMid: string;
+  show: string;
+  all: (n: string) => string;
+  groupsTitle: string;
+  groupsHow: string;
+  groupsBenchmarks: (ro: string, dk: string) => string;
+  positions: (n: string) => string;
+  banded: string;
+  weak: string;
+  romania: string;
+  denmark: string;
+  noComparator: string;
+  withCapHint: string;
+  whySummary: string;
+  bandedNote: (n: string) => ReactNode;
+  outsideCap: (list: string) => ReactNode;
+  andMore: (n: string) => string;
+  compositionTitle: string;
+  compositionLede: string;
+  compositionHero: (ro: string, dk: string) => string;
+  roAll: string;
+  roAllSub: string;
+  dkAll: string;
+  dkAllSub: string;
+  roChapterSub: string;
+  dkSub: string;
+  base: string;
+  aboveBase: string;
+  trendTitle: string;
+  trendHint: string;
+  trendFlat: string;
+  trendMoved: (up: boolean, points: string, from: string, to: string) => string;
+  tableToggle: string;
+  tableLabel: string;
+  columns: { component: string; romania: string; denmark: string };
+  exclIntro: string;
+  holiday: (share: string) => ReactNode;
+  exclOutro: string;
+  measuredTitle: string;
+  measuredLede: ReactNode;
+  verdict: (median: string, measured: string) => ReactNode;
+  employees: (n: string) => string;
+  keyGridRange: (n: string) => string;
+  keyGridMedian: string;
+  keyMeasured: (period: string) => string;
+  oldGrid: (median: string, pct: string, period: string) => string;
+  blocking: string;
+  blockingNote: ReactNode;
+  note: string;
+  noteText: string;
+  sectors: { invatamant: string; sanatate: string };
+}
+
+export const OCCUPATIONS_STRINGS: Record<Lang, OccupationsStrings> = {
+  ro: {
+    title: 'Aceeași meserie, două sisteme',
+    purpose:
+      'Funcțiile din proiect, regrupate după meserie și nu după anexă, apoi puse lângă ce câștigă aceeași meserie în sectorul public danez. Fiecare bară e raportată la mijlocul propriului sistem, deci se pot compara direct.',
+    disclaimer: (
+      <>
+        <strong>Cifra daneză include sporurile. Cea românească, doar dacă bifezi.</strong> Pentru
+        medici, asistenți sau profesori Danemarca nu are grilă — salariul se negociază peste un minim
+        din contractul colectiv, iar ce se publică sunt câștiguri efective. Ca să fie o comparație
+        corectă, partea românească trebuie să primească și ea sporurile.
+      </>
+    ),
+    capSummary: 'Ce spune de fapt plafonul de 20%',
+    capDetail: (
+      <>
+        <p>
+          Art. 21 alin. (2) plafonează suma sporurilor la 20% din suma salariilor de bază —{' '}
+          <strong>pe ordonator principal de credite și pe sursă de finanțare, nu pe persoană</strong>.
+          Este o medie a instituției: un om poate trece binișor peste 20%, dacă altul stă sub.
+        </p>
+        <p>
+          În plus, legea scoate din plafon o listă lungă: munca de noapte (25%), orele suplimentare
+          (75–100%), sporul pentru handicap (15% din valoarea de referință), turele din sănătate (15%),
+          izolarea în Delta Dunării (15%), administrarea fondurilor europene (până la 40%) și premiul de
+          performanță (10–20%, cu plafonul lui separat de 4%). Sporul pentru proiecte europene intră
+          doar cu partea cofinanțată din buget. Practic, în plafon rămân trei: controlul financiar
+          preventiv, condițiile periculoase și capacitatea fiscal-bugetară locală.
+        </p>
+        <p>
+          Bara „cu sporuri în plafon” de mai jos adaugă exact 20% peste bază. Este o ilustrare a ce
+          implică plafonul, nu un drept al nimănui — iar sporurile exceptate pot urca peste ea.
+        </p>
+      </>
+    ),
+    withCap: (
+      <>
+        Adaugă sporurile în plafon la partea românească (+20%) — altfel se compară baza românească cu
+        câștigul danez cu tot cu sporuri
+      </>
+    ),
+    showLegal: 'Arată și intervalul legal complet al bazei (bara palidă)',
+    keyBase: 'România, salariul de bază',
+    keyCap: '+ sporuri în plafon (20%)',
+    keyLegal: 'tot ce permite legea, la bază',
+    keyDk: 'Danemarca, cuartilele angajaților',
+    keyMid: 'mijlocul fiecărui sistem',
+    show: 'Arată',
+    all: (n) => `toate (${n})`,
+    groupsTitle: 'Cum au fost făcute grupele',
+    groupsHow:
+      'Proiectul împarte funcțiile pe anexe, care urmează angajatorul și statutul juridic. Statistica daneză le împarte pe meserii, ca piața muncii. Grupele de aici urmează meseria, iar fiecare spune ce regulă a folosit și câte funcții a prins — ca să poată fi contestată gruparea, nu doar cifra.',
+    groupsBenchmarks: (ro, dk) =>
+      `Reperul românesc este mediana salariului de bază din toată grila, ${ro}. Cel danez este mediana câștigului tuturor angajaților publici, ${dk}. Fiecare sistem e măsurat cu propria lui unitate, iar raportul e ce se compară.`,
+    positions: (n) => `${n} funcții`,
+    banded: '±15% pe categoria unității',
+    weak: 'echivalare slabă',
+    romania: 'România',
+    denmark: 'Danemarca',
+    noComparator:
+      'Statistica daneză nu publică această ocupație separat, deci nu există cu ce fi comparată. Rândul rămâne gol intenționat.',
+    withCapHint: ' cu sporuri în plafon',
+    whySummary: 'Ce intră în grupă și de ce',
+    bandedNote: (n) => (
+      <>
+        <strong>Coeficientul publicat e un mijloc, nu o sumă.</strong> Pentru {n} dintre funcțiile din
+        grupă, Anexa II Cap. II Art. 10 stabilește nivelul între −15% și +15% față de cifra din anexă,
+        în funcție de categoria unității — diminuat la unitățile medico-sociale și ambulatorii, majorat
+        la medicina legală. Categoriile se stabilesc prin hotărâre de Guvern, care încă nu există, deci
+        salariul nu se poate calcula din lege: doar intervalul. Barele de mai sus includ banda.
+      </>
+    ),
+    outsideCap: (list) => (
+      <>
+        <strong>În afara plafonului de 20%:</strong> {list}. Acestea se adaugă peste bara de mai sus,
+        dacă persoana le îndeplinește condițiile.
+      </>
+    ),
+    andMore: (n) => `…și încă ${n}`,
+    compositionTitle: 'Din ce e făcut salariul',
+    compositionLede:
+      'Amândouă părțile sunt acum ce s-a plătit efectiv, nu ce permite legea: Danemarca din statistica de câștiguri, România din execuția bugetară pe clasificația economică — acolo unde „Salarii de bază” stă la 10.01.01 și sporurile la 10.01.05 și 10.01.06.',
+    compositionHero: (ro, dk) =>
+      `Atât e de mare stratul de peste salariul de bază în România față de Danemarca: ${ro} din plată, față de ${dk}. Nu plafonul de 20% e neobișnuit — ci cât de mult atârnă deja plata de el.`,
+    roAll: 'România',
+    roAllSub: 'tot sectorul bugetar, execuție 2025',
+    dkAll: 'Danemarca',
+    dkAllSub: 'toți angajații publici, 2024',
+    roChapterSub: 'tot capitolul bugetar — statul nu publică defalcarea pe meserii',
+    dkSub: 'Danemarca',
+    base: 'bază',
+    aboveBase: 'peste bază',
+    trendTitle: 'Crește stratul de peste salariul de bază?',
+    trendHint: 'Ponderea a tot ce se plătește peste salariul de bază, în fiecare an de execuție. ',
+    trendFlat: 'Practic neschimbată de la un capăt la altul.',
+    trendMoved: (up, points, from, to) =>
+      `${up ? 'A urcat' : 'A scăzut'} cu ${points} puncte procentuale între ${from} și ${to} — o schimbare de pondere, nu de procent.`,
+    tableToggle: 'Vezi compoziția ca tabel',
+    tableLabel: 'Compoziția salarială',
+    columns: { component: 'Componentă', romania: 'România', denmark: 'Danemarca' },
+    exclIntro: 'Ce s-a scos înainte de comparație, ca cele două să măsoare același lucru:',
+    holiday: (share) => (
+      <>
+        <b>Concediul de odihnă</b> nu se scade din nicio parte. Danemarca îl tipărește separat, {share}{' '}
+        din câștig, dar ca sub-poziție a salariului de bază — omul în concediu își primește salariul,
+        exact ca în România. Scăzut ca și cum ar fi o componentă aparte, ar răsturna concluzia.
+      </>
+    ),
+    exclOutro:
+      'Execuția arată regimul actual, nu proiectul: plafonul de 20% n-a funcționat încă niciun an. Iar clasificația economică e un vocabular contabil — ce intră la „Sporuri pentru condiții de muncă” nu e exact mulțimea pe care Art. 21 o plafonează.',
+    measuredTitle: 'Grila față de ce se plătește de fapt',
+    measuredLede: (
+      <>
+        Până aici, fiecare cifră românească a fost ce spune legea. Institutul Național de Statistică
+        publică salariul brut <strong>de bază</strong> — exact mărimea pe care o dă și grila — pentru
+        angajații publici din învățământ și sănătate. Atât cât ține de cele două sectoare, legea poate
+        fi verificată, nu doar descrisă.
+      </>
+    ),
+    verdict: (median, measured) => (
+      <>
+        Mediana grilei {median} · măsurat {measured}{' '}
+      </>
+    ),
+    employees: (n) => `${n} salariați`,
+    keyGridRange: (n) => `intervalul grilei (${n} funcții)`,
+    keyGridMedian: 'mediana grilei',
+    keyMeasured: (period) => `măsurat de INS, ${period}`,
+    oldGrid: (median, pct, period) =>
+      `Grila din anexele legii în vigoare, tipărită pentru 2022, dă o mediană de ${median} — cu ${pct}% sub ce se plătea în ${period}. Peste ea s-au aplicat majorări an de an, care nu sunt în anexe.`,
+    blocking: 'blocant',
+    blockingNote: (
+      <>
+        <strong>Grila se numără pe funcții, măsurătoarea pe oameni.</strong> Mediana grilei tratează un
+        post ocupat de patruzeci de mii de învățători și unul ocupat de un singur inspector-șef ca pe
+        două voturi egale. Cifra INS e ponderată cu numărul de angajați, fiindcă e o anchetă pe
+        salariați. Ca să fie ponderată și grila ar trebui numărul de posturi pe fiecare funcție, iar
+        România nu îl publică — exact golul pe care datele astea <em>nu</em> îl acoperă. Comparația e
+        informativă, nu un test de egalitate.
+      </>
+    ),
+    note: 'de reținut',
+    noteText:
+      'Ancheta acoperă secțiunile CAEN A–S și omite secțiunea O — administrație publică și apărare. Învățământul și sănătatea sunt înăuntru; ministerele, poliția și armata nu. Și numără doar salariații cu program complet plătiți întreaga lună octombrie, ceea ce împinge media în sus față de statul de plată real.',
+    sectors: { invatamant: 'Învățământ', sanatate: 'Sănătate și asistență socială' },
+  },
+  en: {
+    title: 'The same trade, two systems',
+    purpose:
+      "The draft's positions, regrouped by trade rather than by annex, then set beside what the same trade earns in the Danish public sector. Each bar is relative to the middle of its own system, so they compare directly.",
+    disclaimer: (
+      <>
+        <strong>The Danish figure includes supplements. The Romanian one only if you tick the box.</strong>{' '}
+        For doctors, nurses or teachers Denmark has no grid — pay is negotiated above a minimum from the
+        collective agreement, and what is published are actual earnings. For a fair comparison the
+        Romanian side has to receive its supplements too.
+      </>
+    ),
+    capSummary: 'What the 20% cap actually says',
+    capDetail: (
+      <>
+        <p>
+          Art. 21 (2) caps the sum of supplements at 20% of the sum of base salaries —{' '}
+          <strong>per principal budget holder and per funding source, not per person</strong>. It is an
+          institutional average: one person can go well over 20% if another stays under.
+        </p>
+        <p>
+          Moreover, the law takes a long list out of the cap: night work (25%), overtime (75–100%), the
+          disability supplement (15% of the reference value), health-sector shifts (15%), isolation in
+          the Danube Delta (15%), the management of European funds (up to 40%) and the performance bonus
+          (10–20%, with its own separate 4% cap). The European-projects supplement counts only for the
+          part co-financed from the budget. In practice three remain inside the cap: preventive financial
+          control, hazardous conditions and local fiscal capacity.
+        </p>
+        <p>
+          The "with capped supplements" bar below adds exactly 20% on top of base. It illustrates what
+          the cap implies, it is no one's entitlement — and the exempt supplements can rise above it.
+        </p>
+      </>
+    ),
+    withCap: (
+      <>
+        Add the capped supplements to the Romanian side (+20%) — otherwise the Romanian base is compared
+        with Danish earnings, supplements included
+      </>
+    ),
+    showLegal: 'Also show the full legal range of the base (the pale bar)',
+    keyBase: 'Romania, base salary',
+    keyCap: '+ capped supplements (20%)',
+    keyLegal: 'everything the law allows, at base',
+    keyDk: 'Denmark, employee quartiles',
+    keyMid: 'the middle of each system',
+    show: 'Show',
+    all: (n) => `all (${n})`,
+    groupsTitle: 'How the groups were made',
+    groupsHow:
+      'The draft splits positions by annex, which follows the employer and the legal status. Danish statistics split them by trade, like the labour market. The groups here follow the trade, and each says which rule it used and how many positions it caught — so that the grouping can be contested, not just the figure.',
+    groupsBenchmarks: (ro, dk) =>
+      `The Romanian benchmark is the median base salary across the whole grid, ${ro}. The Danish one is the median earnings of all public employees, ${dk}. Each system is measured in its own unit, and the ratio is what gets compared.`,
+    positions: (n) => `${n} positions`,
+    banded: '±15% by unit category',
+    weak: 'weak equivalence',
+    romania: 'Romania',
+    denmark: 'Denmark',
+    noComparator:
+      'Danish statistics do not publish this occupation separately, so there is nothing to compare it with. The row is left empty on purpose.',
+    withCapHint: ' with capped supplements',
+    whySummary: 'What goes into the group and why',
+    bandedNote: (n) => (
+      <>
+        <strong>The published coefficient is a midpoint, not an amount.</strong> For {n} of the
+        positions in the group, Annex II Ch. II Art. 10 sets the level between −15% and +15% of the
+        figure in the annex, depending on the unit category — reduced for medical-social and outpatient
+        units, raised for forensic medicine. The categories are set by Government decision, which does
+        not yet exist, so the salary cannot be computed from the law: only the range. The bars above
+        include the band.
+      </>
+    ),
+    outsideCap: (list) => (
+      <>
+        <strong>Outside the 20% cap:</strong> {list}. These add on top of the bar above, if the person
+        meets their conditions.
+      </>
+    ),
+    andMore: (n) => `…and ${n} more`,
+    compositionTitle: 'What the salary is made of',
+    compositionLede:
+      'Both sides are now what was actually paid, not what the law allows: Denmark from earnings statistics, Romania from budget execution by economic classification — where "Base salaries" sits at 10.01.01 and supplements at 10.01.05 and 10.01.06.',
+    compositionHero: (ro, dk) =>
+      `That is how much larger the layer above base salary is in Romania than in Denmark: ${ro} of pay, against ${dk}. It is not the 20% cap that is unusual — it is how much pay already hangs on it.`,
+    roAll: 'Romania',
+    roAllSub: 'the whole public sector, 2025 execution',
+    dkAll: 'Denmark',
+    dkAllSub: 'all public employees, 2024',
+    roChapterSub: 'the whole budget chapter — the state does not publish the breakdown by trade',
+    dkSub: 'Denmark',
+    base: 'base',
+    aboveBase: 'above base',
+    trendTitle: 'Is the layer above base salary growing?',
+    trendHint: 'The share of everything paid above base salary, in each execution year. ',
+    trendFlat: 'Practically unchanged from one end to the other.',
+    trendMoved: (up, points, from, to) =>
+      `${up ? 'Up' : 'Down'} by ${points} percentage points between ${from} and ${to} — a change of share, not of percent.`,
+    tableToggle: 'See the composition as a table',
+    tableLabel: 'Pay composition',
+    columns: { component: 'Component', romania: 'Romania', denmark: 'Denmark' },
+    exclIntro: 'What was taken out before comparing, so that the two measure the same thing:',
+    holiday: (share) => (
+      <>
+        <b>Annual leave</b> is not deducted from either side. Denmark prints it separately, {share} of
+        earnings, but as a sub-item of base salary — a person on leave receives their salary, exactly
+        as in Romania. Deducted as if it were a separate component, it would overturn the conclusion.
+      </>
+    ),
+    exclOutro:
+      'The execution shows the current regime, not the draft: the 20% cap has not yet operated for a single year. And the economic classification is an accounting vocabulary — what goes under "Supplements for working conditions" is not exactly the set that Art. 21 caps.',
+    measuredTitle: 'The grid against what is actually paid',
+    measuredLede: (
+      <>
+        So far, every Romanian figure has been what the law says. The National Institute of Statistics
+        publishes the gross <strong>base</strong> salary — exactly the quantity the grid gives — for
+        public employees in education and health. As far as those two sectors go, the law can be
+        checked, not only described.
+      </>
+    ),
+    verdict: (median, measured) => (
+      <>
+        Grid median {median} · measured {measured}{' '}
+      </>
+    ),
+    employees: (n) => `${n} employees`,
+    keyGridRange: (n) => `the grid's range (${n} positions)`,
+    keyGridMedian: 'the grid median',
+    keyMeasured: (period) => `measured by INS, ${period}`,
+    oldGrid: (median, pct, period) =>
+      `The grid in the annexes of the law in force, printed for 2022, gives a median of ${median} — ${pct}% below what was paid in ${period}. Year-on-year increases were applied on top of it, which are not in the annexes.`,
+    blocking: 'blocking',
+    blockingNote: (
+      <>
+        <strong>The grid is counted by position, the measurement by people.</strong> The grid median
+        treats a post held by forty thousand primary teachers and one held by a single chief inspector
+        as two equal votes. The INS figure is weighted by the number of employees, because it is a
+        survey of employees. To weight the grid too would take the number of posts per position, and
+        Romania does not publish it — exactly the gap these data do <em>not</em> fill. The comparison
+        is informative, not a test of equality.
+      </>
+    ),
+    note: 'to note',
+    noteText:
+      'The survey covers NACE sections A–S and omits section O — public administration and defence. Education and health are inside; ministries, the police and the army are not. And it counts only full-time employees paid for the whole month of October, which pushes the average up against the real payroll.',
+    sectors: { invatamant: 'Education', sanatate: 'Health and social care' },
+  },
+};
 
 export interface OccupationBenchmarks {
   /** Median base salary across the Romanian grid — the middle of its own system. */
@@ -36,6 +452,7 @@ export default function OccupationsView({
   onScenario,
   measured,
   inForce,
+  lang = 'ro',
 }: {
   /** The section menu, drawn under the title so the page says what it is first. */
   menu?: ReactNode;
@@ -51,7 +468,11 @@ export default function OccupationsView({
   /** What INS measured public employees are paid, education and health only. */
   measured: MeasuredSeries[] | null;
   inForce: Regime | null;
+  /** The page language (RR-10): the view prints its own words in it, numbers follow its locale. */
+  lang?: Lang;
 }) {
+  const t = OCCUPATIONS_STRINGS[lang];
+  const locale = LOCALE[lang];
   const [showLegal, setShowLegal] = useState(false);
   const [withCap, setWithCap] = useState(true);
 
@@ -95,78 +516,41 @@ export default function OccupationsView({
   return (
     <>
       <header className="masthead">
-        <h1>Aceeași meserie, două sisteme</h1>
-        <p>
-          Funcțiile din proiect, regrupate după meserie și nu după anexă, apoi puse lângă ce
-          câștigă aceeași meserie în sectorul public danez. Fiecare bară e raportată la mijlocul
-          propriului sistem, deci se pot compara direct.
-        </p>
+        <h1>{t.title}</h1>
+        <p>{t.purpose}</p>
       </header>
       {menu}
 
       <div className="disclaimer">
-        <strong>Cifra daneză include sporurile. Cea românească, doar dacă bifezi.</strong> Pentru
-        medici, asistenți sau profesori Danemarca nu are grilă — salariul se negociază peste un
-        minim din contractul colectiv, iar ce se publică sunt câștiguri efective. Ca să fie o
-        comparație corectă, partea românească trebuie să primească și ea sporurile.
+        {t.disclaimer}
         <details>
-          <summary>Ce spune de fapt plafonul de 20%</summary>
-          <p>
-            Art. 21 alin. (2) plafonează suma sporurilor la 20% din suma salariilor de bază —{' '}
-            <strong>pe ordonator principal de credite și pe sursă de finanțare, nu pe persoană</strong>.
-            Este o medie a instituției: un om poate trece binișor peste 20%, dacă altul stă sub.
-          </p>
-          <p>
-            În plus, legea scoate din plafon o listă lungă: munca de noapte (25%), orele
-            suplimentare (75–100%), sporul pentru handicap (15% din valoarea de referință), turele
-            din sănătate (15%), izolarea în Delta Dunării (15%), administrarea fondurilor europene
-            (până la 40%) și premiul de performanță (10–20%, cu plafonul lui separat de 4%). Sporul
-            pentru proiecte europene intră doar cu partea cofinanțată din buget. Practic, în plafon
-            rămân trei: controlul financiar preventiv, condițiile periculoase și capacitatea
-            fiscal-bugetară locală.
-          </p>
-          <p>
-            Bara „cu sporuri în plafon” de mai jos adaugă exact 20% peste bază. Este o ilustrare a
-            ce implică plafonul, nu un drept al nimănui — iar sporurile exceptate pot urca peste ea.
-          </p>
+          <summary>{t.capSummary}</summary>
+          {t.capDetail}
         </details>
       </div>
 
       <section>
         <div className="card controls occ-controls civic-scope civic-pay">
-          <Checkbox
-            checked={withCap}
-            onChange={() => setWithCap((v) => !v)}
-            label={
-              <>
-                Adaugă sporurile în plafon la partea românească (+20%) — altfel se compară baza
-                românească cu câștigul danez cu tot cu sporuri
-              </>
-            }
-          />
-          <Checkbox
-            checked={showLegal}
-            onChange={() => setShowLegal((v) => !v)}
-            label="Arată și intervalul legal complet al bazei (bara palidă)"
-          />
+          <Checkbox checked={withCap} onChange={() => setWithCap((v) => !v)} label={t.withCap} />
+          <Checkbox checked={showLegal} onChange={() => setShowLegal((v) => !v)} label={t.showLegal} />
           <div className="occ-key">
-            <span><i className="k-ro-solid" /> România, salariul de bază</span>
-            {withCap && <span><i className="k-ro-cap" /> + sporuri în plafon (20%)</span>}
-            {showLegal && <span><i className="k-ro-faint" /> tot ce permite legea, la bază</span>}
-            <span><i className="k-dk" /> Danemarca, cuartilele angajaților</span>
-            <span><i className="k-mid" /> mijlocul fiecărui sistem</span>
+            <span><i className="k-ro-solid" /> {t.keyBase}</span>
+            {withCap && <span><i className="k-ro-cap" /> {t.keyCap}</span>}
+            {showLegal && <span><i className="k-ro-faint" /> {t.keyLegal}</span>}
+            <span><i className="k-dk" /> {t.keyDk}</span>
+            <span><i className="k-mid" /> {t.keyMid}</span>
           </div>
         </div>
       </section>
 
       <section>
         <div className="sector-filter">
-          <span className="sector-label">Arată</span>
+          <span className="sector-label">{t.show}</span>
           <button
             className={sector === null ? 'on' : ''}
             onClick={() => onScenario({ ...scenario, sector: undefined })}
           >
-            toate ({resolved.length})
+            {t.all(resolved.length.toLocaleString(locale))}
           </button>
           {bySector.map(([name, rows]) => (
             <button
@@ -186,30 +570,25 @@ export default function OccupationsView({
           <div className="occ-list">
             {rows.map((r) => (
               <OccupationRow key={r.group.id} row={r} axisMax={axisMax} showLegal={showLegal}
-                             withCap={withCap} benchmarks={benchmarks} rates={rates} />
+                             withCap={withCap} benchmarks={benchmarks} rates={rates} lang={lang} />
             ))}
           </div>
         </section>
       ))}
 
-      <MeasuredSection regime={regime} inForce={inForce} measured={measured} rates={rates} />
+      <MeasuredSection regime={regime} inForce={inForce} measured={measured} rates={rates} lang={lang} />
 
-      <CompositionSection roComposition={roComposition} resolved={resolved} danish={danish} />
+      <CompositionSection roComposition={roComposition} resolved={resolved} danish={danish} lang={lang} />
 
       <section>
-        <h2>Cum au fost făcute grupele</h2>
+        <h2>{t.groupsTitle}</h2>
         <div className="card readme-grid">
+          <p>{t.groupsHow}</p>
           <p>
-            Proiectul împarte funcțiile pe anexe, care urmează angajatorul și statutul juridic.
-            Statistica daneză le împarte pe meserii, ca piața muncii. Grupele de aici urmează
-            meseria, iar fiecare spune ce regulă a folosit și câte funcții a prins — ca să poată fi
-            contestată gruparea, nu doar cifra.
-          </p>
-          <p>
-            Reperul românesc este mediana salariului de bază din toată grila,{' '}
-            {amountLine(benchmarks.roMedianBase, 'RON', rates)}. Cel danez este mediana câștigului
-            tuturor angajaților publici, {amountLine(benchmarks.dkMedian, 'DKK', rates)}. Fiecare
-            sistem e măsurat cu propria lui unitate, iar raportul e ce se compară.
+            {t.groupsBenchmarks(
+              amountLine(benchmarks.roMedianBase, 'RON', rates, 'native', locale),
+              amountLine(benchmarks.dkMedian, 'DKK', rates, 'native', locale),
+            )}
           </p>
         </div>
       </section>
@@ -224,6 +603,7 @@ function OccupationRow({
   withCap,
   benchmarks,
   rates,
+  lang,
 }: {
   row: ResolvedGroup;
   axisMax: number;
@@ -231,7 +611,12 @@ function OccupationRow({
   withCap: boolean;
   benchmarks: OccupationBenchmarks;
   rates: Rates;
+  lang: Lang;
 }) {
+  const t = OCCUPATIONS_STRINGS[lang];
+  const locale = LOCALE[lang];
+  const times = (v: number) =>
+    `${v.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}×`;
   const pos = (v: number) => `${Math.min((v / axisMax) * 100, 100)}%`;
   const span = (a: number, b: number) => ({ left: pos(a), width: `${Math.max(((b - a) / axisMax) * 100, 0.6)}%` });
 
@@ -253,17 +638,15 @@ function OccupationRow({
           <p className="occ-proposed">{row.group.proposedName}</p>
         </div>
         <div className="badges">
-          <span className="badge">{row.matched.length} funcții</span>
-          {row.bandedPositions > 0 && (
-            <span className="badge">±15% pe categoria unității</span>
-          )}
-          {weak && <span className="badge weak">echivalare slabă</span>}
+          <span className="badge">{t.positions(row.matched.length.toLocaleString(locale))}</span>
+          {row.bandedPositions > 0 && <span className="badge">{t.banded}</span>}
+          {weak && <span className="badge weak">{t.weak}</span>}
         </div>
       </header>
 
       <div className="occ-bars">
         <div className="occ-line">
-          <span className="occ-label">România</span>
+          <span className="occ-label">{t.romania}</span>
           <div className="occ-track">
             <span className="occ-mid" style={{ left: pos(1) }} />
             {showLegal && roLo !== null && roHi !== null && (
@@ -285,7 +668,7 @@ function OccupationRow({
         </div>
 
         <div className="occ-line">
-          <span className="occ-label">Danemarca</span>
+          <span className="occ-label">{t.denmark}</span>
           <div className="occ-track">
             <span className="occ-mid" style={{ left: pos(1) }} />
             {row.dkRatio && <div className="occ-solid dk" style={span(row.dkRatio.q1, row.dkRatio.q3)} />}
@@ -301,12 +684,7 @@ function OccupationRow({
           load; for the trades it does not exist at all, and borrowing another occupation's
           figure to fill the row would be the easiest invented comparison on the page.
         */}
-        {row.group.dkOccupations.length === 0 && (
-          <p className="occ-nocomp">
-            Statistica daneză nu publică această ocupație separat, deci nu există cu ce fi
-            comparată. Rândul rămâne gol intenționat.
-          </p>
-        )}
+        {row.group.dkOccupations.length === 0 && <p className="occ-nocomp">{t.noComparator}</p>}
       </div>
 
       <div className="occ-money">
@@ -318,34 +696,28 @@ function OccupationRow({
                 (withCap && row.roCapped ? row.roCapped.q3 : row.roQ3) / 100,
                 'RON',
                 rates,
+                locale,
               )
             : '—'}
-          {withCap && <em className="occ-caphint"> cu sporuri în plafon</em>}
+          {withCap && <em className="occ-caphint">{t.withCapHint}</em>}
         </span>
         <span>
-          <b>DK</b> {row.dk ? amountRange(row.dk.q1, row.dk.q3, 'DKK', rates) : '—'}
+          <b>DK</b> {row.dk ? amountRange(row.dk.q1, row.dk.q3, 'DKK', rates, locale) : '—'}
         </span>
       </div>
 
       <details className="why">
-        <summary>Ce intră în grupă și de ce</summary>
+        <summary>{t.whySummary}</summary>
         <p className="equiv-note">{row.group.basis}</p>
         {row.bandedPositions > 0 && (
-          <p className="equiv-note">
-            <strong>Coeficientul publicat e un mijloc, nu o sumă.</strong> Pentru{' '}
-            {row.bandedPositions} dintre funcțiile din grupă, Anexa II Cap. II Art. 10 stabilește
-            nivelul între −15% și +15% față de cifra din anexă, în funcție de categoria unității —
-            diminuat la unitățile medico-sociale și ambulatorii, majorat la medicina legală.
-            Categoriile se stabilesc prin hotărâre de Guvern, care încă nu există, deci salariul nu
-            se poate calcula din lege: doar intervalul. Barele de mai sus includ banda.
-          </p>
+          <p className="equiv-note">{t.bandedNote(row.bandedPositions.toLocaleString(locale))}</p>
         )}
         <p className="equiv-note">
-          <strong>În afara plafonului de 20%:</strong>{' '}
-          {row.exemptSupplements
-            .map((e) => `${e.name}${e.rate !== null ? ` (${Math.round(e.rate * 100)}%)` : ''}`)
-            .join('; ')}
-          . Acestea se adaugă peste bara de mai sus, dacă persoana le îndeplinește condițiile.
+          {t.outsideCap(
+            row.exemptSupplements
+              .map((e) => `${e.name}${e.rate !== null ? ` (${Math.round(e.rate * 100)}%)` : ''}`)
+              .join('; '),
+          )}
         </p>
         <ul className="matched">
           {row.matched.slice(0, 14).map((m) => (
@@ -353,7 +725,9 @@ function OccupationRow({
               <PositionName name={m.name} code={m.code} />
             </li>
           ))}
-          {row.matched.length > 14 && <li className="more">…și încă {row.matched.length - 14}</li>}
+          {row.matched.length > 14 && (
+            <li className="more">{t.andMore((row.matched.length - 14).toLocaleString(locale))}</li>
+          )}
         </ul>
       </details>
     </article>
@@ -368,11 +742,12 @@ const SECTOR_SCOPE: Record<string, string> = {
   'Ordine publică': 'ordine-publica',
 };
 
-const pctOf = (n: number, digits = 1) =>
-  `${(n * 100).toLocaleString('ro-RO', { maximumFractionDigits: digits })}%`;
-
 /** One stacked bar. Segments under a hairline are dropped so they cannot look like a mark. */
-function Bar({ side, label, sub }: { side: Side; label: string; sub?: string }) {
+function Bar({ side, label, sub, lang }: { side: Side; label: string; sub?: string; lang: Lang }) {
+  const t = OCCUPATIONS_STRINGS[lang];
+  const locale = LOCALE[lang];
+  const labels = COMPONENT_LABELS[lang];
+  const pctOf = (v: number, digits = 1) => `${(v * 100).toLocaleString(locale, { maximumFractionDigits: digits })}%`;
   return (
     <div className="comp-row">
       <div className="comp-name">
@@ -388,16 +763,16 @@ function Bar({ side, label, sub }: { side: Side; label: string; sub?: string }) 
                 key={s.component}
                 className={`comp-seg ${s.component}`}
                 style={{ width: `${s.share * 100}%` }}
-                title={`${COMPONENT_LABELS[s.component]}: ${pctOf(s.share)}`}
+                title={`${labels[s.component]}: ${pctOf(s.share)}`}
               />
             ))}
         </div>
         <div className="comp-tail">
           <span>
-            bază <b>{pctOf(side.slices.find((s) => s.component === 'basic')?.share ?? 0, 0)}</b>
+            {t.base} <b>{pctOf(side.slices.find((s) => s.component === 'basic')?.share ?? 0, 0)}</b>
           </span>
           <span>
-            peste bază <b>{pctOf(side.supplements)}</b>
+            {t.aboveBase} <b>{pctOf(side.supplements)}</b>
           </span>
         </div>
       </div>
@@ -416,11 +791,19 @@ function CompositionSection({
   roComposition,
   resolved,
   danish,
+  lang,
 }: {
   roComposition: Record<string, Record<string, Shares>> | null;
   resolved: ResolvedGroup[];
   danish: DkOccupation[];
+  lang: Lang;
 }) {
+  const t = OCCUPATIONS_STRINGS[lang];
+  const locale = LOCALE[lang];
+  const labels = COMPONENT_LABELS[lang];
+  const exclusions = EXCLUSION_TEXT[lang];
+  const pctOf = (v: number, digits = 1) => `${(v * 100).toLocaleString(locale, { maximumFractionDigits: digits })}%`;
+
   /** The most recent year in a scope, which is what every bar on this page shows. */
   const latest = (scope: string): Shares | undefined => {
     const byYear = roComposition?.[scope];
@@ -452,28 +835,18 @@ function CompositionSection({
 
   return (
     <section>
-      <h2>Din ce e făcut salariul</h2>
-      <p className="lede">
-        Amândouă părțile sunt acum ce s-a plătit efectiv, nu ce permite legea: Danemarca din
-        statistica de câștiguri, România din execuția bugetară pe clasificația economică — acolo
-        unde „Salarii de bază” stă la 10.01.01 și sporurile la 10.01.05 și 10.01.06.
-      </p>
+      <h2>{t.compositionTitle}</h2>
+      <p className="lede">{t.compositionLede}</p>
 
       {national && national.timesLarger !== null && (
         <>
           <div className="comp-hero">
-            <span className="big">
-              {national.timesLarger.toLocaleString('ro-RO', { maximumFractionDigits: 1 })}×
-            </span>
-            <p>
-              Atât e de mare stratul de peste salariul de bază în România față de Danemarca:{' '}
-              {pctOf(national.ro.supplements)} din plată, față de {pctOf(national.dk.supplements)}.
-              Nu plafonul de 20% e neobișnuit — ci cât de mult atârnă deja plata de el.
-            </p>
+            <span className="big">{national.timesLarger.toLocaleString(locale, { maximumFractionDigits: 1 })}×</span>
+            <p>{t.compositionHero(pctOf(national.ro.supplements), pctOf(national.dk.supplements))}</p>
           </div>
           <div className="card">
-            <Bar side={national.ro} label="România" sub="tot sectorul bugetar, execuție 2025" />
-            <Bar side={national.dk} label="Danemarca" sub="toți angajații publici, 2024" />
+            <Bar side={national.ro} label={t.roAll} sub={t.roAllSub} lang={lang} />
+            <Bar side={national.dk} label={t.dkAll} sub={t.dkAllSub} lang={lang} />
           </div>
         </>
       )}
@@ -485,17 +858,14 @@ function CompositionSection({
         return (
           <div className="card" key={sector} style={{ marginTop: 16 }}>
             <h3>{sector}</h3>
-            <Bar
-              side={compareComposition(shares, {}).ro}
-              label="România"
-              sub="tot capitolul bugetar — statul nu publică defalcarea pe meserii"
-            />
+            <Bar side={compareComposition(shares, {}).ro} label={t.roAll} sub={t.roChapterSub} lang={lang} />
             {rows.map((r) => (
               <Bar
                 key={r.group.id}
                 side={compareComposition({}, r.dkComposition as Shares).dk}
                 label={r.group.label}
-                sub="Danemarca"
+                sub={t.dkSub}
+                lang={lang}
               />
             ))}
           </div>
@@ -519,12 +889,17 @@ function CompositionSection({
         const change = last.share - first.share;
         return (
           <div className="card" style={{ marginTop: 16 }}>
-            <h3>Crește stratul de peste salariul de bază?</h3>
+            <h3>{t.trendTitle}</h3>
             <p className="hint">
-              Ponderea a tot ce se plătește peste salariul de bază, în fiecare an de execuție.{' '}
+              {t.trendHint}
               {Math.abs(change) < 0.005
-                ? 'Practic neschimbată de la un capăt la altul.'
-                : `${change > 0 ? 'A urcat' : 'A scăzut'} cu ${(Math.abs(change) * 100).toLocaleString('ro-RO', { maximumFractionDigits: 1 })} puncte procentuale între ${first.year} și ${last.year} — o schimbare de pondere, nu de procent.`}
+                ? t.trendFlat
+                : t.trendMoved(
+                    change > 0,
+                    (Math.abs(change) * 100).toLocaleString(locale, { maximumFractionDigits: 1 }),
+                    first.year,
+                    last.year,
+                  )}
             </p>
             <div className="trend">
               {points.map((p) => (
@@ -541,19 +916,19 @@ function CompositionSection({
 
       {national && (
         <details className="table-view">
-          <summary>Vezi compoziția ca tabel</summary>
-          <Table className="data" label="Compoziția salarială">
+          <summary>{t.tableToggle}</summary>
+          <Table className="data" label={t.tableLabel}>
             <thead>
               <tr>
-                <th>Componentă</th>
-                <th className="num">România</th>
-                <th className="num">Danemarca</th>
+                <th>{t.columns.component}</th>
+                <th className="num">{t.columns.romania}</th>
+                <th className="num">{t.columns.denmark}</th>
               </tr>
             </thead>
             <tbody>
               {COMPONENTS.map((c: Component) => (
                 <tr key={c}>
-                  <td>{COMPONENT_LABELS[c]}</td>
+                  <td>{labels[c]}</td>
                   <td className="num">
                     {pctOf(national.ro.slices.find((s) => s.component === c)?.share ?? 0)}
                   </td>
@@ -571,41 +946,32 @@ function CompositionSection({
         {COMPONENTS.map((c: Component) => (
           <span key={c}>
             <i style={{ background: `var(--comp-${c})` }} />
-            {COMPONENT_LABELS[c]}
+            {labels[c]}
           </span>
         ))}
       </div>
 
       {national && (
         <div className="comp-excl">
-          <p>Ce s-a scos înainte de comparație, ca cele două să măsoare același lucru:</p>
+          <p>{t.exclIntro}</p>
           <ul>
             {[...national.dk.excluded, ...national.ro.excluded].map((e) => (
               <li key={e.key}>
-                <b>{e.label}</b> ({pctOf(e.share)}) — {e.reason}
+                <b>{exclusions[e.key].label}</b> ({pctOf(e.share)}) — {exclusions[e.key].reason}
               </li>
             ))}
-            <li>
-              <b>Concediul de odihnă</b> nu se scade din nicio parte. Danemarca îl tipărește
-              separat, {pctOf(national.dk.holidayInsideBasic)} din câștig, dar ca sub-poziție a
-              salariului de bază — omul în concediu își primește salariul, exact ca în România.
-              Scăzut ca și cum ar fi o componentă aparte, ar răsturna concluzia.
-            </li>
+            <li>{t.holiday(pctOf(national.dk.holidayInsideBasic))}</li>
           </ul>
-          <p>
-            Execuția arată regimul actual, nu proiectul: plafonul de 20% n-a funcționat încă
-            niciun an. Iar clasificația economică e un vocabular contabil — ce intră la „Sporuri
-            pentru condiții de muncă” nu e exact mulțimea pe care Art. 21 o plafonează.
-          </p>
+          <p>{t.exclOutro}</p>
         </div>
       )}
     </section>
   );
 }
 
-const SECTORS: Array<{ activity: string; family: string; label: string }> = [
-  { activity: 'invatamant', family: 'I-invatamant', label: 'Învățământ' },
-  { activity: 'sanatate', family: 'II-sanatate-asistenta-sociala', label: 'Sănătate și asistență socială' },
+const SECTORS: Array<{ activity: 'invatamant' | 'sanatate'; family: string }> = [
+  { activity: 'invatamant', family: 'I-invatamant' },
+  { activity: 'sanatate', family: 'II-sanatate-asistenta-sociala' },
 ];
 
 /**
@@ -620,12 +986,17 @@ function MeasuredSection({
   inForce,
   measured,
   rates,
+  lang,
 }: {
   regime: Regime;
   inForce: Regime | null;
   measured: MeasuredSeries[] | null;
   rates: Rates;
+  lang: Lang;
 }) {
+  const t = OCCUPATIONS_STRINGS[lang];
+  const locale = LOCALE[lang];
+  const money = (v: number) => amountLine(v, 'RON', rates, 'native', locale);
   const checks = useMemo(
     () =>
       measured
@@ -642,13 +1013,8 @@ function MeasuredSection({
 
   return (
     <section>
-      <h2>Grila față de ce se plătește de fapt</h2>
-      <p className="lede">
-        Până aici, fiecare cifră românească a fost ce spune legea. Institutul Național de
-        Statistică publică salariul brut <strong>de bază</strong> — exact mărimea pe care o dă și
-        grila — pentru angajații publici din învățământ și sănătate. Atât cât ține de cele două
-        sectoare, legea poate fi verificată, nu doar descrisă.
-      </p>
+      <h2>{t.measuredTitle}</h2>
+      <p className="lede">{t.measuredLede}</p>
 
       {checks.map((sector) => {
         const d = sector.draft!;
@@ -656,13 +1022,12 @@ function MeasuredSection({
         return (
           <div className="card" key={sector.activity} style={{ marginTop: 14 }}>
             <div className="meas-head">
-              <h3>{sector.label}</h3>
+              <h3>{t.sectors[sector.activity]}</h3>
               <span className="meas-verdict">
-                Mediana grilei {amountLine(d.grid.median, 'RON', rates)} · măsurat{' '}
-                {amountLine(d.overall!.base, 'RON', rates)}{' '}
+                {t.verdict(money(d.grid.median), money(d.overall!.base))}
                 <b className={d.ratio! > 1.05 ? 'fall' : ''}>
                   ({d.ratio! >= 1 ? '+' : ''}
-                  {((d.ratio! - 1) * 100).toLocaleString('ro-RO', { maximumFractionDigits: 0 })}%)
+                  {((d.ratio! - 1) * 100).toLocaleString(locale, { maximumFractionDigits: 0 })}%)
                 </b>
               </span>
             </div>
@@ -672,7 +1037,7 @@ function MeasuredSection({
                 <div className="meas-row" key={m.occupation}>
                   <div className="meas-name">
                     {m.occupation}
-                    <small>{m.employees.toLocaleString('ro-RO')} salariați</small>
+                    <small>{t.employees(m.employees.toLocaleString(locale))}</small>
                   </div>
                   <div className="meas-track">
                     {/* The grid's range sits behind, the measurement on top of it. */}
@@ -687,29 +1052,27 @@ function MeasuredSection({
                     <div
                       className="meas-dot"
                       style={{ left: `${(m.base / axis) * 100}%` }}
-                      title={`${m.occupation}: ${Math.round(m.base).toLocaleString('ro-RO')} lei`}
+                      title={`${m.occupation}: ${Math.round(m.base).toLocaleString(locale)} lei`}
                     />
                   </div>
-                  <div className="meas-num">{Math.round(m.base).toLocaleString('ro-RO')}</div>
+                  <div className="meas-num">{Math.round(m.base).toLocaleString(locale)}</div>
                 </div>
               ))}
             </div>
 
             <div className="occ-key" style={{ marginTop: 10 }}>
-              <span><i className="k-grid-range" /> intervalul grilei ({d.grid.positions} funcții)</span>
-              <span><i className="k-grid-median" /> mediana grilei</span>
-              <span><i className="k-measured" /> măsurat de INS, {d.period}</span>
+              <span><i className="k-grid-range" /> {t.keyGridRange(d.grid.positions.toLocaleString(locale))}</span>
+              <span><i className="k-grid-median" /> {t.keyGridMedian}</span>
+              <span><i className="k-measured" /> {t.keyMeasured(d.period)}</span>
             </div>
 
             {sector.old?.ratio && (
               <p className="cmp-foot">
-                Grila din anexele legii în vigoare, tipărită pentru 2022, dă o mediană de{' '}
-                {amountLine(sector.old.grid.median, 'RON', rates)} — cu{' '}
-                {(((sector.old.ratio ?? 1) - 1) * 100).toLocaleString('ro-RO', {
-                  maximumFractionDigits: 0,
-                })}
-                % sub ce se plătea în {d.period}. Peste ea s-au aplicat majorări an de an, care nu
-                sunt în anexe.
+                {t.oldGrid(
+                  money(sector.old.grid.median),
+                  (((sector.old.ratio ?? 1) - 1) * 100).toLocaleString(locale, { maximumFractionDigits: 0 }),
+                  d.period,
+                )}
               </p>
             )}
           </div>
@@ -718,24 +1081,12 @@ function MeasuredSection({
 
       <div className="limits" style={{ marginTop: 16 }}>
         <div className="limit blocking">
-          <div className="sev">blocant</div>
-          <p>
-            <strong>Grila se numără pe funcții, măsurătoarea pe oameni.</strong> Mediana grilei
-            tratează un post ocupat de patruzeci de mii de învățători și unul ocupat de un singur
-            inspector-șef ca pe două voturi egale. Cifra INS e ponderată cu numărul de angajați,
-            fiindcă e o anchetă pe salariați. Ca să fie ponderată și grila ar trebui numărul de
-            posturi pe fiecare funcție, iar România nu îl publică — exact golul pe care datele
-            astea <em>nu</em> îl acoperă. Comparația e informativă, nu un test de egalitate.
-          </p>
+          <div className="sev">{t.blocking}</div>
+          <p>{t.blockingNote}</p>
         </div>
         <div className="limit material">
-          <div className="sev">de reținut</div>
-          <p>
-            Ancheta acoperă secțiunile CAEN A–S și omite secțiunea O — administrație publică și
-            apărare. Învățământul și sănătatea sunt înăuntru; ministerele, poliția și armata nu.
-            Și numără doar salariații cu program complet plătiți întreaga lună octombrie, ceea ce
-            împinge media în sus față de statul de plată real.
-          </p>
+          <div className="sev">{t.note}</div>
+          <p>{t.noteText}</p>
         </div>
       </div>
     </section>

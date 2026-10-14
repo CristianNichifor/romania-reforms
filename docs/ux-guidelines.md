@@ -143,9 +143,9 @@ interface is "Date reale" with an honest method page.
 | Source line under every public-pay view | `simulators/salarizare/app/tests/states.test.tsx` |
 | This guideline covers every simulator and cites real tests | `tests/test_ux_guidelines.py` |
 
-Not yet enforced by a test: the as-of date on charts and maps (§ 9 item 8); axe and the 390 px
-check on the deconcentrare and companii-stat pages, which have no browser suite, and on the
-public-pay views other than Acasă.
+Not yet enforced by a test: the as-of date on charts and maps outside the justitie statistics
+page (§ 9 item 8); axe and the 390 px check on the deconcentrare and companii-stat pages, which
+have no browser suite, and on the public-pay views other than Acasă.
 
 ## 9. Known deviations backlog
 
@@ -163,10 +163,9 @@ flight* belong to another session; do not start them in parallel.
    ordering; companii-stat mobile table clipping — done (#161).
 5. public-pay layout: menu below the H1, search after the lead, humanised codes, `*1)`
    markers — done (UX-7, #162).
-6. English mode: public-pay view prose is still Romanian (RR-10). *Acasă (UX-25), Domenii (UX-21),
-   Structură (UX-22), Distribuție (UX-23), Fluturaș (UX-24), Cât costă tot (UX-26), Echivalențe
-   (UX-27), Propunerea noastră (UX-28), Funcție cu funcție (UX-29) and Ce se schimbă (UX-30) are
-   bilingual; Meserii follows.*
+6. English mode: public-pay view prose — done (RR-10, UX-21 to UX-31): every view is bilingual;
+   the data the views read (position titles, patch texts, group notes) stay Romanian, and the
+   footer says so. English copy is agent-written: needs human review.
 7. No status badge on any page. Agree the status per simulator with the owner (most
    use real data, so "Date reale"), then add the badge — done: every app page carries
    "Date reale" (UX-18 and the family-look batch) and every hub card repeats it (UX-32). The
