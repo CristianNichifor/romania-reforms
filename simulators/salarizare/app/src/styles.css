@@ -3,13 +3,19 @@
    used here pass every check in both modes (worst CVD ΔE 24.7 light / 26.8 dark). */
 :root {
   color-scheme: light;
-  --surface-0: #f4f4f2;
-  --surface-1: #fcfcfb;
-  --surface-2: #ececea;
-  --border: #d8d8d4;
-  --text-primary: #0b0b0b;
-  --text-secondary: #52514e;
-  --text-muted: #78776f;
+  /* Chrome on civic-ui neutral roles (UX-14): bg, surface, raised, text, muted, border,
+     action. Only the series colours below are this app's own (ux-guidelines § 6). */
+  --surface-0: #f4f6f6;
+  --surface-1: #ffffff;
+  --surface-2: #e7eeee;
+  --border-strong: #718588;
+  --border: color-mix(in srgb, var(--border-strong) 40%, transparent);
+  --text-primary: #182b2c;
+  --text-secondary: #475d60;
+  --text-muted: color-mix(in srgb, var(--text-secondary) 80%, var(--surface-0));
+  --action: #006b60;
+  --action-hover: #00564d;
+  --on-action: #ffffff;
   --series-1: #2a78d6;
   --accent: #eb6834;
   --grid: #e4e4e0;
@@ -20,13 +26,15 @@
 @media (prefers-color-scheme: dark) {
   :root:where(:not([data-theme='light'])) {
     color-scheme: dark;
-    --surface-0: #121211;
-    --surface-1: #1a1a19;
-    --surface-2: #232322;
-    --border: #34342f;
-    --text-primary: #ffffff;
-    --text-secondary: #c3c2b7;
-    --text-muted: #93928a;
+    --surface-0: #142323;
+    --surface-1: #203332;
+    --surface-2: #304845;
+    --border-strong: #8ca8a1;
+    --text-primary: #f0f6f5;
+    --text-secondary: #c0d3cf;
+    --action: #b5e8dc;
+    --action-hover: #d2f5eb;
+    --on-action: #142323;
     --series-1: #3987e5;
     --accent: #d95926;
     --grid: #2a2a28;
@@ -37,13 +45,15 @@
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --surface-0: #121211;
-  --surface-1: #1a1a19;
-  --surface-2: #232322;
-  --border: #34342f;
-  --text-primary: #ffffff;
-  --text-secondary: #c3c2b7;
-  --text-muted: #93928a;
+  --surface-0: #142323;
+  --surface-1: #203332;
+  --surface-2: #304845;
+  --border-strong: #8ca8a1;
+  --text-primary: #f0f6f5;
+  --text-secondary: #c0d3cf;
+  --action: #b5e8dc;
+  --action-hover: #d2f5eb;
+  --on-action: #142323;
   --series-1: #3987e5;
   --accent: #d95926;
   --grid: #2a2a28;
