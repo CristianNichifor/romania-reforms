@@ -1,6 +1,9 @@
 /* Roles, not raw hex, so light and dark swap in one place.
    Palette values from the validated reference instance; the two categorical hues
-   used here pass every check in both modes (worst CVD ΔE 24.7 light / 26.8 dark). */
+   used here pass every check in both modes (worst CVD ΔE 24.7 light / 26.8 dark).
+   `--selected` is the fill behind white text on a chosen control: the series blue is a
+   chart hue and reads 4.4:1 light / 3.6:1 dark under white, below AA for body-size text;
+   this darker blue reads 6.3:1 in both themes. */
 :root {
   color-scheme: light;
   --surface-0: #f4f4f2;
@@ -11,6 +14,7 @@
   --text-secondary: #52514e;
   --text-muted: #78776f;
   --series-1: #2a78d6;
+  --selected: #1f5fb0;
   --accent: #eb6834;
   --grid: #e4e4e0;
   --mark-quiet: #c4c4bd;
@@ -28,6 +32,7 @@
     --text-secondary: #c3c2b7;
     --text-muted: #93928a;
     --series-1: #3987e5;
+    --selected: #1f5fb0;
     --accent: #d95926;
     --grid: #2a2a28;
     --mark-quiet: #4a4a45;
@@ -45,6 +50,7 @@
   --text-secondary: #c3c2b7;
   --text-muted: #93928a;
   --series-1: #3987e5;
+  --selected: #1f5fb0;
   --accent: #d95926;
   --grid: #2a2a28;
   --mark-quiet: #4a4a45;
@@ -143,8 +149,9 @@ footer a { color: var(--text-secondary); }
         gap: 18px 26px; align-items: start; margin-bottom: 34px;
         padding-bottom: 28px; border-bottom: 1px solid var(--border); }
 .tabgroup { display: grid; gap: 8px; align-content: start; }
+/* Secondary, not muted: 11 px text needs 4.5:1 and muted ink reads 4.1:1 on the page. */
 .tabgroup-title { font-size: 11px; letter-spacing: 0.09em; text-transform: uppercase;
-                  color: var(--text-muted); font-weight: 600; }
+                  color: var(--text-secondary); font-weight: 600; }
 .tabgroup-ask { font-size: 15px; font-weight: 600; color: var(--text-primary);
                 margin: 0 0 2px; }
 .tabs button {
@@ -156,7 +163,7 @@ footer a { color: var(--text-secondary); }
 .tabs button strong { font-size: 14.5px; font-weight: 600; color: var(--text-primary); }
 .tabs button small { font-size: 12.5px; color: var(--text-muted); line-height: 1.35; }
 .tabs button:hover { border-color: var(--series-1); }
-.tabs button.on { background: var(--series-1); border-color: var(--series-1); }
+.tabs button.on { background: var(--selected); border-color: var(--selected); }
 .tabs button.on strong, .tabs button.on small { color: #fff; }
 .tabs button.on small { opacity: 0.85; }
 .tabs button.share { font-size: 13px; display: inline-block; }
@@ -990,5 +997,6 @@ button.more {
   margin: 2px 0 10px;
   font-size: 13px;
   line-height: 20px;
-  opacity: 0.75;
+  /* No opacity: the masthead's secondary ink at 0.75 fell to 4:1 against the page, under AA
+     for 13 px text; secondary ink on its own reads 7:1. */
 }
