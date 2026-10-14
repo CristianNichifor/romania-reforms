@@ -305,6 +305,23 @@ comma-below in Romanian, the counts line and the "from" formatter).
 Test: salarizare `tests/merges-strings.test.ts` (same keys, no Romanian letters in English,
 comma-below in Romanian, count and summary formatters).
 
+### UX-30 Public pay in English, tenth slice: the Ce se schimbă view — done (English copy: needs human review)
+
+- Given `/salarizare/#/compare?lang=en`, then every word the view prints (title and purpose, the
+  four brief cards, the AMEPIP section, the hero sentence, the four column heads with the counted
+  subtitle, the seven row labels and hints, every cell note and "not loaded" dash explanation, the
+  sampled-cell footnote, the proposed corrections with badges and touched counts, the trades
+  section with its table heads and source note, and the four onward cards) is English, and counts,
+  shares, ratios and money use the `en-GB` locale; in Romanian nothing changes. The strings and
+  the annex labels live in per-language tables in `src/CompareView.tsx` (`COMPARE_STRINGS`), the
+  pattern of UX-21 to UX-29. Patch titles, effects, rationales, duty names, position names and
+  the proposal's "not policy" lede are data.
+- The Meserii view remains Romanian in English mode; the "views are in Romanian" footer note
+  stays until it is done.
+
+Test: salarizare `tests/compare-strings.test.ts` (same shape at every level, no Romanian letters
+in English, comma-below in Romanian, the counted subtitle and sentence formatters).
+
 ### UX-16 impozit-teren page check — done
 
 - Given `/impozit-teren/#j=bc` at 390 × 844, when the county table has rendered, then the
