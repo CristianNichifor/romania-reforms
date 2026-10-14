@@ -548,6 +548,7 @@ export default function App() {
         <>
           <DistributionView
             menu={menu}
+            lang={lang}
             inForce={regimes['ro-153-2017'] ?? null}
             draft={ministry}
             crosswalk={assimilation}
