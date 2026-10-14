@@ -18,6 +18,7 @@ import {
   type ProposedDirection,
   type Tier,
 } from './model';
+import { dataLineFor } from './data-line';
 
 const DOC_URL = 'data/deconcentrare.json';
 const REGISTRY_URL = 'data/deconcentrare-registry.json';
@@ -319,6 +320,7 @@ function wireControls(): void {
 async function main(): Promise<void> {
   try {
     doc = await fetchJSON<Document>(DOC_URL);
+    $('#data-line').textContent = dataLineFor(doc);
   } catch (error) {
     const loading = $('.loading');
     loading.textContent = `Nu s-au putut încărca datele: ${error instanceof Error ? error.message : String(error)}`;

@@ -22,6 +22,7 @@ import {
   type MapGeoJSONFeature,
   type MapMouseEvent,
 } from 'maplibre-gl';
+import { dataLineFor } from './data-line';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import {
   assign,
@@ -607,6 +608,7 @@ interface Proposal {
 }
 
 interface Document {
+  publisher: string;
   period: string;
   courts: Court[];
   nationalAverages: { byTier: { tier: string; perJudge: number; perPost: number }[] };
@@ -710,6 +712,7 @@ async function main(): Promise<void> {
   // The year comes from the document, not the markup. The CSM publishes annually and this
   // page had 2023 written into its subtitle while reading 2025 — a caption that disagrees
   // with its own figures is worse than none.
+  el('#data-line').textContent = dataLineFor(doc);
   el('#sub').textContent =
     `${ro.format(doc.courts.length)} de instanțe, dosarele pe care le-au avut de soluționat ` +
     `în ${doc.period} și încărcătura pe judecător.`;

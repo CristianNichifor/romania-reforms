@@ -100,12 +100,15 @@ export default function HomeView({
   inForce,
   denmark,
   onOpen,
+  dataLine,
 }: {
   /** The section menu, drawn after the search so the question people arrive with comes first. */
   menu?: ReactNode;
   ministry: Regime | null;
   inForce: Regime | null;
   denmark: Regime | null;
+  /** "Date: <sursă>, <an>", rendered right under the H1 (UX-5). */
+  dataLine: string;
   onOpen: (view: ViewId, patch?: Partial<Scenario>) => void;
 }) {
   const positions = (regime: Regime | null) => (regime ? regime.positions.length : null);
@@ -130,6 +133,7 @@ export default function HomeView({
           ← Toate simulatoarele
         </a>
         <h1>Cum își plătește România angajații publici</h1>
+        <p className="data-line">{dataLine}</p>
         <p>
           Un instrument pentru dezbaterea publică despre proiectul de lege al salarizării din 20
           august 2026: ce schimbă față de legea care plătește oamenii azi, cine urcă și cine
