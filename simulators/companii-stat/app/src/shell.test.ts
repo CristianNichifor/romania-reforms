@@ -25,8 +25,11 @@ describe.each(['index.html'])('%s', (page) => {
     expect(nav).toContain('<a href="../companii-stat/" aria-current="page">');
   });
 
-  it('names its data right under the H1 (UX-5)', () => {
-    expect(html).toMatch(/<h1[^>]*>[^<]*<\/h1>\s*<p class="data-line" id="data-line"><\/p>/);
+  it('reads title, purpose, then the data line with the one status badge (UX-5, screen criteria 3-4)', () => {
+    expect(html).toMatch(
+      /<h1[^>]*>[^<]*<\/h1>\s*<p class="lede">[^]*?<\/p>\s*<p class="data-line"><span id="data-line"><\/span> <span class="badge status">Date reale<\/span><\/p>/,
+    );
+    expect(html.match(/class="badge[ "]/g)).toHaveLength(1);
   });
 
   it('carries the Content Security Policy in the built page only', () => {

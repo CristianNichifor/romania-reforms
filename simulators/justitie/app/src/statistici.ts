@@ -32,6 +32,7 @@ import {
   type Pooled,
 } from './aggregate';
 import { assign, changedParams, loadCoupling, readScenario } from './arondare';
+import { dataLineFor } from './data-line';
 import { proposedCourts, type ArondareInstante, type Proposal } from './propuse';
 
 const BASE = import.meta.env.BASE_URL;
@@ -922,6 +923,7 @@ function finish(stats: Stats, courts: CourtsFile | null): void {
     .join('');
 
   el('sursa').textContent = `${stats.publisher} · ${stats.provenance.locator}`;
+  el('data-line').textContent = dataLineFor(stats);
   wireTooltips();
 }
 
