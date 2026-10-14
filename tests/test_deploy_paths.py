@@ -35,7 +35,8 @@ def test_every_renamed_path_gets_a_stub_and_a_redirect_rule(tmp_path):
     for old, new in read_renamed_paths().items():
         stub = (site / "romania-reforms" / old / "index.html").read_text()
         target = f"{BASE}{new}/"
-        assert f'<link rel="canonical" href="https://projects.cristian-nichifor.com{target}"' in stub
+        canonical = f"https://projects.cristian-nichifor.com{target}"
+        assert f'<link rel="canonical" href="{canonical}"' in stub
         assert '<meta name="robots" content="noindex"' in stub
         assert f'<meta http-equiv="refresh" content="0; url={target}"' in stub
         assert "location.replace" in stub
@@ -65,7 +66,12 @@ const location = {{ pathname: "/romania-reforms/administrativ/a/b", search: "?x=
 
 def test_middleware_redirects_old_paths():
     result = subprocess.run(
-        [NODE, "--test", "tests/renamed_paths_middleware.test.mjs", "tests/preview_gate_middleware.test.mjs"],
+        [
+            NODE,
+            "--test",
+            "tests/renamed_paths_middleware.test.mjs",
+            "tests/preview_gate_middleware.test.mjs",
+        ],
         cwd=ROOT,
         capture_output=True,
         text=True,

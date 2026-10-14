@@ -5,7 +5,7 @@ Translations written for these items are marked **needs human review**.
 
 ## A. Old paths keep working
 
-### RR-1 Renamed simulator paths redirect — todo
+### RR-1 Renamed simulator paths redirect — done (stubs need the workflow line: needs-human)
 
 The English paths (#147) renamed `administrativ/` to `administrative-reform/` and
 `salarizare/` to `public-pay/`. The old addresses are linked from outside the repository and
