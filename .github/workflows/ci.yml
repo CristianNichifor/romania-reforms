@@ -45,6 +45,8 @@ jobs:
           echo '### Shared bounded verification' >> "$GITHUB_STEP_SUMMARY"
           echo 'The following real-source assertions are NOT certified by this PR check; use full-data.yml.' >> "$GITHUB_STEP_SUMMARY"
           uv run --with geopandas python -m pytest tests/ --collect-only -q -m full_data >> "$GITHUB_STEP_SUMMARY"
+      - name: GitHub Pages redirect keeps path, query and hash
+        run: node --test tests/redirect.test.cjs
       - name: Tests
         run: uv run --with referencing --with geopandas python -m pytest tests/ -q -m "not full_data" --junitxml=reports/shared.xml
       - name: Require executed test evidence

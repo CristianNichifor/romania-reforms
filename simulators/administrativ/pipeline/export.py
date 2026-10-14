@@ -591,7 +591,7 @@ def main(argv: list[str] | None = None) -> int:
     }
     (WEB_DATA_DIR / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
 
-    # Ship the methodology alongside the app so the in-app link resolves on GitHub Pages
+    # Ship the methodology alongside the app so the in-app link resolves on the published site
     # rather than pointing at a repository the reader may not think to go looking for.
     methodology = DOCS_DIR / "METHODOLOGY.md"
     if methodology.exists():

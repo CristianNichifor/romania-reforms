@@ -21,7 +21,7 @@ At the default settings: **3,186 UATs collapse to 682 regions (78.6%)**, recompu
 
 1. **Runs entirely client-side.** No backend, no solver service, no runtime API calls.
    Target: full recomputation under 150 ms so slider drags feel continuous.
-   Hosting is GitHub Pages.
+   Hosting is static (Cloudflare Pages).
 2. **Deterministic and explainable.** Same inputs → byte-identical output, every time.
    A journalist must be able to read the rules in a paragraph, and a mayor must be able to
    dispute them. No optimization heuristics, no randomness, no simulated annealing.

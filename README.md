@@ -1128,24 +1128,27 @@ reaches every figure derived from it.
 
 ## Deployment shape
 
-No custom domain. URLs are plain GitHub Pages project paths, one Pages site for the whole
-repository:
+One Cloudflare Pages site for the whole repository, served through the hub at
+projects.cristian-nichifor.com, with each simulator on its own path:
 
 ```
-cristiannichifor.github.io/romania-reforms/              the index
-cristiannichifor.github.io/romania-reforms/justitie/
-cristiannichifor.github.io/romania-reforms/public-pay/
-cristiannichifor.github.io/romania-reforms/administrative-reform/
-cristiannichifor.github.io/romania-reforms/transport/
-cristiannichifor.github.io/romania-reforms/impozit-teren/
+projects.cristian-nichifor.com/romania-reforms/              the index
+projects.cristian-nichifor.com/romania-reforms/justitie/
+projects.cristian-nichifor.com/romania-reforms/public-pay/
+projects.cristian-nichifor.com/romania-reforms/administrative-reform/
+projects.cristian-nichifor.com/romania-reforms/transport/
+projects.cristian-nichifor.com/romania-reforms/impozit-teren/
 ```
 
-That broke the old standalone project paths, and for scenario-driven apps that matters: a
-scenario *is* a link, hash and all. Redirect stubs carry `location.hash` across where old
-repositories existed, so links shared before the move keep opening the same scenario.
+`.github/workflows/deploy-pages-cloudflare.yml` publishes it: `main` is production, `dev` a
+preview behind the CN Webify preview gate on projects-dev.cristian-nichifor.com.
 
-A domain would remove the problem rather than absorb it, and the stubs are compatible with
-adding one later — they would simply point somewhere else. Not needed now.
+For scenario-driven apps a move matters: a scenario *is* a link, hash and all. Redirect stubs
+carry the path, query and `location.hash` across, so links shared before a move keep opening
+the same scenario. The old standalone simulator repositories forward to their paths here, and
+the former GitHub Pages site at cristiannichifor.github.io/romania-reforms/ now publishes only
+the stub in `redirect/` (`.github/workflows/deploy.yml`), which sends every path to the same
+path on the hub.
 
 **Build:** each app reads `VITE_BASE` from the environment instead of hardcoding a path. The
 deploy builds each simulator with `VITE_BASE=/romania-reforms/<name>/`, assembles the outputs
@@ -1173,7 +1176,7 @@ Five edits, deliberately by hand:
    has one. Its data validated by its own script; the caveat vocabulary from
    `packages/provenance` so a limitation means the same thing across simulators.
 2. A job in `.github/workflows/ci.yml`.
-3. A build step in `.github/workflows/deploy.yml`, with `VITE_BASE` set to
+3. A build step in `.github/workflows/deploy-pages-cloudflare.yml`, with `VITE_BASE` set to
    `/${{ github.event.repository.name }}/<name>/`.
 4. A line in that workflow's assembly step, and its path in the check below it — the check is
    what stops a simulator that failed to build appearing on the landing page as a link to a

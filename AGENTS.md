@@ -31,7 +31,8 @@ skipped tests are incomplete verification, even when pytest returns zero. The ex
 - CI's aggregate status is `verify`: all simulator, shared, provenance and browser jobs
   must succeed. The separate scheduled portal collector and Pages deployment are not
   PR correctness gates. Remote required-check settings are managed separately.
-- `main` is production; its Pages workflow publishes the site. Do not trigger deployment,
+- `main` is production and `dev` a gated preview; `deploy-pages-cloudflare.yml` publishes
+  both to Cloudflare Pages, and `deploy.yml` only keeps the GitHub Pages redirect. Do not trigger deployment,
   releases or collection as part of development verification. Related data/pipeline
   publication requires the applicable full-data and full-source checks in CONTRIBUTING;
   bounded `verify` does not certify missing national inputs or live source refreshes.
