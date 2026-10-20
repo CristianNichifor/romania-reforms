@@ -246,7 +246,11 @@ def hearing_court(dosare, sedinte):
     import pandas as pd  # noqa: PLC0415
 
     if "institutie" in sedinte.columns:
-        return sedinte.institutie
+        supplied = sedinte.institutie.replace("", pd.NA)
+        missing = sedinte.loc[supplied.isna()].drop(columns=["institutie"])
+        if missing.empty:
+            return supplied
+        return supplied.fillna(hearing_court(dosare, missing))
 
     # Only the ambiguous cases need the dated merge, and they are the minority. A case at one
     # court has one answer, and asking `merge_asof` for it means sorting eleven million hearings
@@ -368,21 +372,70 @@ def kaplan_meier(durations, observed, marks=(90, 180, 365)) -> dict:
     }
 
 
-def load(input_dir: Path):
+# The columns each table is actually read for.
+#
+# Projected at the parquet level rather than dropped afterwards, because by then the memory has
+# already been spent. The 2005 backfill holds 18,9 million hearings and half of that table's
+# columns are never touched — the time of day, the three document references, and
+# `solutie_sumar`, which anything published does not even write. On the shallow snapshot this was
+# waste; at 6,5 million cases it is the difference between a build that runs and one the kernel
+# kills.
+#
+# Intersected with what each file actually has, so a column that arrived later in the crawler's
+# life — `institutie` on the child tables — is read where present and absent where not, which is
+# exactly the condition `hearing_court` already branches on.
+COLUMNS = {
+    "dosare": [
+        "numar",
+        "data",
+        "institutie",
+        "departament",
+        "categorie_caz",
+        "stadiu_procesual",
+        "obiect",
+        "is_penal",
+    ],
+    "sedinte": ["dosar_numar", "complet", "data", "solutie", "data_pronuntare", "institutie"],
+    "parti": ["dosar_numar", "nume", "nume_fold", "nume_hash", "calitate"],
+    "cai_atac": ["dosar_numar", "data"],
+}
+
+
+def load(input_dir: Path, tables: tuple[str, ...] = ("dosare", "sedinte", "parti", "cai_atac")):
+    """Read the parquet parts, projected to the columns the builders use.
+
+    `tables` lets a builder skip whole tables it does not touch. `build_portal_instante` needs no
+    parties and no appeals, and loading 17,3 million rows of names to ignore them is most of a
+    machine's memory spent on nothing.
+    """
     import pandas as pd  # noqa: PLC0415
+    import pyarrow.parquet as pq  # noqa: PLC0415
 
     def read(prefix: str):
         files = sorted(glob.glob(str(input_dir / f"{prefix}-*.parquet")))
         if not files:
             raise SystemExit(f"no {prefix}-*.parquet under {input_dir}")
-        return pd.concat([pd.read_parquet(f) for f in files], ignore_index=True)
+        parts = []
+        for file in files:
+            available = set(pq.ParquetFile(file).schema_arrow.names)
+            wanted = [name for name in COLUMNS[prefix] if name in available]
+            parts.append(pd.read_parquet(file, columns=wanted))
+        return pd.concat(parts, ignore_index=True)
 
+    empty = pd.DataFrame()
+    if "dosare" not in tables:
+        raise ValueError("dosare is required")
     dosare = read("dosare")
     # Shards are disjoint by court, but a backfill re-run overlapping an earlier one is not, and
     # the daily workflow deliberately re-crawls a two-month window. Deduplicating on the case
     # number is what makes those overlaps free rather than double-counted.
     dosare = dosare.drop_duplicates(subset=["institutie", "numar"], keep="last")
-    return dosare, read("sedinte"), read("parti"), read("cai_atac")
+    return (
+        dosare,
+        read("sedinte") if "sedinte" in tables else empty,
+        read("parti") if "parti" in tables else empty,
+        read("cai_atac") if "cai_atac" in tables else empty,
+    )
 
 
 def fetch_release(tag: str, into: Path) -> None:
@@ -422,7 +475,9 @@ def build(dosare, sedinte, parti, cai_atac, cohort_months: int, crawled_at: str)
     # it, it is recovered from which court had the file on the day, not from the case number —
     # 11,2% of cases sit at more than one court, and a number-to-court map picks one of them at
     # random. `institutieDinFisier` in the output says which of the two routes was taken.
-    hearings_carry_court = "institutie" in sedinte.columns
+    hearings_carry_court = "institutie" in sedinte.columns and bool(
+        sedinte.institutie.replace("", pd.NA).notna().all()
+    )
     sedinte = sedinte.assign(court=hearing_court(dosare, sedinte))
     sedinte = sedinte.dropna(subset=["court"])
     sedinte = sedinte.assign(level=sedinte.court.map(level_of))
