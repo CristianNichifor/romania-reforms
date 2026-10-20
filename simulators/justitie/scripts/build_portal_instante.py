@@ -438,7 +438,9 @@ def main() -> int:
         else:
             input_dir = Path(args.input)
 
-        dosare, sedinte, _parti, _cai_atac = load(input_dir)
+        # Parties and appeals are never read here, so they are never loaded: 17,3 million rows of
+        # names held in memory to be ignored is most of a machine.
+        dosare, sedinte, _parti, _cai_atac = load(input_dir, tables=("dosare", "sedinte"))
         coverage = sorted(input_dir.glob("coverage*.json"))
         crawled_at = datetime.now().isoformat(timespec="seconds")
         if coverage:

@@ -68,6 +68,49 @@ def frame(rows: list[dict], columns: list[str]):
     return pd.DataFrame(rows, columns=columns)
 
 
+def test_projected_load_keeps_columns_from_heterogeneous_shards(tmp_path: Path) -> None:
+    pytest.importorskip("pyarrow")
+
+    pd.DataFrame(
+        [{"numar": "1", "institutie": "CourtA", "unused": "private detail"}]
+    ).to_parquet(tmp_path / "dosare-01.parquet")
+    pd.DataFrame([{"dosar_numar": "1", "data": "2026-01-01"}]).to_parquet(
+        tmp_path / "sedinte-01.parquet"
+    )
+    pd.DataFrame(
+        [{"dosar_numar": "2", "data": "2026-01-02", "institutie": "CourtB"}]
+    ).to_parquet(tmp_path / "sedinte-02.parquet")
+    pd.DataFrame([{"dosar_numar": "3", "data": "2026-01-03"}]).to_parquet(
+        tmp_path / "sedinte-03.parquet"
+    )
+
+    dosare, sedinte, parti, cai_atac = stats.load(tmp_path, tables=("dosare", "sedinte"))
+
+    assert list(dosare.columns) == ["numar", "institutie"]
+    assert list(sedinte.columns) == ["dosar_numar", "data", "institutie"]
+    assert pd.isna(sedinte.iloc[0]["institutie"])
+    assert sedinte.iloc[1]["institutie"] == "CourtB"
+    assert pd.isna(sedinte.iloc[2]["institutie"])
+    assert parti.empty and cai_atac.empty
+
+
+def test_missing_hearing_courts_are_inferred_without_replacing_supplied_courts() -> None:
+    dosare = pd.DataFrame(
+        [
+            {"numar": "1", "institutie": "CourtA", "registered": pd.Timestamp("2026-01-01")},
+            {"numar": "2", "institutie": "CourtB", "registered": pd.Timestamp("2026-01-01")},
+        ]
+    )
+    sedinte = pd.DataFrame(
+        [
+            {"dosar_numar": "1", "when": pd.Timestamp("2026-02-01"), "institutie": None},
+            {"dosar_numar": "2", "when": pd.Timestamp("2026-02-02"), "institutie": "CourtB"},
+        ]
+    )
+
+    assert stats.hearing_court(dosare, sedinte).tolist() == ["CourtA", "CourtB"]
+
+
 DOSAR_COLUMNS = [
     "numar",
     "numar_vechi",
