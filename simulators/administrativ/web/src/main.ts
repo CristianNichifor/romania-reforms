@@ -256,6 +256,27 @@ async function boot(): Promise<void> {
   publishDisclaimerHeight();
 
   /**
+   * Where the header ends, published to CSS.
+   *
+   * The summary bar and both side panels hang below the header's taller column, the title
+   * block or the wrapped controls. Its height is not a constant either: the back link, title, data line and subtitle wrap differently per
+   * language and width, and a hard-coded 64 px put the summary bar over the status badge.
+   */
+  const brand = el<HTMLElement>('.brand');
+  const actions = el<HTMLElement>('.topbar-actions');
+  const publishTopbarHeight = (): void => {
+    const bottom = Math.max(
+      brand.getBoundingClientRect().bottom,
+      actions.getBoundingClientRect().bottom,
+    );
+    document.documentElement.style.setProperty('--topbar-h', `${Math.round(bottom)}px`);
+  };
+  const topbarObserver = new ResizeObserver(publishTopbarHeight);
+  topbarObserver.observe(brand);
+  topbarObserver.observe(actions);
+  publishTopbarHeight();
+
+  /**
    * Whether this is a touchscreen.
    *
    * The hovercard has no dismiss control because a pointer leaving is its dismiss. A finger

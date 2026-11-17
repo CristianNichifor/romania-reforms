@@ -111,6 +111,18 @@ a.ghost {
   display: flex;
   gap: 8px;
   align-items: center;
+  /* Wrapped rather than squeezed: between 900 and ~1250 px the view tabs were clipped at
+     "Cost administrativ / locui" and "Metodologie" broke mid-word. */
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.topbar-actions > * {
+  flex-shrink: 0;
+}
+
+#methodology-btn {
+  white-space: nowrap;
 }
 
 .lang {
@@ -177,7 +189,10 @@ a.ghost {
 /* --- summary ------------------------------------------------------------------------ */
 .summary {
   position: absolute;
-  top: 64px;
+  /* Under the header, whatever its height. A fixed 64 px drew this bar over the subtitle and
+     the status badge once the header gained the back link and the data line. `--topbar-h`
+     is the brand block's measured bottom edge, published by main.ts. */
+  top: calc(var(--topbar-h, 64px) + 6px);
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -234,7 +249,8 @@ a.ghost {
   left: 16px;
   bottom: 76px;
   width: 292px;
-  max-height: calc(100vh - 230px);
+  /* Same 32 px clearance under the summary bar as before the header grew. */
+  max-height: calc(100vh - 172px - var(--topbar-h, 58px));
   /* The panel itself does not scroll; its body does. The resize handle is pinned to the
      panel's inner edge, and a handle inside a scrolling box scrolls away with the content. */
   display: flex;
@@ -394,9 +410,9 @@ a.ghost {
   right: 16px;
   /* Clears the summary bar, which is centred and can extend to the right on narrow
      viewports. Overlapping it hid the recompute readout entirely. */
-  top: 176px;
+  top: calc(var(--topbar-h, 58px) + 118px);
   width: 320px;
-  max-height: calc(100vh - 268px);
+  max-height: calc(100vh - 210px - var(--topbar-h, 58px));
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -1107,6 +1123,21 @@ a.ghost {
 
   .topbar-actions {
     flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  /* The three view tabs ran off the screen edge, so "Cost administrativ / locuitor" could
+     not be read or reached. They share the row now and the long label wraps. */
+  .modes {
+    flex: 1 1 100%;
+  }
+
+  .modes button {
+    flex: 1 1 0;
+    min-height: 36px;
+    padding: 4px;
+    white-space: normal;
+    line-height: 1.2;
   }
 
   /* Everything below stacks up from the bottom edge: the disclaimer, then the two peek bars,
@@ -1504,8 +1535,11 @@ button.link:hover {
  * absolute, because the deployed base is /romania-reforms/<simulator>/ and the index is one
  * level up wherever it is served from. */
 .up {
-  display: inline-block;
-  margin-bottom: 0.4rem;
+  /* 24 px tall, the guideline's minimum touch target; the text alone was 13 px. */
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  margin-bottom: 0.1rem;
   font-size: 0.76rem;
   letter-spacing: 0.01em;
   text-decoration: none;
