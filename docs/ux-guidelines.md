@@ -142,6 +142,9 @@ interface is "Date reale" with an honest method page.
 | No sideways scroll at 390 px and no serious axe issue | `simulators/administrativ/web/tests/browser/page-checks.spec.ts`, `simulators/transport/app/tests/browser/page-checks.spec.ts`, `simulators/impozit-teren/app/tests/browser/page-checks.spec.ts`, `simulators/justitie/app/tests/browser/page-checks.spec.ts`, `simulators/salarizare/app/scripts/check-page.mjs` |
 | Source and as-of under every chart (justitie statistics) | `simulators/justitie/app/tests/browser/statistics.spec.ts`, `simulators/justitie/app/src/chart-source.test.ts` |
 | Source line under the document pages' data tables | `simulators/deconcentrare/app/src/table-source.test.ts`, `simulators/companii-stat/app/src/table-source.test.ts` |
+| Wide tables scroll in their own region with the first column pinned | `simulators/companii-stat/app/src/table-mobile.test.ts`, `simulators/deconcentrare/app/src/table-mobile.test.ts`, `simulators/impozit-teren/app/src/table-mobile.test.ts` |
+| Severities read "blocant / important / de reținut", caveats summarised in their own words (justitie statistics) | `simulators/justitie/app/src/limitations.test.ts` |
+| Map header controls wrap and the summary bar clears the header at any width (administrativ) | `simulators/administrativ/web/tests/header-layout.test.ts` |
 | This guideline covers every simulator and cites real tests | `tests/test_ux_guidelines.py` |
 
 Not yet enforced by a test: axe and the 390 px check on the deconcentrare and companii-stat
