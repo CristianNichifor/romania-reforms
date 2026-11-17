@@ -498,3 +498,63 @@ button.region.on {
   line-height: 1.5;
   color: var(--muted);
 }
+
+/* UX review, 1440 and 390 px. Links in the running text took the browser's blue while the
+   masthead links were the family's green; headings inherited the body's 1.6 leading. */
+a {
+  color: var(--link);
+}
+h1 {
+  line-height: 1.25;
+}
+h2 {
+  line-height: 1.3;
+}
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.up {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+}
+
+/* A table wider than its region gave no sign that it scrolls: on a phone the numbers were
+   simply absent. The edge shades while there is more to see on that side and clears at the end. */
+.table-scroll {
+  background:
+    linear-gradient(to right, var(--card) 40%, transparent) left / 2.5rem 100% no-repeat local,
+    linear-gradient(to left, var(--card) 40%, transparent) right / 2.5rem 100% no-repeat local,
+    linear-gradient(to right, color-mix(in srgb, var(--fg) 26%, transparent), transparent) left / 0.8rem
+      100% no-repeat scroll,
+    linear-gradient(to left, color-mix(in srgb, var(--fg) 26%, transparent), transparent) right / 0.8rem
+      100% no-repeat scroll,
+    var(--card);
+}
+
+@media (max-width: 640px) {
+  /* The gutter was 52 px a side, leaving 286 px of a 390 px screen for the text. */
+  body {
+    padding: 1rem 1rem 3rem;
+  }
+  .wrap {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  /* One number per row pushed the table four screens down; two per row keeps it near. */
+  .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+  .stat {
+    padding: 0.75rem 0.85rem;
+  }
+  .stat .small {
+    display: block;
+    line-height: 1.4;
+  }
+  .stat-list-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
