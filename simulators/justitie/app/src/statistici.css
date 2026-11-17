@@ -305,6 +305,37 @@ h3 {
   transform: translateX(-100%);
 }
 
+/* On a phone the three columns left the bar about 85 px: the labels were cut to "Litigii cu
+   profesioni…", and four tick labels in 85 px printed on top of each other. The label now takes
+   its own line above the bar, so the bar and its axis get the width of the card. */
+@media (max-width: 46rem) {
+  .bar,
+  .quart,
+  .chart-axis {
+    grid-template-columns: minmax(0, 1fr) var(--value-w);
+    row-gap: 0.15rem;
+  }
+
+  .bar-label {
+    grid-column: 1 / -1;
+    white-space: normal;
+  }
+
+  .bar-note {
+    grid-column: 1 / -1;
+  }
+
+  .chart-axis > span:first-child {
+    display: none;
+  }
+
+  /* Even at the card's width five grouped labels ("1.000.000") touch. The ends say the scale;
+     the gridlines stay for the steps, and every bar prints its own value. */
+  .axis-track span:not(:first-child):not(:last-child) {
+    display: none;
+  }
+}
+
 /* Quartile strips --------------------------------------------------------- */
 
 .quart-track {

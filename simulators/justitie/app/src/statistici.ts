@@ -34,6 +34,7 @@ import {
 import { assign, changedParams, loadCoupling, readScenario } from './arondare';
 import { captionCharts, editionsPeriod } from './chart-source';
 import { dataLineFor } from './data-line';
+import { lead, SEVERITY } from './limitations';
 import { proposedCourts, type ArondareInstante, type Proposal } from './propuse';
 
 const BASE = import.meta.env.BASE_URL;
@@ -924,8 +925,8 @@ function finish(stats: Stats, courts: CourtsFile | null): void {
     .map(
       (limitation) => `
       <details class="lim ${limitation.severity}">
-        <summary><span class="sev">${limitation.severity}</span> ${esc(limitation.id.replace(/-/g, ' '))}</summary>
-        <p>${esc(limitation.text)}</p>
+        <summary><span class="sev">${SEVERITY[limitation.severity]}</span> ${esc(lead(limitation.text).head)}</summary>
+        ${lead(limitation.text).rest ? `<p>${esc(lead(limitation.text).rest)}</p>` : ''}
       </details>`,
     )
     .join('');
