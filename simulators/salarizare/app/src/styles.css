@@ -132,6 +132,9 @@ section > p.lede { margin: 0 0 22px; color: var(--text-secondary); max-width: 78
 .kpi .k { font-size: 12.5px; color: var(--text-secondary); margin-top: 3px; line-height: 1.35; }
 
 .card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px; padding: 22px; }
+/* The menu follows the search on the home view; with no gap its first heading ("Începe aici")
+   sat on the card's bottom border and read as part of the search. */
+.home-search { margin-bottom: 32px; }
 .chart-scroll { overflow-x: auto; }
 svg { display: block; max-width: 100%; }
 svg text { font-family: inherit; }
@@ -936,8 +939,11 @@ i.k-measured { background: var(--series-1); border-radius: 50% !important; }
  * absolute, because the deployed base is /romania-reforms/<simulator>/ and the index is one
  * level up wherever it is served from. */
 .up {
-  display: inline-block;
-  margin-bottom: 0.4rem;
+  /* 24 px tall, the guideline's minimum touch target; the text alone was 19 px. */
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  margin-bottom: 0.2rem;
   font-size: 0.76rem;
   letter-spacing: 0.01em;
   text-decoration: none;
@@ -1025,7 +1031,7 @@ button.more {
 
 /* The language switch and, in English, the note that the views are still Romanian. */
 .lang-switch { margin: 0 0 8px; text-align: right; font-size: 0.85rem; }
-.lang-switch a { color: inherit; }
+.lang-switch a { color: inherit; display: inline-flex; align-items: center; min-height: 24px; }
 .lang-note { margin: 0 0 12px; color: var(--text-secondary); font-size: 0.9rem; }
 
 /* Marks the source sheets hang on a name ("*1)", "**)"): visibly a note, not part of the word. */
