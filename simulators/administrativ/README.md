@@ -51,6 +51,10 @@ docs/       METHODOLOGY.md, PRIOR_ART.md
 data/       Gitignored. Reproducible from `pipeline/fetch.py` on a clean machine.
 ```
 
+Set `ADMIN_REFORM_DATA_DIR` to keep `data/` (raw, processed, reports) outside the
+repository. It does not move `web/public/data`, nor the sibling `justitie` and
+`transport` data that `build_courts.py` and `build_edge_time.py` read.
+
 ## Build order
 
 The model rests entirely on the adjacency graph and the candidacy grid. A wrong
